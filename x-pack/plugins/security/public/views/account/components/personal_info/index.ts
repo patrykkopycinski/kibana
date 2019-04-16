@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './full_time_range_selector_directive';
+export { PersonalInfo } from './personal_info';

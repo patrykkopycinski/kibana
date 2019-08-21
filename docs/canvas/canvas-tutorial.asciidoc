@@ -1,6 +1,6 @@
 [role="xpack"]
-[[canvas-getting-started]]
-== Getting started with Canvas
+[[canvas-tutorial]]
+== Canvas tutorial
 
 To get up and running with Canvas, use the following tutorial where you'll create a display for monitoring sales at an eCommerce store.
 
@@ -37,8 +37,6 @@ The default Elastic logo image appears on your page.
 image::images/canvas-image-element.png[]
 
 You'll notice that the image is tagged as an asset, which allows you to reuse the image from *Manage assets*.
-
-TIP: Want to delete an element? Select the element, then press the delete button on your keyboard.
 
 [float]
 === Customize your data with metrics
@@ -154,9 +152,10 @@ Here are some things to try:
 
 //* Learn more about:
 
-//** {kibana-ref}/canvas-workpad[Workpads]
+** {kibana-ref}/canvas-workpad[Workpads]
+
+** {kibana-ref}/canvas-elements[Elements]
 //** Assets
-//** Data sources
-//** Elements
+//** Expressions
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.

@@ -18,22 +18,29 @@
  */
 
 import * as ast from '../ast';
+import * as literal from '../node_types/literal';
 
-export function buildNodeParams(children) {
+export function buildNodeParams(path, child) {
+  const pathNode = typeof path === 'string' ? ast.fromLiteralExpression(path) : literal.buildNode(path);
   return {
-    arguments: children,
+    arguments: [pathNode, child],
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern, config, context) {
-  const children = node.arguments || [];
+export function toElasticsearchQuery(node, indexPattern, config, context = {}) {
+  if (!indexPattern) {
+    throw new Error('Cannot use nested queries without an index pattern');
+  }
+
+  const [path, child] = node.arguments;
+  const stringPath = ast.toElasticsearchQuery(path);
+  const fullPath = context.nested && context.nested.path ? `${context.nested.path}.${stringPath}` : stringPath;
 
   return {
-    bool: {
-      filter: children.map((child) => {
-        return ast.toElasticsearchQuery(child, indexPattern, config, context);
-      })
-    }
+    nested: {
+      path: fullPath,
+      query: ast.toElasticsearchQuery(child, indexPattern, config, { ...context, nested: { path: fullPath } }),
+      score_mode: 'none',
+    },
   };
 }
-

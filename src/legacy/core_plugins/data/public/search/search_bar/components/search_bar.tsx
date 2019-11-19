@@ -65,6 +65,8 @@ export interface SearchBarOwnProps {
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
 
+  dataTestSubj?: string;
+
   // Togglers
   showQueryBar?: boolean;
   showQueryInput?: boolean;
@@ -412,6 +414,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
+          dataTestSubj={this.props.dataTestSubj}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }

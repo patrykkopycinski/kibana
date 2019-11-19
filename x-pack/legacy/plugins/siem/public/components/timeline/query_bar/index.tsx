@@ -279,6 +279,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
+        dataTestSubj={'timelineQueryInput'}
       />
     );
   }

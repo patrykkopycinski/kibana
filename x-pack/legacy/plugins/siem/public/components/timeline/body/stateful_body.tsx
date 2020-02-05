@@ -9,6 +9,7 @@ import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { BrowserFields } from '../../../containers/source';
 import { TimelineItem, TimelineNonEcsData } from '../../../graphql/types';
@@ -102,169 +103,145 @@ type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 
 export const emptyColumnHeaders: ColumnHeader[] = [];
 
-const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
-  ({
-    addNoteToEvent,
-    applyDeltaToColumnWidth,
-    browserFields,
-    columnHeaders,
-    data,
-    eventIdToNoteIds,
-    height,
+const StatefulBodyComponent: React.FC<StatefulBodyComponentProps> = ({
+  addNoteToEvent,
+  applyDeltaToColumnWidth,
+  browserFields,
+  columnHeaders,
+  data,
+  eventIdToNoteIds,
+  height,
+  id,
+  isEventViewer = false,
+  isSelectAllChecked,
+  loadingEventIds,
+  notesById,
+  pinEvent,
+  pinnedEventIds,
+  range,
+  removeColumn,
+  selectedEventIds,
+  setSelected,
+  clearSelected,
+  showCheckboxes,
+  showRowRenderers,
+  sort,
+  toggleColumn,
+  unPinEvent,
+  updateColumns,
+  updateNote,
+  updateSort,
+}) => {
+  const timelineTypeContext = useTimelineTypeContext();
+
+  const getNotesByIds = useCallback(
+    (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
+    [notesById]
+  );
+
+  const onAddNoteToEvent: AddNoteToEvent = useCallback(
+    ({ eventId, noteId }: { eventId: string; noteId: string }) =>
+      addNoteToEvent!({ id, eventId, noteId }),
+    [id]
+  );
+
+  const onRowSelected: OnRowSelected = useCallback(
+    ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+      setSelected!({
+        id,
+        eventIds: getEventIdToDataMapping(data, eventIds, timelineTypeContext.queryFields ?? []),
+        isSelected,
+        isSelectAllChecked: isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
+      });
+    },
+    [id, data, selectedEventIds, timelineTypeContext.queryFields]
+  );
+
+  const onSelectAll: OnSelectAll = useCallback(
+    ({ isSelected }: { isSelected: boolean }) =>
+      isSelected
+        ? setSelected!({
+            id,
+            eventIds: getEventIdToDataMapping(
+              data,
+              data.map(event => event._id),
+              timelineTypeContext.queryFields ?? []
+            ),
+            isSelected,
+            isSelectAllChecked: isSelected,
+          })
+        : clearSelected!({ id }),
+    [id, data, timelineTypeContext.queryFields]
+  );
+
+  const onColumnSorted: OnColumnSorted = useCallback(
+    sorted => {
+      updateSort!({ id, sort: sorted });
+    },
+    [id]
+  );
+
+  const onColumnRemoved: OnColumnRemoved = useCallback(
+    columnId => removeColumn!({ id, columnId }),
+    [id]
+  );
+
+  const onColumnResized: OnColumnResized = useCallback(
+    ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
+    [id]
+  );
+
+  const onPinEvent: OnPinEvent = useCallback(eventId => pinEvent!({ id, eventId }), [id]);
+
+  const onUnPinEvent: OnUnPinEvent = useCallback(eventId => unPinEvent!({ id, eventId }), [id]);
+
+  const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
+
+  const onUpdateColumns: OnUpdateColumns = useCallback(columns => updateColumns!({ id, columns }), [
     id,
-    isEventViewer = false,
-    isSelectAllChecked,
-    loadingEventIds,
-    notesById,
-    pinEvent,
-    pinnedEventIds,
-    range,
-    removeColumn,
-    selectedEventIds,
-    setSelected,
-    clearSelected,
-    showCheckboxes,
-    showRowRenderers,
-    sort,
-    toggleColumn,
-    unPinEvent,
-    updateColumns,
-    updateNote,
-    updateSort,
-  }) => {
-    const timelineTypeContext = useTimelineTypeContext();
+  ]);
 
-    const getNotesByIds = useCallback(
-      (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
-      [notesById]
-    );
+  // Sync to timelineTypeContext.selectAll so parent components can select all events
+  useEffect(() => {
+    if (timelineTypeContext.selectAll) {
+      onSelectAll({ isSelected: true });
+    }
+  }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
 
-    const onAddNoteToEvent: AddNoteToEvent = useCallback(
-      ({ eventId, noteId }: { eventId: string; noteId: string }) =>
-        addNoteToEvent!({ id, eventId, noteId }),
-      [id]
-    );
-
-    const onRowSelected: OnRowSelected = useCallback(
-      ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
-        setSelected!({
-          id,
-          eventIds: getEventIdToDataMapping(data, eventIds, timelineTypeContext.queryFields ?? []),
-          isSelected,
-          isSelectAllChecked:
-            isSelected && Object.keys(selectedEventIds).length + 1 === data.length,
-        });
-      },
-      [id, data, selectedEventIds, timelineTypeContext.queryFields]
-    );
-
-    const onSelectAll: OnSelectAll = useCallback(
-      ({ isSelected }: { isSelected: boolean }) =>
-        isSelected
-          ? setSelected!({
-              id,
-              eventIds: getEventIdToDataMapping(
-                data,
-                data.map(event => event._id),
-                timelineTypeContext.queryFields ?? []
-              ),
-              isSelected,
-              isSelectAllChecked: isSelected,
-            })
-          : clearSelected!({ id }),
-      [id, data, timelineTypeContext.queryFields]
-    );
-
-    const onColumnSorted: OnColumnSorted = useCallback(
-      sorted => {
-        updateSort!({ id, sort: sorted });
-      },
-      [id]
-    );
-
-    const onColumnRemoved: OnColumnRemoved = useCallback(
-      columnId => removeColumn!({ id, columnId }),
-      [id]
-    );
-
-    const onColumnResized: OnColumnResized = useCallback(
-      ({ columnId, delta }) => applyDeltaToColumnWidth!({ id, columnId, delta }),
-      [id]
-    );
-
-    const onPinEvent: OnPinEvent = useCallback(eventId => pinEvent!({ id, eventId }), [id]);
-
-    const onUnPinEvent: OnUnPinEvent = useCallback(eventId => unPinEvent!({ id, eventId }), [id]);
-
-    const onUpdateNote: UpdateNote = useCallback((note: Note) => updateNote!({ note }), []);
-
-    const onUpdateColumns: OnUpdateColumns = useCallback(
-      columns => updateColumns!({ id, columns }),
-      [id]
-    );
-
-    // Sync to timelineTypeContext.selectAll so parent components can select all events
-    useEffect(() => {
-      if (timelineTypeContext.selectAll) {
-        onSelectAll({ isSelected: true });
-      }
-    }, [timelineTypeContext.selectAll]); // onSelectAll dependency not necessary
-
-    return (
-      <Body
-        addNoteToEvent={onAddNoteToEvent}
-        browserFields={browserFields}
-        columnHeaders={columnHeaders || emptyColumnHeaders}
-        columnRenderers={columnRenderers}
-        data={data}
-        eventIdToNoteIds={eventIdToNoteIds}
-        getNotesByIds={getNotesByIds}
-        height={height}
-        id={id}
-        isEventViewer={isEventViewer}
-        isSelectAllChecked={isSelectAllChecked}
-        loadingEventIds={loadingEventIds}
-        onColumnRemoved={onColumnRemoved}
-        onColumnResized={onColumnResized}
-        onColumnSorted={onColumnSorted}
-        onRowSelected={onRowSelected}
-        onSelectAll={onSelectAll}
-        onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
-        onPinEvent={onPinEvent}
-        onUnPinEvent={onUnPinEvent}
-        onUpdateColumns={onUpdateColumns}
-        pinnedEventIds={pinnedEventIds}
-        range={range!}
-        rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
-        selectedEventIds={selectedEventIds}
-        showCheckboxes={showCheckboxes}
-        sort={sort}
-        toggleColumn={toggleColumn}
-        updateNote={onUpdateNote}
-      />
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.browserFields === nextProps.browserFields &&
-      prevProps.columnHeaders === nextProps.columnHeaders &&
-      prevProps.data === nextProps.data &&
-      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
-      prevProps.notesById === nextProps.notesById &&
-      prevProps.height === nextProps.height &&
-      prevProps.id === nextProps.id &&
-      prevProps.isEventViewer === nextProps.isEventViewer &&
-      prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-      prevProps.loadingEventIds === nextProps.loadingEventIds &&
-      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
-      prevProps.selectedEventIds === nextProps.selectedEventIds &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.showRowRenderers === nextProps.showRowRenderers &&
-      prevProps.range === nextProps.range &&
-      prevProps.sort === nextProps.sort
-    );
-  }
-);
+  return (
+    <Body
+      addNoteToEvent={onAddNoteToEvent}
+      browserFields={browserFields}
+      columnHeaders={columnHeaders || emptyColumnHeaders}
+      columnRenderers={columnRenderers}
+      data={data}
+      eventIdToNoteIds={eventIdToNoteIds}
+      getNotesByIds={getNotesByIds}
+      height={height}
+      id={id}
+      isEventViewer={isEventViewer}
+      isSelectAllChecked={isSelectAllChecked}
+      loadingEventIds={loadingEventIds}
+      onColumnRemoved={onColumnRemoved}
+      onColumnResized={onColumnResized}
+      onColumnSorted={onColumnSorted}
+      onRowSelected={onRowSelected}
+      onSelectAll={onSelectAll}
+      onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
+      onPinEvent={onPinEvent}
+      onUnPinEvent={onUnPinEvent}
+      onUpdateColumns={onUpdateColumns}
+      pinnedEventIds={pinnedEventIds}
+      range={range!}
+      rowRenderers={showRowRenderers ? rowRenderers : [plainRowRenderer]}
+      selectedEventIds={selectedEventIds}
+      showCheckboxes={showCheckboxes}
+      sort={sort}
+      toggleColumn={toggleColumn}
+      updateNote={onUpdateNote}
+    />
+  );
+};
 
 StatefulBodyComponent.displayName = 'StatefulBodyComponent';
 
@@ -319,4 +296,25 @@ export const StatefulBody = connect(makeMapStateToProps, {
   updateColumns: timelineActions.updateColumns,
   updateNote: appActions.updateNote,
   updateSort: timelineActions.updateSort,
-})(StatefulBodyComponent);
+})(
+  React.memo(StatefulBodyComponent, (prevProps, nextProps) => {
+    return (
+      prevProps.browserFields === nextProps.browserFields &&
+      prevProps.columnHeaders === nextProps.columnHeaders &&
+      deepEqual(prevProps.data, nextProps.data) &&
+      prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
+      prevProps.notesById === nextProps.notesById &&
+      prevProps.height === nextProps.height &&
+      prevProps.id === nextProps.id &&
+      prevProps.isEventViewer === nextProps.isEventViewer &&
+      prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
+      prevProps.loadingEventIds === nextProps.loadingEventIds &&
+      prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
+      prevProps.selectedEventIds === nextProps.selectedEventIds &&
+      prevProps.showCheckboxes === nextProps.showCheckboxes &&
+      prevProps.showRowRenderers === nextProps.showRowRenderers &&
+      prevProps.range === nextProps.range &&
+      prevProps.sort === nextProps.sort
+    );
+  })
+);

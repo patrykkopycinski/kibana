@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 
@@ -136,192 +136,169 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulTimelineComponent = React.memo<Props>(
-  ({
-    columns,
-    createTimeline,
-    dataProviders,
-    eventType,
-    end,
-    filters,
-    flyoutHeaderHeight,
-    flyoutHeight,
-    id,
-    isLive,
-    itemsPerPage,
-    itemsPerPageOptions,
-    kqlMode,
-    kqlQueryExpression,
-    onDataProviderEdited,
-    removeColumn,
-    removeProvider,
-    show,
-    showCallOutUnauthorizedMsg,
-    sort,
-    start,
-    updateDataProviderEnabled,
-    updateDataProviderExcluded,
-    updateDataProviderKqlQuery,
-    updateHighlightedDropAndProviderId,
-    updateItemsPerPage,
-    upsertColumn,
-  }) => {
-    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
+const EMPTY_INDEX_TO_ADD: string[] = [];
 
-    const indexToAdd = useMemo<string[]>(() => {
-      if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
-        return [signalIndexName];
+const StatefulTimelineComponent: React.FC<Props> = ({
+  columns,
+  createTimeline,
+  dataProviders,
+  eventType,
+  end,
+  filters,
+  flyoutHeaderHeight,
+  flyoutHeight,
+  id,
+  isLive,
+  itemsPerPage,
+  itemsPerPageOptions,
+  kqlMode,
+  kqlQueryExpression,
+  onDataProviderEdited,
+  removeColumn,
+  removeProvider,
+  show,
+  showCallOutUnauthorizedMsg,
+  sort,
+  start,
+  updateDataProviderEnabled,
+  updateDataProviderExcluded,
+  updateDataProviderKqlQuery,
+  updateHighlightedDropAndProviderId,
+  updateItemsPerPage,
+  upsertColumn,
+}) => {
+  const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
+
+  const indexToAdd = useMemo<string[]>(() => {
+    if (signalIndexExists && signalIndexName != null && ['signal', 'all'].includes(eventType)) {
+      return [signalIndexName];
+    }
+    return EMPTY_INDEX_TO_ADD;
+  }, [eventType, signalIndexExists, signalIndexName]);
+
+  const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
+    (providerId: string, andProviderId?: string) =>
+      removeProvider!({ id, providerId, andProviderId }),
+    [id]
+  );
+
+  const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
+    ({ providerId, enabled, andProviderId }) =>
+      updateDataProviderEnabled!({
+        id,
+        enabled,
+        providerId,
+        andProviderId,
+      }),
+    [id]
+  );
+
+  const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
+    ({ providerId, excluded, andProviderId }) =>
+      updateDataProviderExcluded!({
+        id,
+        excluded,
+        providerId,
+        andProviderId,
+      }),
+    [id]
+  );
+
+  const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
+    ({ andProviderId, excluded, field, operator, providerId, value }) =>
+      onDataProviderEdited!({
+        andProviderId,
+        excluded,
+        field,
+        id,
+        operator,
+        providerId,
+        value,
+      }),
+    [id]
+  );
+
+  const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
+    ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
+    [id]
+  );
+
+  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+    itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
+    [id]
+  );
+
+  const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
+    providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
+    [id]
+  );
+
+  const toggleColumn = useCallback(
+    (column: ColumnHeader) => {
+      const exists = columns.findIndex(c => c.id === column.id) !== -1;
+
+      if (!exists && upsertColumn != null) {
+        upsertColumn({
+          column,
+          id,
+          index: 1,
+        });
       }
-      return [];
-    }, [eventType, signalIndexExists, signalIndexName]);
 
-    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
-      (providerId: string, andProviderId?: string) =>
-        removeProvider!({ id, providerId, andProviderId }),
-      [id]
-    );
-
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
-      ({ providerId, enabled, andProviderId }) =>
-        updateDataProviderEnabled!({
+      if (exists && removeColumn != null) {
+        removeColumn({
+          columnId: column.id,
           id,
-          enabled,
-          providerId,
-          andProviderId,
-        }),
-      [id]
-    );
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
-      ({ providerId, excluded, andProviderId }) =>
-        updateDataProviderExcluded!({
-          id,
-          excluded,
-          providerId,
-          andProviderId,
-        }),
-      [id]
-    );
-
-    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
-      ({ andProviderId, excluded, field, operator, providerId, value }) =>
-        onDataProviderEdited!({
-          andProviderId,
-          excluded,
-          field,
-          id,
-          operator,
-          providerId,
-          value,
-        }),
-      [id]
-    );
-
-    const onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery = useCallback(
-      ({ providerId, kqlQuery }) => updateDataProviderKqlQuery!({ id, kqlQuery, providerId }),
-      [id]
-    );
-
-    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-      itemsChangedPerPage => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      [id]
-    );
-
-    const onChangeDroppableAndProvider: OnChangeDroppableAndProvider = useCallback(
-      providerId => updateHighlightedDropAndProviderId!({ id, providerId }),
-      [id]
-    );
-
-    const toggleColumn = useCallback(
-      (column: ColumnHeader) => {
-        const exists = columns.findIndex(c => c.id === column.id) !== -1;
-
-        if (!exists && upsertColumn != null) {
-          upsertColumn({
-            column,
-            id,
-            index: 1,
-          });
-        }
-
-        if (exists && removeColumn != null) {
-          removeColumn({
-            columnId: column.id,
-            id,
-          });
-        }
-      },
-      [columns, id]
-    );
-
-    useEffect(() => {
-      if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders, show: false });
+        });
       }
-    }, []);
+    },
+    [columns, id]
+  );
 
-    return (
-      <WithSource sourceId="default" indexToAdd={indexToAdd}>
-        {({ indexPattern, browserFields }) => (
-          <Timeline
-            browserFields={browserFields}
-            columns={columns}
-            dataProviders={dataProviders!}
-            end={end}
-            eventType={eventType}
-            filters={filters}
-            flyoutHeaderHeight={flyoutHeaderHeight}
-            flyoutHeight={flyoutHeight}
-            id={id}
-            indexPattern={indexPattern}
-            indexToAdd={indexToAdd}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            kqlQueryExpression={kqlQueryExpression}
-            loadingIndexName={loading}
-            onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-            onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onDataProviderEdited={onDataProviderEditedLocal}
-            onDataProviderRemoved={onDataProviderRemoved}
-            onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-            onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-            show={show!}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            sort={sort!}
-            start={start}
-            toggleColumn={toggleColumn}
-          />
-        )}
-      </WithSource>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.activePage === nextProps.activePage &&
-      prevProps.eventType === nextProps.eventType &&
-      prevProps.end === nextProps.end &&
-      prevProps.flyoutHeaderHeight === nextProps.flyoutHeaderHeight &&
-      prevProps.flyoutHeight === nextProps.flyoutHeight &&
-      prevProps.id === nextProps.id &&
-      prevProps.isLive === nextProps.isLive &&
-      prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      prevProps.kqlMode === nextProps.kqlMode &&
-      prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
-      prevProps.pageCount === nextProps.pageCount &&
-      prevProps.show === nextProps.show &&
-      prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
-      isEqual(prevProps.columns, nextProps.columns) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      isEqual(prevProps.sort, nextProps.sort)
-    );
-  }
-);
+  useEffect(() => {
+    if (createTimeline != null) {
+      createTimeline({ id, columns: defaultHeaders, show: false });
+    }
+  }, []);
+
+  return (
+    <WithSource sourceId="default" indexToAdd={indexToAdd}>
+      {({ indexPattern, browserFields }) => (
+        <Timeline
+          browserFields={browserFields}
+          columns={columns}
+          dataProviders={dataProviders!}
+          end={end}
+          eventType={eventType}
+          filters={filters}
+          flyoutHeaderHeight={flyoutHeaderHeight}
+          flyoutHeight={flyoutHeight}
+          id={id}
+          indexPattern={indexPattern}
+          indexToAdd={indexToAdd}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          kqlQueryExpression={kqlQueryExpression}
+          loadingIndexName={loading}
+          onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+          onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onDataProviderEdited={onDataProviderEditedLocal}
+          onDataProviderRemoved={onDataProviderRemoved}
+          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+          onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+          show={show!}
+          showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+          sort={sort!}
+          start={start}
+          toggleColumn={toggleColumn}
+        />
+      )}
+    </WithSource>
+  );
+};
 
 StatefulTimelineComponent.displayName = 'StatefulTimelineComponent';
 
@@ -369,7 +346,7 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const StatefulTimeline = connect(makeMapStateToProps, {
+const StatefulTimeline = connect(makeMapStateToProps, {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
   onDataProviderEdited: timelineActions.dataProviderEdited,
@@ -384,4 +361,10 @@ export const StatefulTimeline = connect(makeMapStateToProps, {
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
   upsertColumn: timelineActions.upsertColumn,
-})(StatefulTimelineComponent);
+})(React.memo(StatefulTimelineComponent, deepEqual));
+
+const StatefulTimelineWrapperComponent: React.FC<OwnProps> = props => (
+  <StatefulTimeline {...props} />
+);
+
+export const StatefulTimelineWrapper = React.memo(StatefulTimelineWrapperComponent, deepEqual);

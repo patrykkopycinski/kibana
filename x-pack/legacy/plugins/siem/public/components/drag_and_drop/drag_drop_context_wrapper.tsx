@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { BeforeCapture } from './drag_drop_context';
 import { BrowserFields } from '../../containers/source';
@@ -59,45 +60,42 @@ const onDragEndHandler = ({
 /**
  * DragDropContextWrapperComponent handles all drag end events
  */
-export const DragDropContextWrapperComponent = React.memo<Props>(
-  ({ browserFields, children, dataProviders, dispatch }) => {
-    const onDragEnd = useCallback(
-      (result: DropResult) => {
-        enableScrolling();
+export const DragDropContextWrapperComponent: React.FC<Props> = ({
+  browserFields,
+  children,
+  dataProviders,
+  dispatch,
+}) => {
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      enableScrolling();
 
-        if (dataProviders != null) {
-          onDragEndHandler({
-            browserFields,
-            result,
-            dataProviders,
-            dispatch,
-          });
-        }
+      if (dataProviders != null) {
+        onDragEndHandler({
+          browserFields,
+          result,
+          dataProviders,
+          dispatch,
+        });
+      }
 
-        if (!draggableIsField(result)) {
-          document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
-        }
+      if (!draggableIsField(result)) {
+        document.body.classList.remove(IS_DRAGGING_CLASS_NAME);
+      }
 
-        if (draggableIsField(result)) {
-          document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
-        }
-      },
-      [browserFields, dataProviders]
-    );
-    return (
-      // @ts-ignore
-      <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
-        {children}
-      </DragDropContext>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.children === nextProps.children &&
-      prevProps.dataProviders === nextProps.dataProviders
-    ); // prevent re-renders when data providers are added or removed, but all other props are the same
-  }
-);
+      if (draggableIsField(result)) {
+        document.body.classList.remove(IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME);
+      }
+    },
+    [browserFields, dataProviders]
+  );
+  return (
+    // @ts-ignore
+    <DragDropContext onDragEnd={onDragEnd} onBeforeCapture={onBeforeCapture}>
+      {children}
+    </DragDropContext>
+  );
+};
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
@@ -112,7 +110,9 @@ const mapStateToProps = (state: State) => {
   return { dataProviders };
 };
 
-export const DragDropContextWrapper = connect(mapStateToProps)(DragDropContextWrapperComponent);
+export const DragDropContextWrapper = connect(mapStateToProps)(
+  React.memo(DragDropContextWrapperComponent, deepEqual)
+);
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 

@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { ESQuery } from '../../../../../common/typed_json';
@@ -23,6 +24,8 @@ import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats'
 import { manageQuery } from '../../../page/manage_query';
 import { inputsModel } from '../../../../store/inputs';
 import { InspectButtonContainer } from '../../../inspect';
+
+const MemoFormattedMessage = React.memo(FormattedMessage, deepEqual);
 
 export interface OwnProps {
   startDate: number;
@@ -76,7 +79,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                     id={OverviewHostQueryId}
                     subtitle={
                       !isEmpty(overviewHost) ? (
-                        <FormattedMessage
+                        <MemoFormattedMessage
                           defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
                           id="xpack.siem.overview.overviewHost.hostsSubtitle"
                           values={{
@@ -89,14 +92,14 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
                       )
                     }
                     title={
-                      <FormattedMessage
+                      <MemoFormattedMessage
                         id="xpack.siem.overview.hostsTitle"
                         defaultMessage="Host events"
                       />
                     }
                   >
                     <EuiButton href={getHostsUrl()}>
-                      <FormattedMessage
+                      <MemoFormattedMessage
                         id="xpack.siem.overview.hostsAction"
                         defaultMessage="View hosts"
                       />

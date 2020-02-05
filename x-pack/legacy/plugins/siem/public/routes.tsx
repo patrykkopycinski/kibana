@@ -7,10 +7,24 @@
 import { History } from 'history';
 import React, { FC, memo } from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
 import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
+
+const MemoRoute = React.memo(Route, deepEqual);
+
+/* Uncomment only during debugging */
+const whyDidYouRender = require('@welldone-software/why-did-you-render'); // eslint-disable-line
+whyDidYouRender(React, {
+  include: [/^Route/],
+  exclude: [/^ColumnHeaders/],
+  trackAllPureComponents: true,
+  trackHooks: false,
+  collapseGroups: true,
+  // logOnDifferentValues: true,
+});
 
 interface RouterProps {
   history: History;
@@ -20,8 +34,8 @@ const PageRouterComponent: FC<RouterProps> = ({ history }) => (
   <ManageRoutesSpy>
     <Router history={history}>
       <Switch>
-        <Route path="/" render={() => <HomePage />} />
-        <Route render={() => <NotFoundPage />} />
+        <MemoRoute path="/" render={() => <HomePage />} />
+        <MemoRoute render={() => <NotFoundPage />} />
       </Switch>
     </Router>
   </ManageRoutesSpy>

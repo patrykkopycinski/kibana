@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -66,15 +67,25 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
     };
   }, []);
 
+  const setQuery = useCallback(
+    ({ id, inspect, loading, refetch }: SetQuery) =>
+      setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
+    [setGlobalQuery]
+  );
+
+  const deleteQuery = useCallback(
+    ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
+    [deleteOneQuery]
+  );
+
   return (
     <>
       {children({
         isInitializing,
         from,
         to,
-        setQuery: ({ id, inspect, loading, refetch }: SetQuery) =>
-          setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
-        deleteQuery: ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
+        setQuery,
+        deleteQuery,
       })}
     </>
   );
@@ -92,4 +103,4 @@ export const GlobalTime = connect(mapStateToProps, {
   deleteAllQuery: inputsActions.deleteAllQuery,
   deleteOneQuery: inputsActions.deleteOneQuery,
   setGlobalQuery: inputsActions.setQuery,
-})(React.memo(GlobalTimeComponent));
+})(React.memo(GlobalTimeComponent, deepEqual));

@@ -6,6 +6,8 @@
 
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
 import moment from 'moment-timezone';
+import memoizeOne from 'memoize-one';
+import deepEqual from 'fast-deep-equal/es6';
 
 export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   const diff = maxDate.diff(minDate, 'days');
@@ -17,8 +19,11 @@ export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   return diff;
 };
 
-export const histogramDateTimeFormatter = (domain: [number, number] | null, fixedDiff?: number) => {
-  const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
-  const format = niceTimeFormatByDay(diff);
-  return timeFormatter(format);
-};
+export const histogramDateTimeFormatter = memoizeOne(
+  (domain: [number, number] | null, fixedDiff?: number) => {
+    const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
+    const format = niceTimeFormatByDay(diff);
+    return timeFormatter(format);
+  },
+  deepEqual
+);

@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { isEmpty, get } from 'lodash/fp';
 import { History } from '../../../lib/history';
@@ -215,4 +216,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
 });
 
-export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);
+export const FlyoutHeader = connect(
+  makeMapStateToProps,
+  mapDispatchToProps
+)(React.memo(StatefulFlyoutHeader, deepEqual));

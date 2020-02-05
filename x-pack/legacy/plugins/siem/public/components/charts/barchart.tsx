@@ -8,6 +8,7 @@ import React from 'react';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { useTimeZone } from '../../hooks';
 import { AutoSizer } from '../auto_sizer';
@@ -35,6 +36,12 @@ const checkIfAnyValidSeriesExist = (
   !checkIfAllValuesAreZero(data) &&
   data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const Y_ACCESSORS = ['y'];
+const SPLIT_SERIES_ACCESSORS = ['g'];
+
+const MemoSettings = React.memo(Settings, deepEqual);
+MemoSettings.displayName = 'MemoSettings';
+
 // Bar chart rotation: https://ela.st/chart-rotations
 export const BarChartBaseComponent = ({
   data,
@@ -59,7 +66,7 @@ export const BarChartBaseComponent = ({
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} />
+      <MemoSettings {...settings} />
       {data.map(series => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid ? (
@@ -70,9 +77,9 @@ export const BarChartBaseComponent = ({
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
-            yAccessors={['y']}
+            yAccessors={Y_ACCESSORS}
             timeZone={timeZone}
-            splitSeriesAccessors={['g']}
+            splitSeriesAccessors={SPLIT_SERIES_ACCESSORS}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             customSeriesColors={series.color ? [series.color] : undefined}
@@ -95,7 +102,7 @@ export const BarChartBaseComponent = ({
 
 BarChartBaseComponent.displayName = 'BarChartBaseComponent';
 
-export const BarChartBase = React.memo(BarChartBaseComponent);
+export const BarChartBase = React.memo(BarChartBaseComponent, deepEqual);
 
 BarChartBase.displayName = 'BarChartBase';
 
@@ -113,7 +120,7 @@ export const BarChartComponent = ({
     <AutoSizer detectAnyWindowResize={false} content>
       {({ measureRef, content: { height, width } }) => (
         <WrappedByAutoSizer ref={measureRef} height={getChartHeight(customHeight, height)}>
-          <BarChartBaseComponent
+          <BarChartBase
             height={getChartHeight(customHeight, height)}
             width={getChartWidth(customWidth, width)}
             data={barChart}
@@ -133,6 +140,6 @@ export const BarChartComponent = ({
 
 BarChartComponent.displayName = 'BarChartComponent';
 
-export const BarChart = React.memo(BarChartComponent);
+export const BarChart = React.memo(BarChartComponent, deepEqual);
 
 BarChart.displayName = 'BarChart';

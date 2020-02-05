@@ -6,6 +6,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { BrowserFields } from '../../../containers/source';
 import { ColumnHeader } from '../body/column_headers/column_header';
@@ -40,43 +41,41 @@ interface Props {
   toggleColumn: (column: ColumnHeader) => void;
 }
 
-export const ExpandableEvent = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    event,
-    forceExpand = false,
-    id,
-    timelineId,
-    toggleColumn,
-    onUpdateColumns,
-  }) => {
-    const width = useTimelineWidthContext();
-    // Passing the styles directly to the component of LazyAccordion because the width is
-    // being calculated and is recommended by Styled Components for performance
-    // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-    return (
-      <ExpandableDetails hideExpandButton={true}>
-        <LazyAccordion
-          style={{ width: `${width}px` }}
-          id={`timeline-${timelineId}-row-${id}`}
-          renderExpandedContent={() => (
-            <StatefulEventDetails
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              data={event}
-              id={id}
-              onUpdateColumns={onUpdateColumns}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
-          )}
-          forceExpand={forceExpand}
-          paddingSize="none"
-        />
-      </ExpandableDetails>
-    );
-  }
-);
+const ExpandableEventComponent: React.FC<Props> = ({
+  browserFields,
+  columnHeaders,
+  event,
+  forceExpand = false,
+  id,
+  timelineId,
+  toggleColumn,
+  onUpdateColumns,
+}) => {
+  const width = useTimelineWidthContext();
+  // Passing the styles directly to the component of LazyAccordion because the width is
+  // being calculated and is recommended by Styled Components for performance
+  // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+  return (
+    <ExpandableDetails hideExpandButton={true}>
+      <LazyAccordion
+        style={{ width: `${width}px` }}
+        id={`timeline-${timelineId}-row-${id}`}
+        renderExpandedContent={() => (
+          <StatefulEventDetails
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            data={event}
+            id={id}
+            onUpdateColumns={onUpdateColumns}
+            timelineId={timelineId}
+            toggleColumn={toggleColumn}
+          />
+        )}
+        forceExpand={forceExpand}
+        paddingSize="none"
+      />
+    </ExpandableDetails>
+  );
+};
 
-ExpandableEvent.displayName = 'ExpandableEvent';
+export const ExpandableEvent = React.memo(ExpandableEventComponent, deepEqual);

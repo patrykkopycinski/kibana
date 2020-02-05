@@ -5,11 +5,12 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled, { css } from 'styled-components';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -162,7 +163,10 @@ const makeMapStateToProps = () => {
   const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
   const mapStateToProps = (state: State, { inputId = 'global', queryId }: OwnProps) => {
-    return inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    const props =
+      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
+    const propsWithoutRefetch = omit('refetch', props);
+    return propsWithoutRefetch;
   };
   return mapStateToProps;
 };
@@ -174,4 +178,4 @@ const mapDispatchToProps = {
 export const InspectButton = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(InspectButtonComponent));
+)(React.memo(InspectButtonComponent, deepEqual));

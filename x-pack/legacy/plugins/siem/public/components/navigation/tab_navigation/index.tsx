@@ -6,6 +6,7 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { track, METRIC_TYPE, TELEMETRY_EVENT } from '../../../lib/telemetry';
 import { getSearch } from '../helpers';
@@ -88,6 +89,6 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const TabNavigation = React.memo(TabNavigationComponent);
+export const TabNavigation = React.memo(TabNavigationComponent, deepEqual);
 
 TabNavigation.displayName = 'TabNavigation';

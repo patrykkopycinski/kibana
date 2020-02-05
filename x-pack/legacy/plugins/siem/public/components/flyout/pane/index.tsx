@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 import { Resizable, ResizeCallback } from 're-resizable';
 import { throttle } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { TimelineResizeHandle } from './timeline_resize_handle';
 import { FlyoutHeader } from '../header';
@@ -185,6 +186,6 @@ const FlyoutPaneComponent: React.FC<Props> = ({
 
 export const Pane = connect(null, {
   applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-})(React.memo(FlyoutPaneComponent));
+})(React.memo(FlyoutPaneComponent, deepEqual));
 
 Pane.displayName = 'Pane';

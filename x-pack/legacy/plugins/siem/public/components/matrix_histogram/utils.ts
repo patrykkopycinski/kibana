@@ -23,6 +23,8 @@ interface GetBarchartConfigsProps {
 
 export const DEFAULT_CHART_HEIGHT = 174;
 
+const defaultYTickFormatter = (value: string | number): string => value.toLocaleString();
+
 export const getBarchartConfigs = ({
   chartHeight,
   from,
@@ -32,45 +34,45 @@ export const getBarchartConfigs = ({
   onBrushEnd,
   yTickFormatter,
   showLegend,
-}: GetBarchartConfigsProps) => ({
-  series: {
-    xScaleType: scaleType || ScaleType.Time,
-    yScaleType: ScaleType.Linear,
-    stackAccessors: ['g'],
-  },
-  axis: {
-    xTickFormatter:
-      scaleType === ScaleType.Time ? histogramDateTimeFormatter([from, to]) : undefined,
-    yTickFormatter:
-      yTickFormatter != null
-        ? yTickFormatter
-        : (value: string | number): string => value.toLocaleString(),
-    tickSize: 8,
-  },
-  settings: {
-    legendPosition: legendPosition ?? Position.Bottom,
-    onBrushEnd,
-    showLegend: showLegend ?? true,
-    theme: {
-      scales: {
-        barsPadding: 0.08,
-      },
-      chartMargins: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-      },
-      chartPaddings: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
+}: GetBarchartConfigsProps) => {
+  const xTickFormatter = histogramDateTimeFormatter([from, to]);
+
+  return {
+    series: {
+      xScaleType: scaleType || ScaleType.Time,
+      yScaleType: ScaleType.Linear,
+      stackAccessors: ['g'],
+    },
+    axis: {
+      xTickFormatter: scaleType === ScaleType.Time ? xTickFormatter : undefined,
+      yTickFormatter: yTickFormatter ?? defaultYTickFormatter,
+      tickSize: 8,
+    },
+    settings: {
+      legendPosition: legendPosition ?? Position.Bottom,
+      onBrushEnd,
+      showLegend: showLegend ?? true,
+      theme: {
+        scales: {
+          barsPadding: 0.08,
+        },
+        chartMargins: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
+        chartPaddings: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
       },
     },
-  },
-  customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
-});
+    customHeight: chartHeight ?? DEFAULT_CHART_HEIGHT,
+  };
+};
 
 export const formatToChartDataItem = ([key, value]: [
   string,

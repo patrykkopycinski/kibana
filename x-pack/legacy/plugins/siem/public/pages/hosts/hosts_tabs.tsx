@@ -59,32 +59,24 @@ const HostsTabs = memo<HostsTabsProps>(
 
     return (
       <Switch>
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}
-          render={() => <HostsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}
-          render={() => <AuthenticationsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}
-          render={() => <UncommonProcessQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
-          render={() => (
-            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
-          )}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}
-          render={() => <EventsQueryTabBody {...tabProps} />}
-        />
-        <Route
-          path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}
-          render={() => <HostAlertsQueryTabBody {...tabProps} />}
-        />
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.hosts})`}>
+          <HostsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.authentications})`}>
+          <AuthenticationsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.uncommonProcesses})`}>
+          <UncommonProcessQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}>
+          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}>
+          <EventsQueryTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostsPagePath}/:tabName(${HostsTableType.alerts})`}>
+          <HostAlertsQueryTabBody {...tabProps} />
+        </Route>
       </Switch>
     );
   }

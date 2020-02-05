@@ -4,85 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as H from 'history';
-import { isEqual } from 'lodash/fp';
 import { memo, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useLocation, useParams, useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
-import { SpyRouteProps } from './types';
+import { RouteSpyState } from './types';
 import { useRouteSpy } from './use_route_spy';
 
-export const SpyRouteComponent = memo<SpyRouteProps & { location: H.Location }>(
-  ({
-    location: { pathname, search },
-    history,
-    match: {
-      params: { pageName, detailName, tabName, flowTarget },
-    },
-    state,
-  }) => {
-    const [isInitializing, setIsInitializing] = useState(true);
-    const [route, dispatch] = useRouteSpy();
+export const SpyRouteComponent = () => {
+  const { pathname, search, state } = useLocation();
+  const { pageName, detailName, tabName, flowTarget } = useParams();
+  const history = useHistory();
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [route, dispatch] = useRouteSpy();
 
-    useEffect(() => {
-      if (isInitializing && search !== '') {
+  useEffect(() => {
+    if (isInitializing && search !== '') {
+      dispatch({
+        type: 'updateSearch',
+        search,
+      });
+      setIsInitializing(false);
+    }
+  }, [search]);
+  useEffect(() => {
+    if (pageName && !deepEqual(route.pathName, pathname)) {
+      if (isInitializing && detailName == null) {
         dispatch({
-          type: 'updateSearch',
-          search,
+          type: 'updateRouteWithOutSearch',
+          route: {
+            pageName,
+            detailName,
+            tabName,
+            pathName: pathname,
+            history,
+            flowTarget,
+          },
         });
         setIsInitializing(false);
-      }
-    }, [search]);
-    useEffect(() => {
-      if (pageName && !isEqual(route.pathName, pathname)) {
-        if (isInitializing && detailName == null) {
-          dispatch({
-            type: 'updateRouteWithOutSearch',
-            route: {
-              pageName,
-              detailName,
-              tabName,
-              pathName: pathname,
-              history,
-              flowTarget,
-            },
-          });
-          setIsInitializing(false);
-        } else {
-          dispatch({
-            type: 'updateRoute',
-            route: {
-              pageName,
-              detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
-              flowTarget,
-            },
-          });
-        }
       } else {
-        if (pageName && !deepEqual(state, route.state)) {
-          dispatch({
-            type: 'updateRoute',
-            route: {
-              pageName,
-              detailName,
-              tabName,
-              search,
-              pathName: pathname,
-              history,
-              flowTarget,
-              state,
-            },
-          });
-        }
+        dispatch({
+          type: 'updateRoute',
+          route: {
+            pageName,
+            detailName,
+            tabName: tabName as RouteSpyState['tabName'],
+            search,
+            pathName: pathname,
+            history,
+            flowTarget: flowTarget as RouteSpyState['flowTarget'],
+          },
+        });
       }
-    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
-    return null;
-  }
-);
+    } else {
+      if (pageName && !deepEqual(state, route.state)) {
+        dispatch({
+          type: 'updateRoute',
+          route: {
+            pageName,
+            detailName,
+            tabName: tabName as RouteSpyState['tabName'],
+            search,
+            pathName: pathname,
+            history,
+            flowTarget: flowTarget as RouteSpyState['flowTarget'],
+            state,
+          },
+        });
+      }
+    }
+  }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
+  return null;
+};
 
-export const SpyRoute = withRouter(SpyRouteComponent);
+export const SpyRoute = memo(SpyRouteComponent, deepEqual);

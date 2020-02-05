@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 interface RowProps {
   rowHeight?: string;
@@ -24,7 +25,7 @@ const RowComponent = styled.div.attrs<RowProps>(({ rowHeight, rowPadding, theme 
 `;
 RowComponent.displayName = 'RowComponent';
 
-const Row = React.memo(RowComponent);
+const Row = React.memo(RowComponent, deepEqual);
 
 Row.displayName = 'Row';
 
@@ -73,6 +74,7 @@ export const SkeletonRow = React.memo<SkeletonRowProps>(
         {cells}
       </Row>
     );
-  }
+  },
+  deepEqual
 );
 SkeletonRow.displayName = 'SkeletonRow';

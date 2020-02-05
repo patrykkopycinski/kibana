@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { esFilters, esQuery } from '../../../../../../../../../src/plugins/data/common/es_query';
 import { Query } from '../../../../../../../../../src/plugins/data/common/query';
@@ -392,4 +393,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export const SignalsTable = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(React.memo(SignalsTableComponent));
+)(React.memo(SignalsTableComponent, deepEqual));

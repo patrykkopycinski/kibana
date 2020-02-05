@@ -5,6 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { SignalsHistogramPanel } from '../../detection_engine/components/signals_histogram_panel';
 import { signalsHistogramOptions } from '../../detection_engine/components/signals_histogram_panel/config';
@@ -76,4 +77,4 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
 
 SignalsByCategoryComponent.displayName = 'SignalsByCategoryComponent';
 
-export const SignalsByCategory = React.memo(SignalsByCategoryComponent);
+export const SignalsByCategory = React.memo(SignalsByCategoryComponent, deepEqual);

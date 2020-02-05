@@ -94,7 +94,7 @@ export const areachartConfigs = (config?: {
   customHeight: statItemChartCustomHeight,
 });
 
-export const barchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
+export const getBarchartConfigs = (config?: { onElementClick?: ElementClickListener }) => ({
   series: {
     xScaleType: ScaleType.Ordinal,
     yScaleType: ScaleType.Linear,
@@ -204,6 +204,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
     statKey = 'item',
     to,
   }) => {
+    const barchartConfigs = getBarchartConfigs();
     const isBarChartDataAvailable =
       barChart &&
       barChart.length &&
@@ -260,7 +261,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
             <EuiFlexGroup>
               {enableBarChart && (
                 <FlexItem>
-                  <BarChart barChart={barChart} configs={barchartConfigs()} />
+                  <BarChart barChart={barChart} configs={barchartConfigs} />
                 </FlexItem>
               )}
 

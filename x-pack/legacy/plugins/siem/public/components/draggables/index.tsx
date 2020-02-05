@@ -6,6 +6,7 @@
 
 import { EuiBadge, EuiBadgeProps, EuiToolTip, IconType } from '@elastic/eui';
 import React from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { Omit } from '../../../common/utility_types';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
@@ -111,7 +112,8 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
           )
         }
       />
-    ) : null
+    ) : null,
+  deepEqual
 );
 
 DefaultDraggable.displayName = 'DefaultDraggable';

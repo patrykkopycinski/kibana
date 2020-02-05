@@ -7,6 +7,7 @@
 import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
@@ -18,7 +19,6 @@ import { MlHostConditionalContainer } from '../../components/ml/conditional_link
 import { MlNetworkConditionalContainer } from '../../components/ml/conditional_links/ml_network_conditional_container';
 import { StatefulTimeline } from '../../components/timeline';
 import { AutoSaveWarningMsg } from '../../components/timeline/auto_save_warning';
-import { UseUrlState } from '../../components/url_state';
 import { WithSource, indicesExistOrDataTemporarilyUnavailable } from '../../containers/source';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { NotFoundPage } from '../404';
@@ -27,8 +27,9 @@ import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 import { Timelines } from '../timelines';
-import { navTabs } from './home_navigations';
 import { SiemPageName } from './types';
+
+const MemoRoute = React.memo(Route, deepEqual);
 
 /*
  * This is import is important to keep because if we do not have it
@@ -55,95 +56,96 @@ const calculateFlyoutHeight = ({
   windowHeight: number;
 }): number => Math.max(0, windowHeight - globalHeaderSize);
 
-export const HomePage: React.FC = () => (
-  <AutoSizer detectAnyWindowResize={true} content>
-    {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => (
-      <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
-        <HeaderGlobal />
+export const HomePage = React.memo(
+  () => (
+    <AutoSizer detectAnyWindowResize={true} content>
+      {({ measureRef, windowMeasurement: { height: windowHeight = 0 } }) => {
+        const flyoutHeight = calculateFlyoutHeight({
+          globalHeaderSize: globalHeaderHeightPx,
+          windowHeight,
+        });
+        return (
+          <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" ref={measureRef}>
+            <HeaderGlobal />
 
-        <main data-test-subj="pageContainer">
-          <WithSource sourceId="default">
-            {({ browserFields, indexPattern, indicesExist }) => (
-              <DragDropContextWrapper browserFields={browserFields}>
-                <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-                {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
-                  <>
-                    <AutoSaveWarningMsg />
-                    <Flyout
-                      flyoutHeight={calculateFlyoutHeight({
-                        globalHeaderSize: globalHeaderHeightPx,
-                        windowHeight,
-                      })}
-                      headerHeight={flyoutHeaderHeight}
-                      timelineId="timeline-1"
-                      usersViewing={usersViewing}
-                    >
-                      <StatefulTimeline
-                        flyoutHeaderHeight={flyoutHeaderHeight}
-                        flyoutHeight={calculateFlyoutHeight({
-                          globalHeaderSize: globalHeaderHeightPx,
-                          windowHeight,
-                        })}
-                        id="timeline-1"
+            <main data-test-subj="pageContainer">
+              <WithSource sourceId="default">
+                {({ browserFields, indexPattern, indicesExist }) => (
+                  <DragDropContextWrapper browserFields={browserFields}>
+                    {/* <UseUrlState indexPattern={indexPattern} navTabs={navTabs} /> */}
+                    {indicesExistOrDataTemporarilyUnavailable(indicesExist) && (
+                      <>
+                        <AutoSaveWarningMsg />
+                        <Flyout
+                          flyoutHeight={flyoutHeight}
+                          headerHeight={flyoutHeaderHeight}
+                          timelineId="timeline-1"
+                          usersViewing={usersViewing}
+                        >
+                          <StatefulTimeline
+                            flyoutHeaderHeight={flyoutHeaderHeight}
+                            flyoutHeight={flyoutHeight}
+                            id="timeline-1"
+                          />
+                        </Flyout>
+                      </>
+                    )}
+
+                    <Switch>
+                      <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
+                      <MemoRoute path={`/:pageName(${SiemPageName.overview})`}>
+                        <Overview />
+                      </MemoRoute>
+                      <Route
+                        path={`/:pageName(${SiemPageName.hosts})`}
+                        render={({ location, match }) => (
+                          <HostsContainer location={location} url={match.url} />
+                        )}
                       />
-                    </Flyout>
-                  </>
+                      <MemoRoute path={`/:pageName(${SiemPageName.network})`}>
+                        <NetworkContainer />
+                      </MemoRoute>
+                      <Route
+                        path={`/:pageName(${SiemPageName.detections})`}
+                        render={({ location, match }) => (
+                          <DetectionEngineContainer location={location} url={match.url} />
+                        )}
+                      />
+                      <Route
+                        path={`/:pageName(${SiemPageName.timelines})`}
+                        render={() => <Timelines />}
+                      />
+                      <Route path="/link-to" render={props => <LinkToPage {...props} />} />
+                      <Route
+                        path="/ml-hosts"
+                        render={({ location, match }) => (
+                          <MlHostConditionalContainer location={location} url={match.url} />
+                        )}
+                      />
+                      <Route
+                        path="/ml-network"
+                        render={({ location, match }) => (
+                          <MlNetworkConditionalContainer location={location} url={match.url} />
+                        )}
+                      />
+                      <Route>
+                        <NotFoundPage />
+                      </Route>
+                    </Switch>
+                  </DragDropContextWrapper>
                 )}
+              </WithSource>
+            </main>
 
-                <Switch>
-                  <Redirect exact from="/" to={`/${SiemPageName.overview}`} />
-                  <Route
-                    path={`/:pageName(${SiemPageName.overview})`}
-                    render={() => <Overview />}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.hosts})`}
-                    render={({ location, match }) => (
-                      <HostsContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.network})`}
-                    render={({ location, match }) => (
-                      <NetworkContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.detections})`}
-                    render={({ location, match }) => (
-                      <DetectionEngineContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path={`/:pageName(${SiemPageName.timelines})`}
-                    render={() => <Timelines />}
-                  />
-                  <Route path="/link-to" render={props => <LinkToPage {...props} />} />
-                  <Route
-                    path="/ml-hosts"
-                    render={({ location, match }) => (
-                      <MlHostConditionalContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route
-                    path="/ml-network"
-                    render={({ location, match }) => (
-                      <MlNetworkConditionalContainer location={location} url={match.url} />
-                    )}
-                  />
-                  <Route render={() => <NotFoundPage />} />
-                </Switch>
-              </DragDropContextWrapper>
-            )}
-          </WithSource>
-        </main>
+            <HelpMenu />
 
-        <HelpMenu />
-
-        <SpyRoute />
-      </WrappedByAutoSizer>
-    )}
-  </AutoSizer>
+            <SpyRoute />
+          </WrappedByAutoSizer>
+        );
+      }}
+    </AutoSizer>
+  ),
+  deepEqual
 );
 
 HomePage.displayName = 'HomePage';

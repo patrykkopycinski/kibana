@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import { ESQuery } from '../../../../../common/typed_json';
@@ -23,6 +24,8 @@ import { inputsModel } from '../../../../store/inputs';
 import { getOverviewNetworkStats, OverviewNetworkStats } from '../overview_network_stats';
 import { getNetworkUrl } from '../../../link_to';
 import { InspectButtonContainer } from '../../../inspect';
+
+const MemoFormattedMessage = React.memo(FormattedMessage, deepEqual);
 
 export interface OverviewNetworkProps {
   startDate: number;
@@ -77,7 +80,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                     id={OverviewNetworkQueryId}
                     subtitle={
                       !isEmpty(overviewNetwork) ? (
-                        <FormattedMessage
+                        <MemoFormattedMessage
                           defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
                           id="xpack.siem.overview.overviewNetwork.networkSubtitle"
                           values={{
@@ -90,14 +93,14 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
                       )
                     }
                     title={
-                      <FormattedMessage
+                      <MemoFormattedMessage
                         id="xpack.siem.overview.networkTitle"
                         defaultMessage="Network events"
                       />
                     }
                   >
                     <EuiButton href={getNetworkUrl()}>
-                      <FormattedMessage
+                      <MemoFormattedMessage
                         id="xpack.siem.overview.networkAction"
                         defaultMessage="View network"
                       />
@@ -124,4 +127,4 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
 
 OverviewNetworkComponent.displayName = 'OverviewNetworkComponent';
 
-export const OverviewNetwork = React.memo(OverviewNetworkComponent);
+export const OverviewNetwork = React.memo(OverviewNetworkComponent, deepEqual);

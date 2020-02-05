@@ -16,6 +16,7 @@ import {
   RecursivePartial,
 } from '@elastic/charts';
 import { getOr, get, isNull, isNumber } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal/es6/react';
 import { AutoSizer } from '../auto_sizer';
 import { ChartPlaceHolder } from './chart_place_holder';
 import { useTimeZone } from '../../hooks';
@@ -60,6 +61,15 @@ const checkIfAnyValidSeriesExist = (
 ): data is ChartSeriesData[] =>
   Array.isArray(data) && data.some(checkIfAllTheDataInTheSeriesAreValid);
 
+const MemoChart = React.memo(Chart, deepEqual);
+MemoChart.displayName = 'MemoChart';
+const MemoSettings = React.memo(Settings, deepEqual);
+MemoSettings.displayName = 'MemoSettings';
+const MemoAreaSeries = React.memo(AreaSeries, deepEqual);
+MemoAreaSeries.displayName = 'MemoAreaSeries';
+const MemoAxis = React.memo(Axis, deepEqual);
+MemoAxis.displayName = 'MemoAxis';
+
 // https://ela.st/multi-areaseries
 export const AreaChartBaseComponent = ({
   data,
@@ -83,12 +93,12 @@ export const AreaChartBaseComponent = ({
   };
   return chartConfigs.width && chartConfigs.height ? (
     <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
-      <Chart>
-        <Settings {...settings} />
+      <MemoChart>
+        <MemoSettings {...settings} />
         {data.map(series => {
           const seriesKey = series.key;
           return checkIfAllTheDataInTheSeriesAreValid(series) ? (
-            <AreaSeries
+            <MemoAreaSeries
               id={seriesKey}
               key={seriesKey}
               name={series.key.replace('Histogram', '')}
@@ -104,7 +114,7 @@ export const AreaChartBaseComponent = ({
           ) : null;
         })}
 
-        <Axis
+        <MemoAxis
           id={xAxisId}
           position={Position.Bottom}
           showOverlappingTicks={false}
@@ -112,15 +122,15 @@ export const AreaChartBaseComponent = ({
           tickSize={0}
         />
 
-        <Axis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
-      </Chart>
+        <MemoAxis id={yAxisId} position={Position.Left} tickSize={0} tickFormat={yTickFormatter} />
+      </MemoChart>
     </div>
   ) : null;
 };
 
 AreaChartBaseComponent.displayName = 'AreaChartBaseComponent';
 
-export const AreaChartBase = React.memo(AreaChartBaseComponent);
+export const AreaChartBase = React.memo(AreaChartBaseComponent, deepEqual);
 
 AreaChartBase.displayName = 'AreaChartBase';
 
@@ -158,6 +168,6 @@ export const AreaChartComponent = ({
 
 AreaChartComponent.displayName = 'AreaChartComponent';
 
-export const AreaChart = React.memo(AreaChartComponent);
+export const AreaChart = React.memo(AreaChartComponent, deepEqual);
 
 AreaChart.displayName = 'AreaChart';

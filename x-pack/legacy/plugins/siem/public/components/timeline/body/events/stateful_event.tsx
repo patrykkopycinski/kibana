@@ -6,7 +6,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
+import { omit } from 'lodash/fp';
 import VisibilitySensor from 'react-visibility-sensor';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsQuery } from '../../../../containers/timeline/details';
@@ -296,4 +298,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 };
 
-export const StatefulEvent = React.memo(StatefulEventComponent);
+export const StatefulEvent = React.memo(StatefulEventComponent, (prevProps, nextProps) =>
+  deepEqual(omit('onRowSelected', prevProps), omit('onRowSelected', nextProps))
+);

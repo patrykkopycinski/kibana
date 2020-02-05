@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, isEqual } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { esFilters, IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../containers/source';
@@ -72,136 +73,113 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const StatefulSearchOrFilterComponent = React.memo<Props>(
-  ({
-    applyKqlFilterQuery,
-    browserFields,
-    dataProviders,
-    eventType,
-    filters,
-    filterQuery,
-    filterQueryDraft,
-    from,
-    fromStr,
-    indexPattern,
-    isRefreshPaused,
-    kqlMode,
-    refreshInterval,
-    savedQueryId,
-    setFilters,
-    setKqlFilterQueryDraft,
-    setSavedQueryId,
-    timelineId,
-    to,
-    toStr,
-    updateEventType,
-    updateKqlMode,
-    updateReduxTime,
-  }) => {
-    const applyFilterQueryFromKueryExpression = useCallback(
-      (expression: string, kind) =>
-        applyKqlFilterQuery({
-          id: timelineId,
-          filterQuery: {
-            kuery: {
-              kind,
-              expression,
-            },
-            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-          },
-        }),
-      [indexPattern, timelineId]
-    );
-
-    const setFilterQueryDraftFromKueryExpression = useCallback(
-      (expression: string, kind) =>
-        setKqlFilterQueryDraft({
-          id: timelineId,
-          filterQueryDraft: {
+const StatefulSearchOrFilterComponent: React.FC<Props> = ({
+  applyKqlFilterQuery,
+  browserFields,
+  dataProviders,
+  eventType,
+  filters,
+  filterQuery,
+  filterQueryDraft,
+  from,
+  fromStr,
+  indexPattern,
+  isRefreshPaused,
+  kqlMode,
+  refreshInterval,
+  savedQueryId,
+  setFilters,
+  setKqlFilterQueryDraft,
+  setSavedQueryId,
+  timelineId,
+  to,
+  toStr,
+  updateEventType,
+  updateKqlMode,
+  updateReduxTime,
+}) => {
+  const applyFilterQueryFromKueryExpression = useCallback(
+    (expression: string, kind) =>
+      applyKqlFilterQuery({
+        id: timelineId,
+        filterQuery: {
+          kuery: {
             kind,
             expression,
           },
-        }),
-      [timelineId]
-    );
+          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        },
+      }),
+    [indexPattern, timelineId]
+  );
 
-    const setFiltersInTimeline = useCallback(
-      (newFilters: esFilters.Filter[]) =>
-        setFilters({
-          id: timelineId,
-          filters: newFilters,
-        }),
-      [timelineId]
-    );
+  const setFilterQueryDraftFromKueryExpression = useCallback(
+    (expression: string, kind) =>
+      setKqlFilterQueryDraft({
+        id: timelineId,
+        filterQueryDraft: {
+          kind,
+          expression,
+        },
+      }),
+    [timelineId]
+  );
 
-    const setSavedQueryInTimeline = useCallback(
-      (newSavedQueryId: string | null) =>
-        setSavedQueryId({
-          id: timelineId,
-          savedQueryId: newSavedQueryId,
-        }),
-      [timelineId]
-    );
+  const setFiltersInTimeline = useCallback(
+    (newFilters: esFilters.Filter[]) =>
+      setFilters({
+        id: timelineId,
+        filters: newFilters,
+      }),
+    [timelineId]
+  );
 
-    const handleUpdateEventType = useCallback(
-      (newEventType: EventType) =>
-        updateEventType({
-          id: timelineId,
-          eventType: newEventType,
-        }),
-      [timelineId]
-    );
+  const setSavedQueryInTimeline = useCallback(
+    (newSavedQueryId: string | null) =>
+      setSavedQueryId({
+        id: timelineId,
+        savedQueryId: newSavedQueryId,
+      }),
+    [timelineId]
+  );
 
-    return (
-      <SearchOrFilter
-        applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
-        browserFields={browserFields}
-        dataProviders={dataProviders}
-        eventType={eventType}
-        filters={filters}
-        filterQuery={filterQuery}
-        filterQueryDraft={filterQueryDraft}
-        from={from}
-        fromStr={fromStr}
-        indexPattern={indexPattern}
-        isRefreshPaused={isRefreshPaused}
-        kqlMode={kqlMode!}
-        refreshInterval={refreshInterval}
-        savedQueryId={savedQueryId}
-        setFilters={setFiltersInTimeline}
-        setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
-        setSavedQueryId={setSavedQueryInTimeline}
-        timelineId={timelineId}
-        to={to}
-        toStr={toStr}
-        updateEventType={handleUpdateEventType}
-        updateKqlMode={updateKqlMode!}
-        updateReduxTime={updateReduxTime}
-      />
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.eventType === nextProps.eventType &&
-      prevProps.from === nextProps.from &&
-      prevProps.fromStr === nextProps.fromStr &&
-      prevProps.to === nextProps.to &&
-      prevProps.toStr === nextProps.toStr &&
-      prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
-      prevProps.refreshInterval === nextProps.refreshInterval &&
-      prevProps.timelineId === nextProps.timelineId &&
-      isEqual(prevProps.browserFields, nextProps.browserFields) &&
-      isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      isEqual(prevProps.filters, nextProps.filters) &&
-      isEqual(prevProps.filterQuery, nextProps.filterQuery) &&
-      isEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
-      isEqual(prevProps.indexPattern, nextProps.indexPattern) &&
-      isEqual(prevProps.kqlMode, nextProps.kqlMode) &&
-      isEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      isEqual(prevProps.timelineId, nextProps.timelineId)
-    );
-  }
-);
+  const handleUpdateEventType = useCallback(
+    (newEventType: EventType) =>
+      updateEventType({
+        id: timelineId,
+        eventType: newEventType,
+      }),
+    [timelineId]
+  );
+
+  return (
+    <SearchOrFilter
+      applyKqlFilterQuery={applyFilterQueryFromKueryExpression}
+      browserFields={browserFields}
+      dataProviders={dataProviders}
+      eventType={eventType}
+      filters={filters}
+      filterQuery={filterQuery}
+      filterQueryDraft={filterQueryDraft}
+      from={from}
+      fromStr={fromStr}
+      indexPattern={indexPattern}
+      isRefreshPaused={isRefreshPaused}
+      kqlMode={kqlMode!}
+      refreshInterval={refreshInterval}
+      savedQueryId={savedQueryId}
+      setFilters={setFiltersInTimeline}
+      setKqlFilterQueryDraft={setFilterQueryDraftFromKueryExpression!}
+      setSavedQueryId={setSavedQueryInTimeline}
+      timelineId={timelineId}
+      to={to}
+      toStr={toStr}
+      updateEventType={handleUpdateEventType}
+      updateKqlMode={updateKqlMode!}
+      updateReduxTime={updateReduxTime}
+    />
+  );
+};
 StatefulSearchOrFilterComponent.displayName = 'StatefulSearchOrFilterComponent';
 
 const makeMapStateToProps = () => {
@@ -268,4 +246,26 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
 export const StatefulSearchOrFilter = connect(
   makeMapStateToProps,
   mapDispatchToProps
-)(StatefulSearchOrFilterComponent);
+)(
+  React.memo(
+    StatefulSearchOrFilterComponent,
+    (prevProps, nextProps) =>
+      prevProps.eventType === nextProps.eventType &&
+      prevProps.from === nextProps.from &&
+      prevProps.fromStr === nextProps.fromStr &&
+      prevProps.to === nextProps.to &&
+      prevProps.toStr === nextProps.toStr &&
+      prevProps.isRefreshPaused === nextProps.isRefreshPaused &&
+      prevProps.refreshInterval === nextProps.refreshInterval &&
+      prevProps.timelineId === nextProps.timelineId &&
+      deepEqual(prevProps.browserFields, nextProps.browserFields) &&
+      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
+      deepEqual(prevProps.filters, nextProps.filters) &&
+      deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
+      deepEqual(prevProps.filterQueryDraft, nextProps.filterQueryDraft) &&
+      deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
+      deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
+      deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
+      deepEqual(prevProps.timelineId, nextProps.timelineId)
+  )
+);

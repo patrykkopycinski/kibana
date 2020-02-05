@@ -6,10 +6,11 @@
 
 import { EuiBadge } from '@elastic/eui';
 import { defaultTo, getOr } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { State, timelineSelectors } from '../../store';
 import { DataProvider } from '../timeline/data_providers/data_provider';
@@ -71,24 +72,34 @@ interface StateReduxProps {
 
 type Props = OwnProps & DispatchProps & StateReduxProps;
 
-export const FlyoutComponent = React.memo<Props>(
-  ({
-    children,
-    dataProviders,
-    flyoutHeight,
-    headerHeight,
-    show,
+const FlyoutComponent: React.FC<Props> = ({
+  children,
+  dataProviders,
+  flyoutHeight,
+  headerHeight,
+  show,
+  showTimeline,
+  timelineId,
+  usersViewing,
+  width,
+}) => {
+  const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
     showTimeline,
     timelineId,
-    usersViewing,
-    width,
-  }) => (
+  ]);
+
+  const handleOpen = useCallback(() => showTimeline({ id: timelineId, show: true }), [
+    showTimeline,
+    timelineId,
+  ]);
+
+  return (
     <>
       <Visible show={show}>
         <Pane
           flyoutHeight={flyoutHeight}
           headerHeight={headerHeight}
-          onClose={() => showTimeline({ id: timelineId, show: false })}
+          onClose={handleClose}
           timelineId={timelineId}
           usersViewing={usersViewing}
           width={width}
@@ -100,11 +111,11 @@ export const FlyoutComponent = React.memo<Props>(
         dataProviders={dataProviders!}
         show={!show}
         timelineId={timelineId}
-        onOpen={() => showTimeline({ id: timelineId, show: true })}
+        onOpen={handleOpen}
       />
     </>
-  )
-);
+  );
+};
 
 FlyoutComponent.displayName = 'FlyoutComponent';
 
@@ -119,6 +130,6 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
 
 export const Flyout = connect(mapStateToProps, {
   showTimeline: timelineActions.showTimeline,
-})(FlyoutComponent);
+})(React.memo(FlyoutComponent, deepEqual));
 
 Flyout.displayName = 'Flyout';

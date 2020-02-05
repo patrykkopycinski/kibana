@@ -7,6 +7,7 @@
 import { EuiButton } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useCallback, useEffect, useMemo } from 'react';
+import deepEqual from 'fast-deep-equal/es6/react';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import {
@@ -128,4 +129,4 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
 
 AlertsByCategoryComponent.displayName = 'AlertsByCategoryComponent';
 
-export const AlertsByCategory = React.memo(AlertsByCategoryComponent);
+export const AlertsByCategory = React.memo(AlertsByCategoryComponent, deepEqual);

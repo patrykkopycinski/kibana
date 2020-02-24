@@ -22,6 +22,7 @@ import { StepAboutRule } from '../components/step_about_rule';
 import { StepDefineRule } from '../components/step_define_rule';
 import { StepScheduleRule } from '../components/step_schedule_rule';
 import { DetectionEngineHeaderPage } from '../../components/detection_engine_header_page';
+import { useActionConnectorsQuery } from '../../../../containers/actions';
 import * as RuleI18n from '../translations';
 import { redirectToDetections } from '../helpers';
 import { AboutStepRule, DefineStepRule, RuleStep, RuleStepData, ScheduleStepRule } from '../types';
@@ -95,6 +96,8 @@ const CreateRulePageComponent: React.FC = () => {
     [RuleStep.scheduleRule]: false,
   });
   const [{ isLoading, isSaved }, setRule] = usePersistRule();
+  const connectors = useActionConnectorsQuery();
+
   const userHasNoPermissions =
     canUserCRUD != null && hasManageApiKey != null ? !canUserCRUD || !hasManageApiKey : false;
 

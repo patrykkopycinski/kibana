@@ -16,6 +16,7 @@ import {
   PluginInitializerContext,
   Logger,
 } from '../../../../../src/core/server';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../../../plugins/triggers_actions_ui/public';
 import { SecurityPluginSetup as SecuritySetup } from '../../../../plugins/security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../../../plugins/features/server';
 import { EncryptedSavedObjectsPluginSetup as EncryptedSavedObjectsSetup } from '../../../../plugins/encrypted_saved_objects/server';
@@ -43,6 +44,7 @@ export interface SetupPlugins {
   security: SecuritySetup;
   spaces?: SpacesSetup;
   alerting: AlertingSetup;
+  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface StartPlugins {

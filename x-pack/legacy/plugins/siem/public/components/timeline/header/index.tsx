@@ -35,7 +35,6 @@ interface Props {
   onDataProviderRemoved: OnDataProviderRemoved;
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  show: boolean;
   showCallOutUnauthorizedMsg: boolean;
 }
 
@@ -50,7 +49,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
   onDataProviderRemoved,
   onToggleDataProviderEnabled,
   onToggleDataProviderExcluded,
-  show,
   showCallOutUnauthorizedMsg,
 }) => (
   <>
@@ -73,7 +71,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
       onDataProviderRemoved={onDataProviderRemoved}
       onToggleDataProviderEnabled={onToggleDataProviderEnabled}
       onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-      show={show}
     />
     <StatefulSearchOrFilter
       browserFields={browserFields}
@@ -96,6 +93,5 @@ export const TimelineHeader = React.memo(
     prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
     prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
     prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
-    prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg
 );

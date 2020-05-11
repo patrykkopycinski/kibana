@@ -1,0 +1,10 @@
+diff a/x-pack/plugins/siem/public/lib/connectors/types.ts b/x-pack/plugins/siem/public/lib/connectors/types.ts	(rejected hunks)
+@@ -10,7 +10,7 @@
+ import {
+   ConfigType,
+   SecretsType,
+-} from '../../../../actions/server/builtin_action_types/servicenow/types';
++} from '../../../../../actions/server/builtin_action_types/servicenow/types';
+ 
+ export interface ServiceNowActionConnector {
+   config: ConfigType;

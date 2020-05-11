@@ -1,0 +1,11 @@
+diff a/x-pack/plugins/siem/public/mock/global_state.ts b/x-pack/plugins/siem/public/mock/global_state.ts	(rejected hunks)
+@@ -22,7 +22,8 @@ import {
+   DEFAULT_TO,
+   DEFAULT_INTERVAL_TYPE,
+   DEFAULT_INTERVAL_VALUE,
+-} from '../../common/constants';
++} from '../../../common/constants';
++import { networkModel } from '../../network/store';
+ 
+ export const mockGlobalState: State = {
+   app: {

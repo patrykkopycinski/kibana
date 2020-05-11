@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body/constants';
+import { DEFAULT_TIMELINE_WIDTH } from '../../timelines/components/timeline/body/constants';
 import {
   Direction,
   FlowTarget,
@@ -13,8 +13,8 @@ import {
   NetworkTopTablesFields,
   TlsFields,
   UsersFields,
-} from '../graphql/types';
-import { networkModel, State } from '../store';
+} from '../../graphql/types';
+import { State } from '../store';
 
 import { defaultHeaders } from './header';
 import {

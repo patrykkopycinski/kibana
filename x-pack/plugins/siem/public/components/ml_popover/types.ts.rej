@@ -1,0 +1,10 @@
+diff a/x-pack/plugins/siem/public/components/ml_popover/types.ts b/x-pack/plugins/siem/public/components/ml_popover/types.ts	(rejected hunks)
+@@ -4,7 +4,7 @@
+  * you may not use this file except in compliance with the Elastic License.
+  */
+ 
+-import { AuditMessageBase } from '../../../../ml/common/types/audit_message';
++import { AuditMessageBase } from '../../../../../ml/common/types/audit_message';
+ import { MlError } from '../ml/types';
+ 
+ export interface Group {

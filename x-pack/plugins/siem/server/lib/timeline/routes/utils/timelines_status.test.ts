@@ -14,19 +14,14 @@ import {
   mockGetTimelineValue,
 } from '../__mocks__/import_timelines';
 
+import { TimelinesStatus as TimelinesStatusType } from './common';
+
 describe('TimelinesStatus', () => {
   describe('timeline', () => {
     describe('given timeline exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
-      let timelineObj;
-      let status: {
-        isCreatable: boolean;
-        isCreatableViaImport: boolean;
-        isUpdatable: boolean;
-        isUpdatableViaImport: boolean;
-        isHandlingTemplateTimeline: boolean;
-      };
+      let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
         jest.clearAllMocks();
@@ -45,7 +40,8 @@ describe('TimelinesStatus', () => {
             }),
           };
         });
-        const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
+
+        const TimelinesStatus = jest.requireActual('./timelines_status').TimelinesStatus;
 
         timelineObj = new TimelinesStatus({
           timelineInput: {
@@ -62,7 +58,7 @@ describe('TimelinesStatus', () => {
           frameworkRequest: {} as FrameworkRequest,
         });
 
-        status = await timelineObj.init();
+        await timelineObj.init();
       });
 
       test('should get timeline', () => {
@@ -74,37 +70,30 @@ describe('TimelinesStatus', () => {
       });
 
       test('should not creatable', () => {
-        expect(status.isCreatable).toEqual(false);
+        expect(timelineObj.isCreatable).toEqual(false);
       });
 
       test('should not CreatableViaImport', () => {
-        expect(status.isCreatableViaImport).toEqual(false);
+        expect(timelineObj.isCreatableViaImport).toEqual(false);
       });
 
       test('should be Updatable', () => {
-        expect(status.isUpdatable).toEqual(true);
+        expect(timelineObj.isUpdatable).toEqual(true);
       });
 
       test('should not be UpdatableViaImport', () => {
-        expect(status.isUpdatableViaImport).toEqual(false);
+        expect(timelineObj.isUpdatableViaImport).toEqual(false);
       });
 
       test('should indicate we are handling a timeline', () => {
-        expect(status.isHandlingTemplateTimeline).toEqual(false);
+        expect(timelineObj.isHandlingTemplateTimeline).toEqual(false);
       });
     });
 
     describe('given timeline does NOT exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
-      let timelineObj;
-      let status: {
-        isCreatable: boolean;
-        isCreatableViaImport: boolean;
-        isUpdatable: boolean;
-        isUpdatableViaImport: boolean;
-        isHandlingTemplateTimeline: boolean;
-      };
+      let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
         jest.clearAllMocks();
@@ -123,6 +112,7 @@ describe('TimelinesStatus', () => {
             }),
           };
         });
+
         const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
 
         timelineObj = new TimelinesStatus({
@@ -140,7 +130,7 @@ describe('TimelinesStatus', () => {
           frameworkRequest: {} as FrameworkRequest,
         });
 
-        status = await timelineObj.init();
+        await timelineObj.init();
       });
 
       test('should get timeline', () => {
@@ -152,23 +142,23 @@ describe('TimelinesStatus', () => {
       });
 
       test('should be creatable', () => {
-        expect(status.isCreatable).toEqual(true);
+        expect(timelineObj.isCreatable).toEqual(true);
       });
 
       test('should be CreatableViaImport', () => {
-        expect(status.isCreatableViaImport).toEqual(true);
+        expect(timelineObj.isCreatableViaImport).toEqual(true);
       });
 
       test('should be Updatable', () => {
-        expect(status.isUpdatable).toEqual(false);
+        expect(timelineObj.isUpdatable).toEqual(false);
       });
 
       test('should not be UpdatableViaImport', () => {
-        expect(status.isUpdatableViaImport).toEqual(false);
+        expect(timelineObj.isUpdatableViaImport).toEqual(false);
       });
 
       test('should indicate we are handling a timeline', () => {
-        expect(status.isHandlingTemplateTimeline).toEqual(false);
+        expect(timelineObj.isHandlingTemplateTimeline).toEqual(false);
       });
     });
   });
@@ -178,24 +168,16 @@ describe('TimelinesStatus', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
 
-      let timelineObj;
-      let status: {
-        isCreatable: boolean;
-        isCreatableViaImport: boolean;
-        isUpdatable: boolean;
-        isUpdatableViaImport: boolean;
-        isHandlingTemplateTimeline: boolean;
-      };
+      let timelineObj: TimelinesStatusType;
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
-          return {
-            getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-            getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
-              timeline: [mockGetTemplateTimelineValue],
-            }),
-          };
-        });
+        jest.doMock('../../saved_object', () => ({
+          getTimeline: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline.mockReturnValue({
+            timeline: [mockGetTemplateTimelineValue],
+          }),
+        }));
+
         const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
 
         timelineObj = new TimelinesStatus({
@@ -212,7 +194,7 @@ describe('TimelinesStatus', () => {
           },
           frameworkRequest: {} as FrameworkRequest,
         });
-        status = await timelineObj.init();
+        await timelineObj.init();
       });
 
       afterEach(() => {
@@ -232,37 +214,31 @@ describe('TimelinesStatus', () => {
       });
 
       test('should not creatable', () => {
-        expect(status.isCreatable).toEqual(false);
+        expect(timelineObj.isCreatable).toEqual(false);
       });
 
       test('should not CreatableViaImport', () => {
-        expect(status.isCreatableViaImport).toEqual(false);
+        expect(timelineObj.isCreatableViaImport).toEqual(false);
       });
 
       test('should be Updatable', () => {
-        expect(status.isUpdatable).toEqual(true);
+        expect(timelineObj.isUpdatable).toEqual(true);
       });
 
       test('should be UpdatableViaImport', () => {
-        expect(status.isUpdatableViaImport).toEqual(true);
+        expect(timelineObj.isUpdatableViaImport).toEqual(true);
       });
 
       test('should indicate we are handling a template timeline', () => {
-        expect(status.isHandlingTemplateTimeline).toEqual(true);
+        expect(timelineObj.isHandlingTemplateTimeline).toEqual(true);
       });
     });
 
     describe('given template timeline does NOT exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
-      let timelineObj;
-      let status: {
-        isCreatable: boolean;
-        isCreatableViaImport: boolean;
-        isUpdatable: boolean;
-        isUpdatableViaImport: boolean;
-        isHandlingTemplateTimeline: boolean;
-      };
+
+      let timelineObj: TimelinesStatusType;
 
       afterEach(() => {
         jest.clearAllMocks();
@@ -273,12 +249,11 @@ describe('TimelinesStatus', () => {
       });
 
       beforeEach(async () => {
-        jest.doMock('../../saved_object', () => {
-          return {
-            getTimeline: mockGetTimeline,
-            getTimelineByTemplateTimelineId: mockGetTemplateTimeline,
-          };
-        });
+        jest.doMock('../../saved_object', () => ({
+          getTimeline: mockGetTimeline,
+          getTimelineByTemplateTimelineId: mockGetTemplateTimeline,
+        }));
+
         const TimelinesStatus = jest.requireActual('./common').TimelinesStatus;
 
         timelineObj = new TimelinesStatus({
@@ -295,7 +270,7 @@ describe('TimelinesStatus', () => {
           },
           frameworkRequest: {} as FrameworkRequest,
         });
-        status = await timelineObj.init();
+        await timelineObj.init();
       });
 
       test('should get timeline', () => {
@@ -307,23 +282,23 @@ describe('TimelinesStatus', () => {
       });
 
       test('should be creatable', () => {
-        expect(status.isCreatable).toEqual(true);
+        expect(timelineObj.isCreatable).toEqual(true);
       });
 
       test('should be CreatableViaImport', () => {
-        expect(status.isCreatableViaImport).toEqual(true);
+        expect(timelineObj.isCreatableViaImport).toEqual(true);
       });
 
       test('should be Updatable', () => {
-        expect(status.isUpdatable).toEqual(false);
+        expect(timelineObj.isUpdatable).toEqual(false);
       });
 
       test('should be UpdatableViaImport', () => {
-        expect(status.isUpdatableViaImport).toEqual(false);
+        expect(timelineObj.isUpdatableViaImport).toEqual(false);
       });
 
       test('should indicate we are handling a template timeline', () => {
-        expect(status.isHandlingTemplateTimeline).toEqual(true);
+        expect(timelineObj.isHandlingTemplateTimeline).toEqual(true);
       });
     });
   });

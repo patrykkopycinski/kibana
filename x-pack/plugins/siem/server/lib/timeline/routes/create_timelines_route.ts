@@ -42,7 +42,7 @@ export const createTimelinesRoute = (
         const { timelineId, timeline, version } = request.body;
         const { templateTimelineId, templateTimelineVersion, timelineType } = timeline;
 
-        const timelineStatus = new TimelinesStatus({
+        const { isCreatable, checkIsFailureCases, init: initTimelineStatus } = new TimelinesStatus({
           timelineType: timelineType ?? TimelineType.default,
           timelineInput: {
             id: timelineId ?? null,
@@ -56,8 +56,7 @@ export const createTimelinesRoute = (
           },
           frameworkRequest,
         });
-
-        const { isCreatable } = await timelineStatus.init();
+        await initTimelineStatus();
 
         // Create timeline
         if (isCreatable) {
@@ -71,7 +70,7 @@ export const createTimelinesRoute = (
           });
         } else {
           return siemResponse.error(
-            timelineStatus.checkIsFailureCases(TimelineStatusActions.create) || {
+            checkIsFailureCases(TimelineStatusActions.create) || {
               statusCode: 405,
               body: 'update timeline error',
             }

@@ -134,7 +134,14 @@ export const importTimelinesRoute = (
 
                     let newTimeline = null;
                     try {
-                      const timelineStatus = new TimelinesStatus({
+                      const {
+                        isCreatableViaImport,
+                        isUpdatableViaImport,
+                        isHandlingTemplateTimeline,
+                        timelineInput,
+                        checkIsFailureCases,
+                        init: initTimelineStatus,
+                      } = new TimelinesStatus({
                         timelineType,
                         timelineInput: {
                           id: savedObjectId,
@@ -148,13 +155,7 @@ export const importTimelinesRoute = (
                         },
                         frameworkRequest,
                       });
-
-                      const {
-                        isCreatableViaImport,
-                        isUpdatableViaImport,
-                        isHandlingTemplateTimeline,
-                      } = await timelineStatus.init();
-                      const timelineInput = timelineStatus.getTimelineInput();
+                      await initTimelineStatus();
 
                       if (isCreatableViaImport) {
                         // create timeline / template timeline
@@ -183,7 +184,7 @@ export const importTimelinesRoute = (
                       }
 
                       if (!isHandlingTemplateTimeline) {
-                        const errorMessage = timelineStatus.checkIsFailureCases(
+                        const errorMessage = checkIsFailureCases(
                           TimelineStatusActions.createViaImport
                         );
                         const message =
@@ -217,7 +218,7 @@ export const importTimelinesRoute = (
                           status_code: 200,
                         });
                       } else {
-                        const errorMessage = timelineStatus.checkIsFailureCases(
+                        const errorMessage = checkIsFailureCases(
                           TimelineStatusActions.updateViaImport
                         );
                         const message =

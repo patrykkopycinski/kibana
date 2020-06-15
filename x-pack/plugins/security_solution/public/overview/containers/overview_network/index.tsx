@@ -37,35 +37,37 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
 }
 
 export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
-    <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
-      query={overviewNetworkQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate,
-          to: endDate,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.OverviewNetwork.inspect', data),
-          overviewNetwork,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
+  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    return (
+      <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
+        query={overviewNetworkQuery}
+        fetchPolicy={getDefaultFetchPolicy()}
+        notifyOnNetworkStatusChange
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
+        }}
+      >
+        {({ data, loading, refetch }) => {
+          const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
+          return children({
+            id,
+            inspect: getOr(null, 'source.OverviewNetwork.inspect', data),
+            overviewNetwork,
+            loading,
+            refetch,
+          });
+        }}
+      </Query>
+    );
+  }
 );
 
 OverviewNetworkComponentQuery.displayName = 'OverviewNetworkComponentQuery';

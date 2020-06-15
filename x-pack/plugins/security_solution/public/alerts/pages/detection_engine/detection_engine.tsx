@@ -7,7 +7,7 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { StickyContainer } from 'react-sticky';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { GlobalTime } from '../../../common/containers/global_time';
 import {
@@ -19,11 +19,9 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { WrapperPage } from '../../../common/components/wrapper_page';
-import { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store/inputs';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { InputsRange } from '../../../common/store/inputs/model';
 import { useAlertInfo } from '../../components/alerts_info';
 import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/no_api_integration_callout';
@@ -37,11 +35,10 @@ import { DetectionEngineHeaderPage } from '../../components/detection_engine_hea
 import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
 import * as i18n from './translations';
 
-export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
-  filters,
-  query,
-  setAbsoluteRangeDatePicker,
-}) => {
+export const DetectionEnginePageComponent: React.FC = () => {
+  const dispatch = useDispatch();
+  const { query, filters } = useSelector(inputsSelectors.globalSelector());
+
   const {
     loading,
     isSignalIndexExists,
@@ -60,9 +57,9 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
         return;
       }
       const [min, max] = x;
-      setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      dispatch(setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max }));
     },
-    [setAbsoluteRangeDatePicker]
+    [dispatch]
   );
 
   const indexToAdd = useMemo(() => (signalIndexName == null ? [] : [signalIndexName]), [
@@ -164,25 +161,4 @@ export const DetectionEnginePageComponent: React.FC<PropsFromRedux> = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  return (state: State) => {
-    const globalInputs: InputsRange = getGlobalInputs(state);
-    const { query, filters } = globalInputs;
-
-    return {
-      query,
-      filters,
-    };
-  };
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const DetectionEnginePage = connector(React.memo(DetectionEnginePageComponent));
+export const DetectionEnginePage = React.memo(DetectionEnginePageComponent);

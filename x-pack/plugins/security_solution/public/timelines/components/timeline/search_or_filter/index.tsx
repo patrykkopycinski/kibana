@@ -6,7 +6,7 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 
@@ -66,20 +66,23 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     updateKqlMode,
     updateReduxTime,
   }) => {
+    const dispatch = useDispatch();
     const applyFilterQueryFromKueryExpression = useCallback(
       (expression: string, kind) =>
-        applyKqlFilterQuery({
-          id: timelineId,
-          filterQuery: {
-            kuery: {
-              kind,
-              expression,
+        dispatch(
+          timelineActions.applyKqlFilterQuery({
+            id: timelineId,
+            filterQuery: {
+              kuery: {
+                kind,
+                expression,
+              },
+              serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
             },
-            serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
-          },
-        }),
+          })
+        ),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [indexPattern, timelineId]
+      [indexPattern, timelineId, dispatch]
     );
 
     const setFilterQueryDraftFromKueryExpression = useCallback(
@@ -91,7 +94,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             expression,
           },
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [timelineId]
     );
 
@@ -117,12 +119,13 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     const handleUpdateEventType = useCallback(
       (newEventType: EventType) =>
-        updateEventType({
-          id: timelineId,
-          eventType: newEventType,
-        }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+        dispatch(
+          timelineActions.updateEventType({
+            id: timelineId,
+            eventType: newEventType,
+          })
+        ),
+      [dispatch, timelineId]
     );
 
     return (

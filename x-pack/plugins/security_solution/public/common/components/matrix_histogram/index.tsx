@@ -10,8 +10,7 @@ import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import { compose } from 'redux';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as i18n from './translations';
 import { BarChart } from '../charts/barchart';
 import { HeaderSection } from '../header_section';
@@ -83,7 +82,6 @@ export const MatrixHistogramComponent: React.FC<
   hideHistogramIfEmpty = false,
   id,
   indexToAdd,
-  isInspected,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -99,6 +97,10 @@ export const MatrixHistogramComponent: React.FC<
   dispatchSetAbsoluteRangeDatePicker,
   yTickFormatter,
 }) => {
+  const dispatch = useDispatch();
+  const { isInspected } = useSelector((state) =>
+    inputsSelectors.globalQueryByIdSelector()(state, id)
+  );
   const barchartConfigs = useMemo(
     () =>
       getBarchartConfigs({
@@ -111,25 +113,19 @@ export const MatrixHistogramComponent: React.FC<
             return;
           }
           const [min, max] = x;
-          dispatchSetAbsoluteRangeDatePicker({
-            id: setAbsoluteRangeDatePickerTarget,
-            from: min,
-            to: max,
-          });
+          dispatch(
+            setAbsoluteRangeDatePicker({
+              id: setAbsoluteRangeDatePickerTarget,
+              from: min,
+              to: max,
+            })
+          );
         },
         yTickFormatter,
         showLegend,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      chartHeight,
-      startDate,
-      legendPosition,
-      endDate,
-      dispatchSetAbsoluteRangeDatePicker,
-      yTickFormatter,
-      showLegend,
-    ]
+    [chartHeight, startDate, legendPosition, endDate, dispatch, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
@@ -251,21 +247,4 @@ export const MatrixHistogramComponent: React.FC<
   );
 };
 
-export const MatrixHistogram = React.memo(MatrixHistogramComponent);
-
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-export const MatrixHistogramContainer = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps, {
-    dispatchSetAbsoluteRangeDatePicker: setAbsoluteRangeDatePicker,
-  })
-)(MatrixHistogram);
+export const MatrixHistogramContainer = React.memo(MatrixHistogramComponent);

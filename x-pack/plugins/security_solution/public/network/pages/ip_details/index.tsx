@@ -6,7 +6,7 @@
 
 import { EuiHorizontalRule, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -32,8 +32,8 @@ import { decodeIpv6 } from '../../../common/lib/helpers';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { ConditionalFlexGroup } from '../../pages/navigation/conditional_flex_group';
 import { State, inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { setIpDetailsTablesActivePageToZero as dispatchIpDetailsTablesActivePageToZero } from '../../store/actions';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { setIpDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { NetworkEmptyPage } from '../network_empty_page';
 import { NetworkHttpQueryTable } from './network_http_query_table';
@@ -49,35 +49,38 @@ export { getBreadcrumbs } from './utils';
 
 const IpOverviewManage = manageQuery(IpOverview);
 
-export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRedux> = ({
+export const IPDetailsComponent: React.FC<IPDetailsComponentProps> = ({
   detailName,
   filters,
   flowTarget,
   from,
   isInitializing,
   query,
-  setAbsoluteRangeDatePicker,
-  setIpDetailsTablesActivePageToZero,
   setQuery,
   to,
 }) => {
+  const dispatch = useDispatch();
+  const query = useSelector(inputsSelectors.globalQuerySelector);
+  const filters = useSelector(inputsSelectors.globalFiltersQuerySelector);
   const type = networkModel.NetworkType.details;
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
-      setAbsoluteRangeDatePicker({
-        id: 'global',
-        from: fromTo.from,
-        to: fromTo.to,
-      });
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
     },
-    [setAbsoluteRangeDatePicker]
+    [dispatch]
   );
   const kibana = useKibana();
 
   useEffect(() => {
-    setIpDetailsTablesActivePageToZero();
-  }, [detailName, setIpDetailsTablesActivePageToZero]);
+    dispatch(setIpDetailsTablesActivePageToZero());
+  }, [detailName, dispatch]);
 
   return (
     <>
@@ -279,23 +282,6 @@ export const IPDetailsComponent: React.FC<IPDetailsComponentProps & PropsFromRed
 };
 IPDetailsComponent.displayName = 'IPDetailsComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+export const IPDetails = React.memo(IPDetailsComponent);
 
-  return (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-  setIpDetailsTablesActivePageToZero: dispatchIpDetailsTablesActivePageToZero,
-};
-
-export const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const IPDetails = connector(React.memo(IPDetailsComponent));
+IPDetails.displayName = 'IPDetails';

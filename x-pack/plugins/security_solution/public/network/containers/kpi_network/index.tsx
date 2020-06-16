@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../../graphql/types';
@@ -32,8 +32,20 @@ export interface KpiNetworkProps extends QueryTemplateProps {
   children: (args: KpiNetworkArgs) => React.ReactNode;
 }
 
-const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, skip, sourceId, startDate, endDate }) => (
+const KpiNetworkComponentQuery: React.FC<KpiNetworkProps> = ({
+  id = ID,
+  children,
+  filterQuery,
+  isInspected,
+  skip,
+  sourceId,
+  startDate,
+  endDate,
+}) => {
+  const { isInspected } = useSelector((state) =>
+    inputsSelectors.globalQueryByIdSelector()(state, id)
+  );
+  return (
     <Query<GetKpiNetworkQuery.Query, GetKpiNetworkQuery.Variables>
       query={kpiNetworkQuery}
       fetchPolicy={getDefaultFetchPolicy()}
@@ -62,24 +74,9 @@ const KpiNetworkComponentQuery = React.memo<KpiNetworkProps & PropsFromRedux>(
         });
       }}
     </Query>
-  )
-);
+  );
+};
 
 KpiNetworkComponentQuery.displayName = 'KpiNetworkComponentQuery';
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: KpiNetworkProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const KpiNetworkQuery = connector(KpiNetworkComponentQuery);
+export const KpiNetworkQuery = React.memo(KpiNetworkComponentQuery);

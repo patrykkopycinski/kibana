@@ -6,7 +6,7 @@
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { UpdateDateRange } from '../../../common/components/charts/common';
@@ -34,8 +34,8 @@ import { LastEventIndexKey } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors, State } from '../../../common/store';
-import { setHostDetailsTablesActivePageToZero as dispatchHostDetailsTablesActivePageToZero } from '../../store/actions';
-import { setAbsoluteRangeDatePicker as dispatchAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
+import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
@@ -49,23 +49,20 @@ import { getHostDetailsPageFilters } from './helpers';
 const HostOverviewManage = manageQuery(HostOverview);
 const KpiHostDetailsManage = manageQuery(KpiHostsComponent);
 
-const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
-  ({
-    filters,
-    from,
-    isInitializing,
-    query,
-    setAbsoluteRangeDatePicker,
-    setHostDetailsTablesActivePageToZero,
-    setQuery,
-    to,
-    detailName,
-    deleteQuery,
-    hostDetailsPagePath,
-  }) => {
+const HostDetailsComponent = React.memo<HostDetailsProps>(
+  ({ from, isInitializing, setQuery, to, detailName, deleteQuery, hostDetailsPagePath }) => {
+    const dispatch = useDispatch();
+    const query = useSelector(inputsSelectors.globalQuerySelector);
+    const filters = useSelector(inputsSelectors.globalFiltersQuerySelector);
+
+    const setAbsoluteRangeDatePicker = useCallback(
+      (payload) => dispatch(dispatchSetAbsoluteRangeDatePicker(payload)),
+      [dispatch]
+    );
+
     useEffect(() => {
-      setHostDetailsTablesActivePageToZero();
-    }, [setHostDetailsTablesActivePageToZero, detailName]);
+      dispatch(setHostDetailsTablesActivePageToZero());
+    }, [detailName, dispatch]);
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
@@ -79,6 +76,18 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
         }
         const [min, max] = x;
         setAbsoluteRangeDatePicker({ id: 'global', from: min, to: max });
+      },
+      [setAbsoluteRangeDatePicker]
+    );
+
+    const narrowOverviewDateRange = useCallback(
+      (score, interval) => {
+        const fromTo = scoreIntervalToDateTime(score, interval);
+        setAbsoluteRangeDatePicker({
+          id: 'global',
+          from: fromTo.from,
+          to: fromTo.to,
+        });
       },
       [setAbsoluteRangeDatePicker]
     );
@@ -137,14 +146,7 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
                             loading={loading}
                             startDate={from}
                             endDate={to}
-                            narrowDateRange={(score, interval) => {
-                              const fromTo = scoreIntervalToDateTime(score, interval);
-                              setAbsoluteRangeDatePicker({
-                                id: 'global',
-                                from: fromTo.from,
-                                to: fromTo.to,
-                              });
-                            }}
+                            narrowDateRange={narrowOverviewDateRange}
                           />
                         )}
                       </AnomalyTableProvider>
@@ -214,24 +216,9 @@ const HostDetailsComponent = React.memo<HostDetailsProps & PropsFromRedux>(
     );
   }
 );
+
 HostDetailsComponent.displayName = 'HostDetailsComponent';
 
-export const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  return (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-};
+export const HostDetails = React.memo(HostDetailsComponent);
 
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchAbsoluteRangeDatePicker,
-  setHostDetailsTablesActivePageToZero: dispatchHostDetailsTablesActivePageToZero,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const HostDetails = connector(HostDetailsComponent);
+HostDetails.displayName = 'HostDetails';

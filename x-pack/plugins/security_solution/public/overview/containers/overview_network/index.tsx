@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
@@ -36,8 +36,11 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
   startDate: number;
 }
 
-export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & PropsFromRedux>(
-  ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps>(
+  ({ id = ID, children, filterQuery, sourceId, startDate, endDate }) => {
+    const { isInspected } = useSelector((state) =>
+      inputsSelectors.globalQueryByIdSelector()(state, id)
+    );
     return (
       <Query<GetOverviewNetworkQuery.Query, GetOverviewNetworkQuery.Variables>
         query={overviewNetworkQuery}
@@ -72,19 +75,6 @@ export const OverviewNetworkComponentQuery = React.memo<OverviewNetworkProps & P
 
 OverviewNetworkComponentQuery.displayName = 'OverviewNetworkComponentQuery';
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OverviewNetworkProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
+export const OverviewNetworkQuery = React.memo(OverviewNetworkComponentQuery);
 
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const OverviewNetworkQuery = connector(OverviewNetworkComponentQuery);
+OverviewNetworkQuery.displayName = 'OverviewNetworkQuery';

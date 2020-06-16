@@ -6,7 +6,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 
 import { useParams } from 'react-router-dom';
@@ -46,17 +46,10 @@ import { HostsTableType } from '../store/model';
 const KpiHostsComponentManage = manageQuery(KpiHostsComponent);
 
 export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
-  ({
-    deleteQuery,
-    isInitializing,
-    filters,
-    from,
-    query,
-    setAbsoluteRangeDatePicker,
-    setQuery,
-    to,
-    hostsPagePath,
-  }) => {
+  ({ deleteQuery, isInitializing, from, setQuery, to, hostsPagePath }) => {
+    const dispatch = useDispatch();
+    const query = useSelector(inputsSelectors.globalQuerySelector);
+    const filters = useSelector(inputsSelectors.globalFiltersQuerySelector);
     const capabilities = useMlCapabilities();
     const kibana = useKibana();
     const { tabName } = useParams();
@@ -66,6 +59,12 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
       }
       return filters;
     }, [tabName, filters]);
+
+    const setAbsoluteRangeDatePicker = useCallback(
+      (payload) => dispatch(dispatchSetAbsoluteRangeDatePicker(payload)),
+      [dispatch]
+    );
+
     const narrowDateRange = useCallback<UpdateDateRange>(
       ({ x }) => {
         if (!x) {
@@ -165,23 +164,6 @@ export const HostsComponent = React.memo<HostsComponentProps & PropsFromRedux>(
 );
 HostsComponent.displayName = 'HostsComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
+export const Hosts = React.memo(HostsComponent);
 
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const Hosts = connector(HostsComponent);
+Hosts.displayName = 'Hosts';

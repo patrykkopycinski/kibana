@@ -35,7 +35,11 @@ export interface IpOverviewProps extends QueryTemplateProps {
 }
 
 const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
-  ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
+  ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => {
+    const { isInspected } = useSelector((state) =>
+      inputsSelectors.globalQueryByIdSelector()(state, id)
+    );
+    return (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}
       fetchPolicy={getDefaultFetchPolicy()}
@@ -66,19 +70,7 @@ const IpOverviewComponentQuery = React.memo<IpOverviewProps & PropsFromRedux>(
 
 IpOverviewComponentQuery.displayName = 'IpOverviewComponentQuery';
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: IpOverviewProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
 
-const connector = connect(makeMapStateToProps);
+export const IpOverviewQuery = React.memo(IpOverviewComponentQuery);
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const IpOverviewQuery = connector(IpOverviewComponentQuery);

@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
@@ -66,24 +66,31 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     type,
     updateNetworkTable,
   }) => {
+    const dispatch = useDispatch();
+    const stateProps = useSelector(networkSelectors.dnsSelector);
+
     const updateLimitPagination = useCallback(
       (newLimit) =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { limit: newLimit },
-        }),
-      [type, updateNetworkTable]
+        dispatch(
+          networkActions.updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: { limit: newLimit },
+          })
+        ),
+      [dispatch, type]
     );
 
     const updateActivePage = useCallback(
       (newPage) =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { activePage: newPage },
-        }),
-      [type, updateNetworkTable]
+        dispatch(
+          networkActions.updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: { activePage: newPage },
+          })
+        ),
+      [dispatch, type]
     );
 
     const onChange = useCallback(
@@ -94,25 +101,29 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
             direction: criteria.sort.direction as Direction,
           };
           if (!deepEqual(newDnsSortField, sort)) {
-            updateNetworkTable({
-              networkType: type,
-              tableType,
-              updates: { sort: newDnsSortField },
-            });
+            dispatch(
+              networkActions.updateNetworkTable({
+                networkType: type,
+                tableType,
+                updates: { sort: newDnsSortField },
+              })
+            );
           }
         }
       },
-      [sort, type, updateNetworkTable]
+      [dispatch, sort, type]
     );
 
     const onChangePtrIncluded = useCallback(
       () =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { isPtrIncluded: !isPtrIncluded },
-        }),
-      [type, updateNetworkTable, isPtrIncluded]
+        dispatch(
+          networkActions.updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: { isPtrIncluded: !isPtrIncluded },
+          })
+        ),
+      [dispatch, type, isPtrIncluded]
     );
 
     const columns = useMemo(() => getNetworkDnsColumns(), []);
@@ -152,18 +163,6 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
 
 NetworkDnsTableComponent.displayName = 'NetworkDnsTableComponent';
 
-const makeMapStateToProps = () => {
-  const getNetworkDnsSelector = networkSelectors.dnsSelector();
-  const mapStateToProps = (state: State) => getNetworkDnsSelector(state);
-  return mapStateToProps;
-};
+export const NetworkDnsTable = React.memo(NetworkDnsTableComponent);
 
-const mapDispatchToProps = {
-  updateNetworkTable: networkActions.updateNetworkTable,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const NetworkDnsTable = connector(NetworkDnsTableComponent);
+NetworkDnsTable.displayName = 'NetworkDnsTable';

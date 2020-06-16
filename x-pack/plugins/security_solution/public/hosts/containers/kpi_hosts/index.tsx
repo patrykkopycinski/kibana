@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../../graphql/types';
@@ -33,53 +33,45 @@ export interface KpiHostsProps extends QueryTemplateProps {
 }
 
 const KpiHostsComponentQuery = React.memo<KpiHostsProps & PropsFromRedux>(
-  ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
-    <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
-      query={kpiHostsQuery}
-      fetchPolicy={getDefaultFetchPolicy()}
-      notifyOnNetworkStatusChange
-      skip={skip}
-      variables={{
-        sourceId,
-        timerange: {
-          interval: '12h',
-          from: startDate!,
-          to: endDate!,
-        },
-        filterQuery: createFilter(filterQuery),
-        defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-        inspect: isInspected,
-      }}
-    >
-      {({ data, loading, refetch }) => {
-        const kpiHosts = getOr({}, `source.KpiHosts`, data);
-        return children({
-          id,
-          inspect: getOr(null, 'source.KpiHosts.inspect', data),
-          kpiHosts,
-          loading,
-          refetch,
-        });
-      }}
-    </Query>
-  )
+  ({ id = ID, children, endDate, filterQuery, skip, sourceId, startDate }) => {
+    const { isInspected } = useSelector((state) =>
+      inputsSelectors.globalQueryByIdSelector()(state, id)
+    );
+    return (
+      <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
+        query={kpiHostsQuery}
+        fetchPolicy={getDefaultFetchPolicy()}
+        notifyOnNetworkStatusChange
+        skip={skip}
+        variables={{
+          sourceId,
+          timerange: {
+            interval: '12h',
+            from: startDate!,
+            to: endDate!,
+          },
+          filterQuery: createFilter(filterQuery),
+          defaultIndex: useUiSetting<string[]>(DEFAULT_INDEX_KEY),
+          inspect: isInspected,
+        }}
+      >
+        {({ data, loading, refetch }) => {
+          const kpiHosts = getOr({}, `source.KpiHosts`, data);
+          return children({
+            id,
+            inspect: getOr(null, 'source.KpiHosts.inspect', data),
+            kpiHosts,
+            loading,
+            refetch,
+          });
+        }}
+      </Query>
+    );
+  }
 );
 
 KpiHostsComponentQuery.displayName = 'KpiHostsComponentQuery';
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: KpiHostsProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
+export const KpiHostsQuery = React.memo(KpiHostsComponentQuery);
 
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const KpiHostsQuery = connector(KpiHostsComponentQuery);
+KpiHostsQuery.displayName = 'KpiHostsQuery';

@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 import {
@@ -70,96 +70,102 @@ const getSorting = (
   direction: Direction
 ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
-const HostsTableComponent = React.memo<HostsTableProps>(
-  ({
-    activePage,
-    data,
-    direction,
-    fakeTotalCount,
-    id,
-    indexPattern,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    sortField,
-    totalCount,
-    type,
-    updateHostsSort,
-    updateTableActivePage,
-    updateTableLimit,
-  }) => {
-    const updateLimitPagination = useCallback(
-      (newLimit) =>
-        updateTableLimit({
+const HostsTableComponent: React.FC<HostsTableProps> = ({
+  activePage,
+  data,
+  direction,
+  fakeTotalCount,
+  id,
+  indexPattern,
+  isInspect,
+  limit,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  sortField,
+  totalCount,
+  type,
+  updateHostsSort,
+  updateTableActivePage,
+  updateTableLimit,
+}) => {
+  const dispatch = useDispatch();
+  const stateProps = useSelector((state) => hostsSelectors.hostsSelector()(state, type));
+  const updateLimitPagination = useCallback(
+    (newLimit) =>
+      dispatch(
+        hostsActions.updateTableLimit({
           hostsType: type,
           limit: newLimit,
           tableType,
-        }),
-      [type, updateTableLimit]
-    );
+        })
+      ),
+    [type, dispatch]
+  );
 
-    const updateActivePage = useCallback(
-      (newPage) =>
-        updateTableActivePage({
+  const updateActivePage = useCallback(
+    (newPage) =>
+      dispatch(
+        hostsActions.updateTableActivePage({
           activePage: newPage,
           hostsType: type,
           tableType,
-        }),
-      [type, updateTableActivePage]
-    );
+        })
+      ),
+    [type, dispatch]
+  );
 
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null) {
-          const sort: HostsSortField = {
-            field: getSortField(criteria.sort.field),
-            direction: criteria.sort.direction as Direction,
-          };
-          if (sort.direction !== direction || sort.field !== sortField) {
-            updateHostsSort({
+  const onChange = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const sort: HostsSortField = {
+          field: getSortField(criteria.sort.field),
+          direction: criteria.sort.direction as Direction,
+        };
+        if (sort.direction !== direction || sort.field !== sortField) {
+          dispatch(
+            hostsActions.updateHostsSort({
               sort,
               hostsType: type,
-            });
-          }
+            })
+          );
         }
-      },
-      [direction, sortField, type, updateHostsSort]
-    );
+      }
+    },
+    [direction, sortField, type, dispatch]
+  );
 
-    const hostsColumns = useMemo(() => getHostsColumns(), []);
+  const hostsColumns = useMemo(() => getHostsColumns(), []);
 
-    const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
-      sortField,
-      direction,
-    ]);
+  const sorting = useMemo(() => getSorting(`${sortField}-${direction}`, sortField, direction), [
+    sortField,
+    direction,
+  ]);
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={hostsColumns}
-        dataTestSubj={`table-${tableType}`}
-        headerCount={totalCount}
-        headerTitle={i18n.HOSTS}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        isInspect={isInspect}
-        itemsPerRow={rowItems}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        onChange={onChange}
-        pageOfItems={data}
-        showMorePagesIndicator={showMorePagesIndicator}
-        sorting={sorting}
-        totalCount={fakeTotalCount}
-        updateLimitPagination={updateLimitPagination}
-        updateActivePage={updateActivePage}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={hostsColumns}
+      dataTestSubj={`table-${tableType}`}
+      headerCount={totalCount}
+      headerTitle={i18n.HOSTS}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      isInspect={isInspect}
+      itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      onChange={onChange}
+      pageOfItems={data}
+      showMorePagesIndicator={showMorePagesIndicator}
+      sorting={sorting}
+      totalCount={fakeTotalCount}
+      updateLimitPagination={updateLimitPagination}
+      updateActivePage={updateActivePage}
+    />
+  );
+};
 
 HostsTableComponent.displayName = 'HostsTableComponent';
 
@@ -184,24 +190,6 @@ const getNodeField = (field: HostsFields): string => {
   assertUnreachable(field);
 };
 
-const makeMapStateToProps = () => {
-  const getHostsSelector = hostsSelectors.hostsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getHostsSelector(state, type);
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  updateHostsSort: hostsActions.updateHostsSort,
-  updateTableActivePage: hostsActions.updateTableActivePage,
-  updateTableLimit: hostsActions.updateTableLimit,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const HostsTable = connector(HostsTableComponent);
+export const HostsTable = React.memo(HostsTableComponent);
 
 HostsTable.displayName = 'HostsTable';

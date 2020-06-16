@@ -5,8 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
 import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
@@ -39,107 +39,103 @@ const SidebarFlexItem = styled(EuiFlexItem)`
 const OverviewComponent: React.FC<PropsFromRedux> = ({
   filters = NO_FILTERS,
   query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
-}) => (
-  <>
-    <WithSource sourceId="default">
-      {({ indicesExist, indexPattern }) =>
-        indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
-          <StickyContainer>
-            <FiltersGlobal>
-              <SiemSearchBar id="global" indexPattern={indexPattern} />
-            </FiltersGlobal>
+}) => {
+  const dispatch = useDispatch();
+  const filters = useSelector(inputsSelectors.globalFiltersQuerySelector());
+  const query = useSelector(inputsSelectors.globalQuerySelector());
 
-            <WrapperPage>
-              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                <SidebarFlexItem grow={false}>
-                  <StatefulSidebar />
-                </SidebarFlexItem>
+  const setAbsoluteRangeDatePicker = useCallback(
+    (payload) => dispatch(dispatchSetAbsoluteRangeDatePicker(payload)),
+    [dispatch]
+  );
 
-                <EuiFlexItem grow={true}>
-                  <GlobalTime>
-                    {({ from, deleteQuery, setQuery, to }) => (
-                      <EuiFlexGroup direction="column" gutterSize="none">
-                        <EuiFlexItem grow={false}>
-                          <SignalsByCategory
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                          <EuiSpacer size="l" />
-                        </EuiFlexItem>
+  return (
+    <>
+      <WithSource sourceId="default">
+        {({ indicesExist, indexPattern }) =>
+          indicesExistOrDataTemporarilyUnavailable(indicesExist) ? (
+            <StickyContainer>
+              <FiltersGlobal>
+                <SiemSearchBar id="global" indexPattern={indexPattern} />
+              </FiltersGlobal>
 
-                        <EuiFlexItem grow={false}>
-                          <AlertsByCategory
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+              <WrapperPage>
+                <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+                  <SidebarFlexItem grow={false}>
+                    <StatefulSidebar />
+                  </SidebarFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventsByDataset
-                            deleteQuery={deleteQuery}
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
+                  <EuiFlexItem grow={true}>
+                    <GlobalTime>
+                      {({ from, deleteQuery, setQuery, to }) => (
+                        <EuiFlexGroup direction="column" gutterSize="none">
+                          <EuiFlexItem grow={false}>
+                            <SignalsByCategory
+                              filters={filters}
+                              from={from}
+                              indexPattern={indexPattern}
+                              query={query}
+                              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
+                              setQuery={setQuery}
+                              to={to}
+                            />
+                            <EuiSpacer size="l" />
+                          </EuiFlexItem>
 
-                        <EuiFlexItem grow={false}>
-                          <EventCounts
-                            filters={filters}
-                            from={from}
-                            indexPattern={indexPattern}
-                            query={query}
-                            setQuery={setQuery}
-                            to={to}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
-                  </GlobalTime>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </WrapperPage>
-          </StickyContainer>
-        ) : (
-          <OverviewEmpty />
-        )
-      }
-    </WithSource>
+                          <EuiFlexItem grow={false}>
+                            <AlertsByCategory
+                              deleteQuery={deleteQuery}
+                              filters={filters}
+                              from={from}
+                              indexPattern={indexPattern}
+                              query={query}
+                              setQuery={setQuery}
+                              to={to}
+                            />
+                          </EuiFlexItem>
 
-    <SpyRoute />
-  </>
-);
+                          <EuiFlexItem grow={false}>
+                            <EventsByDataset
+                              deleteQuery={deleteQuery}
+                              filters={filters}
+                              from={from}
+                              indexPattern={indexPattern}
+                              query={query}
+                              setQuery={setQuery}
+                              to={to}
+                            />
+                          </EuiFlexItem>
 
-const makeMapStateToProps = () => {
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+                          <EuiFlexItem grow={false}>
+                            <EventCounts
+                              filters={filters}
+                              from={from}
+                              indexPattern={indexPattern}
+                              query={query}
+                              setQuery={setQuery}
+                              to={to}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      )}
+                    </GlobalTime>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </WrapperPage>
+            </StickyContainer>
+          ) : (
+            <OverviewEmpty />
+          )
+        }
+      </WithSource>
 
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-
-  return mapStateToProps;
+      <SpyRoute />
+    </>
+  );
 };
 
-const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
+OverviewComponent.displayName = 'OverviewComponent';
 
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
+export const StatefulOverview = React.memo(OverviewComponent);
 
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulOverview = connector(React.memo(OverviewComponent));
+StatefulOverview.displayName = 'StatefulOverview';

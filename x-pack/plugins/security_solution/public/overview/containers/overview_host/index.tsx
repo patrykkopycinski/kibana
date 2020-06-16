@@ -7,7 +7,7 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-import { connect, ConnectedProps } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
@@ -38,6 +38,10 @@ export interface OverviewHostProps extends QueryTemplateProps {
 
 const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => {
+    const { isInspected } = useSelector((state) =>
+      inputsSelectors.globalQueryByIdSelector()(state, id)
+    );
+
     return (
       <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
         query={overviewHostQuery}
@@ -71,19 +75,4 @@ const OverviewHostComponentQuery = React.memo<OverviewHostProps & PropsFromRedux
 
 OverviewHostComponentQuery.displayName = 'OverviewHostComponentQuery';
 
-const makeMapStateToProps = () => {
-  const getQuery = inputsSelectors.globalQueryByIdSelector();
-  const mapStateToProps = (state: State, { id = ID }: OverviewHostProps) => {
-    const { isInspected } = getQuery(state, id);
-    return {
-      isInspected,
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const OverviewHostQuery = connector(OverviewHostComponentQuery);
+export const OverviewHostQuery = React.memo(OverviewHostComponentQuery);

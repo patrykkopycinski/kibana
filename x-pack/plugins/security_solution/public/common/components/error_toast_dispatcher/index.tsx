@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { appSelectors, State } from '../../store';
 import { appActions } from '../../store/app';
 import { useStateToaster } from '../toasters';
 
-interface OwnProps {
+interface Props {
   toastLifeTimeMs?: number;
 }
 
-type Props = OwnProps & PropsFromRedux;
-
-const ErrorToastDispatcherComponent = ({
-  toastLifeTimeMs = 5000,
-  errors = [],
-  removeError,
-}: Props) => {
+const ErrorToastDispatcherComponent: React.FC<Props> = ({ toastLifeTimeMs = 5000 }) => {
+  const dispatch = useDispatch();
+  const errors = useSelector(appSelectors.errorsSelector) ?? [];
   const [{ toasts }, dispatchToaster] = useStateToaster();
+
   useEffect(() => {
     errors.forEach(({ id, title, message }) => {
       if (!toasts.some((toast) => toast.id === id)) {
@@ -38,23 +35,11 @@ const ErrorToastDispatcherComponent = ({
           },
         });
       }
-      removeError({ id });
+      dispatch(appActions.removeError({ id }));
     });
   });
+
   return null;
 };
 
-const makeMapStateToProps = () => {
-  const getErrorSelector = appSelectors.errorsSelector();
-  return (state: State) => getErrorSelector(state);
-};
-
-const mapDispatchToProps = {
-  removeError: appActions.removeError,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const ErrorToastDispatcher = connector(ErrorToastDispatcherComponent);
+export const ErrorToastDispatcher = React.memo(ErrorToastDispatcherComponent);

@@ -7,7 +7,7 @@
 import { EuiPanel, EuiLoadingContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -64,9 +64,6 @@ type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   canUserCRUD,
-  clearEventsDeleted,
-  clearEventsLoading,
-  clearSelected,
   defaultFilters,
   from,
   globalFilters,
@@ -76,13 +73,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   loading,
   loadingEventIds,
   selectedEventIds,
-  setEventsDeleted,
-  setEventsLoading,
   signalsIndex,
   to,
   updateTimeline,
   updateTimelineIsLoading,
 }) => {
+  const dispatch = useDispatch();
   const [selectAll, setSelectAll] = useState(false);
   const apolloClient = useApolloClient();
 
@@ -121,8 +117,8 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for creating a new timeline -- utilized by row/batch actions
   const createTimelineCallback = useCallback(
     ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
-      updateTimelineIsLoading({ id: 'timeline-1', isLoading: false });
-      updateTimeline({
+      dispatch(timelineActions.updateTimelineIsLoading({ id: 'timeline-1', isLoading: false }));
+      dispatchUpdateTimeline(dispatch)({
         duplicate: true,
         from: fromTimeline,
         id: 'timeline-1',
@@ -135,23 +131,25 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         ruleNote,
       })();
     },
-    [updateTimeline, updateTimelineIsLoading]
+    [dispatch]
   );
 
   const setEventsLoadingCallback = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
-      setEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading });
+      dispatch(
+        timelineActions.setEventsLoading({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isLoading })
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setEventsLoading, ALERTS_TABLE_TIMELINE_ID]
+    [dispatch]
   );
 
   const setEventsDeletedCallback = useCallback(
     ({ eventIds, isDeleted }: SetEventsDeletedProps) => {
-      setEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted });
+      dispatch(
+        timelineActions.setEventsDeleted({ id: ALERTS_TABLE_TIMELINE_ID, eventIds, isDeleted })
+      );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setEventsDeleted, ALERTS_TABLE_TIMELINE_ID]
+    [dispatch]
   );
 
   const onAlertStatusUpdateSuccess = useCallback(
@@ -202,20 +200,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      clearEventsLoading!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearEventsDeleted!({ id: ALERTS_TABLE_TIMELINE_ID });
-      clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+      dispatch(timelineActions.clearEventsLoading({ id: ALERTS_TABLE_TIMELINE_ID }));
+      dispatch(timelineActions.clearEventsDeleted({ id: ALERTS_TABLE_TIMELINE_ID }));
+      dispatch(timelineActions.clearSelected({ id: ALERTS_TABLE_TIMELINE_ID }));
       setFilterGroup(newFilterGroup);
     },
-    [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
+    [dispatch, setFilterGroup]
   );
 
   // Callback for clearing entire selection from utility bar
   const clearSelectionCallback = useCallback(() => {
-    clearSelected!({ id: ALERTS_TABLE_TIMELINE_ID });
+    dispatch(timelineActions.clearSelected({ id: ALERTS_TABLE_TIMELINE_ID }));
     setSelectAll(false);
     setShowClearSelectionAction(false);
-  }, [clearSelected, setSelectAll, setShowClearSelectionAction]);
+  }, [dispatch, setSelectAll, setShowClearSelectionAction]);
 
   // Callback for selecting all events on all pages from utility bar
   // Dispatches to stateful_body's selectAll via TimelineTypeContext props
@@ -394,37 +392,4 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
-  setEventsLoading: ({
-    id,
-    eventIds,
-    isLoading,
-  }: {
-    id: string;
-    eventIds: string[];
-    isLoading: boolean;
-  }) => dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading })),
-  clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
-  setEventsDeleted: ({
-    id,
-    eventIds,
-    isDeleted,
-  }: {
-    id: string;
-    eventIds: string[];
-    isDeleted: boolean;
-  }) => dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted })),
-  clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
-  updateTimelineIsLoading: ({ id, isLoading }: { id: string; isLoading: boolean }) =>
-    dispatch(timelineActions.updateIsLoading({ id, isLoading })),
-  updateTimeline: dispatchUpdateTimeline(dispatch),
-});
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const AlertsTable = connector(React.memo(AlertsTableComponent));
+export const AlertsTable = React.memo(AlertsTableComponent);

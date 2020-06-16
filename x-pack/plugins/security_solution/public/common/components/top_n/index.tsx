@@ -91,6 +91,8 @@ const StatefulTopNComponent: React.FC<Props> = ({
   toggleTopN,
   value,
 }) => {
+  const query = useSelector(inputsSelectors.globalQuerySelector);
+  const filters = useSelector(inputsSelectors.globalFiltersQuerySelector);
   const kibana = useKibana();
 
   //  Regarding data from useTimelineTypeContext:

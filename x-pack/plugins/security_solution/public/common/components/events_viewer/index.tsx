@@ -63,6 +63,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   upsertColumn,
   utilityBar,
 }) => {
+  const query = useSelector(inputsSelectors.globalQuerySelector);
+  const filters = useSelector(inputsSelectors.globalFiltersQuerySelector);
   const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
     defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY)
   );

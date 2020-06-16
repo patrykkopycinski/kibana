@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
@@ -29,27 +29,22 @@ interface OwnProps {
   children: (args: GlobalTimeArgs) => React.ReactNode;
 }
 
-type GlobalTimeProps = OwnProps & PropsFromRedux;
+type GlobalTimeProps = OwnProps;
 
-export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
-  children,
-  deleteAllQuery,
-  deleteOneQuery,
-  from,
-  to,
-  setGlobalQuery,
-}) => {
+export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({ children, from, to }) => {
+  const dispatch = useDispatch();
+  const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>
-      setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch }),
-    [setGlobalQuery]
+      dispatch(inputsActions.setGlobalQuery({ inputId: 'global', id, inspect, loading, refetch })),
+    [dispatch]
   );
 
   const deleteQuery = useCallback(
-    ({ id }: { id: string }) => deleteOneQuery({ inputId: 'global', id }),
-    [deleteOneQuery]
+    ({ id }: { id: string }) => dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id })),
+    [dispatch]
   );
 
   useEffect(() => {
@@ -57,10 +52,9 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
       setIsInitializing(false);
     }
     return () => {
-      deleteAllQuery({ id: 'global' });
+      dispatch(inputsActions.deleteAllQuery({ id: 'global' }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, isInitializing]);
 
   return (
     <>
@@ -75,22 +69,4 @@ export const GlobalTimeComponent: React.FC<GlobalTimeProps> = ({
   );
 };
 
-const mapStateToProps = (state: State) => {
-  const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
-  return {
-    from: timerange.from,
-    to: timerange.to,
-  };
-};
-
-const mapDispatchToProps = {
-  deleteAllQuery: inputsActions.deleteAllQuery,
-  deleteOneQuery: inputsActions.deleteOneQuery,
-  setGlobalQuery: inputsActions.setQuery,
-};
-
-export const connector = connect(mapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const GlobalTime = connector(React.memo(GlobalTimeComponent));
+export const GlobalTime = React.memo(GlobalTimeComponent);

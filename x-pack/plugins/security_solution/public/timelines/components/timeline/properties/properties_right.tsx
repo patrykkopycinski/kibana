@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import {
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -14,10 +15,13 @@ import {
   EuiToolTip,
   EuiAvatar,
 } from '@elastic/eui';
+import { useHistory } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { NewTimeline, Description, NotesButton, NewCase, ExistingCase } from './helpers';
+import { defaultHeaders } from '../body/column_headers/default_headers';
 
 import { disableTemplate } from '../../../../../common/constants';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
 
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -26,6 +30,10 @@ import { Note } from '../../../../common/lib/note';
 import { AssociateNote } from '../../notes/helpers';
 import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
 import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
+import { timelineSelectors } from '../../../../timelines/store/timeline';
+import { setInsertTimeline } from '../../../store/timeline/actions';
+import { timelineActions } from '../../../store/timeline';
+import { SiemPageName } from '../../../../app/types';
 
 import * as i18n from './translations';
 import { NewTemplateTimeline } from './new_template_timeline';
@@ -115,8 +123,112 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
   updateNote,
   usersViewing,
 }) => {
+  const history = useHistory();
+  const dispatch = useDispatch();
   const uiCapabilities = useKibana().services.application.capabilities;
   const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
+
+  const savedObjectId = useSelector(
+    (state: State) => timelineSelectors.selectTimeline(state, timelineId)?.savedObjectId
+  );
+
+  const handleNewTimelineClick = useCallback(() => {
+    onClosePopover();
+    dispatch(
+      timelineActions.createTimeline({
+        id: timelineId,
+        columns: defaultHeaders,
+        show: true,
+        timelineType: TimelineType.default,
+      })
+    );
+  }, [onClosePopover, dispatch, timelineId]);
+
+  const handleOpenTimelineClick = useCallback(() => {
+    onClosePopover();
+    onOpenTimelineModal();
+  }, [onClosePopover, onOpenTimelineModal]);
+
+  const handleNewCaseClick = useCallback(() => {
+    onClosePopover();
+    history.push({
+      pathname: `/${SiemPageName.case}/create`,
+    });
+    dispatch(
+      setInsertTimeline({
+        timelineId,
+        timelineSavedObjectId: savedObjectId,
+        timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
+      })
+    );
+  }, [onClosePopover, history, dispatch, timelineId, savedObjectId, title]);
+
+  const handleExistingCaseClick = useCallback(() => {
+    onClosePopover();
+    onOpenCaseModal();
+  }, [onOpenCaseModal, onClosePopover]);
+
+  const handleInspectClick = useCallback(() => {}, []);
+
+  const panels = [
+    {
+      id: 0,
+      items: [
+        {
+          name: 'Create new timeline',
+          icon: 'plusInCircle',
+          disabled: !capabilitiesCanUserCRUD,
+          onClick: handleNewTimelineClick,
+        },
+        {
+          name: i18n.OPEN_TIMELINE,
+          icon: 'folderOpen',
+          'data-test-subj': 'open-timeline-button',
+          onClick: handleOpenTimelineClick,
+        },
+        {
+          name: 'Attach timeline',
+          icon: 'paperClip',
+          panel: 1,
+          disabled: status === TimelineStatus.draft,
+          toolTipContent: 'You need to put the title to the timeline first',
+        },
+        // {
+        //   name: i18n.INSPECT_TIMELINE_TITLE,
+        //   icon: 'user',
+        //   toolTipPosition: 'right',
+        //   disabled: !isDataInTimeline,
+        //   onClick: handleInspectClick,
+        // },
+      ],
+    },
+    {
+      id: 1,
+      title: 'Attach timeline',
+      items: [
+        {
+          name: i18n.ATTACH_TIMELINE_TO_NEW_CASE,
+          icon: 'paperClip',
+          onClick: handleNewCaseClick,
+          dataTestSubj: 'attach-timeline-case',
+          color: 'text',
+          iconSide: 'left',
+          iconType: 'paperClip',
+        },
+
+        {
+          name: i18n.ATTACH_TIMELINE_TO_EXISTING_CASE,
+          icon: 'paperClip',
+          onClick: handleExistingCaseClick,
+          dataTestSubj: 'attach-timeline-existing-case',
+          color: 'text',
+          iconSide: 'left',
+          iconType: 'paperClip',
+        },
+      ],
+    },
+  ];
+
   return (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -134,28 +246,16 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
             id="timelineSettingsPopover"
             isOpen={showActions}
             closePopover={onClosePopover}
+            panelPaddingSize="none"
           >
-            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+            {/*
               {capabilitiesCanUserCRUD && (
                 <EuiFlexItem grow={false}>
                   <NewTimeline
                     timelineId={timelineId}
                     title={i18n.NEW_TIMELINE}
                     closeGearMenu={onClosePopover}
-                  />
-                </EuiFlexItem>
-              )}
-
-              {/*
-               * CreateTemplateTimelineBtn
-               * Remove the comment here to enable CreateTemplateTimelineBtn
-               */}
-              {!disableTemplate && (
-                <EuiFlexItem grow={false}>
-                  <NewTemplateTimeline
-                    closeGearMenu={onClosePopover}
-                    timelineId={timelineId}
-                    title={i18n.NEW_TEMPLATE_TIMELINE}
                   />
                 </EuiFlexItem>
               )}
@@ -179,7 +279,9 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                   timelineStatus={status}
                 />
               </EuiFlexItem>
+             */}
 
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <InspectButton
                   queryId={timelineId}
@@ -190,8 +292,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                   title={i18n.INSPECT_TIMELINE_TITLE}
                 />
               </EuiFlexItem>
-
-              {showNotesFromWidth ? (
+              {showNotesFromWidth && (
                 <EuiFlexItem grow={false}>
                   <NotesButton
                     animate={true}
@@ -206,9 +307,9 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                     updateNote={updateNote}
                   />
                 </EuiFlexItem>
-              ) : null}
+              )}
 
-              {showDescription ? (
+              {showDescription && (
                 <EuiFlexItem grow={false}>
                   <DescriptionPopoverMenuContainer>
                     <Description
@@ -218,7 +319,7 @@ const PropertiesRightComponent: React.FC<PropertiesRightComponentProps> = ({
                     />
                   </DescriptionPopoverMenuContainer>
                 </EuiFlexItem>
-              ) : null}
+              )}
             </EuiFlexGroup>
           </EuiPopover>
         </InspectButtonContainer>

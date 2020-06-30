@@ -4,25 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
+import { InPaginateProps } from './';
 
-export const Paginate = (props) => {
-  return props.children({
-    rows: props.partialRows,
-    perPage: props.perPage,
-    pageNumber: props.pageNumber,
-    totalPages: props.totalPages,
-    nextPageEnabled: props.nextPageEnabled,
-    prevPageEnabled: props.prevPageEnabled,
-    setPage: (num) => props.setPage(num),
-    nextPage: props.nextPage,
-    prevPage: props.prevPage,
-  });
+export type PaginateProps = Omit<InPaginateProps, 'startPage'> & {
+  pageNumber: number;
+  totalPages: number;
+  nextPageEnabled: boolean;
+  prevPageEnabled: boolean;
+  setPage: (num: number) => void;
+  nextPage: () => void;
+  prevPage: () => void;
+};
+
+export type PaginateChildProps = Omit<PaginateProps, 'children'>;
+
+export const Paginate: React.FunctionComponent<PaginateProps> = ({
+  children,
+  ...childrenProps
+}) => {
+  return <React.Fragment>{children(childrenProps)}</React.Fragment>;
 };
 
 Paginate.propTypes = {
   children: PropTypes.func.isRequired,
-  partialRows: PropTypes.array.isRequired,
+  rows: PropTypes.array.isRequired,
   perPage: PropTypes.number.isRequired,
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,

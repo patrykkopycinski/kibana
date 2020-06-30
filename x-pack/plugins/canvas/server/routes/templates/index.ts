@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { workpadType } from './workpad';
-import { customElementType } from './custom_element';
-import { workpadTemplateType } from './workpad_template';
+import { RouteInitializerDeps } from '../';
+import { initializeListTemplates } from './list';
 
-export { customElementType, workpadType, workpadTemplateType };
+export function initTemplateRoutes(deps: RouteInitializerDeps) {
+  initializeListTemplates(deps);
+}

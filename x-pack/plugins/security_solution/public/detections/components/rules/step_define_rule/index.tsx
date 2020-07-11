@@ -38,7 +38,6 @@ import { NextStep } from '../next_step';
 import {
   Field,
   Form,
-  FormDataProvider,
   getUseField,
   UseField,
   useForm,
@@ -142,6 +141,34 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form]);
+
+  useEffect(() => {
+    const subscription = form.subscribe(
+      ({
+        data: {
+          raw: { index, ruleType },
+        },
+      }) => {
+        if (index != null) {
+          if (deepEqual(index, indicesConfig) && indexModified) {
+            setIndexModified(false);
+          } else if (!deepEqual(index, indicesConfig) && !indexModified) {
+            setIndexModified(true);
+          }
+        }
+
+        if (isMlRule(ruleType) && !localIsMlRule) {
+          setIsMlRule(true);
+          clearErrors();
+        } else if (!isMlRule(ruleType) && localIsMlRule) {
+          setIsMlRule(false);
+          clearErrors();
+        }
+      }
+    );
+
+    return subscription.unsubscribe;
+  }, [clearErrors, form, indexModified, indicesConfig, localIsMlRule]);
 
   const handleResetIndices = useCallback(() => {
     const indexField = form.getFields().index;
@@ -255,27 +282,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               dataTestSubj: 'detectionEngineStepDefineRuleTimeline',
             }}
           />
-          <FormDataProvider pathsToWatch={['index', 'ruleType']}>
-            {({ index, ruleType }) => {
-              if (index != null) {
-                if (deepEqual(index, indicesConfig) && indexModified) {
-                  setIndexModified(false);
-                } else if (!deepEqual(index, indicesConfig) && !indexModified) {
-                  setIndexModified(true);
-                }
-              }
-
-              if (isMlRule(ruleType) && !localIsMlRule) {
-                setIsMlRule(true);
-                clearErrors();
-              } else if (!isMlRule(ruleType) && localIsMlRule) {
-                setIsMlRule(false);
-                clearErrors();
-              }
-
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 

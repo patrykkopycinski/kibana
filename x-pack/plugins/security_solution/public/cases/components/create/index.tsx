@@ -17,14 +17,7 @@ import { useHistory } from 'react-router-dom';
 
 import { isEqual } from 'lodash/fp';
 import { CasePostRequest } from '../../../../../case/common/api';
-import {
-  Field,
-  Form,
-  getUseField,
-  useForm,
-  UseField,
-  FormDataProvider,
-} from '../../../shared_imports';
+import { Field, Form, getUseField, useForm, UseField } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema } from './schema';
 import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
@@ -83,6 +76,34 @@ export const Create = React.memo(() => {
       ),
     [tagOptions]
   );
+
+  useEffect(() => {
+    const subscription = form.subscribe(
+      ({
+        data: {
+          raw: { tags: anotherTags },
+        },
+      }) => {
+        const current: string[] = options.map((opt) => opt.label);
+        const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+          if (!acc.includes(item)) {
+            return [...acc, item];
+          }
+          return acc;
+        }, current);
+        if (!isEqual(current, newOptions)) {
+          setOptions(
+            newOptions.map((label: string) => ({
+              label,
+            }))
+          );
+        }
+      }
+    );
+
+    return subscription.unsubscribe;
+  }, [form, options]);
+
   const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline<CasePostRequest>(
     form,
     'description'
@@ -156,25 +177,6 @@ export const Create = React.memo(() => {
             }}
           />
         </ContainerBig>
-        <FormDataProvider pathsToWatch="tags">
-          {({ tags: anotherTags }) => {
-            const current: string[] = options.map((opt) => opt.label);
-            const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-              if (!acc.includes(item)) {
-                return [...acc, item];
-              }
-              return acc;
-            }, current);
-            if (!isEqual(current, newOptions)) {
-              setOptions(
-                newOptions.map((label: string) => ({
-                  label,
-                }))
-              );
-            }
-            return null;
-          }}
-        </FormDataProvider>
       </Form>
       <Container>
         <EuiFlexGroup

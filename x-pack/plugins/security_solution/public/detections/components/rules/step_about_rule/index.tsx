@@ -18,14 +18,7 @@ import {
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreThreat } from '../mitre';
-import {
-  Field,
-  Form,
-  FormDataProvider,
-  getUseField,
-  UseField,
-  useForm,
-} from '../../../../shared_imports';
+import { Field, Form, getUseField, UseField, useForm } from '../../../../shared_imports';
 
 import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './data';
 import { stepAboutDefaultValue } from './default_value';
@@ -127,6 +120,29 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       setForm(RuleStep.aboutRule, form);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form]);
+
+  useEffect(() => {
+    const subscription = form.subscribe(
+      ({
+        data: {
+          raw: { severity },
+        },
+      }) => {
+        const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
+        const severityField = form.getFields().severity;
+        const riskScoreField = form.getFields().riskScore;
+        if (
+          severityField.value !== severity &&
+          newRiskScore != null &&
+          riskScoreField.value !== newRiskScore
+        ) {
+          riskScoreField.setValue(newRiskScore);
+        }
+      }
+    );
+
+    return subscription.unsubscribe;
   }, [form]);
 
   return isReadOnlyView && myStepData.name != null ? (
@@ -322,21 +338,6 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFlexItem>
           </AdvancedSettingsAccordion>
-          <FormDataProvider pathsToWatch="severity">
-            {({ severity }) => {
-              const newRiskScore = defaultRiskScoreBySeverity[severity as SeverityValue];
-              const severityField = form.getFields().severity;
-              const riskScoreField = form.getFields().riskScore;
-              if (
-                severityField.value !== severity &&
-                newRiskScore != null &&
-                riskScoreField.value !== newRiskScore
-              ) {
-                riskScoreField.setValue(newRiskScore);
-              }
-              return null;
-            }}
-          </FormDataProvider>
         </Form>
       </StepContentWrapper>
 

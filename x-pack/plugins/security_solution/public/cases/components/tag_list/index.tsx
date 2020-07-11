@@ -19,7 +19,7 @@ import {
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, FormDataProvider, useForm } from '../../../shared_imports';
+import { Form, useForm } from '../../../shared_imports';
 import { schema } from './schema';
 import { CommonUseField } from '../create';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -73,6 +73,33 @@ export const TagList = React.memo(
       [tagOptions]
     );
 
+    useEffect(() => {
+      const subscription = form.subscribe(
+        ({
+          data: {
+            raw: { tags: anotherTags },
+          },
+        }) => {
+          const current: string[] = options.map((opt) => opt.label);
+          const newOptions = anotherTags.reduce((acc: string[], item: string) => {
+            if (!acc.includes(item)) {
+              return [...acc, item];
+            }
+            return acc;
+          }, current);
+          if (!isEqual(current, newOptions)) {
+            setOptions(
+              newOptions.map((label: string) => ({
+                label,
+              }))
+            );
+          }
+        }
+      );
+
+      return subscription.unsubscribe;
+    }, [form, options]);
+
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -121,25 +148,6 @@ export const TagList = React.memo(
                       },
                     }}
                   />
-                  <FormDataProvider pathsToWatch="tags">
-                    {({ tags: anotherTags }) => {
-                      const current: string[] = options.map((opt) => opt.label);
-                      const newOptions = anotherTags.reduce((acc: string[], item: string) => {
-                        if (!acc.includes(item)) {
-                          return [...acc, item];
-                        }
-                        return acc;
-                      }, current);
-                      if (!isEqual(current, newOptions)) {
-                        setOptions(
-                          newOptions.map((label: string) => ({
-                            label,
-                          }))
-                        );
-                      }
-                      return null;
-                    }}
-                  </FormDataProvider>
                 </Form>
               </EuiFlexItem>
               <EuiFlexItem>

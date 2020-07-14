@@ -61,7 +61,7 @@ const GraphOverlayComponent = ({
   const [showCaseModal, setShowCaseModal] = useState<boolean>(false);
   const onOpenCaseModal = useCallback(() => setShowCaseModal(true), []);
   const onCloseCaseModal = useCallback(() => setShowCaseModal(false), [setShowCaseModal]);
-  const currentTimeline = useSelector((state: State) =>
+  const { id: currentTimelineId, savedObjectId, timelineType } = useSelector((state: State) =>
     timelineSelectors.selectTimeline(state, timelineId)
   );
   const onRowClick = useCallback(
@@ -72,7 +72,7 @@ const GraphOverlayComponent = ({
         setInsertTimeline({
           graphEventId,
           timelineId,
-          timelineSavedObjectId: currentTimeline.savedObjectId,
+          timelineSavedObjectId: savedObjectId,
           timelineTitle: title.length > 0 ? title : UNTITLED_TIMELINE,
         })
       );
@@ -81,7 +81,7 @@ const GraphOverlayComponent = ({
         path: getCaseDetailsUrl({ id }),
       });
     },
-    [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
+    [dispatch, graphEventId, navigateToApp, onCloseCaseModal, savedObjectId, timelineId, title]
   );
 
   return (
@@ -93,34 +93,36 @@ const GraphOverlayComponent = ({
             {i18n.BACK_TO_EVENTS}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <NewCase
-                compact={true}
-                graphEventId={graphEventId}
-                onClosePopover={noop}
-                timelineId={timelineId}
-                timelineTitle={title}
-                timelineStatus={status}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ExistingCase
-                compact={true}
-                onClosePopover={noop}
-                onOpenCaseModal={onOpenCaseModal}
-                timelineStatus={status}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {timelineType !== 'template' && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <NewCase
+                  compact={true}
+                  graphEventId={graphEventId}
+                  onClosePopover={noop}
+                  timelineId={timelineId}
+                  timelineTitle={title}
+                  timelineStatus={status}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExistingCase
+                  compact={true}
+                  onClosePopover={noop}
+                  onOpenCaseModal={onOpenCaseModal}
+                  timelineStatus={status}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="none" />
       <StyledResolver
         databaseDocumentID={graphEventId}
-        resolverComponentInstanceID={currentTimeline.id}
+        resolverComponentInstanceID={currentTimelineId}
       />
       <AllCasesModal
         onCloseCaseModal={onCloseCaseModal}

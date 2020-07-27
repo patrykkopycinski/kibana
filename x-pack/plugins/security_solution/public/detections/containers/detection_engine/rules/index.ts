@@ -5,7 +5,6 @@
  */
 
 export * from './api';
-export * from './fetch_index_patterns';
 export * from './persist_rule';
 export * from './types';
 export * from './use_rule';

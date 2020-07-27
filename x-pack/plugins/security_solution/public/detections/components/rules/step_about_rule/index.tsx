@@ -19,6 +19,7 @@ import {
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreThreat } from '../mitre';
+import { useWithSource } from '../../../../common/containers/source';
 import {
   Field,
   Form,
@@ -38,7 +39,6 @@ import { NextStep } from '../next_step';
 import { MarkdownEditorForm } from '../../../../common/components/markdown_editor/form';
 import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
 import { AutocompleteField } from '../autocomplete_field';
 
 const CommonUseField = getUseField({ component: Field });
@@ -73,8 +73,10 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
 }) => {
   const initialState = defaultValues ?? stepAboutDefaultValue;
   const [myStepData, setMyStepData] = useState<AboutStepRule>(initialState);
-  const [{ isLoading: indexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+  const { loading: indexPatternLoading, indexPattern } = useWithSource(
+    'default',
     defineRuleData?.index ?? [],
+    false,
     'step_about_rule'
   );
   const canUseExceptions =
@@ -148,7 +150,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 idAria: 'detectionEngineStepAboutRuleSeverityField',
                 isDisabled: isLoading || indexPatternLoading,
                 options: severityOptions,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -161,7 +163,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleRiskScore',
                 idAria: 'detectionEngineStepAboutRuleRiskScore',
                 isDisabled: isLoading || indexPatternLoading,
-                indices: indexPatterns,
+                indices: indexPattern,
               }}
             />
           </EuiFlexItem>
@@ -286,7 +288,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleRuleNameOverride',
                 fieldType: 'string',
                 idAria: 'detectionEngineStepAboutRuleRuleNameOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}
@@ -299,7 +301,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 dataTestSubj: 'detectionEngineStepAboutRuleTimestampOverride',
                 fieldType: 'date',
                 idAria: 'detectionEngineStepAboutRuleTimestampOverride',
-                indices: indexPatterns,
+                indices: indexPattern,
                 isDisabled: isLoading || indexPatternLoading,
                 placeholder: '',
               }}

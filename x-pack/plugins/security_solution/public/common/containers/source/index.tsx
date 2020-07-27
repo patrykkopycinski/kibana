@@ -108,7 +108,7 @@ export const indicesExistOrDataTemporarilyUnavailable = (
 ) => indicesExist || isUndefined(indicesExist);
 
 const EMPTY_BROWSER_FIELDS = {};
-const EMPTY_DOCVALUE_FIELD: DocValueFields[] = [];
+const EMPTY_DOC_VALUE_FIELD: DocValueFields[] = [];
 
 interface UseWithSourceState {
   browserFields: BrowserFields;
@@ -140,7 +140,7 @@ export const useWithSource = (
 
   const [state, setState] = useState<UseWithSourceState>({
     browserFields: EMPTY_BROWSER_FIELDS,
-    docValueFields: EMPTY_DOCVALUE_FIELD,
+    docValueFields: EMPTY_DOC_VALUE_FIELD,
     errorMessage: null,
     indexPattern: getIndexFields(defaultIndex.join(), []),
     indicesExist: indicesExistOrDataTemporarilyUnavailable(undefined),

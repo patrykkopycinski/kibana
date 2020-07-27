@@ -17,7 +17,7 @@ import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { EventsViewer } from './events_viewer';
 import { defaultHeaders } from './default_headers';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
+import { useWithSource } from '../../containers/source';
 import { mockBrowserFields, mockDocValueFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -29,8 +29,8 @@ import { AlertsTableFilterGroup } from '../../../detections/components/alerts_ta
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
+const mockUseWithSource: jest.Mock = useWithSource as jest.Mock;
+jest.mock('../../containers/source');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -41,9 +41,9 @@ const to = '2019-08-27T22:10:56.794Z';
 
 const defaultMocks = {
   browserFields: mockBrowserFields,
-  indexPatterns: mockIndexPattern,
+  indexPattern: mockIndexPattern,
   docValueFields: mockDocValueFields,
-  isLoading: false,
+  loading: false,
 };
 
 const utilityBar = (refetch: inputsModel.Refetch, totalCount: number) => (
@@ -83,7 +83,7 @@ describe('EventsViewer', () => {
   const mount = useMountAppended();
 
   beforeEach(() => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks }]);
+    mockUseWithSource.mockReturnValue([{ ...defaultMocks }]);
   });
 
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
@@ -110,7 +110,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render fetch index pattern is loading', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
+    mockUseWithSource.mockReturnValue([{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>
@@ -135,7 +135,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render when start is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
+    mockUseWithSource.mockReturnValue([{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>
@@ -160,7 +160,7 @@ describe('EventsViewer', () => {
   });
 
   test('it does NOT render when end is empty', async () => {
-    mockUseFetchIndexPatterns.mockImplementation(() => [{ ...defaultMocks, isLoading: true }]);
+    mockUseWithSource.mockReturnValue([{ ...defaultMocks, isLoading: true }]);
 
     const wrapper = mount(
       <TestProviders>

@@ -13,7 +13,7 @@ import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { useFetchIndexPatterns } from '../../../containers/detection_engine/rules';
+import { useWithSource } from '../../../../common/containers/source';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useMlCapabilities } from '../../../../common/components/ml_popover/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
@@ -115,9 +115,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   };
   const [localRuleType, setLocalRuleType] = useState(initialState.ruleType);
   const [myStepData, setMyStepData] = useState<DefineStepRule>(initialState);
-  const [
-    { browserFields, indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
-  ] = useFetchIndexPatterns(myStepData.index, 'step_define_rule');
+  const {
+    browserFields,
+    indexPattern: indexPatternQueryBar,
+    loading: indexPatternLoadingQueryBar,
+  } = useWithSource('default', myStepData.index, false, 'step_define_rule');
 
   const { form } = useForm({
     defaultValue: initialState,

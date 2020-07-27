@@ -16,18 +16,18 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
+import { useWithSource } from '../../containers/source';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
 
 jest.mock('../../components/url_state/normalize_time_range.ts');
 
-const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../detections/containers/detection_engine/rules/fetch_index_patterns');
-mockUseFetchIndexPatterns.mockImplementation(() => [
+const mockUseWithSource: jest.Mock = useWithSource as jest.Mock;
+jest.mock('../../containers/source');
+mockUseWithSource.mockReturnValue([
   {
     browserFields: mockBrowserFields,
-    indexPatterns: mockIndexPattern,
+    indexPattern: mockIndexPattern,
   },
 ]);
 

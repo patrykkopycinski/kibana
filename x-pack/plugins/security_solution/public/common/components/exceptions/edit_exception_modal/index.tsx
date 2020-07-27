@@ -20,7 +20,7 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useWithSource } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import {
   ExceptionListItemSchema,
@@ -95,12 +95,17 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
+  const { loading: isSignalIndexPatternLoading, indexPattern: signalIndexPatterns } = useWithSource(
+    'default',
+    signalIndexName !== null ? [signalIndexName] : [],
+    true,
+    'signals'
+  );
 
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+  const { loading: isIndexPatternLoading, indexPattern } = useWithSource(
+    'default',
     ruleIndices,
+    false,
     'rules'
   );
 
@@ -223,7 +228,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 data-test-subj="edit-exception-modal-builder"
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
+                indexPatterns={indexPattern}
               />
 
               <EuiSpacer />

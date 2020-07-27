@@ -13,8 +13,8 @@ import { Dispatch } from 'redux';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Filter, esQuery } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
-import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
+import { useWithSource } from '../../../common/containers/source';
 import { HeaderSection } from '../../../common/components/header_section';
 import { combineQueries } from '../../../timelines/components/timeline/helpers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -116,8 +116,10 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   const [addExceptionModalState, setAddExceptionModalState] = useState<AddExceptionModalBaseProps>(
     addExceptionModalInitialState
   );
-  const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+  const { browserFields, indexPattern } = useWithSource(
+    'default',
     signalsIndex !== '' ? [signalsIndex] : [],
+    true,
     'alerts_table'
   );
   const kibana = useKibana();
@@ -125,11 +127,11 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPatterns != null) {
+      if (browserFields != null && indexPattern != null) {
         return combineQueries({
           config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
-          indexPattern: indexPatterns,
+          indexPattern,
           browserFields,
           filters: isEmpty(defaultFilters)
             ? [...globalFilters, ...customFilters]
@@ -144,7 +146,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       return null;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [browserFields, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+    [browserFields, globalFilters, globalQuery, indexPattern, kibana, to, from]
   );
 
   // Callback for creating a new timeline -- utilized by row/batch actions

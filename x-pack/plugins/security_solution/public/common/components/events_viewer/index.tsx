@@ -8,7 +8,6 @@ import React, { useCallback, useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
@@ -19,10 +18,9 @@ import {
 } from '../../../timelines/store/timeline/model';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
+import { useWithSource } from '../../containers/source';
 
 export interface OwnProps {
   defaultIndices?: string[];
@@ -67,12 +65,12 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
-  const [
-    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
-  ] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-    'events_viewer'
-  );
+  const {
+    docValueFields,
+    browserFields,
+    indexPattern,
+    loading: isLoadingIndexPattern,
+  } = useWithSource('default', defaultIndices, true, 'events_viewer');
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -134,7 +132,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         filters={globalFilters}
         headerFilterGroup={headerFilterGroup}
         height={height}
-        indexPattern={indexPatterns}
+        indexPattern={indexPattern}
         isLive={isLive}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}

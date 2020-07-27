@@ -45,7 +45,7 @@ import {
   entryHasNonEcsType,
   getMappedNonEcsValue,
 } from '../helpers';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+import { useWithSource } from '../../../containers/source';
 
 export interface AddExceptionModalBaseProps {
   ruleName: string;
@@ -114,12 +114,17 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState(false);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
+  const { loading: isSignalIndexPatternLoading, indexPattern: signalIndexPatterns } = useWithSource(
+    'default',
+    signalIndexName !== null ? [signalIndexName] : [],
+    true,
+    'signals'
+  );
 
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
+  const { loading: isIndexPatternLoading, indexPattern } = useWithSource(
+    'default',
     ruleIndices,
+    false,
     'rules'
   );
 
@@ -319,7 +324,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   listId={ruleExceptionList.list_id}
                   listNamespaceType={ruleExceptionList.namespace_type}
                   ruleName={ruleName}
-                  indexPatterns={indexPatterns}
+                  indexPatterns={indexPattern}
                   isOrDisabled={false}
                   isAndDisabled={false}
                   isNestedDisabled={false}

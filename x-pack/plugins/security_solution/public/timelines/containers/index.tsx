@@ -4,15 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, uniqBy } from 'lodash/fp';
+import deepEqual from 'fast-deep-equal';
+import { getOr, uniqBy, noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Query } from 'react-apollo';
 import { compose, Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch, useSelector, shallowEqual } from 'react-redux';
 
+import { FilterManager, IIndexPattern } from '../../../../../../src/plugins/data/public';
+import { getInvestigateInResolverAction } from '../components/timeline/body/helpers';
+
+import { useManageTimeline } from '../components/manage_timeline';
+import { generateTablePaginationOptions } from '../../common/components/paginated_table/helpers';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 import {
   GetTimelineQuery,
   PageInfo,
@@ -21,7 +26,7 @@ import {
   TimelineItem,
 } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../common/store';
-import { withKibana, WithKibanaProps } from '../../common/lib/kibana';
+import { withKibana, WithKibanaProps, useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../common/containers/query_template';
 import { EventType } from '../../timelines/store/timeline/model';
@@ -34,7 +39,7 @@ export interface TimelineArgs {
   id: string;
   inspect: inputsModel.InspectQuery;
   loading: boolean;
-  loadMore: (cursor: string, tieBreaker: string) => void;
+  loadMore: LoadPage;
   pageInfo: PageInfo;
   refetch: inputsModel.Refetch;
   totalCount: number;
@@ -44,6 +49,223 @@ export interface TimelineArgs {
 export interface CustomReduxProps {
   clearSignalsState: ({ id }: { id?: string }) => void;
 }
+
+type LoadPage = (newActivePage: number) => void;
+
+interface UseTimelineProps extends QueryTemplateProps {
+  endDate: string;
+  eventType?: EventType;
+  filterManager: FilterManager;
+  id: string;
+  indexPattern?: IIndexPattern;
+  indexToAdd?: string[];
+  limit: number;
+  loadingIndexName: boolean;
+  sortField: SortField;
+  fields: string[];
+  startDate: string;
+  queryDeduplication: string;
+}
+
+const getTimelineEvents = (variables: string, timelineEdges: TimelineEdges[]): TimelineItem[] =>
+  timelineEdges.map((e: TimelineEdges) => e.node);
+
+const ID = 'timelineQuery';
+
+export const useTimeline = ({
+  docValueFields,
+  endDate,
+  eventType = 'raw',
+  filterManager,
+  id,
+  indexPattern,
+  indexToAdd = [],
+  limit,
+  loadingIndexName,
+  fields,
+  filterQuery,
+  sourceId,
+  sortField,
+  startDate,
+}: UseTimelineProps): [boolean, TimelineArgs] => {
+  const dispatch = useDispatch();
+  const getQuery = inputsSelectors.timelineQueryByIdSelector();
+  const { isInspected } = useSelector((state: State) => getQuery(state, id), shallowEqual);
+  const { data, notifications, uiSettings } = useKibana().services;
+  const refetch = useRef<inputsModel.Refetch>(noop);
+  const abortCtrl = useRef(new AbortController());
+  const defaultKibanaIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const defaultIndex =
+    indexPattern == null || (indexPattern != null && indexPattern.title === '')
+      ? [
+          ...(['all', 'raw'].includes(eventType) ? defaultKibanaIndex : []),
+          ...(['all', 'alert', 'signal'].includes(eventType) ? indexToAdd : []),
+        ]
+      : indexPattern?.title.split(',') ?? [];
+  const [loading, setLoading] = useState(false);
+  const [timelineRequest, setTimelineRequest] = useState<TimelineRequestOptions>({
+    fieldRequested: fields,
+    filterQuery: createFilter(filterQuery),
+    sourceId,
+    timerange: {
+      interval: '12h',
+      from: startDate,
+      to: endDate,
+    },
+    // pagination: generateTablePaginationOptions(activePage, limit),
+    pagination: generateTablePaginationOptions(0, limit),
+    sort: {
+      direction: 'asc',
+      field: sortField,
+    },
+    defaultIndex,
+    docValueFields: docValueFields ?? [],
+    inspect: isInspected,
+    factoryQueryType: 'timeline',
+  });
+  const { initializeTimeline, setIndexToAdd, setIsTimelineLoading } = useManageTimeline();
+  useEffect(() => {
+    initializeTimeline({
+      filterManager,
+      id,
+      indexToAdd,
+      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId: id })],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setIsTimelineLoading({ id, isLoading: loading || loadingIndexName });
+  }, [loadingIndexName, id, setIsTimelineLoading, loading]);
+
+  useEffect(() => {
+    setIndexToAdd({ id, indexToAdd });
+  }, [id, indexToAdd, setIndexToAdd]);
+
+  const clearSignalsState = useCallback(() => {
+    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
+      dispatch(timelineActions.clearEventsLoading({ id }));
+      dispatch(timelineActions.clearEventsDeleted({ id }));
+    }
+  }, [dispatch, id]);
+
+  const wrappedLoadMore = useCallback(
+    (newActivePage: number) => {
+      clearSignalsState();
+      setTimelineRequest((prevRequest) => {
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
+    },
+    [clearSignalsState, limit]
+  );
+
+  const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
+    id: ID,
+    inspect: {
+      dsl: [],
+      response: [],
+    },
+    refetch: refetch.current,
+    totalCount: -1,
+    pageInfo: {
+      activePage: 0,
+      fakeTotalCount: 0,
+      showMorePagesIndicator: false,
+    },
+    events: [],
+    loadMore: wrappedLoadMore,
+    getUpdatedAt: () => Date.now(),
+  });
+
+  const timelineSearch = useCallback(
+    (request: TimelineRequestOptions) => {
+      let didCancel = false;
+      const asyncSearch = async () => {
+        abortCtrl.current = new AbortController();
+        setLoading(true);
+
+        const searchSubscription$ = data.search
+          .search<TimelineRequestOptions, HostsStrategyResponse>(request, {
+            strategy: 'securitySolutionTimelineSearchStrategy',
+            signal: abortCtrl.current.signal,
+          })
+          .subscribe({
+            next: (response) => {
+              if (!response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                  setTimelineResponse((prevResponse) => ({
+                    ...prevResponse,
+                    events: response.edges,
+                    inspect: response.inspect ?? prevResponse.inspect,
+                    pageInfo: response.pageInfo,
+                    refetch: refetch.current,
+                    totalCount: response.totalCount,
+                  }));
+                }
+                searchSubscription$.unsubscribe();
+              } else if (response.isPartial && !response.isRunning) {
+                if (!didCancel) {
+                  setLoading(false);
+                }
+                // notifications.toasts.addWarning(i18n.ERROR_ALL_HOST);
+                searchSubscription$.unsubscribe();
+              }
+            },
+            error: (msg) => {
+              if (msg.message !== 'Aborted') {
+                // notifications.toasts.addDanger({ title: i18n.FAIL_ALL_HOST, text: msg.message });
+              }
+            },
+          });
+      };
+      abortCtrl.current.abort();
+      asyncSearch();
+      refetch.current = asyncSearch;
+      return () => {
+        didCancel = true;
+        abortCtrl.current.abort();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data.search, notifications.toasts]
+  );
+
+  useEffect(() => {
+    setTimelineRequest((prevRequest) => {
+      const myRequest = {
+        ...prevRequest,
+        defaultIndex,
+        docValueFields: docValueFields ?? [],
+        filterQuery: createFilter(filterQuery),
+        // pagination: generateTablePaginationOptions(activePage, limit),
+        pagination: generateTablePaginationOptions(0, limit),
+        timerange: {
+          interval: '12h',
+          from: startDate,
+          to: endDate,
+        },
+        sort: {
+          direction: 'asc',
+          field: sortField,
+        },
+      };
+      if (!deepEqual(prevRequest, myRequest)) {
+        return myRequest;
+      }
+      return prevRequest;
+    });
+  }, [defaultIndex, docValueFields, endDate, filterQuery, limit, startDate, sortField]);
+
+  useEffect(() => {
+    timelineSearch(timelineRequest);
+  }, [timelineRequest, timelineSearch]);
+
+  return [loading, timelineResponse];
+};
 
 export interface OwnProps extends QueryTemplateProps {
   children?: (args: TimelineArgs) => React.ReactNode;

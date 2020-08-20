@@ -7,6 +7,7 @@
 import { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
 
 import { timelineDetailsFactory } from './details';
+import { timelineEventsFactory } from './events';
 import { SecuritySolutionTimelineFactory } from './types';
 
 export const securitySolutionTimelineFactory: Record<
@@ -14,4 +15,5 @@ export const securitySolutionTimelineFactory: Record<
   SecuritySolutionTimelineFactory<FactoryQueryTypes>
 > = {
   ...timelineDetailsFactory,
+  ...timelineEventsFactory,
 };

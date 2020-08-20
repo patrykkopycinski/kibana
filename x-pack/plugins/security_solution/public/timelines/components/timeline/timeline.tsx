@@ -6,18 +6,17 @@
 
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { TimelineQuery } from '../../containers/index';
+import { useTimeline } from '../../containers/index';
 import { Direction } from '../../../graphql/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode, EventType } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import { getInvestigateInResolverAction } from './body/helpers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -41,7 +40,6 @@ import {
   FilterManager,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 
 const TimelineContainer = styled.div`
@@ -221,25 +219,27 @@ export const TimelineComponent: React.FC<Props> = ({
     }),
     [sort.columnId, sort.sortDirection]
   );
-  const [isQueryLoading, setIsQueryLoading] = useState(false);
-  const { initializeTimeline, setIndexToAdd, setIsTimelineLoading } = useManageTimeline();
-  useEffect(() => {
-    initializeTimeline({
-      filterManager,
-      id,
-      indexToAdd,
-      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId: id })],
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  useEffect(() => {
-    setIsTimelineLoading({ id, isLoading: isQueryLoading || loadingIndexName });
-  }, [loadingIndexName, id, isQueryLoading, setIsTimelineLoading]);
-
-  useEffect(() => {
-    setIndexToAdd({ id, indexToAdd });
-  }, [id, indexToAdd, setIndexToAdd]);
+  const [
+    loading,
+    { events, inspect, totalCount, pageInfo, loadMore, getUpdatedAt, refetch },
+  ] = useTimeline({
+    filterManager,
+    docValueFields,
+    endDate: end,
+    eventType,
+    id,
+    indexToAdd,
+    loadingIndexName,
+    fields: timelineQueryFields,
+    sourceId: 'default',
+    limit: itemsPerPage,
+    filterQuery: combinedQueries?.filterQuery,
+    sortField: timelineQuerySortField,
+    startDate: start,
+    queryDeduplication: 'timeline',
+    canQueryTimeline,
+  });
 
   return (
     <TimelineContainer data-test-subj="timeline">
@@ -273,86 +273,52 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {canQueryTimeline ? (
-        <TimelineQuery
-          docValueFields={docValueFields}
-          endDate={end}
-          eventType={eventType}
+      <>
+        <TimelineRefetch
           id={id}
-          indexToAdd={indexToAdd}
-          fields={timelineQueryFields}
-          sourceId="default"
-          limit={itemsPerPage}
-          filterQuery={combinedQueries!.filterQuery}
-          sortField={timelineQuerySortField}
-          startDate={start}
-          queryDeduplication="timeline"
-        >
-          {({
-            events,
-            inspect,
-            loading,
-            totalCount,
-            pageInfo,
-            loadMore,
-            getUpdatedAt,
-            refetch,
-          }) => {
-            setIsQueryLoading(loading);
-            return (
-              <>
-                <TimelineRefetch
-                  id={id}
-                  inputId="timeline"
-                  inspect={inspect}
-                  loading={loading}
-                  refetch={refetch}
-                />
-                <StyledEuiFlyoutBody
-                  data-test-subj="eui-flyout-body"
-                  className="timeline-flyout-body"
-                >
-                  <StatefulBody
-                    browserFields={browserFields}
-                    data={events}
-                    docValueFields={docValueFields}
-                    id={id}
-                    sort={sort}
-                    toggleColumn={toggleColumn}
-                  />
-                </StyledEuiFlyoutBody>
-                {
-                  /** Hide the footer if Resolver is showing. */
-                  !graphEventId && (
-                    <StyledEuiFlyoutFooter
-                      data-test-subj="eui-flyout-footer"
-                      className="timeline-flyout-footer"
-                    >
-                      <Footer
-                        data-test-subj="timeline-footer"
-                        getUpdatedAt={getUpdatedAt}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        height={footerHeight}
-                        id={id}
-                        isLive={isLive}
-                        isLoading={loading || loadingIndexName}
-                        itemsCount={events.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onLoadMore={loadMore}
-                        serverSideEventCount={totalCount}
-                        tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
-                      />
-                    </StyledEuiFlyoutFooter>
-                  )
-                }
-              </>
-            );
-          }}
-        </TimelineQuery>
-      ) : null}
+          inputId="timeline"
+          inspect={inspect}
+          loading={loading}
+          refetch={refetch}
+        />
+        <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+          <StatefulBody
+            browserFields={browserFields}
+            data={events}
+            docValueFields={docValueFields}
+            id={id}
+            sort={sort}
+            toggleColumn={toggleColumn}
+          />
+        </StyledEuiFlyoutBody>
+        {
+          /** Hide the footer if Resolver is showing. */
+          !graphEventId && (
+            <StyledEuiFlyoutFooter
+              data-test-subj="eui-flyout-footer"
+              className="timeline-flyout-footer"
+            >
+              <Footer
+                data-test-subj="timeline-footer"
+                getUpdatedAt={getUpdatedAt}
+                hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                height={footerHeight}
+                id={id}
+                isLive={isLive}
+                isLoading={loading || loadingIndexName}
+                itemsCount={events.length}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                onLoadMore={loadMore}
+                serverSideEventCount={totalCount}
+                tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
+              />
+            </StyledEuiFlyoutFooter>
+          )
+        }
+      </>
     </TimelineContainer>
   );
 };

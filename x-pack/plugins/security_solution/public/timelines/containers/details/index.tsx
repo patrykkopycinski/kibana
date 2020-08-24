@@ -35,6 +35,32 @@ const getDetailsEvent = memoizeOne(
   (variables: string, detail: DetailItem[]): DetailItem[] => detail
 );
 
+interface UseTimelineDetailsSearchProps {
+  request: TimelineDetailsRequestOptions;
+}
+
+export const useTimelineDetailsSearch = () => {
+  const { data } = useKibana().services;
+
+  const search = useCallback(
+    (request: UseTimelineDetailsSearchProps['request']) =>
+      data.search
+        .search<TimelineDetailsRequestOptions, TimelineDetailsStrategyResponse>(
+          {
+            ...request,
+            factoryQueryType: TimelineDetailsQueries.timelineDetails,
+          },
+          {
+            strategy: 'securitySolutionTimelineSearchStrategy',
+          }
+        )
+        .toPromise(),
+    [data.search]
+  );
+
+  return search;
+};
+
 export const useTimelineDetails = ({
   docValueFields,
   indexName,
@@ -51,7 +77,6 @@ export const useTimelineDetails = ({
   >({
     defaultIndex,
     docValueFields,
-    executeQuery,
     indexName,
     eventId,
     factoryQueryType: TimelineDetailsQueries.timelineDetails,

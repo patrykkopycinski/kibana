@@ -9,6 +9,7 @@ import ApolloClient from 'apollo-client';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Ecs, NoteResult, TimelineNonEcsData } from '../../../graphql/types';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
+import { useTimelineDetailsSearch } from '../../../timelines/containers/details';
 import { inputsModel } from '../../../common/store';
 
 export interface SetEventsLoadingProps {
@@ -41,7 +42,6 @@ export type UpdateAlertsStatus = ({
 export interface UpdateAlertStatusActionProps {
   query?: string;
   alertIds: string[];
-  status: Status;
   selectedStatus: Status;
   setEventsLoading: ({ eventIds, isLoading }: SetEventsLoadingProps) => void;
   setEventsDeleted: ({ eventIds, isDeleted }: SetEventsDeletedProps) => void;
@@ -53,9 +53,12 @@ export interface SendAlertToTimelineActionProps {
   apolloClient?: ApolloClient<{}>;
   createTimeline: CreateTimeline;
   ecsData: Ecs;
+  fetchTimelineDetails: FetchTimelineDetails;
   nonEcsData: TimelineNonEcsData[];
   updateTimelineIsLoading: UpdateTimelineLoading;
 }
+
+export type FetchTimelineDetails = ReturnType<typeof useTimelineDetailsSearch>;
 
 export type UpdateTimelineLoading = ({ id, isLoading }: { id: string; isLoading: boolean }) => void;
 

@@ -21,7 +21,6 @@ import { useFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { HistogramType } from '../../../graphql/types';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 
 const EVENTS_HISTOGRAM_ID = 'eventsOverTimeQuery';
 
@@ -52,14 +51,14 @@ export const histogramConfigs: MatrixHisrogramConfigs = {
   title: i18n.NAVIGATION_EVENTS_TITLE,
 };
 
-export const EventsQueryTabBody = ({
+const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
   pageFilters,
   setQuery,
   startDate,
-}: HostsComponentsQueryProps) => {
+}) => {
   const { initializeTimeline } = useManageTimeline();
   const dispatch = useDispatch();
   const { globalFullScreen } = useFullScreen();
@@ -67,9 +66,6 @@ export const EventsQueryTabBody = ({
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
       defaultModel: eventsDefaultModel,
-      timelineRowActions: () => [
-        getInvestigateInResolverAction({ dispatch, timelineId: TimelineId.hostsPageEvents }),
-      ],
     });
   }, [dispatch, initializeTimeline]);
 
@@ -105,5 +101,9 @@ export const EventsQueryTabBody = ({
     </>
   );
 };
+
+EventsQueryTabBodyComponent.displayName = 'EventsQueryTabBodyComponent';
+
+export const EventsQueryTabBody = React.memo(EventsQueryTabBodyComponent);
 
 EventsQueryTabBody.displayName = 'EventsQueryTabBody';

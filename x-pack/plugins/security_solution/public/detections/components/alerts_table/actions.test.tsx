@@ -14,11 +14,12 @@ import {
   defaultTimelineProps,
   apolloClient,
   mockTimelineApolloResult,
+  mockTimelineDetails,
   mockTimelineDetailsApollo,
 } from '../../../common/mock/';
-import { CreateTimeline, UpdateTimelineLoading } from './types';
+import { CreateTimeline, UpdateTimelineLoading, FetchTimelineDetails } from './types';
 import { Ecs } from '../../../graphql/types';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('apollo-client');
 
@@ -27,6 +28,7 @@ describe('alert actions', () => {
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
   let updateTimelineIsLoading: UpdateTimelineLoading;
+  let fetchTimelineDetails: FetchTimelineDetails;
   let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
@@ -39,6 +41,7 @@ describe('alert actions', () => {
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
+    fetchTimelineDetails = jest.fn() as jest.Mocked<FetchTimelineDetails>;
 
     jest.spyOn(apolloClient, 'query').mockImplementation((obj) => {
       const id = get('variables.id', obj);
@@ -62,19 +65,27 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
 
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
+          isLoading: true,
+        });
       });
 
       test('it invokes createTimeline with designated timeline template if "timelineTemplate" exists', async () => {
+        (fetchTimelineDetails as jest.Mock).mockResolvedValue({
+          data: mockTimelineDetails,
+        });
         await sendAlertToTimelineAction({
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
@@ -262,6 +273,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
@@ -291,6 +303,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
@@ -309,13 +322,17 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: mockEcsDataWithAlert,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
 
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({ id: 'timeline-1', isLoading: true });
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: 'timeline-1',
+          id: TimelineId.active,
+          isLoading: true,
+        });
+        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
+          id: TimelineId.active,
           isLoading: false,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
@@ -339,6 +356,7 @@ describe('alert actions', () => {
           apolloClient,
           createTimeline,
           ecsData: ecsDataMock,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });
@@ -364,6 +382,7 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
+          fetchTimelineDetails,
           nonEcsData: [],
           updateTimelineIsLoading,
         });

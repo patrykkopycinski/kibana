@@ -12,7 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { ESQuery } from '../../../../common/typed_json';
-import { ID as OverviewHostQueryId, OverviewHostQuery } from '../../containers/overview_host';
+import { ID as OverviewHostQueryId, useOverviewHost } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
 import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
 import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
@@ -65,67 +65,71 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     ),
     [goToHost, formatUrl]
   );
+
+  const [loading, { overviewHost, id, inspect, refetch }] = useOverviewHost({
+    endDate,
+    filterQuery,
+    startDate,
+  });
+
+  const formmatedMessageValues = useMemo(() => {
+    const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
+      (total, stat) => total + stat.count,
+      0
+    );
+    const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
+
+    return {
+      formattedHostEventsCount,
+      hostEventsCount,
+    };
+  }, [defaultNumberFormat, overviewHost]);
+
+  const title = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.hostsTitle"
+        defaultMessage="Host events"
+      />
+    ),
+    []
+  );
+
+  const subtitle = useMemo(
+    () =>
+      !isEmpty(overviewHost) ? (
+        <FormattedMessage
+          defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
+          id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
+          values={formmatedMessageValues}
+        />
+      ) : (
+        <>{''}</>
+      ),
+    [formmatedMessageValues, overviewHost]
+  );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
-        <EuiPanel>
-          <OverviewHostQuery
-            data-test-subj="overview-host-query"
-            endDate={endDate}
-            filterQuery={filterQuery}
-            sourceId="default"
-            startDate={startDate}
-          >
-            {({ overviewHost, loading, id, inspect, refetch }) => {
-              const hostEventsCount = getOverviewHostStats(overviewHost).reduce(
-                (total, stat) => total + stat.count,
-                0
-              );
-              const formattedHostEventsCount = numeral(hostEventsCount).format(defaultNumberFormat);
+        <EuiPanel data-test-subj="overview-host-query">
+          <>
+            <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
+              <>
+                <Sourcerer />
+                {hostPageButton}
+              </>
+            </HeaderSection>
 
-              return (
-                <>
-                  <HeaderSection
-                    id={OverviewHostQueryId}
-                    subtitle={
-                      !isEmpty(overviewHost) ? (
-                        <FormattedMessage
-                          defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
-                          id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
-                          values={{
-                            formattedHostEventsCount,
-                            hostEventsCount,
-                          }}
-                        />
-                      ) : (
-                        <>{''}</>
-                      )
-                    }
-                    title={
-                      <FormattedMessage
-                        id="xpack.securitySolution.overview.hostsTitle"
-                        defaultMessage="Host events"
-                      />
-                    }
-                  >
-                    <>
-                      <Sourcerer />
-                      {hostPageButton}
-                    </>
-                  </HeaderSection>
-
-                  <OverviewHostStatsManage
-                    loading={loading}
-                    data={overviewHost}
-                    setQuery={setQuery}
-                    id={id}
-                    inspect={inspect}
-                    refetch={refetch}
-                  />
-                </>
-              );
-            }}
-          </OverviewHostQuery>
+            <OverviewHostStatsManage
+              loading={loading}
+              data={overviewHost}
+              setQuery={setQuery}
+              id={id}
+              inspect={inspect}
+              refetch={refetch}
+            />
+          </>
         </EuiPanel>
       </InspectButtonContainer>
     </EuiFlexItem>

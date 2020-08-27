@@ -78,7 +78,7 @@ export interface HostLastFirstSeenRequestOptions extends Partial<RequestOptionsP
   hostName: string;
 }
 
-export interface HostOverviewRequestOptions extends HostLastFirstSeenRequestOptions {
-  fields: string[];
+export interface HostOverviewRequestOptions extends Partial<RequestOptionsPaginated> {
+  fields?: string[];
   timerange: TimerangeInput;
 }

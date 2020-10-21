@@ -53,6 +53,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -121,6 +122,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   onUnPinEvent,
   onUpdateColumns,
   refetch,
+  onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -199,6 +201,7 @@ const StatefulEventComponent: React.FC<Props> = ({
               onRowSelected={onRowSelected}
               onUnPinEvent={onUnPinEvent}
               refetch={refetch}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               showNotes={!!showNotes[event._id]}
@@ -286,6 +289,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       onUnPinEvent,
       onUpdateColumns,
       refetch,
+      onRuleChange,
       rowRenderers,
       selectedEventIds,
       showCheckboxes,

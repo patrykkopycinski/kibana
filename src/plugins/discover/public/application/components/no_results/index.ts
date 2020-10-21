@@ -17,12 +17,4 @@
  * under the License.
  */
 
-import { LOADING_STATUS } from './index';
-
-export function createInitialLoadingStatusState() {
-  return {
-    anchor: LOADING_STATUS.UNINITIALIZED,
-    predecessors: LOADING_STATUS.UNINITIALIZED,
-    successors: LOADING_STATUS.UNINITIALIZED,
-  };
-}
+export { DiscoverNoResults } from './no_results';

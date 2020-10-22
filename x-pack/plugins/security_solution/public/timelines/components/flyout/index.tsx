@@ -14,7 +14,6 @@ import { DataProvider } from '../timeline/data_providers/data_provider';
 import { FlyoutButton } from './button';
 import { Pane } from './pane';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
-import { DEFAULT_TIMELINE_WIDTH } from '../timeline/body/constants';
 import { StatefulTimeline } from '../timeline';
 import { TimelineById } from '../../store/timeline/types';
 
@@ -43,7 +42,7 @@ interface OwnProps {
 type Props = OwnProps & ProsFromRedux;
 
 export const FlyoutComponent = React.memo<Props>(
-  ({ dataProviders, show = true, showTimeline, timelineId, usersViewing, width }) => {
+  ({ dataProviders, show = true, showTimeline, timelineId, usersViewing }) => {
     const handleClose = useCallback(() => showTimeline({ id: timelineId, show: false }), [
       showTimeline,
       timelineId,
@@ -56,7 +55,7 @@ export const FlyoutComponent = React.memo<Props>(
     return (
       <>
         <Visible show={show}>
-          <Pane onClose={handleClose} timelineId={timelineId} width={width}>
+          <Pane onClose={handleClose}>
             <StatefulTimeline onClose={handleClose} usersViewing={usersViewing} id={timelineId} />
           </Pane>
         </Visible>
@@ -87,9 +86,8 @@ const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     ? timelineById[timelineId]?.dataProviders
     : DEFAULT_DATA_PROVIDERS;
   const show = timelineById[timelineId]?.show ?? false;
-  const width = timelineById[timelineId]?.width ?? DEFAULT_TIMELINE_WIDTH;
 
-  return { dataProviders, show, width };
+  return { dataProviders, show };
 };
 
 const mapDispatchToProps = {

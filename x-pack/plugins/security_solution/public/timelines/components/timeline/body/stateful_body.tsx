@@ -29,6 +29,8 @@ import {
   OnSelectAll,
   OnUnPinEvent,
   OnUpdateColumns,
+  OnChangeItemsPerPage,
+  OnChangePage,
 } from '../events';
 import { getColumnHeaders } from './column_headers/helpers';
 import { getEventIdToDataMapping } from './helpers';
@@ -47,6 +49,17 @@ interface OwnProps {
   toggleColumn: (column: ColumnHeaderOptions) => void;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
+  updatedAt: number;
+  activePage: number;
+  height: number;
+  isLive: boolean;
+  isLoading: boolean;
+  itemsCount: number;
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  onChangeItemsPerPage: OnChangeItemsPerPage;
+  onChangePage: OnChangePage;
+  totalCount: number;
 }
 
 type StatefulBodyComponentProps = OwnProps & PropsFromRedux;
@@ -86,6 +99,18 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateColumns,
     updateNote,
     updateSort,
+    // footer
+    activePage,
+    updatedAt,
+    height,
+    isLive,
+    isLoading,
+    itemsCount,
+    itemsPerPage,
+    itemsPerPageOptions,
+    onChangeItemsPerPage,
+    onChangePage,
+    totalCount,
   }) => {
     const { getManageTimelineById } = useManageTimeline();
     const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
@@ -223,6 +248,18 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         timelineType={timelineType}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
+        // footer
+        activePage={activePage}
+        updatedAt={updatedAt}
+        height={height}
+        isLive={isLive}
+        isLoading={isLoading}
+        itemsCount={itemsCount}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onChangePage={onChangePage}
+        totalCount={totalCount}
       />
     );
   },

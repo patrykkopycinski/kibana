@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAccordion, EuiText, EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useRef } from 'react';
+import styled from 'styled-components';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
@@ -32,6 +34,12 @@ import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { Footer, footerHeight } from '../footer';
+
+const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
+  background: none;
+  padding: 0 10px 5px 12px;
+`;
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -67,6 +75,18 @@ export interface BodyProps {
   timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
+  // footer
+  updatedAt: number;
+  activePage: number;
+  height: number;
+  isLive: boolean;
+  isLoading: boolean;
+  itemsCount: number;
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  onChangeItemsPerPage: OnChangeItemsPerPage;
+  onChangePage: OnChangePage;
+  totalCount: number;
 }
 
 export const hasAdditionalActions = (id: TimelineId): boolean =>
@@ -111,6 +131,18 @@ export const Body = React.memo<BodyProps>(
     timelineId,
     timelineType,
     updateNote,
+    // footer
+    activePage,
+    updatedAt,
+    height,
+    isLive,
+    isLoading,
+    itemsCount,
+    itemsPerPage,
+    itemsPerPageOptions,
+    onChangeItemsPerPage,
+    onChangePage,
+    totalCount,
   }) => {
     const containerElementRef = useRef<HTMLDivElement>(null);
     const actionsColumnWidth = useMemo(
@@ -141,60 +173,116 @@ export const Body = React.memo<BodyProps>(
             timelineType={timelineType}
           />
         )}
-        <TimelineBody
-          data-test-subj="timeline-body"
-          data-timeline-id={timelineId}
-          ref={containerElementRef}
-          visible={show && !graphEventId}
-        >
-          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-            <ColumnHeaders
-              actionsColumnWidth={actionsColumnWidth}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              isEventViewer={isEventViewer}
-              isSelectAllChecked={isSelectAllChecked}
-              onColumnRemoved={onColumnRemoved}
-              onColumnResized={onColumnResized}
-              onColumnSorted={onColumnSorted}
-              onSelectAll={onSelectAll}
-              onUpdateColumns={onUpdateColumns}
-              showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
-              sort={sort}
-              timelineId={timelineId}
-              toggleColumn={toggleColumn}
-            />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={2}>
+            <TimelineBody
+              data-test-subj="timeline-body"
+              data-timeline-id={timelineId}
+              ref={containerElementRef}
+              visible={show && !graphEventId}
+            >
+              <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+                <ColumnHeaders
+                  actionsColumnWidth={actionsColumnWidth}
+                  browserFields={browserFields}
+                  columnHeaders={columnHeaders}
+                  isEventViewer={isEventViewer}
+                  isSelectAllChecked={isSelectAllChecked}
+                  onColumnRemoved={onColumnRemoved}
+                  onColumnResized={onColumnResized}
+                  onColumnSorted={onColumnSorted}
+                  onSelectAll={onSelectAll}
+                  onUpdateColumns={onUpdateColumns}
+                  showEventsSelect={false}
+                  showSelectAllCheckbox={showCheckboxes}
+                  sort={sort}
+                  timelineId={timelineId}
+                  toggleColumn={toggleColumn}
+                />
 
-            <Events
-              containerElementRef={containerElementRef.current!}
-              actionsColumnWidth={actionsColumnWidth}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={data}
-              docValueFields={docValueFields}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              id={timelineId}
-              isEventViewer={isEventViewer}
-              loadingEventIds={loadingEventIds}
-              onPinEvent={onPinEvent}
-              onRowSelected={onRowSelected}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              refetch={refetch}
-              rowRenderers={rowRenderers}
-              onRuleChange={onRuleChange}
-              selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-            />
-          </EventsTable>
-        </TimelineBody>
+                <Events
+                  containerElementRef={containerElementRef.current!}
+                  actionsColumnWidth={actionsColumnWidth}
+                  addNoteToEvent={addNoteToEvent}
+                  browserFields={browserFields}
+                  columnHeaders={columnHeaders}
+                  columnRenderers={columnRenderers}
+                  data={data}
+                  docValueFields={docValueFields}
+                  eventIdToNoteIds={eventIdToNoteIds}
+                  getNotesByIds={getNotesByIds}
+                  id={timelineId}
+                  isEventViewer={isEventViewer}
+                  loadingEventIds={loadingEventIds}
+                  onPinEvent={onPinEvent}
+                  onRowSelected={onRowSelected}
+                  onUpdateColumns={onUpdateColumns}
+                  onUnPinEvent={onUnPinEvent}
+                  pinnedEventIds={pinnedEventIds}
+                  refetch={refetch}
+                  rowRenderers={rowRenderers}
+                  onRuleChange={onRuleChange}
+                  selectedEventIds={selectedEventIds}
+                  showCheckboxes={showCheckboxes}
+                  toggleColumn={toggleColumn}
+                  updateNote={updateNote}
+                />
+              </EventsTable>
+            </TimelineBody>
+            {
+              /** Hide the footer if Resolver is showing. */
+              !graphEventId && (
+                <StyledEuiFlyoutFooter
+                  data-test-subj="eui-flyout-footer"
+                  className="timeline-flyout-footer"
+                >
+                  <Footer
+                    activePage={activePage}
+                    updatedAt={updatedAt}
+                    height={height}
+                    isLive={isLive}
+                    isLoading={isLoading}
+                    itemsCount={itemsCount}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    onChangeItemsPerPage={onChangeItemsPerPage}
+                    onChangePage={onChangePage}
+                    totalCount={totalCount}
+                    data-test-subj="timeline-footer"
+                  />
+                </StyledEuiFlyoutFooter>
+              )
+            }
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiAccordion
+              id="accordion9"
+              buttonContent="Arrows default to the left"
+              paddingSize="s"
+            >
+              <EuiText>
+                <p>
+                  {`Any content inside of `}
+                  <strong>{`EuiAccordion`}</strong>
+                  {` will appear here.`}
+                </p>
+              </EuiText>
+            </EuiAccordion>
+            <EuiAccordion
+              id="accordion9"
+              buttonContent="Arrows default to the left"
+              paddingSize="s"
+            >
+              <EuiText>
+                <p>
+                  {`Any content inside of `}
+                  <strong>{`EuiAccordion`}</strong>
+                  {` will appear here.`}
+                </p>
+              </EuiText>
+            </EuiAccordion>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <TimelineBodyGlobalStyle />
       </>
     );

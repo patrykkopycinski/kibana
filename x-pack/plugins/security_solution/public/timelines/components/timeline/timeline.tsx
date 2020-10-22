@@ -74,11 +74,6 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   }
 `;
 
-const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
-  background: none;
-  padding: 0 10px 5px 12px;
-`;
-
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
   color: #fff;
@@ -279,33 +274,19 @@ export const TimelineComponent: React.FC<Props> = ({
               refetch={refetch}
               sort={sort}
               toggleColumn={toggleColumn}
+              activePage={pageInfo.activePage}
+              updatedAt={updatedAt}
+              height={footerHeight}
+              isLive={isLive}
+              isLoading={loading || loadingSourcerer}
+              itemsCount={events.length}
+              itemsPerPage={itemsPerPage}
+              itemsPerPageOptions={itemsPerPageOptions}
+              onChangeItemsPerPage={onChangeItemsPerPage}
+              onChangePage={loadPage}
+              totalCount={totalCount}
             />
           </StyledEuiFlyoutBody>
-          {
-            /** Hide the footer if Resolver is showing. */
-            !graphEventId && (
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
-              >
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
-                  id={id}
-                  isLive={isLive}
-                  isLoading={loading || loadingSourcerer}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onChangePage={loadPage}
-                  totalCount={totalCount}
-                />
-              </StyledEuiFlyoutFooter>
-            )
-          }
         </>
       ) : null}
     </TimelineContainer>

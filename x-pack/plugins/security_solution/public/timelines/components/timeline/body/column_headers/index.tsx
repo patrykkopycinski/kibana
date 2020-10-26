@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDroppable, EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { DraggableChildrenFn } from 'react-beautiful-dnd';
+import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
+import React, { useState, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
+import update from 'immutability-helper';
 
-import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import { BrowserFields } from '../../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import {
-  DRAG_TYPE_FIELD,
-  droppableTimelineColumnsPrefix,
-} from '../../../../../common/components/drag_and_drop/helpers';
+
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
 import { useFullScreen } from '../../../../../common/containers/use_full_screen';
@@ -63,26 +59,6 @@ interface Props {
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
-interface DraggableContainerProps {
-  children: React.ReactNode;
-  onMount: () => void;
-  onUnmount: () => void;
-}
-
-export const DraggableContainer = React.memo<DraggableContainerProps>(
-  ({ children, onMount, onUnmount }) => {
-    useEffect(() => {
-      onMount();
-
-      return () => onUnmount();
-    }, [onMount, onUnmount]);
-
-    return <>{children}</>;
-  }
-);
-
-DraggableContainer.displayName = 'DraggableContainer';
-
 export const isFullScreen = ({
   globalFullScreen,
   timelineId,
@@ -113,7 +89,8 @@ export const ColumnHeadersComponent = ({
   timelineId,
   toggleColumn,
 }: Props) => {
-  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
+  const [cards, setCards] = useState(columnHeaders);
+  // const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
     timelineFullScreen,
     setTimelineFullScreen,
@@ -142,68 +119,49 @@ export const ColumnHeadersComponent = ({
     [onSelectAll]
   );
 
-  const renderClone: DraggableChildrenFn = useCallback(
-    (dragProvided, _dragSnapshot, rubric) => {
-      const index = rubric.source.index;
-      const header = columnHeaders[index];
-
-      const onMount = () => setDraggingIndex(index);
-      const onUnmount = () => setDraggingIndex(null);
-
-      return (
-        <EventsTh
-          data-test-subj="draggable-header"
-          {...dragProvided.draggableProps}
-          {...dragProvided.dragHandleProps}
-          ref={dragProvided.innerRef}
-        >
-          <DraggableContainer onMount={onMount} onUnmount={onUnmount}>
-            <DraggableFieldBadge fieldId={header.id} fieldWidth={header.width} />
-          </DraggableContainer>
-        </EventsTh>
-      );
-    },
-    [columnHeaders, setDraggingIndex]
-  );
+  const moveCard = useCallback((dragIndex: number, hoverIndex: number) => {
+    setCards((currentCards) => {
+      const dragCard = currentCards[dragIndex];
+      return update(currentCards, {
+        $splice: [
+          [dragIndex, 1],
+          [hoverIndex, 0, dragCard],
+        ],
+      });
+    });
+  }, []);
 
   const ColumnHeaderList = useMemo(
     () =>
-      columnHeaders.map((header, draggableIndex) => (
+      cards.map((header, draggableIndex) => (
         <ColumnHeader
           key={header.id}
           draggableIndex={draggableIndex}
           timelineId={timelineId}
           header={header}
-          isDragging={draggingIndex === draggableIndex}
+          // isDragging={draggingIndex === draggableIndex}
           onColumnRemoved={onColumnRemoved}
           onColumnSorted={onColumnSorted}
           onColumnResized={onColumnResized}
           sort={sort}
+          moveCard={moveCard}
         />
       )),
     [
-      columnHeaders,
+      cards,
       timelineId,
-      draggingIndex,
+      // draggingIndex,
       onColumnRemoved,
       onColumnSorted,
       onColumnResized,
       sort,
+      moveCard,
     ]
   );
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
     [globalFullScreen, timelineId, timelineFullScreen]
-  );
-
-  const DroppableContent = useCallback(
-    (_, state) => (
-      <EventsThGroupData data-test-subj="headers-group" isDragging={state.isDraggingOver}>
-        {ColumnHeaderList}
-      </EventsThGroupData>
-    ),
-    [ColumnHeaderList]
   );
 
   return (
@@ -274,15 +232,12 @@ export const ColumnHeadersComponent = ({
           )}
         </EventsThGroupActions>
 
-        <EuiDroppable
-          direction={'horizontal'}
-          droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-          isDropDisabled={false}
-          type={DRAG_TYPE_FIELD}
-          renderClone={renderClone}
+        <EventsThGroupData
+          data-test-subj="headers-group"
+          // isDragging={state.isDraggingOver}
         >
-          {DroppableContent}
-        </EuiDroppable>
+          {ColumnHeaderList}
+        </EventsThGroupData>
       </EventsTrHeader>
     </EventsThead>
   );

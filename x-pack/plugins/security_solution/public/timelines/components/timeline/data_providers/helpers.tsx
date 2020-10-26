@@ -261,26 +261,22 @@ export const reArrangeProviders = ({
 
 export const addProviderToGroup = ({
   dataProviders,
-  destination,
+  destinationIndex,
   dispatch,
   onAddedToTimeline,
   providerToAdd,
   timelineId,
+  destinationGroupIndex,
 }: {
   dataProviders: DataProvider[];
-  destination: DraggableLocation | undefined;
+  destinationIndex: number;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   providerToAdd: DataProvider;
   timelineId: string;
+  destinationGroupIndex: number;
 }) => {
   const dataProviderGroups = [...flattenIntoAndGroups(dataProviders), ...EMPTY_GROUP];
-
-  if (!isValidDestination(destination)) {
-    return;
-  }
-
-  const destinationGroupIndex = getGroupIndexFromDroppableId(destination.droppableId);
 
   if (
     indexIsValid({
@@ -290,9 +286,9 @@ export const addProviderToGroup = ({
   ) {
     const destinationGroup = dataProviderGroups[destinationGroupIndex];
     const destinationClone = [...destinationGroup];
-    destinationClone.splice(destination.index, 0, omitAnd(providerToAdd)); // ⚠️ mutation
+    destinationClone.splice(destinationIndex, 0, omitAnd(providerToAdd)); // ⚠️ mutation
     const deDuplicatedGroup = destinationClone.filter((provider, i) =>
-      provider.id === providerToAdd.id && i !== destination.index ? false : true
+      provider.id === providerToAdd.id && i !== destinationIndex ? false : true
     );
 
     const updatedGroups = dataProviderGroups.reduce<DataProvidersAnd[][]>(

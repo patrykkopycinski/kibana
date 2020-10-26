@@ -12,9 +12,9 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { BrowserFields } from '../../containers/source';
-import { dragAndDropModel, dragAndDropSelectors } from '../../store';
+// import { dragAndDropModel, dragAndDropSelectors } from '../../store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
+// import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
 import { ADDED_TO_TIMELINE_MESSAGE } from '../../hooks/translations';
@@ -45,7 +45,7 @@ interface Props {
 interface OnDragEndHandlerParams {
   activeTimelineDataProviders: DataProvider[];
   browserFields: BrowserFields;
-  dataProviders: IdToDataProvider;
+  dataProviders: any;
   dispatch: Dispatch;
   onAddedToTimeline: (fieldOrValue: string) => void;
   result: DropResult;
@@ -87,7 +87,7 @@ const onDragEndHandler = ({
 };
 
 const sensors = [useAddToTimelineSensor];
-const emptyDataProviders: dragAndDropModel.IdToDataProvider = {}; // stable reference
+const emptyDataProviders: any = {}; // stable reference
 const emptyActiveTimelineDataProviders: DataProvider[] = []; // stable reference
 const activeTimelineDataProvidersSelector = timelineSelectors.getTimelineByIdSelector();
 

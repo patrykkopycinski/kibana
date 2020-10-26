@@ -7,7 +7,6 @@
 import { combineReducers, PreloadedState, AnyAction, Reducer } from 'redux';
 
 import { appReducer, initialAppState } from './app';
-import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
 import { sourcererReducer, sourcererModel } from './sourcerer';
 
@@ -38,7 +37,6 @@ export const createInitialState = (
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
     app: initialAppState,
-    dragAndDrop: initialDragAndDropState,
     ...pluginsInitState,
     inputs: createInitialInputsState(),
     sourcerer: {
@@ -65,7 +63,6 @@ export const createReducer: (
 ) => Reducer<State, AppAction | AnyAction> = (pluginsReducer: SubPluginsInitReducer) =>
   combineReducers({
     app: appReducer,
-    dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
     sourcerer: sourcererReducer,
     ...pluginsReducer,

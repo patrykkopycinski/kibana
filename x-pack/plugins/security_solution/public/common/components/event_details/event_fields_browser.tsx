@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 
 import { getColumns } from './columns';
 import { search } from './helpers';
@@ -21,14 +20,13 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
   eventId: string;
-  onUpdateColumns: OnUpdateColumns;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, columnHeaders, data, eventId, onUpdateColumns, timelineId, toggleColumn }) => {
+  ({ browserFields, columnHeaders, data, eventId, timelineId, toggleColumn }) => {
     const fieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const items = useMemo(
       () =>
@@ -42,14 +40,12 @@ export const EventFieldsBrowser = React.memo<Props>(
     const columns = useMemo(
       () =>
         getColumns({
-          browserFields,
           columnHeaders,
           eventId,
-          onUpdateColumns,
           contextId: timelineId,
           toggleColumn,
         }),
-      [browserFields, columnHeaders, eventId, onUpdateColumns, timelineId, toggleColumn]
+      [columnHeaders, eventId, timelineId, toggleColumn]
     );
 
     return (

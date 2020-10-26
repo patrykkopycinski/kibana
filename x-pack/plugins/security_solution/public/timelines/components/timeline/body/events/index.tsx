@@ -28,7 +28,6 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
-  containerElementRef: HTMLDivElement;
   data: TimelineItem[];
   docValueFields: DocValueFields[];
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -56,7 +55,6 @@ const EventsComponent: React.FC<Props> = ({
   browserFields,
   columnHeaders,
   columnRenderers,
-  containerElementRef,
   data,
   docValueFields,
   eventIdToNoteIds,
@@ -85,8 +83,6 @@ const EventsComponent: React.FC<Props> = ({
         browserFields={browserFields}
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
-        containerElementRef={containerElementRef}
-        disableSensorVisibility={data != null && data.length < 101}
         docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}

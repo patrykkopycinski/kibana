@@ -10,6 +10,8 @@ import { ApolloProvider } from 'react-apollo';
 import { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndProvider } from 'react-dnd';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
@@ -55,11 +57,13 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
               <ApolloProvider client={apolloClient}>
                 <ApolloClientContext.Provider value={apolloClient}>
                   <ThemeProvider theme={theme}>
-                    <MlCapabilitiesProvider>
-                      <ManageUserInfo>
-                        <PageRouter history={history}>{children}</PageRouter>
-                      </ManageUserInfo>
-                    </MlCapabilitiesProvider>
+                    <DndProvider backend={HTML5Backend}>
+                      <MlCapabilitiesProvider>
+                        <ManageUserInfo>
+                          <PageRouter history={history}>{children}</PageRouter>
+                        </ManageUserInfo>
+                      </MlCapabilitiesProvider>
+                    </DndProvider>
                   </ThemeProvider>
                   <ErrorToastDispatcher />
                   <GlobalToaster />

@@ -18,7 +18,7 @@ import { uniqBy } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { BrowserField, BrowserFields } from '../../../common/containers/source';
+import { BrowserField } from '../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { DroppableWrapper } from '../../../common/components/drag_and_drop/droppable_wrapper';
 import {
@@ -28,15 +28,10 @@ import {
 } from '../../../common/components/drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../common/components/draggables/field_badge';
 import { getEmptyValue } from '../../../common/components/empty_value';
-import {
-  getColumnsWithTimestamp,
-  getExampleText,
-  getIconFromType,
-} from '../../../common/components/event_details/helpers';
+import { getExampleText, getIconFromType } from '../../../common/components/event_details/helpers';
 import { SelectableText } from '../../../common/components/selectable_text';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
-import { OnUpdateColumns } from '../timeline/events';
 import { TruncatableText } from '../../../common/components/truncatable_text';
 import { FieldName } from './field_name';
 import * as i18n from './translations';
@@ -70,23 +65,19 @@ export interface FieldItem {
  * Returns the draggable fields, values, and descriptions shown when a user expands an event
  */
 export const getFieldItems = ({
-  browserFields,
   category,
   categoryId,
   columnHeaders,
   highlight = '',
-  onUpdateColumns,
   timelineId,
   toggleColumn,
 }: {
-  browserFields: BrowserFields;
   category: Partial<BrowserField>;
   categoryId: string;
   columnHeaders: ColumnHeaderOptions[];
   highlight?: string;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
-  onUpdateColumns: OnUpdateColumns;
 }): FieldItem[] =>
   uniqBy('name', [
     ...Object.values(category != null && category.fields != null ? category.fields : {}),
@@ -146,16 +137,7 @@ export const getFieldItems = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <FieldName
-                categoryId={field.category || categoryId}
-                categoryColumns={getColumnsWithTimestamp({
-                  browserFields,
-                  category: field.category || categoryId,
-                })}
-                fieldId={field.name || ''}
-                highlight={highlight}
-                onUpdateColumns={onUpdateColumns}
-              />
+              <FieldName fieldId={field.name || ''} highlight={highlight} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiDraggable>

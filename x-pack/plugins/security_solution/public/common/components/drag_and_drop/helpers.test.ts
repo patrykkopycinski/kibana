@@ -7,8 +7,6 @@
 import { omit } from 'lodash/fp';
 import { DropResult } from 'react-beautiful-dnd';
 
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
-
 import {
   addProviderToTimeline,
   allowTopN,
@@ -924,7 +922,9 @@ describe('helpers', () => {
     test('it dispatches the expected UPDATE_PROVIDERS action when the provider to add exists in the `dataProviders` collection of `id -> `DataProvider`', () => {
       const dispatch = jest.fn();
       const onAddedToTimeline = jest.fn();
-      const dataProviders: IdToDataProvider = {
+      const dataProviders: {
+        [id: string]: DataProvider;
+      } = {
         'hosts-table-hostName-ENDPOINT-W-0-01': {
           and: [],
           enabled: true,

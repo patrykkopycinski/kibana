@@ -8,7 +8,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { TimelineId } from '../../../common/types/timeline';
-import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout } from '../../timelines/components/flyout';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HeaderGlobal } from '../../common/components/header_global';
@@ -23,6 +22,7 @@ import { DETECTIONS_SUB_PLUGIN_ID } from '../../../common/constants';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useUpgradeEndpointPackage } from '../../common/hooks/endpoint/upgrade';
 import { useThrottledResizeObserver } from '../../common/components/utils';
+import { CustomDragLayer } from '../../timelines/components/timeline/data_providers';
 
 const Main = styled.main.attrs<{ paddingTop: number }>(({ paddingTop }) => ({
   style: {
@@ -67,7 +67,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   );
   const [showTimeline] = useShowTimeline();
 
-  const { browserFields, indexPattern, indicesExist } = useSourcererScope(
+  const { indexPattern, indicesExist } = useSourcererScope(
     subPluginId.current === DETECTIONS_SUB_PLUGIN_ID
       ? SourcererScopeName.detections
       : SourcererScopeName.default
@@ -84,20 +84,19 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
       <HeaderGlobal ref={ref} isFixed={headerFixed} />
 
       <Main paddingTop={mainPaddingTop} data-test-subj="pageContainer">
-        <DragDropContextWrapper browserFields={browserFields}>
-          <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
-          {indicesExist && showTimeline && (
-            <>
-              <AutoSaveWarningMsg />
-              <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
-            </>
-          )}
+        <UseUrlState indexPattern={indexPattern} navTabs={navTabs} />
+        {indicesExist && showTimeline && (
+          <>
+            <AutoSaveWarningMsg />
+            <Flyout timelineId={TimelineId.active} usersViewing={usersViewing} />
+          </>
+        )}
 
-          {children}
-        </DragDropContextWrapper>
+        {children}
       </Main>
 
       <HelpMenu />
+      <CustomDragLayer />
     </SecuritySolutionAppWrapper>
   );
 };

@@ -20,7 +20,7 @@ interface Props {
   renderClone?: DraggableChildrenFn;
 }
 
-const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
+export const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string }>`
   transition: background-color 0.7s ease;
   width: 100%;
   height: ${({ height }) => height};

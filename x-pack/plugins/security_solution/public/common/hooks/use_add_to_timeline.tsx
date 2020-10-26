@@ -8,7 +8,6 @@ import d3 from 'd3';
 import { useCallback } from 'react';
 import { DraggableId, FluidDragActions, Position, SensorAPI } from 'react-beautiful-dnd';
 
-import { IS_DRAGGING_CLASS_NAME } from '../components/drag_and_drop/helpers';
 import { HIGHLIGHTED_DROP_TARGET_CLASS_NAME } from '../../timelines/components/timeline/data_providers/empty';
 import { EMPTY_PROVIDERS_GROUP_CLASS_NAME } from '../../timelines/components/timeline/data_providers/providers';
 
@@ -133,9 +132,6 @@ export const useAddToTimeline = ({
       return;
     }
 
-    // add the dragging class, which will show the flyout data providers (if the flyout button is being displayed):
-    document.body.classList.add(IS_DRAGGING_CLASS_NAME);
-
     // start the animation after the flyout data providers are visible:
     setTimeout(() => {
       const draggableCoordinate = getDraggableCoordinate(draggableId);
@@ -155,8 +151,6 @@ export const useAddToTimeline = ({
           fieldName,
           values: points,
         });
-      } else {
-        document.body.classList.remove(IS_DRAGGING_CLASS_NAME); // it was not possible to perform a drag and drop
       }
     }, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps

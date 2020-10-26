@@ -10,7 +10,6 @@ import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_
 import { TrustedAppsPageAction } from '../../management/pages/trusted_apps/store/action';
 
 export { appActions } from './app';
-export { dragAndDropActions } from './drag_and_drop';
 export { inputsActions } from './inputs';
 export { sourcererActions } from './sourcerer';
 import { RoutingAction } from './routing';

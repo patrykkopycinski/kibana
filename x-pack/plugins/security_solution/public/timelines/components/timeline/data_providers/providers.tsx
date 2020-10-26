@@ -4,32 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiDraggable,
-  EuiDroppable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormHelpText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
+import { useDrag, useDrop, XYCoord, DragItem, DropTargetMonitor } from 'react-dnd';
 
-import { timelineActions } from '../../../store/timeline';
+import {
+  useShallowEqualSelector,
+  useDeepEqualSelector,
+} from '../../../../common/hooks/use_selector';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
-  getTimelineProviderDroppableId,
-  IS_DRAGGING_CLASS_NAME,
   getTimelineProviderDraggableId,
+  addProviderToTimeline,
 } from '../../../../common/components/drag_and_drop/helpers';
 
 import { DataProvider, DataProviderType, DataProvidersAnd, IS_OPERATOR } from './data_provider';
-import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
+import { addProviderToGroup, EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
@@ -58,13 +56,15 @@ const ProviderContainer = styled.div`
   user-select: none;
 `;
 
-const DroppableContainer = styled.div`
+const DroppableContainer = styled.div<{ isDragging: boolean }>`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
 
-  .${IS_DRAGGING_CLASS_NAME} &:hover {
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
-  }
+  ${({ isOver, theme }) =>
+    isOver &&
+    `
+      background-color: ${rgba(theme.eui.euiColorSuccess, 0.5)} !important;
+  `}
 `;
 
 const Parens = styled.span`
@@ -80,12 +80,8 @@ const AndOrBadgeContainer = styled.div<{ hideBadge: boolean }>`
   }
 `;
 
-const LastAndOrBadgeInGroup = styled.div`
-  display: none;
-
-  .${IS_DRAGGING_CLASS_NAME} & {
-    display: initial;
-  }
+const LastAndOrBadgeInGroup = styled.div<{ isDragging: boolean }>`
+  display: ${({ isDragging }) => (isDragging ? 'initial' : 'none')};
 `;
 
 const OrFlexItem = styled(EuiFlexItem)`
@@ -153,6 +149,16 @@ interface DataProvidersGroupItem extends Omit<Props, 'dataProviders'> {
 export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
   ({ browserFields, group, groupIndex, dataProvider, index, timelineId }) => {
     const dispatch = useDispatch();
+    const ref = useRef<HTMLDivElement>(null);
+    const [{ isDragging }, drop] = useDrop({
+      accept: 'field',
+      canDrop: () => false,
+      collect: (monitor) => ({
+        isDragging: monitor.getItemType() === 'field',
+        // isOver: monitor.isOver(),
+        // canDrop: monitor.canDrop(),
+      }),
+    });
     const draggableId = useMemo(
       () =>
         getTimelineProviderDraggableId({
@@ -162,6 +168,13 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         }),
       [dataProvider.id, groupIndex, timelineId]
     );
+
+    const [, drag] = useDrag({
+      item: { type: 'field', id: draggableId, index },
+    });
+
+    const opacity = isDragging ? 0 : 1;
+    drag(drop(ref));
 
     const handleDeleteProvider = useCallback(() => {
       const payload = {
@@ -225,75 +238,49 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [dispatch, timelineId]
     );
 
-    const DraggableContent = useCallback(
-      (_, state) => (
-        <ProviderContainer data-test-subj="providerContainer">
-          <EuiFlexGroup alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <ProviderItemBadge
-                andProviderId={index > 0 ? dataProvider.id : undefined}
-                browserFields={browserFields}
-                deleteProvider={handleDeleteProvider}
-                field={
-                  index > 0
-                    ? dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field
-                    : group[0].queryMatch.displayField ?? group[0].queryMatch.field
-                }
-                kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
-                isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
-                isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
-                onDataProviderEdited={handleDataProviderEdited}
-                operator={
-                  index > 0
-                    ? dataProvider.queryMatch.operator ?? IS_OPERATOR
-                    : group[0].queryMatch.operator ?? IS_OPERATOR
-                }
-                register={dataProvider}
-                providerId={index > 0 ? group[0].id : dataProvider.id}
-                timelineId={timelineId}
-                toggleEnabledProvider={handleToggleEnabledProvider}
-                toggleExcludedProvider={handleToggleExcludedProvider}
-                toggleTypeProvider={handleToggleTypeProvider}
-                val={getDataProviderValue(dataProvider)}
-                type={dataProvider.type}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {!state.isDragging &&
-                (index < group.length - 1 ? (
-                  <AndOrBadge type="and" />
-                ) : (
-                  <LastAndOrBadgeInGroup>
-                    <AndOrBadge type="and" />
-                  </LastAndOrBadgeInGroup>
-                ))}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </ProviderContainer>
-      ),
-      [
-        browserFields,
-        dataProvider,
-        group,
-        handleDataProviderEdited,
-        handleDeleteProvider,
-        handleToggleEnabledProvider,
-        handleToggleExcludedProvider,
-        handleToggleTypeProvider,
-        index,
-        timelineId,
-      ]
-    );
-
     return (
-      <EuiDraggable
-        disableInteractiveElementBlocking={true}
-        draggableId={draggableId}
-        index={index}
-        key={dataProvider.id}
-      >
-        {DraggableContent}
-      </EuiDraggable>
+      <ProviderContainer ref={ref} data-test-subj="providerContainer">
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ProviderItemBadge
+              andProviderId={index > 0 ? dataProvider.id : undefined}
+              browserFields={browserFields}
+              deleteProvider={handleDeleteProvider}
+              field={
+                index > 0
+                  ? dataProvider.queryMatch.displayField ?? dataProvider.queryMatch.field
+                  : group[0].queryMatch.displayField ?? group[0].queryMatch.field
+              }
+              kqlQuery={index > 0 ? dataProvider.kqlQuery : group[0].kqlQuery}
+              isEnabled={index > 0 ? dataProvider.enabled : group[0].enabled}
+              isExcluded={index > 0 ? dataProvider.excluded : group[0].excluded}
+              onDataProviderEdited={handleDataProviderEdited}
+              operator={
+                index > 0
+                  ? dataProvider.queryMatch.operator ?? IS_OPERATOR
+                  : group[0].queryMatch.operator ?? IS_OPERATOR
+              }
+              providerId={index > 0 ? group[0].id : dataProvider.id}
+              timelineId={timelineId}
+              toggleEnabledProvider={handleToggleEnabledProvider}
+              toggleExcludedProvider={handleToggleExcludedProvider}
+              toggleTypeProvider={handleToggleTypeProvider}
+              val={getDataProviderValue(dataProvider)}
+              type={dataProvider.type}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {!isDragging &&
+              (index < group.length - 1 ? (
+                <AndOrBadge type="and" />
+              ) : (
+                <LastAndOrBadgeInGroup isDragging={isDragging}>
+                  <AndOrBadge type="and" />
+                </LastAndOrBadgeInGroup>
+              ))}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ProviderContainer>
     );
   }
 );
@@ -306,12 +293,57 @@ interface DataProvidersGroup extends Props {
   isLastGroup: boolean;
 }
 
+const activeTimelineDataProvidersSelector = timelineSelectors.getTimelineByIdSelector();
+const emptyActiveTimelineDataProviders = [];
+
 const DataProvidersGroup = React.memo<DataProvidersGroup>(
   ({ browserFields, timelineId, group, groupIndex, isLastGroup }) => {
-    const droppableId = useMemo(() => getTimelineProviderDroppableId({ groupIndex, timelineId }), [
-      groupIndex,
-      timelineId,
-    ]);
+    const dispatch = useDispatch();
+    const activeTimelineDataProviders = useShallowEqualSelector(
+      (state) =>
+        activeTimelineDataProvidersSelector(state, TimelineId.active)?.dataProviders ??
+        emptyActiveTimelineDataProviders
+    );
+    const [{ isDragging, isOver }, drop] = useDrop({
+      accept: 'field',
+      drop(item: DragItem, monitor: DropTargetMonitor) {
+        // const dragIndex = item.index;
+
+        addProviderToGroup({
+          dispatch,
+          dataProviders: activeTimelineDataProviders,
+          providerToAdd: item.dataProvider,
+          onAddedToTimeline: () => {},
+          timelineId,
+          destinationIndex: 0,
+          destinationGroupIndex: groupIndex,
+        });
+
+        // if (userIsReArrangingProviders(result)) {
+        //   reArrangeProviders({
+        //     dataProviders: activeTimelineDataProviders,
+        //     destination: result.destination,
+        //     dispatch,
+        //     source: result.source,
+        //     timelineId,
+        //   });
+        // } else if (providerWasDroppedOnTimeline(result)) {
+        // addProviderToTimeline({
+        //   activeTimelineDataProviders,
+        //   dataProviders,
+        //   dispatch,
+        //   // onAddedToTimeline,
+        //   result,
+        //   timelineId,
+        // });
+        // }
+      },
+      collect: (monitor) => ({
+        isDragging: monitor.getItemType() === 'field',
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+      }),
+    });
 
     const GroupDataProviders = useMemo(
       () =>
@@ -329,18 +361,6 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
       [browserFields, group, groupIndex, timelineId]
     );
 
-    const DroppableContent = useMemo(
-      () => (
-        <DroppableContainer
-          className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
-          style={listStyle}
-        >
-          {GroupDataProviders}
-        </DroppableContainer>
-      ),
-      [GroupDataProviders, isLastGroup]
-    );
-
     return (
       <>
         {groupIndex !== 0 && <EuiSpacer size="xs" />}
@@ -355,9 +375,15 @@ const DataProvidersGroup = React.memo<DataProvidersGroup>(
             <Parens>{'('}</Parens>
           </ParensContainer>
           <EuiFlexItem grow={false}>
-            <EuiDroppable droppableId={droppableId} direction="horizontal">
-              {DroppableContent}
-            </EuiDroppable>
+            <DroppableContainer
+              ref={drop}
+              isDragging={isDragging}
+              isOver={isOver}
+              className={isLastGroup ? EMPTY_PROVIDERS_GROUP_CLASS_NAME : ''}
+              style={listStyle}
+            >
+              {GroupDataProviders}
+            </DroppableContainer>
           </EuiFlexItem>
           <ParensContainer grow={false}>
             <Parens>{')'}</Parens>

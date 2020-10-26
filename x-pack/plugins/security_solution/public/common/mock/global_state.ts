@@ -194,7 +194,6 @@ export const mockGlobalState: State = {
       filters: [],
     },
   },
-  dragAndDrop: { dataProviders: {} },
   timeline: {
     showCallOutUnauthorizedMsg: false,
     autoSavedWarningMsg: {

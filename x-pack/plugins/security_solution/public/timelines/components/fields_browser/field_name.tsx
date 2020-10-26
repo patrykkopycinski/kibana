@@ -76,11 +76,8 @@ FieldNameContainer.displayName = 'FieldNameContainer';
 
 /** Renders a field name in it's non-dragging state */
 export const FieldName = React.memo<{
-  categoryId: string;
-  categoryColumns: ColumnHeaderOptions[];
   fieldId: string;
   highlight?: string;
-  onUpdateColumns: OnUpdateColumns;
 }>(({ fieldId, highlight = '' }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);

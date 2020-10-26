@@ -8,8 +8,6 @@ import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { IS_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
-
 /**
  * To avoid expensive changes to the DOM, delay showing the popover menu
  */
@@ -65,9 +63,7 @@ export const WithHoverActions = React.memo<Props>(
             // NOTE: the following read from the DOM is expensive, but not as
             // expensive as the default behavior, which adds a div to the body,
             // which-in turn performs a more expensive change to the layout
-            if (!document.body.classList.contains(IS_DRAGGING_CLASS_NAME)) {
-              setShowHoverContent(true);
-            }
+            setShowHoverContent(true);
           }, HOVER_INTENT_DELAY)
         )
       );

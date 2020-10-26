@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import { BrowserFields } from '../../containers/source';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
-import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
@@ -32,7 +31,6 @@ interface Props {
   id: string;
   view: View;
   onEventToggled: () => void;
-  onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -52,7 +50,6 @@ export const EventDetails = React.memo<Props>(
     id,
     view,
     onEventToggled,
-    onUpdateColumns,
     onViewSelected,
     timelineId,
     toggleColumn,
@@ -68,7 +65,6 @@ export const EventDetails = React.memo<Props>(
               columnHeaders={columnHeaders}
               data={data}
               eventId={id}
-              onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               toggleColumn={toggleColumn}
             />
@@ -80,7 +76,7 @@ export const EventDetails = React.memo<Props>(
           content: <JsonView data={data} />,
         },
       ],
-      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn]
+      [browserFields, columnHeaders, data, id, timelineId, toggleColumn]
     );
 
     return (

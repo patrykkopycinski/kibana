@@ -11,8 +11,6 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
-import { dragAndDropActions } from '../../store/actions';
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
@@ -136,7 +134,9 @@ export const fieldWasDroppedOnTimelineColumns = (result: DropResult): boolean =>
 
 interface AddProviderToTimelineParams {
   activeTimelineDataProviders: DataProvider[];
-  dataProviders: IdToDataProvider;
+  dataProviders: {
+    [id: string]: DataProvider;
+  };
   dispatch: Dispatch;
   noProviderFound?: ActionCreator<{
     id: string;
@@ -164,24 +164,19 @@ export const addProviderToTimeline = ({
   dispatch,
   result,
   timelineId,
-  noProviderFound = dragAndDropActions.noProviderFound,
   onAddedToTimeline,
 }: AddProviderToTimelineParams): void => {
   const providerId = getProviderIdFromDraggable(result);
   const providerToAdd = dataProviders[providerId];
 
-  if (providerToAdd) {
-    addContentToTimeline({
-      dataProviders: activeTimelineDataProviders,
-      destination: result.destination,
-      dispatch,
-      onAddedToTimeline,
-      providerToAdd,
-      timelineId,
-    });
-  } else {
-    dispatch(noProviderFound({ id: providerId }));
-  }
+  addContentToTimeline({
+    dataProviders: activeTimelineDataProviders,
+    destination: result.destination,
+    dispatch,
+    onAddedToTimeline,
+    providerToAdd,
+    timelineId,
+  });
 };
 
 const linkFields: Record<string, string> = {

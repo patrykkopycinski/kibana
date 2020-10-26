@@ -5,8 +5,7 @@
  */
 
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
@@ -16,8 +15,7 @@ import { timelineSelectors } from '../../../store/timeline';
 import { OnDataProviderEdited } from '../events';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
-import { DataProvidersAnd, DataProviderType, QueryOperator } from './data_provider';
-import { dragAndDropActions } from '../../../../common/store/drag_and_drop';
+import { DataProviderType, QueryOperator } from './data_provider';
 import { useManageTimeline } from '../../manage_timeline';
 
 interface ProviderItemBadgeProps {
@@ -31,7 +29,6 @@ interface ProviderItemBadgeProps {
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
-  register?: DataProvidersAnd;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
@@ -52,7 +49,6 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     onDataProviderEdited,
     operator,
     providerId,
-    register,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
@@ -91,31 +87,6 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       toggleTypeProvider();
       closePopover();
     }, [toggleTypeProvider, closePopover]);
-
-    const [providerRegistered, setProviderRegistered] = useState(false);
-
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-      // optionally register the provider if provided
-      if (register != null) {
-        dispatch(dragAndDropActions.registerProvider({ provider: { ...register, and: [] } }));
-        setProviderRegistered(true);
-      }
-    }, [providerRegistered, dispatch, register, setProviderRegistered]);
-
-    const unRegisterProvider = useCallback(() => {
-      if (providerRegistered && register != null) {
-        dispatch(dragAndDropActions.unRegisterProvider({ id: register.id }));
-      }
-    }, [providerRegistered, dispatch, register]);
-
-    useEffect(
-      () => () => {
-        unRegisterProvider();
-      },
-      [unRegisterProvider]
-    );
 
     const button = useMemo(
       () => (

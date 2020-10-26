@@ -9,8 +9,9 @@ import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
+import { useDrop } from 'react-dnd';
 
-import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_drop/helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
@@ -25,7 +26,7 @@ export const getBadgeCount = (dataProviders: DataProvider[]): number =>
 
 const SHOW_HIDE_TRANSLATE_X = 501; // px
 
-const Container = styled.div`
+const Container = styled.div<{ isDragging: boolean }>`
   padding-top: 8px;
   position: fixed;
   right: 0px;
@@ -35,10 +36,6 @@ const Container = styled.div`
   width: 500px;
   z-index: ${({ theme }) => theme.eui.euiZLevel9};
 
-  .${IS_DRAGGING_CLASS_NAME} & {
-    transform: none;
-  }
-
   .${FLYOUT_BUTTON_CLASS_NAME} {
     background: ${({ theme }) => rgba(theme.eui.euiPageBackgroundColor, 1)};
     border-radius: 4px 4px 0 0;
@@ -46,13 +43,19 @@ const Container = styled.div`
     height: 46px;
   }
 
-  .${IS_DRAGGING_CLASS_NAME} & .${FLYOUT_BUTTON_CLASS_NAME} {
-    color: ${({ theme }) => theme.eui.euiColorSuccess};
-    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
-    border: 1px solid ${({ theme }) => theme.eui.euiColorSuccess};
-    border-bottom: none;
-    text-decoration: none;
-  }
+  ${({ isDragging, theme }) =>
+    isDragging &&
+    `
+    transform: none;
+
+    & .${FLYOUT_BUTTON_CLASS_NAME} {
+      color: ${theme.eui.euiColorSuccess};
+      background: ${rgba(theme.eui.euiColorSuccess, 0.2)} !important;
+      border: 1px solid ${theme.eui.euiColorSuccess};
+      border-bottom: none;
+      text-decoration: none;
+    }
+  `}
 `;
 
 Container.displayName = 'Container';
@@ -87,6 +90,14 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
   ({ onOpen, show, dataProviders, timelineId }) => {
     const badgeCount = useMemo(() => getBadgeCount(dataProviders), [dataProviders]);
     const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+    const [{ isDragging, isOver }] = useDrop({
+      accept: 'field',
+      collect: (monitor) => ({
+        isDragging: monitor.getItemType() === 'field',
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+      }),
+    });
 
     const badgeStyles: React.CSSProperties = useMemo(
       () => ({
@@ -105,7 +116,7 @@ export const FlyoutButton = React.memo<FlyoutButtonProps>(
     }
 
     return (
-      <Container>
+      <Container isDragging={isDragging}>
         <BadgeButtonContainer
           className="flyout-overlay"
           data-test-subj="flyoutOverlay"

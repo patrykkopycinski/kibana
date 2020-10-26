@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
-import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields, DocValueFields } from '../../../../../common/containers/source';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -19,7 +18,6 @@ import {
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-import { SkeletonRow } from '../../skeleton_row';
 import { OnPinEvent, OnRowSelected, OnUnPinEvent, OnUpdateColumns } from '../../events';
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
@@ -35,12 +33,10 @@ import { inputsModel } from '../../../../../common/store';
 
 interface Props {
   actionsColumnWidth: number;
-  containerElementRef: HTMLDivElement;
   addNoteToEvent: AddNoteToEvent;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   columnRenderers: ColumnRenderer[];
-  disableSensorVisibility: boolean;
   docValueFields: DocValueFields[];
   event: TimelineItem;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -65,34 +61,6 @@ interface Props {
 export const getNewNoteId = (): string => uuid.v4();
 
 const emptyDetails: TimelineEventsDetailsItem[] = [];
-
-/**
- * This is the default row height whenever it is a plain row renderer and not a custom row height.
- * We use this value when we do not know the height of a particular row.
- */
-const DEFAULT_ROW_HEIGHT = '32px';
-
-/**
- * This is the top offset in pixels of the top part of the timeline. The UI area where you do your
- * drag and drop and filtering.  It is a positive number in pixels of _PART_ of the header but not
- * the entire header. We leave room for some rows to render behind the drag and drop so they might be
- * visible by the time the user scrolls upwards. All other DOM elements are replaced with their "blank"
- * rows.
- */
-const TOP_OFFSET = 50;
-
-/**
- * This is the bottom offset in pixels of the bottom part of the timeline. The UI area right below the
- * timeline which is the footer.  Since the footer is so incredibly small we don't have enough room to
- * render around 5 rows below the timeline to get the user the best chance of always scrolling without seeing
- * "blank rows". The negative number is to give the bottom of the browser window a bit of invisible space to
- * keep around 5 rows rendering below it. All other DOM elements are replaced with their "blank"
- * rows.
- */
-const BOTTOM_OFFSET = -500;
-
-const VISIBILITY_SENSOR_OFFSET = { top: TOP_OFFSET, bottom: BOTTOM_OFFSET };
-
 const emptyNotes: string[] = [];
 
 const EventsTrSupplementContainerWrapper = React.memo(({ children }) => {
@@ -106,10 +74,8 @@ const StatefulEventComponent: React.FC<Props> = ({
   actionsColumnWidth,
   addNoteToEvent,
   browserFields,
-  containerElementRef,
   columnHeaders,
   columnRenderers,
-  disableSensorVisibility = true,
   docValueFields,
   event,
   eventIdToNoteIds,
@@ -166,150 +132,92 @@ const StatefulEventComponent: React.FC<Props> = ({
     [addNoteToEvent, event, isEventPinned, onPinEvent]
   );
 
-  // Number of current columns plus one for actions.
-  const columnCount = columnHeaders.length + 1;
-
-  const VisibilitySensorContent = useCallback(
-    ({ isVisible }) => {
-      if (isVisible || disableSensorVisibility) {
-        return (
-          <EventsTrGroup
-            className={STATEFUL_EVENT_CSS_CLASS_NAME}
-            data-test-subj="event"
-            eventType={getEventType(event.ecs)}
-            isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
-            showLeftBorder={!isEventViewer}
-            ref={divElement}
-          >
-            <EventColumnView
-              id={event._id}
-              actionsColumnWidth={actionsColumnWidth}
-              associateNote={associateNote}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={event.data}
-              ecsData={event.ecs}
-              expanded={!!expanded[event._id]}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              isEventPinned={isEventPinned}
-              isEventViewer={isEventViewer}
-              loading={loading}
-              loadingEventIds={loadingEventIds}
-              onEventToggled={onToggleExpanded}
-              onPinEvent={onPinEvent}
-              onRowSelected={onRowSelected}
-              onUnPinEvent={onUnPinEvent}
-              refetch={refetch}
-              onRuleChange={onRuleChange}
-              selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
-              showNotes={!!showNotes[event._id]}
-              timelineId={timelineId}
-              toggleShowNotes={onToggleShowNotes}
-              updateNote={updateNote}
-            />
-
-            <EventsTrSupplementContainerWrapper>
-              <EventsTrSupplement
-                className="siemEventsTable__trSupplement--notes"
-                data-test-subj="event-notes-flex-item"
-              >
-                <NoteCards
-                  associateNote={associateNote}
-                  data-test-subj="note-cards"
-                  getNewNoteId={getNewNoteId}
-                  getNotesByIds={getNotesByIds}
-                  noteIds={eventIdToNoteIds[event._id] || emptyNotes}
-                  showAddNote={!!showNotes[event._id]}
-                  status={timelineStatus}
-                  toggleShowAddNote={onToggleShowNotes}
-                  updateNote={updateNote}
-                />
-              </EventsTrSupplement>
-
-              {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                browserFields,
-                data: event.ecs,
-                timelineId,
-              })}
-
-              <EventsTrSupplement
-                className="siemEventsTable__trSupplement--attributes"
-                data-test-subj="event-details"
-              >
-                <ExpandableEvent
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  event={detailsData || emptyDetails}
-                  forceExpand={!!expanded[event._id] && !loading}
-                  id={event._id}
-                  onEventToggled={onToggleExpanded}
-                  onUpdateColumns={onUpdateColumns}
-                  timelineId={timelineId}
-                  toggleColumn={toggleColumn}
-                />
-              </EventsTrSupplement>
-            </EventsTrSupplementContainerWrapper>
-          </EventsTrGroup>
-        );
-      } else {
-        // Height place holder for visibility detection as well as re-rendering sections.
-        const height =
-          divElement.current != null && divElement.current!.clientHeight
-            ? `${divElement.current!.clientHeight}px`
-            : DEFAULT_ROW_HEIGHT;
-
-        return <SkeletonRow cellCount={columnCount} rowHeight={height} />;
-      }
-    },
-    [
-      actionsColumnWidth,
-      associateNote,
-      browserFields,
-      columnCount,
-      columnHeaders,
-      columnRenderers,
-      detailsData,
-      disableSensorVisibility,
-      event._id,
-      event.data,
-      event.ecs,
-      eventIdToNoteIds,
-      expanded,
-      getNotesByIds,
-      isEventPinned,
-      isEventViewer,
-      loading,
-      loadingEventIds,
-      onPinEvent,
-      onRowSelected,
-      onToggleExpanded,
-      onToggleShowNotes,
-      onUnPinEvent,
-      onUpdateColumns,
-      refetch,
-      onRuleChange,
-      rowRenderers,
-      selectedEventIds,
-      showCheckboxes,
-      showNotes,
-      timelineId,
-      timelineStatus,
-      toggleColumn,
-      updateNote,
-    ]
+  const RowRendererContent = useMemo(
+    () =>
+      getRowRenderer(event.ecs, rowRenderers).renderRow({
+        browserFields,
+        data: event.ecs,
+        timelineId,
+      }),
+    [browserFields, event.ecs, rowRenderers, timelineId]
   );
 
   return (
-    <VisibilitySensor
-      partialVisibility={true}
-      scrollCheck={true}
-      containment={containerElementRef}
-      offset={VISIBILITY_SENSOR_OFFSET}
+    <EventsTrGroup
+      className={STATEFUL_EVENT_CSS_CLASS_NAME}
+      data-test-subj="event"
+      eventType={getEventType(event.ecs)}
+      isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+      showLeftBorder={!isEventViewer}
+      ref={divElement}
     >
-      {VisibilitySensorContent}
-    </VisibilitySensor>
+      <EventColumnView
+        id={event._id}
+        actionsColumnWidth={actionsColumnWidth}
+        associateNote={associateNote}
+        columnHeaders={columnHeaders}
+        columnRenderers={columnRenderers}
+        data={event.data}
+        ecsData={event.ecs}
+        expanded={!!expanded[event._id]}
+        eventIdToNoteIds={eventIdToNoteIds}
+        getNotesByIds={getNotesByIds}
+        isEventPinned={isEventPinned}
+        isEventViewer={isEventViewer}
+        loading={loading}
+        loadingEventIds={loadingEventIds}
+        onEventToggled={onToggleExpanded}
+        onPinEvent={onPinEvent}
+        onRowSelected={onRowSelected}
+        onUnPinEvent={onUnPinEvent}
+        refetch={refetch}
+        onRuleChange={onRuleChange}
+        selectedEventIds={selectedEventIds}
+        showCheckboxes={showCheckboxes}
+        showNotes={!!showNotes[event._id]}
+        timelineId={timelineId}
+        toggleShowNotes={onToggleShowNotes}
+        updateNote={updateNote}
+      />
+
+      <EventsTrSupplementContainerWrapper>
+        <EventsTrSupplement
+          className="siemEventsTable__trSupplement--notes"
+          data-test-subj="event-notes-flex-item"
+        >
+          <NoteCards
+            associateNote={associateNote}
+            data-test-subj="note-cards"
+            getNewNoteId={getNewNoteId}
+            getNotesByIds={getNotesByIds}
+            noteIds={eventIdToNoteIds[event._id] || emptyNotes}
+            showAddNote={!!showNotes[event._id]}
+            status={timelineStatus}
+            toggleShowAddNote={onToggleShowNotes}
+            updateNote={updateNote}
+          />
+        </EventsTrSupplement>
+
+        {RowRendererContent}
+
+        <EventsTrSupplement
+          className="siemEventsTable__trSupplement--attributes"
+          data-test-subj="event-details"
+        >
+          <ExpandableEvent
+            browserFields={browserFields}
+            columnHeaders={columnHeaders}
+            event={detailsData || emptyDetails}
+            forceExpand={!!expanded[event._id] && !loading}
+            id={event._id}
+            onEventToggled={onToggleExpanded}
+            onUpdateColumns={onUpdateColumns}
+            timelineId={timelineId}
+            toggleColumn={toggleColumn}
+          />
+        </EventsTrSupplement>
+      </EventsTrSupplementContainerWrapper>
+    </EventsTrGroup>
   );
 };
 

@@ -14,7 +14,6 @@ import { AppState } from './app/reducer';
 import { InputsState } from './inputs/reducer';
 import { SourcererState } from './sourcerer/reducer';
 import { HostsPluginState } from '../../hosts/store';
-import { DragAndDropState } from './drag_and_drop/reducer';
 import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { ManagementPluginState } from '../../management';
@@ -24,7 +23,6 @@ export type StoreState = HostsPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
-    dragAndDrop: DragAndDropState;
     inputs: InputsState;
     sourcerer: SourcererState;
   };

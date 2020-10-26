@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
@@ -22,7 +22,7 @@ import {
   OnUnPinEvent,
   OnUpdateColumns,
 } from '../events';
-import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
+import { EventsTable, TimelineBody } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { getActionsColumnWidth } from './column_headers/helpers';
 import { Events } from './events';
@@ -112,7 +112,6 @@ export const Body = React.memo<BodyProps>(
     timelineType,
     updateNote,
   }) => {
-    const containerElementRef = useRef<HTMLDivElement>(null);
     const actionsColumnWidth = useMemo(
       () =>
         getActionsColumnWidth(
@@ -144,7 +143,6 @@ export const Body = React.memo<BodyProps>(
         <TimelineBody
           data-test-subj="timeline-body"
           data-timeline-id={timelineId}
-          ref={containerElementRef}
           visible={show && !graphEventId}
         >
           <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
@@ -167,7 +165,6 @@ export const Body = React.memo<BodyProps>(
             />
 
             <Events
-              containerElementRef={containerElementRef.current!}
               actionsColumnWidth={actionsColumnWidth}
               addNoteToEvent={addNoteToEvent}
               browserFields={browserFields}
@@ -195,7 +192,6 @@ export const Body = React.memo<BodyProps>(
             />
           </EventsTable>
         </TimelineBody>
-        <TimelineBodyGlobalStyle />
       </>
     );
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiProgress, EuiTabbedContent } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
@@ -17,11 +17,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
-import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
 import { OnChangeItemsPerPage } from './events';
 import { TimelineKqlFetch } from './fetch_kql_timeline';
-import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { combineQueries } from './helpers';
 import { TimelineRefetch } from './refetch_timeline';
@@ -35,6 +33,10 @@ import {
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
+import { QueryTabContent } from './query_tab';
+import { NotesTabContent } from './notes_tab';
+import { GraphOverlay } from '../graph_overlay';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -59,19 +61,19 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  overflow-y: hidden;
-  flex: 1;
+  // overflow-y: hidden;
+  // flex: 1;
 
-  .euiFlyoutBody__overflow {
-    overflow: hidden;
-    mask-image: none;
-  }
+  // .euiFlyoutBody__overflow {
+  //   overflow: hidden;
+  //   mask-image: none;
+  // }
 
-  .euiFlyoutBody__overflowContent {
-    padding: 0 10px 0 12px;
-    height: 100%;
-    display: flex;
-  }
+  // .euiFlyoutBody__overflowContent {
+  //   padding: 0 10px 0 12px;
+  //   height: 100%;
+  //   display: flex;
+  // }
 `;
 
 const TimelineTemplateBadge = styled.div`
@@ -107,7 +109,6 @@ export interface Props {
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
 
@@ -138,7 +139,6 @@ export const TimelineComponent: React.FC<Props> = ({
   status,
   sort,
   timelineType,
-  toggleColumn,
   usersViewing,
 }) => {
   const kibana = useKibana();
@@ -229,6 +229,26 @@ export const TimelineComponent: React.FC<Props> = ({
     setIsQueryLoading(loading);
   }, [loading]);
 
+  const tabs = [
+    {
+      id: 'query',
+      name: 'Query',
+      content: (
+        <QueryTabContent
+          isEventViewer={false}
+          scopeId={SourcererScopeName.default}
+          timelineId={id}
+          filterManager={filterManager}
+        />
+      ),
+    },
+    {
+      id: 'notes',
+      name: 'Notes',
+      content: <NotesTabContent />,
+    },
+  ];
+
   return (
     <TimelineContainer data-test-subj="timeline">
       {isSaving && <EuiProgress size="s" color="primary" position="absolute" />}
@@ -256,7 +276,7 @@ export const TimelineComponent: React.FC<Props> = ({
         </TimelineHeaderContainer>
       </StyledEuiFlyoutHeader>
       <TimelineKqlFetch id={id} indexPattern={indexPattern} inputId="timeline" />
-      {canQueryTimeline ? (
+      {/* {canQueryTimeline ? (
         <>
           <TimelineRefetch
             id={id}
@@ -264,31 +284,29 @@ export const TimelineComponent: React.FC<Props> = ({
             inspect={inspect}
             loading={loading}
             refetch={refetch}
-          />
-          <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-            <StatefulBody
-              browserFields={browserFields}
-              data={events}
-              docValueFields={docValueFields}
-              id={id}
-              refetch={refetch}
-              sort={sort}
-              toggleColumn={toggleColumn}
-              activePage={pageInfo.activePage}
-              updatedAt={updatedAt}
-              height={footerHeight}
-              isLive={isLive}
-              isLoading={loading || loadingSourcerer}
-              itemsCount={events.length}
-              itemsPerPage={itemsPerPage}
-              itemsPerPageOptions={itemsPerPageOptions}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              onChangePage={loadPage}
-              totalCount={totalCount}
+          /> */}
+      <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+        <>
+          {graphEventId && (
+            <GraphOverlay
+              graphEventId={graphEventId}
+              isEventViewer={false}
+              timelineId={id}
+              timelineType={timelineType}
             />
-          </StyledEuiFlyoutBody>
+          )}
+          <EuiTabbedContent
+            tabs={tabs}
+            initialSelectedTab={tabs[0]}
+            autoFocus="selected"
+            onTabClick={(tab) => {
+              console.error('clicked tab', tab);
+            }}
+          />
         </>
-      ) : null}
+      </StyledEuiFlyoutBody>
+      {/* </>
+      ) : null} */}
     </TimelineContainer>
   );
 };

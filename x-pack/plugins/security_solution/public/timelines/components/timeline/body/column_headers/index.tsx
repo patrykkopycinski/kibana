@@ -8,10 +8,12 @@ import { EuiDroppable, EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/e
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { DraggableChildrenFn } from 'react-beautiful-dnd';
 import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
 
+import { timelineActions } from '../../../../store/timeline';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import { BrowserFields } from '../../../../../common/containers/source';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../store/timeline/model';
 import {
   DRAG_TYPE_FIELD,
   droppableTimelineColumnsPrefix,
@@ -51,11 +53,7 @@ interface Props {
   columnHeaders: ColumnHeaderOptions[];
   isEventViewer?: boolean;
   isSelectAllChecked: boolean;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnResized: OnColumnResized;
-  onColumnSorted: OnColumnSorted;
   onSelectAll: OnSelectAll;
-  onUpdateColumns: OnUpdateColumns;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
   sort: Sort;
@@ -102,17 +100,14 @@ export const ColumnHeadersComponent = ({
   columnHeaders,
   isEventViewer = false,
   isSelectAllChecked,
-  onColumnRemoved,
-  onColumnResized,
-  onColumnSorted,
   onSelectAll,
-  onUpdateColumns,
   showEventsSelect,
   showSelectAllCheckbox,
   sort,
   timelineId,
   toggleColumn,
 }: Props) => {
+  const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
     timelineFullScreen,
@@ -140,6 +135,29 @@ export const ColumnHeadersComponent = ({
       onSelectAll({ isSelected: event.currentTarget.checked });
     },
     [onSelectAll]
+  );
+
+  const onColumnRemoved: OnColumnRemoved = useCallback(
+    (columnId) => dispatch(timelineActions.removeColumn({ id: timelineId, columnId })),
+    [dispatch, timelineId]
+  );
+
+  const onColumnResized: OnColumnResized = useCallback(
+    ({ columnId, delta }) =>
+      dispatch(timelineActions.applyDeltaToColumnWidth({ id: timelineId, columnId, delta })),
+    [dispatch, timelineId]
+  );
+
+  const onUpdateColumns: OnUpdateColumns = useCallback(
+    (columns) => dispatch(timelineActions.updateColumns!({ id: timelineId, columns })),
+    [dispatch, timelineId]
+  );
+
+  const onColumnSorted: OnColumnSorted = useCallback(
+    (sorted) => {
+      dispatch(timelineActions.updateSort!({ id: timelineId, sort: sorted }));
+    },
+    [dispatch, timelineId]
   );
 
   const renderClone: DraggableChildrenFn = useCallback(
@@ -294,16 +312,12 @@ export const ColumnHeaders = React.memo(
     prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
-    prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.onUpdateColumns === nextProps.onUpdateColumns &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
-    prevProps.sort === nextProps.sort &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.toggleColumn === nextProps.toggleColumn &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)
 );

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -15,23 +15,14 @@ import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
-import { COLLAPSE, COLLAPSE_EVENT } from '../../../timelines/components/timeline/body/translations';
 
 export type View = 'table-view' | 'json-view';
-
-const CollapseLink = styled(EuiLink)`
-  margin: 20px 0;
-`;
-
-CollapseLink.displayName = 'CollapseLink';
 
 interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
   data: TimelineEventsDetailsItem[];
-  id: string;
   view: View;
-  onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;
   onViewSelected: (selected: View) => void;
   timelineId: string;
@@ -49,14 +40,14 @@ export const EventDetails = React.memo<Props>(
     browserFields,
     columnHeaders,
     data,
-    id,
     view,
-    onEventToggled,
     onUpdateColumns,
     onViewSelected,
     timelineId,
     toggleColumn,
   }) => {
+    const handleTabClick = useCallback((e) => onViewSelected(e.id as View), [onViewSelected]);
+
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
         {
@@ -67,7 +58,7 @@ export const EventDetails = React.memo<Props>(
               browserFields={browserFields}
               columnHeaders={columnHeaders}
               data={data}
-              eventId={id}
+              eventId={data._id}
               onUpdateColumns={onUpdateColumns}
               timelineId={timelineId}
               toggleColumn={toggleColumn}
@@ -80,7 +71,7 @@ export const EventDetails = React.memo<Props>(
           content: <JsonView data={data} />,
         },
       ],
-      [browserFields, columnHeaders, data, id, onUpdateColumns, timelineId, toggleColumn]
+      [browserFields, columnHeaders, data, onUpdateColumns, timelineId, toggleColumn]
     );
 
     return (
@@ -88,11 +79,8 @@ export const EventDetails = React.memo<Props>(
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
-          onTabClick={(e) => onViewSelected(e.id as View)}
+          onTabClick={handleTabClick}
         />
-        <CollapseLink aria-label={COLLAPSE} data-test-subj="collapse" onClick={onEventToggled}>
-          {COLLAPSE_EVENT}
-        </CollapseLink>
       </Details>
     );
   }

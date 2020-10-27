@@ -9,9 +9,7 @@ import React from 'react';
 import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
-import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
-import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
 import * as i18n from './translations';
@@ -61,22 +59,6 @@ const TimelineHeaderComponent: React.FC<Props> = ({
         iconType="alert"
         size="s"
       />
-    )}
-    {show && !graphEventId && (
-      <>
-        <DataProviders
-          browserFields={browserFields}
-          timelineId={timelineId}
-          dataProviders={dataProviders}
-        />
-
-        <StatefulSearchOrFilter
-          browserFields={browserFields}
-          filterManager={filterManager}
-          indexPattern={indexPattern}
-          timelineId={timelineId}
-        />
-      </>
     )}
   </>
 );

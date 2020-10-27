@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useState, useCallback } from 'react';
+import styled from 'styled-components';
 
 import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
-
 import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
-import { PropertiesLeft } from './properties_left';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
+import { Description, Name, StarIcon } from './helpers';
 
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
@@ -29,7 +29,6 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   isDataInTimeline: boolean;
-  isDatepickerLocked: boolean;
   isFavorite: boolean;
   noteIds: string[];
   timelineId: string;
@@ -44,16 +43,15 @@ interface Props {
   usersViewing: string[];
 }
 
-const rightGutter = 60; // px
 export const datePickerThreshold = 600;
 export const showNotesThreshold = 810;
 export const showDescriptionThreshold = 970;
 
-const starIconWidth = 30;
-const nameWidth = 155;
-const descriptionWidth = 165;
-const noteWidth = 130;
-const settingsWidth = 55;
+export const PropertiesLeftStyle = styled(EuiFlexGroup)`
+  width: 100%;
+`;
+
+PropertiesLeftStyle.displayName = 'PropertiesLeftStyle';
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export const Properties = React.memo<Props>(
@@ -63,7 +61,6 @@ export const Properties = React.memo<Props>(
     getNotesByIds,
     graphEventId,
     isDataInTimeline,
-    isDatepickerLocked,
     isFavorite,
     noteIds,
     status,
@@ -86,7 +83,6 @@ export const Properties = React.memo<Props>(
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
     const onClosePopover = useCallback(() => setShowActions(false), []);
     const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
-    const onToggleLock = useCallback(() => toggleLock({ linkToId: 'timeline' }), [toggleLock]);
     const onOpenTimelineModal = useCallback(() => {
       onClosePopover();
       setShowTimelineModal(true);
@@ -94,44 +90,33 @@ export const Properties = React.memo<Props>(
     }, []);
     const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
-    const datePickerWidth = useMemo(
-      () =>
-        width -
-        rightGutter -
-        starIconWidth -
-        nameWidth -
-        (width >= showDescriptionThreshold ? descriptionWidth : 0) -
-        noteWidth -
-        settingsWidth,
-      [width]
-    );
-
     return (
       <TimelineProperties ref={ref} data-test-subj="timeline-properties">
-        <PropertiesLeft
-          associateNote={associateNote}
-          datePickerWidth={
-            datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
-          }
-          description={description}
-          getNotesByIds={getNotesByIds}
-          isDatepickerLocked={isDatepickerLocked}
-          isFavorite={isFavorite}
-          noteIds={noteIds}
-          onToggleShowNotes={onToggleShowNotes}
-          status={status}
-          showDescription={width >= showDescriptionThreshold}
-          showNotes={showNotes}
-          showNotesFromWidth={width >= showNotesThreshold}
-          timelineId={timelineId}
-          timelineType={timelineType}
-          title={title}
-          toggleLock={onToggleLock}
-          updateDescription={updateDescription}
-          updateIsFavorite={updateIsFavorite}
-          updateNote={updateNote}
-          updateTitle={updateTitle}
-        />
+        <PropertiesLeftStyle alignItems="center" data-test-subj="properties-left" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <StarIcon
+              isFavorite={isFavorite}
+              timelineId={timelineId}
+              updateIsFavorite={updateIsFavorite}
+            />
+          </EuiFlexItem>
+
+          <Name
+            timelineId={timelineId}
+            timelineType={timelineType}
+            title={title}
+            updateTitle={updateTitle}
+          />
+
+          <EuiFlexItem grow={2}>
+            <Description
+              description={description}
+              timelineId={timelineId}
+              updateDescription={updateDescription}
+            />
+          </EuiFlexItem>
+        </PropertiesLeftStyle>
+
         <PropertiesRight
           associateNote={associateNote}
           description={description}

@@ -23,7 +23,6 @@ import {
   getPinOnClick,
   InvestigateInResolverAction,
 } from '../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
@@ -38,17 +37,13 @@ interface Props {
   actionsColumnWidth: number;
   associateNote: AssociateNote;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
-  expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventPinned: boolean;
   isEventViewer?: boolean;
-  loading: boolean;
   loadingEventIds: Readonly<string[]>;
-  onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -72,17 +67,13 @@ export const EventColumnView = React.memo<Props>(
     actionsColumnWidth,
     associateNote,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     eventIdToNoteIds,
-    expanded,
     getNotesByIds,
     isEventPinned = false,
     isEventViewer = false,
-    loading,
     loadingEventIds,
-    onEventToggled,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
@@ -189,19 +180,15 @@ export const EventColumnView = React.memo<Props>(
           additionalActions={additionalActions}
           checked={Object.keys(selectedEventIds).includes(id)}
           onRowSelected={onRowSelected}
-          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
-          loading={loading}
           loadingEventIds={loadingEventIds}
-          onEventToggled={onEventToggled}
           showCheckboxes={showCheckboxes}
         />
 
         <DataDrivenColumns
           _id={id}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
           timelineId={timelineId}

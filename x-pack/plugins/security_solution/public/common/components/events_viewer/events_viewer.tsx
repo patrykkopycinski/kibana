@@ -21,7 +21,7 @@ import { Sort } from '../../../timelines/components/timeline/body/sort';
 import { StatefulBody } from '../../../timelines/components/timeline/body/stateful_body';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
-import { Footer, footerHeight } from '../../../timelines/components/timeline/footer';
+import { footerHeight } from '../../../timelines/components/timeline/footer';
 import { combineQueries, resolverIsShowing } from '../../../timelines/components/timeline/helpers';
 import { TimelineRefetch } from '../../../timelines/components/timeline/refetch_timeline';
 import { EventDetailsWidthProvider } from './event_details_width_context';
@@ -282,7 +282,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              <StatefulBody
+              {/* <StatefulBody
                 browserFields={browserFields}
                 data={nonDeletedEvents}
                 docValueFields={docValueFields}
@@ -292,28 +292,19 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
                 sort={sort}
                 toggleColumn={toggleColumn}
-              />
-
-              {
-                /** Hide the footer if Resolver is showing. */
-                !graphEventId && (
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                )
-              }
+                activePage={pageInfo.activePage}
+                data-test-subj="events-viewer-footer"
+                updatedAt={updatedAt}
+                height={footerHeight}
+                isLive={isLive}
+                isLoading={loading}
+                itemsCount={nonDeletedEvents.length}
+                itemsPerPage={itemsPerPage}
+                itemsPerPageOptions={itemsPerPageOptions}
+                onChangeItemsPerPage={onChangeItemsPerPage}
+                onChangePage={loadPage}
+                totalCount={totalCountMinusDeleted}
+              /> */}
             </EventsContainerLoading>
           </>
         </EventDetailsWidthProvider>

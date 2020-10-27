@@ -11,20 +11,17 @@ import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { EventsTd, EventsTdContent, EventsTdGroupData } from '../../styles';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { getColumnRenderer } from '../renderers/get_column_renderer';
-
+import { columnRenderers } from '../renderers';
 interface DataDrivenColumnProps {
   eventId: string;
   header: ColumnHeaderOptions;
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   timelineId: string;
 }
 
 const DataDrivenColumnComponent: React.FC<DataDrivenColumnProps> = ({
-  columnRenderers,
   header,
   data,
   ecsData,
@@ -45,7 +42,7 @@ const DataDrivenColumnComponent: React.FC<DataDrivenColumnProps> = ({
           fieldName: header.id,
         }),
       }),
-    [columnRenderers, data, ecsData, eventId, header, timelineId]
+    [data, ecsData, eventId, header, timelineId]
   );
 
   return (
@@ -60,21 +57,19 @@ export const DataDrivenColumn = React.memo(DataDrivenColumnComponent);
 interface DataDrivenColumnsProps {
   _id: string;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   timelineId: string;
 }
 
 export const DataDrivenColumns = React.memo<DataDrivenColumnsProps>(
-  ({ _id, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
+  ({ _id, columnHeaders, data, ecsData, timelineId }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
       {columnHeaders.map((header) => (
         <DataDrivenColumn
           key={header.id}
           eventId={_id}
           header={header}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
           timelineId={timelineId}

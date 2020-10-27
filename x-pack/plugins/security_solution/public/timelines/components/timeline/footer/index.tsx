@@ -226,7 +226,7 @@ interface FooterProps {
   updatedAt: number;
   activePage: number;
   height: number;
-  id: string;
+  timelineId: string;
   isLive: boolean;
   isLoading: boolean;
   itemsCount: number;
@@ -242,7 +242,7 @@ export const FooterComponent = ({
   activePage,
   updatedAt,
   height,
-  id,
+  timelineId,
   isLive,
   isLoading,
   itemsCount,
@@ -256,10 +256,10 @@ export const FooterComponent = ({
   const [paginationLoading, setPaginationLoading] = useState(false);
 
   const { getManageTimelineById } = useManageTimeline();
-  const { documentType, loadingText, footerText } = useMemo(() => getManageTimelineById(id), [
-    getManageTimelineById,
-    id,
-  ]);
+  const { documentType, loadingText, footerText } = useMemo(
+    () => getManageTimelineById(timelineId),
+    [getManageTimelineById, timelineId]
+  );
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {

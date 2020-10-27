@@ -31,7 +31,6 @@ export const HostsTabs = memo<HostsTabsProps>(
     from,
     indexNames,
     isInitializing,
-    hostsPagePath,
     setAbsoluteRangeDatePicker,
     setQuery,
     to,

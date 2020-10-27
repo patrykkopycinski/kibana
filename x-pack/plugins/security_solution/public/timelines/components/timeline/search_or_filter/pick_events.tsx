@@ -23,14 +23,16 @@ import {
 } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { sourcererActions } from '../../../../common/store/actions';
 import { State } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
 import { getSourcererScopeSelector, SourcererScopeSelector } from './selectors';
 import * as i18n from './translations';
+import { timelineActions } from '../../../store/timeline';
 
 const PopoverContent = styled.div`
   width: 600px;
@@ -114,13 +116,14 @@ const getEventTypeOptions = (isCustomDisabled: boolean = true) => [
 
 interface PickEventTypeProps {
   eventType: TimelineEventsType;
-  onChangeEventTypeAndIndexesName: (value: TimelineEventsType, indexNames: string[]) => void;
+  timelineId: TimelineId;
 }
 
 const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   eventType = 'all',
-  onChangeEventTypeAndIndexesName,
+  timelineId,
 }) => {
+  const dispatch = useDispatch();
   const [isPopoverOpen, setPopover] = useState(false);
   const [showAdvanceSettings, setAdvanceSettings] = useState(eventType === 'custom');
   const [filterEventType, setFilterEventType] = useState<TimelineEventsType>(eventType);
@@ -231,12 +234,22 @@ const PickEventTypeComponents: React.FC<PickEventTypeProps> = ({
   const closePopover = useCallback(() => setPopover(false), []);
 
   const handleSaveIndices = useCallback(() => {
-    onChangeEventTypeAndIndexesName(
-      filterEventType,
-      selectedOptions.map((so) => so.label)
+    const indexNames = selectedOptions.map((so) => so.label);
+    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: filterEventType }));
+    dispatch(
+      timelineActions.updateIndexNames({
+        id: timelineId,
+        indexNames,
+      })
+    );
+    dispatch(
+      sourcererActions.setSelectedIndexPatterns({
+        id: SourcererScopeName.timeline,
+        selectedPatterns: indexNames,
+      })
     );
     setPopover(false);
-  }, [filterEventType, onChangeEventTypeAndIndexesName, selectedOptions]);
+  }, [dispatch, filterEventType, selectedOptions, timelineId]);
 
   const resetDataSources = useCallback(() => {
     setSelectedOptions(

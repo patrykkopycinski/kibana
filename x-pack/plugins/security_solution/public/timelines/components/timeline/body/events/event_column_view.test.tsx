@@ -45,7 +45,6 @@ describe('EventColumnView', () => {
     loading: false,
     loadingEventIds: [],
     onColumnResized: jest.fn(),
-    onEventToggled: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onUnPinEvent: jest.fn(),

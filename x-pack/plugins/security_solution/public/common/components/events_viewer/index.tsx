@@ -109,28 +109,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     [id, updateItemsPerPage]
   );
 
-  const toggleColumn = useCallback(
-    (column: ColumnHeaderOptions) => {
-      const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
-
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    },
-    [columns, id, upsertColumn, removeColumn]
-  );
-
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
@@ -158,7 +136,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
           onRuleChange={onRuleChange}
           start={start}
           sort={sort}
-          toggleColumn={toggleColumn}
           utilityBar={utilityBar}
           graphEventId={graphEventId}
         />

@@ -44,7 +44,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     kqlMode,
     kqlQueryExpression,
     onClose,
-    removeColumn,
     show,
     showCallOutUnauthorizedMsg,
     sort,
@@ -52,7 +51,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     status,
     timelineType,
     updateItemsPerPage,
-    upsertColumn,
     usersViewing,
   }) => {
     const {
@@ -66,28 +64,6 @@ const StatefulTimelineComponent = React.memo<Props>(
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
       [id, updateItemsPerPage]
-    );
-
-    const toggleColumn = useCallback(
-      (column: ColumnHeaderOptions) => {
-        const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-        if (!exists && upsertColumn != null) {
-          upsertColumn({
-            column,
-            id,
-            index: 1,
-          });
-        }
-
-        if (exists && removeColumn != null) {
-          removeColumn({
-            columnId: column.id,
-            id,
-          });
-        }
-      },
-      [columns, id, removeColumn, upsertColumn]
     );
 
     useEffect(() => {
@@ -123,7 +99,6 @@ const StatefulTimelineComponent = React.memo<Props>(
         sort={sort!}
         start={start}
         status={status}
-        toggleColumn={toggleColumn}
         timelineType={timelineType}
         usersViewing={usersViewing}
       />
@@ -217,13 +192,11 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
-  removeColumn: timelineActions.removeColumn,
   updateColumns: timelineActions.updateColumns,
   updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
   updateSort: timelineActions.updateSort,
-  upsertColumn: timelineActions.upsertColumn,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

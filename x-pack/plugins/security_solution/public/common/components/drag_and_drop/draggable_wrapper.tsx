@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { DraggableStateSnapshot, DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useDrag, DragSourceMonitor } from 'react-dnd';
+import { useDrag, DragSourceMonitor, DragPreviewImage } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
@@ -88,13 +89,17 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   const [goGetTimelineId, setGoGetTimelineId] = useState(false);
   const timelineIdFind = useGetTimelineId(draggableRef, goGetTimelineId);
   const isDisabled = dataProvider.id.includes(`-${ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID}-`);
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag, preview] = useDrag({
     item: { type: 'field', dataProvider },
 
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
+
+  useEffect(() => {
+    preview(getEmptyImage(), { captureDraggingState: true });
+  }, [preview]);
 
   const handleClosePopOverTrigger = useCallback(
     () => setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger),
@@ -142,11 +147,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
 
   const DraggableContent = useMemo(
     () => (
-      <ProviderContainer
-        ref={drag}
-        style={{ opacity: isDragging ? 0 : 1 }}
-        data-test-subj="providerContainer"
-      >
+      <ProviderContainer ref={drag} data-test-subj="providerContainer">
         {truncate ? (
           <TruncatableText data-test-subj="draggable-truncatable-content">
             {children}
@@ -160,7 +161,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
         )}
       </ProviderContainer>
     ),
-    [children, dataProvider.queryMatch.field, drag, isDragging, truncate]
+    [children, dataProvider.queryMatch.field, drag, truncate]
   );
 
   const content = useMemo(

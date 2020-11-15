@@ -135,6 +135,7 @@ export const ColumnHeadersComponent = ({
     () =>
       cards.map((header, draggableIndex) => (
         <ColumnHeader
+          browserFields={browserFields}
           key={header.id}
           draggableIndex={draggableIndex}
           timelineId={timelineId}
@@ -148,6 +149,7 @@ export const ColumnHeadersComponent = ({
         />
       )),
     [
+      browserFields,
       cards,
       timelineId,
       // draggingIndex,

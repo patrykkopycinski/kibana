@@ -106,8 +106,6 @@ export const DataProviders = React.memo<Props>(({ browserFields, dataProviders, 
     }),
   });
 
-  console.error('isOver', isOver);
-
   return (
     <DropTargetDataProvidersContainer
       ref={drop}

@@ -170,7 +170,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     );
 
     const [, drag] = useDrag({
-      item: { type: 'field', id: draggableId, index },
+      item: { type: 'field', id: draggableId, index, dataProvider },
     });
 
     const opacity = isDragging ? 0 : 1;
@@ -238,6 +238,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [dispatch, timelineId]
     );
 
+    // console.error('isDragging', isDragging);
+
     return (
       <ProviderContainer ref={ref} data-test-subj="providerContainer">
         <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -270,14 +272,13 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {!isDragging &&
-              (index < group.length - 1 ? (
+            {index < group.length - 1 ? (
+              <AndOrBadge type="and" />
+            ) : (
+              <LastAndOrBadgeInGroup isDragging={isDragging}>
                 <AndOrBadge type="and" />
-              ) : (
-                <LastAndOrBadgeInGroup isDragging={isDragging}>
-                  <AndOrBadge type="and" />
-                </LastAndOrBadgeInGroup>
-              ))}
+              </LastAndOrBadgeInGroup>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </ProviderContainer>

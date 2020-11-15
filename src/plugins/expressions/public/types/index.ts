@@ -21,8 +21,8 @@ import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
-  ExecutionContextSearch,
   ExpressionsService,
+  SerializableState,
 } from '../../common';
 
 /**
@@ -42,7 +42,7 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: ExecutionContextSearch;
+  searchContext?: SerializableState;
   context?: ExpressionValue;
   variables?: Record<string, any>;
   // Enables debug tracking on each expression in the AST
@@ -53,6 +53,7 @@ export interface IExpressionLoaderParams {
   uiState?: unknown;
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
+  searchSessionId?: string;
 }
 
 export interface ExpressionRenderError extends Error {

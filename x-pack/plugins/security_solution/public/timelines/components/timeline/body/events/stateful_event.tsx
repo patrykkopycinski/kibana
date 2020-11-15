@@ -18,7 +18,17 @@ import {
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
+<<<<<<< HEAD
 import { OnPinEvent, OnRowSelected, OnUnPinEvent, OnUpdateColumns } from '../../events';
+=======
+import {
+  OnColumnResized,
+  OnPinEvent,
+  OnRowSelected,
+  OnUnPinEvent,
+  OnUpdateColumns,
+} from '../../events';
+>>>>>>> bd084396f9bb7319dd8f6a5f6b4e74cb107b9318
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
@@ -30,6 +40,8 @@ import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import { inputsModel } from '../../../../../common/store';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { activeTimeline } from '../../../../containers/active_timeline_context';
 
 interface Props {
   actionsColumnWidth: number;
@@ -96,7 +108,9 @@ const StatefulEventComponent: React.FC<Props> = ({
   toggleColumn,
   updateNote,
 }) => {
-  const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>({});
+  const [expanded, setExpanded] = useState<{ [eventId: string]: boolean }>(
+    timelineId === TimelineId.active ? activeTimeline.getExpandedEventIds() : {}
+  );
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const { status: timelineStatus } = useShallowEqualSelector<TimelineModel>(
     (state) => state.timeline.timelineById[timelineId]
@@ -106,21 +120,21 @@ const StatefulEventComponent: React.FC<Props> = ({
     docValueFields,
     indexName: event._index!,
     eventId: event._id,
-    skip: !expanded[event._id],
+    skip: !expanded || !expanded[event._id],
   });
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
-    setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
-  }, [event, showNotes]);
+    setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
+  }, [event]);
 
   const onToggleExpanded = useCallback(() => {
     const eventId = event._id;
-    setExpanded({
-      ...expanded,
-      [eventId]: !expanded[eventId],
-    });
-  }, [event, expanded]);
+    setExpanded((prevExpanded) => ({ ...prevExpanded, [eventId]: !prevExpanded[eventId] }));
+    if (timelineId === TimelineId.active) {
+      activeTimeline.toggleExpandedEvent(eventId);
+    }
+  }, [event._id, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {

@@ -18,17 +18,7 @@ import {
 import { Note } from '../../../../../common/lib/note';
 import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
-<<<<<<< HEAD
 import { OnPinEvent, OnRowSelected, OnUnPinEvent, OnUpdateColumns } from '../../events';
-=======
-import {
-  OnColumnResized,
-  OnPinEvent,
-  OnRowSelected,
-  OnUnPinEvent,
-  OnUpdateColumns,
-} from '../../events';
->>>>>>> bd084396f9bb7319dd8f6a5f6b4e74cb107b9318
 import { ExpandableEvent } from '../../expandable_event';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';

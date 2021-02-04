@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
+import { useAgentGroups, ALL_AGENTS_GROUP_KEY } from './use_agent_groups';
 import { Direction } from '../../common/search_strategy';
 import { Agent } from '../../common/shared_imports';
 
@@ -59,13 +60,50 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     []
   );
 
-  // const GROUP_KEY = 'local_metadata.os.family'
-  const GROUP_KEY = 'local_metadata.host.name';
   const renderStatus = (online: string) => {
     const color = online ? 'success' : 'danger';
     const label = online ? 'Online' : 'Offline';
     return <EuiHealth color={color}>{label}</EuiHealth>;
   };
+
+  const agentGroups = useAgentGroups();
+  const [selectedGroups, setSelectedGroups] = useState([]);
+  const [allAgentsSelected, setAllAgentsSelected] = useState(false);
+
+  const [groupOptions, setGroupOptions] = useState([]);
+
+  useEffect(() => {
+    const opts = [{ label: ALL_AGENTS_GROUP_KEY }];
+    if (!allAgentsSelected) {
+      const selectedSet = new Set(selectedGroups);
+      const platformOptions = Object.keys(agentGroups.platforms).map((name) => {
+        const platformOption = { label: name };
+        if (selectedSet.has(name)) {
+          platformOption.checked = 'on';
+        }
+        return platformOption;
+      });
+      opts.push(...platformOptions);
+    } else {
+      opts[0].checked = 'on';
+    }
+    setGroupOptions(opts);
+    // TODO: implement policy picking
+  }, [selectedGroups, allAgentsSelected, agentGroups.platforms]);
+
+  const onGroupChange = useCallback((newOptions) => {
+    const newGroupOpts = [];
+    let allSet = false;
+    for (const opt of newOptions.filter((o) => o.checked === 'on')) {
+      if (opt.label === ALL_AGENTS_GROUP_KEY) {
+        allSet = true;
+      } else {
+        newGroupOpts.push(opt.label);
+      }
+    }
+    setAllAgentsSelected(allSet);
+    setSelectedGroups(newGroupOpts);
+  }, []);
 
   const { data = {} } = useAllAgents({
     activePage: pageIndex,
@@ -74,58 +112,14 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     sortField,
   });
 
-  // TODO: abstract this to allow for faceting on other dimensions
-  const [platforms, setPlatforms] = useState(Object.create(null));
-  useEffect(() => {
-    setPlatforms(generateGroupSets(GROUP_KEY, agents));
-  }, [agents]);
-  function generateGroupSets(attributePath: string, groupAgents: Agent[]) {
-    const path = attributePath.split('.');
-    return groupAgents.reduce((acc, agent) => {
-      let groupKey = agent;
-      for (const pathFrag of path) {
-        if (!groupKey) {
-          // XXX: can't find the key path on the agent object
-          return acc;
-        }
-        groupKey = groupKey[pathFrag];
-      }
-      if (!acc[groupKey]) {
-        acc[groupKey] = [agent];
-      } else {
-        acc[groupKey].push(agent);
-      }
-      return acc;
-    }, Object.create(null));
-  }
-
-  const [platformOptions, setPlatformOptions] = useState([]);
-  useEffect(() => {
-    const newOptions = Object.keys(platforms).map((label) => ({ label }));
-    setPlatformOptions(newOptions);
-  }, [platforms]);
-
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
-      if (newSelectedItems.length) {
-        const newGroupState = generateGroupSets(GROUP_KEY, newSelectedItems);
-        for (const el of platformOptions) {
-          if (newGroupState[el.label]?.length === platforms[el.label]?.length) {
-            el.checked = 'on';
-          } else {
-            el.checked = undefined;
-          }
-        }
-      } else {
-        for (const el of platformOptions) {
-          el.checked = undefined;
-        }
+      if (onChange) {
+        onChange(newSelectedItems.map((item) => item._id));
       }
-      // @ts-expect-error
-      onChange(newSelectedItems.map((item) => item._id));
     },
-    [onChange, platforms, platformOptions]
+    [onChange]
   );
 
   const columns: Array<EuiBasicTableColumn<{}>> = useMemo(
@@ -211,39 +205,30 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     // @ts-expect-error update types
   }, [selectedAgents, data.agents, selectedItems.length]);
 
-  const onGroupChange = useCallback(
-    (newOptions) => {
-      const currentSelectedSet = new Set(selectedItems);
-      for (let i = 0; i < platformOptions.length; ++i) {
-        const newOp = newOptions[i];
-        const oldOp = platformOptions[i];
-        if (newOp.checked !== oldOp.checked) {
-          const newAgents = platforms[newOp.label];
-          const newAgentSet = new Set(newAgents);
-          if (newOp.checked === 'on') {
-            const agentDiff = newAgents.filter((a) => !currentSelectedSet.has(a));
-            selectedItems.push(...agentDiff);
-            tableRef.current.setSelection(selectedItems);
-          } else {
-            const newSelection = selectedItems.filter((a) => !newAgentSet.has(a));
-            tableRef.current.setSelection(newSelection);
-          }
-          break;
-        }
-      }
-      setPlatformOptions(newOptions);
-    },
-    [selectedItems, platformOptions, platforms]
-  );
-
-  // useEffect(() => {
-  //   if (selectedAgents && agents && selectedItems.length !== selectedAgents.length) {
-  //     tableRef?.current?.setSelection(
-  //       // @ts-expect-error
-  //       selectedAgents.map((agentId) => find({ _id: agentId }, agents))
-  //     );
-  //   }
-  // }, [selectedAgents, agents, selectedItems.length]);
+  // const onGroupChange = useCallback(
+  //  (newOptions) => {
+  //    const currentSelectedSet = new Set(selectedItems);
+  //    for (let i = 0; i < platformOptions.length; ++i) {
+  //      const newOp = newOptions[i];
+  //      const oldOp = platformOptions[i];
+  //      if (newOp.checked !== oldOp.checked) {
+  //        const newAgents = platforms[newOp.label];
+  //        const newAgentSet = new Set(newAgents);
+  //        if (newOp.checked === 'on') {
+  //          const agentDiff = newAgents.filter((a) => !currentSelectedSet.has(a));
+  //          selectedItems.push(...agentDiff);
+  //          tableRef.current.setSelection(selectedItems);
+  //        } else {
+  //          const newSelection = selectedItems.filter((a) => !newAgentSet.has(a));
+  //          tableRef.current.setSelection(newSelection);
+  //        }
+  //        break;
+  //      }
+  //    }
+  //    setPlatformOptions(newOptions);
+  //  },
+  //  [selectedItems, platformOptions, platforms]
+  // );
 
   let modal;
 
@@ -260,7 +245,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
               aria-label="Searchable example"
               searchable
               searchProps={searchProps}
-              options={platformOptions}
+              options={groupOptions}
               onChange={onGroupChange}
             >
               {(list, search) => (
@@ -270,20 +255,22 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
                 </Fragment>
               )}
             </EuiSelectable>
-            <EuiBasicTable<Agent>
-              ref={tableRef}
-              // @ts-expect-error update types
-              // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
-              items={data.agents ?? []}
-              itemId="_id"
-              columns={columns}
-              pagination={pagination}
-              sorting={sorting}
-              isSelectable={true}
-              selection={selection}
-              onChange={onTableChange}
-              rowHeader="firstName"
-            />
+            {allAgentsSelected || selectedGroups?.length ? null : (
+              <EuiBasicTable<Agent>
+                ref={tableRef}
+                // @ts-expect-error update types
+                // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
+                items={data.agents ?? []}
+                itemId="_id"
+                columns={columns}
+                pagination={pagination}
+                sorting={sorting}
+                isSelectable={true}
+                selection={selection}
+                onChange={onTableChange}
+                rowHeader="firstName"
+              />
+            )}
           </EuiModalBody>
 
           <EuiModalFooter>
@@ -299,8 +286,13 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   }
 
   let buttonText;
-  const numAgents = selectedAgents.length;
-  if (numAgents > 0) {
+  if (allAgentsSelected) {
+    buttonText = 'All Agents Selected';
+  } else if (selectedGroups.length) {
+    const numGroups = selectedGroups.length;
+    buttonText = `${numGroups} Agent Group${numGroups > 1 ? 's' : ''} Selected`;
+  } else if (selectedAgents.length > 0) {
+    const numAgents = selectedAgents.length;
     buttonText = `${numAgents} Agent${numAgents > 1 ? 's' : ''} Selected`;
   } else {
     buttonText = 'Select Agents';

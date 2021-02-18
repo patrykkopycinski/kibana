@@ -19,6 +19,7 @@ import {
   EuiModalFooter,
   EuiOverlayMask,
   EuiSelectable,
+  EuiSelectableOption,
   EuiButton,
   EuiButtonEmpty,
   EuiHealth,
@@ -33,6 +34,8 @@ interface AgentsTableProps {
   selectedAgents: string[];
   onChange: (payload: string[]) => void;
 }
+
+type GroupOption = EuiSelectableOption<{}>;
 
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -66,44 +69,38 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     return <EuiHealth color={color}>{label}</EuiHealth>;
   };
 
-  const agentGroups = useAgentGroups();
-  const [selectedGroups, setSelectedGroups] = useState([]);
-  const [allAgentsSelected, setAllAgentsSelected] = useState(false);
-
-  const [groupOptions, setGroupOptions] = useState([]);
-
+  const { loading: groupsLoading, groups } = useAgentGroups();
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [allAgentsSelected, setAllAgentsSelected] = useState<boolean>(false);
+  const [groupOptions, setGroupOptions] = useState<GroupOption[]>([]);
   useEffect(() => {
-    const opts = [{ label: ALL_AGENTS_GROUP_KEY }];
+    const opts: GroupOption[] = [{ label: ALL_AGENTS_GROUP_KEY }];
     if (!allAgentsSelected) {
-      const selectedSet = new Set(selectedGroups);
-      const platformOptions = Object.keys(agentGroups.platforms).map((name) => {
-        const platformOption = { label: name };
+      const selectedSet = new Set<string|undefined>(selectedGroups);
+      const generateOption = (name: string) => {
+        const platformOption: GroupOption = { label: name };
         if (selectedSet.has(name)) {
           platformOption.checked = 'on';
         }
         return platformOption;
-      });
+      }
+      const platformOptions = groups.platforms.map(generateOption);
       opts.push(...platformOptions);
+      const policyOptions = groups.policies.map(generateOption);
+      opts.push(...policyOptions);
     } else {
       opts[0].checked = 'on';
     }
     setGroupOptions(opts);
     // TODO: implement policy picking
-  }, [selectedGroups, allAgentsSelected, agentGroups.platforms]);
+  }, [groups.policies, groups.platforms, selectedGroups]);
 
-  const onGroupChange = useCallback((newOptions) => {
-    const newGroupOpts = [];
-    let allSet = false;
-    for (const opt of newOptions.filter((o) => o.checked === 'on')) {
-      if (opt.label === ALL_AGENTS_GROUP_KEY) {
-        allSet = true;
-      } else {
-        newGroupOpts.push(opt.label);
-      }
-    }
-    setAllAgentsSelected(allSet);
-    setSelectedGroups(newGroupOpts);
-  }, []);
+  const onGroupChange = useCallback((newOptions: GroupOption[]) => {
+    const selected = newOptions.filter(el => el.checked === 'on').map(el => el.label)
+    setSelectedGroups(selected)
+    setAllAgentsSelected(selected.some(el => el === ALL_AGENTS_GROUP_KEY))
+    onChange([])
+  }, [onChange]);
 
   const { data = {} } = useAllAgents({
     activePage: pageIndex,
@@ -115,9 +112,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
-      if (onChange) {
-        onChange(newSelectedItems.map((item) => item._id));
-      }
+      onChange(newSelectedItems.map((item: {_id: string}) => item._id));
     },
     [onChange]
   );
@@ -237,24 +232,27 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
       <EuiOverlayMask>
         <EuiModal onClose={closeModal} initialFocus="[name=popswitch]">
           <EuiModalHeader>
-            <EuiModalHeaderTitle>Modal title</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>Select Agents</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
-            <EuiSelectable
-              aria-label="Searchable example"
-              searchable
-              searchProps={searchProps}
-              options={groupOptions}
-              onChange={onGroupChange}
-            >
-              {(list, search) => (
-                <Fragment>
-                  {search}
-                  {list}
-                </Fragment>
-              )}
-            </EuiSelectable>
+            {groupsLoading 
+              ? null
+              : <EuiSelectable
+                aria-label="Searchable example"
+                searchable
+                searchProps={searchProps}
+                options={groupOptions}
+                onChange={onGroupChange}
+              >
+                {(list, search) => (
+                  <Fragment>
+                    {search}
+                    {list}
+                  </Fragment>
+                )}
+              </EuiSelectable>
+            }
             {allAgentsSelected || selectedGroups?.length ? null : (
               <EuiBasicTable<Agent>
                 ref={tableRef}

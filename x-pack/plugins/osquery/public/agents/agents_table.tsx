@@ -30,14 +30,21 @@ import { useAgentGroups, ALL_AGENTS_GROUP_KEY } from './use_agent_groups';
 import { Direction } from '../../common/search_strategy';
 import { Agent } from '../../common/shared_imports';
 
-interface AgentsTableProps {
-  selectedAgents: string[];
-  onChange: (payload: string[]) => void;
+export interface AgentsSelection {
+  agents: string[];
+  allAgentsSelected: boolean;
+  platformsSelected: string[];
+  policiesSelected: string[];
 }
 
-type GroupOption = EuiSelectableOption<{}>;
+interface AgentsTableProps {
+  agentSelection: AgentsSelection;
+  onChange: (payload: AgentsSelection) => void;
+}
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
+type GroupOption = EuiSelectableOption<{ type: string }>;
+
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [sortField, setSortField] = useState<keyof Agent>('upgraded_at');
@@ -74,33 +81,58 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const [allAgentsSelected, setAllAgentsSelected] = useState<boolean>(false);
   const [groupOptions, setGroupOptions] = useState<GroupOption[]>([]);
   useEffect(() => {
-    const opts: GroupOption[] = [{ label: ALL_AGENTS_GROUP_KEY }];
+    const opts: GroupOption[] = [{ label: ALL_AGENTS_GROUP_KEY, type: 'all' }];
     if (!allAgentsSelected) {
-      const selectedSet = new Set<string|undefined>(selectedGroups);
-      const generateOption = (name: string) => {
-        const platformOption: GroupOption = { label: name };
+      const selectedSet = new Set<string | undefined>(selectedGroups);
+      const generateOption = (type: string) => (name: string) => {
+        const option: GroupOption = { label: name, type };
         if (selectedSet.has(name)) {
-          platformOption.checked = 'on';
+          option.checked = 'on';
         }
-        return platformOption;
-      }
-      const platformOptions = groups.platforms.map(generateOption);
+        return option;
+      };
+      const platformOptions = groups.platforms.map(generateOption('platform'));
       opts.push(...platformOptions);
-      const policyOptions = groups.policies.map(generateOption);
+      const policyOptions = groups.policies.map(generateOption('policy'));
       opts.push(...policyOptions);
     } else {
       opts[0].checked = 'on';
     }
     setGroupOptions(opts);
     // TODO: implement policy picking
-  }, [groups.policies, groups.platforms, selectedGroups]);
+  }, [groups.policies, groups.platforms, selectedGroups, allAgentsSelected]);
 
-  const onGroupChange = useCallback((newOptions: GroupOption[]) => {
-    const selected = newOptions.filter(el => el.checked === 'on').map(el => el.label)
-    setSelectedGroups(selected)
-    setAllAgentsSelected(selected.some(el => el === ALL_AGENTS_GROUP_KEY))
-    onChange([])
-  }, [onChange]);
+  const onGroupChange = useCallback(
+    (newOptions: GroupOption[]) => {
+      const selectedPlatforms: string[] = [];
+      const selectedPolicies: string[] = [];
+      newOptions.forEach((opt) => {
+        if (opt.checked === 'on') {
+          switch (opt.type) {
+            case 'platform':
+              selectedPlatforms.push(opt.label);
+              break;
+            case 'policy':
+              selectedPolicies.push(opt.label);
+              break;
+            default:
+              break;
+          }
+        }
+      });
+      const selected = newOptions.filter((el) => el.checked === 'on').map((el) => el.label);
+      setSelectedGroups(selected);
+      const allSelected = selected.some((el) => el === ALL_AGENTS_GROUP_KEY);
+      setAllAgentsSelected(allSelected);
+      onChange({
+        ...agentSelection,
+        allAgentsSelected: allSelected,
+        platformsSelected: selectedPlatforms,
+        policiesSelected: selectedPolicies,
+      });
+    },
+    [onChange, agentSelection]
+  );
 
   const { data = {} } = useAllAgents({
     activePage: pageIndex,
@@ -112,9 +144,12 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
-      onChange(newSelectedItems.map((item: {_id: string}) => item._id));
+      onChange({
+        ...agentSelection,
+        agents: newSelectedItems.map((item: { _id: string }) => item._id),
+      });
     },
-    [onChange]
+    [onChange, agentSelection]
   );
 
   const columns: Array<EuiBasicTableColumn<{}>> = useMemo(
@@ -186,6 +221,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   );
 
   useEffect(() => {
+    const selectedAgents = agentSelection?.agents;
     if (
       selectedAgents?.length &&
       // @ts-expect-error update types
@@ -198,32 +234,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
       );
     }
     // @ts-expect-error update types
-  }, [selectedAgents, data.agents, selectedItems.length]);
-
-  // const onGroupChange = useCallback(
-  //  (newOptions) => {
-  //    const currentSelectedSet = new Set(selectedItems);
-  //    for (let i = 0; i < platformOptions.length; ++i) {
-  //      const newOp = newOptions[i];
-  //      const oldOp = platformOptions[i];
-  //      if (newOp.checked !== oldOp.checked) {
-  //        const newAgents = platforms[newOp.label];
-  //        const newAgentSet = new Set(newAgents);
-  //        if (newOp.checked === 'on') {
-  //          const agentDiff = newAgents.filter((a) => !currentSelectedSet.has(a));
-  //          selectedItems.push(...agentDiff);
-  //          tableRef.current.setSelection(selectedItems);
-  //        } else {
-  //          const newSelection = selectedItems.filter((a) => !newAgentSet.has(a));
-  //          tableRef.current.setSelection(newSelection);
-  //        }
-  //        break;
-  //      }
-  //    }
-  //    setPlatformOptions(newOptions);
-  //  },
-  //  [selectedItems, platformOptions, platforms]
-  // );
+  }, [agentSelection, data.agents, selectedItems.length]);
 
   let modal;
 
@@ -236,9 +247,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
           </EuiModalHeader>
 
           <EuiModalBody>
-            {groupsLoading 
-              ? null
-              : <EuiSelectable
+            {groupsLoading ? null : (
+              <EuiSelectable
                 aria-label="Searchable example"
                 searchable
                 searchProps={searchProps}
@@ -252,7 +262,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
                   </Fragment>
                 )}
               </EuiSelectable>
-            }
+            )}
             {allAgentsSelected || selectedGroups?.length ? null : (
               <EuiBasicTable<Agent>
                 ref={tableRef}
@@ -289,8 +299,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   } else if (selectedGroups.length) {
     const numGroups = selectedGroups.length;
     buttonText = `${numGroups} Agent Group${numGroups > 1 ? 's' : ''} Selected`;
-  } else if (selectedAgents.length > 0) {
-    const numAgents = selectedAgents.length;
+  } else if (agentSelection?.agents?.length) {
+    const numAgents = agentSelection.agents.length;
     buttonText = `${numAgents} Agent${numAgents > 1 ? 's' : ''} Selected`;
   } else {
     buttonText = 'Select Agents';

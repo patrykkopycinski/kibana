@@ -11,6 +11,13 @@ import moment from 'moment';
 
 import { IRouter } from '../../../../../../src/core/server';
 
+export interface AgentsSelection {
+  agents: string[];
+  allAgentsSelected: boolean;
+  platformsSelected: string[];
+  policiesSelected: string[];
+}
+
 export const createActionRoute = (router: IRouter) => {
   router.post(
     {
@@ -22,14 +29,64 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
+      const selectedAgents: string[] = [];
+      const {
+        agentSelection: { allAgentsSelected, platformsSelected, policiesSelected, agents },
+      } = request.body as { agentSelection: AgentsSelection };
+      const extractIds = ({ body }) =>
+        body.hits.hits.map((o) => o._source.local_metadata.elastic.agent.id);
+      if (allAgentsSelected) {
+        // make a query for all agent ids
+        const ids = extractIds(
+          await esClient.search<{}, {}>({
+            index: '.fleet-agents',
+            body: {
+              _source: 'local_metadata.elastic.agent.id',
+              size: 9000,
+              query: {
+                match_all: {},
+              },
+            },
+          })
+        );
+        selectedAgents.push(...ids);
+      } else if (platformsSelected.length > 0 || policiesSelected.length > 0) {
+        const filters: Array<{
+          term: { [key: string]: string };
+        }> = platformsSelected.map((platform) => ({
+          term: { 'local_metadata.os.platform': platform },
+        }));
+        filters.push(...policiesSelected.map((policyId) => ({ term: { policyId } })));
+        const query = {
+          index: '.fleet-agents',
+          body: {
+            _source: 'local_metadata.elastic.agent.id',
+            size: 9000,
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      should: filters,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        };
+        const ids = extractIds(await esClient.search<{}, {}>(query));
+        selectedAgents.push(...ids);
+      } else {
+        selectedAgents.push(...agents);
+      }
       const action = {
         action_id: uuid.v4(),
         '@timestamp': moment().toISOString(),
         expiration: moment().add(2, 'days').toISOString(),
         type: 'INPUT_ACTION',
         input_type: 'osquery',
-        // @ts-expect-error update validation
-        agents: request.body.agents,
+        agents: selectedAgents,
         data: {
           id: uuid.v4(),
           // @ts-expect-error update validation

@@ -45,14 +45,14 @@ export const buildAgentsQuery = ({
   };
 
   if (aggregations) {
-    dslQuery.body.aggs = Object.keys(aggregations).reduce((acc, aggKey) => {
+    Object.keys(aggregations).reduce((acc, aggKey) => {
       acc[aggKey] = {
         terms: {
-          field: aggregations[aggKey]
-        }
-      }
-      return acc
-    }, {} as {[key: string]: {terms: {field: string}}})
+          field: aggregations[aggKey],
+        },
+      };
+      return acc;
+    }, dslQuery.body.aggs as { [key: string]: { terms: { field: string } } });
   }
 
   return dslQuery;

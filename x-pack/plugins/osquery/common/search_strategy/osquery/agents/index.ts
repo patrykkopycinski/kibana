@@ -17,8 +17,8 @@ export interface AggregationDataPoint {
 
 export interface AgentAggregation {
   [key: string]: {
-    buckets: AggregationDataPoint[]
-  }
+    buckets: AggregationDataPoint[];
+  };
 }
 
 export interface AgentsStrategyResponse extends IEsSearchResponse {

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useKibana } from '../common/lib/kibana';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 
@@ -22,43 +22,41 @@ export const ALL_AGENTS_GROUP_KEY = 'All agents';
 export const useAgentGroups = () => {
   const { data, notifications } = useKibana().services;
   const [loading, setLoading] = useState(true);
-  const [platforms, setPlatforms] = useState<string[]>([])
-  const [policies, setPolicies] = useState<string[]>([])
+  const [platforms, setPlatforms] = useState<string[]>([]);
+  const [policies, setPolicies] = useState<string[]>([]);
 
   const abortCtrl = useRef(new AbortController());
   useEffect(() => {
     let didCancel = false;
     const searchSubscription$ = data.search
-      .search<AgentsRequestOptions, AgentsStrategyResponse>({
-        filterQuery: undefined,
-        factoryQueryType: OsqueryQueries.agents,
-        aggregations: {
-          platforms: "local_metadata.os.platform",
-          policies: "policy_id"
-        },
-        pagination: generateTablePaginationOptions(0, 9000),
-        sort: {
-          direction: 'asc',
-          field: 'local_metadata.os.platform'
+      .search<AgentsRequestOptions, AgentsStrategyResponse>(
+        {
+          filterQuery: undefined,
+          factoryQueryType: OsqueryQueries.agents,
+          aggregations: {
+            platforms: 'local_metadata.os.platform',
+            policies: 'policy_id',
+          },
+          pagination: generateTablePaginationOptions(0, 9000),
+          sort: {
+            direction: 'asc',
+            field: 'local_metadata.os.platform',
+          },
+        } as AgentsRequestOptions,
+        {
+          strategy: 'osquerySearchStrategy',
+          abortSignal: abortCtrl.current.signal,
         }
-      } as AgentsRequestOptions, {
-        strategy: 'osquerySearchStrategy',
-        abortSignal: abortCtrl.current.signal,
-      })
+      )
       .subscribe({
         next: (response) => {
           if (isCompleteResponse(response)) {
             if (!didCancel) {
               setLoading(false);
-              console.log(response)
               if (response.aggregations) {
-                const aggs = response.aggregations
-                setPlatforms(
-                  aggs.platforms.buckets.map(o => o.key)
-                )
-                setPolicies(
-                  aggs.policies.buckets.map(o => o.key)
-                )
+                const aggs = response.aggregations;
+                setPlatforms(aggs.platforms.buckets.map((o) => o.key));
+                setPolicies(aggs.policies.buckets.map((o) => o.key));
               }
             }
             searchSubscription$.unsubscribe();
@@ -77,17 +75,18 @@ export const useAgentGroups = () => {
           }
         },
       });
+    const abort = abortCtrl.current;
     return () => {
       didCancel = true;
-      abortCtrl.current.abort()
-    }
-  }, [setPolicies, setPlatforms])
+      abort.abort();
+    };
+  }, [setPolicies, setPlatforms, data.search, notifications.toasts]);
   return {
     loading,
     groups: {
       [ALL_AGENTS_GROUP_KEY]: [],
       platforms,
       policies,
-    }
+    },
   };
 };

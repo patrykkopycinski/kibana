@@ -99,7 +99,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
       opts[0].checked = 'on';
     }
     setGroupOptions(opts);
-    // TODO: implement policy picking
   }, [groups.policies, groups.platforms, selectedGroups, allAgentsSelected]);
 
   const onGroupChange = useCallback(

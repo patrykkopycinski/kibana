@@ -18,6 +18,7 @@
   ],
   "requiredPlugins": [
     "actions",
+    "case",
     "data",
     "dataEnhanced",
     "fleet",

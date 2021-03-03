@@ -77,6 +77,7 @@ import {
   authenticateAgentWithAccessToken,
   listAgents,
   getAgent,
+  getAgents,
 } from './services/agents';
 import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
@@ -315,12 +316,14 @@ export class FleetPlugin
       },
       agentService: {
         getAgent,
+        getAgents,
         listAgents,
         getAgentStatusById,
         authenticateAgentWithAccessToken,
       },
       agentPolicyService: {
         get: agentPolicyService.get,
+        getByIDs: agentPolicyService.getByIDs,
         list: agentPolicyService.list,
         getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,

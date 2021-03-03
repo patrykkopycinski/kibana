@@ -27,6 +27,7 @@ import {
   LazyOsqueryManagedPolicyEditExtension,
 } from './fleet_integration';
 import { getActionType } from './osquery_action_type';
+import { getLazyCasesIntegration } from './cases_integration/lazy_index';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -94,7 +95,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
     }
 
-    return {};
+    return {
+      // @ts-expect-error update types
+      getCasesIntegration: (props) => getLazyCasesIntegration(props),
+    };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

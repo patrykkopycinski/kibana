@@ -380,6 +380,87 @@ export const getGeneratedAlertsAttachment = ({
   };
 };
 
+export const getOsqueryAlertsAttachment = ({
+  action,
+  osqueryActionId,
+  alertIds,
+  ruleId,
+  ruleName,
+}: {
+  action: CaseUserActions;
+  alertIds: string[];
+  osqueryActionId: string[];
+  ruleId: string;
+  ruleName: string;
+}): EuiCommentProps => {
+  const fetchEcsAlertsData = async (fetchAlertIds?: string[]): Promise<Ecs[]> => {
+    if (isEmpty(fetchAlertIds)) {
+      return [];
+    }
+    const alertResponse = await KibanaServices.get().http.fetch<
+      SearchResponse<{ '@timestamp': string; [key: string]: unknown }>
+    >(DETECTION_ENGINE_QUERY_SIGNALS_URL, {
+      method: 'POST',
+      body: JSON.stringify(buildAlertsQuery(fetchAlertIds ?? [])),
+    });
+    return (
+      alertResponse?.hits.hits.reduce<Ecs[]>(
+        (acc, { _id, _index, _source }) => [
+          ...acc,
+          {
+            ...formatAlertToEcsSignal(_source as {}),
+            _id,
+            _index,
+            timestamp: _source['@timestamp'],
+          },
+        ],
+        []
+      ) ?? []
+    );
+  };
+
+  return {
+    username: <EuiIcon type="logoOsquery" size="m" />,
+    className: 'comment-alert comment-osquery_alert',
+    type: 'update',
+    event: (
+      <AlertCommentEvent
+        alertId={alertIds[0]}
+        ruleId={ruleId}
+        ruleName={ruleName}
+        alertsCount={alertIds.length}
+        commentType={CommentType.generatedAlert}
+      />
+    ),
+    'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
+    timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+    timelineIcon: 'bell',
+    actions: (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UserActionCopyLink id={action.actionId} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <InvestigateInTimelineAction
+            ariaLabel={i18n.SEND_ALERT_TO_TIMELINE}
+            alertIds={alertIds}
+            key="investigate-in-timeline"
+            ecsRowData={null}
+            fetchEcsAlertsData={fetchEcsAlertsData}
+            nonEcsRowData={[
+              {
+                field: 'action_id',
+                value: osqueryActionId,
+              },
+              { field: 'alert_type', value: ['osquery_alert'] },
+            ]}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+  };
+};
+
 interface Signal {
   rule: {
     id: string;

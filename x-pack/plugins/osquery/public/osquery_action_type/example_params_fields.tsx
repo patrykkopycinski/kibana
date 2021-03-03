@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { EuiTextArea } from '@elastic/eui';
+import React, { Fragment, useEffect } from 'react';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionParamsProps } from '../../../triggers_actions_ui/public/types';
 
@@ -21,10 +20,20 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   errors,
 }) => {
   console.error('actionParams', actionParams, index, errors);
-  const { message } = actionParams;
+
+  useEffect(() => {
+    editAction(
+      'message',
+      {
+        alerts: `[{{context.alerts}}]`,
+      },
+      index
+    );
+  }, []);
+
   return (
     <Fragment>
-      <EuiTextArea
+      {/* <EuiTextArea
         fullWidth
         isInvalid={errors.message.length > 0 && message !== undefined}
         name="message"
@@ -37,7 +46,7 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
             editAction('message', '', index);
           }
         }}
-      />
+      /> */}
     </Fragment>
   );
 };

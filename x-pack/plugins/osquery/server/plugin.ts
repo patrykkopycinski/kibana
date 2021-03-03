@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
+import { curry, uniq, mapKeys, some } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeExecutorResult } from '../../actions/server/types';
 import {
@@ -23,6 +23,7 @@ import { osquerySearchStrategyProvider } from './search_strategy/osquery';
 import { initSavedObjects } from './saved_objects';
 import { OsqueryAppContext, OsqueryAppContextService } from './lib/osquery_app_context_services';
 import { ConfigType } from './config';
+import { createActionHandler } from './handlers';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
@@ -57,7 +58,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       id: '.osquery',
       name: 'Osquery',
       minimumLicenseRequired: 'gold',
-      executor: curry(executor)({}),
+      executor: curry(executor)({
+        osqueryContext,
+      }),
     });
 
     core.getStartServices().then(([, depsStart]) => {
@@ -73,8 +76,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.logger.debug('osquery: Started');
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
 
+    // console.log('sss', plugins.case);
+
     this.osqueryAppContextService.start({
       ...plugins.fleet,
+      getCaseClient: plugins.case.getCaseClient,
       // @ts-expect-error update types
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
@@ -93,5 +99,120 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
 // @ts-expect-error update types
 async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
+  // console.log('executor,', payload, execOptions);
+  console.log(
+    'asdsd',
+    Object.keys(payload.osqueryContext),
+    Object.keys(execOptions),
+    Object.keys(execOptions.services),
+    Object.keys(execOptions.params)
+  );
+  // console.log(
+  //   'execOptions.params.message.alerts',
+  //   JSON.parse(execOptions.params.message.alerts).length
+  // );
+  const parsedAlerts = JSON.parse(execOptions.params.message.alerts);
+  // @ts-expect-error update types
+  const affectedHosts = uniq(parsedAlerts.map((alert) => alert.host?.name));
+  // @ts-expect-error update types
+  const agentIds = uniq(parsedAlerts.map((alert) => alert.agent?.id));
+
+  console.log('affectedHosts', affectedHosts);
+  console.log('agentIds', agentIds);
+
+  const agentsService = payload.osqueryContext.service.getAgentService();
+  const policyService = payload.osqueryContext.service.getAgentPolicyService();
+  const caseClient = payload.osqueryContext.service.getCaseClient(
+    execOptions.services.scopedClusterClient,
+    execOptions.services.savedObjectsClient,
+    {
+      email: '',
+      full_name: '',
+      username: '',
+    }
+  );
+  console.log(agentsService);
+
+  const agents = await agentsService.getAgents(
+    execOptions.services.savedObjectsClient,
+    execOptions.services.scopedClusterClient,
+    ['b64923ff-e12c-40bf-a42e-159c8f12a5e8']
+  );
+  console.log('agents', JSON.stringify(agents, null, 2));
+  const agentsById = mapKeys(agents, 'id');
+
+  // console.log('agentsById', JSON.stringify(agentsById, null, 2));
+
+  // @ts-expect-error update types
+  const policyIds: string[] = uniq(agents.map((agent) => agent.policy_id));
+
+  // console.log('policyIds', policyIds);
+
+  const policies = await Promise.all(
+    policyIds.map(
+      async (policyId) => await policyService.get(execOptions.services.savedObjectsClient, policyId)
+    )
+  );
+  const policiesById = mapKeys(policies, 'id');
+
+  // console.log(
+  //   'policiesById',
+  //   Object.keys(policiesById),
+  //   Object.keys(policiesById['fde75890-7551-11eb-b738-97756114a699'])
+  // );
+
+  const agentsWithOsqueryPolicy = agents.filter((agent) => {
+    if (!agent.policy_id) {
+      return false;
+    }
+
+    const agentPolicy = policiesById[agent.policy_id];
+
+    if (!agentPolicy) {
+      return false;
+    }
+
+    return some(
+      agentPolicy.package_policies,
+      (packagePolicy) => packagePolicy.package.name === 'osquery_elastic_managed'
+    );
+  });
+
+  console.log('agentsWithOsqueryPolicy', agentsWithOsqueryPolicy.length);
+
+  // console.log('caseClient', caseClient, Object.keys(caseClient));
+
+  // console.log('policies', JSON.stringify(policies, null, 2));
+
+  const response = await createActionHandler(
+    execOptions.services.scopedClusterClient,
+    execOptions.services.savedObjectsClient,
+    {
+      agents: ['b64923ff-e12c-40bf-a42e-159c8f12a5e8'],
+      query: {
+        query: 'select * from uptime',
+      },
+    }
+  );
+
+  const caseId = '53428a60-7aae-11eb-a532-0f6743084623';
+
+  if (caseClient && caseId) {
+    caseClient.addComment({
+      caseId,
+      comment: {
+        type: 'osquery_alert',
+        alertId: response.actions[0].action_id,
+        index: '.fleet-actions',
+        rule: {
+          id: '',
+          name: '',
+        },
+      },
+    });
+  }
+
+  // console.log('response', JSON.stringify(response, null, 2));
+
   return { status: 'ok', data: {}, actionId: execOptions.actionId };
 }

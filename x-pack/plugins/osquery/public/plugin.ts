@@ -88,7 +88,9 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       },
     });
 
-    // plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
+    if (config.actionEnabled) {
+      plugins.triggersActionsUi.actionTypeRegistry.register(getActionType());
+    }
 
     // Return methods that should be available to other plugins
     return {};

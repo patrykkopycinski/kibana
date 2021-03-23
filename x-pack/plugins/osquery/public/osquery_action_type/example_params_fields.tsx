@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-/* eslint-disable react-perf/jsx-no-new-function-as-prop, react/jsx-no-bind */
+import React, { useEffect } from 'react';
 
-import React, { Fragment } from 'react';
-import { EuiTextArea } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionParamsProps } from '../../../triggers_actions_ui/public/types';
+import { OsqueryEditor } from '../editor';
 
 interface ExampleActionParams {
   message: string;
@@ -23,24 +22,33 @@ const ExampleParamsFields: React.FunctionComponent<ActionParamsProps<ExampleActi
   errors,
 }) => {
   // console.error('actionParams', actionParams, index, errors);
-  const { message } = actionParams;
+  const { query } = actionParams;
+
+  useEffect(() => {
+    editAction(
+      'message',
+      {
+        alerts: `[{{context.alerts}}]`,
+      },
+      index
+    );
+  }, []);
+
   return (
-    <Fragment>
-      <EuiTextArea
-        fullWidth
-        isInvalid={errors.message.length > 0 && message !== undefined}
-        name="message"
-        value={message || ''}
-        onChange={(e) => {
-          editAction('message', e.target.value, index);
-        }}
-        onBlur={() => {
-          if (!message) {
-            editAction('message', '', index);
-          }
-        }}
-      />
-    </Fragment>
+    <OsqueryEditor
+      fullWidth
+      isInvalid={errors.query.length > 0 && query !== undefined}
+      name="query"
+      defaultValue={query || ''}
+      onChange={(newQueryValue) => {
+        editAction('query', newQueryValue, index);
+      }}
+      onBlur={() => {
+        if (!query) {
+          editAction('query', '', index);
+        }
+      }}
+    />
   );
 };
 

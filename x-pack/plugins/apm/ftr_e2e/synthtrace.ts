@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable-next-line*/
-    export default {
-  'apm_8.0.0': {
-    start: '2021-08-03T06:50:15.910Z',
-    end: '2021-08-03T07:20:15.910Z',
-  },
+export const synthtrace = {
+  index: (events: any[]) =>
+    new Promise((resolve) => {
+      cy.task('synthtrace:index', events).then(resolve);
+    }),
+  clean: () =>
+    new Promise((resolve) => {
+      cy.task('synthtrace:clean').then(resolve);
+    }),
 };

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('import_geojson', function () {
-    loadTestFile(require.resolve('./add_layer_import_panel'));
-    loadTestFile(require.resolve('./file_indexing_panel'));
-  });
-}
+export { ShapefileImporter, SHAPEFILE_TYPES } from './shapefile_importer';

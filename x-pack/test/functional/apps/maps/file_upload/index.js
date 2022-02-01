@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type { GeoJsonPreview } from './geojson_importer';
-export { GeoJsonImporter, GEOJSON_FILE_TYPES } from './geojson_importer';
+export default function ({ loadTestFile }) {
+  describe('geo file upload', function () {
+    loadTestFile(require.resolve('./wizard'));
+    loadTestFile(require.resolve('./geojson'));
+    loadTestFile(require.resolve('./shapefile'));
+  });
+}

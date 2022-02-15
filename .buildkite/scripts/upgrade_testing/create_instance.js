@@ -28,7 +28,6 @@ const createInstance = async (version) => {
   } catch (error) {
     console.log('error', error);
     throw error;
-    // throw new pRetry.AbortError(error);
   }
 
   if (response.status === 404) {
@@ -42,8 +41,6 @@ const isInstanceReady = async ({ deploymentId }) => {
   console.log('isInstanceReady');
 
   const clusterInfo = await request.get(`/deployments/${deploymentId}`);
-
-  // console.log('clusterInfo', clusterInfo.data);
 
   if (!clusterInfo.data?.healthy) {
     throw new Error('Instance not ready yet');

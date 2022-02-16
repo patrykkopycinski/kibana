@@ -1,8 +1,8 @@
 #!/bin/bash
 
-set -euo pipefail
+# set -euo pipefail
 
-.buildkite/scripts/lifecycle/pre_build.sh
-.buildkite/scripts/bootstrap.sh
+# .buildkite/scripts/lifecycle/pre_build.sh
+# .buildkite/scripts/bootstrap.sh
 
-node .buildkite/scripts/upgrade_testing/create_instance_runner.js
+node .buildkite/scripts/upgrade_testing/create_instance_runner.js $1 $2

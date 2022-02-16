@@ -10,6 +10,7 @@ const find = require('lodash/find');
 const pRetry = require('p-retry');
 const axios = require('axios');
 const getConfig = require('./upgrade_testing_config');
+const execa = require('execa');
 
 const CLOUD_API_KEY = process.env.CLOUD_API_KEY_SECRET;
 
@@ -62,5 +63,18 @@ module.exports = async function (version) {
     kibana: clusterInfo.resources.kibana[0].info.metadata.endpoint,
   };
 
+  // Store data in buildkite meta-date to be used in next steps
+  // await execa.command(`buildkite-agent meta-data set "resources" ${JSON.stringify(resources)}`, {
+  //   shell: true,
+  // });
+  await execa.command(`buildkite-agent meta-data set "deploymentId" ${deploymentId}`, {
+    shell: true,
+  });
+  // await execa.command(
+  //   `buildkite-agent meta-data set "credentials" ${JSON.stringify(credentials)}`,
+  //   {
+  //     shell: true,
+  //   }
+  // );
   return { resources, deploymentId, credentials };
 };

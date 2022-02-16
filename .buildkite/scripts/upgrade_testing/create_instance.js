@@ -20,13 +20,11 @@ const request = axios.create({
 });
 
 const createInstance = async (version) => {
-  console.log('CLOUD_API_KEY', CLOUD_API_KEY);
-
   let response;
   try {
     response = await request.post('deployments?validate_only=false', getConfig(version));
   } catch (error) {
-    console.log('error', error);
+    console.error(error);
     throw error;
   }
 
@@ -38,10 +36,9 @@ const createInstance = async (version) => {
 };
 
 const isInstanceReady = async ({ deploymentId }) => {
-  console.log('isInstanceReady');
+  console.log('Wait for instance to be ready');
 
   const clusterInfo = await request.get(`/deployments/${deploymentId}`);
-
   if (!clusterInfo.data?.healthy) {
     throw new Error('Instance not ready yet');
   }
@@ -55,8 +52,6 @@ module.exports = async function (version) {
   const deploymentId = instance.data.id;
   const credentials = find(instance.data.resources, { kind: 'elasticsearch' }).credentials;
 
-  console.log('credentials', credentials);
-
   const clusterInfo = await pRetry(() => isInstanceReady({ deploymentId }), {
     retries: 10,
     minTimeout: 30 * 1000,
@@ -66,6 +61,6 @@ module.exports = async function (version) {
     elasticsearch: clusterInfo.resources.elasticsearch[0].info.metadata.endpoint,
     kibana: clusterInfo.resources.kibana[0].info.metadata.endpoint,
   };
-  console.log(deploymentId);
+
   return { resources, deploymentId, credentials };
 };

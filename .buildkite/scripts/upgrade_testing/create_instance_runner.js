@@ -7,12 +7,18 @@
  */
 
 const createInstance = require('./create_instance');
+const yargs = require('yargs');
 
 (async () => {
-  const selectedVersion = process.argv.version;
+  const argv = yargs
+    .option('stackVersion', {
+      alias: 'v',
+      description: 'Cloud stack version',
+      type: 'string',
+    })
+    .demandOption('stackVersion')
+    .help()
+    .alias('help', 'h').argv;
 
-  if (!selectedVersion) {
-    throw new Error('There is no version specified. You have to specify a version');
-  }
-  return await createInstance(selectedVersion);
+  return await createInstance(argv.stackVersion);
 })();

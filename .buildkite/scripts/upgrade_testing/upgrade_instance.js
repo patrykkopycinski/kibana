@@ -20,7 +20,7 @@ const request = axios.create({
 });
 
 const isInstanceReady = async ({ deploymentId }) => {
-  console.log('isInstanceReady');
+  console.log('Waiting for instance to be upgraded');
 
   const clusterInfo = await request.get(`/deployments/${deploymentId}`);
 
@@ -32,7 +32,6 @@ const isInstanceReady = async ({ deploymentId }) => {
 };
 
 const upgradeInstance = async ({ deploymentId, version }) => {
-  console.log('upgradeInstance');
   const clusterInfo = await isInstanceReady({ deploymentId });
 
   const newConfig = {
@@ -71,7 +70,7 @@ const upgradeInstance = async ({ deploymentId, version }) => {
     minTimeout: 30 * 1000,
   });
 
-  console.log('isREADY!');
+  console.log('Instance has been upgraded successfully');
 
   return response;
 };

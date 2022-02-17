@@ -7,7 +7,7 @@
  */
 
 const execa = require('execa');
-// const deleteInstance = require('./delete_instance');
+const deleteInstance = require('./delete_instance');
 
 module.exports = async function (deploymentId, credentials, resources) {
   const baseCommand = `CYPRESS_BASE_URL=https://${credentials.username}:${credentials.password}@${resources.kibana}:9243 CYPRESS_ELASTICSEARCH_URL=https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243 CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution cypress:run:cloud-upgrade`;
@@ -21,7 +21,7 @@ module.exports = async function (deploymentId, credentials, resources) {
     );
   } catch (error) {
     console.error('error', error);
-    // await deleteInstance(deploymentId);
+    await deleteInstance(deploymentId);
   }
   await execa.command(`buildkite-agent meta-data set "baseCommand" ${baseCommand}`, {
     shell: true,

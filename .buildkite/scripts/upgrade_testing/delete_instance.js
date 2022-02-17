@@ -17,6 +17,7 @@ const request = axios.create({
 });
 
 module.exports = async function (deploymentId) {
+  if (!deploymentId) throw 'A deploymend id is needed for this action';
   let response;
   try {
     response = await request.post(`deployments/${deploymentId}/_shutdown`);

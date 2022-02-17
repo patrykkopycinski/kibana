@@ -15,18 +15,18 @@ const execa = require('execa');
       shell: true,
     })
   ).stdout;
-  console.log('deploymentId', deploymentId);
+
   const credentials = (
     await execa.command(`buildkite-agent meta-data get "credentials"`, {
       shell: true,
     })
   ).stdout;
-  console.log('credentials', credentials);
+
   const resources = (
     await execa.command(`buildkite-agent meta-data get "resources"`, {
       shell: true,
     })
   ).stdout;
-  console.log('resources', resources);
-  return await setUpInstance();
+
+  return await setUpInstance(deploymentId, JSON.parse(credentials), JSON.parse(resources));
 })();

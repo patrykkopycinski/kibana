@@ -77,9 +77,9 @@ const upgradeInstance = async ({ deploymentId, version }) => {
 };
 
 module.exports = async function (deploymentId, version) {
-  await upgradeInstance({ deploymentId });
+  await upgradeInstance({ deploymentId, version });
 
-  await pRetry(() => isInstanceReady({ deploymentId, version }), {
+  await pRetry(() => isInstanceReady({ deploymentId }), {
     retries: 10,
     minTimeout: 30 * 1000,
   });

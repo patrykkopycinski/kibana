@@ -16,17 +16,29 @@ const execa = require('execa');
     })
   ).stdout;
 
-  const credentials = (
-    await execa.command(`buildkite-agent meta-data get "credentials"`, {
+  const kibana = (
+    await execa.command(`buildkite-agent meta-data get "kibana"`, {
       shell: true,
     })
   ).stdout;
 
-  const resources = (
-    await execa.command(`buildkite-agent meta-data get "resources"`, {
+  const elasticsearch = (
+    await execa.command(`buildkite-agent meta-data get "elasticsearch"`, {
       shell: true,
     })
   ).stdout;
 
-  return await setUpInstance(deploymentId, JSON.parse(credentials), JSON.parse(resources));
+  const username = (
+    await execa.command(`buildkite-agent meta-data get "username"`, {
+      shell: true,
+    })
+  ).stdout;
+
+  const password = (
+    await execa.command(`buildkite-agent meta-data get "password"`, {
+      shell: true,
+    })
+  ).stdout;
+
+  return await setUpInstance(deploymentId, { username, password }, { kibana, elasticsearch });
 })();

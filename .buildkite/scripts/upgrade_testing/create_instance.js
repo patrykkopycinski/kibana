@@ -64,17 +64,17 @@ module.exports = async function (version) {
   };
 
   // Store data in buildkite meta-date to be used in next steps
-  // await execa.command(`buildkite-agent meta-data set "resources" ${JSON.stringify(resources)}`, {
-  //   shell: true,
-  // });
+  await execa.command(`buildkite-agent meta-data set "resources" ${JSON.stringify(resources)}`, {
+    shell: true,
+  });
   await execa.command(`buildkite-agent meta-data set "deploymentId" ${deploymentId}`, {
     shell: true,
   });
-  // await execa.command(
-  //   `buildkite-agent meta-data set "credentials" ${JSON.stringify(credentials)}`,
-  //   {
-  //     shell: true,
-  //   }
-  // );
+  await execa.command(
+    `buildkite-agent meta-data set "credentials" ${JSON.stringify(credentials)}`,
+    {
+      shell: true,
+    }
+  );
   return { resources, deploymentId, credentials };
 };

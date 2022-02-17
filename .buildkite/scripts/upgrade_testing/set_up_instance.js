@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-const execa = require('execa');
+// const execa = require('execa');
 // const deleteInstance = require('./delete_instance');
 
 // module.exports = async function (deploymentId, credentials, resources) {
 module.exports = async function () {
   // const baseCommand = `CYPRESS_BASE_URL=https://${credentials.username}:${credentials.password}@${resources.kibana}:9243 CYPRESS_ELASTICSEARCH_URL=https://${credentials.username}:${credentials.password}@${resources.elasticsearch}:9243 CYPRESS_ELASTICSEARCH_USERNAME=${credentials.username} CYPRESS_ELASTICSEARCH_PASSWORD=${credentials.password} yarn --cwd x-pack/plugins/security_solution cypress:run:cloud-upgrade`;
-
   // console.log('command', baseCommand);
-
   // try {
   //   await execa.command(
   //     `${baseCommand} --spec cypress/cloud_upgrade_integration/trusted_apps/trusted_apps_pre.spec.ts`,
@@ -27,9 +25,4 @@ module.exports = async function () {
   //   await deleteInstance(deploymentId);
   // }
   // return baseCommand;
-  const deploymentId = await execa.command(`buildkite-agent meta-data get "deploymentId"`, {
-    shell: true,
-  });
-
-  console.log('deploymentId', deploymentId);
 };

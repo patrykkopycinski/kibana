@@ -18,4 +18,5 @@ const execa = require('execa');
 
   console.log(deploymentId);
   // return await deleteInstance(deploymentId);
+  // comment for testing
 })();

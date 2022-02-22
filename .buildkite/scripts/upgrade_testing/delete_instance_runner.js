@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// const deleteInstance = require('./delete_instance');
+const deleteInstance = require('./delete_instance');
 const execa = require('execa');
 
 (async () => {
@@ -16,7 +16,5 @@ const execa = require('execa');
     })
   ).stdout;
 
-  console.log(deploymentId);
-  // return await deleteInstance(deploymentId);
-  // comment for testing
+  return await deleteInstance(deploymentId);
 })();

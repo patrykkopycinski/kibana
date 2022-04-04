@@ -343,8 +343,7 @@ export const OsqueryColumnField = React.memo(
 
 export interface ECSMappingEditorFieldProps {
   path: string;
-  query: string;
-  euiFieldProps: EuiComboBoxProps<{}>;
+  euiFieldProps?: EuiComboBoxProps<{}>;
 }
 
 interface ECSMappingEditorFormProps {
@@ -448,7 +447,6 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
 }) => {
   console.error('item', item, isDisabled, isLastItem);
 
-  const form = useFormContext();
   const [formData] = useFormData();
 
   const handleAddClick = useCallback(() => {
@@ -541,11 +539,11 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
             <EuiFlexItem>
               <CommonUseField
                 path={`${item.path}.key`}
-                // component={ECSComboboxField}
-                // euiFieldProps={ecsComboBoxEuiFieldProps}
-                // readDefaultValueOnForm={!item.isNew}
-                // validationData={ecsFieldValidationData}
-                // config={ecsFieldConfig}
+                component={ECSComboboxField}
+                euiFieldProps={ecsComboBoxEuiFieldProps}
+                readDefaultValueOnForm={!item.isNew}
+                validationData={ecsFieldValidationData}
+                config={ecsFieldConfig}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -622,11 +620,9 @@ export const ECSMappingEditorField = React.memo(
   ({ path, euiFieldProps }: ECSMappingEditorFieldProps) => {
     const [osquerySchemaOptions, setOsquerySchemaOptions] = useState<OsquerySchemaOption[]>([]);
 
-    const [{ savedQueryId, query, ecs_mapping }] = useFormData({
+    const [{ query }] = useFormData({
       watch: ['savedQueryId', 'query', 'ecs_mapping'],
     });
-
-    console.error('ecs_mapping', ecs_mapping);
 
     useEffect(() => {
       setOsquerySchemaOptions((currentValue) => {
@@ -810,27 +806,27 @@ export const ECSMappingEditorField = React.memo(
       });
     }, [query]);
 
-    // const RenderUseArrayItems = useCallback(
-    //   ({ items, addItem, removeItem }) => {
-    //     console.error('items', items);
-    //     return (
-    //       <>
-    //         {items.map((item) => (
-    //           <ECSMappingEditorForm
-    //             key={item.id}
-    //             osquerySchemaOptions={osquerySchemaOptions}
-    //             item={item}
-    //             onAdd={addItem}
-    //             onDelete={removeItem}
-    //             isDisabled={!!euiFieldProps?.isDisabled}
-    //             isLastItem={item.path === `ecs_mapping[${items.length - 1}]`}
-    //           />
-    //         ))}
-    //       </>
-    //     );
-    //   },
-    //   [euiFieldProps?.isDisabled, osquerySchemaOptions]
-    // );
+    const RenderUseArrayItems = useCallback(
+      ({ items, addItem, removeItem }) => {
+        console.error('items', items);
+        return (
+          <>
+            {items.map((item) => (
+              <ECSMappingEditorForm
+                key={item.id}
+                osquerySchemaOptions={osquerySchemaOptions}
+                item={item}
+                onAdd={addItem}
+                onDelete={removeItem}
+                isDisabled={!!euiFieldProps?.isDisabled}
+                isLastItem={item.path === `ecs_mapping[${items.length - 1}]`}
+              />
+            ))}
+          </>
+        );
+      },
+      [euiFieldProps?.isDisabled, osquerySchemaOptions]
+    );
 
     return (
       <>
@@ -872,37 +868,7 @@ export const ECSMappingEditorField = React.memo(
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <UseArray
-          // key={formData.savedQueryId }
-          path={path}
-          // initialNumberOfItems={(ecs_mapping ?? []).length + 1}
-        >
-          {({ items, addItem, removeItem }) => {
-            console.error('items', items);
-            return (
-              <>
-                {items.map((item) => (
-                  <div key={item.id}>
-                    <UseField
-                      path={`${item.path}.key`}
-                      defaultValue="dupa"
-                      readDefaultValueOnForm={true}
-                    />
-                    {/* <ECSMappingEditorForm
-                      // key={item.id}
-                      osquerySchemaOptions={osquerySchemaOptions}
-                      item={item}
-                      onAdd={addItem}
-                      onDelete={removeItem}
-                      isDisabled={!!euiFieldProps?.isDisabled}
-                      isLastItem={item.path === `ecs_mapping[${items.length - 1}]`}
-                    /> */}
-                  </div>
-                ))}
-              </>
-            );
-          }}
-        </UseArray>
+        <UseArray path={path}>{RenderUseArrayItems}</UseArray>
       </>
     );
   }

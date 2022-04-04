@@ -54,16 +54,12 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
     [viewMode]
   );
 
-  const [{ query, ecs_mapping }] = useFormData({ watch: ['query', 'ecs_mapping'] });
-
   const handleHidePlayground = useCallback(() => setPlaygroundVisible(false), []);
 
   const handleTogglePlayground = useCallback(
     () => setPlaygroundVisible((prevValue) => !prevValue),
     []
   );
-
-  console.error('DUPA', ecs_mapping);
 
   return (
     <>
@@ -75,45 +71,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseArray path="ecs_mapping" initialNumberOfItems={4}>
-            {({ items, addItem, removeItem }) => (
-              <>
-                {items.map(({ id, path, isNew }) => (
-                  <EuiFlexGroup key={id} alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      {/* Processor name */}
-                      <UseField
-                        path={`${path}.key`}
-                        // config={processorNameConfig}
-                        component={TextField}
-                        readDefaultValueOnForm={!isNew}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      {/* Processor type & config */}
-                      {/* <ProcessorTypeConfigurator basePath={path} readDefaultValueOnForm={!isNew} /> */}
-                    </EuiFlexItem>
-                    {items.length > 1 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="minusInCircle"
-                          onClick={() => removeItem(id)}
-                          aria-label="Remove processor"
-                        />
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-
-                {/* Add processor button */}
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiButtonEmpty onClick={addItem}>Add processor</EuiButtonEmpty>
-                </EuiFlexGroup>
-              </>
-            )}
-          </UseArray>
-          {/* <ECSMappingEditorField path="ecs_mapping" query={query} /> */}
+          <ECSMappingEditorField path="ecs_mapping" />
         </EuiFlexItem>
       </EuiFlexGroup>
       {!viewMode && hasPlayground && (

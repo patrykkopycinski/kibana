@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-export type { Subscription } from './subject';
+import { FieldConfig } from '../../types';
 
-export { Subject } from './subject';
-
-export { flattenObject, unflattenObject, mapFormFields, stripOutUndefinedValues } from './utils';
+/**
+ * The "title" field base configuration
+ */
+export const titleConfigBase: FieldConfig<string> = {
+  label: 'Title',
+  helpText: 'This is a help text for the field.',
+};

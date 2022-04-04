@@ -19,6 +19,7 @@ export const storybookAliases = {
   data_enhanced: 'x-pack/plugins/data_enhanced/.storybook',
   discover: 'src/plugins/discover/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
+  es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
   expression_image: 'src/plugins/expression_image/.storybook',
   expression_metric_vis: 'src/plugins/chart_expressions/expression_metric/.storybook',

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { Subscription } from './subject';
+import { Props as FormProps } from '../form';
 
-export { Subject } from './subject';
-
-export { flattenObject, unflattenObject, mapFormFields, stripOutUndefinedValues } from './utils';
+export type FormArgs = Pick<FormProps, 'children' | 'FormWrapper'>;

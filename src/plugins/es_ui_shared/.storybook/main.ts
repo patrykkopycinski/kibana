@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { Subscription } from './subject';
+import { defaultConfig } from '@kbn/storybook';
 
-export { Subject } from './subject';
-
-export { flattenObject, unflattenObject, mapFormFields, stripOutUndefinedValues } from './utils';
+module.exports = defaultConfig;

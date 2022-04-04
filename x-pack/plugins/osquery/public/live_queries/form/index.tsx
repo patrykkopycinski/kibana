@@ -17,7 +17,6 @@ import {
   EuiAccordion,
   EuiAccordionProps,
 } from '@elastic/eui';
-import uuid from 'uuid';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -169,6 +168,22 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     },
     serializer: ({ savedQueryId, ...formData }) =>
       pickBy({ ...formData, saved_query_id: savedQueryId }, (value) => !isEmpty(value)),
+    deserializer: (payload) => {
+      if (!payload) return {} as PackFormData;
+
+      return {
+        agentSelection: payload.id,
+        savedQueryId: payload.description,
+        query: payload.query,
+        ecs_mapping: Object.entries(payload.ecs_mapping ?? {}).map(([key, value]) => ({
+          key,
+          result: {
+            type: Object.keys(value)[0],
+            value: Object.values(value)[0],
+          },
+        })),
+      };
+    },
     defaultValue: deepMerge(
       {
         agentSelection: {
@@ -229,8 +244,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         updateFieldValues({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
-          ecs_mapping: savedQuery.ecs_mapping ?? {},
+          ecs_mapping: savedQuery.ecs_mapping ?? [
+            {
+              key: '',
+              result: {
+                type: '',
+                value: '',
+              },
+            },
+          ],
         });
+
+        if (savedQuery.ecs_mapping) {
+          setAdvancedContentState('open');
+        }
       } else {
         setFieldValue('savedQueryId', null);
       }

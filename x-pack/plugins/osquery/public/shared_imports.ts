@@ -15,6 +15,8 @@ export type {
   ValidationError,
   ValidationFunc,
   ValidationFuncArg,
+  FormArrayField,
+  ArrayItem,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 export {
   getUseField,
@@ -32,6 +34,7 @@ export {
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
+  TextField,
   Field,
   ComboBoxField,
   ToggleField,

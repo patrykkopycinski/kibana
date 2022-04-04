@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +17,7 @@ import {
   EuiAccordion,
   EuiAccordionProps,
 } from '@elastic/eui';
+import uuid from 'uuid';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,21 +26,31 @@ import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';
 import styled from 'styled-components';
 
-import { pickBy, isEmpty } from 'lodash';
-import { UseField, Form, FormData, useForm, useFormData, FIELD_TYPES } from '../../shared_imports';
+import { pickBy, get, isEmpty, filter, last } from 'lodash';
+import { constructMultiTermOtherFilter } from 'src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper';
+import {
+  Field,
+  getUseField,
+  UseField,
+  useFormData,
+  fieldValidators,
+  Form,
+  FormData,
+  useFormContext,
+  useForm,
+  FIELD_TYPES,
+} from '../../shared_imports';
 import { AgentsTableField } from './agents_table_field';
 import { LiveQueryQueryField } from './live_query_query_field';
 import { useKibana } from '../../common/lib/kibana';
 import { ResultTabs } from '../../routes/saved_queries/edit/tabs';
 import { queryFieldValidation } from '../../common/validations';
-import { fieldValidators } from '../../shared_imports';
 import { SavedQueryFlyout } from '../../saved_queries';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
-import {
-  ECSMappingEditorField,
-  ECSMappingEditorFieldRef,
-} from '../../packs/queries/lazy_ecs_mapping_editor_field';
+import { ECSMappingEditorField } from '../../packs/queries/ecs_mapping_editor_field';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
+
+export const CommonUseField = getUseField({ component: Field });
 
 const FORM_ID = 'liveQueryForm';
 
@@ -75,7 +88,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   enabled = true,
   hideFullscreen,
 }) => {
-  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const permissions = useKibana().services.application.capabilities.osquery;
   const { http } = useKibana().services;
   const [advancedContentState, setAdvancedContentState] =
@@ -136,7 +148,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       ],
     },
     ecs_mapping: {
-      defaultValue: {},
+      defaultValue: [],
       type: FIELD_TYPES.JSON,
       validations: [],
     },
@@ -146,19 +158,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     id: FORM_ID,
     schema: formSchema,
     onSubmit: async (formData, isValid) => {
-      const ecsFieldValue = await ecsFieldRef?.current?.validate();
-
-      if (isValid && !!ecsFieldValue) {
+      if (isValid) {
         try {
-          await mutateAsync(
-            pickBy(
-              {
-                ...formData,
-                ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
-              },
-              (value) => !isEmpty(value)
-            )
-          );
+          await mutateAsync(pickBy(formData, (value) => !isEmpty(value)));
           // eslint-disable-next-line no-empty
         } catch (e) {}
       }
@@ -178,19 +180,19 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         query: '',
         savedQueryId: null,
+        // ecs_mapping: [],
       },
       defaultValue ?? {}
     ),
   });
 
-  const { setFieldValue, submit, isSubmitting } = form;
-
+  const { setFieldValue, updateFieldValues, submit, isSubmitting, getFields } = form;
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
   const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const [{ agentSelection, ecs_mapping, query, savedQueryId }] = useFormData({
+  const [{ agentSelection, query, savedQueryId, ecs_mapping }] = useFormData({
     form,
-    watch: ['agentSelection', 'ecs_mapping', 'query', 'savedQueryId'],
+    watch: ['agentSelection', 'query', 'savedQueryId'],
   });
 
   const agentSelected = useMemo(
@@ -209,12 +211,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const queryStatus = useMemo(() => {
     if (!agentSelected) return 'disabled';
-    if (isError || !form.getFields().query.isValid) return 'danger';
+    if (isError || !getFields().query.isValid) return 'danger';
     if (isLoading) return 'loading';
     if (isSuccess) return 'complete';
 
     return 'incomplete';
-  }, [agentSelected, isError, isLoading, isSuccess, form]);
+  }, [agentSelected, getFields, isError, isLoading, isSuccess]);
 
   const resultsStatus = useMemo(
     () => (queryStatus === 'complete' ? 'incomplete' : 'disabled'),
@@ -223,20 +225,18 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const handleSavedQueryChange = useCallback(
     (savedQuery) => {
+      console.error('savedQuery', savedQuery);
       if (savedQuery) {
-        setFieldValue('query', savedQuery.query);
-        setFieldValue('savedQueryId', savedQuery.savedQueryId);
-        if (!isEmpty(savedQuery.ecs_mapping)) {
-          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
-          setAdvancedContentState('open');
-        } else {
-          setFieldValue('ecs_mapping', {});
-        }
+        updateFieldValues({
+          query: savedQuery.query,
+          savedQueryId: savedQuery.savedQueryId,
+          ecs_mapping: savedQuery.ecs_mapping ?? {},
+        });
       } else {
         setFieldValue('savedQueryId', null);
       }
     },
-    [setFieldValue]
+    [setFieldValue, updateFieldValues]
   );
 
   const commands = useMemo(
@@ -318,11 +318,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               isDisabled={queryComponentProps.disabled}
             >
               <EuiSpacer size="xs" />
-              <UseField
+              <ECSMappingEditorField
                 path="ecs_mapping"
-                component={ECSMappingEditorField}
                 query={query}
-                fieldRef={ecsFieldRef}
                 euiFieldProps={ecsFieldProps}
               />
             </StyledEuiAccordion>

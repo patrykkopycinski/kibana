@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, FormSchema } from '../../shared_imports';
+import ECSSchema from '../../common/schemas/ecs/v8.2.0.json';
 
-export const formSchema: FormSchema = {
-  agents: {
-    type: FIELD_TYPES.MULTI_SELECT,
-  },
-  query: {
-    type: FIELD_TYPES.TEXTAREA,
-    validations: [],
-  },
-};
+export const ECSSchemaOptions = ECSSchema.map((ecs) => ({
+  label: ecs.field,
+  value: ecs,
+}));
+
+export type ECSSchemaOption = typeof ECSSchemaOptions[0];

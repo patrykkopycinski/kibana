@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import {
   EuiFlyout,
   EuiTitle,
@@ -19,7 +18,7 @@ import {
   EuiButton,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -29,9 +28,10 @@ import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
 import { UsePackQueryFormProps, PackFormData, usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
-import { ECSMappingEditorField, ECSMappingEditorFieldRef } from './lazy_ecs_mapping_editor_field';
+import { ECSMappingEditorField } from './ecs_mapping_editor_field';
 
 const CommonUseField = getUseField({ component: Field });
+const GhostFormField = () => <></>;
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -46,44 +46,34 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   onSave,
   onClose,
 }) => {
-  const ecsFieldRef = useRef<ECSMappingEditorFieldRef>();
   const [isEditMode] = useState(!!defaultValue);
   const { form } = usePackQueryForm({
     uniqueQueryIds,
     defaultValue,
-    handleSubmit: async (payload, isValid) => {
-      const ecsFieldValue = await ecsFieldRef?.current?.validate();
-      const isEcsFieldValueValid =
-        ecsFieldValue &&
-        Object.values(ecsFieldValue).every((field) => !isEmpty(Object.values(field)[0]));
-
-      return new Promise((resolve) => {
-        if (isValid && isEcsFieldValueValid) {
-          onSave({
-            ...payload,
-            ...(isEmpty(ecsFieldValue) ? {} : { ecs_mapping: ecsFieldValue }),
-          });
+    handleSubmit: async (payload, isValid) =>
+      new Promise((resolve) => {
+        if (isValid) {
+          onSave(payload);
           onClose();
         }
         resolve();
-      });
-    },
+      }),
   });
 
   const { submit, setFieldValue, reset, isSubmitting, validate } = form;
-
-  const [{ query }] = useFormData({
-    form,
-    watch: ['query'],
-  });
 
   const handleSetQueryValue = useCallback(
     (savedQuery) => {
       reset();
 
       if (savedQuery) {
+        console.error('savedQuery', savedQuery);
         setFieldValue('id', savedQuery.id);
         setFieldValue('query', savedQuery.query);
+
+        if (savedQuery.savedQueryId) {
+          setFieldValue('savedQueryId', savedQuery.savedQueryId);
+        }
 
         if (savedQuery.description) {
           setFieldValue('description', savedQuery.description);
@@ -101,9 +91,25 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           setFieldValue('version', [savedQuery.version]);
         }
 
-        if (savedQuery.ecs_mapping) {
-          setFieldValue('ecs_mapping', savedQuery.ecs_mapping);
-        }
+        // if (savedQuery.ecs_mapping) {
+        //   console.error('sss', savedQuery);
+        //   setFieldValue('ecs_mapping__array', [
+        //     {
+        //       id: 0,
+        //       path: `ecs_mapping[0]`,
+        //       isNew: false,
+        //     },
+        //   ]);
+        //   setFieldValue('ecs_mapping', [
+        //     {
+        //       key: 'client.address',
+        //       result: {
+        //         type: 'field',
+        //         value: 'minutes',
+        //       },
+        //     },
+        //   ]);
+        // }
       }
 
       validate();
@@ -189,12 +195,8 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
           <EuiSpacer />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <CommonUseField
-                path="ecs_mapping"
-                component={ECSMappingEditorField}
-                query={query}
-                fieldRef={ecsFieldRef}
-              />
+              <CommonUseField path="savedQueryId" component={GhostFormField} />
+              <ECSMappingEditorField path="ecs_mapping" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </Form>

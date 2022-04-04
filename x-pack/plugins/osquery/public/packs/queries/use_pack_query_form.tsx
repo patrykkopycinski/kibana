@@ -76,7 +76,8 @@ export const usePackQueryForm = ({
       id: '',
       query: '',
       interval: 3600,
-      ecs_mapping: {},
+      ecs_mapping: [],
+      savedQueryId: ''
     },
     // @ts-expect-error update types
     serializer: (payload) =>
@@ -98,6 +99,7 @@ export const usePackQueryForm = ({
         if (isEmpty(draft.ecs_mapping)) {
           delete draft.ecs_mapping;
         }
+        delete draft.savedQueryId;
         return draft;
       }),
     // @ts-expect-error update types
@@ -111,6 +113,7 @@ export const usePackQueryForm = ({
         platform: payload.platform,
         version: payload.version ? [payload.version] : [],
         ecs_mapping: payload.ecs_mapping ?? {},
+        savedQueryId: payload.savedQueryId,
       };
     },
     // @ts-expect-error update types

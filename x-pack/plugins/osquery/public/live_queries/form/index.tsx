@@ -27,7 +27,6 @@ import deepMerge from 'deepmerge';
 import styled from 'styled-components';
 
 import { pickBy, get, isEmpty, filter, last } from 'lodash';
-import { constructMultiTermOtherFilter } from 'src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper';
 import {
   Field,
   getUseField,
@@ -180,7 +179,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         query: '',
         savedQueryId: null,
-        // ecs_mapping: [],
+        ecs_mapping: [],
       },
       defaultValue ?? {}
     ),
@@ -318,11 +317,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
               isDisabled={queryComponentProps.disabled}
             >
               <EuiSpacer size="xs" />
-              <ECSMappingEditorField
-                path="ecs_mapping"
-                query={query}
-                euiFieldProps={ecsFieldProps}
-              />
+              <ECSMappingEditorField path="ecs_mapping" euiFieldProps={ecsFieldProps} />
             </StyledEuiAccordion>
           </>
         ) : (
@@ -371,7 +366,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       ecsMappingField,
       advancedContentState,
       handleToggle,
-      query,
       ecsFieldProps,
       formType,
       agentSelected,

@@ -66,4 +66,3 @@ export const templateSavedQueries = (
     ...(!isEmpty(item.attributes.ecs_mapping) ? { ecs_mapping: item.attributes.ecs_mapping } : {}),
     prebuilt: prebuiltSavedQueryIds.includes(item.id),
   }));
-

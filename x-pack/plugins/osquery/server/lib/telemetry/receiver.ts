@@ -29,7 +29,7 @@ import type {
 import { getPrebuiltSavedQueryIds } from '../../routes/saved_query/utils';
 
 export class TelemetryReceiver {
-  // @ts-expect-error
+  // @ts-expect-error used as part of this
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;

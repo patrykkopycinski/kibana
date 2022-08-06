@@ -24,7 +24,7 @@ import { OsqueryTelemetryTask } from './task';
 export class TelemetryEventsSender {
   private readonly logger: Logger;
   private intervalId?: NodeJS.Timeout;
-  // @ts-expect-error
+  // @ts-expect-error used as part of this
   private receiver: TelemetryReceiver | undefined;
   public analyticsReportEvent: AnalyticsServiceSetup['reportEvent'] | undefined;
 

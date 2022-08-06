@@ -29,6 +29,7 @@ import type {
 import { getPrebuiltSavedQueryIds } from '../../routes/saved_query/utils';
 
 export class TelemetryReceiver {
+  // @ts-ignore
   private readonly logger: Logger;
   private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;

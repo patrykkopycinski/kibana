@@ -35343,7 +35343,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "すべて",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody": "アラート概要の読み込みエラーが発生しました。ヘルプについては、管理者にお問い合わせください。",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle": "アラート概要を読み込めません",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days": "過去30日間",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "アラート",
     "xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel": "ルールの削除",
     "xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel": "無効にする",

@@ -35374,7 +35374,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "Tous",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody": "Une erreur s'est produite lors du chargement du récapitulatif des alertes. Contactez votre administrateur pour obtenir de l'aide.",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle": "Impossible de charger le récapitulatif des alertes",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.last30days": "30 derniers jours",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "Alertes",
     "xpack.triggersActionsUI.sections.ruleDetails.deleteRuleButtonLabel": "Supprimer la règle",
     "xpack.triggersActionsUI.sections.ruleDetails.disableRuleButtonLabel": "Désactiver",

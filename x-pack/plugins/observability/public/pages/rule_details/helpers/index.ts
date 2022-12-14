@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { AlertStatus } from '@kbn/rule-data-utils';
-
-export interface AlertsSummaryWidgetUIProps {
-  active: number;
-  recovered: number;
-  timeRangeTitle: JSX.Element | string;
-  onClick: (status?: AlertStatus) => void;
-}
+export { getDefaultAlertSummaryTimeRange } from './get_alert_summary_time_range';

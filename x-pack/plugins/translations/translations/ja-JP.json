@@ -10997,7 +10997,6 @@
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.eventsName": "イベント",
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.integrateName": "統合",
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.settingsName": "設定",
-    "xpack.enterpriseSearch.analytics.featureDisabledState.title": "行動分析が無効です",
     "xpack.enterpriseSearch.analytics.productCardDescription": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール。",
     "xpack.enterpriseSearch.analytics.productDescription": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール。",
     "xpack.enterpriseSearch.analytics.productName": "分析",

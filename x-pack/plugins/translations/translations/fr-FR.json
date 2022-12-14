@@ -11010,7 +11010,6 @@
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.eventsName": "Événements",
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.integrateName": "Intégrer",
     "xpack.enterpriseSearch.analytics.collectionsView.tabs.settingsName": "Paramètres",
-    "xpack.enterpriseSearch.analytics.featureDisabledState.title": "L'analyse comportementale est désactivée",
     "xpack.enterpriseSearch.analytics.productCardDescription": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche.",
     "xpack.enterpriseSearch.analytics.productDescription": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche.",
     "xpack.enterpriseSearch.analytics.productName": "Analyse",

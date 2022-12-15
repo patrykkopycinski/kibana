@@ -8259,7 +8259,6 @@
     "xpack.apm.views.storageExplorer.title": "Explorateur de stockage",
     "xpack.apm.views.traceOverview.title": "Traces",
     "xpack.apm.views.transactions.title": "Transactions",
-    "xpack.apm.waterfall.exceedsMax": "Le nombre d'éléments dans cette trace dépasse ce qui est affiché",
     "xpack.apm.waterfall.showCriticalPath": "Afficher le chemin critique",
     "xpack.banners.settings.backgroundColor.description": "Définissez la couleur d'arrière-plan de la bannière. {subscriptionLink}",
     "xpack.banners.settings.placement.description": "Affichez une bannière haute pour cet espace, au-dessus de l'en-tête Elastic. {subscriptionLink}",

@@ -8248,7 +8248,6 @@
     "xpack.apm.views.storageExplorer.title": "ストレージエクスプローラー",
     "xpack.apm.views.traceOverview.title": "トレース",
     "xpack.apm.views.transactions.title": "トランザクション",
-    "xpack.apm.waterfall.exceedsMax": "このトレースの項目数は表示されている範囲を超えています",
     "xpack.apm.waterfall.showCriticalPath": "クリティカルパスを表示",
     "xpack.banners.settings.backgroundColor.description": "バナーの背景色。{subscriptionLink}",
     "xpack.banners.settings.placement.description": "Elasticヘッダーの上に、このスペースの上部のバナーを表示します。{subscriptionLink}",

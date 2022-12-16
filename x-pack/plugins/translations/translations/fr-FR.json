@@ -12717,7 +12717,6 @@
     "xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage": "Une erreur inattendue s'est produite",
     "xpack.enterpriseSearch.shared.result.expandTooltip.allVisible": "Tous les champs sont visibles",
     "xpack.enterpriseSearch.shared.unsavedChangesMessage": "Vos modifications n'ont pas été enregistrées. Voulez-vous vraiment quitter ?",
-    "xpack.enterpriseSearch.technicalPreviewLabel": "Version d'évaluation technique",
     "xpack.enterpriseSearch.trialCalloutLink": "Découvrez plus d'informations sur les licences de la Suite Elastic.",
     "xpack.enterpriseSearch.troubleshooting.setup.documentationLinkLabel": "Dépannage de la configuration d'Enterprise Search",
     "xpack.enterpriseSearch.typeLabel": "Type",

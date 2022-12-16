@@ -12704,7 +12704,6 @@
     "xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage": "予期しないエラーが発生しました",
     "xpack.enterpriseSearch.shared.result.expandTooltip.allVisible": "すべてのフィールドが表示されます",
     "xpack.enterpriseSearch.shared.unsavedChangesMessage": "変更は保存されていません。終了してよろしいですか？",
-    "xpack.enterpriseSearch.technicalPreviewLabel": "テクニカルプレビュー",
     "xpack.enterpriseSearch.trialCalloutLink": "Elastic Stackライセンスの詳細を参照してください。",
     "xpack.enterpriseSearch.troubleshooting.setup.documentationLinkLabel": "エンタープライズ サーチ設定のトラブルシューティング",
     "xpack.enterpriseSearch.typeLabel": "型",

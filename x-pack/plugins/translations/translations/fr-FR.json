@@ -7823,7 +7823,6 @@
     "xpack.apm.settings.apmIndices.metricsIndicesLabel": "Index des indicateurs",
     "xpack.apm.settings.apmIndices.noPermissionTooltipLabel": "Votre rôle d'utilisateur ne dispose pas d'autorisations pour changer les index APM",
     "xpack.apm.settings.apmIndices.onboardingIndicesLabel": "Intégration des index",
-    "xpack.apm.settings.apmIndices.sourcemapIndicesLabel": "Index des source maps",
     "xpack.apm.settings.apmIndices.spanIndicesLabel": "Index des intervalles",
     "xpack.apm.settings.apmIndices.title": "Index",
     "xpack.apm.settings.apmIndices.transactionIndicesLabel": "Index des transactions",

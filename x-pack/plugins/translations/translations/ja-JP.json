@@ -7812,7 +7812,6 @@
     "xpack.apm.settings.apmIndices.metricsIndicesLabel": "メトリックインデックス",
     "xpack.apm.settings.apmIndices.noPermissionTooltipLabel": "ユーザーロールには、APMインデックスを変更する権限がありません",
     "xpack.apm.settings.apmIndices.onboardingIndicesLabel": "オンボーディングインデックス",
-    "xpack.apm.settings.apmIndices.sourcemapIndicesLabel": "ソースマップインデックス",
     "xpack.apm.settings.apmIndices.spanIndicesLabel": "スパンインデックス",
     "xpack.apm.settings.apmIndices.title": "インデックス",
     "xpack.apm.settings.apmIndices.transactionIndicesLabel": "トランザクションインデックス",

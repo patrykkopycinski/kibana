@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import type { TestBed } from '@kbn/test-jest-helpers';
 import { getMockServices } from '../__jest__';
-import { InspectorFlyoutContent } from './inspector_flyout_content';
-import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
+import { ContentEditorFlyoutContent } from './editor_flyout_content';
+import type { Props as ContentEditorFlyoutContentProps } from './editor_flyout_content';
 
-describe('<InspectorFlyoutContent />', () => {
+describe('<ContentEditorFlyoutContent />', () => {
   beforeAll(() => {
     jest.useFakeTimers();
   });
@@ -26,7 +26,7 @@ describe('<InspectorFlyoutContent />', () => {
   describe('metadata', () => {
     let testBed: TestBed;
 
-    const savedObjectItem: InspectorFlyoutContentProps['item'] = {
+    const savedObjectItem: ContentEditorFlyoutContentProps['item'] = {
       id: '123',
       title: 'Foo',
       description: 'Some description',
@@ -38,29 +38,33 @@ describe('<InspectorFlyoutContent />', () => {
 
     const mockedServices = getMockServices();
 
-    const defaultProps: InspectorFlyoutContentProps = {
+    const defaultProps: ContentEditorFlyoutContentProps = {
       item: savedObjectItem,
       entityName: 'foo',
       services: mockedServices,
       onCancel: jest.fn(),
     };
 
-    const setup = registerTestBed<string, InspectorFlyoutContentProps>(InspectorFlyoutContent, {
-      memoryRouter: { wrapComponent: false },
-      defaultProps,
-    });
+    const setup = registerTestBed<string, ContentEditorFlyoutContentProps>(
+      ContentEditorFlyoutContent,
+      {
+        memoryRouter: { wrapComponent: false },
+        defaultProps,
+      }
+    );
 
-    const waitForValidationResults = async () =>
-      await act(() => {
+    const waitForValidationResults = async () => {
+      await act(async () => {
         jest.advanceTimersByTime(550); // There is a 500ms delay to display input errors + async validation
       });
+    };
 
     test('should set the correct flyout title', async () => {
       await act(async () => {
         testBed = await setup();
       });
       const { find } = testBed!;
-      expect(find('flyoutTitle').text()).toBe('Inspector');
+      expect(find('flyoutTitle').text()).toBe('Foo details');
     });
 
     test('should render the form with the provided item', async () => {

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { InspectorProvider, InspectorKibanaProvider } from './services';
-export { useOpenInspector } from './open_inspector';
-export type { OpenInspectorParams } from './open_inspector';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/packages/content-management/content_editor'],
+};

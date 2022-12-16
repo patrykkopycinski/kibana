@@ -30,16 +30,13 @@ import { useMetadataForm } from './use_metadata_form';
 import type { CustomValidators } from './use_metadata_form';
 
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
-  title: i18n.translate('contentManagement.inspector.flyoutTitle', {
-    defaultMessage: 'Inspector',
-  }),
-  saveButtonLabel: i18n.translate('contentManagement.inspector.saveButtonLabel', {
+  saveButtonLabel: i18n.translate('contentManagement.contentEditor.saveButtonLabel', {
     defaultMessage: 'Update {entityName}',
     values: {
       entityName,
     },
   }),
-  cancelButtonLabel: i18n.translate('contentManagement.inspector.cancelButtonLabel', {
+  cancelButtonLabel: i18n.translate('contentManagement.contentEditor.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
 });
@@ -59,7 +56,9 @@ export interface Props {
   onCancel: () => void;
 }
 
-export const InspectorFlyoutContent: FC<Props> = ({
+const capitalize = (str: string) => `${str.charAt(0).toLocaleUpperCase()}${str.substring(1)}`;
+
+export const ContentEditorFlyoutContent: FC<Props> = ({
   item,
   entityName,
   isReadonly = true,
@@ -113,13 +112,22 @@ export const InspectorFlyoutContent: FC<Props> = ({
     margin-right: ${euiTheme.size.m};
   `;
 
+  const title = capitalize(
+    i18n.translate('contentManagement.contentEditor.flyoutTitle', {
+      defaultMessage: '{entityName} details',
+      values: {
+        entityName,
+      },
+    })
+  );
+
   return (
     <>
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
             <EuiIcon type="inspect" css={iconCSS} size="l" />
-            <span>{i18nTexts.title}</span>
+            <span>{title}</span>
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>

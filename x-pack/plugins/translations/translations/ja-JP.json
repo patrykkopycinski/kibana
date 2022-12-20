@@ -27745,7 +27745,6 @@
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription": "Elastic から事前にパッケージ化されているルールをインストールしました",
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription": "Elasticから事前にパッケージ化されているタイムラインテンプレートをインストールしました",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "ルールとタイムラインを取得できませんでした",
-    "xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription": "タグを取得できませんでした",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "詳細を表示",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudDropdownOption": "クラウドワークロード（LinuxサーバーまたはKubernetes環境）",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersAllEvents": "すべてのイベント",

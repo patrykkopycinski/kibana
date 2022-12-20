@@ -27772,7 +27772,6 @@
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedRuleSuccesDescription": "Installation effectuée des règles prépackagées à partir d'Elastic",
     "xpack.securitySolution.containers.detectionEngine.createPrePackagedTimelineSuccesDescription": "Installation effectuée des modèles de chronologies prépackagées à partir d'Elastic",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "Impossible de récupérer les règles et les chronologies",
-    "xpack.securitySolution.containers.detectionEngine.tagFetchFailDescription": "Impossible de récupérer les balises",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "Afficher les détails",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudDropdownOption": "Charges de travail cloud (serveurs Linux ou environnements Kubernetes)",
     "xpack.securitySolution.createPackagePolicy.stepConfigure.cloudEventFiltersAllEvents": "Tous les événements",

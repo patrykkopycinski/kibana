@@ -30527,7 +30527,6 @@
     "xpack.securitySolution.policy.list.updatedAt": "Dernière mise à jour",
     "xpack.securitySolution.policyDetails.backToEndpointList": "Afficher tous les points de terminaison",
     "xpack.securitySolution.policyDetails.backToPolicyButton": "Retour à la liste des politiques",
-    "xpack.securitySolution.policyList.endpointCountError": "Erreur lors de la récupération du nombre de points de terminaison",
     "xpack.securitySolution.policyList.packageVersionError": "Erreur lors de la récupération de la version du pack de points de terminaison",
     "xpack.securitySolution.policyStatusText.failure": "Échec",
     "xpack.securitySolution.policyStatusText.success": "Succès",

@@ -30498,7 +30498,6 @@
     "xpack.securitySolution.policy.list.updatedAt": "最終更新",
     "xpack.securitySolution.policyDetails.backToEndpointList": "すべてのエンドポイントを表示",
     "xpack.securitySolution.policyDetails.backToPolicyButton": "ポリシーリストに戻る",
-    "xpack.securitySolution.policyList.endpointCountError": "エンドポイント数の取得エラー",
     "xpack.securitySolution.policyList.packageVersionError": "エンドポイントパッケージバージョンの取得エラー",
     "xpack.securitySolution.policyStatusText.failure": "失敗",
     "xpack.securitySolution.policyStatusText.success": "成功",

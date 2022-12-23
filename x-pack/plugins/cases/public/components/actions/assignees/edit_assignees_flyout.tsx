@@ -17,21 +17,19 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   euiFullHeight,
-  EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
 import type { Case } from '../../../../common';
-import { useGetTags } from '../../../containers/use_get_tags';
-import { EditTagsSelectable } from './edit_tags_selectable';
+import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import * as i18n from './translations';
 import type { ItemsSelectionState } from '../types';
 
 interface Props {
   selectedCases: Case[];
   onClose: () => void;
-  onSaveTags: (args: ItemsSelectionState) => void;
+  onSaveAssignees: (args: ItemsSelectionState) => void;
 }
 
 const fullHeight = css`
@@ -42,15 +40,20 @@ const fullHeight = css`
   }
 `;
 
-const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSaveTags }) => {
-  const { data: tags, isLoading } = useGetTags();
-
-  const [tagsSelection, setTagsSelection] = useState<ItemsSelectionState>({
+const EditAssigneesFlyoutComponent: React.FC<Props> = ({
+  selectedCases,
+  onClose,
+  onSaveAssignees,
+}) => {
+  const [assigneesSelection, setAssigneesSelection] = useState<ItemsSelectionState>({
     selectedItems: [],
     unSelectedItems: [],
   });
 
-  const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+  const onSave = useCallback(
+    () => onSaveAssignees(assigneesSelection),
+    [onSaveAssignees, assigneesSelection]
+  );
 
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
@@ -59,30 +62,24 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
     <EuiFlyout
       ownFocus
       onClose={onClose}
-      aria-labelledby="cases-edit-tags-flyout"
-      data-test-subj="cases-edit-tags-flyout"
+      aria-labelledby="cases-edit-assignees-flyout"
+      data-test-subj="cases-edit-assignees-flyout"
       size="s"
       paddingSize="m"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 data-test-subj="cases-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
+          <h2 data-test-subj="cases-edit-assignees-flyout-title">{i18n.EDIT_ASSIGNEES}</h2>
         </EuiTitle>
         <EuiText color="subdued">
           <p>{headerSubtitle}</p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={fullHeight}>
-        {isLoading ? (
-          <EuiLoadingSpinner />
-        ) : (
-          <EditTagsSelectable
-            selectedCases={selectedCases}
-            isLoading={isLoading}
-            tags={tags ?? []}
-            onChangeTags={setTagsSelection}
-          />
-        )}
+        <EditAssigneesSelectable
+          selectedCases={selectedCases}
+          onChangeAssignees={setAssigneesSelection}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -90,13 +87,13 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
             <EuiButtonEmpty
               onClick={onClose}
               flush="left"
-              data-test-subj="cases-edit-tags-flyout-cancel"
+              data-test-subj="cases-edit-assignees-flyout-cancel"
             >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onSave} fill data-test-subj="cases-edit-tags-flyout-submit">
+            <EuiButton onClick={onSave} fill data-test-subj="cases-edit-assignees-flyout-submit">
               {i18n.SAVE_SELECTION}
             </EuiButton>
           </EuiFlexItem>
@@ -106,6 +103,6 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
   );
 };
 
-EditTagsFlyoutComponent.displayName = 'EditTagsFlyout';
+EditAssigneesFlyoutComponent.displayName = 'EditAssigneesFlyout';
 
-export const EditTagsFlyout = React.memo(EditTagsFlyoutComponent);
+export const EditAssigneesFlyout = React.memo(EditAssigneesFlyoutComponent);

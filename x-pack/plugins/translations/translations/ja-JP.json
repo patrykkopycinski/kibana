@@ -16567,7 +16567,6 @@
     "xpack.infra.hostsTable.nameColumnHeader": "名前",
     "xpack.infra.hostsTable.numberOfCpusColumnHeader": "CPU数",
     "xpack.infra.hostsTable.operatingSystemColumnHeader": "オペレーティングシステム",
-    "xpack.infra.hostsTable.servicesOnHostColumnHeader": "ホストのサービス",
     "xpack.infra.infra.nodeDetails.apmTabLabel": "APM",
     "xpack.infra.infra.nodeDetails.createAlertLink": "インベントリルールの作成",
     "xpack.infra.infra.nodeDetails.openAsPage": "ページとして開く",

@@ -35240,7 +35240,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.status": "ステータス",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage": "期間がルールの想定実行時間を超えています。",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel": "現在アクティブ",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "すべて",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody": "アラート概要の読み込みエラーが発生しました。ヘルプについては、管理者にお問い合わせください。",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle": "アラート概要を読み込めません",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "アラート",

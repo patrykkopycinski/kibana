@@ -35271,7 +35271,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.status": "Statut",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsList.ruleTypeExcessDurationMessage": "La durée dépasse le temps d'exécution attendu de la règle.",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.activeLabel": "Actuellement actives",
-    "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.allAlertsLabel": "Tous",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingBody": "Une erreur s'est produite lors du chargement du récapitulatif des alertes. Contactez votre administrateur pour obtenir de l'aide.",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.errorLoadingTitle": "Impossible de charger le récapitulatif des alertes",
     "xpack.triggersActionsUI.sections.ruleDetails.alertsSummary.title": "Alertes",

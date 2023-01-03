@@ -10,14 +10,16 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   ERROR_GROUP_ID,
+  ERROR_ID,
   SERVICE_NAME,
   TRANSACTION_SAMPLED,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { getTransaction } from '../../transactions/get_transaction';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getErrorGroupSample({
+const ERROR_SAMPLES_SIZE = 10000;
+
+export async function getErrorGroupSampleIds({
   environment,
   kuery,
   serviceName,
@@ -39,8 +41,8 @@ export async function getErrorGroupSample({
       events: [ProcessorEvent.error as const],
     },
     body: {
-      track_total_hits: true,
-      size: 1,
+      track_total_hits: ERROR_SAMPLES_SIZE,
+      size: ERROR_SAMPLES_SIZE,
       query: {
         bool: {
           filter: [
@@ -50,9 +52,10 @@ export async function getErrorGroupSample({
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
           ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }],
+          should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
         },
       },
+      _source: [ERROR_ID],
       sort: asMutableArray([
         { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
@@ -60,25 +63,14 @@ export async function getErrorGroupSample({
     },
   };
 
-  const resp = await apmEventClient.search('get_error_group_sample', params);
-  const error = resp.hits.hits[0]?._source;
-  const transactionId = error?.transaction?.id;
-  const traceId = error?.trace?.id;
-
-  let transaction;
-  if (transactionId && traceId) {
-    transaction = await getTransaction({
-      transactionId,
-      traceId,
-      apmEventClient,
-      start,
-      end,
-    });
-  }
+  const resp = await apmEventClient.search(
+    'get_error_group_sample_ids',
+    params
+  );
+  const errorSampleIds = resp.hits.hits.map((item) => item._source.error.id);
 
   return {
-    transaction,
-    error,
+    errorSampleIds,
     occurrencesCount: resp.hits.total.value,
   };
 }

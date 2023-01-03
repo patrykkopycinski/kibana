@@ -16804,7 +16804,6 @@
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "Réessayer",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder": "Recherche d'entrées de log… (par ex. host.name:host-1)",
     "xpack.infra.logsPage.toolbar.logFilterErrorToastTitle": "Erreur de filtrage du log",
-    "xpack.infra.logsPage.toolbar.logFilterUnsupportedLanguageError": "SQL n'est pas pris en charge",
     "xpack.infra.logStream.kqlErrorTitle": "Expression KQL non valide",
     "xpack.infra.logStream.unknownErrorTitle": "Une erreur s'est produite",
     "xpack.infra.logStreamEmbeddable.description": "Ajoutez un tableau de logs de diffusion en direct.",

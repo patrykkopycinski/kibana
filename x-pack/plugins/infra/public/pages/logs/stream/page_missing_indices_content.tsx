@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './provider';
-export * from './selectors';
-export * from './state_machine';
-export * from './types';
+import React from 'react';
+import { LogStreamPageTemplate } from './components/stream_page_template';
+
+export const StreamPageMissingIndicesContent = React.memo(() => (
+  <LogStreamPageTemplate hasData={false} isDataLoading={false} />
+));

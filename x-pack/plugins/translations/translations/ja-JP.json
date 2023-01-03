@@ -16790,7 +16790,6 @@
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "再試行",
     "xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder": "ログエントリーを検索中…（例：host.name:host-1）",
     "xpack.infra.logsPage.toolbar.logFilterErrorToastTitle": "ログフィルターエラー",
-    "xpack.infra.logsPage.toolbar.logFilterUnsupportedLanguageError": "SQLはサポートされていません",
     "xpack.infra.logStream.kqlErrorTitle": "無効なKQL式",
     "xpack.infra.logStream.unknownErrorTitle": "エラーが発生しました",
     "xpack.infra.logStreamEmbeddable.description": "ライブストリーミングログのテーブルを追加します。",

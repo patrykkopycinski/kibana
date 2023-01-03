@@ -24615,7 +24615,6 @@
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "Prix AWS Lambda pour 1M de requêtes",
     "xpack.observability.apmLabs": "Activer le bouton Ateliers dans APM",
     "xpack.observability.apmLabsDescription": "Cet indicateur détermine si l'utilisateur a accès au bouton Ateliers, moyen rapide d'activer et de désactiver les fonctionnalités de la version d'évaluation technique dans APM.",
-    "xpack.observability.apmOperationsBreakdown": "Répartition des opérations APM",
     "xpack.observability.apmProgressiveLoading": "Utiliser le chargement progressif des vues APM sélectionnées",
     "xpack.observability.apmProgressiveLoadingQualityHigh": "Taux d'échantillonnage élevé (plus lent, plus précis)",
     "xpack.observability.apmProgressiveLoadingQualityLow": "Taux d'échantillonnage bas (plus rapide, moins précis)",

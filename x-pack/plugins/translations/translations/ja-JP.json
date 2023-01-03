@@ -24594,7 +24594,6 @@
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "1MリクエストごとのAWS Lambdaの料金",
     "xpack.observability.apmLabs": "APMで［ラボ］ボタンを有効にする",
     "xpack.observability.apmLabsDescription": "このフラグはビューアーで［ラボ］ボタンを使用できるかどうかを決定します。APMでテクニカルプレビュー中の機能を有効および無効にするための簡単な方法です。",
-    "xpack.observability.apmOperationsBreakdown": "APM演算内訳",
     "xpack.observability.apmProgressiveLoading": "選択したAPMビューのプログレッシブ読み込みを使用",
     "xpack.observability.apmProgressiveLoadingQualityHigh": "高サンプリングレート（低速、最も精度が高い）",
     "xpack.observability.apmProgressiveLoadingQualityLow": "低サンプリングレート（最速、最も精度が低い）",

@@ -7,14 +7,9 @@
  */
 
 import { encode as encodeRison } from '@kbn/rison';
-import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createStateHash, isStateHash } from './state_hash';
 
 describe('stateHash', () => {
-  beforeEach(() => {
-    mockStorage.clear();
-  });
-
   describe('#createStateHash', () => {
     it('returns a hash', () => {
       const json = JSON.stringify({ a: 'a' });
@@ -36,6 +31,13 @@ describe('stateHash', () => {
       const json2 = JSON.stringify({ a: 'b' });
       const hash2 = createStateHash(json2);
       expect(hash1).not.toEqual(hash2);
+    });
+
+    it('calls existingJsonProvider if provided', () => {
+      const json = JSON.stringify({ a: 'a' });
+      const existingJsonProvider = jest.fn(() => json);
+      createStateHash(json, existingJsonProvider);
+      expect(existingJsonProvider).toHaveBeenCalled();
     });
   });
 

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-}
+import { parse as _parseUrl } from 'url';
+
+export const parseUrl = (url: string) => _parseUrl(url, true);
+
+export const parseUrlHash = (url: string) => {
+  const hash = parseUrl(url).hash;
+  return hash ? parseUrl(hash.slice(1)) : null;
+};

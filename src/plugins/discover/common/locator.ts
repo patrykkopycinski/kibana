@@ -10,9 +10,9 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { VIEW_MODE } from './components/view_mode_toggle';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
+import { VIEW_MODE } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
@@ -95,12 +95,17 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Breakdown field
    */
   breakdownField?: string;
+  /**
+   * Used when navigating to particular alert results
+   */
+  isAlertResults?: boolean;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 export interface DiscoverAppLocatorDependencies {
   useHash: boolean;
+  setStateToKbnUrl: typeof setStateToKbnUrl;
 }
 
 /**
@@ -108,6 +113,7 @@ export interface DiscoverAppLocatorDependencies {
  */
 export interface MainHistoryLocationState {
   dataViewSpec?: DataViewSpec;
+  isAlertResults?: boolean;
 }
 
 export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverAppLocatorParams> {
@@ -134,6 +140,7 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
       viewMode,
       hideAggregatedPreview,
       breakdownField,
+      isAlertResults,
     } = params;
     const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
     const appState: {
@@ -168,13 +175,12 @@ export class DiscoverAppLocatorDefinition implements LocatorDefinition<DiscoverA
     if (breakdownField) appState.breakdownField = breakdownField;
 
     const state: MainHistoryLocationState = {};
-    if (dataViewSpec) {
-      state.dataViewSpec = dataViewSpec;
-    }
+    if (dataViewSpec) state.dataViewSpec = dataViewSpec;
+    if (isAlertResults) state.isAlertResults = isAlertResults;
 
     let path = `#/${savedSearchPath}`;
-    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = this.deps.setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
+    path = this.deps.setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (searchSessionId) {
       path = `${path}&searchSessionId=${searchSessionId}`;

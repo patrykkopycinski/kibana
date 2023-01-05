@@ -33586,7 +33586,6 @@
     "xpack.synthetics.monitor.step.screenshot.notAvailable": "La capture d'écran de l'étape n'est pas disponible.",
     "xpack.synthetics.monitor.step.screenshot.unAvailable": "Image indisponible",
     "xpack.synthetics.monitor.step.thumbnail.alt": "Version plus grande de la capture d'écran de la miniature de l'étape du parcours.",
-    "xpack.synthetics.monitor.step.viewDetails": "Afficher les détails",
     "xpack.synthetics.monitor.stepName.label": "Nom de l'étape",
     "xpack.synthetics.monitorCharts.durationChart.wrapper.label": "Graphique affichant la durée de ping du moniteur, avec regroupement par emplacement.",
     "xpack.synthetics.monitorCharts.monitorDuration.titleLabel": "Durée du moniteur",

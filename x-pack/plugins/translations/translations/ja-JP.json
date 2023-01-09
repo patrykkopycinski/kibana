@@ -2445,7 +2445,6 @@
     "embeddableApi.addPanel.displayName": "パネルの追加",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりませんでした。",
     "embeddableApi.addPanel.Title": "ライブラリから追加",
-    "embeddableApi.contextMenuTrigger.description": "パネルの右上のコンテキストメニューをクリックします。",
     "embeddableApi.contextMenuTrigger.title": "コンテキストメニュー",
     "embeddableApi.customizePanel.action.displayName": "パネルタイトルを編集",
     "embeddableApi.customizePanel.modal.cancel": "キャンセル",

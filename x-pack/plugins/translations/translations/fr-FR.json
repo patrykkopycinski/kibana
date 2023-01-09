@@ -2447,7 +2447,6 @@
     "embeddableApi.addPanel.displayName": "Ajouter un panneau",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "Aucun objet correspondant trouvé.",
     "embeddableApi.addPanel.Title": "Ajouter depuis la bibliothèque",
-    "embeddableApi.contextMenuTrigger.description": "Un menu contextuel cliquable dans l’angle supérieur droit du panneau.",
     "embeddableApi.contextMenuTrigger.title": "Menu contextuel",
     "embeddableApi.customizePanel.action.displayName": "Modifier le titre du panneau",
     "embeddableApi.customizePanel.modal.cancel": "Annuler",

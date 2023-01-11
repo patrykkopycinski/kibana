@@ -33548,7 +33548,6 @@
     "xpack.synthetics.monitor.step.screenshot.ariaLabel": "ステップスクリーンショットを読み込んでいます。",
     "xpack.synthetics.monitor.step.screenshot.notAvailable": "ステップスクリーンショットがありません。",
     "xpack.synthetics.monitor.step.screenshot.unAvailable": "画像がありません",
-    "xpack.synthetics.monitor.step.thumbnail.alt": "このステップのサムネイルのスクリーンショットの大きいバージョン。",
     "xpack.synthetics.monitor.stepName.label": "ステップ名",
     "xpack.synthetics.monitorCharts.durationChart.wrapper.label": "場所でグループ化された、モニターのping期間を示すグラフ。",
     "xpack.synthetics.monitorCharts.monitorDuration.titleLabel": "監視期間",

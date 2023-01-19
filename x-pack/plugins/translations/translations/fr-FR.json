@@ -3988,7 +3988,7 @@
     "indexPatternFieldEditor.editor.flyoutEditFieldSubtitle": "Vue de données : {patternName}",
     "indexPatternFieldEditor.editor.form.source.scriptFieldHelpText": "Les champs d'exécution sans script récupèrent les valeurs de {source}. Si un champ n'existe pas dans _source, la recherche ne renvoie pas de valeur. {learnMoreLink}",
     "indexPatternFieldEditor.editor.form.valueDescription": "Définissez une valeur pour le champ au lieu de la récupérer à partir du champ portant le même nom dans {source}.",
-    "indexPatternFieldEditor.fieldPreview.subTitle": "Depuis : {from}",
+    "indexPatternFieldEditor.fieldPreview.subTitle": "Depuis : {documentSource}",
     "indexPatternFieldEditor.number.numeralLabel": "Modèle de format Numeral.js (par défaut : {defaultPattern})",
     "indexPatternFieldEditor.cancelField.confirmationModal.cancelButtonLabel": "Annuler",
     "indexPatternFieldEditor.cancelField.confirmationModal.description": "Les modifications apportées à votre champ seront ignorées. Voulez-vous vraiment continuer ?",

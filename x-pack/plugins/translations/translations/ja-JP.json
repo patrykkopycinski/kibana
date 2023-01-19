@@ -3985,7 +3985,7 @@
     "indexPatternFieldEditor.editor.flyoutEditFieldSubtitle": "データビュー：{patternName}",
     "indexPatternFieldEditor.editor.form.source.scriptFieldHelpText": "スクリプトがないランタイムフィールドは、{source}から値を取得します。フィールドが_sourceに存在しない場合は、検索リクエストは値を返しません。{learnMoreLink}",
     "indexPatternFieldEditor.editor.form.valueDescription": "{source}の同じ名前のフィールドから取得するのではなく、フィールドの値を設定します。",
-    "indexPatternFieldEditor.fieldPreview.subTitle": "開始：{from}",
+    "indexPatternFieldEditor.fieldPreview.subTitle": "開始：{documentSource}",
     "indexPatternFieldEditor.number.numeralLabel": "Numeral.js のフォーマットパターン（デフォルト：{defaultPattern}）",
     "indexPatternFieldEditor.cancelField.confirmationModal.cancelButtonLabel": "キャンセル",
     "indexPatternFieldEditor.cancelField.confirmationModal.description": "フィールドの変更は破棄されます。続行しますか？",

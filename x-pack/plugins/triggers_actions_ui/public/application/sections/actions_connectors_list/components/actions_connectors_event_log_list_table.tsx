@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import datemath from '@kbn/datemath';
 import {
   EuiFieldSearch,
@@ -22,34 +21,26 @@ import {
   EuiSwitch,
   EuiDataGridColumn,
 } from '@elastic/eui';
-import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { IExecutionLog } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
-  GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
-  LOCKED_COLUMNS,
+  GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
+  CONNECTOR_LOCKED_COLUMNS,
 } from '../../../constants';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+import { LoadGlobalConnectorExecutionLogAggregationsProps } from '../../../lib/action_connector_api';
+import {
+  ComponentOpts as ConnectorApis,
+  withActionOperations,
+} from '../../common/components/with_actions_api_operations';
+import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
+import { ConnectorEventLogListKPIWithApi as ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kpi';
 import {
   EventLogDataGrid,
-  getIsColumnSortable,
-  ColumnHeaderWithToolTip,
-  numTriggeredActionsDisplay,
-  numGeneratedActionsDisplay,
-  numSucceededActionsDisplay,
-  numErroredActionsDisplay,
   EventLogListStatusFilter,
+  getIsColumnSortable,
 } from '../../common/components/event_log';
-import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
-import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
-import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_link';
-import { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
-import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
-import {
-  ComponentOpts as RuleApis,
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
@@ -62,30 +53,33 @@ const getParsedDate = (date: string) => {
 };
 
 const API_FAILED_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.apiError',
+  'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.apiError',
   {
     defaultMessage: 'Failed to fetch execution history',
   }
 );
 
 const SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.searchPlaceholder',
+  'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.searchPlaceholder',
   {
     defaultMessage: 'Search event log message',
   }
 );
 
-const RULE_EVENT_LOG_LIST_STORAGE_KEY = 'xpack.triggersActionsUI.ruleEventLogList.initialColumns';
+const CONNECTOR_EVENT_LOG_LIST_STORAGE_KEY =
+  'xpack.triggersActionsUI.connectorEventLogList.initialColumns';
 
 const getDefaultColumns = (columns: string[]) => {
-  const columnsWithoutLockedColumn = columns.filter((column) => !LOCKED_COLUMNS.includes(column));
-  return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
+  const columnsWithoutLockedColumn = columns.filter(
+    (column) => !CONNECTOR_LOCKED_COLUMNS.includes(column)
+  );
+  return [...CONNECTOR_LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
 };
 
 const ALL_SPACES_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.ruleEventLogList.showAllSpacesToggle',
+  'xpack.triggersActionsUI.connectorEventLogList.showAllSpacesToggle',
   {
-    defaultMessage: 'Show rules from all spaces',
+    defaultMessage: 'Show connectors from all spaces',
   }
 );
 
@@ -96,51 +90,39 @@ const updateButtonProps = {
 
 const MAX_RESULTS = 1000;
 
-export type RuleEventLogListOptions = 'stackManagement' | 'default';
+export type ConnectorEventLogListOptions = 'stackManagement' | 'default';
 
-export type RuleEventLogListCommonProps = {
-  ruleId: string;
+export type ConnectorEventLogListCommonProps = {
   localStorageKey?: string;
   refreshToken?: number;
   initialPageSize?: number;
-  // Duplicating these properties is extremely silly but it's the only way to get Jest to cooperate with the way this component is structured
-  overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
-  overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
-  hasRuleNames?: boolean;
+  hasConnectorNames?: boolean;
   hasAllSpaceSwitch?: boolean;
-  setHeaderActions?: (components?: React.ReactNode[]) => void;
-} & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
+} & Pick<ConnectorApis, 'loadGlobalConnectorExecutionLogAggregations'>;
 
-export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
+export type ConnectorEventLogListTableProps<T extends ConnectorEventLogListOptions = 'default'> =
   T extends 'default'
-    ? RuleEventLogListCommonProps
+    ? ConnectorEventLogListCommonProps
     : T extends 'stackManagement'
-    ? RuleEventLogListCommonProps
+    ? ConnectorEventLogListCommonProps
     : never;
 
-export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
-  props: RuleEventLogListTableProps<T>
+export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOptions>(
+  props: ConnectorEventLogListTableProps<T>
 ) => {
   const {
-    ruleId,
-    localStorageKey = RULE_EVENT_LOG_LIST_STORAGE_KEY,
+    localStorageKey = CONNECTOR_EVENT_LOG_LIST_STORAGE_KEY,
     refreshToken,
-    loadGlobalExecutionLogAggregations,
-    loadExecutionLogAggregations,
-    overrideLoadGlobalExecutionLogAggregations,
-    overrideLoadExecutionLogAggregations,
+    loadGlobalConnectorExecutionLogAggregations,
     initialPageSize = 10,
-    hasRuleNames = false,
+    hasConnectorNames = false,
     hasAllSpaceSwitch = false,
-    setHeaderActions,
   } = props;
 
   const { uiSettings, notifications } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
-  const [selectedRunLog, setSelectedRunLog] = useState<IExecutionLog | undefined>();
   const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
     refreshToken
   );
@@ -149,11 +131,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(() => {
-    return getDefaultColumns(
-      JSON.parse(localStorage.getItem(localStorageKey) ?? 'null') || hasRuleNames
-        ? GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
-        : RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS
-    );
+    return getDefaultColumns(GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS);
   });
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
   const [filter, setFilter] = useState<string[]>([]);
@@ -181,13 +159,12 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
-  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces, activeSpace } =
-    useMultipleSpaces({
-      setShowFromAllSpaces,
-      showFromAllSpaces,
-      visibleColumns,
-      setVisibleColumns,
-    });
+  const { onShowAllSpacesChange, canAccessMultipleSpaces, namespaces } = useMultipleSpaces({
+    setShowFromAllSpaces,
+    showFromAllSpaces,
+    visibleColumns,
+    setVisibleColumns,
+  });
 
   const isInitialized = useRef(false);
 
@@ -205,34 +182,14 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     }));
   }, [sortingColumns]);
 
-  useEffect(() => {
-    setHeaderActions?.([<RulesListDocLink />]);
-    return () => setHeaderActions?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadLogsFn = useMemo(() => {
-    if (ruleId === '*') {
-      return overrideLoadGlobalExecutionLogAggregations ?? loadGlobalExecutionLogAggregations;
-    }
-    return overrideLoadExecutionLogAggregations ?? loadExecutionLogAggregations;
-  }, [
-    ruleId,
-    overrideLoadExecutionLogAggregations,
-    overrideLoadGlobalExecutionLogAggregations,
-    loadExecutionLogAggregations,
-    loadGlobalExecutionLogAggregations,
-  ]);
-
   const loadEventLogs = async () => {
-    if (!loadLogsFn) {
+    if (!loadGlobalConnectorExecutionLogAggregations) {
       return;
     }
     setIsLoading(true);
     try {
-      const result = await loadLogsFn({
-        id: ruleId,
-        sort: formattedSort as LoadExecutionLogAggregationsProps['sort'],
+      const result = await loadGlobalConnectorExecutionLogAggregations({
+        sort: formattedSort as LoadGlobalConnectorExecutionLogAggregationsProps['sort'],
         outcomeFilter: filter,
         message: searchText,
         dateStart: getParsedDate(dateStart),
@@ -255,14 +212,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     }
     setIsLoading(false);
   };
-
-  const getPaginatedRowIndex = useCallback(
-    (rowIndex: number) => {
-      const { pageIndex, pageSize } = pagination;
-      return rowIndex - pageIndex * pageSize;
-    },
-    [pagination]
-  );
 
   const onChangeItemsPerPage = useCallback(
     (pageSize: number) => {
@@ -312,16 +261,6 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [setPagination, setFilter]
   );
 
-  const onFlyoutOpen = useCallback((runLog: IExecutionLog) => {
-    setIsFlyoutOpen(true);
-    setSelectedRunLog(runLog);
-  }, []);
-
-  const onFlyoutClose = useCallback(() => {
-    setIsFlyoutOpen(false);
-    setSelectedRunLog(undefined);
-  }, []);
-
   const onSearchChange = useCallback(
     (e) => {
       if (e.target.value === '') {
@@ -343,64 +282,22 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
 
   const columns: EuiDataGridColumn[] = useMemo(
     () => [
-      ...(hasRuleNames
-        ? [
-            {
-              id: 'rule_id',
-              displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.ruleId',
-                {
-                  defaultMessage: 'Rule Id',
-                }
-              ),
-              isSortable: getIsColumnSortable('rule_id'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-              },
-            },
-            {
-              id: 'rule_name',
-              displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.ruleName',
-                {
-                  defaultMessage: 'Rule',
-                }
-              ),
-              isSortable: getIsColumnSortable('rule_name'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-                showHide: false,
-              },
-            },
-          ]
-        : []),
-      ...(showFromAllSpaces
-        ? [
-            {
-              id: 'space_ids',
-              displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.spaceIds',
-                {
-                  defaultMessage: 'Space',
-                }
-              ),
-              isSortable: getIsColumnSortable('space_ids'),
-              actions: {
-                showSortAsc: false,
-                showSortDesc: false,
-                showHide: false,
-              },
-            },
-          ]
-        : []),
+      {
+        id: 'connector_id',
+        displayAsText: i18n.translate(
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorId',
+          {
+            defaultMessage: 'Connector Id',
+          }
+        ),
+        isSortable: getIsColumnSortable('connector_id'),
+      },
       {
         id: 'id',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.id',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.id',
           {
-            defaultMessage: 'Id',
+            defaultMessage: 'Execution Id',
           }
         ),
         isSortable: getIsColumnSortable('id'),
@@ -408,7 +305,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       {
         id: 'timestamp',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timestamp',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.timestamp',
           {
             defaultMessage: 'Timestamp',
           }
@@ -421,24 +318,9 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         initialWidth: 250,
       },
       {
-        id: 'execution_duration',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.duration',
-          {
-            defaultMessage: 'Duration',
-          }
-        ),
-        isSortable: getIsColumnSortable('execution_duration'),
-        isResizable: false,
-        actions: {
-          showHide: false,
-        },
-        initialWidth: 100,
-      },
-      {
         id: 'status',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.response',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.response',
           {
             defaultMessage: 'Response',
           }
@@ -451,7 +333,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             {
               iconType: 'annotation',
               label: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.showOnlyFailures',
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.showOnlyFailures',
                 {
                   defaultMessage: 'Show only failures',
                 }
@@ -462,7 +344,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             {
               iconType: 'annotation',
               label: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.showAll',
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.showAll',
                 {
                   defaultMessage: 'Show all',
                 }
@@ -476,6 +358,25 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         isResizable: false,
         initialWidth: 150,
       },
+      ...(hasConnectorNames
+        ? [
+            {
+              id: 'connector_name',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.connectorName',
+                {
+                  defaultMessage: 'Connector',
+                }
+              ),
+              isSortable: getIsColumnSortable('connector_name'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
       {
         id: 'message',
         actions: {
@@ -483,116 +384,33 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           showSortDesc: false,
         },
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.message',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.message',
           {
             defaultMessage: 'Message',
           }
         ),
         isSortable: getIsColumnSortable('message'),
-        cellActions: [
-          ({ rowIndex, Component }) => {
-            const pagedRowIndex = getPaginatedRowIndex(rowIndex);
-            const eventLog = logs || [];
-            const runLog = eventLog[pagedRowIndex];
-            const actionErrors = runLog?.num_errored_actions as number;
-            if (actionErrors) {
-              return (
-                <Component onClick={() => onFlyoutOpen(runLog)} iconType="alert">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.viewActionErrors"
-                    defaultMessage="View action errors"
-                  />
-                </Component>
-              );
-            }
-            return null;
-          },
-        ],
+        cellActions: [],
       },
       {
-        id: 'num_active_alerts',
+        id: 'execution_duration',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.activeAlerts',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.duration',
           {
-            defaultMessage: 'Active alerts',
+            defaultMessage: 'Duration',
           }
         ),
-        initialWidth: 140,
-        isSortable: getIsColumnSortable('num_active_alerts'),
-      },
-      {
-        id: 'num_new_alerts',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.newAlerts',
-          {
-            defaultMessage: 'New alerts',
-          }
-        ),
-        initialWidth: 140,
-        isSortable: getIsColumnSortable('num_new_alerts'),
-      },
-      {
-        id: 'num_recovered_alerts',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.recoveredAlerts',
-          {
-            defaultMessage: 'Recovered alerts',
-          }
-        ),
-        isSortable: getIsColumnSortable('num_recovered_alerts'),
-      },
-      {
-        id: 'num_triggered_actions',
-        displayAsText: numTriggeredActionsDisplay,
-        display: <ColumnHeaderWithToolTip id="num_triggered_actions" />,
-        isSortable: getIsColumnSortable('num_triggered_actions'),
-      },
-      {
-        id: 'num_generated_actions',
-        displayAsText: numGeneratedActionsDisplay,
-        display: <ColumnHeaderWithToolTip id="num_generated_actions" />,
-        isSortable: getIsColumnSortable('num_generated_actions'),
-      },
-      {
-        id: 'num_succeeded_actions',
-        displayAsText: numSucceededActionsDisplay,
-        display: <ColumnHeaderWithToolTip id="num_succeeded_actions" />,
-        isSortable: getIsColumnSortable('num_succeeded_actions'),
-      },
-      {
-        id: 'num_errored_actions',
+        isSortable: getIsColumnSortable('execution_duration'),
+        isResizable: false,
         actions: {
-          showSortAsc: false,
-          showSortDesc: false,
+          showHide: false,
         },
-        displayAsText: numErroredActionsDisplay,
-        display: <ColumnHeaderWithToolTip id="num_errored_actions" />,
-        isSortable: getIsColumnSortable('num_errored_actions'),
-      },
-      {
-        id: 'total_search_duration',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.totalSearchDuration',
-          {
-            defaultMessage: 'Total search duration',
-          }
-        ),
-        isSortable: getIsColumnSortable('total_search_duration'),
-      },
-      {
-        id: 'es_search_duration',
-        displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.esSearchDuration',
-          {
-            defaultMessage: 'ES search duration',
-          }
-        ),
-        isSortable: getIsColumnSortable('es_search_duration'),
+        initialWidth: 100,
       },
       {
         id: 'schedule_delay',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.scheduleDelay',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.scheduleDelay',
           {
             defaultMessage: 'Schedule delay',
           }
@@ -602,15 +420,34 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
       {
         id: 'timed_out',
         displayAsText: i18n.translate(
-          'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.timedOut',
+          'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.timedOut',
           {
             defaultMessage: 'Timed out',
           }
         ),
         isSortable: getIsColumnSortable('timed_out'),
       },
+      ...(showFromAllSpaces
+        ? [
+            {
+              id: 'space_ids',
+              displayAsText: i18n.translate(
+                'xpack.triggersActionsUI.sections.connectorEventLogList.eventLogColumn.spaceIds',
+                {
+                  defaultMessage: 'Space',
+                }
+              ),
+              isSortable: getIsColumnSortable('space_ids'),
+              actions: {
+                showSortAsc: false,
+                showSortDesc: false,
+                showHide: false,
+              },
+            },
+          ]
+        : []),
     ],
-    [getPaginatedRowIndex, onFlyoutOpen, onFilterChange, hasRuleNames, showFromAllSpaces, logs]
+    [onFilterChange, hasConnectorNames, showFromAllSpaces]
   );
 
   const renderList = () => {
@@ -620,7 +457,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     return (
       <>
         {isLoading && (
-          <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
+          <EuiProgress size="xs" color="accent" data-test-subj="connectorEventLogListProgressBar" />
         )}
         <EventLogDataGrid
           columns={columns}
@@ -629,10 +466,8 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           sortingColumns={sortingColumns}
           visibleColumns={visibleColumns}
           dateFormat={dateFormat}
-          selectedRunLog={selectedRunLog}
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
-          onFlyoutOpen={onFlyoutOpen}
           setVisibleColumns={setVisibleColumns}
           setSortingColumns={setSortingColumns}
         />
@@ -689,7 +524,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
-              data-test-subj="ruleEventLogListDatePicker"
+              data-test-subj="connectorEventLogListDatePicker"
               width="auto"
               isLoading={isLoading}
               start={dateStart}
@@ -714,8 +549,8 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         <EuiSpacer />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RuleEventLogListKPI
-          ruleId={ruleId}
+        <ConnectorEventLogListKPI
+          data-test-subj="connectorEventLogListKpi"
           dateStart={dateStart}
           dateEnd={dateEnd}
           outcomeFilter={filter}
@@ -731,23 +566,15 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           <RefineSearchPrompt
             documentSize={actualTotalItemCount}
             visibleDocumentSize={MAX_RESULTS}
-            backToTopAnchor="rule_event_log_list"
+            backToTopAnchor="logs"
           />
         )}
       </EuiFlexItem>
-      {isFlyoutOpen && selectedRunLog && (
-        <RuleActionErrorLogFlyout
-          runLog={selectedRunLog}
-          refreshToken={refreshToken}
-          onClose={onFlyoutClose}
-          activeSpaceId={activeSpace?.id}
-        />
-      )}
     </EuiFlexGroup>
   );
 };
 
-const RuleEventLogListTableWithSpaces: React.FC<RuleEventLogListTableProps> = (props) => {
+const ConnectorEventLogListTableWithSpaces: React.FC<ConnectorEventLogListTableProps> = (props) => {
   const { spaces } = useKibana().services;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -757,12 +584,14 @@ const RuleEventLogListTableWithSpaces: React.FC<RuleEventLogListTableProps> = (p
   );
   return (
     <SpacesContextWrapper feature="triggersActions">
-      <RuleEventLogListTable {...props} />
+      <ConnectorEventLogListTable {...props} />
     </SpacesContextWrapper>
   );
 };
 
-export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTableWithSpaces);
+export const ConnectorEventLogListTableWithApi = withActionOperations(
+  ConnectorEventLogListTableWithSpaces
+);
 
 // eslint-disable-next-line import/no-default-export
-export { RuleEventLogListTableWithApi as default };
+export { ConnectorEventLogListTableWithApi as default };

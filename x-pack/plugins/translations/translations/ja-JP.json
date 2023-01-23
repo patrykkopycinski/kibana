@@ -13735,7 +13735,6 @@
     "xpack.fleet.agentList.statusOfflineFilterText": "オフライン",
     "xpack.fleet.agentList.statusUnhealthyFilterText": "異常",
     "xpack.fleet.agentList.statusUpdatingFilterText": "更新中",
-    "xpack.fleet.agentList.tagsColumnTitle": "タグ",
     "xpack.fleet.agentList.tagsFilterText": "タグ",
     "xpack.fleet.agentList.unenrollOneButton": "エージェントの登録解除",
     "xpack.fleet.agentList.upgradeOneButton": "エージェントをアップグレード",

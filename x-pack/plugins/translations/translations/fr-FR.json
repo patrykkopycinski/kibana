@@ -13748,7 +13748,6 @@
     "xpack.fleet.agentList.statusOfflineFilterText": "Hors ligne",
     "xpack.fleet.agentList.statusUnhealthyFilterText": "Défectueux",
     "xpack.fleet.agentList.statusUpdatingFilterText": "Mise à jour",
-    "xpack.fleet.agentList.tagsColumnTitle": "Balises",
     "xpack.fleet.agentList.tagsFilterText": "Balises",
     "xpack.fleet.agentList.unenrollOneButton": "Désenregistrer l'agent",
     "xpack.fleet.agentList.upgradeOneButton": "Mettre à niveau l'agent",

@@ -36175,7 +36175,6 @@
     "cases.components.status.inProgress": "進行中",
     "cases.components.status.open": "開く",
     "devTools.badge.betaLabel": "ベータ",
-    "devTools.badge.betaTooltipText": "この機能は将来のリリースで大幅に変更される可能性があります",
     "devTools.badge.readOnly.text": "読み取り専用",
     "devTools.badge.readOnly.tooltip": "を保存できませんでした",
     "devTools.breadcrumb.homeLabel": "開発ツール",

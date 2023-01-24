@@ -36206,7 +36206,6 @@
     "cases.components.status.inProgress": "En cours",
     "cases.components.status.open": "Ouvrir",
     "devTools.badge.betaLabel": "Bêta",
-    "devTools.badge.betaTooltipText": "Cette fonctionnalité pourra considérablement changer dans les futures versions",
     "devTools.badge.readOnly.text": "Lecture seule",
     "devTools.badge.readOnly.tooltip": "Enregistrement impossible",
     "devTools.breadcrumb.homeLabel": "Outils de développement",

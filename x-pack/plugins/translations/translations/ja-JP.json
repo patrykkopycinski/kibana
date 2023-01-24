@@ -29939,7 +29939,6 @@
     "xpack.securitySolution.hosts.navigation.sessionsTitle": "セッション",
     "xpack.securitySolution.hosts.navigation.uncommonProcessesTitle": "非共通プロセス",
     "xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel": "ソースダッシュボードを表示",
-    "xpack.securitySolution.hosts.navigaton.hostScoreOverTimeTitle": "経時的なホストリスクスコア",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData": "認証データをクエリできませんでした",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingEventsData": "イベントデータをクエリできませんでした",
     "xpack.securitySolution.hosts.pageTitle": "ホスト",

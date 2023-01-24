@@ -29969,7 +29969,6 @@
     "xpack.securitySolution.hosts.navigation.sessionsTitle": "Sessions",
     "xpack.securitySolution.hosts.navigation.uncommonProcessesTitle": "Processus inhabituels",
     "xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel": "Afficher le tableau de bord de la source",
-    "xpack.securitySolution.hosts.navigaton.hostScoreOverTimeTitle": "Score de risque de l'hôte sur la durée",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData": "Impossible d'interroger les données d'authentifications",
     "xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingEventsData": "Impossible d'interroger les données d'événements",
     "xpack.securitySolution.hosts.pageTitle": "Hôtes",

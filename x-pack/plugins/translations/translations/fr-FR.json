@@ -10172,7 +10172,6 @@
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "Afficher les règles CSP ",
     "xpack.csp.cspEvaluationBadge.failLabel": "Échec",
     "xpack.csp.cspEvaluationBadge.passLabel": "Réussite",
-    "xpack.csp.cspSettings.rules": "Règles de sécurité du CSP - ",
     "xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterPrefixTitle": "Afficher tous les résultats pour ",
     "xpack.csp.dashboard.benchmarkSection.defaultClusterTitle": "ID cluster",
     "xpack.csp.dashboard.benchmarkSection.manageRulesButton": "Gérer les règles",

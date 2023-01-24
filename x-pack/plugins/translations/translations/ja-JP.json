@@ -10161,7 +10161,6 @@
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "CSPルールを表示 ",
     "xpack.csp.cspEvaluationBadge.failLabel": "失敗",
     "xpack.csp.cspEvaluationBadge.passLabel": "合格",
-    "xpack.csp.cspSettings.rules": "CSPセキュリティルール - ",
     "xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterPrefixTitle": "すべての調査結果を表示 ",
     "xpack.csp.dashboard.benchmarkSection.defaultClusterTitle": "クラスターID",
     "xpack.csp.dashboard.benchmarkSection.manageRulesButton": "ルールの管理",

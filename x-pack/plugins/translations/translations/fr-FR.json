@@ -18116,7 +18116,6 @@
     "xpack.lens.indexPattern.cumulativeSumOf": "Somme cumulée de {name}",
     "xpack.lens.indexPattern.dateHistogram.autoLongerExplanation": "Pour choisir l'intervalle, Lens divise la plage temporelle spécifiée par le paramètre avancé {targetBarSetting} et calcule le meilleur intervalle pour vos données. Par exemple, lorsque la plage temporelle est de 4 jours, les données sont divisées en compartiments horaires. Pour configurer le nombre de barres maximal, utilisez le paramètre avancé {maxBarSetting}.",
     "xpack.lens.indexPattern.dateHistogram.restrictedInterval": "Intervalle fixé à {intervalValue} en raison de restrictions d'agrégation.",
-    "xpack.lens.indexPattern.dateHistogramTimeShift": "Dans un calque unique, vous ne pouvez pas combiner un décalage de plage temporelle précédent avec des histogrammes de dates. Utilisez une durée de décalage temporel explicite dans \"{column}\" ou remplacez l’histogramme de dates.",
     "xpack.lens.indexPattern.derivativeOf": "Différences de {name}",
     "xpack.lens.indexPattern.fieldNoOperation": "Le champ {field} ne peut pas être utilisé sans opération",
     "xpack.lens.indexPattern.fieldsNotFound": "{count, plural, one {Champ} other {Champs}} {missingFields} {count, plural, one {introuvable} other {introuvables}}",

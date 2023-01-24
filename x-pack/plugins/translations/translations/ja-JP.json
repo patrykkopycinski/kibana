@@ -18098,7 +18098,6 @@
     "xpack.lens.indexPattern.cumulativeSumOf": "{name}の累積和",
     "xpack.lens.indexPattern.dateHistogram.autoLongerExplanation": "間隔を選択するために、Lensでは、指定された時間範囲が{targetBarSetting}詳細設定で分割され、データに最適な間隔が計算されます。たとえば、時間範囲が4日の場合、データは1時間のバケットに分割されます。バーの最大数を設定するには、{maxBarSetting}詳細設定を使用します。",
     "xpack.lens.indexPattern.dateHistogram.restrictedInterval": "集約の制限により間隔は {intervalValue} に固定されています。",
-    "xpack.lens.indexPattern.dateHistogramTimeShift": "単一のレイヤーでは、前の時間範囲シフトと日付ヒストグラムを結合できません。\"{column}\"で明示的な時間シフト期間を使用するか、日付ヒストグラムを置換してください。",
     "xpack.lens.indexPattern.derivativeOf": "{name} の差異",
     "xpack.lens.indexPattern.fieldNoOperation": "フィールド{field}は演算なしで使用できません",
     "xpack.lens.indexPattern.fieldsNotFound": "{count, plural, other {個のフィールド}} {missingFields} {count, plural, other {が}}見つかりません",

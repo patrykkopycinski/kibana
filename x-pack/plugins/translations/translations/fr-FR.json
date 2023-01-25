@@ -26737,7 +26737,6 @@
     "xpack.securitySolution.console.commandValidation.exclusiveOr": "Cette commande ne prend en charge qu'un seul des arguments suivants : {argNames}",
     "xpack.securitySolution.console.commandValidation.invalidArgValue": "Valeur d'argument non valide : {argName}. {error}",
     "xpack.securitySolution.console.commandValidation.missingRequiredArg": "Argument requis manquant : {argName}",
-    "xpack.securitySolution.console.commandValidation.mustHaveArgs": "Arguments requis manquants : {requiredArgs}",
     "xpack.securitySolution.console.commandValidation.unknownArgument": "{countOfInvalidArgs, plural, =1 {Argument} other {Arguments}} de {command} non pris en charge par cette commande : {unknownArgs}",
     "xpack.securitySolution.console.commandValidation.unsupportedArg": "Argument non pris en charge : {argName}",
     "xpack.securitySolution.console.sidePanel.helpDescription": "Utilisez le bouton Ajouter ({icon}) pour insérer une action de réponse dans la barre de texte. Le cas échéant, ajoutez des paramètres ou commentaires supplémentaires.",

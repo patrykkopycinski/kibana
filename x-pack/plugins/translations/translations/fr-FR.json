@@ -11813,7 +11813,7 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext": "Tester avec un document de votre index",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description": "Vous pouvez simuler les résultats de votre pipeline en transmettant un tableau de documents.",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton": "Simuler un pipeline",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle": "Documents",
+    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle.documents": "Documents",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title": "Consulter les résultats de pipeline (facultatif)",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title": "Ajouter un pipeline d'inférence",
     "xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.apiIndexSubtitle": "Les pipelines d'ingestion optimisent votre index pour les applications de recherche. Si vous souhaitez utiliser ces pipelines dans votre index basé sur des API, vous devrez les référencer explicitement dans vos requêtes d'API.",

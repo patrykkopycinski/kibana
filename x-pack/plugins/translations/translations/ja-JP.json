@@ -11800,7 +11800,7 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.addDocument.helptext": "インデックスからのドキュメントでテスト",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.description": "パイプライン結果をシミュレートするには、ドキュメントの配列を渡します。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.runButton": "パイプラインのシミュレート",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle": "ドキュメント",
+    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.subtitle.documents": "ドキュメント",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.title": "パイプライン結果の確認（任意）",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.title": "推論パイプラインの追加",
     "xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.apiIndexSubtitle": "インジェストパイプラインは、検索アプリケーションのインデックスを最適化します。APIベースのインデックスでこれらのパイプラインを使用する場合は、APIリクエストで明示的に参照する必要があります。",

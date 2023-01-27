@@ -22028,7 +22028,6 @@
     "xpack.ml.newJob.wizard.editJsonButton": "JSON を編集",
     "xpack.ml.newJob.wizard.estimateModelMemoryError": "モデルメモリ上限を計算できませんでした",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.categorizationPerPartitionFieldLabel": "パーティションフィールド",
-    "xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel": "パーティション単位の分類を有効にする",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel": "警告時に停止する",
     "xpack.ml.newJob.wizard.jobCreatorTitle.advanced": "高度な設定",
     "xpack.ml.newJob.wizard.jobCreatorTitle.categorization": "カテゴリー分け",

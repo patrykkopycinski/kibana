@@ -22048,7 +22048,6 @@
     "xpack.ml.newJob.wizard.editJsonButton": "Modifier le JSON",
     "xpack.ml.newJob.wizard.estimateModelMemoryError": "La limite de mémoire du modèle n'a pas pu être calculée",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.categorizationPerPartitionFieldLabel": "Champ de partition",
-    "xpack.ml.newJob.wizard.extraStep.categorizationJob.perPartitionCategorizationLabel": "Activer la catégorisation par partition",
     "xpack.ml.newJob.wizard.extraStep.categorizationJob.stopOnWarnLabel": "Arrêter après avertissement",
     "xpack.ml.newJob.wizard.jobCreatorTitle.advanced": "Avancé",
     "xpack.ml.newJob.wizard.jobCreatorTitle.categorization": "Catégorisation",

@@ -20638,7 +20638,6 @@
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high": "La différence entre les valeurs actuelles et typiques de ce compartiment a un impact élevé.",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low": "La différence entre les valeurs actuelles et typiques de ce compartiment a un impact modéré.",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium": "La différence entre les valeurs actuelles et typiques de ce compartiment a un impact significatif.",
-    "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle": "Explication des anomalies",
     "xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle": "Exemples de catégorie",
     "xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle": "Description",
     "xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle": "Détails sur l'anomalie la plus sévère",

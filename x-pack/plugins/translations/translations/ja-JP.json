@@ -20618,7 +20618,6 @@
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high": "このバケットの実際の値と標準の値の間で見られる差異の影響が大きくなります。",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low": "このバケットの実際の値と標準の値の間で見られる差異の影響が中程度になります。",
     "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium": "このバケットの実際の値と標準の値の間で見られる差異の影響が非常に大きくなります。",
-    "xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationTitle": "異常の説明",
     "xpack.ml.anomaliesTable.anomalyDetails.categoryExamplesTitle": "カテゴリーの例",
     "xpack.ml.anomaliesTable.anomalyDetails.descriptionTitle": "説明",
     "xpack.ml.anomaliesTable.anomalyDetails.detailsOnHighestSeverityAnomalyTitle": "深刻度が高い異常の詳細",

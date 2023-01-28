@@ -3973,7 +3973,6 @@
     "indexPatternFieldEditor.editor.form.advancedSettings.hideButtonLabel": "Masquer les paramètres avancés",
     "indexPatternFieldEditor.editor.form.advancedSettings.showButtonLabel": "Afficher les paramètres avancés",
     "indexPatternFieldEditor.editor.form.changeWarning": "Modifier le nom ou le type peut affecter les recherches et les visualisations utilisant ce champ.",
-    "indexPatternFieldEditor.editor.form.customLabelDescription": "Créez une étiquette à afficher à la place du nom du champ dans Discover, Maps et Visualize. Utile pour raccourcir un nom de champ long.  Les requêtes et les filtres utilisent le nom de champ d'origine.",
     "indexPatternFieldEditor.editor.form.customLabelLabel": "Étiquette personnalisée",
     "indexPatternFieldEditor.editor.form.customLabelTitle": "Définir une étiquette personnalisée",
     "indexPatternFieldEditor.editor.form.defineFieldLabel": "Définir un script",

@@ -35119,8 +35119,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.apiError": "Impossible de récupérer le KPI du log d'événements.",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip": "Réponses pour un maximum de 10 000 exécutions de règles les plus récentes.",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription": "Dernière réponse",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active": "Actif",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive": "Récupéré",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText": "La règle est désactivée",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText": "La règle est activée",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText": "La règle s’est répétée",

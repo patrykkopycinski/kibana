@@ -35087,8 +35087,6 @@
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.apiError": "イベントログKPIを取得できませんでした。",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleEventLogListKpi.responseTooltip": "最大10,000件の直近のルール実行の応答。",
     "xpack.triggersActionsUI.sections.ruleDetails.rulesList.ruleLastExecutionDescription": "前回の応答",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.active": "アクティブ",
-    "xpack.triggersActionsUI.sections.ruleDetails.rulesList.status.inactive": "回復済み",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.disabledOptionText": "ルールが無効です",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.enabledOptionText": "ルールが有効です",
     "xpack.triggersActionsUI.sections.ruleDetails.ruleStateFilter.snoozedOptionText": "ルールがスヌーズされました",

@@ -2270,7 +2270,6 @@
     "discover.fieldList.flyoutBackIcon": "戻る",
     "discover.fieldList.flyoutHeading": "フィールドリスト",
     "discover.grid.closePopover": "ポップオーバーを閉じる",
-    "discover.grid.copyClipboardButton": "クリップボードにコピー",
     "discover.grid.copyColumnNameToClipboard.toastTitle": "クリップボードにコピーされました",
     "discover.grid.copyColumnNameToClipBoardButton": "名前をコピー",
     "discover.grid.copyColumnValuesToClipBoardButton": "列をコピー",

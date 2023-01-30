@@ -2272,7 +2272,6 @@
     "discover.fieldList.flyoutBackIcon": "Retour",
     "discover.fieldList.flyoutHeading": "Liste des champs",
     "discover.grid.closePopover": "Fermer la fenêtre contextuelle",
-    "discover.grid.copyClipboardButton": "Copier dans le presse-papiers",
     "discover.grid.copyColumnNameToClipboard.toastTitle": "Copié dans le presse-papiers",
     "discover.grid.copyColumnNameToClipBoardButton": "Copier le nom",
     "discover.grid.copyColumnValuesToClipBoardButton": "Copier la colonne",

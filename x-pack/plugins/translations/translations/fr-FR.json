@@ -13732,7 +13732,6 @@
     "xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel": "En savoir plus",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "Espace de nom par défaut",
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "Nouveau nom de la stratégie d'agent",
-    "xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText": "La sortie Logstash pour l'intégration des agents n'est pas prise en charge pour APM",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "Collecte des logs et des mesures du système",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription": "Délai d'expiration facultatif en secondes. Si une valeur est renseignée, un agent est automatiquement désenregistré après une période d'inactivité équivalente à ce délai.",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel": "Délai d'expiration pour le désenregistrement",

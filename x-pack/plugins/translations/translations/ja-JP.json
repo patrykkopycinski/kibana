@@ -13719,7 +13719,6 @@
     "xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel": "詳細",
     "xpack.fleet.agentPolicyForm.namespaceFieldLabel": "デフォルト名前空間",
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "新しいエージェントポリシー名",
-    "xpack.fleet.agentPolicyForm.outputOptionDisabledAPMAndLogstashText": "APMではエージェント統合のLogstash出力はサポートされていません",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "システムログとメトリックの収集",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutDescription": "任意のタイムアウト（秒）。指定されている場合、この期間が経過した後、エージェントは自動的に登録解除されます。",
     "xpack.fleet.agentPolicyForm.unenrollmentTimeoutLabel": "登録解除タイムアウト",

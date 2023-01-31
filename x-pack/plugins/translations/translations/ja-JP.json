@@ -13231,7 +13231,6 @@
     "xpack.fileUpload.geoUploadWizard.creatingDataView": "データビュー{indexName}を作成しています",
     "xpack.fileUpload.geoUploadWizard.dataIndexingStarted": "インデックスを作成中：{indexName}",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "インデックスに書き込み中：{progress}%完了",
-    "xpack.fileUpload.importComplete.failedFeaturesMsg": "{numFailures}個の特長量にインデックスを作成できませんでした。",
     "xpack.fileUpload.importComplete.permissionFailureMsg": "インデックス\"{indexName}\"にデータを作成またはインポートするアクセス権がありません。",
     "xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock": "エラー：{reason}",
     "xpack.fileUpload.importComplete.uploadSuccessMsg": "{numFeatures}個の特徴量にインデックスを作成しました。",

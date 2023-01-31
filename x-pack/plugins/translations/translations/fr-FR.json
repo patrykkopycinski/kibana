@@ -13244,7 +13244,6 @@
     "xpack.fileUpload.geoUploadWizard.creatingDataView": "Création de la vue de données : {indexName}",
     "xpack.fileUpload.geoUploadWizard.dataIndexingStarted": "Création de l'index : {indexName}",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "Écriture dans l'index : {progress} % terminé",
-    "xpack.fileUpload.importComplete.failedFeaturesMsg": "Impossible d'indexer {numFailures} fonctionnalités.",
     "xpack.fileUpload.importComplete.permissionFailureMsg": "Vous ne disposez pas d'autorisation pour créer ni importer des données dans l'index \"{indexName}\".",
     "xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock": "Erreur : {reason}",
     "xpack.fileUpload.importComplete.uploadSuccessMsg": "{numFeatures} fonctionnalités indexées.",

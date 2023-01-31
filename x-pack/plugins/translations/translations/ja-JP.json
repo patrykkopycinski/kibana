@@ -29698,7 +29698,6 @@
     "xpack.securitySolution.expandedValue.links.viewUserSummary": "ユーザー概要を表示",
     "xpack.securitySolution.expandedValue.showTopN.showTopValues": "上位の値を表示",
     "xpack.securitySolution.featureCatalogueDescription": "インフラストラクチャ全体の統合保護のため、脅威を防止、収集、検出し、それに対応します。",
-    "xpack.securitySolution.featureRegistr.subFeatures.fileOperations": "ファイル操作",
     "xpack.securitySolution.featureRegistry.deleteSubFeatureDetails": "ケースとコメントを削除",
     "xpack.securitySolution.featureRegistry.deleteSubFeatureName": "削除",
     "xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle": "ケース",

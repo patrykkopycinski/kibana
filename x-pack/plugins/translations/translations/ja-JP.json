@@ -13276,7 +13276,7 @@
     "xpack.fleet.addIntegration.installAgentStepTitle": "FleetでElasticエージェントを構成および登録して、自動的に更新をデプロイしたり、一元的にエージェントを管理したりします。上級者ユーザーは、Fleetの代わりに、{standaloneLink}でエージェントを実行できます。",
     "xpack.fleet.addIntegration.standaloneWarning": "スタンドアロンモードでElasticエージェントを実行して統合を設定する方法は、上級者向けです。可能なかぎり、{link}を使用することをお勧めします。",
     "xpack.fleet.agentActivity.completedTitle": "{nbAgents} {agents} {completedText}{offlineText}",
-    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}",
+    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}",
     "xpack.fleet.agentActivityFlyout.cancelledDescription": "{date}にキャンセルされました",
     "xpack.fleet.agentActivityFlyout.cancelledTitle": "エージェント{cancelledText}がキャンセルされました",
     "xpack.fleet.agentActivityFlyout.completedDescription": "{date}に完了しました",

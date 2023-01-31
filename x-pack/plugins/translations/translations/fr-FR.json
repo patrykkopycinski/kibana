@@ -13289,7 +13289,7 @@
     "xpack.fleet.addIntegration.installAgentStepTitle": "Ces étapes configurent et enregistrent l'agent Elastic Agent dans Fleet afin d'en centraliser la gestion tout en déployant automatiquement les mises à jour. Comme alternative à Fleet, les utilisateurs avancés peuvent exécuter des agents dans {standaloneLink}.",
     "xpack.fleet.addIntegration.standaloneWarning": "La configuration des intégrations en exécutant Elastic Agent en mode autonome est une opération avancée. Si possible, nous vous conseillons d'utiliser plutôt {link}. ",
     "xpack.fleet.agentActivity.completedTitle": "{nbAgents} {agents} {completedText}{offlineText}",
-    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}",
+    "xpack.fleet.agentActivity.inProgressTitle": "{inProgressText} {nbAgents} {agents} {reassignText}{upgradeText}{failuresText}",
     "xpack.fleet.agentActivityFlyout.cancelledDescription": "Annulé le {date}",
     "xpack.fleet.agentActivityFlyout.cancelledTitle": "Agent {cancelledText} annulé",
     "xpack.fleet.agentActivityFlyout.completedDescription": "Terminé {date}",

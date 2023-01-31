@@ -34031,7 +34031,6 @@
     "xpack.synthetics.sourceConfiguration.heartbeatIndicesTitle": "アップタイムインデックス",
     "xpack.synthetics.sourceConfiguration.indicesSectionTitle": "インデックス",
     "xpack.synthetics.sourceConfiguration.warningStateLabel": "使用期間上限",
-    "xpack.synthetics.ssl": "SSL",
     "xpack.synthetics.stackManagement": "スタック管理",
     "xpack.synthetics.stepDetails.expected": "期待値",
     "xpack.synthetics.stepDetails.objectCount": "オブジェクト数",

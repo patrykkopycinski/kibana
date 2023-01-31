@@ -34060,7 +34060,6 @@
     "xpack.synthetics.sourceConfiguration.heartbeatIndicesTitle": "Index Uptime",
     "xpack.synthetics.sourceConfiguration.indicesSectionTitle": "Index",
     "xpack.synthetics.sourceConfiguration.warningStateLabel": "Limite d'âge",
-    "xpack.synthetics.ssl": "SSL",
     "xpack.synthetics.stackManagement": "Gestion de la Suite",
     "xpack.synthetics.stepDetails.expected": "Attendus",
     "xpack.synthetics.stepDetails.objectCount": "Décompte de l'objet",

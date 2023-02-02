@@ -12104,7 +12104,6 @@
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel": "平均応答",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.clientErrorsLabel": "4xxエラー",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.durationTooltipTitle": "期間",
-    "xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage": "詳細なクロール統計情報については、設定でWebクローラーログを有効にします。",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltip": "クロール中にアクセスされ抽出されたページ。",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltipTitle": "アクセスされたページ",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle": "ページ",

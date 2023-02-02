@@ -12117,7 +12117,6 @@
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.avgResponseTimeLabel": "Réponse moy.",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.clientErrorsLabel": "Erreurs 4xx",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.durationTooltipTitle": "Durée",
-    "xpack.enterpriseSearch.crawler.crawlDetailsSummary.logsDisabledMessage": "Activer les journaux du robot d'indexation dans les paramètres pour obtenir des statistiques d'indexation plus détaillées.",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltip": "URL visitées et extraites pendant l'indexation.",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesTooltipTitle": "Pages visitées",
     "xpack.enterpriseSearch.crawler.crawlDetailsSummary.pagesVisitedTooltipTitle": "Pages",

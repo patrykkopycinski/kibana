@@ -7504,7 +7504,6 @@
     "xpack.apm.serviceOverview.embeddedMap.error": "マップを読み込めませんでした",
     "xpack.apm.serviceOverview.embeddedMap.error.toastTitle": "埋め込み可能なマップの追加中にエラーが発生しました",
     "xpack.apm.serviceOverview.embeddedMap.input.title": "国別レイテンシ",
-    "xpack.apm.serviceOverview.embeddedMap.metric.label": "ページ読み込み時間",
     "xpack.apm.serviceOverview.embeddedMap.title": "国別平均レイテンシ",
     "xpack.apm.serviceOverview.errorsTable.errorMessage": "取得できませんでした",
     "xpack.apm.serviceOverview.errorsTable.loading": "読み込み中...",

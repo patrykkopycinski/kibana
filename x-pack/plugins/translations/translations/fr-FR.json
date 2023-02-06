@@ -7515,7 +7515,6 @@
     "xpack.apm.serviceOverview.embeddedMap.error": "Impossible de charger la carte",
     "xpack.apm.serviceOverview.embeddedMap.error.toastTitle": "Une erreur s'est produite lors de l'ajout de l'incorporation de la carte",
     "xpack.apm.serviceOverview.embeddedMap.input.title": "Latence par pays",
-    "xpack.apm.serviceOverview.embeddedMap.metric.label": "Durée du chargement de la page",
     "xpack.apm.serviceOverview.embeddedMap.title": "Latence moyenne par pays",
     "xpack.apm.serviceOverview.errorsTable.errorMessage": "Impossible de récupérer",
     "xpack.apm.serviceOverview.errorsTable.loading": "Chargement...",

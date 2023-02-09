@@ -125,7 +125,6 @@
     "advancedSettings.form.saveButtonLabel": "Enregistrer les modifications",
     "advancedSettings.form.saveButtonTooltipWithInvalidChanges": "Corrigez les paramètres non valides avant d'enregistrer.",
     "advancedSettings.form.saveErrorMessage": "Enregistrement impossible",
-    "advancedSettings.pageTitle": "Paramètres",
     "advancedSettings.searchBar.unableToParseQueryErrorMessage": "Impossible d'analyser la requête",
     "advancedSettings.searchBarAriaLabel": "Rechercher dans les paramètres avancés",
     "advancedSettings.voiceAnnouncement.ariaLabel": "Informations de résultat des paramètres avancés",

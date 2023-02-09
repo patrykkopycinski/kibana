@@ -125,7 +125,6 @@
     "advancedSettings.form.saveButtonLabel": "変更を保存",
     "advancedSettings.form.saveButtonTooltipWithInvalidChanges": "保存前に無効な設定を修正してください。",
     "advancedSettings.form.saveErrorMessage": "を保存できませんでした",
-    "advancedSettings.pageTitle": "設定",
     "advancedSettings.searchBar.unableToParseQueryErrorMessage": "クエリをパースできません",
     "advancedSettings.searchBarAriaLabel": "高度な設定を検索",
     "advancedSettings.voiceAnnouncement.ariaLabel": "詳細設定結果情報",

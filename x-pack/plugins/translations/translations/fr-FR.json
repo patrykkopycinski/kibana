@@ -2308,7 +2308,6 @@
     "discover.localMenu.shareTitle": "Partager",
     "discover.noMatchRoute.bannerTitleText": "Page introuvable",
     "discover.noResults.noDocumentsOrCheckPermissionsDescription": "Assurez-vous de disposer de l'autorisation d'afficher les index et vérifiez qu'ils contiennent des documents.",
-    "discover.noResults.searchExamples.noResultsBecauseOfError": "Une erreur s’est produite lors de la récupération des résultats de recherche.",
     "discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle": "Aucun résultat ne correspond à vos critères de recherche.",
     "discover.noResultsFound": "Résultat introuvable",
     "discover.notifications.invalidTimeRangeText": "La plage temporelle spécifiée n'est pas valide (de : \"{from}\" à \"{to}\").",

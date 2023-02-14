@@ -2306,7 +2306,6 @@
     "discover.localMenu.shareTitle": "共有",
     "discover.noMatchRoute.bannerTitleText": "ページが見つかりません",
     "discover.noResults.noDocumentsOrCheckPermissionsDescription": "インデックスと含まれるドキュメントを表示する権限がありません。",
-    "discover.noResults.searchExamples.noResultsBecauseOfError": "検索結果の取得中にエラーが発生しました",
     "discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle": "検索条件と一致する結果がありません。",
     "discover.noResultsFound": "結果が見つかりませんでした",
     "discover.notifications.invalidTimeRangeText": "指定された時間範囲が無効です。（開始：'{from}'、終了：'{to}'）",

@@ -10018,8 +10018,6 @@
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundForNameTitle": " pour \"{name}\"",
     "xpack.csp.benchmarks.totalIntegrationsCountMessage": "Affichage de {pageCount} sur {totalCount, plural, one {# intégration} other {# intégrations}}",
     "xpack.csp.cloudPosturePage.errorRenderer.errorDescription": "{error} {statusCode} : {body}",
-    "xpack.csp.dashboard.benchmarkSection.clusterTitle": "{title} - {shortId}",
-    "xpack.csp.dashboard.benchmarkSection.clusterTitleTooltip.clusterTitle": "{title} - {shortId}",
     "xpack.csp.dashboard.benchmarkSection.lastEvaluatedTitle": "Dernière évaluation {dateFromNow}",
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "Affichage de {pageStart}-{pageEnd} sur {total} {type}",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "Ajouter un filtre {field}",

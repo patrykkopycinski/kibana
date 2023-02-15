@@ -10024,8 +10024,6 @@
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "Affichage de {pageStart}-{pageEnd} sur {total} {type}",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "Ajouter un filtre {field}",
     "xpack.csp.findings.findingsTableCell.addNegateFilterButton": "Ajouter un filtre {field} négatif",
-    "xpack.csp.rules.header.rulesCountLabel": "{count, plural, one { règle} other { règles}}",
-    "xpack.csp.rules.header.totalRulesCount": "Affichage des {rules}",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "Règles - {integrationName}",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "Pour utiliser ces fonctionnalités de sécurité du cloud, vous devez {link}.",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "Aucune intégration Benchmark trouvée",

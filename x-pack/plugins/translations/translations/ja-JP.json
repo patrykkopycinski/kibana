@@ -10013,8 +10013,6 @@
     "xpack.csp.findings.distributionBar.showingPageOfTotalLabel": "{total}件中{pageStart}-{pageEnd}件の{type}を表示しています",
     "xpack.csp.findings.findingsTableCell.addFilterButton": "{field}フィルターを追加",
     "xpack.csp.findings.findingsTableCell.addNegateFilterButton": "{field}否定フィルターを追加",
-    "xpack.csp.rules.header.rulesCountLabel": "{count, plural, other {個のルール}}",
-    "xpack.csp.rules.header.totalRulesCount": "{rules}を表示しています",
     "xpack.csp.rules.rulePageHeader.pageHeaderTitle": "ルール - {integrationName}",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "これらのクラウドセキュリティ機能を使用するには、{link}する必要があります。",
     "xpack.csp.benchmarks.benchmarkEmptyState.integrationsNotFoundTitle": "ベンチマーク統合が見つかりません",

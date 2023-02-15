@@ -10128,7 +10128,6 @@
     "xpack.csp.navigation.rulesNavItemLabel": "ルール",
     "xpack.csp.noFindingsStates.indexing.indexingButtonTitle": "まだ結果がありません",
     "xpack.csp.noFindingsStates.indexing.indexingDescription": "データの収集とインデックス作成を待機しています。結果を表示するには、しばらくたってから確認してください",
-    "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "結果の収集に想定よりも時間がかかっています。後でもう一度確認してください",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutTitle": "結果が遅れています",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedButtonTitle": "エージェントのインストール",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription": "結果を表示するには、KubernetesクラスターでElasticエージェントをインストールし、セットアップ処理を完了してください。",

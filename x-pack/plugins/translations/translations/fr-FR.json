@@ -10139,7 +10139,6 @@
     "xpack.csp.navigation.rulesNavItemLabel": "Règles",
     "xpack.csp.noFindingsStates.indexing.indexingButtonTitle": "Pas encore de résultats",
     "xpack.csp.noFindingsStates.indexing.indexingDescription": "En attente de la collecte et de l'indexation des données. Revenez plus tard pour voir vos résultats",
-    "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "La collecte des résultats prend plus de temps que prévu, revenez nous voir bientôt.",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutTitle": "Résultats retardés",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedButtonTitle": "Installer l'agent",
     "xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedDescription": "Pour voir les résultats, terminez le processus de configuration en installant un agent Elastic sur votre cluster Kubernetes.",

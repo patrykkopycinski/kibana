@@ -13607,7 +13607,6 @@
     "xpack.fleet.agentLogs.datasetSelectText": "データセット",
     "xpack.fleet.agentLogs.downloadLink": "ダウンロード",
     "xpack.fleet.agentLogs.logDisabledCallOutTitle": "ログ収集は無効です",
-    "xpack.fleet.agentLogs.logLevelEmpty": "ログが見つかりません",
     "xpack.fleet.agentLogs.logLevelSelectText": "ログレベル",
     "xpack.fleet.agentLogs.openInLogsUiLinkText": "ログで開く",
     "xpack.fleet.agentLogs.searchPlaceholderText": "ログを検索…",

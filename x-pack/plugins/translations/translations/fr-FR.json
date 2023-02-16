@@ -13620,7 +13620,6 @@
     "xpack.fleet.agentLogs.datasetSelectText": "Ensemble de données",
     "xpack.fleet.agentLogs.downloadLink": "télécharger",
     "xpack.fleet.agentLogs.logDisabledCallOutTitle": "La collecte de logs est désactivée",
-    "xpack.fleet.agentLogs.logLevelEmpty": "Aucun log trouvé",
     "xpack.fleet.agentLogs.logLevelSelectText": "Niveau du log",
     "xpack.fleet.agentLogs.openInLogsUiLinkText": "Ouvrir dans Logs",
     "xpack.fleet.agentLogs.searchPlaceholderText": "Rechercher dans les logs…",

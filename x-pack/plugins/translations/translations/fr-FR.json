@@ -16374,7 +16374,6 @@
     "xpack.infra.hostsViewPage.table.averageTxColumnHeader": "TX (moy.)",
     "xpack.infra.hostsViewPage.table.diskLatencyColumnHeader": "Latence du disque (moy.)",
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "Nom",
-    "xpack.infra.hostsViewPage.table.numberOfCpusColumnHeader": "Nombre de processeurs",
     "xpack.infra.hostsViewPage.table.operatingSystemColumnHeader": "Système d'exploitation",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines": "Ouvrir dans Lens",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.title": "Indicateurs",

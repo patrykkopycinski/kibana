@@ -16359,7 +16359,6 @@
     "xpack.infra.hostsViewPage.table.averageTxColumnHeader": "TX（平均）",
     "xpack.infra.hostsViewPage.table.diskLatencyColumnHeader": "ディスクレイテンシ（平均）",
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "名前",
-    "xpack.infra.hostsViewPage.table.numberOfCpusColumnHeader": "CPU数",
     "xpack.infra.hostsViewPage.table.operatingSystemColumnHeader": "オペレーティングシステム",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines": "Lensで開く",
     "xpack.infra.hostsViewPage.tabs.metricsCharts.title": "メトリック",

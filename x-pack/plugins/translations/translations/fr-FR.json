@@ -33240,8 +33240,6 @@
     "xpack.synthetics.durationTrend.percentile75": "75e",
     "xpack.synthetics.editMonitor.errorDetailsRoute.title": "Détails de l'erreur",
     "xpack.synthetics.editMonitor.pageHeader.title": "Modifier le moniteur",
-    "xpack.synthetics.editPackagePolicy.inUptime": "Modifier dans Uptime",
-    "xpack.synthetics.editPackagePolicy.inUptimeDesc": "Cette politique de package est gérée par l’application Uptime.",
     "xpack.synthetics.emptyState.loadingMessage": "Chargement…",
     "xpack.synthetics.emptyStateError.notAuthorized": "Vous n'êtes pas autorisé à afficher les données Uptime, veuillez contacter votre administrateur système.",
     "xpack.synthetics.emptyStateError.notFoundPage": "Page introuvable",

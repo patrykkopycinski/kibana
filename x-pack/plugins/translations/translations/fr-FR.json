@@ -14234,7 +14234,6 @@
     "xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.learnMoreLink": "En savoir plus",
     "xpack.fleet.packagePolicyField.yamlCodeEditor": "Éditeur de code YAML",
     "xpack.fleet.packagePolicyValidation.boolValueError": "Les valeurs booléennes doivent être définies sur \"true\" ou \"false\".",
-    "xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage": "Format non valide",
     "xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage": "Nombre entier non valide",
     "xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage": "Nombre entier non valide",
     "xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage": "Format YAML non valide",

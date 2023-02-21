@@ -14221,7 +14221,6 @@
     "xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.learnMoreLink": "詳細",
     "xpack.fleet.packagePolicyField.yamlCodeEditor": "YAMLコードエディター",
     "xpack.fleet.packagePolicyValidation.boolValueError": "ブール値はtrueまたはfalseでなければなりません",
-    "xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage": "無効なフォーマット",
     "xpack.fleet.packagePolicyValidation.invalidIntegerErrorMessage": "無効な整数",
     "xpack.fleet.packagePolicyValidation.invalidIntegerMultiErrorMessage": "無効な整数",
     "xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage": "YAML形式が無効です",

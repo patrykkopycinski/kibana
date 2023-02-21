@@ -17256,7 +17256,6 @@
     "xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText": "Délimiteur utilisé dans les données CSV. La valeur par défaut est {value}.",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText": "Formats de date attendus. Les formats fournis sont appliqués de manière séquentielle. Accepte un modèle temporel Java ou l'un des formats suivants : {allowedFormats}.",
     "xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText": "Paramètres régionaux pour la date. Utile lors de l'analyse des noms de mois ou de jours. La valeur par défaut est {timezone}.",
-    "xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatHelpText": "Format à utiliser lors de l'écriture de la date dans {targetField}. Accepte un modèle temporel Java ou l'un des formats suivants : {allowedFormats}. La valeur par défaut est {defaultFormat}.",
     "xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText": "Champ de sortie. S'il est vide, le champ d'entrée est mis à jour à la place. La valeur par défaut est {defaultField}.",
     "xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText": "Fuseau horaire pour la date. La valeur par défaut est {timezone}.",
     "xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText": "Paramètres régionaux à utiliser lors de l'analyse de la date. Utile lors de l'analyse des noms de mois ou de jours. La valeur par défaut est {locale}.",

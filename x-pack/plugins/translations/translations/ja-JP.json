@@ -17241,7 +17241,6 @@
     "xpack.ingestPipelines.pipelineEditor.convertForm.separatorHelpText": "CSVデータで使用される区切り文字。デフォルトは{value}です。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.formatsFieldHelpText": "想定されるデータ形式。指定された形式は連続で適用されます。Java時間パターンまたは次の形式のいずれかを使用できます。{allowedFormats}。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.localeHelpText": "日付のロケール。月名または曜日名を解析するときに有用です。デフォルトは{timezone}です。",
-    "xpack.ingestPipelines.pipelineEditor.dateForm.outputFormatHelpText": "データを{targetField}に書き込むときに使用する形式。Java時間パターンまたは次の形式のいずれかを使用できます。{allowedFormats}。デフォルトは{defaultFormat}です。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.targetFieldHelpText": "出力フィールド。空の場合、所定の入力フィールドが更新されます。デフォルトは{defaultField}です。",
     "xpack.ingestPipelines.pipelineEditor.dateForm.timezoneHelpText": "日付のタイムゾーン。デフォルトは{timezone}です。",
     "xpack.ingestPipelines.pipelineEditor.dateIndexForm.localeHelpText": "日付を解析するときに使用するロケール。月名または曜日名を解析するときに有用です。デフォルトは{locale}です。",

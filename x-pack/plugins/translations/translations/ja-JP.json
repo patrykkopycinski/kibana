@@ -10045,7 +10045,6 @@
     "xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle": "このクラスターの失敗した調査結果をすべて表示",
     "xpack.csp.dashboard.risksTable.complianceColumnLabel": "コンプライアンス",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "すべてのフィールド調査結果を表示",
-    "xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle": "クラウド態勢スコア",
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "CISセクション別のコンプライアンス",
     "xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription": "評価されたクラスター",
     "xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription": "失敗した調査結果",

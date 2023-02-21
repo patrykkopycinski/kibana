@@ -10056,7 +10056,6 @@
     "xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle": "Afficher tous les échecs des résultats pour ce cluster",
     "xpack.csp.dashboard.risksTable.complianceColumnLabel": "Conformité",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "Afficher tous les échecs des résultats",
-    "xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle": "Score du niveau du cloud",
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "Conformité par section CIS",
     "xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription": "Clusters évalués",
     "xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription": "Résultats en échec",

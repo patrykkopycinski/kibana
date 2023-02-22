@@ -1570,7 +1570,7 @@
               "\nECS version this event conforms to. `ecs.version` is a required field and must exist in all events.\nWhen querying across multiple indices -- which may conform to slightly different ECS versions -- this field lets integrations adjust to the schema version of the events."
             ],
             "signature": [
-              "\"8.6.0\""
+              "\"8.6.1\""
             ],
             "path": "packages/kbn-ecs/generated/ecs.ts",
             "deprecated": false,
@@ -6780,7 +6780,7 @@
             "label": "indicator",
             "description": [],
             "signature": [
-              "{ as?: { number?: number | undefined; organization?: { name?: string | undefined; } | undefined; } | undefined; confidence?: string | undefined; description?: string | undefined; email?: { address?: string | undefined; } | undefined; file?: { accessed?: string | undefined; attributes?: string[] | undefined; code_signature?: { digest_algorithm?: string | undefined; exists?: boolean | undefined; signing_id?: string | undefined; status?: string | undefined; subject_name?: string | undefined; team_id?: string | undefined; timestamp?: string | undefined; trusted?: boolean | undefined; valid?: boolean | undefined; } | undefined; created?: string | undefined; ctime?: string | undefined; device?: string | undefined; directory?: string | undefined; drive_letter?: string | undefined; elf?: { architecture?: string | undefined; byte_order?: string | undefined; cpu_type?: string | undefined; creation_date?: string | undefined; exports?: Record<string, unknown>[] | undefined; header?: { abi_version?: string | undefined; class?: string | undefined; data?: string | undefined; entrypoint?: number | undefined; object_version?: string | undefined; os_abi?: string | undefined; type?: string | undefined; version?: string | undefined; } | undefined; imports?: Record<string, unknown>[] | undefined; sections?: Record<string, unknown>[] | undefined; segments?: Record<string, unknown>[] | undefined; shared_libraries?: string[] | undefined; telfhash?: string | undefined; } | undefined; extension?: string | undefined; fork_name?: string | undefined; gid?: string | undefined; group?: string | undefined; hash?: { md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; inode?: string | undefined; mime_type?: string | undefined; mode?: string | undefined; mtime?: string | undefined; name?: string | undefined; owner?: string | undefined; path?: string | undefined; pe?: { architecture?: string | undefined; company?: string | undefined; description?: string | undefined; file_version?: string | undefined; imphash?: string | undefined; original_file_name?: string | undefined; pehash?: string | undefined; product?: string | undefined; } | undefined; size?: number | undefined; target_path?: string | undefined; type?: string | undefined; uid?: string | undefined; x509?: { alternative_names?: string[] | undefined; issuer?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; not_after?: string | undefined; not_before?: string | undefined; public_key_algorithm?: string | undefined; public_key_curve?: string | undefined; public_key_exponent?: number | undefined; public_key_size?: number | undefined; serial_number?: string | undefined; signature_algorithm?: string | undefined; subject?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; version_number?: string | undefined; } | undefined; } | undefined; first_seen?: string | undefined; geo?: { city_name?: string | undefined; continent_code?: string | undefined; continent_name?: string | undefined; country_iso_code?: string | undefined; country_name?: string | undefined; location?: { lat: number; lon: number; } | undefined; name?: string | undefined; postal_code?: string | undefined; region_iso_code?: string | undefined; region_name?: string | undefined; timezone?: string | undefined; } | undefined; ip?: string | undefined; last_seen?: string | undefined; marking?: { tlp?: string | undefined; } | undefined; modified_at?: string | undefined; port?: number | undefined; provider?: string | undefined; reference?: string | undefined; registry?: { data?: { bytes?: string | undefined; strings?: string[] | undefined; type?: string | undefined; } | undefined; hive?: string | undefined; key?: string | undefined; path?: string | undefined; value?: string | undefined; } | undefined; scanner_stats?: number | undefined; sightings?: number | undefined; type?: string | undefined; url?: { domain?: string | undefined; extension?: string | undefined; fragment?: string | undefined; full?: string | undefined; original?: string | undefined; password?: string | undefined; path?: string | undefined; port?: number | undefined; query?: string | undefined; registered_domain?: string | undefined; scheme?: string | undefined; subdomain?: string | undefined; top_level_domain?: string | undefined; username?: string | undefined; } | undefined; x509?: { alternative_names?: string[] | undefined; issuer?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; not_after?: string | undefined; not_before?: string | undefined; public_key_algorithm?: string | undefined; public_key_curve?: string | undefined; public_key_exponent?: number | undefined; public_key_size?: number | undefined; serial_number?: string | undefined; signature_algorithm?: string | undefined; subject?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; version_number?: string | undefined; } | undefined; } | undefined"
+              "{ as?: { number?: number | undefined; organization?: { name?: string | undefined; } | undefined; } | undefined; confidence?: string | undefined; description?: string | undefined; email?: { address?: string | undefined; } | undefined; file?: { accessed?: string | undefined; attributes?: string[] | undefined; code_signature?: { digest_algorithm?: string | undefined; exists?: boolean | undefined; signing_id?: string | undefined; status?: string | undefined; subject_name?: string | undefined; team_id?: string | undefined; timestamp?: string | undefined; trusted?: boolean | undefined; valid?: boolean | undefined; } | undefined; created?: string | undefined; ctime?: string | undefined; device?: string | undefined; directory?: string | undefined; drive_letter?: string | undefined; elf?: { architecture?: string | undefined; byte_order?: string | undefined; cpu_type?: string | undefined; creation_date?: string | undefined; exports?: Record<string, unknown>[] | undefined; header?: { abi_version?: string | undefined; class?: string | undefined; data?: string | undefined; entrypoint?: number | undefined; object_version?: string | undefined; os_abi?: string | undefined; type?: string | undefined; version?: string | undefined; } | undefined; imports?: Record<string, unknown>[] | undefined; sections?: Record<string, unknown>[] | undefined; segments?: Record<string, unknown>[] | undefined; shared_libraries?: string[] | undefined; telfhash?: string | undefined; } | undefined; extension?: string | undefined; fork_name?: string | undefined; gid?: string | undefined; group?: string | undefined; hash?: { md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; inode?: string | undefined; mime_type?: string | undefined; mode?: string | undefined; mtime?: string | undefined; name?: string | undefined; owner?: string | undefined; path?: string | undefined; pe?: { architecture?: string | undefined; company?: string | undefined; description?: string | undefined; file_version?: string | undefined; imphash?: string | undefined; original_file_name?: string | undefined; pehash?: string | undefined; product?: string | undefined; } | undefined; size?: number | undefined; target_path?: string | undefined; type?: string | undefined; uid?: string | undefined; x509?: { alternative_names?: string[] | undefined; issuer?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; not_after?: string | undefined; not_before?: string | undefined; public_key_algorithm?: string | undefined; public_key_curve?: string | undefined; public_key_exponent?: number | undefined; public_key_size?: number | undefined; serial_number?: string | undefined; signature_algorithm?: string | undefined; subject?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; version_number?: string | undefined; } | undefined; } | undefined; first_seen?: string | undefined; geo?: { city_name?: string | undefined; continent_code?: string | undefined; continent_name?: string | undefined; country_iso_code?: string | undefined; country_name?: string | undefined; location?: { lat: number; lon: number; } | undefined; name?: string | undefined; postal_code?: string | undefined; region_iso_code?: string | undefined; region_name?: string | undefined; timezone?: string | undefined; } | undefined; ip?: string | undefined; last_seen?: string | undefined; marking?: { tlp?: string | undefined; tlp_version?: string | undefined; } | undefined; modified_at?: string | undefined; port?: number | undefined; provider?: string | undefined; reference?: string | undefined; registry?: { data?: { bytes?: string | undefined; strings?: string[] | undefined; type?: string | undefined; } | undefined; hive?: string | undefined; key?: string | undefined; path?: string | undefined; value?: string | undefined; } | undefined; scanner_stats?: number | undefined; sightings?: number | undefined; type?: string | undefined; url?: { domain?: string | undefined; extension?: string | undefined; fragment?: string | undefined; full?: string | undefined; original?: string | undefined; password?: string | undefined; path?: string | undefined; port?: number | undefined; query?: string | undefined; registered_domain?: string | undefined; scheme?: string | undefined; subdomain?: string | undefined; top_level_domain?: string | undefined; username?: string | undefined; } | undefined; x509?: { alternative_names?: string[] | undefined; issuer?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; not_after?: string | undefined; not_before?: string | undefined; public_key_algorithm?: string | undefined; public_key_curve?: string | undefined; public_key_exponent?: number | undefined; public_key_size?: number | undefined; serial_number?: string | undefined; signature_algorithm?: string | undefined; subject?: { common_name?: string[] | undefined; country?: string[] | undefined; distinguished_name?: string | undefined; locality?: string[] | undefined; organization?: string[] | undefined; organizational_unit?: string[] | undefined; state_or_province?: string[] | undefined; } | undefined; version_number?: string | undefined; } | undefined; } | undefined"
             ],
             "path": "packages/kbn-ecs/generated/threat.ts",
             "deprecated": false,
@@ -6823,20 +6823,6 @@
             "description": [],
             "signature": [
               "{ id?: string[] | undefined; name?: string[] | undefined; reference?: string[] | undefined; subtechnique?: { id?: string[] | undefined; name?: string[] | undefined; reference?: string[] | undefined; } | undefined; } | undefined"
-            ],
-            "path": "packages/kbn-ecs/generated/threat.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ecs",
-            "id": "def-common.EcsThreat.threat",
-            "type": "Object",
-            "tags": [],
-            "label": "threat",
-            "description": [],
-            "signature": [
-              "{ indicator?: { marking?: { tlp?: { version?: string | undefined; } | undefined; } | undefined; } | undefined; } | undefined"
             ],
             "path": "packages/kbn-ecs/generated/threat.ts",
             "deprecated": false,
@@ -8350,7 +8336,7 @@
         "label": "EcsVersion",
         "description": [],
         "signature": [
-          "\"8.6.0\""
+          "\"8.6.1\""
         ],
         "path": "packages/kbn-ecs/generated/index.ts",
         "deprecated": false,
@@ -142151,10 +142137,10 @@
           },
           {
             "parentPluginId": "@kbn/ecs",
-            "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version",
+            "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp",
             "type": "Object",
             "tags": [],
-            "label": "'threat.enrichments.indicator.marking.tlp.version'",
+            "label": "'threat.enrichments.indicator.marking.tlp'",
             "description": [],
             "path": "packages/kbn-ecs/generated/ecs_flat.ts",
             "deprecated": false,
@@ -142162,7 +142148,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.dashed_name",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.dashed_name",
                 "type": "string",
                 "tags": [],
                 "label": "dashed_name",
@@ -142173,7 +142159,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.description",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.description",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -142184,8 +142170,8 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.example",
-                "type": "number",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.example",
+                "type": "string",
                 "tags": [],
                 "label": "example",
                 "description": [],
@@ -142195,7 +142181,21 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.flat_name",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.expected_values",
+                "type": "Array",
+                "tags": [],
+                "label": "expected_values",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.flat_name",
                 "type": "string",
                 "tags": [],
                 "label": "flat_name",
@@ -142206,7 +142206,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.ignore_above",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.ignore_above",
                 "type": "number",
                 "tags": [],
                 "label": "ignore_above",
@@ -142217,7 +142217,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.level",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.level",
                 "type": "string",
                 "tags": [],
                 "label": "level",
@@ -142228,7 +142228,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.name",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.name",
                 "type": "string",
                 "tags": [],
                 "label": "name",
@@ -142239,7 +142239,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.normalize",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.normalize",
                 "type": "Array",
                 "tags": [],
                 "label": "normalize",
@@ -142253,7 +142253,7 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.short",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.short",
                 "type": "string",
                 "tags": [],
                 "label": "short",
@@ -142264,7 +142264,133 @@
               },
               {
                 "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.version.type",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ecs",
+            "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version",
+            "type": "Object",
+            "tags": [],
+            "label": "'threat.enrichments.indicator.marking.tlp_version'",
+            "description": [],
+            "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.dashed_name",
+                "type": "string",
+                "tags": [],
+                "label": "dashed_name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.example",
+                "type": "number",
+                "tags": [],
+                "label": "example",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.flat_name",
+                "type": "string",
+                "tags": [],
+                "label": "flat_name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.ignore_above",
+                "type": "number",
+                "tags": [],
+                "label": "ignore_above",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.level",
+                "type": "string",
+                "tags": [],
+                "label": "level",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.normalize",
+                "type": "Array",
+                "tags": [],
+                "label": "normalize",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.short",
+                "type": "string",
+                "tags": [],
+                "label": "short",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.enrichments.indicator.marking.tlp_version.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -166694,6 +166820,132 @@
           },
           {
             "parentPluginId": "@kbn/ecs",
+            "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version",
+            "type": "Object",
+            "tags": [],
+            "label": "'threat.indicator.marking.tlp_version'",
+            "description": [],
+            "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.dashed_name",
+                "type": "string",
+                "tags": [],
+                "label": "dashed_name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.example",
+                "type": "number",
+                "tags": [],
+                "label": "example",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.flat_name",
+                "type": "string",
+                "tags": [],
+                "label": "flat_name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.ignore_above",
+                "type": "number",
+                "tags": [],
+                "label": "ignore_above",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.level",
+                "type": "string",
+                "tags": [],
+                "label": "level",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.normalize",
+                "type": "Array",
+                "tags": [],
+                "label": "normalize",
+                "description": [],
+                "signature": [
+                  "never[]"
+                ],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.short",
+                "type": "string",
+                "tags": [],
+                "label": "short",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ecs",
+                "id": "def-common.EcsFlat.threat.indicator.marking.tlp_version.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ecs",
             "id": "def-common.EcsFlat.threat.indicator.modified_at",
             "type": "Object",
             "tags": [],
@@ -175541,132 +175793,6 @@
               {
                 "parentPluginId": "@kbn/ecs",
                 "id": "def-common.EcsFlat.threat.technique.subtechnique.reference.type",
-                "type": "string",
-                "tags": [],
-                "label": "type",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/ecs",
-            "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version",
-            "type": "Object",
-            "tags": [],
-            "label": "'threat.threat.indicator.marking.tlp.version'",
-            "description": [],
-            "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.dashed_name",
-                "type": "string",
-                "tags": [],
-                "label": "dashed_name",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.description",
-                "type": "string",
-                "tags": [],
-                "label": "description",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.example",
-                "type": "number",
-                "tags": [],
-                "label": "example",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.flat_name",
-                "type": "string",
-                "tags": [],
-                "label": "flat_name",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.ignore_above",
-                "type": "number",
-                "tags": [],
-                "label": "ignore_above",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.level",
-                "type": "string",
-                "tags": [],
-                "label": "level",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.name",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.normalize",
-                "type": "Array",
-                "tags": [],
-                "label": "normalize",
-                "description": [],
-                "signature": [
-                  "never[]"
-                ],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.short",
-                "type": "string",
-                "tags": [],
-                "label": "short",
-                "description": [],
-                "path": "packages/kbn-ecs/generated/ecs_flat.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ecs",
-                "id": "def-common.EcsFlat.threat.threat.indicator.marking.tlp.version.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
@@ -345721,10 +345847,10 @@
                   },
                   {
                     "parentPluginId": "@kbn/ecs",
-                    "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version",
+                    "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp",
                     "type": "Object",
                     "tags": [],
-                    "label": "'threat.enrichments.indicator.marking.tlp.version'",
+                    "label": "'threat.enrichments.indicator.marking.tlp'",
                     "description": [],
                     "path": "packages/kbn-ecs/generated/ecs_nested.ts",
                     "deprecated": false,
@@ -345732,7 +345858,7 @@
                     "children": [
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.dashed_name",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.dashed_name",
                         "type": "string",
                         "tags": [],
                         "label": "dashed_name",
@@ -345743,7 +345869,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.description",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.description",
                         "type": "string",
                         "tags": [],
                         "label": "description",
@@ -345754,8 +345880,8 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.example",
-                        "type": "number",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.example",
+                        "type": "string",
                         "tags": [],
                         "label": "example",
                         "description": [],
@@ -345765,7 +345891,21 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.flat_name",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.expected_values",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "expected_values",
+                        "description": [],
+                        "signature": [
+                          "string[]"
+                        ],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.flat_name",
                         "type": "string",
                         "tags": [],
                         "label": "flat_name",
@@ -345776,7 +345916,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.ignore_above",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.ignore_above",
                         "type": "number",
                         "tags": [],
                         "label": "ignore_above",
@@ -345787,7 +345927,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.level",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.level",
                         "type": "string",
                         "tags": [],
                         "label": "level",
@@ -345798,7 +345938,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.name",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.name",
                         "type": "string",
                         "tags": [],
                         "label": "name",
@@ -345809,7 +345949,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.normalize",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.normalize",
                         "type": "Array",
                         "tags": [],
                         "label": "normalize",
@@ -345823,7 +345963,7 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.short",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.short",
                         "type": "string",
                         "tags": [],
                         "label": "short",
@@ -345834,7 +345974,133 @@
                       },
                       {
                         "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.version.type",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/ecs",
+                    "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "'threat.enrichments.indicator.marking.tlp_version'",
+                    "description": [],
+                    "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.dashed_name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "dashed_name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.description",
+                        "type": "string",
+                        "tags": [],
+                        "label": "description",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.example",
+                        "type": "number",
+                        "tags": [],
+                        "label": "example",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.flat_name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "flat_name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.ignore_above",
+                        "type": "number",
+                        "tags": [],
+                        "label": "ignore_above",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.level",
+                        "type": "string",
+                        "tags": [],
+                        "label": "level",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.normalize",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "normalize",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.short",
+                        "type": "string",
+                        "tags": [],
+                        "label": "short",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.enrichments.indicator.marking.tlp_version.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",
@@ -370264,6 +370530,132 @@
                   },
                   {
                     "parentPluginId": "@kbn/ecs",
+                    "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "'threat.indicator.marking.tlp_version'",
+                    "description": [],
+                    "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.dashed_name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "dashed_name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.description",
+                        "type": "string",
+                        "tags": [],
+                        "label": "description",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.example",
+                        "type": "number",
+                        "tags": [],
+                        "label": "example",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.flat_name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "flat_name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.ignore_above",
+                        "type": "number",
+                        "tags": [],
+                        "label": "ignore_above",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.level",
+                        "type": "string",
+                        "tags": [],
+                        "label": "level",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.name",
+                        "type": "string",
+                        "tags": [],
+                        "label": "name",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.normalize",
+                        "type": "Array",
+                        "tags": [],
+                        "label": "normalize",
+                        "description": [],
+                        "signature": [
+                          "never[]"
+                        ],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.short",
+                        "type": "string",
+                        "tags": [],
+                        "label": "short",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/ecs",
+                        "id": "def-common.EcsNested.threat.fields.threat.indicator.marking.tlp_version.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/ecs",
                     "id": "def-common.EcsNested.threat.fields.threat.indicator.modified_at",
                     "type": "Object",
                     "tags": [],
@@ -379111,132 +379503,6 @@
                       {
                         "parentPluginId": "@kbn/ecs",
                         "id": "def-common.EcsNested.threat.fields.threat.technique.subtechnique.reference.type",
-                        "type": "string",
-                        "tags": [],
-                        "label": "type",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      }
-                    ]
-                  },
-                  {
-                    "parentPluginId": "@kbn/ecs",
-                    "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "'threat.threat.indicator.marking.tlp.version'",
-                    "description": [],
-                    "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "children": [
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.dashed_name",
-                        "type": "string",
-                        "tags": [],
-                        "label": "dashed_name",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.description",
-                        "type": "string",
-                        "tags": [],
-                        "label": "description",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.example",
-                        "type": "number",
-                        "tags": [],
-                        "label": "example",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.flat_name",
-                        "type": "string",
-                        "tags": [],
-                        "label": "flat_name",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.ignore_above",
-                        "type": "number",
-                        "tags": [],
-                        "label": "ignore_above",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.level",
-                        "type": "string",
-                        "tags": [],
-                        "label": "level",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.name",
-                        "type": "string",
-                        "tags": [],
-                        "label": "name",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.normalize",
-                        "type": "Array",
-                        "tags": [],
-                        "label": "normalize",
-                        "description": [],
-                        "signature": [
-                          "never[]"
-                        ],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.short",
-                        "type": "string",
-                        "tags": [],
-                        "label": "short",
-                        "description": [],
-                        "path": "packages/kbn-ecs/generated/ecs_nested.ts",
-                        "deprecated": false,
-                        "trackAdoption": false
-                      },
-                      {
-                        "parentPluginId": "@kbn/ecs",
-                        "id": "def-common.EcsNested.threat.fields.threat.threat.indicator.marking.tlp.version.type",
                         "type": "string",
                         "tags": [],
                         "label": "type",

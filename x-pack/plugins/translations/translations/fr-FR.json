@@ -4483,7 +4483,6 @@
     "presentationUtil.solutionToolbar.quickButton.ariaButtonLabel": "Créer {createType}",
     "presentationUtil.dashboardPicker.searchDashboardPlaceholder": "Recherche dans les tableaux de bord…",
     "presentationUtil.dataViewPicker.changeDataViewTitle": "Vue de données",
-    "presentationUtil.fieldPicker.noDataViewLabel": "Aucune vue de données sélectionnée",
     "presentationUtil.fieldPicker.noFieldsLabel": "Aucun champ correspondant",
     "presentationUtil.fieldSearch.fieldFilterButtonLabel": "Filtrer par type",
     "presentationUtil.fieldSearch.filterByTypeLabel": "Filtrer par type",

@@ -4481,7 +4481,6 @@
     "presentationUtil.solutionToolbar.quickButton.ariaButtonLabel": "新しい{createType}を作成",
     "presentationUtil.dashboardPicker.searchDashboardPlaceholder": "ダッシュボードを検索...",
     "presentationUtil.dataViewPicker.changeDataViewTitle": "データビュー",
-    "presentationUtil.fieldPicker.noDataViewLabel": "データビューが選択されていません",
     "presentationUtil.fieldPicker.noFieldsLabel": "一致するがフィールドがありません",
     "presentationUtil.fieldSearch.fieldFilterButtonLabel": "タイプでフィルタリング",
     "presentationUtil.fieldSearch.filterByTypeLabel": "タイプでフィルタリング",

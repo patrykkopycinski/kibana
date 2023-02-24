@@ -9,17 +9,24 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { PrimaryButton } from './primary';
+import { ToolbarButton } from './toolbar_button';
 
 describe('<ToolbarButton />', () => {
-  test('is rendered', () => {
-    const component = mountWithIntl(<PrimaryButton label="test" />);
+  test('is rendered - default', () => {
+    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={() => 'click'} />);
     expect(component.render()).toMatchSnapshot();
   });
 
-  test('it can be passed a functional onClick handler', () => {
+  test('is rendered - primary', () => {
+    const component = mountWithIntl(
+      <ToolbarButton type="primary" label="Create chart" onClick={() => 'click'} />
+    );
+    expect(component.render()).toMatchSnapshot();
+  });
+
+  test('accepts an onClick handler', () => {
     const mockHandler = jest.fn();
-    const component = mountWithIntl(<PrimaryButton label="withOnClick" onClick={mockHandler} />);
+    const component = mountWithIntl(<ToolbarButton label="Create chart" onClick={mockHandler} />);
     component.find('button').simulate('click');
     expect(mockHandler).toHaveBeenCalled();
   });

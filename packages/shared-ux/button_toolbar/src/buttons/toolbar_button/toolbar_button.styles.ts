@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { UseEuiTheme } from '@elastic/eui';
 
-import { SolutionToolbarPopover, Props as SolutionToolbarPopoverProps } from './popover';
-
-export type Props = Omit<SolutionToolbarPopoverProps, 'primary'>;
-
-export const PrimaryActionPopover = (props: Omit<SolutionToolbarPopoverProps, 'primary'>) => (
-  <SolutionToolbarPopover primary={true} {...props} />
-);
+export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
+  return {
+    emptyButton: {
+      backgroundColor: euiTheme.colors.emptyShade,
+      border: `${euiTheme.border.thin} !important`,
+      color: `${euiTheme.colors.text}`,
+    },
+  };
+};

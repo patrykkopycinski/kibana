@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { PrimaryButton } from './primary';
-export type { Props as PrimaryButtonProps } from './primary';
+export { ToolbarButton } from './toolbar_button';
+export type { Props as ToolbarButtonProps } from './toolbar_button';

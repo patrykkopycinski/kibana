@@ -31,7 +31,9 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getByTestSubj(...args: Parameters<Cypress.Chainable['get']>): Chainable<JQuery<HTMLElement>>;
+      getByTestSubj(
+        ...args: Parameters<Cypress.Chainable['get']>
+      ): Cypress.Chainable<JQuery<HTMLElement>>;
     }
   }
 }

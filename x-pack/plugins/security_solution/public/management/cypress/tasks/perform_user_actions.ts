@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export type ActionTypes = 'click' | 'input' | 'clear';
+import { recurse } from 'cypress-recurse';
+
+export type ActionTypes = 'click' | 'input' | 'clear' | 'select';
 
 export interface FormAction {
   type: ActionTypes;
@@ -21,18 +23,31 @@ export const performUserActions = (actions: FormAction[]) => {
 };
 
 const performAction = (action: FormAction) => {
-  let element;
-  if (action.customSelector) {
-    element = cy.get(action.customSelector);
-  } else {
-    element = cy.getByTestSubj(action.selector || '');
-  }
+  const getElement = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+    if (action.customSelector) {
+      return cy.get(action.customSelector);
+    }
+    return cy.getByTestSubj(action.selector || '');
+  };
 
   if (action.type === 'click') {
-    element.click();
+    getElement().click();
   } else if (action.type === 'input') {
-    element.type(action.value || '');
+    getElement().type(action.value || '');
   } else if (action.type === 'clear') {
-    element.clear();
+    getElement().clear();
+  } else if (action.type === 'select') {
+    recurse(
+      () => {
+        const element = getElement();
+        element.click();
+        cy.wait(500)
+          .get(`button[title="${action?.value as string}"]`)
+          .click();
+        return element.invoke('text');
+      },
+      (inputValue) => inputValue.startsWith(`${action.value}`),
+      { delay: 1000, limit: 50 }
+    );
   }
 };

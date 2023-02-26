@@ -187,20 +187,14 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
           value: 'This is the event filter description',
         },
         {
-          type: 'click',
+          type: 'select',
           selector: 'fieldAutocompleteComboBox',
+          value: 'agent.type',
         },
         {
-          type: 'click',
-          customSelector: 'button[title="agent.type"]',
-        },
-        {
-          type: 'click',
+          type: 'select',
           selector: 'valuesAutocompleteMatch',
-        },
-        {
-          type: 'click',
-          customSelector: 'button[title="endpoint"]',
+          value: 'endpoint',
         },
       ],
       checkResults: [

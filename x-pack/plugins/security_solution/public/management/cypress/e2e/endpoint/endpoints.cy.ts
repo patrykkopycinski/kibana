@@ -98,28 +98,28 @@ describe('Endpoints page', () => {
 
     cy.visit(getEndpointListPath({ name: 'endpointList' }));
 
-    cy.getBySel('policyListRevNo')
+    cy.getByTestSubj('policyListRevNo')
       .eq(0)
       .invoke('text')
       .then(parseRevNumber)
       .then((initialRevisionNumber) => {
         // Update policy
-        cy.getBySel('policyNameCellLink').eq(0).click();
+        cy.getByTestSubj('policyNameCellLink').eq(0).click();
 
-        cy.getBySel('policyDetailsSaveButton').click();
-        cy.getBySel('policyDetailsConfirmModal').should('exist');
-        cy.getBySel('confirmModalConfirmButton').click();
+        cy.getByTestSubj('policyDetailsSaveButton').click();
+        cy.getByTestSubj('policyDetailsConfirmModal').should('exist');
+        cy.getByTestSubj('confirmModalConfirmButton').click();
         cy.contains(/has been updated/);
 
-        cy.getBySel('policyDetailsBackLink').click();
+        cy.getByTestSubj('policyDetailsBackLink').click();
 
         // Assert disappearing 'Out-of-date' indicator, Success Policy Status and increased revision number
-        cy.getBySel('rowPolicyOutOfDate').should('exist');
-        cy.getBySel('rowPolicyOutOfDate').should('not.exist'); // depends on the 10s auto-refresh
+        cy.getByTestSubj('rowPolicyOutOfDate').should('exist');
+        cy.getByTestSubj('rowPolicyOutOfDate').should('not.exist'); // depends on the 10s auto-refresh
 
-        cy.getBySel('policyStatusCellLink').eq(0).should('contain', 'Success');
+        cy.getByTestSubj('policyStatusCellLink').eq(0).should('contain', 'Success');
 
-        cy.getBySel('policyListRevNo')
+        cy.getByTestSubj('policyListRevNo')
           .eq(0)
           .invoke('text')
           .then(parseRevNumber)

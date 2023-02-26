@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEndpointListPath } from '../../../common/routing';
 import { login } from '../../tasks/login';
 import { runEndpointLoaderScript } from '../../tasks/run_endpoint_loader';
 
@@ -18,7 +19,7 @@ describe('Endpoints page', () => {
   });
 
   it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
+    cy.visit(getEndpointListPath({ name: 'endpointList' }));
     cy.contains('Hosts running Elastic Defend').should('exist');
   });
 });

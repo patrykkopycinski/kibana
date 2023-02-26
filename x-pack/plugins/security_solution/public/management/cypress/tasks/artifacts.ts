@@ -83,8 +83,7 @@ export const yieldFirstPolicyID = () => {
   request({
     method: 'GET',
     url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
-  })
-  .then(({ body }) => {
+  }).then(({ body }) => {
     expect(body.items.length).to.be.least(1);
     return body.items[0].id;
   });

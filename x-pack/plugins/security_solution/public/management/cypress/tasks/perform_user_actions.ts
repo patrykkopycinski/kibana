@@ -38,15 +38,13 @@ const performAction = (action: FormAction) => {
     getElement().clear();
   } else if (action.type === 'select') {
     recurse(
-      () => {
+      (): Cypress.Chainable<string> => {
         const element = getElement();
         element.click();
-        cy.wait(500)
-          .get(`button[title="${action?.value as string}"]`)
-          .click();
+        cy.get(`button[title="${action?.value as string}"]`).click();
         return element.invoke('text');
       },
-      (inputValue) => inputValue.startsWith(`${action.value}`),
+      (inputValue: string) => inputValue.startsWith(`${action.value}`),
       { delay: 1000, limit: 50 }
     );
   }

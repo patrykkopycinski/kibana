@@ -13,7 +13,7 @@ import {
   reassignAgentPolicy,
 } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { getEndpointListPath } from '../../../common/routing';
+import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
 import {
   AGENT_HOSTNAME_CELL,
@@ -34,7 +34,7 @@ describe('Endpoints page', () => {
   });
 
   it('Shows endpoint on the list', () => {
-    cy.visit(getEndpointListPath({ name: 'endpointList' }));
+    cy.visit(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
     cy.getByTestSubj(AGENT_HOSTNAME_CELL).should('have.text', endpointHostname);
   });
@@ -71,7 +71,7 @@ describe('Endpoints page', () => {
     });
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
-      cy.visit(getEndpointListPath({ name: 'endpointList' }));
+      cy.visit(APP_ENDPOINTS_PATH);
       const hostname = cy
         .getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${endpointHostname}")`);
@@ -96,7 +96,7 @@ describe('Endpoints page', () => {
   it('should update endpoint policy on Endpoint', () => {
     const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-    cy.visit(getEndpointListPath({ name: 'endpointList' }));
+    cy.visit(APP_ENDPOINTS_PATH);
 
     cy.getByTestSubj('policyListRevNo')
       .eq(0)

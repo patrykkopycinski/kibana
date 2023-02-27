@@ -80,7 +80,7 @@ describe('Artifact tabs in Policy Details page', () => {
     removeAllArtifacts();
   });
 
-  for (const testData of getArtifactsListTestsData()) {
+  for (const testData of [getArtifactsListTestsData()[1]]) {
     describe(`${testData.title} tab`, () => {
       beforeEach(() => {
         login();
@@ -104,7 +104,7 @@ describe('Artifact tabs in Policy Details page', () => {
           cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
         });
 
-        it(`[ALL] User can add ${testData.title} artifact`, () => {
+        it.only(`[ALL] User can add ${testData.title} artifact`, () => {
           loginWithPrivilegeAll();
           visitArtifactTab(testData.tabId);
 

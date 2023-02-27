@@ -104,7 +104,7 @@ describe('Artifact tabs in Policy Details page', () => {
           cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
         });
 
-        it.only(`[ALL] User can add ${testData.title} artifact`, () => {
+        it(`[ALL] User can add ${testData.title} artifact`, () => {
           loginWithPrivilegeAll();
           visitArtifactTab(testData.tabId);
 

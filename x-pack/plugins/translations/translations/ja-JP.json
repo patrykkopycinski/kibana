@@ -10573,8 +10573,6 @@
     "xpack.enterpriseSearch.crawler.authenticationPanel.emptyPrompt.description": "{addAuthenticationButtonLabel}をクリックすると、保護されたコンテンツのクローリングに必要な資格情報を提供します",
     "xpack.enterpriseSearch.crawler.components.crawlDetailsSummary.crawlCountOnDomains": "{domainCount, plural, other  {# 件のドメイン}}で{crawlType}クロール",
     "xpack.enterpriseSearch.crawler.crawlCustomSettingsFlyout.includeSitemapsCheckboxLabel": "{robotsDotTxt}で検出されたサイトマップを含める",
-    "xpack.enterpriseSearch.crawler.crawlRulesTable.description": "URLがルールと一致するページを含めるか除外するためのクロールルールを作成します。ルールは連続で実行されます。各URLは最初の一致に従って評価されます。{link}",
-    "xpack.enterpriseSearch.crawler.deduplicationPanel.description": "Webクローラーは一意のページにのみインデックスします。重複するページを検討するときにクローラーが使用するフィールドを選択します。すべてのスキーマフィールドを選択解除して、このドメインで重複するドキュメントを許可します。{documentationLink}。",
     "xpack.enterpriseSearch.crawler.deleteDomainModal.description": "ドメイン{domainUrl}をクローラーから削除します。これにより、設定したすべてのエントリポイントとクロールルールも削除されます。このドメインに関連するすべてのドキュメントは、次回のクロールで削除されます。{thisCannotBeUndoneMessage}",
     "xpack.enterpriseSearch.crawler.entryPointsTable.emptyMessageDescription": "クローラーのエントリポイントを指定するには、{link}してください",
     "xpack.enterpriseSearch.errorConnectingState.cloudErrorMessage": "クラウドデプロイのエンタープライズ サーチノードが実行中ですか？{deploymentSettingsLink}",

@@ -3876,7 +3876,6 @@
     "indexPatternEditor.typeSelect.standardDescription": "すべてのデータに完全アグリゲーションを実行",
     "indexPatternEditor.typeSelect.standardTitle": "標準データビュー",
     "indexPatternEditor.validations.noSingleAstriskPattern": "単一の「*」は許可されたパターンではありません",
-    "indexPatternEditor.validations.titleHelpText": "1つ以上のデータソースと一致するインデックスパターンを入力します。複数の文字の一致にアスタリスク（*）を使用します。ペースと / ? , \" &lt; > | 文字は使用できません。",
     "indexPatternEditor.validations.titleIsRequiredErrorMessage": "インデックスパターンが必要です。",
     "indexPatternFieldEditor.date.momentLabel": "Moment.jsのフォーマットパターン（デフォルト：{defaultPattern}）",
     "indexPatternFieldEditor.defaultErrorMessage": "このフォーマット構成の使用を試みた際にエラーが発生しました：{message}",

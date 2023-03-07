@@ -29884,7 +29884,6 @@
     "xpack.securitySolution.lists.valueListsForm.keywordsRadioLabel": "キーワード",
     "xpack.securitySolution.lists.valueListsForm.listTypesRadioLabel": "値リストのタイプ",
     "xpack.securitySolution.lists.valueListsForm.textRadioLabel": "テキスト",
-    "xpack.securitySolution.lists.valueListsImportButton": "リストをインポート",
     "xpack.securitySolution.lists.valueListsImportSuccess": "値リスト'{fileName}'がインポートされました",
     "xpack.securitySolution.lists.valueListsImportSuccessTitle": "値リストがインポートされました",
     "xpack.securitySolution.lists.valueListsTable.actionsColumn": "アクション",

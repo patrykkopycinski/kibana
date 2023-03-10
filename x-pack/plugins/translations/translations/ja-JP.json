@@ -17033,7 +17033,6 @@
     "xpack.infra.nodeDetails.yes": "はい",
     "xpack.infra.nodesToWaffleMap.groupsWithGroups.allName": "すべて",
     "xpack.infra.nodesToWaffleMap.groupsWithNodes.allName": "すべて",
-    "xpack.infra.notFoundPage.noContentFoundErrorTitle": "コンテンツがありません",
     "xpack.infra.openView.actionNames.deleteConfirmation": "ビューを削除しますか？",
     "xpack.infra.openView.cancelButton": "キャンセル",
     "xpack.infra.openView.columnNames.actions": "アクション",

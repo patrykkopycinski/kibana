@@ -10025,7 +10025,6 @@
     "xpack.csp.dashboard.benchmarkSection.manageRulesButton": "ルールの管理",
     "xpack.csp.dashboard.cspPageTemplate.pageTitle": "クラウド態勢",
     "xpack.csp.dashboard.risksTable.cisSectionColumnLabel": "CISセクション",
-    "xpack.csp.dashboard.risksTable.clusterCardViewAllButtonTitle": "このクラスターの失敗した調査結果をすべて表示",
     "xpack.csp.dashboard.risksTable.complianceColumnLabel": "コンプライアンス",
     "xpack.csp.dashboard.risksTable.viewAllButtonTitle": "すべてのフィールド調査結果を表示",
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "CISセクション別のコンプライアンス",

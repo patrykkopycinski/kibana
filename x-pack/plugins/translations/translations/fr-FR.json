@@ -17435,7 +17435,6 @@
     "xpack.infra.alerting.metricsDropdownMenu": "Indicateurs",
     "xpack.infra.alerting.metricsDropdownTitle": "Règles d'indicateurs",
     "xpack.infra.alerts.charts.errorMessage": "Oups, un problème est survenu",
-    "xpack.infra.alerts.charts.loadingMessage": "Chargement",
     "xpack.infra.alerts.charts.noDataMessage": "Aucune donnée graphique disponible",
     "xpack.infra.alerts.timeLabels.days": "jours",
     "xpack.infra.alerts.timeLabels.hours": "heures",

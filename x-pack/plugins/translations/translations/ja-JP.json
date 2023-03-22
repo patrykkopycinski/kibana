@@ -17434,7 +17434,6 @@
     "xpack.infra.alerting.metricsDropdownMenu": "メトリック",
     "xpack.infra.alerting.metricsDropdownTitle": "メトリックルール",
     "xpack.infra.alerts.charts.errorMessage": "問題が発生しました",
-    "xpack.infra.alerts.charts.loadingMessage": "読み込み中",
     "xpack.infra.alerts.charts.noDataMessage": "グラフデータがありません",
     "xpack.infra.alerts.timeLabels.days": "日",
     "xpack.infra.alerts.timeLabels.hours": "時間",

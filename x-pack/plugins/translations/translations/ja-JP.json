@@ -417,7 +417,6 @@
     "controls.controlGroup.manageControl.titleInputTitle": "ラベル",
     "controls.controlGroup.manageControl.widthInputTitle": "最小幅",
     "controls.controlGroup.management.addControl": "コントロールを追加",
-    "controls.controlGroup.management.buttonTitle": "設定",
     "controls.controlGroup.management.delete": "コントロールを削除",
     "controls.controlGroup.management.delete.cancel": "キャンセル",
     "controls.controlGroup.management.delete.confirm": "削除",

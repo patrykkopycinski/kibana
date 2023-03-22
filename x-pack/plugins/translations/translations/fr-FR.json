@@ -417,7 +417,6 @@
     "controls.controlGroup.manageControl.titleInputTitle": "Étiquette",
     "controls.controlGroup.manageControl.widthInputTitle": "Largeur minimale",
     "controls.controlGroup.management.addControl": "Ajouter un contrôle",
-    "controls.controlGroup.management.buttonTitle": "Paramètres",
     "controls.controlGroup.management.delete": "Supprimer le contrôle",
     "controls.controlGroup.management.delete.cancel": "Annuler",
     "controls.controlGroup.management.delete.confirm": "Supprimer",

@@ -3165,7 +3165,6 @@
     "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarChartsError": "valueLabels引数は棒グラフでのみ適用できます。",
     "expressionXY.tooltipActions.emptyFilterSelection": "フィルターする1つ以上の系列を選択",
     "expressionXY.xAxisConfigFn.help": "xyグラフのx軸設定を構成",
-    "expressionXY.xyChart.emptyXLabel": "（空）",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "アラート",
     "expressionXY.xyChart.iconSelect.asteriskIconLabel": "アスタリスク",
     "expressionXY.xyChart.iconSelect.bellIconLabel": "ベル",

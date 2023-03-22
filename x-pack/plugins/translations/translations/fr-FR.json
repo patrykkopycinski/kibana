@@ -3165,7 +3165,6 @@
     "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarChartsError": "L'argument \"valueLabels\" s'applique uniquement aux graphiques à barres.",
     "expressionXY.tooltipActions.emptyFilterSelection": "Sélectionner au moins une série à filtrer",
     "expressionXY.xAxisConfigFn.help": "Configurer la config de l'axe x du graphique xy",
-    "expressionXY.xyChart.emptyXLabel": "(vide)",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "Alerte",
     "expressionXY.xyChart.iconSelect.asteriskIconLabel": "Astérisque",
     "expressionXY.xyChart.iconSelect.bellIconLabel": "Cloche",

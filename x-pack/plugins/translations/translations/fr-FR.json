@@ -20297,7 +20297,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "Afficher le repère de temps actuel",
     "xpack.lens.xyChart.showEnzones": "Afficher les marqueurs de données partielles",
     "xpack.lens.xyChart.splitSeries": "Répartition",
-    "xpack.lens.xyChart.tickLabels": "Étiquettes de graduation",
     "xpack.lens.xyChart.tooltip": "Infobulle",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Ce paramètre s'applique uniquement lorsque l'axe du haut est activé.",
     "xpack.lens.xyChart.topAxisLabel": "Axe du haut",

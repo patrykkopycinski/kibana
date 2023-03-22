@@ -20297,7 +20297,6 @@
     "xpack.lens.xyChart.showCurrenTimeMarker": "現在時刻マーカーを表示",
     "xpack.lens.xyChart.showEnzones": "部分データマーカーを表示",
     "xpack.lens.xyChart.splitSeries": "内訳",
-    "xpack.lens.xyChart.tickLabels": "目盛ラベル",
     "xpack.lens.xyChart.tooltip": "ツールチップ",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "この設定は、上の軸が有効であるときにのみ適用されます。",
     "xpack.lens.xyChart.topAxisLabel": "上の軸",

@@ -610,7 +610,6 @@
     "core.euiStepStrings.simpleWarning": "L'étape {number} comporte des avertissements",
     "core.euiStepStrings.step": "Étape {number} : {title}",
     "core.euiStepStrings.warning": "L'étape {number} : {title} comporte des avertissements",
-    "core.euiSuperSelectControl.selectAnOption": "Choisir une option : {selectedValue} est sélectionné",
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage} lignes",
     "core.euiTourStepIndicator.ariaLabel": "Étape {number} {status}",

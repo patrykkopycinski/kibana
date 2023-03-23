@@ -610,7 +610,6 @@
     "core.euiStepStrings.simpleWarning": "ステップ{number}には警告があります",
     "core.euiStepStrings.step": "ステップ{number}：{title}",
     "core.euiStepStrings.warning": "ステップ{number}：{title}には警告があります",
-    "core.euiSuperSelectControl.selectAnOption": "オプションの選択：{selectedValue}件を選択済み",
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage}行",
     "core.euiTourStepIndicator.ariaLabel": "ステップ{number}{status}",

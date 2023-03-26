@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useStopAction } from './use_stop_action';
-export { isStopActionDisabled, StopActionName } from './stop_action_name';
+export { useScheduleNowAction } from './use_schedule_now_action';
+export { isScheduleNowActionDisabled, ScheduleNowActionName } from './schedule_now_action_name';

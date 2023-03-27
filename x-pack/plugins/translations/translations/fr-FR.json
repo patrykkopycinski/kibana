@@ -2467,7 +2467,6 @@
     "discover.sourceViewer.errorMessage": "Impossible de récupérer les données pour le moment. Actualisez l'onglet et réessayez.",
     "discover.sourceViewer.errorMessageTitle": "Une erreur s'est produite.",
     "discover.sourceViewer.refresh": "Actualiser",
-    "discover.textBasedLanguages.visualize.label": "Visualiser dans Lens",
     "discover.toggleSidebarAriaLabel": "Activer/Désactiver la barre latérale",
     "discover.topNav.openOptionsPopover.documentExplorerDisabledHint": "Saviez-vous que Discover possède un nouvel Explorateur de documents avec un meilleur tri des données, des colonnes redimensionnables et une vue en plein écran ? Vous pouvez modifier le mode d'affichage dans les Paramètres avancés.",
     "discover.topNav.openOptionsPopover.documentExplorerEnabledHint": "Vous pouvez revenir à l'affichage Discover classique dans les Paramètres avancés.",

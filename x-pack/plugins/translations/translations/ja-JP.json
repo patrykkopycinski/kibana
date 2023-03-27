@@ -2467,7 +2467,6 @@
     "discover.sourceViewer.errorMessage": "現在データを取得できませんでした。タブを更新して、再試行してください。",
     "discover.sourceViewer.errorMessageTitle": "エラーが発生しました",
     "discover.sourceViewer.refresh": "更新",
-    "discover.textBasedLanguages.visualize.label": "Lensで可視化",
     "discover.toggleSidebarAriaLabel": "サイドバーを切り替える",
     "discover.topNav.openOptionsPopover.documentExplorerDisabledHint": "Discoverの新しいドキュメントエクスプローラーでは、データの並べ替え、列のサイズ変更、全画面表示といった優れた機能をご利用いただけます。高度な設定で表示モードを変更できます。",
     "discover.topNav.openOptionsPopover.documentExplorerEnabledHint": "高度な設定でクラシックDiscoverビューに戻すことができます。",

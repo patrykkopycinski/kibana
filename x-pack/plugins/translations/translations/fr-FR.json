@@ -26052,7 +26052,6 @@
     "xpack.observability.seriesEditor.show": "Afficher la série",
     "xpack.observability.serviceGroupMaxServicesUiSettingDescription": "Limiter le nombre de services dans un groupe de services donné",
     "xpack.observability.serviceGroupMaxServicesUiSettingName": "Nombre maximum de services dans un groupe de services",
-    "xpack.observability.slo.alerting.burnRate.fired": "Alerte",
     "xpack.observability.slo.alerting.reasonDescription": "Une description concise de la raison du signalement",
     "xpack.observability.slo.alerting.thresholdDescription": "Valeur de seuil du taux d'avancement.",
     "xpack.observability.slo.alerting.timestampDescription": "Horodatage du moment où l'alerte a été détectée.",

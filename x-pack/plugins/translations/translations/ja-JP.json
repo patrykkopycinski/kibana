@@ -26033,7 +26033,6 @@
     "xpack.observability.seriesEditor.show": "系列を表示",
     "xpack.observability.serviceGroupMaxServicesUiSettingDescription": "特定のサービスグループのサービス数を制限",
     "xpack.observability.serviceGroupMaxServicesUiSettingName": "サービスグループの最大サービス",
-    "xpack.observability.slo.alerting.burnRate.fired": "アラート",
     "xpack.observability.slo.alerting.reasonDescription": "アラートの理由の簡潔な説明",
     "xpack.observability.slo.alerting.thresholdDescription": "バーンレートしきい値。",
     "xpack.observability.slo.alerting.timestampDescription": "アラートが検出された時点のタイムスタンプ。",

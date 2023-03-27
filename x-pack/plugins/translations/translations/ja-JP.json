@@ -34143,7 +34143,7 @@
     "xpack.stackConnectors.components.serviceNowSIR.correlationIDHelpLabel": "インシデントを更新するID",
     "xpack.stackConnectors.components.serviceNowSIR.selectMessageText": "ServiceNow SecOpsでインシデントを作成します。",
     "xpack.stackConnectors.components.serviceNowSIR.title": "セキュリティインシデント",
-    "xpack.stackConnectors.components.slack..error.requiredSlackMessageText": "メッセージが必要です。",
+    "xpack.stackConnectors.components.slack.error.requiredSlackMessageText": "メッセージが必要です。",
     "xpack.stackConnectors.components.slack.connectorTypeTitle": "Slack に送信",
     "xpack.stackConnectors.components.slack.error.invalidWebhookUrlText": "Web フック URL が無効です。",
     "xpack.stackConnectors.components.slack.messageTextAreaFieldLabel": "メッセージ",

@@ -11247,7 +11247,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.textClassificationModel": "さらに、predicted_probabilityが{probabilityThreshold}より大きい場合、predicted_valueは\"{fieldName}\"にコピーされます。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.textEmbeddingModel": "さらにpredicted_valueは\"{fieldName}\"にコピーされます。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText.userProvided": "これは、推論結果を保持するフィールドの名前を指定します。プレフィックスに\"ml.inference\"、ml.inference.{targetField}が付きます",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.test.example.code": "JSONフォーマットを使用: {code}",
     "xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.customDescription": "{indexName}のカスタムインジェストパイプライン",
     "xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.processorsDescription": "{processorsCount}プロセッサー",
     "xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitleAPIindex": "推論パイプラインは、エンタープライズサーチインジェストパイプラインからのプロセッサーとして実行されます。APIベースのインデックスでこれらのパイプラインを使用するには、APIリクエストで{pipelineName}パイプラインを参照する必要があります。",

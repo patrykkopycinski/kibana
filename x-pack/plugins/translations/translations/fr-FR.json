@@ -930,8 +930,6 @@
     "core.status.yellowTitle": "Jaune",
     "core.statusPage.coreStatus.sectionTitle": "Statut principal",
     "core.statusPage.loadStatus.serverIsDownErrorMessage": "Échec de requête du statut du serveur. Votre serveur est peut-être indisponible ?",
-    "core.statusPage.metricsTiles.columns.heapTotalHeader": "Tas total",
-    "core.statusPage.metricsTiles.columns.heapUsedHeader": "Tas utilisé",
     "core.statusPage.metricsTiles.columns.load.metaHeader": "Intervalle de charge",
     "core.statusPage.metricsTiles.columns.loadHeader": "Charge",
     "core.statusPage.metricsTiles.columns.processDelayDetailsHeader": "Centiles",

@@ -930,8 +930,6 @@
     "core.status.yellowTitle": "黄",
     "core.statusPage.coreStatus.sectionTitle": "コアステータス",
     "core.statusPage.loadStatus.serverIsDownErrorMessage": "サーバーステータスのリクエストに失敗しました。サーバーがダウンしている可能性があります。",
-    "core.statusPage.metricsTiles.columns.heapTotalHeader": "ヒープ合計",
-    "core.statusPage.metricsTiles.columns.heapUsedHeader": "使用ヒープ",
     "core.statusPage.metricsTiles.columns.load.metaHeader": "読み込み間隔",
     "core.statusPage.metricsTiles.columns.loadHeader": "読み込み",
     "core.statusPage.metricsTiles.columns.processDelayDetailsHeader": "パーセンタイル",

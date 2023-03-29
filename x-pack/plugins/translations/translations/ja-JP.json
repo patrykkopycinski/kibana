@@ -25609,7 +25609,6 @@
     "xpack.observability.alertDetails.errorPromptTitle": "アラート詳細を読み込めません",
     "xpack.observability.alertDetails.viewRuleDetails": "ルール詳細を表示",
     "xpack.observability.alerts.actions.addToCase": "既存のケースに追加",
-    "xpack.observability.alerts.actions.addToCaseDisabled": "この選択では、［ケースに追加］を使用できません",
     "xpack.observability.alerts.actions.addToNewCase": "新しいケースに追加",
     "xpack.observability.alerts.alertStatusFilter.active": "アクティブ",
     "xpack.observability.alerts.alertStatusFilter.legend": "フィルタリング条件",

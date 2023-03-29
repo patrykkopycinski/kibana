@@ -12433,8 +12433,6 @@
     "xpack.enterpriseSearch.content.index.filtering.priority": "Priorité de la règle",
     "xpack.enterpriseSearch.content.index.filtering.rule": "Règle",
     "xpack.enterpriseSearch.content.index.filtering.value": "Valeur",
-    "xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.description": "Vous pouvez créer une version de cette configuration spécifique à l'index et la modifier pour votre cas d'utilisation.",
-    "xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.platinumText": "Avec une licence Platinum, vous pouvez créer une version de cette configuration spécifique à l'index et la modifier pour votre cas d'utilisation.",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.apiIndex": "Il s'agit d'un index basé sur l'API.",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.cancelButtonLabel": "Annuler",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.closeButtonLabel": "Fermer",

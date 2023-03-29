@@ -12432,8 +12432,6 @@
     "xpack.enterpriseSearch.content.index.filtering.priority": "ルール優先度",
     "xpack.enterpriseSearch.content.index.filtering.rule": "ルール",
     "xpack.enterpriseSearch.content.index.filtering.value": "値",
-    "xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.description": "この構成のインデックス固有のバージョンを作成し、ユースケースに合わせて修正できます。",
-    "xpack.enterpriseSearch.content.index.pipelines.copyAndCustomize.platinumText": "プラチナライセンスでは、この構成のインデックス固有のバージョンを作成し、ユースケースに合わせて修正できます。",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.apiIndex": "これはAPIベースのインデックスです。",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.cancelButtonLabel": "キャンセル",
     "xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.closeButtonLabel": "閉じる",

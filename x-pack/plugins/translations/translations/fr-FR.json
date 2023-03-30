@@ -26413,7 +26413,6 @@
     "xpack.profiling.breadcrumb.topnFunctions": "N premiers",
     "xpack.profiling.checkSetup.setupFailureToastTitle": "Impossible de terminer la configuration",
     "xpack.profiling.featureRegistry.profilingFeatureName": "Universal Profiling",
-    "xpack.profiling.flameGraph.showInformationWindow": "Afficher la fenêtre d'informations",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2ExclusiveLabel": "CO2 annualisé (enfants excl.)",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2InclusiveLabel": "CO2 annualisé",
     "xpack.profiling.flameGraphInformationWindow.annualizedCoreSecondsExclusiveLabel": "Cœurs-secondes annualisé (enfants excl.)",

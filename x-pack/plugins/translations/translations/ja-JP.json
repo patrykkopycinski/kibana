@@ -26394,7 +26394,6 @@
     "xpack.profiling.breadcrumb.topnFunctions": "トップ N",
     "xpack.profiling.checkSetup.setupFailureToastTitle": "設定を完了できませんでした",
     "xpack.profiling.featureRegistry.profilingFeatureName": "ユニバーサルプロファイリング",
-    "xpack.profiling.flameGraph.showInformationWindow": "情報ウィンドウを表示",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2ExclusiveLabel": "年間換算CO2（子を除く）",
     "xpack.profiling.flameGraphInformationWindow.annualizedCo2InclusiveLabel": "年間換算CO2",
     "xpack.profiling.flameGraphInformationWindow.annualizedCoreSecondsExclusiveLabel": "年間換算core-seconds（子を除く）",

@@ -25569,8 +25569,6 @@
     "xpack.observability..synthetics.addDataButtonLabel": "Syntheticsデータの追加",
     "xpack.observability.alertDetails.actionsButtonLabel": "アクション",
     "xpack.observability.alertDetails.addToCase": "ケースに追加",
-    "xpack.observability.alertDetails.alertActiveState": "アクティブ",
-    "xpack.observability.alertDetails.alertRecoveredState": "回復済み",
     "xpack.observability.alertDetails.editSnoozeRule": "ルールをスヌーズ",
     "xpack.observability.alertDetails.errorPromptBody": "アラート詳細の読み込みエラーが発生しました。",
     "xpack.observability.alertDetails.errorPromptTitle": "アラート詳細を読み込めません",

@@ -25588,8 +25588,6 @@
     "xpack.observability..synthetics.addDataButtonLabel": "Ajouter des données synthétiques",
     "xpack.observability.alertDetails.actionsButtonLabel": "Actions",
     "xpack.observability.alertDetails.addToCase": "Ajouter au cas",
-    "xpack.observability.alertDetails.alertActiveState": "Actif",
-    "xpack.observability.alertDetails.alertRecoveredState": "Récupéré",
     "xpack.observability.alertDetails.editSnoozeRule": "Répéter la règle",
     "xpack.observability.alertDetails.errorPromptBody": "Une erreur s'est produite lors du chargement des détails de l'alerte.",
     "xpack.observability.alertDetails.errorPromptTitle": "Impossible de charger les détails de l'alerte",

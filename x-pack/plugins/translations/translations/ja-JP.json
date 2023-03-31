@@ -11436,7 +11436,6 @@
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.subtitle": "分析コレクションには、構築している特定の検索アプリケーションの分析イベントを格納できます。以下で覚えやすい名前を指定してください。",
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.title": "分析コレクションを作成",
     "xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage": "コレクションが正常に削除されました",
-    "xpack.enterpriseSearch.analytics.collectionsView.breadcrumb": "コレクションを表示",
     "xpack.enterpriseSearch.analytics.productCardDescription": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール。",
     "xpack.enterpriseSearch.analytics.productDescription": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール。",
     "xpack.enterpriseSearch.analytics.productName": "Behavioral Analytics",

@@ -11437,7 +11437,6 @@
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.subtitle": "Une collection d'analyse permet de stocker les événements d'analyse pour toute application de recherche que vous créez. Affectez-lui un nom facile à retenir ci-dessous.",
     "xpack.enterpriseSearch.analytics.collectionsCreate.form.title": "Créer une collection d'analyses",
     "xpack.enterpriseSearch.analytics.collectionsDelete.action.successMessage": "La collection a été supprimée avec succès",
-    "xpack.enterpriseSearch.analytics.collectionsView.breadcrumb": "Afficher la collection",
     "xpack.enterpriseSearch.analytics.productCardDescription": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche.",
     "xpack.enterpriseSearch.analytics.productDescription": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche.",
     "xpack.enterpriseSearch.analytics.productName": "Behavioral Analytics",

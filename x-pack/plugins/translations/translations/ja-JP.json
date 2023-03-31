@@ -1228,7 +1228,6 @@
     "dashboard.topNave.viewConfigDescription": "表示専用モードに切り替え",
     "dashboard.unsavedChangesBadge": "保存されていない変更",
     "data.advancedSettings.autocompleteIgnoreTimerangeText": "このプロパティを無効にすると、現在の時間範囲からではなく、データセットからオートコンプリートの候補を取得します。{learnMoreLink}",
-    "data.advancedSettings.autocompleteValueSuggestionMethodText": "KQL自動入力で値の候補をクエリするために使用される方法。terms_enumを選択すると、Elasticsearch用語enum APIを使用して、自動入力候補のパフォーマンスを改善します。（terms_enumはドキュメントレベルのセキュリティと互換性がありません。） terms_aggを選択すると、Elasticsearch用語アグリゲーションを使用します。{learnMoreLink}",
     "data.advancedSettings.courier.customRequestPreferenceText": "{setRequestReferenceSetting}が{customSettingValue}に設定されているときに使用される{requestPreferenceLink}です。",
     "data.advancedSettings.courier.maxRequestsText": "Kibanaから送信された_msearch requestsリクエストに使用される{maxRequestsLink}設定を管理します。この構成を無効にしてElasticsearchのデフォルトを使用するには、0に設定します。",
     "data.advancedSettings.query.allowWildcardsText": "設定すると、クエリ句の頭に*が使えるようになります。基本的なLuceneクエリでリーディングワイルドカードを無効にするには、{queryStringOptionsPattern}を使用します。",

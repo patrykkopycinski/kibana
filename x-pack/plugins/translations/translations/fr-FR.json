@@ -34116,7 +34116,7 @@
     "xpack.stackConnectors.components.serviceNowSIR.correlationIDHelpLabel": "Identificateur pour les incidents de mise à jour",
     "xpack.stackConnectors.components.serviceNowSIR.selectMessageText": "Créez un incident dans ServiceNow SecOps.",
     "xpack.stackConnectors.components.serviceNowSIR.title": "Incident de sécurité",
-    "xpack.stackConnectors.components.slack.error.requiredSlackMessageText": "Le message est requis.",
+    "xpack.stackConnectors.components.slack..error.requiredSlackMessageText": "Le message est requis.",
     "xpack.stackConnectors.components.slack.connectorTypeTitle": "Envoyer vers Slack",
     "xpack.stackConnectors.components.slack.error.invalidWebhookUrlText": "L'URL de webhook n'est pas valide.",
     "xpack.stackConnectors.components.slack.messageTextAreaFieldLabel": "Message",

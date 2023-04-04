@@ -15370,6 +15370,7 @@
     "xpack.fleet.settings.editOutputFlyout.editTitle": "出力を編集",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputLabel": "ホスト",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder": "ホストURLを指定",
+    "xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout": "この出力タイプは現在、リモートElasticsearchクラスタへの接続をサポートしていません。",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingDescription": "有効にすると、エージェントは、この出力に対して定義されたすべてのホストで負荷を分散します。これにより、エージェントによって開かれる接続数が増えます。",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel": "ロードバランシング",
     "xpack.fleet.settings.editOutputFlyout.logstashHostsInputLabel": "Logstashホスト",

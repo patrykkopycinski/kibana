@@ -15371,6 +15371,7 @@
     "xpack.fleet.settings.editOutputFlyout.editTitle": "Modifier la sortie",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputLabel": "Hôtes",
     "xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder": "Indiquer l’URL de l’hôte",
+    "xpack.fleet.settings.editOutputFlyout.esOutputTypeCallout": "Ce type de sortie ne prend actuellement pas en charge la connectivité à un cluster Elasticsearch distant.",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingDescription": "Une fois activés, les agents équilibreront la charge sur tous les hôtes définis pour cette sortie. Cela augmentera le nombre de connexions ouvertes par l'agent.",
     "xpack.fleet.settings.editOutputFlyout.loadBalancingSwitchLabel": "Équilibrage des charges",
     "xpack.fleet.settings.editOutputFlyout.logstashHostsInputLabel": "Hôtes Logstash",

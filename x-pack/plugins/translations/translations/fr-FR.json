@@ -25907,8 +25907,6 @@
     "xpack.observability.page_header.addUptimeDataLink.label": "Accédez à un tutoriel sur l'ajout de données Uptime",
     "xpack.observability.page_header.addUXDataLink.label": "Accédez à un tutoriel sur l'ajout de données APM d'expérience utilisateur.",
     "xpack.observability.pageLayout.sideNavTitle": "Observabilité",
-    "xpack.observability.pages.alertDetails.alertSummary.duration": "Durée",
-    "xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate": "Dernière mise à jour du statut",
     "xpack.observability.profilingElasticsearchPlugin": "Utiliser le plug-in de profileur Elasticsearch",
     "xpack.observability.resources.documentation": "Documentation",
     "xpack.observability.resources.forum": "Forum de discussion",

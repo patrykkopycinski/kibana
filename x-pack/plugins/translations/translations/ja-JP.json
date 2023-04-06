@@ -25888,8 +25888,6 @@
     "xpack.observability.page_header.addUptimeDataLink.label": "アップタイムデータの追加に関するチュートリアルに移動",
     "xpack.observability.page_header.addUXDataLink.label": "ユーザーエクスペリエンスAPMデータの追加に関するチュートリアルに移動",
     "xpack.observability.pageLayout.sideNavTitle": "Observability",
-    "xpack.observability.pages.alertDetails.alertSummary.duration": "期間",
-    "xpack.observability.pages.alertDetails.alertSummary.lastStatusUpdate": "前回のステータス更新",
     "xpack.observability.profilingElasticsearchPlugin": "Elasticsearchプロファイラープラグインを使用",
     "xpack.observability.resources.documentation": "ドキュメント",
     "xpack.observability.resources.forum": "ディスカッションフォーラム",

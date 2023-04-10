@@ -9072,7 +9072,6 @@
     "xpack.canvas.functions.exactlyHelpText": "Crée un filtre qui fait correspondre une colonne donnée à une valeur exacte.",
     "xpack.canvas.functions.filters.args.group": "Nom du groupe de filtres à utiliser.",
     "xpack.canvas.functions.filters.args.ungrouped": "Exclure les filtres qui appartiennent à un groupe de filtres ?",
-    "xpack.canvas.functions.filtersHelpText": "Agrège les filtres d'éléments du workpad qui doivent être utilisés ailleurs, généralement, une source de données.",
     "xpack.canvas.functions.getCell.args.columnHelpText": "Nom de la colonne dans laquelle récupérer la valeur. S'il n'est pas renseigné, la valeur est récupérée dans la première colonne.",
     "xpack.canvas.functions.getCell.args.rowHelpText": "Numéro de ligne, démarrant à 0.",
     "xpack.canvas.functions.getCell.columnNotFoundErrorMessage": "Colonne introuvable : \"{column}\"",

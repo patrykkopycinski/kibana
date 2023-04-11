@@ -35346,7 +35346,6 @@
     "xpack.synthetics.monitorManagement.getAPIKeyReducedPermissions.description": "Utilisez une clé d’API pour transmettre des moniteurs à distance à partir d'un pipeline CLI ou CD. Pour générer une clé d’API, vous devez disposer des autorisations de gérer les clés d’API et d’un accès en écriture à Uptime. Veuillez contacter votre administrateur.",
     "xpack.synthetics.monitorManagement.getProjectApiKey.label": "Générer une clé d'API de projet",
     "xpack.synthetics.monitorManagement.getProjectAPIKeyLabel.generate": "Générer une clé d'API de projet",
-    "xpack.synthetics.monitorManagement.heading": "Gestion des moniteurs",
     "xpack.synthetics.monitorManagement.hostFieldLabel": "Hôte",
     "xpack.synthetics.monitorManagement.inProgress": "EN COURS",
     "xpack.synthetics.monitorManagement.invalidLabel": "Non valide",

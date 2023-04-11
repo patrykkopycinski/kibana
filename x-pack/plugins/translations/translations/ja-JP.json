@@ -35325,7 +35325,6 @@
     "xpack.synthetics.monitorManagement.getAPIKeyReducedPermissions.description": "APIキーを使用して、CLIまたはCDパイプラインからリモートでモニターをプッシュします。APIキーを生成するには、APIキーを管理する権限とアップタイム書き込み権限が必要です。管理者にお問い合わせください。",
     "xpack.synthetics.monitorManagement.getProjectApiKey.label": "プロジェクトAPIキーを生成",
     "xpack.synthetics.monitorManagement.getProjectAPIKeyLabel.generate": "プロジェクトAPIキーを生成",
-    "xpack.synthetics.monitorManagement.heading": "モニター管理",
     "xpack.synthetics.monitorManagement.hostFieldLabel": "ホスト",
     "xpack.synthetics.monitorManagement.inProgress": "進行中",
     "xpack.synthetics.monitorManagement.invalidLabel": "無効",

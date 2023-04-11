@@ -5808,7 +5808,6 @@
     "unifiedSearch.queryBarTopRow.submitButton.refresh": "クエリの更新",
     "unifiedSearch.queryBarTopRow.submitButton.run": "クエリを実行",
     "unifiedSearch.queryBarTopRow.submitButton.update": "更新が必要です",
-    "unifiedSearch.search.searchBar.savedQuery": "保存されたクエリ",
     "unifiedSearch.search.searchBar.savedQueryDescriptionText": "再度使用するクエリテキストとフィルターを保存します。",
     "unifiedSearch.search.searchBar.savedQueryForm.titleConflictText": "タイトルがすでに保存されているクエリに使用されています",
     "unifiedSearch.search.searchBar.savedQueryForm.titleExistsText": "名前が必要です。",

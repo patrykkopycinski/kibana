@@ -5807,7 +5807,6 @@
     "unifiedSearch.queryBarTopRow.submitButton.refresh": "Actualiser la requête",
     "unifiedSearch.queryBarTopRow.submitButton.run": "Exécuter la requête",
     "unifiedSearch.queryBarTopRow.submitButton.update": "Nécessite une mise à jour",
-    "unifiedSearch.search.searchBar.savedQuery": "Requête enregistrée",
     "unifiedSearch.search.searchBar.savedQueryDescriptionText": "Enregistrez le texte et les filtres de la requête que vous souhaitez réutiliser.",
     "unifiedSearch.search.searchBar.savedQueryForm.titleConflictText": "Ce nom est en conflit avec une requête enregistrée existante.",
     "unifiedSearch.search.searchBar.savedQueryForm.titleExistsText": "Un nom est requis.",

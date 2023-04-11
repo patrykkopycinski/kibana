@@ -38038,7 +38038,6 @@
     "xpack.cloudDefend.errorConditionRequired": "セレクターにつき1つ以上の条件が必要です。",
     "xpack.cloudDefend.errorDuplicateName": "この名前はすでに別のセレクターで使用されています。",
     "xpack.cloudDefend.errorInvalidName": "セレクター名は英数字でなければならず、スペースは使用できません。",
-    "xpack.cloudDefend.errorValueLengthExceeded": "値は32文字以下でなければなりません。",
     "xpack.cloudDefend.errorValueRequired": "1つ以上の値が必要です。",
     "xpack.cloudDefend.name": "名前",
     "xpack.cloudLinks.deploymentLinkLabel": "このデプロイの管理",

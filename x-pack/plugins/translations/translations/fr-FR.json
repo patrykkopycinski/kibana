@@ -38070,7 +38070,6 @@
     "xpack.cloudDefend.errorConditionRequired": "Au moins une condition par sélecteur est requise.",
     "xpack.cloudDefend.errorDuplicateName": "Ce nom est déjà utilisé par un autre sélecteur.",
     "xpack.cloudDefend.errorInvalidName": "Les noms des sélecteurs doivent être alphanumériques et ne doivent pas inclure d'espaces.",
-    "xpack.cloudDefend.errorValueLengthExceeded": "Les valeurs ne doivent pas dépasser 32 caractères.",
     "xpack.cloudDefend.errorValueRequired": "Au moins une valeur est requise.",
     "xpack.cloudDefend.name": "Nom",
     "xpack.cloudLinks.deploymentLinkLabel": "Gérer ce déploiement",

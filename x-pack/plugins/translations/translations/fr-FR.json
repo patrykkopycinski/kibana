@@ -13184,7 +13184,6 @@
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel": "Mot de passe",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.portLabel": "Port",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel": "Certificat SSL",
-    "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel": "Désactiver SSL (vrai/faux)",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel": "Nom d'utilisateur",
     "xpack.enterpriseSearch.nativeConnectors.mysql.name": "MySQL",
     "xpack.enterpriseSearch.nav.analyticsCollectionsTitle": "Collections",

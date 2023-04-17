@@ -13183,7 +13183,6 @@
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel": "パスワード",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.portLabel": "ポート",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel": "SSL証明書",
-    "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel": "SSLの無効化（True/False）",
     "xpack.enterpriseSearch.nativeConnectors.mysql.configuration.usernameLabel": "ユーザー名",
     "xpack.enterpriseSearch.nativeConnectors.mysql.name": "MySQL",
     "xpack.enterpriseSearch.nav.analyticsCollectionsTitle": "コレクション",

@@ -20422,7 +20422,6 @@
     "xpack.maps.addLayerPanel.changeDataSourceButtonLabel": "レイヤーを変更",
     "xpack.maps.addLayerPanel.footer.cancelButtonLabel": "キャンセル",
     "xpack.maps.aggs.defaultCountLabel": "カウント",
-    "xpack.maps.appTitle": "マップ",
     "xpack.maps.attribution.addBtnAriaLabel": "属性を追加",
     "xpack.maps.attribution.addBtnLabel": "属性を追加",
     "xpack.maps.attribution.applyBtnLabel": "適用",

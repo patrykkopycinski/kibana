@@ -20422,7 +20422,6 @@
     "xpack.maps.addLayerPanel.changeDataSourceButtonLabel": "Changer de calque",
     "xpack.maps.addLayerPanel.footer.cancelButtonLabel": "Annuler",
     "xpack.maps.aggs.defaultCountLabel": "compte",
-    "xpack.maps.appTitle": "Cartes",
     "xpack.maps.attribution.addBtnAriaLabel": "Ajouter une attribution",
     "xpack.maps.attribution.addBtnLabel": "Ajouter une attribution",
     "xpack.maps.attribution.applyBtnLabel": "Appliquer",

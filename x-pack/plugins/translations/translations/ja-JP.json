@@ -27406,7 +27406,6 @@
     "xpack.security.management.editRole.featureTable.featureVisibilityTitle": "機能権限をカスタマイズ",
     "xpack.security.management.editRole.featureTable.managementCategoryHelpText": "スタック管理へのアクセスは、ElasticsearchとKibanaの両方の権限によって決まり、明示的に無効にすることはできません。",
     "xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip": "機能でサブ機能の権限がカスタマイズされています。この行を展開すると詳細が表示されます。",
-    "xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel": "インデックスの権限を削除",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel": "提供されたドキュメントのクエリエディター",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel": "提供されたドキュメントのクエリ",
     "xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel": "特定のドキュメントの読み込み権限を提供",

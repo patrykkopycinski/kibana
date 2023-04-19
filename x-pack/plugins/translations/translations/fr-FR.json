@@ -27426,7 +27426,6 @@
     "xpack.security.management.editRole.featureTable.featureVisibilityTitle": "Personnaliser les privilèges des fonctionnalités",
     "xpack.security.management.editRole.featureTable.managementCategoryHelpText": "L'accès à Stack Management est déterminé à la fois par les privilèges Elasticsearch et les privilèges Kibana, et il ne peut pas être explicitement désactivé.",
     "xpack.security.management.editRole.featureTable.privilegeCustomizationTooltip": "La fonctionnalité possède des privilèges de sous-fonctionnalités personnalisés. Développez cette ligne pour en savoir plus.",
-    "xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel": "Supprimer un privilège d'index",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryEditorAriaLabel": "Éditeur de requêtes des documents accordés",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel": "Requête des documents accordés",
     "xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel": "Accorder des privilèges de lecture à des documents spécifiques",

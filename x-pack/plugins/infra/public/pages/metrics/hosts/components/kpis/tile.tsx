@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { EuiIcon, EuiPanel } from '@elastic/eui';
@@ -12,23 +13,34 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { EuiI18n } from '@elastic/eui';
-import { useLensAttributes } from '../../../../../../hooks/use_lens_attributes';
-import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { HostsLensLineChartFormulas } from '../../../../../../common/visualizations';
-import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { LensWrapper } from '../../chart/lens_wrapper';
+import styled from 'styled-components';
+import { EuiToolTip } from '@elastic/eui';
+import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
+import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
+import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
+import { useHostsViewContext } from '../../hooks/use_hosts_view';
+import { LensWrapper } from '../chart/lens_wrapper';
 
-export interface MetricChartProps {
+export interface KPIChartProps {
   title: string;
-  type: HostsLensLineChartFormulas;
-  breakdownSize: number;
-  render?: boolean;
+  subtitle?: string;
+  trendLine?: boolean;
+  backgroundColor: string;
+  type: HostsLensMetricChartFormulas;
+  toolTip: string;
 }
 
-const MIN_HEIGHT = 300;
+const MIN_HEIGHT = 150;
 
-export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) => {
+export const Tile = ({
+  title,
+  subtitle,
+  type,
+  backgroundColor,
+  toolTip,
+  trendLine = false,
+}: KPIChartProps) => {
   const { searchCriteria, onSubmit } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
@@ -38,9 +50,12 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     dataView,
     options: {
       title,
-      breakdownSize,
+      subtitle,
+      backgroundColor,
+      showTrendLine: trendLine,
+      showTitle: false,
     },
-    visualizationType: 'lineChart',
+    visualizationType: 'metricChart',
   });
 
   const filters = [...searchCriteria.filters, ...searchCriteria.panelFilters];
@@ -64,17 +79,15 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   };
 
   return (
-    <EuiPanel
-      borderRadius="m"
+    <EuiPanelStyled
       hasShadow={false}
-      hasBorder
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsView-metricChart-${type}`}
+      data-test-subj={`hostsView-metricsTrend-${type}`}
     >
       {error ? (
         <EuiFlexGroup
-          style={{ minHeight: MIN_HEIGHT, alignContent: 'center' }}
+          style={{ height: MIN_HEIGHT, alignContent: 'center' }}
           gutterSize="xs"
           justifyContent="center"
           alignItems="center"
@@ -93,18 +106,32 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <LensWrapper
-          id={`hostsViewsmetricsChart-${type}`}
-          attributes={attributes}
-          style={{ height: MIN_HEIGHT }}
-          extraActions={extraActions}
-          lastReloadRequestTime={baseRequest.requestTs}
-          dateRange={searchCriteria.dateRange}
-          filters={filters}
-          query={searchCriteria.query}
-          onBrushEnd={handleBrushEnd}
-        />
+        <EuiToolTip
+          className="eui-fullWidth"
+          delay="regular"
+          content={toolTip}
+          anchorClassName="eui-fullWidth"
+        >
+          <LensWrapper
+            id={`hostViewKPIChart-${type}`}
+            attributes={attributes}
+            style={{ height: MIN_HEIGHT }}
+            extraActions={extraActions}
+            lastReloadRequestTime={baseRequest.requestTs}
+            dateRange={searchCriteria.dateRange}
+            filters={filters}
+            query={searchCriteria.query}
+            onBrushEnd={handleBrushEnd}
+          />
+        </EuiToolTip>
       )}
-    </EuiPanel>
+    </EuiPanelStyled>
   );
 };
+
+const EuiPanelStyled = styled(EuiPanel)`
+  .echMetric {
+    border-radius: ${(p) => p.theme.eui.euiBorderRadius};
+    pointer-events: none;
+  }
+`;

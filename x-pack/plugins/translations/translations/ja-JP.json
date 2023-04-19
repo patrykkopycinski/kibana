@@ -34888,7 +34888,6 @@
     "xpack.synthetics.monitorConfig.textAssertion.label": "テキストアサーション",
     "xpack.synthetics.monitorConfig.throttling.helpText": "ネットワークスロットリングをシミュレートします（ダウンロード、アップロード、レイテンシ）。今後のバージョンではその他のオプションが追加されます。",
     "xpack.synthetics.monitorConfig.throttling.label": "接続プロファイル",
-    "xpack.synthetics.monitorConfig.throttling.options.default": "デフォルト",
     "xpack.synthetics.monitorConfig.timeout.formatError": "タイムアウトが無効です。",
     "xpack.synthetics.monitorConfig.timeout.greaterThan0Error": "タイムアウトは0以上でなければなりません。",
     "xpack.synthetics.monitorConfig.timeout.helpText": "接続のテストとデータの交換に許可された合計時間。",

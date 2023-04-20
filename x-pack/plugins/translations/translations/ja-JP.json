@@ -36288,7 +36288,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearly": "年ごと",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel": "毎",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatLabel": "繰り返し",
-    "xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch": "繰り返しにする",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "スケジュールを保存",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "タイムゾーン",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "アラートフラップ検出",

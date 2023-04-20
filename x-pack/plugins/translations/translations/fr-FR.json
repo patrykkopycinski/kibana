@@ -36320,7 +36320,6 @@
     "xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearly": "Annuel",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatIntervalLabel": "Chaque",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.repeatLabel": "Répéter",
-    "xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch": "Rendre récurrent",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule": "Enregistrer le calendrier",
     "xpack.triggersActionsUI.ruleSnoozeScheduler.timezoneLabel": "Fuseau horaire",
     "xpack.triggersActionsUI.rulesSettings.flapping.alertFlappingDetection": "Détection de bagotement d'alerte",

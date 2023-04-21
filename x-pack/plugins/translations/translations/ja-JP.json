@@ -7547,7 +7547,6 @@
     "xpack.apm.dataView.autoCreateDisabled": "データビューの自動作成は、「autoCreateApmDataView」構成オプションによって無効化されています",
     "xpack.apm.dataView.noApmData": "APMデータがありません",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "すべての演算",
-    "xpack.apm.dependencies.kueryBarPlaceholder": "依存関係メトリックを検索（例：span.destination.service.resource:elasticsearch）",
     "xpack.apm.dependenciesInventory.dependencyTableColumn": "依存関係",
     "xpack.apm.dependenciesTable.columnErrorRate": "失敗したトランザクション率",
     "xpack.apm.dependenciesTable.columnErrorRateTip": "選択したサービスの失敗したトランザクションの割合。4xxステータスコード（クライアントエラー）のHTTPサーバートランザクションは、サーバーではなく呼び出し側が失敗の原因であるため、失敗と見なされません。",

@@ -7546,7 +7546,6 @@
     "xpack.apm.dataView.autoCreateDisabled": "La création automatique des vues de données a été désactivée via l'option de configuration \"autoCreateApmDataView\"",
     "xpack.apm.dataView.noApmData": "Aucune donnée APM",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "Toutes les opérations",
-    "xpack.apm.dependencies.kueryBarPlaceholder": "Rechercher dans les indicateurs de dépendance (par ex., span.destination.service.resource:elasticsearch)",
     "xpack.apm.dependenciesInventory.dependencyTableColumn": "Dépendance",
     "xpack.apm.dependenciesTable.columnErrorRate": "Taux de transactions ayant échoué",
     "xpack.apm.dependenciesTable.columnErrorRateTip": "Le pourcentage de transactions ayant échoué pour le service sélectionné. Les transactions du serveur HTTP avec un code du statut 4xx (erreur du client) ne sont pas considérées comme des échecs, car l'appelant, et non le serveur, a provoqué l'échec.",

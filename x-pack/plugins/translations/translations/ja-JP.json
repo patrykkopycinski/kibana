@@ -5813,7 +5813,6 @@
     "unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel": "保存されたクエリの適用",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText": "キャンセル",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText": "削除",
-    "unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel": "選択した保存されたクエリで置換",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel": "新規保存クエリを保存",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText": "新規保存",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText": "変更を保存",

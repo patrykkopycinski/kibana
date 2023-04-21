@@ -5812,7 +5812,6 @@
     "unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel": "Appliquer la requête enregistrée",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionCancelButtonText": "Annuler",
     "unifiedSearch.search.searchBar.savedQueryPopoverConfirmDeletionConfirmButtonText": "Supprimer",
-    "unifiedSearch.search.searchBar.savedQueryPopoverReplaceFilterSetLabel": "Remplacer par la requête enregistrée sélectionnée",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonAriaLabel": "Enregistrer en tant que nouvelle requête enregistrée",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveAsNewButtonText": "Enregistrer en tant que nouvelle",
     "unifiedSearch.search.searchBar.savedQueryPopoverSaveChangesButtonText": "Enregistrer les modifications",

@@ -20560,7 +20560,6 @@
     "xpack.maps.mapActions.removeFeatureError": "インデックスから機能を削除できません。",
     "xpack.maps.mapListing.entityName": "マップ",
     "xpack.maps.mapListing.entityNamePlural": "マップ",
-    "xpack.maps.mapListing.errorAttemptingToLoadSavedMaps": "マップを読み込めません",
     "xpack.maps.mapSavedObjectLabel": "マップ",
     "xpack.maps.mapSettingsPanel.addCustomIcon": "カスタムアイコンを追加",
     "xpack.maps.mapSettingsPanel.autoFitToBoundsLocationLabel": "自動的にマップをデータ境界に合わせる",

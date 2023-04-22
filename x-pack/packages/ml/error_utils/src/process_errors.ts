@@ -5,103 +5,30 @@
  * 2.0.
  */
 
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import Boom from '@hapi/boom';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import {
+  ErrorType,
+  MLErrorObject,
+  isBoomError,
+  isErrorString,
+  isErrorMessage,
+  isEsErrorBody,
+  isMLResponseError,
+} from './types';
 
-export interface WrappedError {
-  body: {
-    attributes: {
-      body: EsErrorBody;
-    };
-    message: Boom.Boom;
-  };
-  statusCode: number;
-}
-
-export interface EsErrorRootCause {
-  type: string;
-  reason: string;
-  caused_by?: EsErrorRootCause;
-  script?: string;
-}
-
-export interface EsErrorBody {
-  error: {
-    root_cause?: EsErrorRootCause[];
-    caused_by?: EsErrorRootCause;
-    type: string;
-    reason: string;
-  };
-  status: number;
-}
-
-export interface DVResponseError {
-  statusCode: number;
-  error: string;
-  message: string;
-  attributes?: {
-    body: EsErrorBody;
-  };
-}
-
-export interface ErrorMessage {
-  message: string;
-}
-
-export interface DVErrorObject {
-  causedBy?: string;
-  message: string;
-  statusCode?: number;
-  fullError?: EsErrorBody;
-}
-
-export interface DVHttpFetchError<T> extends IHttpFetchError {
-  body: T;
-}
-
-export type ErrorType =
-  | WrappedError
-  | DVHttpFetchError<DVResponseError>
-  | EsErrorBody
-  | Boom.Boom
-  | string
-  | undefined;
-
-export function isEsErrorBody(error: any): error is EsErrorBody {
-  return error && error.error?.reason !== undefined;
-}
-
-export function isErrorString(error: any): error is string {
-  return typeof error === 'string';
-}
-
-export function isErrorMessage(error: any): error is ErrorMessage {
-  return error && error.message !== undefined && typeof error.message === 'string';
-}
-
-export function isDVResponseError(error: any): error is DVResponseError {
-  return typeof error.body === 'object' && 'message' in error.body;
-}
-
-export function isBoomError(error: any): error is Boom.Boom {
-  return error?.isBoom === true;
-}
-
-export function isWrappedError(error: any): error is WrappedError {
-  return error && isBoomError(error.body?.message) === true;
-}
-
-export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
-  // extract properties of the error object from within the response error
-  // coming from Kibana, Elasticsearch, and our own DV messages
-
+/**
+ * Extract properties of the error object from within the response error
+ * coming from Kibana, Elasticsearch, and our own ML messages.
+ *
+ * @param {ErrorType} error
+ * @returns {MLErrorObject}
+ */
+export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
   // some responses contain raw es errors as part of a bulk response
   // e.g. if some jobs fail the action in a bulk request
-
   if (isEsErrorBody(error)) {
     return {
-      message: error.error.reason,
+      message: error.error.reason ?? '',
       statusCode: error.status,
       fullError: error,
     };
@@ -111,9 +38,6 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
     return {
       message: error,
     };
-  }
-  if (isWrappedError(error)) {
-    return error.body.message?.output?.payload;
   }
 
   if (isBoomError(error)) {
@@ -135,12 +59,12 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
     };
   }
 
-  if (isDVResponseError(error)) {
+  if (isMLResponseError(error)) {
     if (
       typeof error.body.attributes === 'object' &&
       typeof error.body.attributes.body?.error?.reason === 'string'
     ) {
-      const errObj: DVErrorObject = {
+      const errObj: MLErrorObject = {
         message: error.body.attributes.body.error.reason,
         statusCode: error.body.statusCode,
         fullError: error.body.attributes.body,
@@ -159,7 +83,7 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
         typeof error.body.attributes.body.error.root_cause[0] === 'object' &&
         isPopulatedObject(error.body.attributes.body.error.root_cause[0], ['script'])
       ) {
-        errObj.causedBy = error.body.attributes.body.error.root_cause[0].script;
+        errObj.causedBy = error.body.attributes.body.error.root_cause[0].script as string;
         errObj.message += `: '${error.body.attributes.body.error.root_cause[0].script}'`;
       }
       return errObj;
@@ -181,4 +105,16 @@ export const extractErrorProperties = (error: ErrorType): DVErrorObject => {
   return {
     message: '',
   };
+};
+
+/**
+ * Extract only the error message within the response error
+ * coming from Kibana, Elasticsearch, and our own ML messages.
+ *
+ * @param {ErrorType} error
+ * @returns {string}
+ */
+export const extractErrorMessage = (error: ErrorType): string => {
+  const errorObj = extractErrorProperties(error);
+  return errorObj.message;
 };

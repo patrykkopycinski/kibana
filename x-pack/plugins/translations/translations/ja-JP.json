@@ -35532,7 +35532,7 @@
     "xpack.transform.stepCreateForm.duplicateDataViewErrorMessage": "Kibanaデータビュー{dataViewName}の作成中にエラーが発生しました：データビューはすでに存在します。",
     "xpack.transform.stepCreateForm.startTransformErrorMessage": "変換 {transformId} の開始中にエラーが発生しました。",
     "xpack.transform.stepCreateForm.startTransformSuccessMessage": "変換 {transformId} の開始リクエストが受け付けられました。",
-    "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "無効なクエリ：{errorMessage}",
+    "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "無効なクエリ：{queryErrorMessage}",
     "xpack.transform.stepDefineForm.queryPlaceholderKql": "例: {example}.",
     "xpack.transform.stepDefineForm.queryPlaceholderLucene": "例: {example}.",
     "xpack.transform.stepDefineForm.runtimeFieldsListLabel": "{runtimeFields}",

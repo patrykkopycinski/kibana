@@ -35553,7 +35553,7 @@
     "xpack.transform.stepCreateForm.duplicateDataViewErrorMessage": "Une erreur est survenue lors de la création de la vue de données Kibana {dataViewName} : La vue de données existe déjà.",
     "xpack.transform.stepCreateForm.startTransformErrorMessage": "Une erreur s'est produite lors du démarrage de la transformation {transformId} :",
     "xpack.transform.stepCreateForm.startTransformSuccessMessage": "La requête pour démarrer la transformation {transformId} a été reconnue.",
-    "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "Requête non valide : {errorMessage}",
+    "xpack.transform.stepDefineForm.invalidKuerySyntaxErrorMessageQueryBar": "Requête non valide : {queryErrorMessage}",
     "xpack.transform.stepDefineForm.queryPlaceholderKql": "Par exemple, {example}",
     "xpack.transform.stepDefineForm.queryPlaceholderLucene": "Par exemple, {example}",
     "xpack.transform.stepDefineForm.runtimeFieldsListLabel": "{runtimeFields}",

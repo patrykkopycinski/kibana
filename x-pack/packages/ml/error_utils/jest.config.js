@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ErrorType } from '@kbn/ml-error-utils';
-
-export interface DatafeedValidationResponse {
-  valid: boolean;
-  documentsFound: boolean;
-  error?: ErrorType;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/x-pack/packages/ml/error_utils'],
+};

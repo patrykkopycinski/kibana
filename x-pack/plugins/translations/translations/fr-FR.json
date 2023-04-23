@@ -10619,8 +10619,6 @@
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle": "Ajouter une intégration KSPM",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle": "En savoir plus sur le niveau de sécurité du cloud",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle": "Détectez les erreurs de configuration de sécurité dans vos ressources cloud !",
-    "xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip": "Échec des résultats",
-    "xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip": "Réussite des résultats",
     "xpack.csp.createPackagePolicy.customAssetsTab.dashboardViewLabel": "Afficher le tableau de bord CSP",
     "xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel": "Afficher les résultats CSP ",
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "Afficher les règles CSP ",

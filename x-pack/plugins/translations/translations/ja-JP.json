@@ -10619,8 +10619,6 @@
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle": "KSPM統合の追加",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle": "クラウドセキュリティ態勢の詳細をご覧ください",
     "xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle": "クラウドリソースでセキュリティの誤った構成を検出します。",
-    "xpack.csp.cloudPostureScoreChart.counterLink.failedFindingsTooltip": "失敗した調査結果",
-    "xpack.csp.cloudPostureScoreChart.counterLink.passedFindingsTooltip": "合格した調査結果",
     "xpack.csp.createPackagePolicy.customAssetsTab.dashboardViewLabel": "CSPダッシュボードを表示",
     "xpack.csp.createPackagePolicy.customAssetsTab.findingsViewLabel": "CSP調査結果を表示 ",
     "xpack.csp.createPackagePolicy.customAssetsTab.rulesViewLabel": "CSPルールを表示 ",

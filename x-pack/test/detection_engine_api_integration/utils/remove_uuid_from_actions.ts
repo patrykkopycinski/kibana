@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Connectors } from './connector';
+import { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 
-export type CreateRulePropsRewrites<CreateRuleProps> = Partial<Exclude<CreateRuleProps, 'type'>>;
-
-export interface Actions {
-  connectors: Connectors[];
-}
+export const removeUUIDFromActions = (actions: RuleActionArray): RuleActionArray => {
+  return actions.map(({ uuid, ...restOfAction }) => ({
+    ...restOfAction,
+  }));
+};

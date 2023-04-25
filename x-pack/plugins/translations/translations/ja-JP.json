@@ -32267,7 +32267,6 @@
     "xpack.sessionView.metadataDetailsTab.cloud": "クラウド",
     "xpack.sessionView.metadataDetailsTab.container": "コンテナー",
     "xpack.sessionView.metadataDetailsTab.host": "ホストOS",
-    "xpack.sessionView.metadataDetailsTab.metadata": "メタデータ",
     "xpack.sessionView.metadataDetailsTab.orchestrator": "オーケストレーター",
     "xpack.sessionView.networkTooltip": "ネットワークアラート",
     "xpack.sessionView.output": "アウトプット",

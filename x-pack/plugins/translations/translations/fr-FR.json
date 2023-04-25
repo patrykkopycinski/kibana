@@ -32288,7 +32288,6 @@
     "xpack.sessionView.metadataDetailsTab.cloud": "Cloud",
     "xpack.sessionView.metadataDetailsTab.container": "Conteneur",
     "xpack.sessionView.metadataDetailsTab.host": "Système d'exploitation de l'hôte",
-    "xpack.sessionView.metadataDetailsTab.metadata": "Métadonnées",
     "xpack.sessionView.metadataDetailsTab.orchestrator": "Orchestrateur",
     "xpack.sessionView.networkTooltip": "Alerte réseau",
     "xpack.sessionView.output": "Sortie",

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { CategoryTable } from './category_table';
+export { SamplingMenu } from './sampling_menu';
+export { RandomSampler } from './random_sampler';

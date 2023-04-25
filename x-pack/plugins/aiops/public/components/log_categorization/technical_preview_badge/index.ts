@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CategoryTable } from './category_table';
+export { TechnicalPreviewBadge } from './technical_preview_badge';

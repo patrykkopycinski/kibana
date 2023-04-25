@@ -7,14 +7,9 @@
  */
 
 export {
-  type FieldVisualizeButtonProps,
-  FieldVisualizeButton,
-  getFieldVisualizeButton,
-} from './field_visualize_button';
+  type FieldCategorizeButtonProps,
+  FieldCategorizeButton,
+  getFieldCategorizeButton,
+} from './field_categorize_button';
 
-export {
-  triggerVisualizeActions,
-  triggerVisualizeActionsTextBasedLanguages,
-  getVisualizeInformation,
-  type VisualizeInformation,
-} from './visualize_trigger_utils';
+export { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';

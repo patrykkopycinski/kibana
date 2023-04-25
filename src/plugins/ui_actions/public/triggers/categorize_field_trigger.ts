@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-export {
-  type FieldVisualizeButtonProps,
-  FieldVisualizeButton,
-  getFieldVisualizeButton,
-} from './field_visualize_button';
+import { Trigger } from '.';
 
-export {
-  triggerVisualizeActions,
-  triggerVisualizeActionsTextBasedLanguages,
-  getVisualizeInformation,
-  type VisualizeInformation,
-} from './visualize_trigger_utils';
+export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
+export const categorizeFieldTrigger: Trigger = {
+  id: CATEGORIZE_FIELD_TRIGGER,
+  title: 'Run pattern analysis',
+  description: 'Triggered when user wants to run pattern analysis on a field.',
+};

@@ -34806,7 +34806,6 @@
     "xpack.synthetics.monitorDetails.statusBar.pingType.icmp": "ICMP",
     "xpack.synthetics.monitorDetails.statusBar.pingType.tcp": "TCP",
     "xpack.synthetics.monitorDetails.summary.availability": "Disponibilité",
-    "xpack.synthetics.monitorDetails.summary.avgDuration": "Durée moy.",
     "xpack.synthetics.monitorDetails.summary.brushArea": "Brosser une zone pour une plus haute fidélité",
     "xpack.synthetics.monitorDetails.summary.complete": "Terminé",
     "xpack.synthetics.monitorDetails.summary.duration": "Durée",

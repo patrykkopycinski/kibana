@@ -34785,7 +34785,6 @@
     "xpack.synthetics.monitorDetails.statusBar.pingType.icmp": "ICMP",
     "xpack.synthetics.monitorDetails.statusBar.pingType.tcp": "TCP",
     "xpack.synthetics.monitorDetails.summary.availability": "可用性",
-    "xpack.synthetics.monitorDetails.summary.avgDuration": "平均期間",
     "xpack.synthetics.monitorDetails.summary.brushArea": "信頼度を高めるためにエリアを精査",
     "xpack.synthetics.monitorDetails.summary.complete": "完了",
     "xpack.synthetics.monitorDetails.summary.duration": "期間",

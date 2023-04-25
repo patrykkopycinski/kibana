@@ -28474,8 +28474,6 @@
     "xpack.securitySolution.authz.mlUnavailable": "機械学習プラグインが使用できません。プラグインを有効にしてください。",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "現在のユーザーは機械学習管理者ではありません。",
     "xpack.securitySolution.badge.readOnly.text": "読み取り専用",
-    "xpack.securitySolution.beatFields.errorSearchDescription": "Beatフィールドの取得でエラーが発生しました",
-    "xpack.securitySolution.beatFields.failSearchDescription": "Beat フィールドで検索を実行できませんでした",
     "xpack.securitySolution.blocklist.cardActionDeleteLabel": "ブロックリストの削除",
     "xpack.securitySolution.blocklist.cardActionEditLabel": "ブロックリストの編集",
     "xpack.securitySolution.blocklist.conditions.header": "条件",

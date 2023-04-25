@@ -28495,8 +28495,6 @@
     "xpack.securitySolution.authz.mlUnavailable": "Le plug-in de Machine Learning n'est pas disponible. Essayez d'activer le plug-in.",
     "xpack.securitySolution.authz.userIsNotMlAdminMessage": "L'utilisateur actuel n'est pas un administrateur de Machine Learning.",
     "xpack.securitySolution.badge.readOnly.text": "Lecture seule",
-    "xpack.securitySolution.beatFields.errorSearchDescription": "Une erreur s'est produite lors de l'obtention des champs d'agents Beats",
-    "xpack.securitySolution.beatFields.failSearchDescription": "Impossible de lancer une recherche sur les champs d'agents Beats",
     "xpack.securitySolution.blocklist.cardActionDeleteLabel": "Supprimer la liste noire",
     "xpack.securitySolution.blocklist.cardActionEditLabel": "Modifier la liste noire",
     "xpack.securitySolution.blocklist.conditions.header": "Conditions",

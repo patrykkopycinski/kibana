@@ -21379,7 +21379,6 @@
     "xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel": "(intervalle d'agrégation : {focusAggInt}, étendue du compartiment : {bucketSpan})",
     "xpack.ml.trainedModels.modelsList.deleteModal.header": "Supprimer {modelsCount, plural, one {{modelId}} other {# modèles}} ?",
     "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "La suppression {modelsCount, plural, one {du modèle} other {des modèles}} a échoué",
-    "xpack.ml.trainedModels.modelsList.forceStopDialog.title": "Arrêter le modèle {modelId} ?",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, one {# modèle sélectionné} other {# modèles sélectionnés}}",
     "xpack.ml.trainedModels.modelsList.startDeployment.modalTitle": "Démarrer le déploiement de {modelId}",
     "xpack.ml.trainedModels.modelsList.startFailed": "Impossible de démarrer \"{modelId}\"",

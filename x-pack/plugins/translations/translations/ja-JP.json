@@ -21366,7 +21366,6 @@
     "xpack.ml.timeSeriesExplorer.timeSeriesChart.updatedAnnotationNotificationMessage": "ID {jobId}のジョブの注釈が更新されました。",
     "xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel": "（アグリゲーション間隔：{focusAggInt}、バケットスパン：{bucketSpan}）",
     "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "{modelsCount, plural, other {モデル}}の削除が失敗しました",
-    "xpack.ml.trainedModels.modelsList.forceStopDialog.title": "モデル{modelId}を停止しますか？",
     "xpack.ml.trainedModels.modelsList.selectedModelsMessage": "{modelsCount, plural, other {#個のモデル}}を選択済み",
     "xpack.ml.trainedModels.modelsList.startDeployment.modalTitle": "{modelId}デプロイを開始",
     "xpack.ml.trainedModels.modelsList.startFailed": "\"{modelId}\"の開始に失敗しました",

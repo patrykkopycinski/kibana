@@ -2362,7 +2362,6 @@
     "discover.grid.flyout.documentNavigation": "ドキュメントナビゲーション",
     "discover.grid.flyout.toastColumnAdded": "列'{columnName}'が追加されました",
     "discover.grid.flyout.toastColumnRemoved": "列'{columnName}'が削除されました",
-    "discover.grid.flyout.toastFilterAdded": "フィルターが追加されました",
     "discover.grid.selectDoc": "ドキュメント'{rowNumber}'を選択",
     "discover.grid.tableRow.detailHeading": "拡張ドキュメント",
     "discover.grid.tableRow.viewSingleDocumentLinkTextSimple": "1つのドキュメント",

@@ -2362,7 +2362,6 @@
     "discover.grid.flyout.documentNavigation": "Navigation dans le document",
     "discover.grid.flyout.toastColumnAdded": "La colonne \"{columnName}\" a été ajoutée.",
     "discover.grid.flyout.toastColumnRemoved": "La colonne \"{columnName}\" a été supprimée.",
-    "discover.grid.flyout.toastFilterAdded": "Le filtre a été ajouté.",
     "discover.grid.selectDoc": "Sélectionner le document \"{rowNumber}\"",
     "discover.grid.tableRow.detailHeading": "Document développé",
     "discover.grid.tableRow.viewSingleDocumentLinkTextSimple": "Document unique",

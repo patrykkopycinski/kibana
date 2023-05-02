@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
-import { useInventoryViews } from '../../../../hooks/use_inventory_views';
+import { useMetricsExplorerViews } from '../../../../hooks/use_metrics_explorer_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { useWaffleViewState, WaffleViewState } from '../hooks/use_waffle_view_state';
+import { MetricExplorerViewState } from '../hooks/use_metric_explorer_state';
 
-export const SavedViews = () => {
-  const { viewState } = useWaffleViewState();
+interface Props {
+  viewState: MetricExplorerViewState;
+}
+
+export const SavedViews = ({ viewState }: Props) => {
   const {
     currentView,
     views,
@@ -25,10 +28,10 @@ export const SavedViews = () => {
     updateViewById,
     switchViewById,
     setDefaultViewById,
-  } = useInventoryViews();
+  } = useMetricsExplorerViews();
 
   return (
-    <SavedViewsToolbarControls<WaffleViewState>
+    <SavedViewsToolbarControls<MetricExplorerViewState>
       currentView={currentView}
       views={views}
       isFetchingViews={isFetchingViews}

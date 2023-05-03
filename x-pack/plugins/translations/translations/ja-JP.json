@@ -25093,7 +25093,6 @@
     "xpack.observability.apmProgressiveLoadingDescription": "{technicalPreviewLabel} APMビューでデータのプログレッシブ読み込みを行うかどうか。サンプリングされていないデータをバックグラウンドで読み込みながら、最初は低いサンプリングレート、低い精度、高速の応答時間でデータを要求できます",
     "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel}サービス名によるデフォルトAPMサービスインベントリおよびストレージエクスプローラーページの並べ替え（機械学習が適用されていないサービス）。{feedbackLink}。",
     "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} APMトレースエクスプローラー機能を有効にし、KQLまたはEQLでトレースを検索、検査できます。{feedbackLink}",
-    "xpack.observability.enableAgentExplorerDescription": "{technicalPreviewLabel}エージェントエクスプローラー表示を有効にします。",
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} ［サービスメトリック］タブにAmazon Lambdaメトリックを表示します。{feedbackLink}",
     "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel} 任意で、トレースのクリティカルパスを表示します。",
     "xpack.observability.enableInfrastructureHostsViewDescription": "{technicalPreviewLabel}インフラアプリでホストビューを有効にします。{feedbackLink}。",

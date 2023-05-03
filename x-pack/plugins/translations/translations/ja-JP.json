@@ -21157,7 +21157,6 @@
     "xpack.ml.trainedModels.modelsList.startFailed": "\"{modelId}\"の開始に失敗しました",
     "xpack.ml.trainedModels.modelsList.startSuccess": "\"{modelId}\"のデプロイが正常に開始しました。",
     "xpack.ml.trainedModels.modelsList.stopFailed": "\"{modelId}\"の停止に失敗しました",
-    "xpack.ml.trainedModels.modelsList.stopSuccess": "\"{modelId}\"のデプロイが正常に停止しました。",
     "xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle": "{modelId}デプロイを更新",
     "xpack.ml.trainedModels.modelsList.updateFailed": "\"{modelId}\"を更新できませんでした",
     "xpack.ml.trainedModels.modelsList.updateSuccess": "\"{modelId}\"のデプロイが正常に更新されました。",

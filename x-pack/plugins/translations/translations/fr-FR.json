@@ -21170,7 +21170,6 @@
     "xpack.ml.trainedModels.modelsList.startFailed": "Impossible de démarrer \"{modelId}\"",
     "xpack.ml.trainedModels.modelsList.startSuccess": "Le déploiement de \"{modelId}\" a bien été démarré.",
     "xpack.ml.trainedModels.modelsList.stopFailed": "Impossible d'arrêter \"{modelId}\"",
-    "xpack.ml.trainedModels.modelsList.stopSuccess": "Le déploiement de \"{modelId}\" a bien été arrêté.",
     "xpack.ml.trainedModels.modelsList.successfullyDeletedMessage": "{modelsCount, plural, one {Le modèle {modelIds}} other {# modèles}} {modelsCount, plural, one {a bien été supprimé} other { ont bien été supprimés}}",
     "xpack.ml.trainedModels.modelsList.updateDeployment.modalTitle": "Mettre à jour le déploiement {modelId}",
     "xpack.ml.trainedModels.modelsList.updateFailed": "Impossible de mettre à jour \"{modelId}\"",

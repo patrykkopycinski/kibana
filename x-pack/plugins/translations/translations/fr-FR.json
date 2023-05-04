@@ -17873,7 +17873,6 @@
     "xpack.infra.registerFeatures.logsTitle": "Logs",
     "xpack.infra.sampleDataLinkLabel": "Logs",
     "xpack.infra.savedView.defaultViewNameHosts": "Vue par défaut",
-    "xpack.infra.savedView.errorOnCreate.duplicateViewName": "Une vue portant ce nom existe déjà.",
     "xpack.infra.savedView.errorOnCreate.title": "Une erreur s'est produite lors de l'enregistrement de la vue.",
     "xpack.infra.savedView.findError.title": "Une erreur s'est produite lors du chargement des vues.",
     "xpack.infra.savedView.manageViews": "Gérer les vues",

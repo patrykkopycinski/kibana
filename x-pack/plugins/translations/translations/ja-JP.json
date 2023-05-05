@@ -34927,7 +34927,6 @@
     "xpack.synthetics.server.project.delete.toolarge": "削除リクエストペイロードが大きすぎます。リクエストごとに送信できる削除するモニターは250以下にしてください",
     "xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType": "モニターを別のタイプに更新できません。",
     "xpack.synthetics.service.projectMonitors.failedToUpdateMonitor": "モニターを作成または更新できません",
-    "xpack.synthetics.service.projectMonitors.failedToUpdateMonitors": "モニターを作成または更新できません",
     "xpack.synthetics.service.projectMonitors.insufficientFleetPermissions": "パーミッションがありません。非公開の場所を構成するには、Fleetと統合の書き込み権限が必要です。解決するには、Fleetと統合の書き込み権限が割り当てられたユーザーで、新しいAPIキーを生成してください。",
     "xpack.synthetics.settings.alertDefaultForm.requiredEmail": "終了：選択した電子メールコネクターには電子メールアドレスが必須です",
     "xpack.synthetics.settings.applyChanges": "変更を適用",

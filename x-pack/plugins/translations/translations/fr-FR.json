@@ -34948,7 +34948,6 @@
     "xpack.synthetics.server.project.delete.toolarge": "La charge utile de la requête de suppression est trop volumineuse. Veuillez envoyer au maximum 250 moniteurs à supprimer par requête",
     "xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType": "Impossible de mettre à jour le moniteur avec un type différent.",
     "xpack.synthetics.service.projectMonitors.failedToUpdateMonitor": "Impossible de créer ou de mettre à jour le moniteur",
-    "xpack.synthetics.service.projectMonitors.failedToUpdateMonitors": "Impossible de créer ou de mettre à jour les moniteurs",
     "xpack.synthetics.service.projectMonitors.insufficientFleetPermissions": "Permissions insuffisantes. Pour configurer les emplacements privés, vous devez disposer d'autorisations d'écriture sur Fleet et sur les intégrations. Pour résoudre ce problème, veuillez générer une nouvelle clé d'API avec un utilisateur disposant des autorisations d'écriture sur Fleet et sur les intégrations.",
     "xpack.synthetics.settings.alertDefaultForm.requiredEmail": "À : L'e-mail est requis pour le connecteur d'e-mails sélectionné",
     "xpack.synthetics.settings.applyChanges": "Appliquer les modifications",

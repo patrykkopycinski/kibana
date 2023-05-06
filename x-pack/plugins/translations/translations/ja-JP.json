@@ -28519,7 +28519,6 @@
     "xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip": "エンドポイントイベントフィルターは、［ホスト］ページの［イベント］セクションから作成できます。",
     "xpack.securitySolution.detectionEngine.alerts.actions.addException": "ルール例外の追加",
     "xpack.securitySolution.detectionEngine.alerts.actions.addToCase": "既存のケースに追加",
-    "xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled": "この選択では、［ケースに追加］を使用できません",
     "xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase": "新しいケースに追加",
     "xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel": "アラートをタイムラインに送信",
     "xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle": "タイムラインで調査",

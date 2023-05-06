@@ -28540,7 +28540,6 @@
     "xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip": "Les filtres d'événements de point de terminaison peuvent être créés dans la section Événements sur la page Hôtes.",
     "xpack.securitySolution.detectionEngine.alerts.actions.addException": "Ajouter une exception à une règle",
     "xpack.securitySolution.detectionEngine.alerts.actions.addToCase": "Ajouter à un cas existant",
-    "xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled": "L'ajout au cas n'est pas pris en charge pour cette sélection",
     "xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase": "Ajouter au nouveau cas",
     "xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel": "Envoyer une alerte à la chronologie",
     "xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle": "Investiguer dans la chronologie",

@@ -51,7 +51,7 @@ export class PopulateBundleCachePlugin {
     compiler.hooks.emit.tap(
       {
         name: 'PopulateBundleCachePlugin',
-        before: ['BundleMetricsPlugin'],
+        before: 'BundleMetricsPlugin',
       },
       (compilation) => {
         const bundleRefExportIds: string[] = [];
@@ -68,7 +68,11 @@ export class PopulateBundleCachePlugin {
           paths.add(path);
           let content: Buffer;
           try {
-            content = compiler.inputFileSystem.readFileSync(path);
+            compiler.inputFileSystem.readFile(path, (error, fileContent) => {
+              if (fileContent) {
+                content = fileContent as Buffer;
+              }
+            });
           } catch {
             return rawHashes.set(path, null);
           }

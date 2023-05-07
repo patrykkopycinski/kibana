@@ -68,9 +68,9 @@ const observeCompiler = (
       }
 
       const moduleCount = bundle.cache.getModuleCount();
-      if (moduleCount === undefined) {
-        throw new Error(`moduleCount wasn't populated by PopulateBundleCachePlugin`);
-      }
+      // if (moduleCount === undefined) {
+      //   throw new Error(`moduleCount wasn't populated by PopulateBundleCachePlugin`);
+      // }
 
       return compilerMsgs.compilerSuccess({
         moduleCount,

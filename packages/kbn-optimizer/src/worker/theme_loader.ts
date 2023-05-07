@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
 import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
 
@@ -19,7 +18,7 @@ const compare = (a: ThemeTag, b: ThemeTag) =>
 export default function (this: webpack.loader.LoaderContext) {
   this.cacheable(true);
 
-  const options = getOptions(this);
+  const options = this.getOptions();
   const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
 
@@ -27,7 +26,9 @@ export default function (this: webpack.loader.LoaderContext) {
     if (themeTags.includes(tag)) {
       return `
   case '${tag}':
-    return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`;
+    return require(${JSON.stringify(
+      this.utils.contextify(this.context || this.rootContext, `${this.resourcePath}?${tag}`)
+    )});`;
     }
 
     const fallback = themeTags
@@ -39,7 +40,9 @@ export default function (this: webpack.loader.LoaderContext) {
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
-    return require(${stringifyRequest(this, `${this.resourcePath}?${fallback}`)})`;
+    return require(${JSON.stringify(
+      this.utils.contextify(this.context || this.rootContext, `${this.resourcePath}?${fallback}`)
+    )})`;
   }).join('\n');
 
   return `

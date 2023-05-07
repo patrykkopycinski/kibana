@@ -29,6 +29,7 @@ SHARED_DEPS = [
   "@npm//antlr4ts",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
+  "@npm//node-polyfill-webpack-plugin",
 ]
 
 webpack_cli(
@@ -38,7 +39,6 @@ webpack_cli(
     "//packages/kbn-babel-preset",
     "@npm//@babel/runtime",
     "@npm//babel-loader",
-    "@npm//raw-loader",
     "@npm//rxjs",
 
     "webpack.config.js",

@@ -15,7 +15,6 @@ webpack_cli(
     "@npm//moment",
     "@npm//babel-loader",
     "@npm//css-loader",
-    "@npm//url-loader",
     "//packages/kbn-ui-shared-deps-npm",
     "//packages/kbn-babel-register",
     "//packages/kbn-babel-preset",

@@ -7,7 +7,6 @@
  */
 
 import { externals } from '@kbn/ui-shared-deps-src';
-import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
 import webpack, { Configuration, Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';
@@ -17,7 +16,21 @@ import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
 const stats = {
-  ...Stats.presetToOptions('minimal'),
+  // ...Stats.presetToOptions('minimal'),
+  all: false,
+  version: true,
+  timings: true,
+  modules: true,
+  errorsSpace: 0,
+  warningsSpace: 0,
+  modulesSpace: 0,
+  assets: true,
+  assetsSpace: 0,
+  errors: true,
+  errorsCount: true,
+  warnings: true,
+  warningsCount: true,
+  logging: 'warn',
   colors: true,
   errorDetails: true,
   errors: true,
@@ -82,9 +95,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          type: 'asset/source',
         },
         {
           test: /\.peggy$/,
@@ -110,9 +121,11 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'sass-loader',
               options: {
                 additionalData(content: string, loaderContext: any) {
-                  return `@import ${stringifyRequest(
-                    loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                  return `@import ${JSON.stringify(
+                    loaderContext.utils.contextify(
+                      loaderContext.context || loaderContext.rootContext,
+                      resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                    )
                   )};\n${content}`;
                 },
                 implementation: require('node-sass'),

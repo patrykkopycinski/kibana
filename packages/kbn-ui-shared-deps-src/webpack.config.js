@@ -22,10 +22,7 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 const REPO_ROOT = Path.resolve(__dirname, '..', '..');
 
 module.exports = {
-  node: {
-    child_process: 'empty',
-    fs: 'empty',
-  },
+  target: 'web',
   externals: {
     module: 'module',
   },
@@ -43,7 +40,6 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps-src/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
-    futureEmitAssets: true,
   },
 
   module: {
@@ -69,9 +65,11 @@ module.exports = {
       },
       {
         test: /\.(ttf)(\?|$)/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8 * 1024, // 8kb
+          },
         },
       },
       {
@@ -101,7 +99,7 @@ module.exports = {
 
   optimization: {
     minimize: false,
-    noEmitOnErrors: true,
+    emitOnErrors: false,
   },
 
   performance: {

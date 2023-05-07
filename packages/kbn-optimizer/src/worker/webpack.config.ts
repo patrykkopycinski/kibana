@@ -8,10 +8,9 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import zlib from 'zlib';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
@@ -36,14 +35,21 @@ export function getWebpackConfig(
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
+    target: 'web',
     context: bundle.contextDir,
-    cache: true,
+    // cache: true,
+    cache: {
+      type: 'filesystem',
+      compression: 'brotli',
+      buildDependencies: {
+        config: [__filename],
+      },
+    },
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
     output: {
@@ -55,11 +61,11 @@ export function getWebpackConfig(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      emitOnErrors: false,
       splitChunks: {
         maxAsyncRequests: 10,
         cacheGroups: {
@@ -74,13 +80,13 @@ export function getWebpackConfig(
 
     plugins: [
       new CleanWebpackPlugin(),
-      new BundleRemotesPlugin(bundle, bundleRemotes),
-      new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
-      new BundleMetricsPlugin(bundle),
-      new webpack.DllReferencePlugin({
-        context: worker.repoRoot,
-        manifest: DLL_MANIFEST,
-      }),
+      // new BundleRemotesPlugin(bundle, bundleRemotes),
+      // new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
+      // new BundleMetricsPlugin(bundle),
+      // new webpack.DllReferencePlugin({
+      //   context: worker.repoRoot,
+      //   manifest: DLL_MANIFEST,
+      // }),
       ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
@@ -177,12 +183,14 @@ export function getWebpackConfig(
                 {
                   loader: 'sass-loader',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/styles/core_app/_globals_${theme}.scss`
+                    additionalData(content: string, loaderContext: webpack.LoaderContext<unknown>) {
+                      return `@import ${JSON.stringify(
+                        loaderContext.utils.contextify(
+                          loaderContext.context || loaderContext.rootContext,
+                          Path.resolve(
+                            worker.repoRoot,
+                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                          )
                         )
                       )};\n${content}`;
                     },
@@ -208,9 +216,10 @@ export function getWebpackConfig(
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8 * 1024, // 8kb
+            },
           },
         },
         {
@@ -227,9 +236,7 @@ export function getWebpackConfig(
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          type: 'asset/source',
         },
         {
           test: /\.peggy$/,
@@ -271,22 +278,21 @@ export function getWebpackConfig(
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
       }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-        compressionOptions: {
-          level: 11,
-        },
-      }),
+      // new CompressionPlugin({
+      //   algorithm: 'brotliCompress',
+      //   filename: '[path].br',
+      //   test: /\.(js|css)$/,
+      //   compressionOptions: {
+      //     params: {
+      //       [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+      //     },
+      //   },
+      // }),
     ],
 
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
           terserOptions: {

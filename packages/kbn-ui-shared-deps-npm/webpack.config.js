@@ -22,10 +22,7 @@ module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
 
   return {
-    node: {
-      child_process: 'empty',
-      fs: 'empty',
-    },
+    target: 'web',
     externals: {
       module: 'module',
     },
@@ -119,7 +116,6 @@ module.exports = (_, argv) => {
       devtoolModuleFilenameTemplate: (info) =>
         `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
-      futureEmitAssets: true,
     },
 
     module: {
@@ -157,7 +153,7 @@ module.exports = (_, argv) => {
 
     optimization: {
       minimize: false,
-      noEmitOnErrors: true,
+      // emitOnErrors: false,
     },
 
     performance: {

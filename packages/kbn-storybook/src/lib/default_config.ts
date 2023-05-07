@@ -98,7 +98,7 @@ export const defaultConfig: StorybookConfig = {
       })
     );
 
-    config.node = { fs: 'empty' };
+    // config.node = { fs: 'empty' };
     config.watch = true;
     config.watchOptions = {
       ...config.watchOptions,

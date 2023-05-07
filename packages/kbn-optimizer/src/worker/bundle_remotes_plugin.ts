@@ -40,7 +40,11 @@ export class BundleRemotesPlugin {
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      compilationParams.normalModuleFactory.hooks.factory.tap(
+      console.log(
+        'ompilationParams.normalModuleFactory.hooks',
+        compilationParams.normalModuleFactory.hooks
+      );
+      compilationParams.normalModuleFactory.hooks.module.tap(
         'BundleRefsPlugin/normalModuleFactory/factory',
         (wrappedFactory: ModuleFactory): ModuleFactory =>
           (data, callback) => {

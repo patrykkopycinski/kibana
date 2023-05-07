@@ -9,7 +9,6 @@ require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils');
 
 const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
@@ -22,6 +21,7 @@ const {
 const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = {
+  target: 'web',
   context: KIBANA_ROOT,
   entry: {
     [SHAREABLE_RUNTIME_NAME]: require.resolve('./index.ts'),
@@ -35,6 +35,8 @@ module.exports = {
   resolve: {
     alias: {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
+      [require.resolve('@elastic/eui/es/components/drag_and_drop')]: false,
+      [require.resolve('highlight.js')]: false,
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
   },
@@ -142,9 +144,14 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               additionalData(content, loaderContext) {
-                return `@import ${stringifyRequest(
-                  loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                return `@import ${JSON.stringify(
+                  loaderContext.utils.contextify(
+                    loaderContext.context || loaderContext.rootContext,
+                    path.resolve(
+                      KIBANA_ROOT,
+                      'src/core/public/styles/core_app/_globals_v8light.scss'
+                    )
+                  )
                 )};\n${content}`;
               },
               implementation: require('node-sass'),
@@ -163,7 +170,7 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-        loader: 'url-loader',
+        type: 'asset/resource',
         sideEffects: false,
       },
       {
@@ -172,21 +179,10 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: [
-          require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('highlight.js'),
-        ],
-        use: require.resolve('null-loader'),
-      },
-      {
         test: /\.peggy$/,
         use: require.resolve('@kbn/peggy-loader'),
       },
     ],
-  },
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
   },
   plugins: [
     isProd ? new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }) : [],

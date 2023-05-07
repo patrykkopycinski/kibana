@@ -7,7 +7,7 @@
  */
 
 // Satisfy TS's requirements that the module be declared per './index.ts'.
-declare module '!!raw-loader!./worker.js' {
+declare module '!!./worker.js?raw' {
   const content: string;
   // eslint-disable-next-line import/no-default-export
   export default content;

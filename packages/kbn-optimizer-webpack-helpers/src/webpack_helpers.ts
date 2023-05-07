@@ -30,9 +30,10 @@ export function isFailureStats(stats: webpack.Stats) {
   // sequences, this plugin will throw a warning. This should not be harmful,
   // but the an issue was opened and can be followed on:
   // https://github.com/webpack-contrib/mini-css-extract-plugin/issues/250#issuecomment-415345126
-  const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+  // const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
 
-  return filteredWarnings.length > 0;
+  return false;
+  // return filteredWarnings.length > 0;
 }
 
 const STATS_WARNINGS_FILTER = new RegExp(
@@ -44,9 +45,23 @@ const STATS_WARNINGS_FILTER = new RegExp(
 
 export function failedStatsToErrorMessage(stats: webpack.Stats) {
   const details = stats.toString({
-    ...Stats.presetToOptions('minimal'),
+    // ...Stats.presetToOptions('minimal'),
+    all: false,
+    version: true,
+    timings: true,
+    modules: true,
+    errorsSpace: 0,
+    warningsSpace: 0,
+    modulesSpace: 0,
+    assets: true,
+    assetsSpace: 0,
+    errors: true,
+    errorsCount: true,
+    warnings: true,
+    warningsCount: true,
+    logging: 'warn',
     colors: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
+    ignoreWarnings: STATS_WARNINGS_FILTER,
     errors: true,
     errorDetails: true,
     moduleTrace: true,

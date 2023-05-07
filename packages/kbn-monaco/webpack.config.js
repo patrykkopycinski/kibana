@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const path = require('path');
 
 const getWorkerEntry = (language) => {
@@ -22,9 +23,10 @@ const getWorkerEntry = (language) => {
 };
 
 const getWorkerConfig = (language) => ({
+  target: 'web',
   mode: process.env.NODE_ENV || 'development',
   entry: getWorkerEntry(language),
-  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
     filename: `${language}.editor.worker.js`,
@@ -32,6 +34,7 @@ const getWorkerConfig = (language) => ({
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
   },
+  plugins: [new NodePolyfillPlugin()],
   stats: 'errors-only',
   module: {
     rules: [

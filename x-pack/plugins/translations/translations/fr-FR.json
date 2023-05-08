@@ -30969,7 +30969,6 @@
     "xpack.securitySolution.kpiUsers.totalUsers.errorSearchDescription": "Une erreur s'est produite sur la recherche du KPI du total des utilisateurs",
     "xpack.securitySolution.kpiUsers.totalUsers.title": "Utilisateurs",
     "xpack.securitySolution.kubernetes.columnContainer": "Conteneur",
-    "xpack.securitySolution.kubernetes.columnEntryType": "Type d’entrée",
     "xpack.securitySolution.kubernetes.columnExecutable": "Leader de session",
     "xpack.securitySolution.kubernetes.columnInteractive": "Interactivité",
     "xpack.securitySolution.kubernetes.columnNode": "Nœud",

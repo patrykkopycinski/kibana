@@ -30948,7 +30948,6 @@
     "xpack.securitySolution.kpiUsers.totalUsers.errorSearchDescription": "統計ユーザーKPI検索でエラーが発生しました",
     "xpack.securitySolution.kpiUsers.totalUsers.title": "ユーザー",
     "xpack.securitySolution.kubernetes.columnContainer": "コンテナー",
-    "xpack.securitySolution.kubernetes.columnEntryType": "エントリタイプ",
     "xpack.securitySolution.kubernetes.columnExecutable": "セッションリーダー",
     "xpack.securitySolution.kubernetes.columnInteractive": "インタラクティブ",
     "xpack.securitySolution.kubernetes.columnNode": "ノード",

@@ -25788,7 +25788,6 @@
     "xpack.osquery.liveQueryActionResults.table.expiredStatusText": "期限切れ",
     "xpack.osquery.liveQueryActionResults.table.pendingStatusText": "保留中",
     "xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle": "結果行数",
-    "xpack.osquery.liveQueryActionResults.table.skippedErrorText": "このクエリは、使用されているパラメーターとその値がアラートで見つからないため、呼び出されていません。",
     "xpack.osquery.liveQueryActionResults.table.skippedStatusText": "スキップ済み",
     "xpack.osquery.liveQueryActionResults.table.statusColumnTitle": "ステータス",
     "xpack.osquery.liveQueryActionResults.table.successStatusText": "成功",

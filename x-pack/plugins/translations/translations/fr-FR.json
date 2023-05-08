@@ -25807,7 +25807,6 @@
     "xpack.osquery.liveQueryActionResults.table.expiredStatusText": "expiré",
     "xpack.osquery.liveQueryActionResults.table.pendingStatusText": "en attente",
     "xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle": "Nombre de lignes de résultats",
-    "xpack.osquery.liveQueryActionResults.table.skippedErrorText": "Cette requête n'a pas été appelée en raison du paramètre utilisé et de sa valeur non trouvée dans l'alerte.",
     "xpack.osquery.liveQueryActionResults.table.skippedStatusText": "ignoré",
     "xpack.osquery.liveQueryActionResults.table.statusColumnTitle": "Statut",
     "xpack.osquery.liveQueryActionResults.table.successStatusText": "réussite",

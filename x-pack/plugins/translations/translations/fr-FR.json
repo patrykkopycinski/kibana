@@ -34531,7 +34531,6 @@
     "xpack.synthetics.monitorConfig.textAssertion.helpText": "Prenez en considération la page chargée lorsque le texte spécifié est rendu.",
     "xpack.synthetics.monitorConfig.textAssertion.label": "Assertion de texte",
     "xpack.synthetics.monitorConfig.throttling.helpText": "Simulez la régulation du réseau (téléchargement, chargement, latence). D'autres options seront ajoutées dans une prochaine version.",
-    "xpack.synthetics.monitorConfig.throttling.label": "Profil de connexion",
     "xpack.synthetics.monitorConfig.timeout.formatError": "Le délai d'expiration n'est pas valide.",
     "xpack.synthetics.monitorConfig.timeout.greaterThan0Error": "Le délai d'expiration doit être supérieur ou égal à 0.",
     "xpack.synthetics.monitorConfig.timeout.helpText": "Temps total autorisé pour tester la connexion et l'échange de données.",

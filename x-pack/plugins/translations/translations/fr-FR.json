@@ -11114,7 +11114,6 @@
     "xpack.enterpriseSearch.actionsHeader": "Actions",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.headingTitle": "Vous avez peut-être supprimé cette collection d'analyses",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.subHeading": "Une collection d'analyse permet de stocker les événements d'analyse pour toute application de recherche que vous créez. Créez une nouvelle collection pour commencer.",
-    "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description": "Une fois que vous avez appelé createTracker, vous pouvez utiliser les méthodes de suivi telles que trackPageView pour envoyer les événements vers Behavioral Analytics.",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionThree": "Vous pouvez également déployer des événements personnalisés dans Behavioral Analytics en appelant la méthode trackEvent.",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo": "Une fois initialisé, vous aurez la possibilité de suivre les vues de page dans votre application.",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.title": "Déployer les événements de vue de page et de comportement",

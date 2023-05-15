@@ -11113,7 +11113,6 @@
     "xpack.enterpriseSearch.actionsHeader": "アクション",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.headingTitle": "この分析コレクションを削除した可能性があります",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.collectionNotFoundState.subHeading": "分析コレクションには、構築している特定の検索アプリケーションの分析イベントを格納できます。開始するには、新しいコレクションを作成してください。",
-    "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description": "createTrackerを呼び出したら、trackPageViewなどのtrackerメソッドを使って、Behavioral Analyticsにイベントを送ることができます。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionThree": "また、trackEventメソッドを呼び出すことで、Behavioral Analyticsにカスタムイベントをディスパッチすることもできます。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo": "初期化すると、アプリケーションのページビューを追跡することができるようになります。",
     "xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.title": "ページビューと行動イベントのディスパッチ",

@@ -16977,7 +16977,6 @@
     "xpack.infra.nodeContextMenu.viewUptimeLink": "{inventoryName} en disponibilité",
     "xpack.infra.nodeDetails.tabs.metadata.seeMore": "+{count} en plus",
     "xpack.infra.parseInterval.errorMessage": "{value} n'est pas une chaîne d'intervalle",
-    "xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage": "Chargement de logs {nodeType}",
     "xpack.infra.snapshot.missingSnapshotMetricError": "L'agrégation de {metric} pour {nodeType} n'est pas disponible.",
     "xpack.infra.sourceConfiguration.logIndicesRecommendedValue": "La valeur recommandée est {defaultValue}",
     "xpack.infra.sourceConfiguration.metricIndicesRecommendedValue": "La valeur recommandée est {defaultValue}",

@@ -16976,7 +16976,6 @@
     "xpack.infra.nodeContextMenu.viewUptimeLink": "アップタイムの{inventoryName}",
     "xpack.infra.nodeDetails.tabs.metadata.seeMore": "+ 追加の{count}",
     "xpack.infra.parseInterval.errorMessage": "{value}は間隔文字列ではありません",
-    "xpack.infra.redirectToNodeLogs.loadingNodeLogsMessage": "{nodeType} ログを読み込み中",
     "xpack.infra.snapshot.missingSnapshotMetricError": "{nodeType}の{metric}のアグリゲーションを利用できません。",
     "xpack.infra.sourceConfiguration.logIndicesRecommendedValue": "推奨値は {defaultValue} です",
     "xpack.infra.sourceConfiguration.metricIndicesRecommendedValue": "推奨値は {defaultValue} です",

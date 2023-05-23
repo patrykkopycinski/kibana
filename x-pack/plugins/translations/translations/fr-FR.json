@@ -35323,8 +35323,6 @@
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "Éditeur de code",
     "xpack.stackConnectors.components.index.preconfiguredIndex": "Index Elasticsearch",
     "xpack.stackConnectors.components.index.preconfiguredIndexDocLink": "Affichez les documents.",
-    "xpack.stackConnectors.components.index.refreshLabel": "Actualiser l'index",
-    "xpack.stackConnectors.components.index.refreshTooltip": "Actualisez les partitions affectées pour rendre cette opération visible pour la recherche.",
     "xpack.stackConnectors.components.index.resetDefaultIndexLabel": "Réinitialiser l'index par défaut",
     "xpack.stackConnectors.components.index.selectMessageText": "Indexez les données dans Elasticsearch.",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "Token d'API",

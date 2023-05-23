@@ -35304,8 +35304,6 @@
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "コードエディター",
     "xpack.stackConnectors.components.index.preconfiguredIndex": "Elasticsearchインデックス",
     "xpack.stackConnectors.components.index.preconfiguredIndexDocLink": "ドキュメントを表示します。",
-    "xpack.stackConnectors.components.index.refreshLabel": "更新インデックス",
-    "xpack.stackConnectors.components.index.refreshTooltip": "影響を受けるシャードを更新し、この処理を検索できるようにします。",
     "xpack.stackConnectors.components.index.resetDefaultIndexLabel": "デフォルトのインデックスをリセット",
     "xpack.stackConnectors.components.index.selectMessageText": "データを Elasticsearch にインデックスしてください。",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "APIトークン",

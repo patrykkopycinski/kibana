@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { Metadata, TabProps } from './metadata';
+import { Metadata, type MetadataProps } from './metadata';
 
-import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
-import { useSourceContext } from '../../../../../../containers/metrics_source';
+import { useMetadata } from '../hooks/use_metadata';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-jest.mock('../../../../../../containers/metrics_source');
-jest.mock('../../../../metric_detail/hooks/use_metadata');
+jest.mock('../../../containers/metrics_source');
+jest.mock('../hooks/use_metadata');
 
-const metadataProps: TabProps = {
+const metadataProps: MetadataProps = {
   currentTimeRange: {
     from: 1679316685686,
     to: 1679585836087,
@@ -39,6 +39,7 @@ const metadataProps: TabProps = {
     diskLatency: 0,
     memoryTotal: 16777216,
   },
+  showActionsColumn: true,
 };
 
 const renderHostMetadata = () =>

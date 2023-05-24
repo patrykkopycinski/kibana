@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { useMetricsDataViewContext } from '../../../pages/metrics/hosts/hooks/use_data_view';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useUnifiedSearchContext } from '../../../pages/metrics/hosts/hooks/use_unified_search';
 import { buildMetadataFilter } from './build_metadata_filter';
-import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface AddMetadataFilterButtonProps {
   item: {
@@ -20,12 +20,9 @@ interface AddMetadataFilterButtonProps {
   };
 }
 
-const filterAddedToastTitle = i18n.translate(
-  'xpack.infra.hostsViewPage.flyout.metadata.filterAdded',
-  {
-    defaultMessage: 'Filter was added',
-  }
-);
+const filterAddedToastTitle = i18n.translate('xpack.infra.metadataEmbeddable.filterAdded', {
+  defaultMessage: 'Filter was added',
+});
 
 export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) => {
   const { dataView } = useMetricsDataViewContext();
@@ -69,12 +66,9 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     return (
       <span>
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.infra.hostsViewPage.flyout.metadata.setRemoveFilterTooltip',
-            {
-              defaultMessage: 'Remove filter',
-            }
-          )}
+          content={i18n.translate('xpack.infra.metadataEmbeddable.setRemoveFilterTooltip', {
+            defaultMessage: 'Remove filter',
+          })}
         >
           <EuiButtonIcon
             size="s"
@@ -82,12 +76,9 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
             iconType="filter"
             display="base"
             data-test-subj="hostsView-flyout-metadata-remove-filter"
-            aria-label={i18n.translate(
-              'xpack.infra.hostsViewPage.flyout.metadata.filterAriaLabel',
-              {
-                defaultMessage: 'Filter',
-              }
-            )}
+            aria-label={i18n.translate('xpack.infra.metadataEmbeddable.filterAriaLabel', {
+              defaultMessage: 'Filter',
+            })}
             onClick={() => {
               telemetry.reportHostFlyoutFilterRemoved({
                 field_name: existingFilter.meta.key!,
@@ -103,24 +94,18 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
   return (
     <span>
       <EuiToolTip
-        content={i18n.translate(
-          'xpack.infra.hostsViewPage.flyout.metadata.setFilterByValueTooltip',
-          {
-            defaultMessage: 'Filter by value',
-          }
-        )}
+        content={i18n.translate('xpack.infra.metadataEmbeddable.setFilterByValueTooltip', {
+          defaultMessage: 'Filter by value',
+        })}
       >
         <EuiButtonIcon
           color="primary"
           size="s"
           iconType="filter"
           data-test-subj="hostsView-flyout-metadata-add-filter"
-          aria-label={i18n.translate(
-            'xpack.infra.hostsViewPage.flyout.metadata.AddFilterAriaLabel',
-            {
-              defaultMessage: 'Add Filter',
-            }
-          )}
+          aria-label={i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
+            defaultMessage: 'Add Filter',
+          })}
           onClick={handleAddFilter}
         />
       </EuiToolTip>

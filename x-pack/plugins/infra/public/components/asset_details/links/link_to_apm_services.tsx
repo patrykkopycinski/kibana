@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
   hostName: string;

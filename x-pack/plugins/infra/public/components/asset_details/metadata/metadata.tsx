@@ -9,22 +9,35 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSourceContext } from '../../../../../../containers/metrics_source';
-import { findInventoryModel } from '../../../../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
-import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { findInventoryModel } from '../../../../common/inventory_models';
+import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import { useMetadata } from '../hooks/use_metadata';
+import { useSourceContext } from '../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import type { HostNodeRow } from '../../../hooks/use_hosts_table';
-import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
+import type { HostNodeRow } from '../types';
 
-export interface TabProps {
+export interface MetadataSearchUrlState {
+  metadataSearchUrlState: string;
+  setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
+}
+
+export interface MetadataProps {
   currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
   nodeType: InventoryItemType;
+  showActionsColumn?: boolean;
+  persistMetadataSearchToUrlState?: MetadataSearchUrlState;
 }
 
-export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
+export const Metadata = ({
+  node,
+  currentTimeRange,
+  nodeType,
+  showActionsColumn,
+  persistMetadataSearchToUrlState,
+}: MetadataProps) => {
   const nodeId = node.name;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
@@ -39,7 +52,7 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
   if (fetchMetadataError) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorTitle', {
+        title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
           defaultMessage: 'Sorry, there was an error',
         })}
         color="danger"
@@ -47,7 +60,7 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
         data-test-subj="infraMetadataErrorCallout"
       >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.hostDetail.metadata.errorMessage"
+          id="xpack.infra.metadataEmbeddable.errorMessage"
           defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
           values={{
             reload: (
@@ -55,7 +68,7 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
                 data-test-subj="infraMetadataReloadPageLink"
                 onClick={() => window.location.reload()}
               >
-                {i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.errorAction', {
+                {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
                   defaultMessage: 'reload the page',
                 })}
               </EuiLink>
@@ -66,5 +79,16 @@ export const Metadata = ({ node, currentTimeRange, nodeType }: TabProps) => {
     );
   }
 
-  return <Table rows={fields} loading={metadataLoading} />;
+  return (
+    <Table
+      persistMetadataSearchToUrlState={persistMetadataSearchToUrlState}
+      showActionsColumn={showActionsColumn}
+      rows={fields}
+      loading={metadataLoading}
+    />
+  );
 };
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Metadata;

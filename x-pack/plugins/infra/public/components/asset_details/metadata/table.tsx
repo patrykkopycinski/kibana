@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiInMemoryTable,
   EuiSearchBarProps,
+  type HorizontalAlignment,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -19,8 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
-import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
+import { MetadataSearchUrlState } from './metadata';
 
 interface Row {
   name: string;
@@ -30,6 +31,8 @@ interface Row {
 export interface Props {
   rows: Row[];
   loading: boolean;
+  showActionsColumn?: boolean;
+  persistMetadataSearchToUrlState?: MetadataSearchUrlState;
 }
 
 interface SearchErrorType {
@@ -39,46 +42,64 @@ interface SearchErrorType {
 /**
  * Columns translations
  */
-const FIELD_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.field', {
+const FIELD_LABEL = i18n.translate('xpack.infra.metadataEmbeddable.field', {
   defaultMessage: 'Field',
 });
 
-const VALUE_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.value', {
+const VALUE_LABEL = i18n.translate('xpack.infra.metadataEmbeddable.value', {
   defaultMessage: 'Value',
 });
 
 /**
  * Component translations
  */
-const SEARCH_PLACEHOLDER = i18n.translate(
-  'xpack.infra.hostsViewPage.hostDetail.metadata.searchForMetadata',
-  {
-    defaultMessage: 'Search for metadata…',
-  }
-);
+const SEARCH_PLACEHOLDER = i18n.translate('xpack.infra.metadataEmbeddable.searchForMetadata', {
+  defaultMessage: 'Search for metadata…',
+});
 
-const NO_METADATA_FOUND = i18n.translate(
-  'xpack.infra.hostsViewPage.hostDetail.metadata.noMetadataFound',
-  {
-    defaultMessage: 'No metadata found.',
-  }
-);
+const NO_METADATA_FOUND = i18n.translate('xpack.infra.metadataEmbeddable.noMetadataFound', {
+  defaultMessage: 'No metadata found.',
+});
 
-const LOADING = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.loading', {
+const LOADING = i18n.translate('xpack.infra.metadataEmbeddable.loading', {
   defaultMessage: 'Loading...',
 });
 
 export const Table = (props: Props) => {
-  const { rows, loading } = props;
+  const { rows, loading, showActionsColumn } = props;
   const [searchError, setSearchError] = useState<SearchErrorType | null>(null);
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+  const [metadataSearch, setMetadataSearch] = useState('');
+
+  const defaultColumns = useMemo(
+    () => [
+      {
+        field: 'name',
+        name: FIELD_LABEL,
+        width: '35%',
+        sortable: false,
+        render: (name: string) => <EuiText size="s">{name}</EuiText>,
+      },
+      {
+        field: 'value',
+        name: VALUE_LABEL,
+        width: '55%',
+        sortable: false,
+        render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
+      },
+    ],
+    []
+  );
 
   const debouncedSearchOnChange = useMemo(
     () =>
       debounce<(queryText: string) => void>((queryText) => {
-        setHostFlyoutOpen({ metadataSearch: String(queryText) ?? '' });
+        return props.persistMetadataSearchToUrlState
+          ? props.persistMetadataSearchToUrlState.setMetadataSearchUrlState({
+              metadataSearch: String(queryText) ?? '',
+            })
+          : setMetadataSearch(String(queryText) ?? '');
       }, 500),
-    [setHostFlyoutOpen]
+    [props.persistMetadataSearchToUrlState]
   );
 
   const searchBarOnChange = useCallback(
@@ -101,38 +122,33 @@ export const Table = (props: Props) => {
       schema: true,
       placeholder: SEARCH_PLACEHOLDER,
     },
-    query: hostFlyoutOpen.metadataSearch
-      ? Query.parse(hostFlyoutOpen.metadataSearch)
+    query: props.persistMetadataSearchToUrlState
+      ? props.persistMetadataSearchToUrlState.metadataSearchUrlState
+        ? Query.parse(props.persistMetadataSearchToUrlState.metadataSearchUrlState)
+        : Query.MATCH_ALL
+      : metadataSearch
+      ? Query.parse(metadataSearch)
       : Query.MATCH_ALL,
   };
 
   const columns = useMemo(
-    () => [
-      {
-        field: 'name',
-        name: FIELD_LABEL,
-        width: '35%',
-        sortable: false,
-        render: (name: string) => <EuiText size="s">{name}</EuiText>,
-      },
-      {
-        field: 'value',
-        name: VALUE_LABEL,
-        width: '55%',
-        sortable: false,
-        render: (_name: string, item: Row) => <ExpandableContent values={item.value} />,
-      },
-      {
-        field: 'value',
-        name: 'Actions',
-        sortable: false,
-        showOnHover: true,
-        render: (_name: string, item: Row) => {
-          return <AddMetadataFilterButton item={item} />;
-        },
-      },
-    ],
-    []
+    () =>
+      showActionsColumn
+        ? [
+            ...defaultColumns,
+            {
+              field: 'value',
+              name: 'Actions',
+              sortable: false,
+              showOnHover: true,
+              align: 'center' as HorizontalAlignment,
+              render: (_name: string, item: Row) => {
+                return <AddMetadataFilterButton item={item} />;
+              },
+            },
+          ]
+        : defaultColumns,
+    [defaultColumns, showActionsColumn]
   );
 
   return (

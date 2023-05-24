@@ -10,7 +10,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { decorateWithGlobalStorybookThemeProviders } from '../../../../../../test_utils/use_global_storybook_theme';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { LinkToApmServices, type LinkToApmServicesProps } from './link_to_apm_services';
 
 const mockServices = {
@@ -27,7 +27,7 @@ const mockServices = {
 };
 
 export default {
-  title: 'infra/Host Details View/Components/Links',
+  title: 'infra/Asset Details View/Components/Links',
   decorators: [
     (wrappedStory) => <EuiCard title="Link to APM Services">{wrappedStory()}</EuiCard>,
     (wrappedStory) => (

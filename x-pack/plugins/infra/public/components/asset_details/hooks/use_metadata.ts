@@ -9,12 +9,12 @@ import { useEffect } from 'react';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { InfraMetadata, InfraMetadataRT } from '../../../../../common/http_api/metadata_api';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
-import { getFilteredMetrics } from '../lib/get_filtered_metrics';
-import { MetricsTimeInput } from './use_metrics_time';
+import { useHTTPRequest } from '../../../hooks/use_http_request';
+import { type InfraMetadata, InfraMetadataRT } from '../../../../common/http_api/metadata_api';
+import { throwErrors, createPlainError } from '../../../../common/runtime_types';
+import type { MetricsTimeInput } from '../../../pages/metrics/metric_detail/hooks/use_metrics_time';
+import { getFilteredMetrics } from '../../../pages/metrics/metric_detail/lib/get_filtered_metrics';
+import type { InventoryItemType, InventoryMetric } from '../../../../common/inventory_models/types';
 
 export function useMetadata(
   nodeId: string,

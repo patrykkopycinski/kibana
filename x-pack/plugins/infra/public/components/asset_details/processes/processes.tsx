@@ -17,25 +17,26 @@ import {
   EuiIconTip,
   Query,
 } from '@elastic/eui';
-import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
-import { getFieldByType } from '../../../../../../../common/inventory_models';
-import { parseSearchString } from '../../../../inventory_view/components/node_details/tabs/processes/parse_search_string';
-import { ProcessesTable } from '../../../../inventory_view/components/node_details/tabs/processes/processes_table';
-import { STATE_NAMES } from '../../../../inventory_view/components/node_details/tabs/processes/states';
-import { SummaryTable } from '../../../../inventory_view/components/node_details/tabs/processes/summary_table';
-import { TabContent } from '../../../../inventory_view/components/node_details/tabs/shared';
+import { parseSearchString } from './parse_search_string';
+import { ProcessesTable } from './processes_table';
+import { STATE_NAMES } from './states';
+import { SummaryTable } from './summary_table';
+import { TabContent } from '../../../pages/metrics/inventory_view/components/node_details/tabs/shared';
 import {
   SortBy,
   useProcessList,
   ProcessListContextProvider,
-} from '../../../../inventory_view/hooks/use_process_list';
-import type { HostNodeRow } from '../../../hooks/use_hosts_table';
-import { useHostFlyoutOpen } from '../../../hooks/use_host_flyout_open_url_state';
+} from '../../../pages/metrics/inventory_view/hooks/use_process_list';
+import { getFieldByType } from '../../../../common/inventory_models';
+import type { HostNodeRow } from '../types';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
 export interface ProcessesProps {
   node: HostNodeRow;
   nodeType: InventoryItemType;
   currentTime: number;
+  searchFilter?: string;
+  setSearchFilter?: (searchFilter: { searchFilter: string }) => void;
 }
 
 const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]) => ({
@@ -43,10 +44,16 @@ const options = Object.entries(STATE_NAMES).map(([value, view]: [string, string]
   view,
 }));
 
-export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
+export const Processes = ({
+  currentTime,
+  node,
+  nodeType,
+  searchFilter,
+  setSearchFilter,
+}: ProcessesProps) => {
+  const [searchText, setSearchText] = useState(searchFilter ?? '');
   const [searchBarState, setSearchBarState] = useState<Query>(() =>
-    hostFlyoutOpen.searchFilter ? Query.parse(hostFlyoutOpen.searchFilter) : Query.MATCH_ALL
+    searchText ? Query.parse(searchText) : Query.MATCH_ALL
   );
 
   const [sortBy, setSortBy] = useState<SortBy>({
@@ -64,34 +71,32 @@ export const Processes = ({ currentTime, node, nodeType }: ProcessesProps) => {
     error,
     response,
     makeRequest: reload,
-  } = useProcessList(
-    hostTerm,
-    currentTime,
-    sortBy,
-    parseSearchString(hostFlyoutOpen.searchFilter ?? '')
-  );
+  } = useProcessList(hostTerm, currentTime, sortBy, parseSearchString(searchText));
 
-  const debouncedSearchOnChange = useMemo(
-    () =>
-      debounce<(queryText: string) => void>(
-        (queryText) => setHostFlyoutOpen({ searchFilter: queryText }),
-        500
-      ),
-    [setHostFlyoutOpen]
-  );
+  const debouncedSearchOnChange = useMemo(() => {
+    return debounce<(queryText: string) => void>((queryText) => {
+      if (setSearchFilter) {
+        setSearchFilter({ searchFilter: queryText });
+      }
+      setSearchText(queryText);
+    }, 500);
+  }, [setSearchFilter]);
 
   const searchBarOnChange = useCallback(
     ({ query, queryText }) => {
       setSearchBarState(query);
       debouncedSearchOnChange(queryText);
     },
-    [setSearchBarState, debouncedSearchOnChange]
+    [debouncedSearchOnChange]
   );
 
   const clearSearchBar = useCallback(() => {
     setSearchBarState(Query.MATCH_ALL);
-    setHostFlyoutOpen({ searchFilter: '' });
-  }, [setHostFlyoutOpen]);
+    if (setSearchFilter) {
+      setSearchFilter({ searchFilter: '' });
+    }
+    setSearchText('');
+  }, [setSearchFilter]);
 
   return (
     <TabContent>

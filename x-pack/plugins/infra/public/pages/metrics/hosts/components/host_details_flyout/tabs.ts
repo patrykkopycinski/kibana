@@ -6,9 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutTabIds } from '../../../hooks/use_host_flyout_open_url_state';
+import type { Tab } from '../../../../../components/asset_details/asset_details';
+import { FlyoutTabIds } from '../../hooks/use_host_flyout_open_url_state';
 
-export const metadataTab = {
+export const processesTab: Tab = {
+  id: FlyoutTabIds.PROCESSES,
+  name: i18n.translate('xpack.infra.metrics.nodeDetails.tabs.processes', {
+    defaultMessage: 'Processes',
+  }),
+  'data-test-subj': 'hostsView-flyout-tabs-processes',
+};
+
+export const metadataTab: Tab = {
   id: FlyoutTabIds.METADATA,
   name: i18n.translate('xpack.infra.nodeDetails.tabs.metadata.title', {
     defaultMessage: 'Metadata',

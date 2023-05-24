@@ -10,9 +10,9 @@ import { EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
-import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
-import type { HostNodeRow } from '../../../hooks/use_hosts_table';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { HostNodeRow } from '../types';
 
 export interface LinkToUptimeProps {
   nodeType: InventoryItemType;

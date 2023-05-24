@@ -9,7 +9,7 @@ import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { SourceProvider } from '../../../../../containers/metrics_source';
+import { SourceProvider } from '../../containers/metrics_source';
 
 export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.ReactNode>(
   wrappedStory: () => StoryFnReactReturnType,
@@ -175,6 +175,7 @@ export const DecorateWithKibanaContext = <StoryFnReactReturnType extends React.R
       currentAppId$: { title: 'infra', subscribe: () => {} },
       navigateToUrl: () => {},
     },
+    dataViews: { create: () => {} },
     data: {
       query: {
         filterManager: { filterManagerService: { addFilters: () => {}, removeFilter: () => {} } },

@@ -37704,8 +37704,6 @@
     "xpack.triggersActionsUI.checkActionTypeEnabled.actionTypeDisabledByLicenseMessage": "このコネクターには{minimumLicenseRequired}ライセンスが必要です。",
     "xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage": "このルールタイプには{minimumLicenseRequired}ライセンスが必要です。",
     "xpack.triggersActionsUI.components.builtinActionTypes.missingSecretsValuesLabel": "機密情報はインポートされません。次のフィールド{encryptedFieldsLength, plural, other {s}}{secretFieldsLabel}の値{encryptedFieldsLength, plural, other {s}}を入力してください。",
-    "xpack.triggersActionsUI.components.buttonGroupField.error.requiredField": "{label}は必須です。",
-    "xpack.triggersActionsUI.components.passwordField.error.requiredNameText": "{label}は必須です。",
     "xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesLabel": "{secretFieldsLabel} {encryptedFieldsLength, plural, other {値}}を記憶しておいてください。コネクターを編集するたびに、{encryptedFieldsLength, plural, other {それらを}}再入力する必要があります。",
     "xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesMessage": "値{encryptedFieldsLength, plural, other {s}}{secretFieldsLabel}{encryptedFieldsLength, plural, other {あります}}暗号化されました。{encryptedFieldsLength, plural, other {これらの}}フィールド{encryptedFieldsLength, plural, other {s}}の値{encryptedFieldsLength, plural, other {s}}を再入力してください。",
     "xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage": "[aggType]が\"{aggType}\"のときには[aggField]に値が必要です",

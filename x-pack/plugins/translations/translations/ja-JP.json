@@ -20147,8 +20147,6 @@
     "xpack.ingestPipelines.testPipelineFlyout.successNotificationText": "パイプラインが実行されました",
     "xpack.ingestPipelines.testPipelineFlyout.title": "パイプラインをテスト",
     "xpack.kubernetesSecurity.treeNavigation.loadMore": "{name}詳細表示",
-    "xpack.kubernetesSecurity.beta": "ベータ",
-    "xpack.kubernetesSecurity.breadcrumb.responseActionButton": "対応",
     "xpack.kubernetesSecurity.chartsToggle.hide": "グラフを非表示",
     "xpack.kubernetesSecurity.chartsToggle.show": "チャートを表示",
     "xpack.kubernetesSecurity.containerNameWidget.containerImage": "コンテナーイメージ",

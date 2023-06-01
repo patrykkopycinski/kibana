@@ -10,6 +10,7 @@ import React from 'react';
 import type { HttpStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { TelemetryService } from '..';
 import type { TelemetryConstants } from '../..';
 
 interface RenderBannerConfig {
@@ -18,31 +19,37 @@ interface RenderBannerConfig {
   theme: ThemeServiceStart;
   onSeen: () => void;
   telemetryConstants: TelemetryConstants;
+  telemetryService: TelemetryService;
 }
 
-export function renderOptedInNoticeBanner({
+export function renderOptInStatusNoticeBanner({
   onSeen,
   overlays,
   http,
   theme,
   telemetryConstants,
+  telemetryService,
 }: RenderBannerConfig) {
   const OptedInNoticeBannerLazy = withSuspense(
     React.lazy(() =>
-      import('../../components/opted_in_notice_banner').then(({ OptedInNoticeBanner }) => ({
-        default: OptedInNoticeBanner,
-      }))
+      import('../../components/opt_in_status_notice_banner').then(
+        ({ OptInStatusNoticeBanner }) => ({
+          default: OptInStatusNoticeBanner,
+        })
+      )
     )
   );
+
   const mount = toMountPoint(
     <OptedInNoticeBannerLazy
       onSeenBanner={onSeen}
       http={http}
       telemetryConstants={telemetryConstants}
+      telemetryService={telemetryService}
     />,
     { theme$: theme.theme$ }
   );
-  const bannerId = overlays.banners.add(mount, 10000);
 
+  const bannerId = overlays.banners.add(mount, 10000);
   return bannerId;
 }

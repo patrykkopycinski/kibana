@@ -8,34 +8,47 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { OptedInNoticeBanner } from './opted_in_notice_banner';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { mockTelemetryConstants } from '../mocks';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mockTelemetryConstants, mockTelemetryService } from '../mocks';
+import { OptInStatusNoticeBanner } from './opt_in_status_notice_banner';
+import { OptInMessage } from './opt_in_message';
 
 const mockHttp = httpServiceMock.createStartContract();
 const telemetryConstants = mockTelemetryConstants();
+const telemetryService = mockTelemetryService();
 
-describe('OptInDetailsComponent', () => {
+describe('OptInStatusNoticeBanner', () => {
   it('renders as expected', () => {
+    const onSeenBanner = () => {};
+    const dom = shallowWithIntl(
+      <OptInStatusNoticeBanner
+        onSeenBanner={onSeenBanner}
+        http={mockHttp}
+        telemetryConstants={telemetryConstants}
+        telemetryService={telemetryService}
+      />
+    );
     expect(
-      shallowWithIntl(
-        <OptedInNoticeBanner
-          onSeenBanner={() => {}}
-          http={mockHttp}
+      dom.containsMatchingElement(
+        <OptInMessage
           telemetryConstants={telemetryConstants}
+          telemetryService={telemetryService}
+          addBasePath={mockHttp.basePath.prepend}
+          onClick={onSeenBanner}
         />
       )
-    ).toMatchSnapshot();
+    ).toBe(true);
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
     const onLinkClick = jest.fn();
     const component = shallowWithIntl(
-      <OptedInNoticeBanner
+      <OptInStatusNoticeBanner
         onSeenBanner={onLinkClick}
         http={mockHttp}
         telemetryConstants={telemetryConstants}
+        telemetryService={telemetryService}
       />
     );
 

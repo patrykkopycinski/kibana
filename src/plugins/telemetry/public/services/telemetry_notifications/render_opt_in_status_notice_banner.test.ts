@@ -6,25 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
+import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 import { overlayServiceMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { mockTelemetryConstants } from '../../mocks';
+import { mockTelemetryConstants, mockTelemetryService } from '../../mocks';
 
-describe('renderOptedInNoticeBanner', () => {
+describe('renderOptInStatusNoticeBanner', () => {
   it('adds a banner to banners with priority of 10000', () => {
     const bannerID = 'brucer-wayne';
     const overlays = overlayServiceMock.createStartContract();
     const mockHttp = httpServiceMock.createStartContract();
     const theme = themeServiceMock.createStartContract();
     const telemetryConstants = mockTelemetryConstants();
+    const telemetryService = mockTelemetryService();
     overlays.banners.add.mockReturnValue(bannerID);
 
-    const returnedBannerId = renderOptedInNoticeBanner({
+    const returnedBannerId = renderOptInStatusNoticeBanner({
       http: mockHttp,
       onSeen: jest.fn(),
       overlays,
       theme,
       telemetryConstants,
+      telemetryService,
     });
 
     expect(overlays.banners.add).toBeCalledTimes(1);

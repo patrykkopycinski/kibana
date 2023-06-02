@@ -36754,7 +36754,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "プロジェクト",
     "xpack.synthetics.overview.groupPopover.tag.label": "タグ",
     "xpack.synthetics.overview.heading": "監視",
-    "xpack.synthetics.overview.headingBetaSection": "Synthetics",
     "xpack.synthetics.overview.monitors.label": "監視",
     "xpack.synthetics.overview.noMonitorsFoundContent": "検索を更新してください。",
     "xpack.synthetics.overview.noMonitorsFoundHeading": "モニターが見つかりません",

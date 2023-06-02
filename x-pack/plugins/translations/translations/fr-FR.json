@@ -36773,7 +36773,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "Projet",
     "xpack.synthetics.overview.groupPopover.tag.label": "Balise",
     "xpack.synthetics.overview.heading": "Moniteurs",
-    "xpack.synthetics.overview.headingBetaSection": "Synthetics",
     "xpack.synthetics.overview.monitors.label": "Moniteurs",
     "xpack.synthetics.overview.noMonitorsFoundContent": "Essayez d'affiner votre recherche.",
     "xpack.synthetics.overview.noMonitorsFoundHeading": "Aucun moniteur trouvé",

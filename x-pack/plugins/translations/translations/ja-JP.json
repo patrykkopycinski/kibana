@@ -26689,7 +26689,7 @@
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {が検出されました} Inventory {しきい値を超えました} other {を超えました}}",
     "xpack.observability.ruleDetails.executionLogError": "ルール実行ログを読み込めません。理由：{message}",
     "xpack.observability.ruleDetails.ruleLoadError": "ルールを読み込めません。理由：{message}",
-    "xpack.observability.slo.alerting.burnRate.reason": "過去{longWindowDuration}のバーンレートは{longWindowBurnRate}で、過去{shortWindowDuration}のバーンレートは{shortWindowBurnRate}です。両期間とも{burnRateThreshold}を超えたらアラート",
+    "xpack.observability.slo.alerting.burnRate.reason": "{actionGroupName}: 過去{longWindowDuration}のバーンレートは{longWindowBurnRate}で、過去{shortWindowDuration}のバーンレートは{shortWindowBurnRate}です。両期間とも{burnRateThreshold}を超えたらアラート",
     "xpack.observability.slo.duration.day": "{duration, plural, other {#日}}",
     "xpack.observability.slo.duration.hour": "{duration, plural, other {#時間}}",
     "xpack.observability.slo.duration.minute": "{duration, plural, other {#分}}",

@@ -26707,7 +26707,7 @@
     "xpack.observability.rules.deleteSelectedIdsConfirmModal.descriptionText": "Vous ne pouvez pas récupérer {numIdsToDelete, plural, one {un {singleTitle} supprimé} many {des {multipleTitle} supprimés} other {des {multipleTitle} supprimés}}.",
     "xpack.observability.rules.deleteSelectedIdsErrorNotification.descriptionText": "Impossible de supprimer {numErrors, number} {numErrors, plural, one {{singleTitle}} many {{multipleTitle}} other {{multipleTitle}}}",
     "xpack.observability.rules.deleteSelectedIdsSuccessNotification.descriptionText": "{numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} many {{multipleTitle}} other {{multipleTitle}}} supprimé(s)",
-    "xpack.observability.slo.alerting.burnRate.reason": "Le taux d'avancement pour le (les) dernier(s) {longWindowDuration} est de {longWindowBurnRate} et pour le (les) dernier(s) {shortWindowDuration} est de {shortWindowBurnRate}. Alerter si supérieur à {burnRateThreshold} pour les deux fenêtres",
+    "xpack.observability.slo.alerting.burnRate.reason": "{actionGroupName}: Le taux d'avancement pour le (les) dernier(s) {longWindowDuration} est de {longWindowBurnRate} et pour le (les) dernier(s) {shortWindowDuration} est de {shortWindowBurnRate}. Alerter si supérieur à {burnRateThreshold} pour les deux fenêtres",
     "xpack.observability.slo.duration.day": "{duration, plural, one {1 jour} many {# jours} other {# jours}}",
     "xpack.observability.slo.duration.hour": "{duration, plural, one {1 heure} many {# heures} other {# heures}}",
     "xpack.observability.slo.duration.minute": "{duration, plural, one {1 minute} many {# minutes} other {# minutes}}",

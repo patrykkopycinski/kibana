@@ -24929,7 +24929,6 @@
     "xpack.ml.trainedModels.modelsList.builtInModelMessage": "ビルトインモデル",
     "xpack.ml.trainedModels.modelsList.collapseRow": "縮小",
     "xpack.ml.trainedModels.modelsList.createdAtHeader": "作成日時：",
-    "xpack.ml.trainedModels.modelsList.deleteDisabledTooltip": "モデルにはパイプラインが関連付けられています",
     "xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel": "キャンセル",
     "xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel": "削除",
     "xpack.ml.trainedModels.modelsList.deleteModelActionLabel": "モデルを削除",

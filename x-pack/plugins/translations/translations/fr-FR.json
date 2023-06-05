@@ -24943,7 +24943,6 @@
     "xpack.ml.trainedModels.modelsList.builtInModelMessage": "Modèle intégré",
     "xpack.ml.trainedModels.modelsList.collapseRow": "Réduire",
     "xpack.ml.trainedModels.modelsList.createdAtHeader": "Créé à",
-    "xpack.ml.trainedModels.modelsList.deleteDisabledTooltip": "Le modèle a des pipelines associés",
     "xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel": "Annuler",
     "xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel": "Supprimer",
     "xpack.ml.trainedModels.modelsList.deleteModelActionLabel": "Supprimer le modèle",

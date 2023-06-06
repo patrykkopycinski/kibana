@@ -8189,8 +8189,6 @@
     "xpack.apm.latencyChartHistory.chartTitle": " レイテンシアラート履歴",
     "xpack.apm.latencyChartHistory.last30days": "過去30日間",
     "xpack.apm.latencyCorrelations.licenseCheckText": "遅延の相関関係を使用するには、Elastic Platinumライセンスのサブスクリプションが必要です。使用すると、パフォーマンスの低下に関連しているフィールドを検出できます。",
-    "xpack.apm.license.betaBadge": "ベータ",
-    "xpack.apm.license.betaTooltipMessage": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.apm.license.button": "トライアルを開始",
     "xpack.apm.license.title": "無料の 30 日トライアルを開始",
     "xpack.apm.managedTable.errorMessage": "取得できませんでした",

@@ -8188,8 +8188,6 @@
     "xpack.apm.latencyChartHistory.chartTitle": " historique des alertes de latence",
     "xpack.apm.latencyChartHistory.last30days": "30 derniers jours",
     "xpack.apm.latencyCorrelations.licenseCheckText": "Pour utiliser les corrélations de latence, vous devez disposer d'une licence Elastic Platinum. Elle vous permettra de découvrir quels champs sont corrélés à de faibles performances.",
-    "xpack.apm.license.betaBadge": "Version bêta",
-    "xpack.apm.license.betaTooltipMessage": "Cette fonctionnalité est actuellement en version bêta. Si vous rencontrez des bugs ou si vous souhaitez apporter des commentaires, ouvrez un ticket de problème ou visitez notre forum de discussion.",
     "xpack.apm.license.button": "Commencer l'essai",
     "xpack.apm.license.title": "Commencer un essai gratuit de 30 jours",
     "xpack.apm.managedTable.errorMessage": "Impossible de récupérer",

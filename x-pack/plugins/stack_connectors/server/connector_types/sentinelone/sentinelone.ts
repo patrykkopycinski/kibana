@@ -18,21 +18,10 @@ import type {
   SentinelOneRunActionParams,
   SentinelOneRunActionResponse,
   SentinelOneStoriesActionResponse,
-  SentinelOneWebhooksActionParams,
-  SentinelOneWebhooksActionResponse,
   SentinelOneWebhookObject,
-  SentinelOneStoryObject,
 } from '../../../common/sentinelone/types';
-import {
-  SentinelOneStoriesApiResponseSchema,
-  SentinelOneWebhooksApiResponseSchema,
-  SentinelOneRunApiResponseSchema,
-} from './api_schema';
-import type {
-  SentinelOneBaseApiResponse,
-  SentinelOneStoriesApiResponse,
-  SentinelOneWebhooksApiResponse,
-} from './api_schema';
+import { SentinelOneStoriesApiResponseSchema, SentinelOneRunApiResponseSchema } from './api_schema';
+import type { SentinelOneBaseApiResponse, SentinelOneStoriesApiResponse } from './api_schema';
 import { API_MAX_RESULTS, SUB_ACTION } from '../../../common/sentinelone/constants';
 
 export const API_PATH = '/web/api/v2.1';

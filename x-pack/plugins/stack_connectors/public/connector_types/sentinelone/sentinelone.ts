@@ -11,11 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  SENTINELONE_CONNECTOR_ID,
-  SENTINELONE_TITLE,
-  SUB_ACTION,
-} from '../../../common/sentinelone/constants';
+import { SENTINELONE_CONNECTOR_ID, SENTINELONE_TITLE } from '../../../common/sentinelone/constants';
 import type { SentinelOneConfig, SentinelOneSecrets } from '../../../common/sentinelone/types';
 import type { SentinelOneExecuteActionParams } from './types';
 

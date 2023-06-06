@@ -10,7 +10,6 @@ import {
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCodeBlock,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,

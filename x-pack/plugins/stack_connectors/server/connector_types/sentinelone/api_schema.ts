@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { SentinelOneStoryObjectSchema } from '../../../common/sentinelone/schema';
 
 // SentinelOne response base schema
 export const SentinelOneBaseApiResponseSchema = schema.object({}, { unknowns: 'ignore' });

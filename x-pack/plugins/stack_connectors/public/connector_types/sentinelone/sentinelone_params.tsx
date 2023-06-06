@@ -10,15 +10,12 @@ import { find } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHighlight,
-  EuiSpacer,
 } from '@elastic/eui';
 import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {

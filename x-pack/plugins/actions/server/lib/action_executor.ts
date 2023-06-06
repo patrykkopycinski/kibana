@@ -314,6 +314,10 @@ export class ActionExecutor {
           );
         }
 
+        if (result.data) {
+          event.data = result.data;
+        }
+
         eventLogger.logEvent(event);
         const { error, ...resultWithoutError } = result;
         return resultWithoutError;

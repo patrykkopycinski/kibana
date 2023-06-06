@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const EVENT_LOG_PROVIDER = 'actions';
-export const EVENT_LOG_ACTIONS = {
-  execute: 'execute',
-  executeStart: 'execute-start',
-  executeTimeout: 'execute-timeout',
-  response: 'response',
-};
+export { getConnectorType as getSentinelOneConnectorType } from './sentinelone';

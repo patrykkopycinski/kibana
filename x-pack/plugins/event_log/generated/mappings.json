@@ -1,6 +1,10 @@
 {
     "dynamic": "false",
     "properties": {
+        "data": {
+          "type": "object",
+          "enabled": false
+        },
         "@timestamp": {
             "type": "date"
         },

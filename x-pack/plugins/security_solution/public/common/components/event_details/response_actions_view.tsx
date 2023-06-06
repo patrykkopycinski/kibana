@@ -32,6 +32,8 @@ export const useResponseActionsView = ({
 }) => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
+  console.error('duao', rawEventData, responseActionsEnabled);
+
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -39,15 +41,18 @@ export const useResponseActionsView = ({
   const responseActions =
     expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
 
-  const shouldEarlyReturn = !ecsData || !responseActionsEnabled || !responseActions;
+  const shouldEarlyReturn = !ecsData || !responseActionsEnabled; // || !responseActions;
   const alertId = rawEventData?._id ?? '';
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
+      executionIds: [rawEventData?.fields['kibana.alert.rule.execution.uuid'][0]],
     },
     { enabled: !shouldEarlyReturn }
   );
+
+  console.error('automatedList', automatedList, isFetched);
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 

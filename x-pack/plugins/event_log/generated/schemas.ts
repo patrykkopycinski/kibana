@@ -29,6 +29,7 @@ export type IEvent = DeepPartial<DeepWriteable<IValidatedEvent>>;
 export const EventSchema = schema.maybe(
   schema.object({
     '@timestamp': ecsDate(),
+    data: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     message: ecsString(),
     tags: ecsStringMulti(),
     ecs: schema.maybe(

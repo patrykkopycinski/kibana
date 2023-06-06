@@ -20,6 +20,8 @@ export const buildActionsQuery = ({
   executionIds,
   sort,
 }: ActionRequestOptions): ISearchRequestParams => {
+  console.error('buildActionsQuery', alertIds, executionIds, sort);
+
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX, KIBANA_EVENTS_LOGS_INDEX],
@@ -29,7 +31,8 @@ export const buildActionsQuery = ({
         bool: {
           minimum_should_match: 2,
           should: [
-            { terms: { 'event.kind': ['action'] } },
+            { term: { 'event.kind': 'action' } },
+            { term: { 'event.action': 'execute' } },
             { terms: { 'kibana.alert.rule.execution.uuid': executionIds } },
             { term: { type: 'INPUT_ACTION' } },
             { terms: { alert_ids: alertIds } },
@@ -48,6 +51,8 @@ export const buildActionsQuery = ({
       ],
     },
   };
+
+  console.log(JSON.stringify(dslQuery, null, 2));
 
   return dslQuery;
 };

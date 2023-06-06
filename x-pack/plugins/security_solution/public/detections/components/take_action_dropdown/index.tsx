@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -55,6 +55,7 @@ export interface TakeActionDropdownProps {
   refetch: (() => void) | undefined;
   refetchFlyoutData: () => Promise<void>;
   onOsqueryClick: (id: string) => void;
+  onSentinelClick: (id: string) => void;
   scopeId: string;
 }
 
@@ -73,6 +74,7 @@ export const TakeActionDropdown = React.memo(
     refetchFlyoutData,
     onOsqueryClick,
     scopeId,
+    onSentinelClick,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
     const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
@@ -237,6 +239,13 @@ export const TakeActionDropdown = React.memo(
       refetch,
     });
 
+    console.error('data', detailsData, ecsData);
+
+    const handleSentinelClick = useCallback(() => {
+      onSentinelClick();
+      setIsPopoverOpen(false);
+    }, [onSentinelClick, setIsPopoverOpen]);
+
     const items: React.ReactElement[] = useMemo(
       () => [
         ...(tGridEnabled ? addToCaseActionItems : []),
@@ -245,8 +254,21 @@ export const TakeActionDropdown = React.memo(
         ...endpointResponseActionsConsoleItems,
         ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
+        ...(ecsData?.event?.module?.[0] === 'sentinel_one'
+          ? [
+              <EuiContextMenuItem
+                key="sentinel-action-item"
+                onClick={handleSentinelClick}
+                size={'s'}
+              >
+                <>{'Respond with SentinelOne'}</>
+              </EuiContextMenuItem>,
+            ]
+          : []),
       ],
       [
+        ecsData,
+        handleSentinelClick,
         tGridEnabled,
         addToCaseActionItems,
         alertsActionItems,

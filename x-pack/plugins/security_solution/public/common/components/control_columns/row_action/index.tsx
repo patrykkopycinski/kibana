@@ -96,6 +96,8 @@ const RowActionComponent = ({
       },
     };
 
+    console.error('isSecurityFlyoutEnabled', isSecurityFlyoutEnabled);
+
     if (isSecurityFlyoutEnabled) {
       openFlyout({
         right: {

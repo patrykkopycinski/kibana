@@ -125,6 +125,8 @@ export abstract class SubActionConnector<Config, Secrets> {
         headers: this.getHeaders(headers),
       });
 
+      console.log('xxx', normalizedURL);
+
       this.validateResponse(responseSchema, res.data);
 
       return res;

@@ -6,11 +6,22 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCodeBlock,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { find } from 'lodash/fp';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isActiveTimeline } from '../../../../../helpers';
 import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
@@ -47,6 +58,32 @@ interface AddExceptionModalWrapperData {
   ruleRuleId: string;
   ruleName: string;
 }
+
+const SentinelFlyout = ({ onClose, ecsData }) => {
+  const kibana = useKibana();
+
+  console.error('kibana', kibana);
+
+  return (
+    <EuiFlyout onClose={onClose} size="s">
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>A typical flyout</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiText>
+          <p>
+            For consistency across the many flyouts, please utilize the following code for
+            implementing the flyout with a header.
+          </p>
+        </EuiText>
+        {/* {kibana.services.triggersActionsUi.getActionForm({})} */}
+        {/* <EuiCodeBlock language="html">{htmlCode}</EuiCodeBlock> */}
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
 
 export const FlyoutFooterComponent = React.memo(
   ({
@@ -137,6 +174,12 @@ export const FlyoutFooterComponent = React.memo(
       null | string
     >(null);
 
+    const [isSentinelFlyoutOpen, setSentinelFlyoutOpen] = useState<boolean>(false);
+
+    const handleSentinelClick = useCallback(() => setSentinelFlyoutOpen(true), []);
+
+    const handleCloseSentinelFlyout = useCallback(() => setSentinelFlyoutOpen(false), []);
+
     const closeOsqueryFlyout = useCallback(() => {
       setOsqueryFlyoutOpenWithAgentId(null);
     }, [setOsqueryFlyoutOpenWithAgentId]);
@@ -165,6 +208,7 @@ export const FlyoutFooterComponent = React.memo(
                   indexName={expandedEvent.indexName}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+                  onSentinelClick={handleSentinelClick}
                 />
               )}
             </EuiFlexItem>
@@ -196,6 +240,9 @@ export const FlyoutFooterComponent = React.memo(
             onClose={closeOsqueryFlyout}
             ecsData={detailsEcsData}
           />
+        )}
+        {isSentinelFlyoutOpen && detailsEcsData != null && (
+          <SentinelFlyout ecsData={detailsEcsData} onClose={handleCloseSentinelFlyout} />
         )}
       </>
     );

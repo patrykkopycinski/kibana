@@ -55,16 +55,16 @@ export const TOKEN_REQUIRED = i18n.translate(
 );
 
 // params form
-export const STORY_LABEL = i18n.translate(
+export const ASC = i18n.translate(
   'xpack.stackConnectors.security.sentinelone.params.storyFieldLabel',
   {
-    defaultMessage: 'SentinelOne Story',
+    defaultMessage: 'SentinelOne Script',
   }
 );
 export const STORY_HELP = i18n.translate(
   'xpack.stackConnectors.security.sentinelone.params.storyHelp',
   {
-    defaultMessage: 'The SentinelOne story to send the events to',
+    defaultMessage: 'The SentinelOne script to send the events to',
   }
 );
 export const STORY_PLACEHOLDER = i18n.translate(
@@ -76,7 +76,7 @@ export const STORY_PLACEHOLDER = i18n.translate(
 export const STORY_ARIA_LABEL = i18n.translate(
   'xpack.stackConnectors.security.sentinelone.params.storyFieldAriaLabel',
   {
-    defaultMessage: 'Select a SentinelOne story',
+    defaultMessage: 'Select a SentinelOne script',
   }
 );
 export const STORY_PUBLISHED_BADGE_TEXT = i18n.translate(

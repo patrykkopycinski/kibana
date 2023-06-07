@@ -13457,7 +13457,6 @@
     "xpack.enterpriseSearch.content.searchApplication.api.step2.copyEndpointDescription": "Utilisez cette URL pour accéder aux points de terminaison d'API de votre application de recherche.",
     "xpack.enterpriseSearch.content.searchApplication.api.step2.title": "Copier le point de terminaison de votre application de recherche",
     "xpack.enterpriseSearch.content.searchApplication.api.step3.title": "Découvrir comment appeler vos points de terminaison",
-    "xpack.enterpriseSearch.content.searchApplications.connect.apiTabTitle": "API",
     "xpack.enterpriseSearch.content.searchApplications.connect.pageTitle": "Connecter",
     "xpack.enterpriseSearch.content.searchApplications.content.indicesTabTitle": "Index",
     "xpack.enterpriseSearch.content.searchApplications.content.pageTitle": "Contenu",

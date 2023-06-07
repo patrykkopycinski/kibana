@@ -12932,8 +12932,6 @@
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text": "Oui, retirer cet index",
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title": "Supprimer cet index de l'application de recherche",
     "xpack.enterpriseSearch.content.engine.indices.searchPlaceholder": "Filtrer les index",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description": "Certaines données peuvent être inaccessibles à partir de cette application de recherche. Recherchez les opérations en attente ou les erreurs sur les index concernés, ou supprimez les index qui ne doivent plus être utilisés par cette application de recherche.",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title": "Certains de vos index ne sont pas disponibles.",
     "xpack.enterpriseSearch.content.engine.indicesSelect.docsLabel": "Documents :",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.columnTitle": "Dans tous les index ?",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.moreInfo": "Plus d'infos",

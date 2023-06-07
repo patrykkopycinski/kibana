@@ -12931,8 +12931,6 @@
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.text": "はい。このインデックスを削除します",
     "xpack.enterpriseSearch.content.engine.indices.removeIndexConfirm.title": "このインデックスを検索アプリケーションから削除",
     "xpack.enterpriseSearch.content.engine.indices.searchPlaceholder": "インデックスのフィルター",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.description": "この検索アプリケーションからは一部のデータに接続できない場合があります。影響を受けるインデックスで保留中の処理またはエラーがあるかどうかを確認するか、この検索アプリケーションで使用されないインデックスを削除してください。",
-    "xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title": "一部のインデックスが使用できません。",
     "xpack.enterpriseSearch.content.engine.indicesSelect.docsLabel": "ドキュメント：",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.columnTitle": "すべてのインデックスにありますか？",
     "xpack.enterpriseSearch.content.engine.schema.field_indices.moreInfo": "詳細",

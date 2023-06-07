@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
+import type {
+  ExpandedEventFieldsObject,
+  RawEventData,
+} from '../../../../common/types/response_actions';
 import { ResponseActionsResults } from '../response_actions/response_actions_results';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { useGetAutomatedActionList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
@@ -16,51 +22,63 @@ import { EventsViewType } from './event_details';
 import * as i18n from './translations';
 
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import type { ExpandedEventFieldsObject, RawEventData } from './types';
 
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
 `;
 
-export const useResponseActionsView = ({
+export const useResponseActionsView = <T extends object = JSX.Element>({
   rawEventData,
   ecsData,
 }: {
-  ecsData?: Ecs;
-  rawEventData: RawEventData;
-}) => {
+  ecsData?: Ecs | null;
+  rawEventData: SearchHit | undefined;
+}): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
   console.error('duao', rawEventData, responseActionsEnabled);
 
   const expandedEventFieldsObject = rawEventData
-    ? (expandDottedObject(rawEventData.fields) as ExpandedEventFieldsObject)
+    ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
 
-  const responseActions =
-    expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+  // const responseActions =
+  //   expandedEventFieldsObject?.kibana?.alert?.rule?.parameters?.[0].response_actions;
+  const shouldEarlyReturn = !rawEventData || !responseActionsEnabled; // || !responseActions?.length;
 
-  const shouldEarlyReturn = !ecsData || !responseActionsEnabled; // || !responseActions;
   const alertId = rawEventData?._id ?? '';
 
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
-      executionIds: [rawEventData?.fields['kibana.alert.rule.execution.uuid'][0]],
+      executionIds: [rawEventData?.fields?.['kibana.alert.rule.execution.uuid'][0]],
     },
     { enabled: !shouldEarlyReturn }
   );
 
-  console.error('automatedList', automatedList, isFetched);
+  if (shouldEarlyReturn) {
+    return;
+  }
 
   const ruleName = expandedEventFieldsObject?.kibana?.alert?.rule?.name;
 
-  const totalItemCount = useMemo(() => automatedList?.items?.length ?? 0, [automatedList]);
+  const totalItemCount = automatedList?.items?.length ?? 0;
 
-  if (shouldEarlyReturn || !responseActions?.length) {
-    return;
-  }
+  const content = (
+    <>
+      <EuiSpacer size="s" />
+      <TabContentWrapper data-test-subj="responseActionsViewWrapper">
+        {isFetched && totalItemCount && automatedList?.items.length ? (
+          <ResponseActionsResults
+            actions={automatedList.items}
+            ruleName={ruleName}
+            ecsData={ecsData}
+          />
+        ) : null}
+      </TabContentWrapper>
+    </>
+  );
 
   return {
     id: EventsViewType.responseActionsView,
@@ -71,19 +89,6 @@ export const useResponseActionsView = ({
         {totalItemCount}
       </EuiNotificationBadge>
     ),
-    content: (
-      <>
-        <EuiSpacer size="s" />
-        <TabContentWrapper data-test-subj="responseActionsViewWrapper">
-          {isFetched && totalItemCount && automatedList?.items.length ? (
-            <ResponseActionsResults
-              actions={automatedList.items}
-              ruleName={ruleName}
-              ecsData={ecsData}
-            />
-          ) : null}
-        </TabContentWrapper>
-      </>
-    ),
+    content,
   };
 };

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import React, { useCallback } from 'react';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
+import type { Ecs } from '@kbn/cases-plugin/common';
+import { EuiSpacer } from '@elastic/eui';
 import { EndpointResponseActionResults } from './endpoint_action_results';
 import type {
   LogsEndpointAction,
@@ -18,59 +19,53 @@ import { useKibana } from '../../lib/kibana';
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
   ruleName?: string[];
-  ecsData: Ecs;
+  ecsData?: Ecs | null;
 }
 
 export const ResponseActionsResults = React.memo(
   ({ actions, ruleName, ecsData }: ResponseActionsResultsProps) => {
     const {
       services: {
-        osquery,
-        triggersActionsUi: { actionTypeRegistry },
+        osquery: { OsqueryResult },
       },
     } = useKibana();
-    const { OsqueryResult } = osquery;
+
+    const getAction = useCallback(
+      (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {
+        if (isOsquery(action)) {
+          const actionId = action.action_id;
+          const startDate = action['@timestamp'];
+
+          return (
+            <OsqueryResult
+              key={actionId}
+              actionId={actionId}
+              startDate={startDate}
+              ruleName={ruleName}
+              ecsData={ecsData}
+            />
+          );
+        }
+        if (isEndpoint(action)) {
+          return (
+            <EndpointResponseActionResults action={action} key={action.EndpointActions.action_id} />
+          );
+        }
+        return null;
+      },
+      [OsqueryResult, ecsData, ruleName]
+    );
 
     return (
       <>
         {actions.map((action) => {
-          if (isOsquery(action)) {
-            const actionId = action.action_id;
-            const startDate = action['@timestamp'];
-
-            return (
-              <OsqueryResult
-                key={actionId}
-                actionId={actionId}
-                startDate={startDate}
-                ruleName={ruleName}
-                ecsData={ecsData}
-              />
-            );
-          }
-          if (isEndpoint(action)) {
-            return (
-              <EndpointResponseActionResults
-                action={action}
-                key={action.EndpointActions.action_id}
-              />
-            );
-          }
-          if (action.event?.kind === 'action') {
-            const actionTypeId = action.kibana.saved_objects.find(
-              (so) => so.type === 'action'
-            ).type_id;
-
-            const res = actionTypeRegistry.get(actionTypeId);
-
-            const ResolvedCOmponent = res.actionResultsFields;
-            return (
-              <Suspense fallback={<span>Loading...</span>}>
-                <ResolvedCOmponent action={action} />
-              </Suspense>
-            );
-          }
-          return null;
+          return (
+            <>
+              <EuiSpacer size="s" />
+              {getAction(action)}
+              <EuiSpacer size="s" />
+            </>
+          );
         })}
       </>
     );

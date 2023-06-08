@@ -18498,7 +18498,6 @@
     "xpack.infra.hostsViewPage.table.averageTxColumnHeader": "TX (moy.)",
     "xpack.infra.hostsViewPage.table.diskLatencyColumnHeader": "Latence du disque (moy.)",
     "xpack.infra.hostsViewPage.table.nameColumnHeader": "Nom",
-    "xpack.infra.hostsViewPage.table.operatingSystemColumnHeader": "Système d'exploitation",
     "xpack.infra.hostsViewPage.table.toggleDialogWithDetails": "Afficher/Masquer les détails de la boîte de dialogue",
     "xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.active": "Actif",
     "xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.legend": "Filtrer par",

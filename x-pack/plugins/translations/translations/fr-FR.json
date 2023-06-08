@@ -21188,7 +21188,6 @@
     "xpack.lens.xyChart.axisSide.top": "Haut",
     "xpack.lens.xyChart.bottomAxisDisabledHelpText": "Ce paramètre s'applique uniquement lorsque l'axe du bas est activé.",
     "xpack.lens.xyChart.bottomAxisLabel": "Axe du bas",
-    "xpack.lens.xyChart.curveStyleLabel": "Courbes",
     "xpack.lens.xyChart.defaultAnnotationLabel": "Événement",
     "xpack.lens.xyChart.defaultRangeAnnotationLabel": "Plage d'événements",
     "xpack.lens.xyChart.endValuesLabel": "Valeurs de fin",

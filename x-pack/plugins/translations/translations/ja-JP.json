@@ -21188,7 +21188,6 @@
     "xpack.lens.xyChart.axisSide.top": "トップ",
     "xpack.lens.xyChart.bottomAxisDisabledHelpText": "この設定は、下の軸が有効であるときにのみ適用されます。",
     "xpack.lens.xyChart.bottomAxisLabel": "下の軸",
-    "xpack.lens.xyChart.curveStyleLabel": "曲線",
     "xpack.lens.xyChart.defaultAnnotationLabel": "イベント",
     "xpack.lens.xyChart.defaultRangeAnnotationLabel": "イベント範囲",
     "xpack.lens.xyChart.endValuesLabel": "終了値",

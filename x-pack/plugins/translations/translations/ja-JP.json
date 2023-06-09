@@ -12979,7 +12979,6 @@
     "xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title": "検索アプリケーションの名前を指定",
     "xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title": "インデックスを選択",
     "xpack.enterpriseSearch.content.engines.createEngine.submit": "作成",
-    "xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.description": "最初の検索アプリケーションの作成を説明します。",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.title": "最初の検索アプリケーションを作成",
     "xpack.enterpriseSearch.content.engines.indices.addIndicesFlyout.updateError.title": "エンジンの更新エラー",

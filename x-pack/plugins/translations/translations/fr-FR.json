@@ -12980,7 +12980,6 @@
     "xpack.enterpriseSearch.content.engines.createEngine.nameEngine.title": "Nommer votre application de recherche",
     "xpack.enterpriseSearch.content.engines.createEngine.selectIndices.title": "Sélectionner les index",
     "xpack.enterpriseSearch.content.engines.createEngine.submit": "Créer",
-    "xpack.enterpriseSearch.content.engines.createEngine.technicalPreviewCallOut.title": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale.",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.description": "Découvrez comment créer votre première application de recherche.",
     "xpack.enterpriseSearch.content.engines.enginesList.empty.title": "Créer votre première application de recherche",
     "xpack.enterpriseSearch.content.engines.indices.addIndicesFlyout.updateError.title": "Erreur lors de la mise à jour du moteur",

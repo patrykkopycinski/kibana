@@ -21219,7 +21219,6 @@
     "xpack.lens.xyChart.iconSelect.starLabel": "Étoile",
     "xpack.lens.xyChart.iconSelect.tagIconLabel": "Balise",
     "xpack.lens.xyChart.iconSelect.triangleIconLabel": "Triangle",
-    "xpack.lens.xyChart.ignoreGlobalFilters": "Utiliser les filtres globaux",
     "xpack.lens.xyChart.layerAnnotation": "Annotation",
     "xpack.lens.xyChart.layerAnnotationsIgnoreTitle": "Calques ignorant les filtres globaux",
     "xpack.lens.xyChart.layerAnnotationsLabel": "Annotations",

@@ -13142,7 +13142,6 @@
     "xpack.enterpriseSearch.content.indices.configurationConnector.warning.description": "Si vous synchronisez au moins un document avant d'avoir finalisé votre client connecteur, vous devrez recréer votre index de recherche.",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.error": "Le format JSON n'est pas valide",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.title": "Règles avancées",
-    "xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description": "Votre connecteur est configuré et déployé. Configurez une synchronisation unique en cliquant sur le bouton Sync, ou activez un calendrier de synchronisation récurrent. Le connecteur utilise le fuseau horaire UTC. ",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.error.title": "Examinez la configuration de votre connecteur pour voir si des erreurs ont été signalées.",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.button.label": "Configurer",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.description": "Configurez et déployez votre connecteur, puis revenez ici pour définir votre calendrier de synchronisation. Ce calendrier déterminera l'intervalle de synchronisation du connecteur avec votre source de données pour les documents mis à jour.",

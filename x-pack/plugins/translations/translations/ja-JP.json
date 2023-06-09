@@ -13141,7 +13141,6 @@
     "xpack.enterpriseSearch.content.indices.configurationConnector.warning.description": "コネクタークライアントを確定する前に、1つ以上のドキュメントを同期した場合、検索インデックスを再作成する必要があります。",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.error": "JSON形式が無効です",
     "xpack.enterpriseSearch.content.indices.connector.syncRules.advancedRules.title": "詳細ルール",
-    "xpack.enterpriseSearch.content.indices.connectorScheduling.configured.description": "コネクターが構成され、デプロイされます。［同期］ボタンをクリックしてワンタイム同期を構成するか、繰り返し同期スケジュールを有効にします。コネクターはタイムゾーンとしてUTCを使用します。",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.error.title": "報告されたエラーのコネクター構成を確認します。",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.button.label": "構成",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.notConnected.description": "コネクターを構成してデプロイし、ここに戻って、同期スケジュールを設定します。このスケジュールは、コネクターが更新されたドキュメントのデータソースと同期する間隔を指定します。",

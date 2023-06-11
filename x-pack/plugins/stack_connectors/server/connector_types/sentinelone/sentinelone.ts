@@ -8,10 +8,6 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  SentinelOneStoriesActionParamsSchema,
-  SentinelOneRunActionParamsSchema,
-} from '../../../common/sentinelone/schema';
 import type {
   SentinelOneConfig,
   SentinelOneSecrets,
@@ -21,8 +17,8 @@ import type {
   SentinelOneWebhookObject,
 } from '../../../common/sentinelone/types';
 import { SentinelOneBaseApiResponseSchema } from './api_schema';
-import type { SentinelOneBaseApiResponse, SentinelOneStoriesApiResponse } from './api_schema';
-import { API_MAX_RESULTS, SUB_ACTION } from '../../../common/sentinelone/constants';
+import type { SentinelOneBaseApiResponse } from './api_schema';
+import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
 export const API_PATH = '/web/api/v2.1';
 export const WEBHOOK_PATH = '/webhook';

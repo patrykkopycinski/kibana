@@ -239,8 +239,6 @@ export const TakeActionDropdown = React.memo(
       refetch,
     });
 
-    console.error('data', detailsData, ecsData);
-
     const handleSentinelClick = useCallback(() => {
       onSentinelClick();
       setIsPopoverOpen(false);
@@ -254,7 +252,8 @@ export const TakeActionDropdown = React.memo(
         ...endpointResponseActionsConsoleItems,
         ...(osqueryAvailable ? [osqueryActionItem] : []),
         ...investigateInTimelineActionItems,
-        ...(ecsData?.event?.module?.[0] === 'sentinel_one'
+        ...(ecsData?.event?.module?.[0] === 'sentinel_one' ||
+        ecsData?.host?.name?.[0] === 'patrykkopycinski-dev-8509'
           ? [
               <EuiContextMenuItem
                 key="sentinel-action-item"

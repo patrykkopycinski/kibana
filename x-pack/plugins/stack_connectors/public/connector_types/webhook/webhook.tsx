@@ -43,6 +43,5 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),
     actionParamsFields: lazy(() => import('./webhook_params')),
-    actionResultsFields: lazy(() => import('./webhook_results')),
   };
 }

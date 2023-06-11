@@ -15,13 +15,11 @@ import {
   KIBANA_EVENTS_LOGS_INDEX,
 } from '../../../../../../common/endpoint/constants';
 
-export const buildActionsQuery = ({
+export const buildResponseActionsQuery = ({
   alertIds,
   executionIds,
   sort,
 }: ActionRequestOptions): ISearchRequestParams => {
-  console.error('buildActionsQuery', alertIds, executionIds, sort);
-
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX, KIBANA_EVENTS_LOGS_INDEX],
@@ -52,8 +50,6 @@ export const buildActionsQuery = ({
       ],
     },
   };
-
-  console.log(JSON.stringify(dslQuery, null, 2));
 
   return dslQuery;
 };

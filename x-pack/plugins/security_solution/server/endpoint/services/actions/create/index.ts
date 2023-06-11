@@ -144,7 +144,6 @@ export const actionCreateService = (
       agent: {
         id: payload.endpoint_ids,
       },
-      hosts: payload.hosts,
       EndpointActions: {
         action_id: actionID,
         expiration: moment().add(2, 'weeks').toISOString(),

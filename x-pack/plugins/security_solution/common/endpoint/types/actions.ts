@@ -122,7 +122,6 @@ export interface LogsEndpointAction {
   agent: {
     id: string | string[];
   };
-  hosts: Record<string, { name: string }> | undefined;
   EndpointActions: EndpointActionFields & ActionRequestFields;
   error?: EcsError;
   user: {

@@ -51,6 +51,7 @@ export const TestConnectorForm = ({
   isExecutingAction,
   actionTypeRegistry,
 }: TestConnectorFormProps) => {
+  console.error('actionParams', actionParams, JSON.stringify(connector, null, 2));
   const [actionErrors, setActionErrors] = useState<IErrorObject>({});
   const [hasErrors, setHasErrors] = useState<boolean>(false);
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
@@ -159,7 +160,7 @@ export const TestConnectorForm = ({
           result?.status === 'ok' ? (
             <SuccessfulExecution />
           ) : (
-            <FailedExecussion executionResult={result} />
+            <FailedExecution executionResult={result} />
           )
         ),
         getOrElse(() => <AwaitingExecution />)
@@ -203,7 +204,7 @@ const SuccessfulExecution = () => (
   </EuiCallOut>
 );
 
-const FailedExecussion = ({
+const FailedExecution = ({
   executionResult,
 }: {
   executionResult: ActionTypeExecutorResult<unknown> | undefined;

@@ -181,6 +181,7 @@ export interface BulkEditResponse {
 export enum ActionConnectorMode {
   Test = 'test',
   ActionForm = 'actionForm',
+  Manual = 'manual',
 }
 
 export interface BulkOperationResponse {

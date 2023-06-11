@@ -25,10 +25,9 @@ interface ResponseActionsResultsProps {
 export const ResponseActionsResults = React.memo(
   ({ actions, ruleName, ecsData }: ResponseActionsResultsProps) => {
     const {
-      services: {
-        osquery: { OsqueryResult },
-      },
+      services: { osquery },
     } = useKibana();
+    const { OsqueryResult } = osquery;
 
     const getAction = useCallback(
       (action: LogsEndpointActionWithHosts | LogsOsqueryAction) => {

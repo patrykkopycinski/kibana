@@ -96,7 +96,6 @@ export const indexEndpointAndFleetActionsForHost = async (
       agent: {
         id: [agentId],
       },
-      hosts: undefined,
       '@timestamp': action['@timestamp'],
       user: {
         id: action.user_id,

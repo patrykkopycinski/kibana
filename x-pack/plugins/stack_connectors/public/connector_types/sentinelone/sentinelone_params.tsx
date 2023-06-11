@@ -6,27 +6,30 @@
  */
 
 // import yargs from 'yargs-parser';
-import { find } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import {
   EuiBadge,
-  EuiComboBox,
+  EuiButtonIcon,
   EuiComboBoxOptionOption,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHighlight,
+  EuiInMemoryTable,
+  EuiScreenReaderOnly,
+  EuiSuperSelect,
 } from '@elastic/eui';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  JsonEditorWithMessageVariables,
-  useSubAction,
-  useKibana,
+  ActionConnectorMode,
+  ActionParamsProps,
+  TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { Random, EuiBasicTableColumn, EuiSearchBarProps, EuiLink } from '@elastic/eui';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import type {
   SentinelOneScriptObject,
-  SentinelOneWebhookObject,
   // SentinelOneWebhooksActionParams,
   SentinelOneScriptsActionResponse,
   // SentinelOneWebhooksActionResponse,
@@ -36,15 +39,23 @@ import type { SentinelOneExecuteActionParams, SentinelOneExecuteSubActionParams 
 import * as i18n from './translations';
 
 type ScriptOption = EuiComboBoxOptionOption<SentinelOneScriptObject>;
-type WebhookOption = EuiComboBoxOptionOption<SentinelOneWebhookObject>;
 
-const createOption = <T extends SentinelOneScriptObject | SentinelOneWebhookObject>(
-  item: T
-): EuiComboBoxOptionOption<T> => ({
-  key: item.id.toString(),
-  value: item,
-  label: item.name,
-});
+interface User {
+  id: number;
+  firstName: string | null | undefined;
+  lastName: string;
+  github: string;
+  dateOfBirth: Date;
+  online: boolean;
+  location: {
+    city: string;
+    country: string;
+  };
+}
+
+const random = new Random();
+
+const noItemsFoundMsg = 'No users match search criteria';
 
 const renderScript = (
   { label, value }: ScriptOption,
@@ -65,16 +76,13 @@ const renderScript = (
 
 const SentinelOneParamsFields: React.FunctionComponent<
   ActionParamsProps<SentinelOneExecuteActionParams>
-> = ({ actionConnector, actionParams, editAction, index, executionMode, errors }) => {
+> = ({ actionConnector, actionParams, editAction, index, executionMode, errors, ...rest }) => {
   console.error('actionParams', actionParams);
   const { toasts } = useKibana().notifications;
   const { subAction, subActionParams } = actionParams;
-  const { body, webhookUrl } = subActionParams ?? {};
+  const [selected, setSelected] = useState<User | undefined>();
 
   const [connectorId, setConnectorId] = useState<string | undefined>(actionConnector?.id);
-  const [selectedScriptOption, setSelectedScriptOption] = useState<
-    ScriptOption | null | undefined
-  >();
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
@@ -84,12 +92,6 @@ const SentinelOneParamsFields: React.FunctionComponent<
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTest, subAction]);
-
-  if (connectorId !== actionConnector?.id) {
-    // Script (and webhook) reset needed before requesting with a different connectorId
-    setSelectedScriptOption(null);
-    setConnectorId(actionConnector?.id);
-  }
 
   const editSubActionParams = useCallback(
     (params: SentinelOneExecuteSubActionParams) => {
@@ -109,108 +111,190 @@ const SentinelOneParamsFields: React.FunctionComponent<
 
   console.error('remoteScripts', remoteScripts);
 
-  const scriptsOptions = useMemo(
-    () =>
-      remoteScripts?.map((item) => ({
-        key: item.id.toString(),
-        id: item.id,
-        label: item.scriptName,
-      })) ?? [],
-    [remoteScripts]
-  );
-
   useEffect(() => {
     if (scriptsError) {
       toasts.danger({ title: i18n.STORIES_ERROR, body: scriptsError.message });
     }
   }, [toasts, scriptsError]);
 
-  // useEffect(() => {
-  //   if (selectedScriptOption === undefined && webhook?.scriptId && scripts) {
-  //     // Set the initial selected script option from saved scriptId when scripts are loaded
-  //     const selectedScript = remoteScripts.find(({ id }) => id === webhook.scriptId);
-  //     if (selectedScript) {
-  //       setSelectedScriptOption(createOption(selectedScript));
-  //     } else {
-  //       toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
-  //       editSubActionParams({ webhook: undefined });
-  //     }
-  //   }
-  // }, [selectedScriptOption, webhook?.scriptId, remoteScripts, toasts, editSubActionParams]);
+  const pagination = {
+    initialPageSize: 10,
+    pageSizeOptions: [10, 20, 50],
+  };
 
-  const selectedScriptOptions = useMemo(
-    () => (selectedScriptOption ? [selectedScriptOption] : []),
-    [selectedScriptOption]
-  );
-
-  const selectedScriptArguments = useMemo(
-    () => {
-      const instructions = find(remoteScripts, { id: selectedScriptOption?.id })?.inputInstructions;
-
-      // const args =
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
     },
-    // () => yargs(find(remoteScripts, { id: selectedScriptOption?.id }?.inputInstructions).argv),
-    [remoteScripts, selectedScriptOption?.id]
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'location',
+        name: 'Location',
+        multiSelect: false,
+        options: [
+          {
+            value: 'Windows',
+          },
+          {
+            value: 'macos',
+          },
+          {
+            value: 'linux',
+          },
+        ],
+      },
+    ],
+  };
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
   );
 
-  const onChangeScript = useCallback(([selected]: ScriptOption[]) => {
-    setSelectedScriptOption(selected ?? null);
-  }, []);
+  const toggleDetails = (user: User) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
-  // console.error(
-  //   'selectedScriptOption',
-  //   selectedScriptOption,
-  //   find(remoteScripts, { id: selectedScriptOption?.id }),
-  //   selectedScriptArguments
-  // );
+    if (itemIdToExpandedRowMapValues[user.id]) {
+      delete itemIdToExpandedRowMapValues[user.id];
+    } else {
+      itemIdToExpandedRowMapValues[user.id] = <>dupa true</>;
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
+  const columns: Array<EuiBasicTableColumn<User>> = [
+    {
+      field: 'scriptName',
+      name: 'Script name',
+    },
+    {
+      field: 'scriptType',
+      name: 'Script type',
+    },
+    {
+      field: 'osTypes',
+      name: 'OS types',
+    },
+    {
+      actions: [
+        {
+          name: 'Choose',
+          description: 'Choose this script',
+          isPrimary: true,
+          onClick: (item) => {
+            setSelected(item);
+            editSubActionParams({ body: item.inputInstructions });
+          },
+        },
+      ],
+    },
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand rows</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (user: User) => {
+        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(user)}
+            aria-label={itemIdToExpandedRowMapValues[user.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMapValues[user.id] ? 'arrowDown' : 'arrowRight'}
+          />
+        );
+      },
+    },
+  ];
+
+  const actionTypeOptions = [
+    {
+      value: 'killProcess',
+      inputDisplay: 'Kill process',
+    },
+    {
+      value: 'isolateAgent',
+      inputDisplay: 'Isolate agent',
+    },
+    {
+      value: 'releaseAgent',
+      inputDisplay: 'Release agent',
+    },
+    {
+      value: 'getFile',
+      inputDisplay: 'Get file',
+      disabled: true,
+    },
+    {
+      value: 'executeScript',
+      inputDisplay: 'Execute script',
+    },
+  ];
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          error={errors.script}
-          isInvalid={!!errors.script?.length && selectedScriptOption !== undefined}
-          label={i18n.STORY_LABEL}
-          helpText={i18n.STORY_HELP}
-        >
-          <EuiComboBox
-            aria-label={i18n.STORY_PLACEHOLDER}
-            placeholder={
-              webhookUrl ? i18n.DISABLED_BY_WEBHOOK_URL_PLACEHOLDER : i18n.STORY_ARIA_LABEL
-            }
-            singleSelection={{ asPlainText: true }}
-            options={scriptsOptions}
-            selectedOptions={selectedScriptOptions}
-            onChange={onChangeScript}
-            isDisabled={isLoadingScripts || !!webhookUrl}
-            isLoading={isLoadingScripts}
-            renderOption={renderScript}
-            fullWidth
-            data-test-subj="sentinelone-scriptSelector"
-          />
-        </EuiFormRow>
+        <EuiSuperSelect
+          options={actionTypeOptions}
+          valueOfSelected={subAction}
+          onChange={(value) => editAction('subAction', value, index)}
+        />
       </EuiFlexItem>
-
-      {isTest && (
-        <EuiFlexItem>
-          <JsonEditorWithMessageVariables
-            paramsProperty={'body'}
-            inputTargetValue={body}
-            label={i18n.BODY_LABEL}
-            aria-label={i18n.BODY_ARIA_LABEL}
-            errors={errors.body as string[]}
-            onDocumentsChange={(json: string) => {
-              editSubActionParams({ body: json });
-            }}
-            onBlur={() => {
-              if (!body) {
-                editSubActionParams({ body: '' });
+      {subAction === 'executeScript' && (
+        <>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              error={errors.script}
+              isInvalid={!!errors.script?.length}
+              label={i18n.STORY_LABEL}
+              labelAppend={
+                selected ? (
+                  <EuiLink onClick={() => setSelected(undefined)}>Change action</EuiLink>
+                ) : null
               }
-            }}
-            data-test-subj="sentinelone-bodyJsonEditor"
-          />
-        </EuiFlexItem>
+            >
+              {selected ? (
+                <EuiFieldText fullWidth value={selected.scriptName} />
+              ) : (
+                <EuiInMemoryTable
+                  items={remoteScripts ?? []}
+                  itemId="id"
+                  loading={isLoadingScripts}
+                  // message={message}
+                  columns={columns}
+                  search={search}
+                  pagination={pagination}
+                  sorting
+                  hasActions
+                  itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                />
+              )}
+            </EuiFormRow>
+          </EuiFlexItem>
+
+          <>
+            {selected && (
+              <EuiFlexItem>
+                <TextAreaWithMessageVariables
+                  index={index}
+                  editAction={editAction}
+                  messageVariables={[]}
+                  paramsProperty={'body'}
+                  label={'Command'}
+                  inputTargetValue={subActionParams?.body ?? undefined}
+                  helpText={
+                    selected?.inputExample ? `Example: ${selected?.inputExample}` : undefined
+                  }
+                />
+              </EuiFlexItem>
+            )}
+          </>
+        </>
       )}
     </EuiFlexGroup>
   );

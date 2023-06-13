@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export { AccessDeniedCallout } from './access_denied';
+export const useMlLicenseInfo = jest.fn(() => {
+  return {
+    isSecurityEnabled: true,
+    hasLicenseExpired: false,
+    isMlEnabled: true,
+    isMinimumLicense: true,
+    isFullLicense: true,
+    isTrialLicense: false,
+    license: {},
+  };
+});

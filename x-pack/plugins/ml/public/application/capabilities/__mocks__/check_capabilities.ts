@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { AccessDeniedCallout } from './access_denied';
+export const usePermissionCheck = jest.fn((arg: string | string[]) => {
+  if (Array.isArray(arg)) {
+    return arg.map((v) => true);
+  }
+  return true;
+});

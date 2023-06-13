@@ -2752,7 +2752,6 @@
     "expressionMetric.functions.metricHelpText": "Affiche un nombre sur une étiquette.",
     "expressionMetric.renderer.metric.displayName": "Indicateur",
     "expressionMetric.renderer.metric.helpDescription": "Présenter un nombre sur une étiquette",
-    "expressionMetricVis.errors.unsupportedColumnFormat": "Expression de visualisation de l'indicateur – Format de colonne non pris en charge : \"{id}\"",
     "expressionMetricVis.trendA11yTitle": "{dataTitle} sur la durée.",
     "expressionMetricVis.function.breakdownBy.help": "La dimension contenant les étiquettes des sous-catégories.",
     "expressionMetricVis.function.color.help": "Fournit une couleur de visualisation statique. Remplacé par la palette.",

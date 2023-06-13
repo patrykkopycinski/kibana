@@ -2752,7 +2752,6 @@
     "expressionMetric.functions.metricHelpText": "ラベルの上に数字を表示します。",
     "expressionMetric.renderer.metric.displayName": "メトリック",
     "expressionMetric.renderer.metric.helpDescription": "ラベルの上に数字をレンダリングします",
-    "expressionMetricVis.errors.unsupportedColumnFormat": "メトリック視覚化式 - サポートされていない列形式：\"{id}\"",
     "expressionMetricVis.trendA11yTitle": "一定時間の{dataTitle}。",
     "expressionMetricVis.function.breakdownBy.help": "サブカテゴリのラベルを含むディメンション。",
     "expressionMetricVis.function.color.help": "静的ビジュアライゼーション色を提供します。パレットで上書きされます。",

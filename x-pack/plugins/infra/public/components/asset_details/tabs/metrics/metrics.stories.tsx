@@ -5,38 +5,28 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
+import type { Meta, Story } from '@storybook/react/types-6-0';
+import { Metrics, type MetricsProps } from './metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { Metadata, MetadataProps } from './metadata';
 import { DecorateWithKibanaContext } from '../../__stories__/decorator';
 
-const stories: Meta<MetadataProps> = {
-  title: 'infra/Asset Details View/Components/Metadata',
+const stories: Meta<MetricsProps> = {
+  title: 'infra/Asset Details View/Components/Metrics',
   decorators: [decorateWithGlobalStorybookThemeProviders, DecorateWithKibanaContext],
-  component: Metadata,
+  component: Metrics,
   args: {
-    currentTimeRange: {
-      from: 1679316685686,
-      to: 1679585836087,
-      interval: '1m',
-    },
+    nodeId: 'host-1',
+    currentTime: 1683630468,
     nodeType: 'host',
-    nodeName: 'host-1',
-    showActionsColumn: false,
   },
 };
 
-const Template: Story<MetadataProps> = (args) => {
-  return <Metadata {...args} />;
+const Template: Story<MetricsProps> = (args) => {
+  return <Metrics {...args} />;
 };
 
 export const Default = Template.bind({});
-
-export const WithActions = Template.bind({});
-WithActions.args = {
-  showActionsColumn: true,
-};
 
 export const NoData = Template.bind({});
 NoData.parameters = {
@@ -49,13 +39,6 @@ export const LoadingState = Template.bind({});
 LoadingState.parameters = {
   apiResponse: {
     mock: 'loading',
-  },
-};
-
-export const ErrorState = Template.bind({});
-ErrorState.parameters = {
-  apiResponse: {
-    mock: 'error',
   },
 };
 

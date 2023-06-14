@@ -19019,7 +19019,6 @@
     "xpack.infra.metrics.alerting.threshold.belowRecovery": "より小",
     "xpack.infra.metrics.alerting.threshold.betweenRecovery": "の間",
     "xpack.infra.metrics.alerting.threshold.customEquation": "カスタム等式",
-    "xpack.infra.metrics.alerting.threshold.defaultActionMessage": "\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\}は状態\\{\\{context.alertState\\}\\}です\n\n理由：\n\\{\\{context.reason\\}\\}\n",
     "xpack.infra.metrics.alerting.threshold.documentCount": "ドキュメントカウント",
     "xpack.infra.metrics.alerting.threshold.errorState": "エラー",
     "xpack.infra.metrics.alerting.threshold.fired": "アラート",

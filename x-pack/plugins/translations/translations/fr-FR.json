@@ -19020,7 +19020,6 @@
     "xpack.infra.metrics.alerting.threshold.belowRecovery": "inférieur à",
     "xpack.infra.metrics.alerting.threshold.betweenRecovery": "entre",
     "xpack.infra.metrics.alerting.threshold.customEquation": "Équation personnalisée",
-    "xpack.infra.metrics.alerting.threshold.defaultActionMessage": "\\{\\{alertName\\}\\} - \\{\\{context.group\\}\\} est à l'état \\{\\{context.alertState\\}\\}\n\nRaison :\n\\{\\{context.reason\\}\\}\n",
     "xpack.infra.metrics.alerting.threshold.documentCount": "Nombre de documents",
     "xpack.infra.metrics.alerting.threshold.errorState": "ERREUR",
     "xpack.infra.metrics.alerting.threshold.fired": "Alerte",

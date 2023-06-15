@@ -7156,7 +7156,6 @@
     "xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel": "Autre compte du document",
     "xpack.aiops.documentCountChart.baselineBadgeLabel": "Référence de base",
     "xpack.aiops.documentCountChart.deviationBadgeLabel": "général",
-    "xpack.aiops.documentCountContent.clearSelectionAriaLabel": "Effacer la sélection",
     "xpack.aiops.explainLogRateSpikes.loadingState.doneMessage": "Terminé.",
     "xpack.aiops.explainLogRateSpikes.loadingState.groupingResults": "Transformation de paires champ/valeur significatives en groupes.",
     "xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData": "Chargement des données d’histogramme.",

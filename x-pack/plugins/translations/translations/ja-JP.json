@@ -7157,7 +7157,6 @@
     "xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel": "他のドキュメントカウント",
     "xpack.aiops.documentCountChart.baselineBadgeLabel": "ベースライン",
     "xpack.aiops.documentCountChart.deviationBadgeLabel": "偏差",
-    "xpack.aiops.documentCountContent.clearSelectionAriaLabel": "選択した項目をクリア",
     "xpack.aiops.explainLogRateSpikes.loadingState.doneMessage": "完了しました。",
     "xpack.aiops.explainLogRateSpikes.loadingState.groupingResults": "重要なフィールドと値のペアをグループに変換しています。",
     "xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData": "ヒストグラムデータを読み込んでいます。",

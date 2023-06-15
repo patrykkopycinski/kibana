@@ -33114,7 +33114,6 @@
     "xpack.securitySolution.responseActionsList.list.expandButton.collapse": "Réduire",
     "xpack.securitySolution.responseActionsList.list.expandButton.expand": "Développer",
     "xpack.securitySolution.responseActionsList.list.filter.actions": "Actions",
-    "xpack.securitySolution.responseActionsList.list.filter.automated": "Automatisé",
     "xpack.securitySolution.responseActionsList.list.filter.clearAll": "Tout effacer",
     "xpack.securitySolution.responseActionsList.list.filter.Hosts": "Hôtes",
     "xpack.securitySolution.responseActionsList.list.filter.statuses": "Statuts",

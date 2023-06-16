@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const FILE_ATTACHMENT_TYPE = '.files';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MiB
-export const MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024; // 10 MiB
-export const MAX_FILES_PER_CASE = 100;
-export const MAX_DELETE_FILES = 50;
+export type LensProps = Pick<TypedLensByValueInput, 'attributes' | 'timeRange'>;

@@ -28,15 +28,17 @@ export const buildResponseActionsQuery = ({
       fields: [{ field: '*' }, { field: 'EndpointActions.*', include_unmapped: true }],
       query: {
         bool: {
-          minimum_should_match: 2,
+          minimum_should_match: 1,
           should: [
-            { term: { 'event.kind': 'action' } },
-            { term: { 'event.action': 'execute' } },
-            { terms: { 'kibana.alert.rule.execution.uuid': executionIds } },
-            { term: { type: 'INPUT_ACTION' } },
+            // { term: { type: 'INPUT_ACTION' } },
             { terms: { alert_ids: alertIds } },
             {
               terms: { 'data.alert_id': alertIds },
+            },
+            {
+              terms: {
+                'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': alertIds,
+              },
             },
           ] as estypes.QueryDslQueryContainer[],
         },
@@ -48,6 +50,11 @@ export const buildResponseActionsQuery = ({
           },
         },
       ],
+      runtime_mappings: {
+        'kibana.action.execution.sentinelone.params.subActionParams.alert_ids': {
+          type: 'keyword' as const,
+        },
+      },
     },
   };
 

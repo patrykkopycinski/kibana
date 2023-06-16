@@ -18,6 +18,52 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
   params,
   variables
 ) => {
+  console.log('renderParameterTemplates');
+  console.log(JSON.stringify(params, null, 2));
+  console.log(JSON.stringify(variables, null, 2));
+
+  if (params?.subAction === 'killProcess') {
+    return {
+      subAction: 'killProcess',
+      subActionParams: {
+        processName: variables.context.alerts[0].process.name,
+        hostname: variables.context.alerts[0].host.hostname,
+        alert_ids: [variables.context.alerts[0]._id],
+      },
+    };
+  }
+
+  if (params?.subAction === 'isolateHost') {
+    return {
+      subAction: 'isolateHost',
+      subActionParams: {
+        hostname: variables.context.alerts[0].host.hostname,
+        alert_ids: [variables.context.alerts[0]._id],
+      },
+    };
+  }
+
+  if (params?.subAction === 'releaseHost') {
+    return {
+      subAction: 'releaseHost',
+      subActionParams: {
+        hostname: variables.context.alerts[0].host.hostname,
+        alert_ids: [variables.context.alerts[0]._id],
+      },
+    };
+  }
+
+  if (params?.subAction === 'executeScript') {
+    return {
+      subAction: 'executeScript',
+      subActionParams: {
+        hostname: variables.context.alerts[0].host.hostname,
+        alert_ids: [variables.context.alerts[0]._id],
+        ...params.subActionParams,
+      },
+    };
+  }
+
   if (params?.subAction !== SUB_ACTION.RUN) return params;
 
   let body: string;

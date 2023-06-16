@@ -16,6 +16,19 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { AppGlobalStyle } from '../page';
 
 const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  > div {
+    width: 100%;
+  }
+
+  > div:nth-child(2) {
+    display: flex;
+    flex-direction: column;
+  }
+
   &.securitySolutionWrapper--fullHeight {
     height: 100%;
     display: flex;

@@ -11,6 +11,7 @@ export const API_MAX_RESULTS = 1000;
 
 export enum SUB_ACTION {
   KILL_PROCESS = 'killProcess',
+  EXECUTE_SCRIPT = 'executeScript',
   GET_AGENTS = 'getAgents',
   ISOLATE_AGENT = 'isolateAgent',
   RELEASE_AGENT = 'releaseAgent',

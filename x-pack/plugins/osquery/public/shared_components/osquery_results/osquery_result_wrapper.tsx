@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComment, EuiErrorBoundary } from '@elastic/eui';
+import { EuiComment, EuiErrorBoundary, EuiAvatar } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
 
@@ -21,6 +21,7 @@ import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_sta
 import { ATTACHED_QUERY } from '../../agents/translations';
 import { useLiveQueryDetails } from '../../actions/use_live_query_details';
 import type { OsqueryActionResultProps } from './types';
+import { OsqueryIcon } from '../../components/osquery_icon';
 
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
   ({ actionId, ruleName, startDate, ecsData }) => {
@@ -44,6 +45,14 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}
+          timelineAvatar={
+            <EuiAvatar
+              name={ruleName && ruleName[0]}
+              iconType={OsqueryIcon}
+              color="subdued"
+              css={{ padding: 8 }}
+            />
+          }
         >
           {!read ? (
             <EmptyPrompt />

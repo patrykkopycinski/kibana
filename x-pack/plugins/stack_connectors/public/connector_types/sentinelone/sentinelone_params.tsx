@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// import yargs from 'yargs-parser';
+import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import {
   EuiBadge,
@@ -86,13 +86,6 @@ const SentinelOneParamsFields: React.FunctionComponent<
 
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
-  useEffect(() => {
-    if (!subAction) {
-      editAction('subAction', isTest ? SUB_ACTION.TEST : SUB_ACTION.RUN, index);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isTest, subAction]);
-
   const editSubActionParams = useCallback(
     (params: SentinelOneExecuteSubActionParams) => {
       editAction('subActionParams', { ...subActionParams, ...params }, index);
@@ -123,10 +116,23 @@ const SentinelOneParamsFields: React.FunctionComponent<
   };
 
   const search: EuiSearchBarProps = {
+    defaultQuery: 'scriptType:action',
     box: {
       incremental: true,
     },
     filters: [
+      {
+        type: 'field_value_selection',
+        field: 'scriptType',
+        name: 'Script type',
+        multiSelect: true,
+        options: [
+          {
+            value: 'action',
+          },
+          { value: 'dataCollection' },
+        ],
+      },
       {
         type: 'field_value_selection',
         field: 'location',
@@ -157,7 +163,7 @@ const SentinelOneParamsFields: React.FunctionComponent<
     if (itemIdToExpandedRowMapValues[user.id]) {
       delete itemIdToExpandedRowMapValues[user.id];
     } else {
-      itemIdToExpandedRowMapValues[user.id] = <>dupa true</>;
+      itemIdToExpandedRowMapValues[user.id] = <>More details true</>;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -182,8 +188,18 @@ const SentinelOneParamsFields: React.FunctionComponent<
           description: 'Choose this script',
           isPrimary: true,
           onClick: (item) => {
+            console.error('item', item);
             setSelected(item);
-            editSubActionParams({ body: item.inputInstructions });
+            editAction(
+              'subActionParams.script',
+              {
+                scriptId: item.id,
+                scriptRuntimeTimeoutSeconds: 3600,
+                taskDescription: item.scriptName,
+                requiresApproval: item.requiresApproval ?? false,
+              },
+              index
+            );
           },
         },
       ],
@@ -238,11 +254,14 @@ const SentinelOneParamsFields: React.FunctionComponent<
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiSuperSelect
-          options={actionTypeOptions}
-          valueOfSelected={subAction}
-          onChange={(value) => editAction('subAction', value, index)}
-        />
+        <EuiFormRow fullWidth label="Action type">
+          <EuiSuperSelect
+            fullWidth
+            options={actionTypeOptions}
+            valueOfSelected={subAction}
+            onChange={(value) => editAction('subAction', value, index)}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
       {subAction === 'executeScript' && (
         <>
@@ -251,7 +270,7 @@ const SentinelOneParamsFields: React.FunctionComponent<
               fullWidth
               error={errors.script}
               isInvalid={!!errors.script?.length}
-              label={i18n.STORY_LABEL}
+              label={'Script'}
               labelAppend={
                 selected ? (
                   <EuiLink onClick={() => setSelected(undefined)}>Change action</EuiLink>
@@ -284,9 +303,9 @@ const SentinelOneParamsFields: React.FunctionComponent<
                   index={index}
                   editAction={editAction}
                   messageVariables={[]}
-                  paramsProperty={'body'}
+                  paramsProperty={'subActionParams.script.inputParams'}
                   label={'Command'}
-                  inputTargetValue={subActionParams?.body ?? undefined}
+                  inputTargetValue={subActionParams?.script?.inputParams ?? undefined}
                   helpText={
                     selected?.inputExample ? `Example: ${selected?.inputExample}` : undefined
                   }

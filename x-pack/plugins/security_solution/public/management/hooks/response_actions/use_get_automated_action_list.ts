@@ -67,7 +67,10 @@ export const useGetAutomatedActionList = (
             fields: object;
           }
         ) => {
-          return expandDottedObject(edge.fields, true);
+          return {
+            ...expandDottedObject(edge.fields, true),
+            source: edge._source,
+          };
         }
       );
 

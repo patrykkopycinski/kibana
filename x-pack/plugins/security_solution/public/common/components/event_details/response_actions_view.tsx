@@ -37,8 +37,6 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
 }): EuiTabbedContentTab | undefined => {
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
-  console.error('duao', rawEventData, responseActionsEnabled);
-
   const expandedEventFieldsObject = rawEventData
     ? (expandDottedObject((rawEventData as RawEventData).fields) as ExpandedEventFieldsObject)
     : undefined;
@@ -52,7 +50,6 @@ export const useResponseActionsView = <T extends object = JSX.Element>({
   const { data: automatedList, isFetched } = useGetAutomatedActionList(
     {
       alertIds: [alertId],
-      executionIds: [rawEventData?.fields?.['kibana.alert.rule.execution.uuid'][0]],
     },
     { enabled: !shouldEarlyReturn }
   );

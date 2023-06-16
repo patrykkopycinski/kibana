@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
+import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -280,6 +281,14 @@ export class ActionExecutor {
         }
         // end gen_ai extension
 
+        // start sentinelone extension
+        if (result.status === 'ok' && actionTypeId === '.sentinelone') {
+          // console.error('result.data', result.data);
+          set(event, 'kibana.action.execution.sentinelone.data', result.data);
+          set(event, 'kibana.action.execution.sentinelone.params', params);
+        }
+        // end sentinelone extension
+
         const currentUser = security?.authc.getCurrentUser(request);
 
         event.user = event.user || {};
@@ -312,10 +321,6 @@ export class ActionExecutor {
           logger.warn(
             `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
           );
-        }
-
-        if (result.data) {
-          event.data = result.data;
         }
 
         eventLogger.logEvent(event);

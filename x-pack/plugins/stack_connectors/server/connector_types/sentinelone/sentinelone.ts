@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -14,15 +15,13 @@ import type {
   SentinelOneRunActionParams,
   SentinelOneRunActionResponse,
   SentinelOneStoriesActionResponse,
-  SentinelOneWebhookObject,
 } from '../../../common/sentinelone/types';
 import { SentinelOneBaseApiResponseSchema } from './api_schema';
 import type { SentinelOneBaseApiResponse } from './api_schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
+export const API_MAX_RESULTS = 1000;
 export const API_PATH = '/web/api/v2.1';
-export const WEBHOOK_PATH = '/webhook';
-export const WEBHOOK_AGENT_TYPE = 'Agents::WebhookAgent';
 
 export class SentinelOneConnector extends SubActionConnector<
   SentinelOneConfig,
@@ -32,7 +31,6 @@ export class SentinelOneConnector extends SubActionConnector<
     remoteScripts: string;
     agents: string;
     remoteScriptsExecute: string;
-    getRunWebhookURL: (webhook: SentinelOneWebhookObject) => string;
   };
 
   constructor(params: ServiceParams<SentinelOneConfig, SentinelOneSecrets>) {
@@ -45,8 +43,6 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
       agents: `${this.config.url}${API_PATH}/agents`,
-      getRunWebhookURL: (webhook) =>
-        `${this.config.url}${WEBHOOK_PATH}/${webhook.path}/${webhook.secret}`,
     };
 
     this.registerSubActions();
@@ -56,18 +52,6 @@ export class SentinelOneConnector extends SubActionConnector<
     this.registerSubAction({
       name: SUB_ACTION.GET_REMOTE_SCRIPTS,
       method: 'getRemoteScripts',
-      schema: SentinelOneBaseApiResponseSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.RUN,
-      method: 'runWebhook',
-      schema: SentinelOneBaseApiResponseSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.TEST,
-      method: 'runWebhook',
       schema: SentinelOneBaseApiResponseSchema,
     });
 
@@ -100,28 +84,66 @@ export class SentinelOneConnector extends SubActionConnector<
       method: 'killProcess',
       schema: SentinelOneBaseApiResponseSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.EXECUTE_SCRIPT,
+      method: 'executeScript',
+      schema: SentinelOneBaseApiResponseSchema,
+    });
+  }
+
+  public async executeScript(payload) {
+    console.error('executeScript payload: ', payload);
+
+    return this.sentinelOneApiRequest({
+      url: this.urls.remoteScriptsExecute,
+      method: 'post',
+      data: {
+        data: {
+          outputDestination: 'SentinelCloud',
+          ...payload.script,
+        },
+        filter: {
+          computerName: payload.hostname,
+        },
+      },
+      responseSchema: SentinelOneBaseApiResponseSchema,
+    });
   }
 
   public async killProcess(payload) {
-    const terminateScriptResponse = await this.sentinelOneApiRequest({
-      url: this.urls.remoteScripts,
+    console.error('killProcess payload: ', payload);
+
+    const agentData = await this.sentinelOneApiRequest({
+      url: this.urls.agents,
       params: {
-        query: 'terminate',
-        osTypes: payload.osType,
+        computerName: payload.hostname,
       },
       responseSchema: SentinelOneBaseApiResponseSchema,
     });
 
-    return this.this.sentinelOneApiRequest({
+    const terminateScriptResponse = await this.sentinelOneApiRequest({
+      url: this.urls.remoteScripts,
+      params: {
+        query: 'terminate',
+        osTypes: agentData?.data[0]?.osType,
+      },
+      responseSchema: SentinelOneBaseApiResponseSchema,
+    });
+
+    if (!payload.processName) {
+      throw new Error('No process name provided');
+    }
+
+    return this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
-      params: {
+      data: {
         data: {
           outputDestination: 'SentinelCloud',
-          scriptId: terminateScriptResponse.data.data[0].id,
-          scriptRuntimeTimeoutSeconds:
-            terminateScriptResponse.data.data[0].scriptRuntimeTimeoutSeconds,
-          taskDescription: terminateScriptResponse.data.data[0].scriptName,
+          scriptId: terminateScriptResponse.data[0].id,
+          scriptRuntimeTimeoutSeconds: terminateScriptResponse.data[0].scriptRuntimeTimeoutSeconds,
+          taskDescription: terminateScriptResponse.data[0].scriptName,
           inputParams: `--terminate --processes ${payload.processName}`,
         },
         filter: {
@@ -174,7 +196,7 @@ export class SentinelOneConnector extends SubActionConnector<
       responseSchema: SentinelOneBaseApiResponseSchema,
     });
 
-    console.error('releaseAgent response: ', response);
+    // console.error('releaseAgent response: ', response);
 
     if (response.data.length === 0) {
       throw new Error('No agents found');
@@ -226,14 +248,13 @@ export class SentinelOneConnector extends SubActionConnector<
       responseSchema: SentinelOneBaseApiResponseSchema,
       params: {
         ...req.params,
-        // limit: API_MAX_RESULTS,
         APIToken:
           //  this.secrets.token
           'UqWuy281YioTN11dK5mEejpprE3qjURFSKZt2FXv1xTrDgbFrdIa454BnJm7y1w4EjqWr0vOXaZP7hjJ',
       },
     });
 
-    console.error('response: ', response.data);
+    // console.error('response: ', response.data);
 
     return response.data;
   }
@@ -252,60 +273,9 @@ export class SentinelOneConnector extends SubActionConnector<
   public async getRemoteScripts(): Promise<SentinelOneStoriesActionResponse> {
     return this.sentinelOneApiRequest({
       url: this.urls.remoteScripts,
-    });
-  }
-
-  // public async getWebhooks({
-  //   storyId,
-  // }: SentinelOneWebhooksActionParams): Promise<SentinelOneWebhooksActionResponse> {
-  //   return this.sentinelOneApiRequest(
-  //     {
-  //       url: this.urls.agents,
-  //       params: { story_id: storyId },
-  //       headers: this.getAuthHeaders(),
-  //       responseSchema: SentinelOneWebhooksApiResponseSchema,
-  //     },
-  //   );
-  // }
-
-  public async runWebhook(
-    params: SentinelOneRunActionParams
-  ): Promise<SentinelOneRunActionResponse> {
-    console.log('------------------');
-    // console.log('webhook: ', webhook);
-    // console.log('webhookUrl: ', webhookUrl);
-    // console.log('runWebhook body: ', JSON.stringify(body, null, 2));
-    console.log('------------------');
-
-    const response = await this.request({
-      url: this.urls.remoteScriptsExecute,
-      method: 'post',
-      responseSchema: SentinelOneRunApiResponseSchema,
       params: {
-        APIToken:
-          'UqWuy281YioTN11dK5mEejpprE3qjURFSKZt2FXv1xTrDgbFrdIa454BnJm7y1w4EjqWr0vOXaZP7hjJ',
-      },
-      data: {
-        filter: {},
-        data: {
-          outputDestination: 'SentinelCloud',
-          taskDescription: 'Processessss list',
-          scriptId: '1164327803034796041',
-        },
+        limit: API_MAX_RESULTS,
       },
     });
-
-    console.error('response: ', response.data);
-
-    // if (!webhook && !webhookUrl) {
-    //   throw Error('Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none');
-    // }
-    // const response = await this.request({
-    //   url: webhookUrl ? webhookUrl : this.urls.getRunWebhookURL(webhook!),
-    //   method: 'post',
-    //   responseSchema: SentinelOneRunApiResponseSchema,
-    //   data: body,
-    // });
-    return response.data;
   }
 }

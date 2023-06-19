@@ -20249,7 +20249,6 @@
     "xpack.lens.indexPattern.timeShiftMultipleWarning": "{label} utilise un décalage temporel de {columnTimeShift} qui n'est pas un multiple de l'intervalle de l'histogramme des dates de {interval}. Pour éviter une non-correspondance des données, utilisez un multiple de {interval} comme décalage temporel.",
     "xpack.lens.indexPattern.timeShiftSmallWarning": "{label} utilise un décalage temporel de {columnTimeShift} qui est inférieur à l'intervalle de l'histogramme des dates de {interval}. Pour éviter une non-correspondance des données, utilisez un multiple de {interval} comme décalage temporel.",
     "xpack.lens.indexPattern.tsdbRollupWarning": "{label} utilise une fonction qui n'est pas prise en charge par les données cumulées. Sélectionnez une autre fonction ou modifiez la plage temporelle.",
-    "xpack.lens.indexPattern.uniqueLabel": "{label} [{num}]",
     "xpack.lens.indexPattern.valueCountOf": "Nombre de {name}",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "Afficher uniquement {indexPatternTitle}",
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "Afficher uniquement le calque {layerNumber}",

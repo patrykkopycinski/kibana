@@ -20248,7 +20248,6 @@
     "xpack.lens.indexPattern.timeShiftMultipleWarning": "{label}は{columnTimeShift}の時間シフトを使用しています。これは{interval}の日付ヒストグラム間隔の乗数ではありません。不一致のデータを防止するには、時間シフトとして{interval}を使用します。",
     "xpack.lens.indexPattern.timeShiftSmallWarning": "{label}は{columnTimeShift}の時間シフトを使用しています。これは{interval}の日付ヒストグラム間隔よりも小さいです。不一致のデータを防止するには、時間シフトとして{interval}を使用します。",
     "xpack.lens.indexPattern.tsdbRollupWarning": "{label}は、ロールアップされたデータによってサポートされていない関数を使用しています。別の関数を選択するか、時間範囲を選択してください。",
-    "xpack.lens.indexPattern.uniqueLabel": "{label} [{num}]",
     "xpack.lens.indexPattern.valueCountOf": "{name}のカウント",
     "xpack.lens.indexPatternSuggestion.removeLayerLabel": "{indexPatternTitle}のみを表示",
     "xpack.lens.indexPatternSuggestion.removeLayerPositionLabel": "レイヤー{layerNumber}のみを表示",

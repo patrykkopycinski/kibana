@@ -37624,7 +37624,7 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.days": "{value, plural, one {# 日} other {# 日}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.weeks": "{value, plural, one {# 週間} other {# 週間}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.months": "{value, plural, one {# 月} other {# 月}}",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.years": "{value, plural, one {# 年} other {# 年}}",    
+    "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.years": "{value, plural, one {# 年} other {# 年}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipText": "ルール間隔{interval}は構成された最小間隔{minimumInterval}を下回ります。これはアラートのパフォーマンスに影響する場合があります。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "このルールの過去の{sampleLimit}実行時間（mm:ss）の{percentileOrdinal}パーセンタイル。",
     "xpack.triggersActionsUI.sections.rulesList.selectAllRulesButton": "すべての{formattedTotalRules}件の{totalRules, plural, =1 {ルール} other {ルール}}を選択",

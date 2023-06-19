@@ -37654,7 +37654,7 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.days": "{value, plural, one {# jour} other {# jours}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.weeks": "{value, plural, one {# semaine} other {# semaines}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.months": "{value, plural, one {# mois} other {# mois}}",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.years": "{value, plural, one {# année} other {# années}}",    
+    "xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.years": "{value, plural, one {# année} other {# années}}",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipText": "L'intervalle de règle de {interval} est inférieur à l'intervalle minimal configuré de {minimumInterval}. Cela peut avoir un impact sur les performances d'alerting.",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "{percentileOrdinal} centile des {sampleLimit} dernières durées d'exécution de cette règle (mm:ss).",
     "xpack.triggersActionsUI.sections.rulesList.selectAllRulesButton": "Tout sélectionner : {formattedTotalRules} {totalRules, plural, =1 {règle} one {règles} many {règles} other {règles}}",

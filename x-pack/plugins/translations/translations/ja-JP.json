@@ -31312,7 +31312,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepActionsTitle": "アクション",
     "xpack.securitySolution.detectionEngine.rules.stepDefinitionTitle": "定義",
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "スケジュール",
-    "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent": "カスタムクエリルールでアラート抑制オプションが利用可能になり、新規条件ルールで複数のフィールドを選択できるようになりました",
     "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourTitle": "新しいセキュリティルール機能が利用可能です",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "更新",
     "xpack.securitySolution.detectionEngine.rulesSnoozeBadge.error.unableToFetch": "スヌーズ設定を取得できません",

@@ -31331,7 +31331,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepActionsTitle": "Actions",
     "xpack.securitySolution.detectionEngine.rules.stepDefinitionTitle": "Définition",
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "Planification",
-    "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourContent": "Les options de suppression d'alerte sont maintenant disponibles pour les règles de requête personnalisée, et plusieurs champs peuvent être sélectionnés dans les règles relatives aux nouveaux termes",
     "xpack.securitySolution.detectionEngine.rules.tour.createRuleTourTitle": "De nouvelles fonctionnalités de règle de sécurité sont disponibles",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "Mettre à jour",
     "xpack.securitySolution.detectionEngine.rulesSnoozeBadge.error.unableToFetch": "Impossible de récupérer les paramètres de répétition",

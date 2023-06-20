@@ -26964,7 +26964,6 @@
     "xpack.observability.slo.sloEdit.createAlert.title": "Créer",
     "xpack.observability.slo.sloEdit.createSloButton": "Créer un SLO",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.helpText": "Utilisez le caractère * pour élargir votre recherche.",
-    "xpack.observability.slo.sloEdit.customKql.indexSelection.indexOptionsLabel": "Sélectionner un index existant",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternLabel": "Utiliser un modèle d'indexation",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.label": "Index",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder": "Sélectionner un index ou un modèle d'indexation",

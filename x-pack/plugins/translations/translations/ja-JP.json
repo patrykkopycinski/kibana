@@ -26946,7 +26946,6 @@
     "xpack.observability.slo.sloEdit.createAlert.title": "作成",
     "xpack.observability.slo.sloEdit.createSloButton": "SLOの作成",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.helpText": "* で検索クエリの範囲を広げます。",
-    "xpack.observability.slo.sloEdit.customKql.indexSelection.indexOptionsLabel": "既存のインデックスを選択",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.indexPatternLabel": "インデックスパターンを使用",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.label": "インデックス",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.placeholder": "インデックスまたはインデックスパターンを選択",

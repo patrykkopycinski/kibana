@@ -32641,7 +32641,6 @@
     "xpack.securitySolution.markdown.insight.modalCancelButtonLabel": "キャンセル",
     "xpack.securitySolution.markdown.insight.relativeTimerange": "相対的時間範囲",
     "xpack.securitySolution.markdown.insight.relativeTimerangeText": "アラートの作成日時に相対的な、クエリを限定するための時間範囲を選択します（任意）。",
-    "xpack.securitySolution.markdown.insight.technicalPreview": "テクニカルプレビュー",
     "xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel": "クエリを追加",
     "xpack.securitySolution.markdown.osquery.addModalTitle": "クエリを追加",
     "xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel": "変更を保存",

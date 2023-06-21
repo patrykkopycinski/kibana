@@ -32660,7 +32660,6 @@
     "xpack.securitySolution.markdown.insight.modalCancelButtonLabel": "Annuler",
     "xpack.securitySolution.markdown.insight.relativeTimerange": "Plage temporelle relative",
     "xpack.securitySolution.markdown.insight.relativeTimerangeText": "Sélectionnez une plage horaire pour limiter la requête, par rapport à l'heure de création de l'alerte (facultatif).",
-    "xpack.securitySolution.markdown.insight.technicalPreview": "Version d'évaluation technique",
     "xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel": "Ajouter une recherche",
     "xpack.securitySolution.markdown.osquery.addModalTitle": "Ajouter une recherche",
     "xpack.securitySolution.markdown.osquery.editModalConfirmButtonLabel": "Enregistrer les modifications",

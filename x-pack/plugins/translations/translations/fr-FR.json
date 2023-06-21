@@ -22927,8 +22927,6 @@
     "xpack.ml.customUrlsEditor.customTimeRangeEndDate": "Date de fin",
     "xpack.ml.customUrlsEditor.customTimeRangeLabel": "Plage temporelle personnalisée",
     "xpack.ml.customUrlsEditor.customTimeRangeStartDate": "Date de début",
-    "xpack.ml.customUrlsEditor.customTimeRangeSwitch": "Ajouter une plage temporelle personnalisée ?",
-    "xpack.ml.customUrlsEditor.customTimeRangeTooltip": "Si cette option n'est pas définie, les paramètres globaux s'appliquent par défaut à la plage temporelle.",
     "xpack.ml.customUrlsEditor.dashboardNameLabel": "Nom du tableau de bord",
     "xpack.ml.customUrlsEditor.dataViewLabel": "Vue de données",
     "xpack.ml.customUrlsEditor.intervalLabel": "Intervalle",

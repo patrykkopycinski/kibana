@@ -22913,8 +22913,6 @@
     "xpack.ml.customUrlsEditor.customTimeRangeEndDate": "終了日",
     "xpack.ml.customUrlsEditor.customTimeRangeLabel": "カスタム時間範囲",
     "xpack.ml.customUrlsEditor.customTimeRangeStartDate": "開始日",
-    "xpack.ml.customUrlsEditor.customTimeRangeSwitch": "カスタム時間範囲を追加しますか？",
-    "xpack.ml.customUrlsEditor.customTimeRangeTooltip": "設定していない場合は、時間範囲のデフォルトはグローバル設定です。",
     "xpack.ml.customUrlsEditor.dashboardNameLabel": "ダッシュボード名",
     "xpack.ml.customUrlsEditor.dataViewLabel": "データビュー",
     "xpack.ml.customUrlsEditor.intervalLabel": "間隔",

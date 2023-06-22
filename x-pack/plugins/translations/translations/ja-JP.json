@@ -11329,7 +11329,7 @@
     "xpack.customBranding.customizedLogoLabel": "組織名",
     "xpack.customBranding.customLogoLabel": "カスタムロゴ",
     "xpack.customBranding.faviconPNGTitle": "ファビコン（PNG）",
-    "xpack.customBranding.faviconSVGTitle": "ファビコン（PNG）",
+    "xpack.customBranding.faviconSVGTitle": "ファビコン（SVG）",
     "xpack.customBranding.pageTitleLabel": "ページタイトル",
     "xpack.customBranding.settings.subscriptionRequiredLink.text": "サブスクリプションが必要です。",
     "xpack.customBranding.uiSettings.validate.customLogo.badFile": "このファイルは動作しません。別の画像ファイルを試してください。",

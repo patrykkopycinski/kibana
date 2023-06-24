@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { EuiPageBody } from '@elastic/eui';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom-v5-compat';
 import { Router, Routes as RouterRoutes, Route } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
 import { EuiText } from '@elastic/eui';
@@ -41,13 +41,16 @@ export const Routes: React.FC<{}> = () => {
       <EuiPageContent>
         <EuiPageContentBody>
           <RouterRoutes>
-            <Route path="/hello">
-              <HelloPage
-                firstName={query.get('firstName') || ''}
-                lastName={query.get('lastName') || ''}
-              />
-            </Route>
-            <Redirect from="/" to="/hello" />
+            <Route
+              path="/hello"
+              element={
+                <HelloPage
+                  firstName={query.get('firstName') || ''}
+                  lastName={query.get('lastName') || ''}
+                />
+              }
+            />
+            <Route index element={<Navigate to="/hello" replace />} />
           </RouterRoutes>
         </EuiPageContentBody>
       </EuiPageContent>

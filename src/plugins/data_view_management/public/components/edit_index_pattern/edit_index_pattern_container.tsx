@@ -10,28 +10,32 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom-v5-compat';
 import { EditIndexPattern } from '.';
 import { IndexPatternManagmentContext } from '../../types';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
-const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...props }) => {
+const EditIndexPatternCont: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const { dataViews, setBreadcrumbs, notifications } =
     useKibana<IndexPatternManagmentContext>().services;
   const [error, setError] = useState<Error | undefined>();
   const [indexPattern, setIndexPattern] = useState<DataView>();
 
   useEffect(() => {
-    dataViews
-      .get(props.match.params.id)
-      .then((ip: DataView) => {
-        setIndexPattern(ip);
-        setBreadcrumbs(getEditBreadcrumbs(ip));
-      })
-      .catch((err) => {
-        setError(err);
-      });
-  }, [dataViews, props.match.params.id, setBreadcrumbs, setError]);
+    if (id) {
+      dataViews
+        .get(id)
+        .then((ip: DataView) => {
+          setIndexPattern(ip);
+          setBreadcrumbs(getEditBreadcrumbs(ip));
+        })
+        .catch((err) => {
+          setError(err);
+        });
+    }
+  }, [dataViews, id, setBreadcrumbs, setError]);
 
   if (error) {
     const [errorTitle, errorMessage] = [
@@ -41,7 +45,7 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       i18n.translate('indexPatternManagement.editIndexPattern.couldNotLoadMessage', {
         defaultMessage:
           'The data view with id:{objectId} could not be loaded. Try creating a new one.',
-        values: { objectId: props.match.params.id },
+        values: { objectId: id },
       }),
     ];
 
@@ -49,10 +53,10 @@ const EditIndexPatternCont: React.FC<RouteComponentProps<{ id: string }>> = ({ .
       title: errorTitle,
       toastMessage: errorMessage,
     });
-    props.history.push('/');
+    navigate('/');
   }
 
   return indexPattern != null ? <EditIndexPattern indexPattern={indexPattern} /> : null;
 };
 
-export const EditIndexPatternContainer = withRouter(EditIndexPatternCont);
+export const EditIndexPatternContainer = React.memo(EditIndexPatternCont);

@@ -8,8 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useNavigate } from 'react-router-dom-v5-compat';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -34,16 +34,16 @@ interface PageDef {
   component: React.ReactNode;
 }
 
-type NavProps = RouteComponentProps & {
-  navigateToApp: CoreStart['application']['navigateToApp'];
+interface NavProps {
   pages: PageDef[];
-};
+}
 
-const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
+const Nav = ({ pages }: NavProps) => {
+  const navigate = useNavigate();
   const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
-    onClick: () => history.push(`/${page.id}`),
+    onClick: () => navigate(`/${page.id}`),
     'data-test-subj': page.id,
   }));
 
@@ -58,11 +58,10 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
       ]}
     />
   );
-});
+};
 
 interface Props {
   basename: string;
-  navigateToApp: CoreStart['application']['navigateToApp'];
   embeddableApi: EmbeddableStart;
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
@@ -73,12 +72,7 @@ interface Props {
   embeddableExamples: EmbeddableExamplesStart;
 }
 
-const EmbeddableExplorerApp = ({
-  basename,
-  navigateToApp,
-  embeddableApi,
-  embeddableExamples,
-}: Props) => {
+const EmbeddableExplorerApp = ({ basename, embeddableApi, embeddableExamples }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
@@ -121,14 +115,14 @@ const EmbeddableExplorerApp = ({
   ];
 
   const routes = pages.map((page, i) => (
-    <Route key={i} path={`/${page.id}`} render={(props) => page.component} />
+    <Route key={i} path={`/${page.id}`} element={page.component} />
   ));
 
   return (
     <Router basename={basename}>
       <EuiPage>
         <EuiPageSideBar>
-          <Nav navigateToApp={navigateToApp} pages={pages} />
+          <Nav pages={pages} />
         </EuiPageSideBar>
         {routes}
       </EuiPage>

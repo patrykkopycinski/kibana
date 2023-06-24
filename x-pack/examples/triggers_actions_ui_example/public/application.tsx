@@ -7,8 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -46,9 +45,80 @@ const TriggersActionsUiExampleApp = ({
       <EuiPage>
         <Sidebar />
         <Route
-          exact
-          path="/"
-          render={() => (
+          path="/rules_list"
+          element={
+            <Page title="Rules List">
+              <RulesListSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rules_list_notify_badge"
+          element={
+            <Page title="Rule List Notify Badge">
+              <RulesListNotifyBadgeSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rule_tag_badge"
+          element={
+            <Page title="Rule Tag Badge">
+              <RuleTagBadgeSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rule_tag_filter"
+          element={
+            <Page title="Rule Tag Filter">
+              <RuleTagFilterSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rule_event_log_list"
+          element={
+            <Page title="Run History List">
+              <RuleEventLogListSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rule_status_dropdown"
+          element={
+            <Page title="Rule Status Dropdown">
+              <RuleStatusDropdownSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rule_status_filter"
+          element={
+            <Page title="Rule Status Filter">
+              <RuleStatusFilterSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/alerts_table"
+          element={
+            <Page title="Alerts Table">
+              <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          path="/rules_settings_link"
+          element={
+            <Page title="Rules Settings Link">
+              <RulesSettingsLinkSandbox triggersActionsUi={triggersActionsUi} />
+            </Page>
+          }
+        />
+        <Route
+          index
+          element={
             <Page title="Home" isHome>
               <EuiTitle size="l">
                 <h1>Welcome to the Triggers Actions UI plugin example</h1>
@@ -60,79 +130,7 @@ const TriggersActionsUiExampleApp = ({
                 components are functioning correctly outside of their original plugin.
               </EuiText>
             </Page>
-          )}
-        />
-        <Route
-          path="/rules_list"
-          render={() => (
-            <Page title="Rules List">
-              <RulesListSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rules_list_notify_badge"
-          render={() => (
-            <Page title="Rule List Notify Badge">
-              <RulesListNotifyBadgeSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rule_tag_badge"
-          render={() => (
-            <Page title="Rule Tag Badge">
-              <RuleTagBadgeSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rule_tag_filter"
-          render={() => (
-            <Page title="Rule Tag Filter">
-              <RuleTagFilterSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rule_event_log_list"
-          render={() => (
-            <Page title="Run History List">
-              <RuleEventLogListSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rule_status_dropdown"
-          render={() => (
-            <Page title="Rule Status Dropdown">
-              <RuleStatusDropdownSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rule_status_filter"
-          render={() => (
-            <Page title="Rule Status Filter">
-              <RuleStatusFilterSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/alerts_table"
-          render={() => (
-            <Page title="Alerts Table">
-              <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
-        <Route
-          path="/rules_settings_link"
-          render={() => (
-            <Page title="Rules Settings Link">
-              <RulesSettingsLinkSandbox triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
+          }
         />
       </EuiPage>
     </Router>

@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { Redirect } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { getTutorial } from '../load_tutorials';
@@ -22,10 +22,44 @@ import { GettingStarted } from './guided_onboarding';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
+const TutorialRoute = () => {
+  const { savedObjectsClient, addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+
+  const { id } = useParams();
+
+  return (
+    <Tutorial
+      addBasePath={addBasePath}
+      isCloudEnabled={isCloudEnabled}
+      getTutorial={getTutorial}
+      replaceTemplateStrings={replaceTemplateStrings}
+      tutorialId={id}
+      bulkCreate={savedObjectsClient.bulkCreate}
+    />
+  );
+};
+
+const TutorialDirectoryRoute = () => {
+  const { application, addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+
+  const { tab: tabId } = useParams();
+  // Redirect to integrations app unless a specific tab that is still supported was specified.
+  if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
+    application.navigateToApp('integrations', { replace: true });
+    return null;
+  }
+
+  return (
+    <TutorialDirectory addBasePath={addBasePath} openTab={tabId} isCloudEnabled={isCloudEnabled} />
+  );
+};
+
 export function HomeApp({ directories, solutions }) {
   const {
-    application,
-    savedObjectsClient,
     getBasePath,
     addBasePath,
     environmentService,
@@ -35,59 +69,29 @@ export function HomeApp({ directories, solutions }) {
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
-  const renderTutorialDirectory = (props) => {
-    // Redirect to integrations app unless a specific tab that is still supported was specified.
-    const tabId = props.match.params.tab;
-    if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
-      application.navigateToApp('integrations', { replace: true });
-      return null;
-    }
-
-    return (
-      <TutorialDirectory
-        addBasePath={addBasePath}
-        openTab={tabId}
-        isCloudEnabled={isCloudEnabled}
-      />
-    );
-  };
-
-  const renderTutorial = (props) => {
-    return (
-      <Tutorial
-        addBasePath={addBasePath}
-        isCloudEnabled={isCloudEnabled}
-        getTutorial={getTutorial}
-        replaceTemplateStrings={replaceTemplateStrings}
-        tutorialId={props.match.params.id}
-        bulkCreate={savedObjectsClient.bulkCreate}
-      />
-    );
-  };
-
   return (
     <I18nProvider>
       <Router>
-        <Routes>
-          <Route path="/tutorial/:id" render={renderTutorial} />
-          <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+        <Routes legacySwitch={false}>
+          <Route path="/tutorial/:id" render={<TutorialRoute />} />
+          <Route path="/tutorial_directory/:tab?" element={<TutorialDirectoryRoute />} />
           {guidedOnboardingService.isEnabled && (
-            <Route path="/getting_started">
-              <GettingStarted />
-            </Route>
+            <Route path="/getting_started" element={<GettingStarted />} />
           )}
-          <Route exact path="/">
-            <Home
-              addBasePath={addBasePath}
-              directories={directories}
-              solutions={solutions}
-              localStorage={localStorage}
-              urlBasePath={getBasePath()}
-              hasUserDataView={() => dataViewsService.hasUserDataView()}
-              isCloudEnabled={isCloudEnabled}
-            />
-          </Route>
-          <Redirect to="/" />
+          <Route
+            index
+            element={
+              <Home
+                addBasePath={addBasePath}
+                directories={directories}
+                solutions={solutions}
+                localStorage={localStorage}
+                urlBasePath={getBasePath()}
+                hasUserDataView={() => dataViewsService.hasUserDataView()}
+                isCloudEnabled={isCloudEnabled}
+              />
+            }
+          />
         </Routes>
       </Router>
     </I18nProvider>

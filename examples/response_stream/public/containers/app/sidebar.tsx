@@ -8,11 +8,11 @@
 
 import React from 'react';
 import { EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { routes } from '../../routes';
 
 export const Sidebar: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <EuiPageSideBar>
@@ -24,7 +24,7 @@ export const Sidebar: React.FC = () => {
           items: items.map((route) => ({
             id: route.id,
             name: route.title,
-            onClick: () => history.push(`/${route.id}`),
+            onClick: () => navigate(`/${route.id}`),
             'data-test-subj': route.id,
           })),
         }))}

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -20,7 +20,9 @@ import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
-export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
+export const DashboardNoMatch = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { restorePreviousUrl } = useDashboardMountContext();
   const {
     settings: {
@@ -32,9 +34,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
 
   useEffect(() => {
     restorePreviousUrl();
-    const { navigated } = navigateToLegacyKibanaUrl(
-      history.location.pathname + history.location.search
-    );
+    const { navigated } = navigateToLegacyKibanaUrl(location.pathname + location.search);
 
     if (!navigated) {
       const bannerMessage = i18n.translate('dashboard.noMatchRoute.bannerTitleText', {
@@ -50,7 +50,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                 id="dashboard.noMatchRoute.bannerText"
                 defaultMessage="Dashboard application doesn't recognize this route: {route}."
                 values={{
-                  route: history.location.pathname,
+                  route: location.pathname,
                 }}
               />
             </p>
@@ -66,9 +66,9 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         }
       }, 15000);
 
-      history.replace(LANDING_PAGE_PATH);
+      navigate(LANDING_PAGE_PATH, { replace: true });
     }
-  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
+  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, navigate, location]);
 
   return null;
 };

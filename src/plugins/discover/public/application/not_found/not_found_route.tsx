@@ -9,7 +9,8 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
+import { Route } from '@kbn/shared-ux-router';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { getUrlTracker } from '../../kibana_services';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -58,5 +59,9 @@ export function NotFoundRoute() {
     }, 15000);
   }, [core.overlays.banners, history, urlForwarding, core.theme.theme$]);
 
-  return <Redirect to={{ pathname: '/', state: { referrer: currentLocation } }} />;
+  return (
+    <Route
+      element={<Navigate to={{ pathname: '/', state: { referrer: currentLocation } }} replace />}
+    />
+  );
 }

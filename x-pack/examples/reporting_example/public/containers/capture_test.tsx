@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { parsePath } from 'history';
 import {
   EuiTabbedContent,
@@ -58,7 +58,7 @@ const tabs: Array<EuiTabbedContentTab & { id: MyForwardableState['captureTest'] 
 export const CaptureTest: FunctionComponent = () => {
   const { forwardedState } = useApplicationContext();
   const tabToRender = forwardedState?.captureTest;
-  const history = useHistory();
+  const navigate = useNavigate();
   return (
     <EuiPage>
       <EuiPageBody>

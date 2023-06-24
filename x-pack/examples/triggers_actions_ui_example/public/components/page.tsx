@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 import {
   EuiPageContent_Deprecated as EuiPageContent,
@@ -28,7 +28,7 @@ interface PageProps {
 export const Page: React.FC<PageProps> = (props) => {
   const { title, crumb, isHome, children } = props;
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const breadcrumbs: Array<{
     text: string;
@@ -42,7 +42,7 @@ export const Page: React.FC<PageProps> = (props) => {
     breadcrumbs.splice(0, 0, {
       text: 'Home',
       onClick: () => {
-        history.push(`/`);
+        navigate(`/`);
       },
     });
   }

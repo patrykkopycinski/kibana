@@ -27,8 +27,8 @@ export const renderApp = (
       <KibanaThemeProvider theme$={coreStart.theme.theme$}>
         <Router history={history}>
           <Routes>
-            <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
-            <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
+            <Route path={ROUTES.captureTest} element={<CaptureTest />} />
+            <Route index element={<Main basename={appBasePath} {...coreStart} {...deps} />} />
           </Routes>
         </Router>
       </KibanaThemeProvider>

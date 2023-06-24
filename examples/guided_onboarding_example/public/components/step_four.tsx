@@ -17,7 +17,7 @@ import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiCode,
 } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 interface StepFourProps {
   guidedOnboarding: GuidedOnboardingPluginStart;

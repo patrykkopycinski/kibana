@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
 
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom-v5-compat';
 
 import type { SavedObjectReference } from '@kbn/core/public';
 import { useKibana, useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -402,7 +402,7 @@ export const VisualizeListing = () => {
       headingId="visualizeListingHeading"
       title={visualizeLibraryTitle}
       tabs={tabs}
-      activeTabId={activeTab}
+      activeTabId={activeTab as string}
       changeActiveTab={(id) => {
         application.navigateToUrl(`#/${id}`);
       }}

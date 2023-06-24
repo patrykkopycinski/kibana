@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -15,24 +15,24 @@ import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadc
 import { IndexPatternManagmentContext } from '../../../types';
 import { CreateEditField } from './create_edit_field';
 
-export type CreateEditFieldContainerProps = RouteComponentProps<{ id: string; fieldName?: string }>;
-
-const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props }) => {
+const CreateEditFieldCont: React.FC = () => {
+  const params = useParams<{ id: string; fieldName: string }>();
   const { setBreadcrumbs, dataViews } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPattern, setIndexPattern] = useState<DataView>();
-  const fieldName =
-    props.match.params.fieldName && decodeURIComponent(props.match.params.fieldName);
+  const fieldName = params.fieldName && decodeURIComponent(params.fieldName);
 
   useEffect(() => {
-    dataViews.get(props.match.params.id).then((ip: DataView) => {
-      setIndexPattern(ip);
-      if (ip) {
-        setBreadcrumbs(
-          fieldName ? getEditFieldBreadcrumbs(ip, fieldName) : getCreateFieldBreadcrumbs(ip)
-        );
-      }
-    });
-  }, [props.match.params.id, fieldName, setBreadcrumbs, dataViews]);
+    if (params.id) {
+      dataViews.get(params.id).then((ip: DataView) => {
+        setIndexPattern(ip);
+        if (ip) {
+          setBreadcrumbs(
+            fieldName ? getEditFieldBreadcrumbs(ip, fieldName) : getCreateFieldBreadcrumbs(ip)
+          );
+        }
+      });
+    }
+  }, [params, fieldName, setBreadcrumbs, dataViews]);
 
   if (indexPattern) {
     return (
@@ -47,4 +47,4 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
   }
 };
 
-export const CreateEditFieldContainer = withRouter(CreateEditFieldCont);
+export const CreateEditFieldContainer = React.memo(CreateEditFieldCont);

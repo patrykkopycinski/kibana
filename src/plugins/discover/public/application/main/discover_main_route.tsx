@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, memo, useCallback, useMemo } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { redirectWhenMissing, SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';

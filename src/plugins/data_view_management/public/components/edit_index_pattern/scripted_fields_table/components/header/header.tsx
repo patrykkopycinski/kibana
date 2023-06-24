@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiLink, EuiIcon } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,12 +16,13 @@ import { ScopedHistory } from '@kbn/core/public';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { IndexPatternManagmentContext } from '../../../../../types';
 
-interface HeaderProps extends RouteComponentProps {
+interface HeaderProps {
   indexPatternId: string;
   history: ScopedHistory;
 }
 
-export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
+export const Header = ({ indexPatternId }: HeaderProps) => {
+  const history = useHistory();
   const { dataViews, docLinks } = useKibana<IndexPatternManagmentContext>().services;
   const links = docLinks?.links;
   const userEditPermission = dataViews.getCanSaveSync();
@@ -69,4 +70,4 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
       )}
     </EuiFlexGroup>
   );
-});
+};

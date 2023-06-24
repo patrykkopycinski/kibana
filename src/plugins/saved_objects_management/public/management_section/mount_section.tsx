@@ -59,7 +59,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     wrapWithTheme(
       <I18nProvider>
         <Router history={history}>
-          <Routes>
+          <Routes legacySwitch={false}>
             <Route path={'/:type/:id'} exact={true}>
               <RedirectToHomeIfUnauthorized>
                 <Suspense fallback={<EuiLoadingSpinner />}>

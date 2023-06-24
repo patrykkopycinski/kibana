@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
@@ -52,7 +52,7 @@ export const Main = (props: MainProps) => {
     guidedOnboarding: { guidedOnboardingApi },
     notifications,
   } = props;
-  const history = useHistory();
+  const navigate = useNavigate();
   const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
   const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 
@@ -322,7 +322,7 @@ export const Main = (props: MainProps) => {
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepOne')}>
+            <EuiButton onClick={() => navigate('stepOne')}>
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepOne.link"
                 defaultMessage="Step 1"
@@ -330,7 +330,7 @@ export const Main = (props: MainProps) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepTwo')}>
+            <EuiButton onClick={() => navigate('stepTwo')}>
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepTwo.link"
                 defaultMessage="Step 2"
@@ -338,7 +338,7 @@ export const Main = (props: MainProps) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepThree')}>
+            <EuiButton onClick={() => navigate('stepThree')}>
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepThree.link"
                 defaultMessage="Step 3"
@@ -346,7 +346,7 @@ export const Main = (props: MainProps) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepFour')}>
+            <EuiButton onClick={() => navigate('stepFour')}>
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepFour.link"
                 defaultMessage="Step 4"

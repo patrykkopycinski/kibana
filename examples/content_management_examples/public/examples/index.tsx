@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
@@ -53,17 +53,18 @@ export const renderApp = (
 
           <EuiPageTemplate.Section>
             <Routes>
-              <Redirect from="/" to="/todos" exact />
-              <Route path="/todos">
-                <TodoApp contentClient={contentManagement.client} />
-              </Route>
-              <Route path="/msearch">
-                <MSearchApp
-                  contentClient={contentManagement.client}
-                  core={core}
-                  savedObjectsTagging={savedObjectsTaggingOss}
-                />
-              </Route>
+              <Route path="/todos" element={<TodoApp contentClient={contentManagement.client} />} />
+              <Route
+                path="/msearch"
+                element={
+                  <MSearchApp
+                    contentClient={contentManagement.client}
+                    core={core}
+                    savedObjectsTagging={savedObjectsTaggingOss}
+                  />
+                }
+              />
+              <Route index element={<Navigate to="/todos" replace />} />
             </Routes>
           </EuiPageTemplate.Section>
         </EuiPageTemplate>

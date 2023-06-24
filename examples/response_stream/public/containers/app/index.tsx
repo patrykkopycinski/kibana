@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { BrowserRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
@@ -20,7 +20,7 @@ export const App: React.FC = () => {
   const routeElements: React.ReactElement[] = [];
   for (const { items } of routes) {
     for (const { id, component } of items) {
-      routeElements.push(<Route key={id} path={`/${id}`} render={(props) => component} />);
+      routeElements.push(<Route key={id} path={`/${id}`} element={component} />);
     }
   }
 
@@ -30,7 +30,7 @@ export const App: React.FC = () => {
         <Sidebar />
         <Routes>
           {routeElements}
-          <Redirect to="/simple-string-stream" />
+          <Route index element={<Navigate to="/simple-string-stream" replace />} />
         </Routes>
       </EuiPage>
     </Router>

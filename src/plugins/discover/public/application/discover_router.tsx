@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
@@ -28,6 +28,16 @@ interface DiscoverRoutesProps {
   isDev: boolean;
 }
 
+const RedirectToSingleDocRoute = ({ prefix }: { prefix?: string }) => {
+  const { dataView, index } = useParams();
+  const prefixPath = useCallback(
+    (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
+    [prefix]
+  );
+
+  return <Navigate to={prefixPath(`doc/${dataView}/${index}`)} />;
+};
+
 export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProps) => {
   const prefixPath = useCallback(
     (path: string) => (prefix ? `${prefix}/${path}` : `/${path}`),
@@ -35,17 +45,13 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
   );
 
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route path={prefixPath('context/:dataViewId/:id')}>
         <ContextAppRoute />
       </Route>
       <Route
         path={prefixPath('doc/:dataView/:index/:type')}
-        render={(props) => (
-          <Redirect
-            to={prefixPath(`doc/${props.match.params.dataView}/${props.match.params.index}`)}
-          />
-        )}
+        element={<RedirectToSingleDocRoute prefix={prefix} />}
       />
       <Route path={prefixPath('doc/:dataViewId/:index')}>
         <SingleDocRoute />
@@ -72,14 +78,14 @@ interface CustomDiscoverRoutesProps {
 export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscoverRoutesProps) => {
   const { profile } = useParams<{ profile: string }>();
   const customizationCallbacks = useMemo(
-    () => profileRegistry.get(profile)?.customizationCallbacks,
+    () => profileRegistry.get(profile as string)?.customizationCallbacks,
     [profile, profileRegistry]
   );
 
   if (customizationCallbacks) {
     return (
       <DiscoverRoutes
-        prefix={addProfile('', profile)}
+        prefix={addProfile('', profile as string)}
         customizationCallbacks={customizationCallbacks}
         {...props}
       />
@@ -111,13 +117,17 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <Routes>
-            <Route path={addProfile('', ':profile')}>
-              <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
-            </Route>
-            <Route path="/">
-              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
-            </Route>
+          <Routes legacySwitch={false}>
+            <Route
+              path={addProfile('', ':profile')}
+              element={<CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />}
+            />
+            <Route
+              index
+              element={
+                <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+              }
+            />
           </Routes>
         </Router>
       </EuiErrorBoundary>

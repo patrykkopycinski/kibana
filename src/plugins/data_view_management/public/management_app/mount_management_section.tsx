@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
@@ -87,20 +87,19 @@ export async function mountManagementSection(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <Router history={params.history}>
-            <Routes>
-              <Route path={['/create']}>
-                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-              </Route>
-              <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
-                <CreateEditFieldContainer />
-              </Route>
-              <Route path={['/dataView/:id']}>
-                <EditIndexPatternContainer />
-              </Route>
-              <Redirect path={'/patterns*'} to={'dataView*'} />
-              <Route path={['/']}>
-                <IndexPatternTableWithRouter canSave={canSave} />
-              </Route>
+            <Routes legacySwitch={false}>
+              <Route
+                path={'/create'}
+                element={<IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />}
+              />
+              <Route
+                path={'/dataView/:id/field/:fieldName'}
+                element={<CreateEditFieldContainer />}
+              />
+              <Route path={'/dataView/:id/create-field/'} element={<CreateEditFieldContainer />} />
+              <Route path={'/dataView/:id'} element={<EditIndexPatternContainer />} />
+              <Route path={'/patterns*'} element={<Navigate to={'dataView*'} replace />} />
+              <Route index element={<IndexPatternTableWithRouter canSave={canSave} />} />
             </Routes>
           </Router>
         </I18nProvider>

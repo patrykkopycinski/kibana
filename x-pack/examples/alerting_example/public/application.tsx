@@ -7,8 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
+import { useParams } from 'react-router-dom-v5-compat';
 import { EuiPage } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
@@ -26,6 +26,26 @@ export interface AlertingExampleComponentParams {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
+const RuleRoute = ({ http }: { http: CoreStart['http'] }) => {
+  const { id } = useParams<{ id: string }>();
+
+  return (
+    <Page title={`View People In Space Rule`} crumb={`Astros ${id}`}>
+      <ViewAlertPage http={http} id={id as string} />
+    </Page>
+  );
+};
+
+const AstroRoute = ({ http }: { http: CoreStart['http'] }) => {
+  const { id } = useParams<{ id: string }>();
+
+  return (
+    <Page title={`View People In Space Rule`} crumb={`Astros ${id}`}>
+      <ViewPeopleInSpaceAlertPage http={http} id={id as string} />
+    </Page>
+  );
+};
+
 const AlertingExampleApp = ({
   basename,
   http,
@@ -34,34 +54,15 @@ const AlertingExampleApp = ({
   return (
     <Router basename={basename}>
       <EuiPage>
+        <Route path={`/rule/:id`} element={<RuleRoute http={http} />} />
+        <Route path={`/astros/:id`} element={<AstroRoute http={http} />} />
         <Route
-          path={`/`}
-          exact={true}
-          render={() => (
+          index
+          element={
             <Page title={`Home`} isHome={true}>
               <DocumentationPage triggersActionsUi={triggersActionsUi} />
             </Page>
-          )}
-        />
-        <Route
-          path={`/rule/:id`}
-          render={(props) => {
-            return (
-              <Page title={`View Rule`} crumb={`View Rule ${props.match.params.id}`}>
-                <ViewAlertPage http={http} id={props.match.params.id} />
-              </Page>
-            );
-          }}
-        />
-        <Route
-          path={`/astros/:id`}
-          render={(props) => {
-            return (
-              <Page title={`View People In Space Rule`} crumb={`Astros ${props.match.params.id}`}>
-                <ViewPeopleInSpaceAlertPage http={http} id={props.match.params.id} />
-              </Page>
-            );
-          }}
+          }
         />
       </EuiPage>
     </Router>

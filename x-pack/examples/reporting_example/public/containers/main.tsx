@@ -30,7 +30,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { parsePath } from 'history';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, useHistory } from 'react-router-dom';
+import { useHref } from 'react-router-dom-v5-compat';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import * as Rx from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
@@ -54,7 +55,6 @@ interface ReportingExampleAppProps {
 const sourceLogos = ['Beats', 'Cloud', 'Logging', 'Kibana'];
 
 export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAppProps) => {
-  const history = useHistory();
   const { forwardedState } = useApplicationContext();
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -318,7 +318,7 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
-                        <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                        <EuiLink href={useHref(parsePath(ROUTES.captureTest))}>
                           Go to capture test
                         </EuiLink>
                       </EuiText>

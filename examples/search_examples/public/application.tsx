@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -49,30 +49,35 @@ export const renderApp = (
         <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
           <Router history={history}>
             <Routes>
-              <Route path={LINKS[0].path}>
-                <SearchExamplesApp
-                  notifications={notifications}
-                  navigation={navigation}
-                  data={data}
-                  http={http}
-                  unifiedSearch={unifiedSearch}
-                />
-              </Route>
-              <Route path={LINKS[1].path}>
-                <SqlSearchExampleApp notifications={notifications} data={data} />
-              </Route>
-              <Route path={LINKS[2].path}>
-                <SearchSessionsExampleApp
-                  navigation={navigation}
-                  notifications={notifications}
-                  data={data}
-                  unifiedSearch={unifiedSearch}
-                />
-              </Route>
+              <Route
+                path={LINKS[0].path}
+                element={
+                  <SearchExamplesApp
+                    notifications={notifications}
+                    navigation={navigation}
+                    data={data}
+                    http={http}
+                    unifiedSearch={unifiedSearch}
+                  />
+                }
+              />
+              <Route
+                path={LINKS[1].path}
+                element={<SqlSearchExampleApp notifications={notifications} data={data} />}
+              />
+              <Route
+                path={LINKS[2].path}
+                element={
+                  <SearchSessionsExampleApp
+                    navigation={navigation}
+                    notifications={notifications}
+                    data={data}
+                    unifiedSearch={unifiedSearch}
+                  />
+                }
+              />
 
-              <Route path="/" exact={true}>
-                <Redirect to={LINKS[0].path} />
-              </Route>
+              <Route index element={<Navigate to={LINKS[0].path} replace />} />
             </Routes>
           </Router>
         </SearchExamplePage>

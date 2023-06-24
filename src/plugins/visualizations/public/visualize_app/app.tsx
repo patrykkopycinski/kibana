@@ -8,7 +8,7 @@
 
 import './app.scss';
 import React, { useEffect, useCallback, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -130,15 +130,19 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   }
 
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
         <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
-      <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
-        <VisualizeEditor onAppLeave={onAppLeave} />
-      </Route>
       <Route
-        exact
+        path={VisualizeConstants.CREATE_PATH}
+        element={<VisualizeEditor onAppLeave={onAppLeave} />}
+      />
+      <Route
+        path={`${VisualizeConstants.EDIT_PATH}/:id`}
+        element={<VisualizeEditor onAppLeave={onAppLeave} />}
+      />
+      <Route
         path={[
           VisualizeConstants.LANDING_PAGE_PATH,
           VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,

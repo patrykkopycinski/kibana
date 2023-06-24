@@ -18,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -69,7 +69,7 @@ export const GettingStarted = () => {
   const [filter, setFilter] = useState<GuideFilterValues>(
     isTypeOfGuideFilterValue(query.useCase) ? (query.useCase as GuideFilterValues) : 'all'
   );
-  const history = useHistory();
+  const navigate = useNavigate();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -108,9 +108,9 @@ export const GettingStarted = () => {
 
   useEffect(() => {
     if (cloud?.isCloudEnabled === false) {
-      return history.push('/');
+      return navigate('/');
     }
-  }, [cloud, history]);
+  }, [cloud, navigate]);
 
   useEffect(() => {
     // disable welcome screen on the home page

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 
 export const Sidebar = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   return (
     <EuiPageSidebar>
       <EuiSideNav
@@ -22,52 +22,52 @@ export const Sidebar = () => {
               {
                 id: 'home',
                 name: 'Home',
-                onClick: () => history.push('/'),
+                onClick: () => navigate('/'),
               },
               {
                 id: 'rules_list',
                 name: 'Rules List',
-                onClick: () => history.push(`/rules_list`),
+                onClick: () => navigate(`/rules_list`),
               },
               {
                 id: 'rules_list_notify_badge',
                 name: 'Rules List Notify Badge',
-                onClick: () => history.push(`/rules_list_notify_badge`),
+                onClick: () => navigate(`/rules_list_notify_badge`),
               },
               {
                 id: 'rule_tag_badge',
                 name: 'Rule Tag Badge',
-                onClick: () => history.push(`/rule_tag_badge`),
+                onClick: () => navigate(`/rule_tag_badge`),
               },
               {
                 id: 'rule_tag_filter',
                 name: 'Rule Tag Filter',
-                onClick: () => history.push(`/rule_tag_filter`),
+                onClick: () => navigate(`/rule_tag_filter`),
               },
               {
                 id: 'rule_event_log_list',
                 name: 'Run History List',
-                onClick: () => history.push(`/rule_event_log_list`),
+                onClick: () => navigate(`/rule_event_log_list`),
               },
               {
                 id: 'rule_status_dropdown',
                 name: 'Rule Status Dropdown',
-                onClick: () => history.push(`/rule_status_dropdown`),
+                onClick: () => navigate(`/rule_status_dropdown`),
               },
               {
                 id: 'rule_status_filter',
                 name: 'Rule Status Filter',
-                onClick: () => history.push(`/rule_status_filter`),
+                onClick: () => navigate(`/rule_status_filter`),
               },
               {
                 id: 'alerts table',
                 name: 'Alert Table',
-                onClick: () => history.push('/alerts_table'),
+                onClick: () => navigate('/alerts_table'),
               },
               {
                 id: 'rules settings link',
                 name: 'Rules Settings Link',
-                onClick: () => history.push('/rules_settings_link'),
+                onClick: () => navigate('/rules_settings_link'),
               },
             ],
           },

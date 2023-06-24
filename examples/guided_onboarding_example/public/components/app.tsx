@@ -43,21 +43,22 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
           <EuiPageTemplate.Section>
             <Router history={history}>
               <Routes>
-                <Route exact path="/">
-                  <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepOne">
-                  <StepOne guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route exact path="/stepTwo">
-                  <StepTwo />
-                </Route>
-                <Route exact path="/stepThree">
-                  <StepThree guidedOnboarding={guidedOnboarding} />
-                </Route>
-                <Route path="/stepFour/:indexName?">
-                  <StepFour guidedOnboarding={guidedOnboarding} />
-                </Route>
+                <Route
+                  path="/"
+                  element={
+                    <Main notifications={notifications} guidedOnboarding={guidedOnboarding} />
+                  }
+                />
+                <Route path="/stepOne" element={<StepOne guidedOnboarding={guidedOnboarding} />} />
+                <Route path="/stepTwo" element={<StepTwo />} />
+                <Route
+                  path="/stepThree"
+                  element={<StepThree guidedOnboarding={guidedOnboarding} />}
+                />
+                <Route
+                  path="/stepFour/:indexName?"
+                  element={<StepFour guidedOnboarding={guidedOnboarding} />}
+                />
               </Routes>
             </Router>
           </EuiPageTemplate.Section>

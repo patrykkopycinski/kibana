@@ -8,7 +8,7 @@
 
 import './visualize_editor.scss';
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { EventEmitter } from 'events';
 
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';

@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -36,6 +35,7 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
 import {
@@ -51,7 +51,7 @@ import { RelationshipsTable } from '../relationships_table';
 import { getTabs, getPath, convertToEuiFilterOptions } from './utils';
 import { getFieldInfo } from '../../utils';
 
-interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
+interface TabsProps {
   indexPattern: DataView;
   fields: DataViewField[];
   saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
@@ -142,12 +142,12 @@ export function Tabs({
   indexPattern,
   saveIndexPattern,
   fields,
-  history,
   refreshFields,
   relationships,
   allowedTypes,
   compositeRuntimeFields,
 }: TabsProps) {
+  const navigate = useNavigate();
   const {
     uiSettings,
     docLinks,
@@ -497,7 +497,7 @@ export function Tabs({
                 scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
                   redirectToRoute: (field: DataViewField) => {
-                    history.push(getPath(field, indexPattern));
+                    navigate(getPath(field, indexPattern));
                   },
                 }}
                 onRemoveField={refreshFilters}
@@ -545,7 +545,7 @@ export function Tabs({
       fieldWildcardMatcherDecorated,
       fields,
       getFilterSection,
-      history,
+      navigate,
       indexPattern,
       indexedFieldTypeFilter,
       schemaFieldTypeFilter,

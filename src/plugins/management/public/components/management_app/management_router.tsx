@@ -7,7 +7,7 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
@@ -34,7 +34,7 @@ export const ManagementRouter = memo(
     theme$,
   }: ManagementRouterProps) => (
     <Router history={history}>
-      <Routes>
+      <Routes legacySwitch={false}>
         {sections.map((section) =>
           section
             .getAppsEnabled()
@@ -57,7 +57,12 @@ export const ManagementRouter = memo(
           section
             .getAppsEnabled()
             .filter((app) => app.redirectFrom)
-            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+            .map((app) => (
+              <Route
+                path={`/${app.redirectFrom}*`}
+                element={<Navigate to={`${app.basePath}*`} replace />}
+              />
+            ))
         )}
         <Route
           path={'/'}

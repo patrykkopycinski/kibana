@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ScopedHistory } from '@kbn/core/public';

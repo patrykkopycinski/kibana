@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 import {
   EuiPageBody,
@@ -19,14 +19,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-type PageProps = RouteComponentProps & {
+interface PageProps {
   title: string;
   children: React.ReactNode;
   crumb?: string;
   isHome?: boolean;
-};
+}
 
-export const Page = withRouter(({ title, crumb, children, isHome = false, history }: PageProps) => {
+export const Page = ({ title, crumb, children, isHome = false }: PageProps) => {
+  const navigate = useNavigate();
   const breadcrumbs: Array<{
     text: string;
     onClick?: () => void;
@@ -39,7 +40,7 @@ export const Page = withRouter(({ title, crumb, children, isHome = false, histor
     breadcrumbs.splice(0, 0, {
       text: 'Home',
       onClick: () => {
-        history.push(`/`);
+        navigate(`/`);
       },
     });
   }
@@ -59,4 +60,4 @@ export const Page = withRouter(({ title, crumb, children, isHome = false, histor
       </EuiPageContent>
     </EuiPageBody>
   );
-});
+};

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom-v5-compat';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';

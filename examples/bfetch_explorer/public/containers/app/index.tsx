@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { BrowserRouter as Router, Route, Routes } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
@@ -30,7 +30,7 @@ export const App: React.FC = () => {
         <Sidebar />
         <Routes>
           {routeElements}
-          <Redirect to="/count-until" />
+          <Route index element={<Navigate to="/count-until" />} />
         </Routes>
       </EuiPage>
     </Router>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useMemo } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom-v5-compat';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';

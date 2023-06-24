@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
@@ -205,15 +205,18 @@ export const TodoAppPage: React.FC<{
         <EuiPageContent>
           <EuiPageContentBody>
             <Routes>
-              <Route path={'/completed'}>
-                <TodoApp filter={'completed'} stateContainer={stateContainer} />
-              </Route>
-              <Route path={'/not-completed'}>
-                <TodoApp filter={'not-completed'} stateContainer={stateContainer} />
-              </Route>
-              <Route path={'/'}>
-                <TodoApp filter={null} stateContainer={stateContainer} />
-              </Route>
+              <Route
+                path={'/completed'}
+                element={<TodoApp filter={'completed'} stateContainer={stateContainer} />}
+              />
+              <Route
+                path={'/not-completed'}
+                element={<TodoApp filter={'not-completed'} stateContainer={stateContainer} />}
+              />
+              <Route
+                path={'/'}
+                element={<TodoApp filter={null} stateContainer={stateContainer} />}
+              />
             </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>

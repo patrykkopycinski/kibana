@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 
 export const addProfile = (path: string, profile: string) => {
   const trimmedPath = path.trim();
@@ -16,9 +16,12 @@ export const addProfile = (path: string, profile: string) => {
 };
 
 export const getProfile = (path: string) => {
-  const match = matchPath<{ profile?: string }>(path, {
-    path: '/p/:profile',
-  });
+  const match = matchPath<{ profile?: string }>(
+    {
+      path: '/p/:profile',
+    },
+    path
+  );
 
   return {
     profile: match?.params.profile,

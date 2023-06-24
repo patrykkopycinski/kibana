@@ -8,7 +8,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Workspace } from '../types';
 import { createGraphStore } from '../state_management';
@@ -58,7 +58,7 @@ export const WorkspaceRoute = ({
    * will not leads to updates, therefore `renderCounter` is used to update react state.
    */
   const [renderCounter, setRenderCounter] = useState(0);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const indexPatternProvider = useMemo(
     () => createCachedIndexPatternProvider(getIndexPatternProvider.get),
@@ -110,7 +110,7 @@ export const WorkspaceRoute = ({
       overlays: coreStart.overlays,
       savePolicy: graphSavePolicy,
       contentClient,
-      changeUrl: (newUrl) => history.push(newUrl),
+      changeUrl: (newUrl) => navigate(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome,
       handleSearchQueryError,

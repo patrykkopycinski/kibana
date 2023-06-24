@@ -6,43 +6,39 @@
  */
 
 import React from 'react';
-import { Redirect, RouteProps, RedirectProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Navigate, To, NavigateProps, useLocation } from 'react-router-dom-v5-compat';
 
-interface RedirectWithQueryParamsProps extends Omit<RedirectProps, 'to'> {
-  from: string;
-  to: string | RouteProps['location'];
+interface RedirectWithQueryParamsProps extends Omit<NavigateProps, 'to'> {
+  to: string | To;
 }
 
 // This workaround preserves query parameters in the redirect
 // https://github.com/ReactTraining/react-router/issues/5818#issuecomment-379212014
 export const RedirectWithQueryParams: React.FunctionComponent<RedirectWithQueryParamsProps> = ({
-  from,
   to,
   ...rest
 }) => {
-  return (
-    <Route
-      path={from}
-      render={({ location }: RouteProps) => {
-        return location ? (
-          <Redirect
-            {...rest}
-            from={from}
-            to={
-              typeof to === 'string'
-                ? {
-                    ...location,
-                    pathname: to,
-                  }
-                : {
-                    ...location,
-                    ...to,
-                  }
-            }
-          />
-        ) : null;
-      }}
-    />
-  );
+  const location = useLocation();
+
+  if (location) {
+    return (
+      <Navigate
+        {...rest}
+        replace
+        to={
+          typeof to === 'string'
+            ? {
+                ...location,
+                pathname: to,
+              }
+            : {
+                ...location,
+                ...to,
+              }
+        }
+      />
+    );
+  }
+
+  return null;
 };

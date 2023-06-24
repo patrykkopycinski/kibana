@@ -27,7 +27,23 @@ export const Routes = ({
   ) : (
     <ReactRouterRoutes>
       {Children.map(children, (child) => {
-        if (React.isValidElement(child) && child.type === LegacyRoute) {
+        if (!React.isValidElement(child)) return child;
+
+        if (child.type === LegacyRoute && child.props.element) {
+          return (
+            <Route
+              {...child.props}
+              element={
+                <>
+                  <MatchPropagator />
+                  {child.props.element}
+                </>
+              }
+            />
+          );
+        }
+
+        if (child.type === LegacyRoute) {
           const path = replace(child?.props.path, match.url + '/', '');
           const renderFunction =
             typeof child?.props.children === 'function'

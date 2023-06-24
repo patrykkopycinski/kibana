@@ -78,13 +78,16 @@ const MetricsApp: React.FC<{
             <Routes>
               <Route path="/link-to" component={LinkToMetricsPage} />
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+                <Route path="/snpashot" element={<RedirectWithQueryParams to="/inventory" />} />
               )}
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+                <Route
+                  path="/metrics-explorer"
+                  element={<RedirectWithQueryParams to="/explorer" />}
+                />
               )}
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+                <Route path="/" element={<RedirectWithQueryParams to="/inventory" />} />
               )}
               {uiCapabilities?.infrastructure?.show && (
                 <Route path="/" component={InfrastructurePage} />

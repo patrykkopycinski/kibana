@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { useLocation, useParams, Navigate } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
@@ -16,20 +16,13 @@ import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
 import { useSourceContext } from '../../containers/metrics_source';
 
-type RedirectToHostDetailType = RouteComponentProps<{
-  hostIp: string;
-}>;
-
-export const RedirectToHostDetailViaIP = ({
-  match: {
-    params: { hostIp },
-  },
-  location,
-}: RedirectToHostDetailType) => {
+export const RedirectToHostDetailViaIP = () => {
+  const { hostIp } = useParams<{ hostIp: string }>();
+  const location = useLocation();
   const { source } = useSourceContext();
 
   const { error, name } = useHostIpToName(
-    hostIp,
+    hostIp as string,
     (source && source.configuration && source.configuration.metricAlias) || null
   );
 
@@ -50,7 +43,7 @@ export const RedirectToHostDetailViaIP = ({
   )('');
 
   if (name) {
-    return <Redirect to={`/detail/host/${name}?${searchString}`} />;
+    return <Navigate to={`/detail/host/${name}?${searchString}`} replace />;
   }
 
   return (

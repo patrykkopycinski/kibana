@@ -6,7 +6,7 @@
  */
 
 import { PathsOf, TypeOf, TypeAsArgs } from '@kbn/typed-react-router-config';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingRouter, profilingRouter, ProfilingRoutes } from '../routing';
 
@@ -22,7 +22,7 @@ export interface StatefulProfilingRouter extends ProfilingRouter {
 }
 
 export function useProfilingRouter(): StatefulProfilingRouter {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const {
     start: { core },
@@ -38,11 +38,11 @@ export function useProfilingRouter(): StatefulProfilingRouter {
     push: (...args) => {
       const next = link(...args);
 
-      history.push(next);
+      navigate(next);
     },
     replace: (path, ...args) => {
       const next = link(path, ...args);
-      history.replace(next);
+      navigate(next, { replace: true });
     },
     link: (path, ...args) => {
       return core.http.basePath.prepend('/app/profiling' + link(path, ...args));

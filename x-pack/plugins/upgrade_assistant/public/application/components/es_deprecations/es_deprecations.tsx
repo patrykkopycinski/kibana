@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 import {
   EuiPageHeader,
@@ -117,7 +117,8 @@ const RemoteClustersAppLink: React.FunctionComponent = () => {
   );
 };
 
-export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
+export const EsDeprecations = () => {
+  const navigate = useNavigate();
   const {
     services: {
       api,
@@ -167,7 +168,7 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
       <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
         <NoDeprecationsPrompt
           deprecationType="Elasticsearch"
-          navigateToOverviewPage={() => history.push('/overview')}
+          navigateToOverviewPage={() => navigate('/overview')}
         />
       </EuiPageContent>
     );
@@ -213,4 +214,4 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
       <EsDeprecationsTable deprecations={esDeprecations?.deprecations} reload={resendRequest} />
     </div>
   );
-});
+};

@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
 import { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
@@ -41,7 +41,7 @@ interface WorkspaceTopNavMenuProps {
 export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
   const store = useStore();
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const allSavingDisabled = props.graphSavePolicy === 'none';
   const isInspectDisabled = !props.workspace?.lastRequest || !props.workspace.lastRequest;
 
@@ -70,9 +70,9 @@ export const WorkspaceTopNavMenu = (props: WorkspaceTopNavMenuProps) => {
     run() {
       props.confirmWipeWorkspace(() => {
         if (location.pathname === '/workspace/') {
-          history.go(0);
+          navigate(0);
         } else {
-          history.push('/workspace/');
+          navigate('/workspace/');
         }
       });
     },

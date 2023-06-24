@@ -46,16 +46,16 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
 
   return (
     <Router history={history}>
-      <Routes>
+      <Routes legacySwitch={false}>
         <Route
           path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-          component={CloneTransformSection}
+          element={<CloneTransformSection />}
         />
         <Route
           path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
+          element={<CreateTransformSection />}
         />
-        <Route path={`/`} component={TransformManagementSection} />
+        <Route path={`/`} element={<TransformManagementSection />} />
       </Routes>
     </Router>
   );

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom-v5-compat';
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ export const useWorkspaceLoader = ({
   data,
 }: UseWorkspaceLoaderProps) => {
   const [state, setState] = useState<WorkspaceLoadedState>();
-  const { replace: historyReplace } = useHistory();
+  const navigate = useNavigate();
   const { search } = useLocation();
   const { id } = useParams<WorkspaceUrlParams>();
 
@@ -92,7 +92,7 @@ export const useWorkspaceLoader = ({
                 defaultMessage: "Couldn't load graph with ID",
               }),
             });
-            historyReplace('/home');
+            navigate('/home', { replace: true });
             // return promise that never returns to prevent the controller from loading
             return new Promise(() => {});
           })
@@ -141,7 +141,7 @@ export const useWorkspaceLoader = ({
     id,
     search,
     store,
-    historyReplace,
+    navigate,
     contentClient,
     setState,
     coreStart,

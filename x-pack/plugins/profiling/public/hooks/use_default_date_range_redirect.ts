@@ -5,12 +5,12 @@
  * 2.0.
  */
 import qs from 'query-string';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function useDateRangeRedirect() {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const query = qs.parse(location.search);
 
@@ -33,10 +33,13 @@ export function useDateRangeRedirect() {
       ...query,
     };
 
-    history.replace({
-      ...location,
-      search: qs.stringify(nextQuery),
-    });
+    navigate(
+      {
+        ...location,
+        search: qs.stringify(nextQuery),
+      },
+      { replace: true }
+    );
   };
 
   return {

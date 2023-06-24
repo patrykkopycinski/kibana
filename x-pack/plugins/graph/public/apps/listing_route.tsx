@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { deleteSavedWorkspace, findSavedWorkspace } from '../helpers/saved_workspace_utils';
@@ -45,7 +45,7 @@ export function ListingRoute({
 }: ListingRouteProps) {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
-  const history = useHistory();
+  const navigate = useNavigate();
   const query = new URLSearchParams(useLocation().search);
   const initialFilter = query.get('filter') || '';
 
@@ -54,8 +54,8 @@ export function ListingRoute({
   }, [chrome]);
 
   const createItem = useCallback(() => {
-    history.push(getNewPath());
-  }, [history]);
+    navigate(getNewPath());
+  }, [navigate]);
 
   const findItems = useCallback(
     (search: string) => {
@@ -73,9 +73,9 @@ export function ListingRoute({
 
   const editItem = useCallback(
     (savedWorkspace: { id: string }) => {
-      history.push(getEditPath(savedWorkspace));
+      navigate(getEditPath(savedWorkspace));
     },
-    [history]
+    [navigate]
   );
 
   const deleteItems = useCallback(

@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
@@ -44,11 +44,11 @@ export function ProfilingAppPageTemplate({
 
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
 
-  const history = useHistory();
+  const location = useLocation();
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [history.location.pathname]);
+  }, [location.pathname]);
 
   return (
     <ObservabilityPageTemplate

@@ -85,18 +85,18 @@ export const LogsPageContent: React.FunctionComponent = () => {
         </HeaderMenuPortal>
       )}
 
-      <Routes>
-        <Route path={streamTab.pathname} component={StreamPage} />
-        <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
-        <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
-        <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+      <Routes legacySwitch={false}>
+        <Route path={streamTab.pathname} element={<StreamPage />} />
+        <Route path={anomaliesTab.pathname} element={<LogEntryRatePage />} />
+        <Route path={logCategoriesTab.pathname} element={<LogEntryCategoriesPage />} />
+        <Route path={settingsTab.pathname} element={<LogsSettingsPage />} />
         {enableDeveloperRoutes && (
-          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
+          <Route path={'/state-machine-playground'} element={<StateMachinePlayground />} />
         )}
-        <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
-        <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
-        <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
-        <Route render={() => <NotFoundPage title="Logs" />} />
+        <Route path="/analysis" element={<RedirectWithQueryParams to={anomaliesTab.pathname} />} />
+        <Route path="/log-rate" element={<RedirectWithQueryParams to={anomaliesTab.pathname} />} />
+        <Route path="/" element={<RedirectWithQueryParams to={streamTab.pathname} />} />
+        <Route index element={<NotFoundPage title="Logs" />} />
       </Routes>
     </>
   );

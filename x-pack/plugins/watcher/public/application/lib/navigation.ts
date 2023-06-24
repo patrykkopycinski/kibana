@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-let router: any;
-export const registerRouter = (aRouter: any) => {
-  router = aRouter;
+import type { NavigateFunction } from 'react-router-dom-v5-compat';
+
+export const goToWatchList = (navigate: NavigateFunction) => {
+  navigate({ pathname: `/watches` });
 };
 
-export const goToWatchList = () => {
-  router.history.push({ pathname: `/watches` });
+export const goToCreateThresholdAlert = (navigate: NavigateFunction) => {
+  navigate({ pathname: `/watches/new-watch/threshold` });
 };
 
-export const goToCreateThresholdAlert = () => {
-  router.history.push({ pathname: `/watches/new-watch/threshold` });
-};
-
-export const goToCreateAdvancedWatch = () => {
-  router.history.push({ pathname: `/watches/new-watch/json` });
+export const goToCreateAdvancedWatch = (navigate: NavigateFunction) => {
+  navigate({ pathname: `/watches/new-watch/json` });
 };

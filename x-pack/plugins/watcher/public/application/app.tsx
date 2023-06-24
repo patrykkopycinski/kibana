@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
-import { Redirect, withRouter, RouteComponentProps } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -26,14 +26,8 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
 import { LicenseStatus } from '../../common/types/license_status';
 import { WatchListPage, WatchEditPage, WatchStatusPage } from './sections';
-import { registerRouter } from './lib/navigation';
 import { AppContextProvider } from './app_context';
 import { LicensePrompt } from './license_prompt';
-
-const ShareRouter = withRouter(({ children, history }: RouteComponentProps & { children: any }) => {
-  registerRouter({ history });
-  return children;
-});
 
 export interface AppDeps {
   docLinks: DocLinksStart;
@@ -66,23 +60,20 @@ export const App = (deps: AppDeps) => {
   }
   return (
     <Router history={deps.history}>
-      <ShareRouter>
-        <AppContextProvider value={deps}>
-          <AppWithoutRouter />
-        </AppContextProvider>
-      </ShareRouter>
+      <AppContextProvider value={deps}>
+        <AppWithoutRouter />
+      </AppContextProvider>
     </Router>
   );
 };
 
 // Export this so we can test it with a different router.
 export const AppWithoutRouter = () => (
-  <Routes>
-    <Route exact path="/watches" component={WatchListPage} />
-    <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
-    <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
-    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
-    <Redirect exact from="/" to="/watches" />
-    <Redirect exact from="" to="/watches" />
+  <Routes legacySwitch={false}>
+    <Route path="/watches/watch/:id/status" element={<WatchStatusPage />} />
+    <Route path="/watches/watch/:id/edit" element={<WatchEditPage />} />
+    <Route path="/watches/new-watch/:type(json|threshold)" element={<WatchEditPage />} />
+    <Route path="/watches" element={<WatchListPage />} />
+    <Route index element={<Navigate to="/watches" />} />
   </Routes>
 );

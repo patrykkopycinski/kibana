@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom-v5-compat';
 import { DEFAULT_LOG_VIEW } from '../../../common/log_views';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 
 import { AuthorizationContext } from '../../../../lib/authorization';
@@ -19,7 +19,7 @@ import { cloneActionNameText, CloneActionName } from './clone_action_name';
 
 export type CloneAction = ReturnType<typeof useCloneAction>;
 export const useCloneAction = (forceDisable: boolean, transformNodes: number) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const appDeps = useAppDependencies();
   const dataViewsContract = appDeps.data.dataViews;
   const toastNotifications = useToastNotifications();
@@ -46,7 +46,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
             })
           );
         } else {
-          history.push(`/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewId}`);
+          navigate(`/${SECTION_SLUG.CLONE_TRANSFORM}/${item.id}?dataViewId=${dataViewId}`);
         }
       } catch (e) {
         toastNotifications.addError(e, {
@@ -56,7 +56,7 @@ export const useCloneAction = (forceDisable: boolean, transformNodes: number) =>
         });
       }
     },
-    [history, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
+    [navigate, dataViewsContract, toastNotifications, loadDataViews, getDataViewIdByTitle]
   );
 
   const action: TransformListAction = useMemo(

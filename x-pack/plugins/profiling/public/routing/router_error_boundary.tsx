@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { ProfilingPluginPublicStartDeps } from '../types';
 

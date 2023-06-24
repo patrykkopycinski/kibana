@@ -7,7 +7,7 @@
 import '../_index.scss';
 import { pick } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { parse, stringify } from 'query-string';
 import { isEqual } from 'lodash';
 import { encode } from '@kbn/rison';
@@ -97,7 +97,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
     savedSearch: savedSearchService,
   } = services;
 
-  const history = useHistory();
+  const navigate = useNavigate();
   const { search: urlSearchString } = useLocation();
 
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>(undefined);
@@ -239,9 +239,9 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
         if (oldLocationSearchString !== newLocationSearchString) {
           const newSearchString = stringify(parsedQueryString, { sort: false });
           if (replaceState) {
-            history.replace({ search: newSearchString });
+            navigate({ search: newSearchString }, { replace: true });
           } else {
-            history.push({ search: newSearchString });
+            navigate({ search: newSearchString });
           }
         }
       } catch (error) {
@@ -249,7 +249,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
         console.error('Could not save url state', error);
       }
     },
-    [history, urlSearchString]
+    [navigate, urlSearchString]
   );
 
   return (

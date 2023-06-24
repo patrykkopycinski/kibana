@@ -11,9 +11,10 @@ import {
   // eslint-disable-next-line no-restricted-imports
   Route as ReactRouterRoute,
   RouteComponentProps,
-  RouteProps,
+  RouteProps as LegacyRouteProps,
   useRouteMatch,
 } from 'react-router-dom';
+import { RouteProps } from 'react-router-dom-v5-compat';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
@@ -28,7 +29,7 @@ export const Route = <T extends {}>({
   component: Component,
   render,
   ...rest
-}: RouteProps<string, { [K: string]: string } & T>) => {
+}: LegacyRouteProps<string, { [K: string]: string } & T> & RouteProps) => {
   const component = useMemo(() => {
     if (!Component) {
       return undefined;

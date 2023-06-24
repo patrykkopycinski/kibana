@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
-
+import { useNavigate } from 'react-router-dom-v5-compat';
 import {
   CriteriaWithPagination,
   EuiButton,
@@ -48,6 +48,7 @@ import { PageError as GenericPageError } from '../../shared_imports';
 
 export const WatchListPage = () => {
   // hooks
+  const routerNavigate = useNavigate();
   const {
     setBreadcrumbs,
     history,
@@ -119,11 +120,11 @@ export const WatchListPage = () => {
               data-test-subj={`${watchType}WatchCreateLink`}
               onClick={() => {
                 setIsPopOverOpen(false);
-                const navigate =
+                const navigateFn =
                   watchType === WATCH_TYPES.THRESHOLD
                     ? goToCreateThresholdAlert
                     : goToCreateAdvancedWatch;
-                navigate();
+                navigateFn(routerNavigate);
               }}
             >
               {watchType === WATCH_TYPES.THRESHOLD ? (

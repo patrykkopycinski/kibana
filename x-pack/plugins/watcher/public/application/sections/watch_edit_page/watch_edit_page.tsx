@@ -8,6 +8,7 @@
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
 
+import { useParams } from 'react-router-dom-v5-compat';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -83,19 +84,9 @@ const watchReducer = (state: any, action: any) => {
   }
 };
 
-export const WatchEditPage = ({
-  match: {
-    params: { id, type },
-  },
-}: {
-  match: {
-    params: {
-      id: string | undefined;
-      type: string | undefined;
-    };
-  };
-}) => {
+export const WatchEditPage = () => {
   // hooks
+  const { id, type } = useParams();
   const { setBreadcrumbs } = useAppContext();
   const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 

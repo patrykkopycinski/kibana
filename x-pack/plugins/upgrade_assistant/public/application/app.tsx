@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -144,12 +144,12 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
   }
 
   return (
-    <Routes>
-      <Route exact path="/overview" component={Overview} />
-      <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
-      <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
-      <Redirect from="/" to="/overview" />
+    <Routes legacySwitch={false}>
+      <Route path="/overview" element={Overview} />
+      <Route path="/es_deprecations" element={EsDeprecations} />
+      <Route path="/es_deprecation_logs" element={EsDeprecationLogs} />
+      <Route path="/kibana_deprecations" element={KibanaDeprecations} />
+      <Route path="/" element={<Navigate to="/overview" replace />} />
     </Routes>
   );
 };

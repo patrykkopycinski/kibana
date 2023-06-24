@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { matchPath, useLocation } from 'react-router-dom';
+import { matchPath, useLocation } from 'react-router-dom-v5-compat';
 import { partition } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
@@ -32,7 +32,7 @@ const findItemsByPath = (
         return found;
       }
     }
-    if (matchPath(pathname, { path: sideNavItem.href })) {
+    if (matchPath({ path: sideNavItem.href }, pathname)) {
       return [sideNavItem];
     }
   }

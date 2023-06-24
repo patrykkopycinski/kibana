@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { USERS_PATH } from '../../../../common/constants';
@@ -17,18 +17,19 @@ import { usersDetailsPagePath, usersDetailsTabPath, usersTabPath } from './const
 
 export const UsersContainer = React.memo(() => {
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route path={usersTabPath}>
         <Users />
       </Route>
       <Route // Compatibility redirect for the old external alert path to events page with external alerts showing.
         path={`${USERS_PATH}/externalAlerts`}
         render={({ location: { search = '' } }) => (
-          <Redirect
+          <Navigate
             to={{
               pathname: `${USERS_PATH}/${UsersTableType.events}`,
               search: `${search}&onlyExternalAlerts=true`,
             }}
+            replace
           />
         )}
       />
@@ -53,11 +54,12 @@ export const UsersContainer = React.memo(() => {
           },
           location: { search = '' },
         }) => (
-          <Redirect
+          <Navigate
             to={{
               pathname: `${USERS_PATH}/name/${detailName}/${UsersTableType.authentications}`,
               search,
             }}
+            replace
           />
         )}
       />
@@ -70,18 +72,19 @@ export const UsersContainer = React.memo(() => {
           },
           location: { search = '' },
         }) => (
-          <Redirect
+          <Navigate
             to={{
               pathname: `${USERS_PATH}/name/${detailName}/${tabName}`,
               search,
             }}
+            replace
           />
         )}
       />
       <Route // Redirect to the first tab when tabName is not present.
         path={USERS_PATH}
         render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} />
+          <Navigate to={{ pathname: `${USERS_PATH}/${UsersTableType.allUsers}`, search }} replace />
         )}
       />
     </Routes>

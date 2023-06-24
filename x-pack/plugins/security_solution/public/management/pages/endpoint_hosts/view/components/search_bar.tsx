@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { encode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import { TimeHistory } from '@kbn/data-plugin/public';
@@ -19,7 +19,7 @@ import * as selectors from '../../store/selectors';
 import { clone } from '../../models/index_pattern';
 
 export const AdminSearchBar = memo(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { admin_query: _, ...queryParams } = useEndpointSelector(selectors.uiQueryParams);
   const searchBarIndexPatterns = useEndpointSelector(selectors.patterns);
   const searchBarQuery = useEndpointSelector(selectors.searchBarQuery);
@@ -30,7 +30,7 @@ export const AdminSearchBar = memo(() => {
 
   const onQuerySubmit = useCallback(
     (params: { query?: Query }) => {
-      history.push(
+      navigate(
         urlFromQueryParams({
           ...queryParams,
           // if query is changed, reset back to first page
@@ -40,7 +40,7 @@ export const AdminSearchBar = memo(() => {
         })
       );
     },
-    [history, queryParams, searchBarQuery.query]
+    [navigate, queryParams, searchBarQuery.query]
   );
 
   const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);

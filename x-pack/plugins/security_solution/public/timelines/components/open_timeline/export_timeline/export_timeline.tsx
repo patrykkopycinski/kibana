@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import * as i18n from '../translations';
 import { TimelineType } from '../../../../../common/types/timeline/api';

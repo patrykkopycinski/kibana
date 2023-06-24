@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { PolicyDetails, PolicyList } from './view';
@@ -24,7 +24,7 @@ import { getPolicyDetailPath } from '../../common/routing';
 
 export const PolicyContainer = memo(() => {
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route
         path={[
           MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -34,14 +34,16 @@ export const PolicyContainer = memo(() => {
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
         ]}
         exact
-        component={PolicyDetails}
+        element={<PolicyDetails />}
       />
       <Route
         path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
         exact
-        render={(props) => <Redirect to={getPolicyDetailPath(props.match.params.policyId)} />}
+        render={(props) => (
+          <Navigate to={getPolicyDetailPath(props.match.params.policyId)} replace />
+        )}
       />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} exact component={PolicyList} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} element={<PolicyList />} />
       <Route path="*" component={NotFoundPage} />
     </Routes>
   );

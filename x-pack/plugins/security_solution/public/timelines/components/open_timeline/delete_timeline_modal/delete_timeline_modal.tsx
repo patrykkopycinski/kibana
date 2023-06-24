@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { isEmpty } from 'lodash/fp';
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import * as i18n from '../translations';
 import { TimelineType } from '../../../../../common/types/timeline/api';
 

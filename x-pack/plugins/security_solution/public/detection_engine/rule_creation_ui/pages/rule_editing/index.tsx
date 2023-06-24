@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
@@ -553,7 +553,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
 
 const EditRulePageWrapper: FC = () => {
   const { detailName: ruleId } = useParams<{ detailName: string }>();
-  const { data: rule } = useRule(ruleId, true);
+  const { data: rule } = useRule(ruleId as string, true);
   return rule != null ? <EditRulePageComponent rule={rule} /> : <></>;
 };
 

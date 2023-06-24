@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 
 import { noop } from 'lodash/fp';

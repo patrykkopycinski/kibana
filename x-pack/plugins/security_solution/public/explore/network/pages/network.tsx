@@ -9,7 +9,7 @@ import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';

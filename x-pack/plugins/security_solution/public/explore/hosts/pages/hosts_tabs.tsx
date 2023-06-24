@@ -40,29 +40,39 @@ export const HostsTabs = React.memo<HostsTabsProps>(
     const hostNameExistsFilter = useMemo(() => fieldNameExistsFilter(SecurityPageName.hosts), []);
 
     return (
-      <Routes>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
-          <HostRiskScoreQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.uncommonProcesses})`}>
-          <UncommonProcessQueryTabBody {...tabProps} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.anomalies})`}>
-          <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
-          <EventsQueryTabBody
-            additionalFilters={hostNameExistsFilter}
-            tableId={TableId.hostsPageEvents}
-            {...tabProps}
-          />
-        </Route>
-        <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>
-          <SessionsTabBody {...tabProps} />
-        </Route>
+      <Routes legacySwitch={false}>
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}
+          element={<HostsQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}
+          element={<HostRiskScoreQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.uncommonProcesses})`}
+          element={<UncommonProcessQueryTabBody {...tabProps} />}
+        />
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.anomalies})`}
+          element={
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+          }
+        />
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}
+          element={
+            <EventsQueryTabBody
+              additionalFilters={hostNameExistsFilter}
+              tableId={TableId.hostsPageEvents}
+              {...tabProps}
+            />
+          }
+        />
+        <Route
+          path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}
+          element={<SessionsTabBody {...tabProps} />}
+        />
       </Routes>
     );
   }

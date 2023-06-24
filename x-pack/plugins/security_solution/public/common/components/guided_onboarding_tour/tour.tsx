@@ -10,7 +10,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { siemGuideId } from '../../../../common/guided_onboarding/siem_guide_config';
 import { isTourPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';

@@ -9,7 +9,7 @@ import { EuiModal } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { createGlobalStyle } from 'styled-components';
 
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { DeleteTimelineModal, DELETE_TIMELINE_MODAL_WIDTH } from './delete_timeline_modal';
 import type { DeleteTimelines } from '../types';
 import { TimelineType } from '../../../../../common/types/timeline/api';

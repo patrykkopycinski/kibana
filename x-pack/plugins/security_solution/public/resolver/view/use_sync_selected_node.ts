@@ -7,7 +7,7 @@
 
 import { useContext, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import * as selectors from '../store/selectors';
 import { SideEffectContext } from './side_effect_context';
 import { panelViewAndParameters } from '../store/panel_view_and_parameters';

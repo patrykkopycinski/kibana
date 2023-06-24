@@ -44,7 +44,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
     };
 
     return (
-      <Routes>
+      <Routes legacySwitch={false}>
         <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>

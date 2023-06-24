@@ -8,7 +8,7 @@
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';

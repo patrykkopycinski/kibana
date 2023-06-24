@@ -8,7 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { TimelineId } from '../../../common/types/timeline';
 import { TimelineType } from '../../../common/types/timeline/api';

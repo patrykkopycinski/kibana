@@ -10,7 +10,7 @@ import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -67,7 +67,7 @@ interface PolicyTab {
 }
 
 export const PolicyTabs = React.memo(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const http = useHttp();
   const toasts = useToasts();
 
@@ -89,7 +89,7 @@ export const PolicyTabs = React.memo(() => {
     canWriteBlocklist,
     loading: privilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
-  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
+  const { state: routeState = {} }: { state: PolicyDetailsRouteState } = useLocation();
 
   // move the user out of this route if they can't access it
   useEffect(() => {
@@ -99,7 +99,7 @@ export const PolicyTabs = React.memo(() => {
       (isInHostIsolationExceptionsTab && !canReadHostIsolationExceptions) ||
       (isInBlocklistsTab && !canReadBlocklist)
     ) {
-      history.replace(getPolicyDetailPath(policyId));
+      navigate(getPolicyDetailPath(policyId), { replace: true });
       toasts.addDanger(
         i18n.translate('xpack.securitySolution.policyDetails.missingArtifactAccess', {
           defaultMessage:
@@ -112,7 +112,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     canReadHostIsolationExceptions,
     canReadTrustedApplications,
-    history,
+    navigate,
     isInBlocklistsTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
@@ -365,9 +365,12 @@ export const PolicyTabs = React.memo(() => {
           path = getPolicyBlocklistsPath(policyId);
           break;
       }
-      history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
+      navigate(
+        path,
+        routeState?.backLink ? { state: { backLink: routeState.backLink } } : undefined
+      );
     },
-    [history, policyId, routeState]
+    [navigate, policyId, routeState]
   );
 
   // show loader for privileges validation

@@ -7,7 +7,7 @@
 
 import type { MouseEventHandler } from 'react';
 import { useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import type { LocationDescriptorObject } from 'history';
 
 type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
@@ -25,7 +25,7 @@ export const useNavigateByRouterEventHandler = (
   /** Additional onClick callback */
   onClick?: EventHandlerCallback
 ): EventHandlerCallback => {
-  const history = useHistory();
+  const navigate = useNavigate();
   return useCallback(
     (ev) => {
       try {
@@ -60,13 +60,13 @@ export const useNavigateByRouterEventHandler = (
       ev.preventDefault();
 
       if (Array.isArray(routeTo)) {
-        history.push(...routeTo);
+        navigate(...routeTo);
       } else if (typeof routeTo === 'string') {
-        history.push(routeTo);
+        navigate(routeTo);
       } else {
-        history.push(routeTo);
+        navigate(routeTo);
       }
     },
-    [history, onClick, routeTo]
+    [navigate, onClick, routeTo]
   );
 };

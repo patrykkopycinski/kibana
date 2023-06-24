@@ -6,7 +6,7 @@
  */
 import React, { useCallback, memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { useEndpointSelector } from '../hooks';
 import { uiQueryParams } from '../../store/selectors';
 
@@ -14,20 +14,21 @@ import { getEndpointListPath } from '../../../../common/routing';
 import { EndpointDetails } from './endpoint_details';
 
 export const EndpointDetailsFlyout = memo(() => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const queryParams = useEndpointSelector(uiQueryParams);
   const { selected_endpoint: selectedEndpoint, ...queryParamsWithoutSelectedEndpoint } =
     queryParams;
 
   const handleFlyoutClose = useCallback(() => {
     const { show: _show, ...urlSearchParams } = queryParamsWithoutSelectedEndpoint;
-    history.push(
+    navigate(
       getEndpointListPath({
         name: 'endpointList',
         ...urlSearchParams,
       })
     );
-  }, [history, queryParamsWithoutSelectedEndpoint]);
+  }, [navigate, queryParamsWithoutSelectedEndpoint]);
+
   return (
     <EuiFlyout
       onClose={handleFlyoutClose}

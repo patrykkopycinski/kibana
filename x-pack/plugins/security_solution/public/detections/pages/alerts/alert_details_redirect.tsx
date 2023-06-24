@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { Redirect, useLocation, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
 
 import moment from 'moment';
 import { encode } from '@kbn/rison';
@@ -84,5 +84,5 @@ export const AlertDetailsRedirect = () => {
 
   const url = `${ALERTS_PATH}?${urlParams.toString()}`;
 
-  return <Redirect to={url} />;
+  return <Navigate to={url} />;
 };

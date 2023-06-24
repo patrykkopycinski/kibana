@@ -8,7 +8,7 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { addEntitiesToKql } from './add_entities_to_kql';
@@ -23,13 +23,12 @@ interface QueryStringType {
 }
 
 export const MlNetworkConditionalContainer = React.memo(() => {
-  const { path } = useRouteMatch();
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <Route
         strict
         exact
-        path={path}
+        path=""
         render={({ location }) => {
           const queryStringDecoded = parse(location.search.substring(1), {
             sort: false,
@@ -44,11 +43,11 @@ export const MlNetworkConditionalContainer = React.memo(() => {
             encode: false,
           });
 
-          return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+          return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
         }}
       />
       <Route
-        path={`${path}/ip/:ip`}
+        path="ip/:ip"
         render={({
           location,
           match: {
@@ -69,7 +68,7 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               encode: false,
             });
 
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
           } else if (multipleEntities(ip)) {
             const ips: string[] = getMultipleEntities(ip);
             queryStringDecoded.query = addEntitiesToKql(
@@ -81,20 +80,20 @@ export const MlNetworkConditionalContainer = React.memo(() => {
               sort: false,
               encode: false,
             });
-            return <Redirect to={`${NETWORK_PATH}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}?${reEncoded}`} />;
           } else {
             const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
               sort: false,
               encode: false,
             });
-            return <Redirect to={`${NETWORK_PATH}/ip/${ip}?${reEncoded}`} />;
+            return <Navigate to={`${NETWORK_PATH}/ip/${ip}?${reEncoded}`} />;
           }
         }}
       />
       <Route
         path={`${NETWORK_PATH}/ml-network/`}
         render={({ location: { search = '' } }) => (
-          <Redirect
+          <Navigate
             from={`${NETWORK_PATH}/ml-network/`}
             to={{
               pathname: `${NETWORK_PATH}/ml-network`,

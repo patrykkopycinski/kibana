@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -53,34 +53,36 @@ const RulesSubRoutes = [
   },
 ];
 
+const RedirectToFirstTab = React.memo(() => {
+  const location = useLocation();
+  const { detailName } = useParams<{ detailName: string }>();
+
+  return (
+    <Navigate
+      to={{
+        ...location,
+        pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+        search: location.search,
+      }}
+      replace
+    />
+  );
+});
+
+RedirectToFirstTab.displayName = 'RedirectToFirstTab';
+
 const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Routes>
+        <Routes legacySwitch={false}>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
-            exact
-            render={({
-              match: {
-                params: { detailName },
-              },
-              location,
-            }) => (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
-                  search: location.search,
-                }}
-              />
-            )}
+            element={<RedirectToFirstTab />}
           />
-          <Route path="/rules" exact>
-            <Redirect to={`/rules/${AllRulesTabs.management}`} />
-          </Route>
+          <Route path="/rules" element={<Navigate to={`/rules/${AllRulesTabs.management}`} />} />
           {RulesSubRoutes.map((route) => (
             <Route
               key={`rules-route-${route.path}`}

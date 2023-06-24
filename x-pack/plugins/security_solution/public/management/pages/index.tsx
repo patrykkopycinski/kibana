@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -93,7 +93,7 @@ export const ManagementContainer = memo(() => {
   }
 
   return (
-    <Routes>
+    <Routes legacySwitch={false}>
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
@@ -131,9 +131,10 @@ export const ManagementContainer = memo(() => {
       />
 
       {canReadEndpointList && (
-        <Route path={MANAGEMENT_PATH} exact>
-          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-        </Route>
+        <Route
+          path={MANAGEMENT_PATH}
+          element={<Navigate to={getEndpointListPath({ name: 'endpointList' })} />}
+        />
       )}
       <Route path="*" component={NotFoundPage} />
     </Routes>

@@ -13,7 +13,7 @@ import {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { EuiSkeletonText } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';

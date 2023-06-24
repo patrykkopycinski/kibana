@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { OsqueryInvestigationGuidePanel } from './osquery/osquery_investigation_guide_panel';
 import { useRule } from '../rule_management/logic';

@@ -71,7 +71,7 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     };
 
     return (
-      <Routes>
+      <Routes legacySwitch={false}>
         <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
           <DnsQueryTabBody {...tabProps} />
         </Route>

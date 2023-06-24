@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { useUrlParams } from './use_url_params';
 
 /**
@@ -15,19 +15,20 @@ import { useUrlParams } from './use_url_params';
  * NOTE: This hook will also increment the `page_index` by 1 since `page` is now one-based
  */
 export const useOldUrlSearchPaginationReplace = (): void => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { urlParams } = useUrlParams();
 
   useEffect(() => {
     if ((urlParams.page_index && !urlParams.page) || (urlParams.page_size && !urlParams.pageSize)) {
-      history.replace(
+      navigate(
         `${history.location.pathname}${history.location.search
           .replaceAll('page_size', 'pageSize')
           .replaceAll(
             `page_index=${urlParams.page_index}`,
             `page=${Number(urlParams.page_index) + 1}`
-          )}`
+          )}`,
+        { replace: true }
       );
     }
-  }, [history, urlParams.page, urlParams.pageSize, urlParams.page_index, urlParams.page_size]);
+  }, [navigate, urlParams.page, urlParams.pageSize, urlParams.page_index, urlParams.page_size]);
 };

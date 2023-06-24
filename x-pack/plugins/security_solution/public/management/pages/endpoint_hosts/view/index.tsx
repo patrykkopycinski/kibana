@@ -20,7 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
@@ -103,7 +103,7 @@ EndpointListNavLink.displayName = 'EndpointListNavLink';
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const EndpointList = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { services } = useKibana();
   const {
     listData,
@@ -140,7 +140,7 @@ export const EndpointList = () => {
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
-  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
+  const { state: routeState = {} }: { state: PolicyDetailsRouteState } = useLocation();
 
   const backLinkOptions = useMemo<BackToExternalAppButtonProps>(() => {
     if (routeState?.backLink) {
@@ -207,7 +207,7 @@ export const EndpointList = () => {
     ({ page }: { page: { index: number; size: number } }) => {
       const { index, size } = page;
       // FIXME: PT: if endpoint details is open, table is not displaying correct number of rows
-      history.push(
+      navigate(
         getEndpointListPath({
           name: 'endpointList',
           ...queryParams,
@@ -216,7 +216,7 @@ export const EndpointList = () => {
         })
       );
     },
-    [history, queryParams]
+    [navigate, queryParams]
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(

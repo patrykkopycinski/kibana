@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { HOSTS_PATH } from '../../../../common/constants';
@@ -36,24 +36,23 @@ const getHostDetailsTabPath = () =>
   `${HostsTableType.sessions})`;
 
 export const HostsContainer = React.memo(() => (
-  <Routes>
+  <Routes legacySwitch={false}>
     <Route path={`${HOSTS_PATH}/ml-hosts`}>
       <MlHostConditionalContainer />
     </Route>
     <Route // Compatibility redirect for the old external alert path to events page with external alerts showing.
       path={`${HOSTS_PATH}/externalAlerts`}
       render={({ location: { search = '' } }) => (
-        <Redirect
+        <Navigate
           to={{
             pathname: `${HOSTS_PATH}/${HostsTableType.events}`,
             search: `${search}&onlyExternalAlerts=true`,
           }}
+          replace
         />
       )}
     />
-    <Route path={getHostsTabPath()}>
-      <Hosts />
-    </Route>
+    <Route path={getHostsTabPath()} element={<Hosts />} />
     <Route
       path={getHostDetailsTabPath()}
       render={({
@@ -75,11 +74,12 @@ export const HostsContainer = React.memo(() => (
         },
         location: { search = '' },
       }) => (
-        <Redirect
+        <Navigate
           to={{
             pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
             search,
           }}
+          replace
         />
       )}
     />
@@ -91,18 +91,19 @@ export const HostsContainer = React.memo(() => (
         },
         location: { search = '' },
       }) => (
-        <Redirect
+        <Navigate
           to={{
             pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
             search,
           }}
+          replace
         />
       )}
     />
     <Route // Redirect to the first tab when tabName is not present.
       path={HOSTS_PATH}
       render={({ location: { search = '' } }) => (
-        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
+        <Navigate to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} replace />
       )}
     />
   </Routes>

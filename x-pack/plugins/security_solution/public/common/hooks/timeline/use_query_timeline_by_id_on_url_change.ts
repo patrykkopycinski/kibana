@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useDispatch } from 'react-redux';
 import { safeDecode } from '@kbn/rison';

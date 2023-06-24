@@ -10,7 +10,7 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';

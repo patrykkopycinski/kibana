@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { RouteProps, RouteComponentProps } from 'react-router-dom';
-import { Redirect } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom-v5-compat';
+import { useLocation, Navigate } from 'react-router-dom-v5-compat';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { Alerts } from './pages/alerts';
@@ -18,20 +18,26 @@ const AlertsRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const DetectionsRedirects = ({ location }: RouteComponentProps) =>
-  location.pathname === DETECTIONS_PATH ? (
-    <Redirect to={{ ...location, pathname: ALERTS_PATH }} />
+const DetectionsRedirects = () => {
+  const location = useLocation();
+
+  return location.pathname === DETECTIONS_PATH ? (
+    <Navigate to={{ ...location, pathname: ALERTS_PATH }} replace />
   ) : (
-    <Redirect to={{ ...location, pathname: location.pathname.replace(DETECTIONS_PATH, '') }} />
+    <Navigate
+      to={{ ...location, pathname: location.pathname.replace(DETECTIONS_PATH, '') }}
+      replace
+    />
   );
+};
 
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    render: DetectionsRedirects,
+    element: <DetectionsRedirects />,
   },
   {
     path: ALERTS_PATH,
-    component: AlertsRoutes,
+    element: <AlertsRoutes />,
   },
 ];

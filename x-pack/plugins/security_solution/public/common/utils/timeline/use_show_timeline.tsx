@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { useShowTimelineForGivenPath } from './use_show_timeline_for_path';
 
 export const useShowTimeline = () => {

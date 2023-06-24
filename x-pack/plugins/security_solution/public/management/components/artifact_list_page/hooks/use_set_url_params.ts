@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { useCallback } from 'react';
 import { pickBy } from 'lodash';
 import { useUrlParams } from '../../../hooks/use_url_params';
@@ -17,12 +17,12 @@ export const useSetUrlParams = (): ((
   replace?: boolean
 ) => void) => {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { toUrlParams, urlParams: currentUrlParams } = useUrlParams();
 
   return useCallback(
     (params, replace = false) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams(
           replace
@@ -31,6 +31,6 @@ export const useSetUrlParams = (): ((
         ),
       });
     },
-    [currentUrlParams, history, location, toUrlParams]
+    [currentUrlParams, navigate, location, toUrlParams]
   );
 };

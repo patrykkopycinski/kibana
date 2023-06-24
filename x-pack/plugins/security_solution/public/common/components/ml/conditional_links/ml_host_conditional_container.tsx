@@ -8,7 +8,7 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
@@ -23,86 +23,84 @@ interface QueryStringType {
   timerange: string | null;
 }
 
-export const MlHostConditionalContainer = React.memo(() => {
-  const { path } = useRouteMatch();
-  return (
-    <Routes>
-      <Route
-        strict
-        exact
-        path={path}
-        render={({ location }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
-            sort: false,
-          }) as Required<QueryStringType>;
+const RedirectToHosts = React.memo(() => {
+  const location = useLocation();
 
-          if (queryStringDecoded.query != null) {
-            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-          }
-          const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-            sort: false,
-            encode: false,
-          });
-          return <Redirect to={`${HOSTS_PATH}?${reEncoded}`} />;
-        }}
-      />
-      <Route
-        path={`${path}/:hostName`}
-        render={({
-          location,
-          match: {
-            params: { hostName },
-          },
-        }) => {
-          const queryStringDecoded = parse(location.search.substring(1), {
-            sort: false,
-          }) as Required<QueryStringType>;
+  const queryStringDecoded = parse(location.search.substring(1), {
+    sort: false,
+  }) as Required<QueryStringType>;
 
-          if (queryStringDecoded.query != null) {
-            queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
-          }
-          if (emptyEntity(hostName)) {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-              sort: false,
-              encode: false,
-            });
-
-            return <Redirect to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
-          } else if (multipleEntities(hostName)) {
-            const hosts: string[] = getMultipleEntities(hostName);
-            queryStringDecoded.query = addEntitiesToKql(
-              ['host.name'],
-              hosts,
-              queryStringDecoded.query || ''
-            );
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-              sort: false,
-              encode: false,
-            });
-
-            return <Redirect to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
-          } else {
-            const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
-              sort: false,
-              encode: false,
-            });
-
-            return (
-              <Redirect
-                to={`${HOSTS_PATH}/name/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
-              />
-            );
-          }
-        }}
-      />
-      <Route
-        path={`${HOSTS_PATH}/ml-hosts/`}
-        render={({ location: { search = '' } }) => (
-          <Redirect from={`${HOSTS_PATH}/ml-hosts/`} to={`${HOSTS_PATH}/ml-hosts${search}`} />
-        )}
-      />
-    </Routes>
-  );
+  if (queryStringDecoded.query != null) {
+    queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+  }
+  const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+    sort: false,
+    encode: false,
+  });
+  return <Navigate to={`${HOSTS_PATH}?${reEncoded}`} />;
 });
+
+RedirectToHosts.displayName = 'RedirectToHosts';
+
+const RedirectToHost = React.memo(() => {
+  const location = useLocation();
+  const { hostName } = useParams();
+
+  const queryStringDecoded = parse(location.search.substring(1), {
+    sort: false,
+  }) as Required<QueryStringType>;
+
+  if (queryStringDecoded.query != null) {
+    queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
+  }
+  if (emptyEntity(hostName as string)) {
+    const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+      sort: false,
+      encode: false,
+    });
+
+    return <Navigate to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
+  } else if (multipleEntities(hostName as string)) {
+    const hosts: string[] = getMultipleEntities(hostName as string);
+    queryStringDecoded.query = addEntitiesToKql(
+      ['host.name'],
+      hosts,
+      queryStringDecoded.query || ''
+    );
+    const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+      sort: false,
+      encode: false,
+    });
+
+    return <Navigate to={`${HOSTS_PATH}/${HostsTableType.anomalies}?${reEncoded}`} />;
+  } else {
+    const reEncoded = stringify(urlUtils.encodeQuery(queryStringDecoded), {
+      sort: false,
+      encode: false,
+    });
+
+    return (
+      <Navigate to={`${HOSTS_PATH}/name/${hostName}/${HostsTableType.anomalies}?${reEncoded}`} />
+    );
+  }
+});
+
+RedirectToHost.displayName = 'RedirectToHost';
+
+const RedirectToMLHosts = React.memo(() => {
+  const { search = '' } = useLocation();
+
+  return <Navigate to={`${HOSTS_PATH}/ml-hosts${search}`} replace />;
+});
+
+RedirectToMLHosts.displayName = 'RedirectToMLHosts';
+
+export const MlHostConditionalContainer = React.memo(() => (
+  <Routes legacySwitch={false}>
+    <Route path="" element={<RedirectToHosts />} />
+    <Route path=":hostName" element={<RedirectToHost />} />
+    <Route path={`${HOSTS_PATH}/ml-hosts/`} element={<RedirectToMLHosts />} />
+  </Routes>
+));
 
 MlHostConditionalContainer.displayName = 'MlHostConditionalContainer';

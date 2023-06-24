@@ -6,7 +6,7 @@
  */
 
 import { useRef, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom-v5-compat';
 import { parameterName } from '../store/parameter_name';
 /**
  * Cleanup any query string keys that were added by this Resolver instance.
@@ -22,7 +22,7 @@ export function useResolverQueryParamCleaner(id: string) {
   const searchRef = useRef<string>();
   searchRef.current = useLocation().search;
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const resolverKey = parameterName(id);
 
@@ -45,7 +45,7 @@ export function useResolverQueryParamCleaner(id: string) {
        */
       urlSearchParams.delete(oldResolverKey);
       const relativeURL = { search: urlSearchParams.toString() };
-      history.replace(relativeURL);
+      navigate(relativeURL, { replace: true });
     };
-  }, [resolverKey, history]);
+  }, [resolverKey, navigate]);
 }

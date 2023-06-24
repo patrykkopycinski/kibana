@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import { first } from 'lodash/fp';
 import { StatefulTopN } from '../../common/components/top_n';

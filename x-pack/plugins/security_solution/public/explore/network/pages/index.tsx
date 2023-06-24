@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { Redirect } from 'react-router-dom';
+import { useLocation, useParams, Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
@@ -30,6 +30,26 @@ const getPathWithFlowType = (detailName: string, flowTarget?: FlowTargetSourceDe
     NetworkRouteType.flows
   }`;
 
+const RedirectToDefaultNetworkPage = () => {
+  const { search = '' } = useLocation();
+
+  return <Navigate to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />;
+};
+
+const RedirectToDefaultNetworkDetailsPage = () => {
+  const { detailName, flowTarget } = useParams();
+  const { search = '' } = useLocation();
+
+  return (
+    <Navigate
+      to={{
+        pathname: getPathWithFlowType(detailName, flowTarget as FlowTargetSourceDest),
+        search,
+      }}
+    />
+  );
+};
+
 const NetworkContainerComponent = () => {
   const capabilities = useMlCapabilities();
   const capabilitiesFetched = capabilities.capabilitiesFetched;
@@ -43,50 +63,35 @@ const NetworkContainerComponent = () => {
   );
 
   return (
-    <Routes>
-      <Route
-        exact
-        strict
-        path={NETWORK_PATH}
-        render={({ location: { search = '' } }) => (
-          <Redirect to={{ pathname: `${NETWORK_PATH}/${NetworkRouteType.flows}`, search }} />
-        )}
-      />
+    <Routes legacySwitch={false}>
+      <Route path={NETWORK_PATH} element={<RedirectToDefaultNetworkPage />} />
       <Route path={`${NETWORK_PATH}/ml-network`}>
         <MlNetworkConditionalContainer />
       </Route>
-      <Route strict path={networkRoutePath}>
-        <Network
-          capabilitiesFetched={capabilities.capabilitiesFetched}
-          hasMlUserPermissions={userHasMlUserPermissions}
-        />
-      </Route>
-      <Route path={NETWORK_DETAILS_TAB_PATH}>
-        <NetworkDetails />
-      </Route>
+      <Route
+        path={networkRoutePath}
+        element={
+          <Network
+            capabilitiesFetched={capabilities.capabilitiesFetched}
+            hasMlUserPermissions={userHasMlUserPermissions}
+          />
+        }
+      />
+      <Route path={NETWORK_DETAILS_TAB_PATH} element={<NetworkDetails />} />
       <Route
         path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget(${FLOW_TARGET_PARAM})?`}
-        render={({
-          match: {
-            params: { detailName, flowTarget },
-          },
-          location: { search = '' },
-        }) => (
-          <Redirect
+        element={<RedirectToDefaultNetworkDetailsPage />}
+      />
+      <Route
+        index
+        element={
+          <Navigate
             to={{
-              pathname: getPathWithFlowType(detailName, flowTarget as FlowTargetSourceDest),
-              search,
+              pathname: NETWORK_PATH,
             }}
           />
-        )}
+        }
       />
-      <Route>
-        <Redirect
-          to={{
-            pathname: NETWORK_PATH,
-          }}
-        />
-      </Route>
     </Routes>
   );
 };

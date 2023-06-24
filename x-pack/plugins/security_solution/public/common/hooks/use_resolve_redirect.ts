@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { safeDecode, encode } from '@kbn/rison';
 import { useDeepEqualSelector } from './use_selector';
 import { TimelineId } from '../../../common/types/timeline';

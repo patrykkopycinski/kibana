@@ -24,7 +24,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -242,7 +242,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     refresh: refreshRule,
     loading: ruleLoading,
     isExistingRule,
-  } = useRuleWithFallback(ruleId);
+  } = useRuleWithFallback(ruleId as string);
 
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
@@ -730,7 +730,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                       <EuiFlexItem grow={false}>
                         <EditRuleSettingButtonLink
-                          ruleId={ruleId}
+                          ruleId={ruleId as string}
                           disabled={
                             !isExistingRule ||
                             !hasUserCRUDPermission(canUserCRUD) ||
@@ -822,84 +822,95 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer />
             </Display>
             <StyledMinHeightTabContainer>
-              <Routes>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
-                  <>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AlertsTableFilterGroup
-                          status={filterGroup}
-                          onFilterGroupChanged={onFilterGroupChangedCallback}
+              <Routes legacySwitch={false}>
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}
+                  element={
+                    <>
+                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <AlertsTableFilterGroup
+                            status={filterGroup}
+                            onFilterGroupChanged={onFilterGroupChangedCallback}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          {updatedAt &&
+                            timelinesUi.getLastUpdated({
+                              updatedAt: updatedAt || Date.now(),
+                              showUpdating,
+                            })}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <Display show={!globalFullScreen}>
+                        <AlertsHistogramPanel
+                          filters={alertMergedFilters}
+                          query={query}
+                          signalIndexName={signalIndexName}
+                          defaultStackByOption={defaultRuleStackByOption}
+                          updateDateRange={updateDateRangeCallback}
+                          runtimeMappings={runtimeMappings}
                         />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiSpacer size="l" />
-                    <Display show={!globalFullScreen}>
-                      <AlertsHistogramPanel
-                        filters={alertMergedFilters}
-                        query={query}
-                        signalIndexName={signalIndexName}
-                        defaultStackByOption={defaultRuleStackByOption}
-                        updateDateRange={updateDateRangeCallback}
-                        runtimeMappings={runtimeMappings}
-                      />
-                      <EuiSpacer />
-                    </Display>
-                    {ruleId != null && (
-                      <GroupedAlertsTable
-                        currentAlertStatusFilterValue={[filterGroup]}
-                        defaultFilters={alertMergedFilters}
-                        from={from}
-                        globalFilters={filters}
-                        globalQuery={query}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        hasIndexWrite={hasIndexWrite ?? false}
-                        loading={loading}
-                        renderChildComponent={renderGroupedAlertTable}
-                        runtimeMappings={runtimeMappings}
-                        signalIndexName={signalIndexName}
-                        tableId={TableId.alertsOnRuleDetailsPage}
-                        to={to}
-                      />
-                    )}
-                  </>
-                </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
-                  <ExceptionsViewer
-                    rule={rule}
-                    listTypes={[
-                      ExceptionListTypeEnum.DETECTION,
-                      ExceptionListTypeEnum.RULE_DEFAULT,
-                    ]}
-                    onRuleChange={refreshRule}
-                    isViewReadOnly={!isExistingRule}
-                    data-test-subj="exceptionTab"
-                  />
-                </Route>
+                        <EuiSpacer />
+                      </Display>
+                      {ruleId != null && (
+                        <GroupedAlertsTable
+                          currentAlertStatusFilterValue={[filterGroup]}
+                          defaultFilters={alertMergedFilters}
+                          from={from}
+                          globalFilters={filters}
+                          globalQuery={query}
+                          hasIndexMaintenance={hasIndexMaintenance ?? false}
+                          hasIndexWrite={hasIndexWrite ?? false}
+                          loading={loading}
+                          renderChildComponent={renderGroupedAlertTable}
+                          runtimeMappings={runtimeMappings}
+                          signalIndexName={signalIndexName}
+                          tableId={TableId.alertsOnRuleDetailsPage}
+                          to={to}
+                        />
+                      )}
+                    </>
+                  }
+                />
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}
+                  element={
+                    <ExceptionsViewer
+                      rule={rule}
+                      listTypes={[
+                        ExceptionListTypeEnum.DETECTION,
+                        ExceptionListTypeEnum.RULE_DEFAULT,
+                      ]}
+                      onRuleChange={refreshRule}
+                      isViewReadOnly={!isExistingRule}
+                      data-test-subj="exceptionTab"
+                    />
+                  }
+                />
                 <Route
                   path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.endpointExceptions})`}
-                >
-                  <ExceptionsViewer
-                    rule={rule}
-                    listTypes={[ExceptionListTypeEnum.ENDPOINT]}
-                    onRuleChange={refreshRule}
-                    isViewReadOnly={!isExistingRule}
-                    data-test-subj="endpointExceptionsTab"
-                  />
-                </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
-                </Route>
-                <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
-                  <ExecutionEventsTable ruleId={ruleId} />
-                </Route>
+                  element={
+                    <ExceptionsViewer
+                      rule={rule}
+                      listTypes={[ExceptionListTypeEnum.ENDPOINT]}
+                      onRuleChange={refreshRule}
+                      isViewReadOnly={!isExistingRule}
+                      data-test-subj="endpointExceptionsTab"
+                    />
+                  }
+                />
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}
+                  element={
+                    <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                  }
+                />
+                <Route
+                  path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}
+                  element={<ExecutionEventsTable ruleId={ruleId as string} />}
+                />
               </Routes>
             </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>

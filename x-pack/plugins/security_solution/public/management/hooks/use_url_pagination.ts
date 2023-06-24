@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../common/constants';
 import { useUrlParams } from './use_url_params';
 
@@ -62,7 +62,7 @@ export const paginationFromUrlParams = (urlParams: UrlPaginationParams): Paginat
  */
 export const useUrlPagination = (): UrlPagination => {
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { urlParams, toUrlParams } = useUrlParams();
 
   const urlPaginationParams = useMemo(() => {
@@ -71,7 +71,7 @@ export const useUrlPagination = (): UrlPagination => {
   const [pagination, setPagination] = useState<Pagination>(urlPaginationParams);
   const setUrlPagination = useCallback<SetUrlPagination>(
     ({ pageSize, page }) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -80,7 +80,7 @@ export const useUrlPagination = (): UrlPagination => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   useEffect(() => {

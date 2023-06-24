@@ -11,7 +11,7 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 

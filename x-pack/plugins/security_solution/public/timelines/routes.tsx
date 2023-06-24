@@ -25,6 +25,6 @@ const TimelinesRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: TIMELINES_PATH,
-    component: TimelinesRoutes,
+    element: <TimelinesRoutes />,
   },
 ];

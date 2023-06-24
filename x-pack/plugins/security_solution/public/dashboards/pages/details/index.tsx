@@ -10,7 +10,7 @@ import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';

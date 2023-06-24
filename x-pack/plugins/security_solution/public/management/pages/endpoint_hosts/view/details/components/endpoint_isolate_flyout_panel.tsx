@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { EuiForm, EuiFlyoutBody } from '@elastic/eui';
@@ -36,7 +36,7 @@ import type { AppAction } from '../../../../../../common/store/actions';
 export const EndpointIsolationFlyoutPanel = memo<{
   hostMeta: HostMetadata;
 }>(({ hostMeta }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const dispatch = useDispatch<Dispatch<AppAction>>();
 
   const { show, ...queryParams } = useEndpointSelector(uiQueryParams);
@@ -52,14 +52,14 @@ export const EndpointIsolationFlyoutPanel = memo<{
   const IsolationForm = isCurrentlyIsolated ? EndpointUnisolateForm : EndpointIsolateForm;
 
   const handleCancel: EndpointIsolatedFormProps['onCancel'] = useCallback(() => {
-    history.push(
+    navigate(
       getEndpointDetailsPath({
         name: 'endpointDetails',
         ...queryParams,
         selected_endpoint: hostMeta.agent.id,
       })
     );
-  }, [history, hostMeta.agent.id, queryParams]);
+  }, [navigate, hostMeta.agent.id, queryParams]);
 
   const handleConfirm: EndpointIsolatedFormProps['onConfirm'] = useCallback(() => {
     dispatch({

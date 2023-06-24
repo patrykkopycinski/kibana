@@ -23,7 +23,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';

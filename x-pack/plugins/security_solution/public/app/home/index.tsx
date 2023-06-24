@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 import type { AppMountParameters } from '@kbn/core/public';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';

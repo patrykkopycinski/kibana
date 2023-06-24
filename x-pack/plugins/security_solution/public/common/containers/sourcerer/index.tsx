@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
 import type {
   SelectedDataView,
@@ -490,10 +490,13 @@ const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:de
 export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
-  matchPath(pathname, {
-    path: detectionsPaths,
-    strict: false,
-  }) == null
+  matchPath(
+    {
+      path: detectionsPaths,
+      strict: false,
+    },
+    pathname
+  ) == null
     ? SourcererScopeName.default
     : SourcererScopeName.detections;
 
@@ -508,7 +511,10 @@ export const sourcererPaths = [
 ];
 
 export const showSourcererByPath = (pathname: string): boolean =>
-  matchPath(pathname, {
-    path: sourcererPaths,
-    strict: false,
-  }) != null;
+  matchPath(
+    {
+      path: sourcererPaths,
+      strict: false,
+    },
+    pathname
+  ) != null;

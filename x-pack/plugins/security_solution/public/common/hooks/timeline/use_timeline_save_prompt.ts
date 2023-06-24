@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
-import { useHistory } from 'react-router-dom';
+import { unstable_useBlocker as useBlocker, useLocation } from 'react-router-dom-v5-compat';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
 import type { TimelineId } from '../../../../common/types';
 import { TimelineTabs } from '../../../../common/types';
@@ -30,15 +30,21 @@ export const useTimelineSavePrompt = (
   timelineId: TimelineId,
   onAppLeave: (handler: AppLeaveHandler) => void
 ) => {
+  const location = useLocation();
+  const relativePath = location.pathname.replace(APP_PATH, '');
   const dispatch = useDispatch();
   const { overlays, application, http } = useKibana().services;
   const getIsTimelineVisible = useShowTimelineForGivenPath();
-  const history = useHistory();
 
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
   const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
     getTimelineShowStatus(state, timelineId)
   );
+  const isBlocked =
+    !getIsTimelineVisible(relativePath) &&
+    timelineStatus === TimelineStatus.draft &&
+    updated != null;
+  const blocker = useBlocker(isBlocked);
 
   const showSaveTimelineModal = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: true }));
@@ -57,44 +63,33 @@ export const useTimelineSavePrompt = (
   }, [dispatch, timelineId]);
 
   useEffect(() => {
-    const unblock = history.block((location) => {
-      const relativePath = location.pathname.replace(APP_PATH, '');
-      async function confirmSaveTimeline() {
-        const confirmRes = await overlays?.openConfirm(UNSAVED_TIMELINE_SAVE_PROMPT, {
-          title: UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
-          'data-test-subj': 'appLeaveConfirmModal',
-        });
+    async function confirmSaveTimeline() {
+      const confirmRes = await overlays?.openConfirm(UNSAVED_TIMELINE_SAVE_PROMPT, {
+        title: UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
+        'data-test-subj': 'appLeaveConfirmModal',
+      });
 
-        if (confirmRes) {
-          unblock();
-          application.navigateToUrl(
-            http.basePath.get() + location.pathname + location.hash + location.search,
-            {
-              state: location.state,
-            }
-          );
-        } else {
-          showSaveTimelineModal();
-        }
-      }
-
-      if (
-        !getIsTimelineVisible(relativePath) &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
-      ) {
-        confirmSaveTimeline();
+      if (confirmRes) {
+        blocker.proceed?.();
+        application.navigateToUrl(
+          http.basePath.get() + location.pathname + location.hash + location.search,
+          {
+            state: location.state,
+          }
+        );
       } else {
-        return;
+        showSaveTimelineModal();
       }
-      return false;
-    });
+    }
+
+    if (isBlocked) {
+      confirmSaveTimeline();
+    }
 
     return () => {
-      unblock();
+      blocker.proceed?.();
     };
   }, [
-    history,
     http.basePath,
     application,
     overlays,
@@ -102,7 +97,16 @@ export const useTimelineSavePrompt = (
     getIsTimelineVisible,
     timelineStatus,
     updated,
+    blocker,
+    isBlocked,
+    location,
   ]);
+
+  useEffect(() => {
+    if (blocker.state === 'blocked' && !isBlocked) {
+      blocker.reset();
+    }
+  }, [blocker, isBlocked]);
 
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {

@@ -8,7 +8,7 @@
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { Immutable, EndpointPendingActions } from '../../../../../common/endpoint/types';
@@ -86,10 +86,13 @@ export const patternsError = (state: Immutable<EndpointState>) => state.patterns
 
 export const isOnEndpointPage = (state: Immutable<EndpointState>) => {
   return (
-    matchPath(state.location?.pathname ?? '', {
-      path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
-      exact: true,
-    }) !== null
+    matchPath(
+      {
+        path: MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+        exact: true,
+      },
+      state.location?.pathname ?? ''
+    ) !== null
   );
 };
 

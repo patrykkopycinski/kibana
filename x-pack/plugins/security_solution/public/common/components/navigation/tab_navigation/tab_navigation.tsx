@@ -8,7 +8,7 @@
 import { EuiTab, EuiTabs, EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import deepEqual from 'fast-deep-equal';
 
 import { useNavigation } from '../../../lib/kibana';

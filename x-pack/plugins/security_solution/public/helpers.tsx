@@ -8,8 +8,8 @@
 import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
-import type { RouteProps } from 'react-router-dom';
-import { matchPath, Redirect } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom-v5-compat';
+import { matchPath, Navigate } from 'react-router-dom-v5-compat';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { DocLinks } from '@kbn/doc-links';
@@ -164,33 +164,45 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
 });
 
 export const isDetectionsPath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
-    strict: false,
-  });
+  return !!matchPath(
+    {
+      path: `(${ALERTS_PATH}|${RULES_PATH}|${EXCEPTIONS_PATH})`,
+      strict: false,
+    },
+    pathname
+  );
 };
 
 const isAlertsPath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `${ALERTS_PATH}`,
-    strict: false,
-  });
+  return !!matchPath(
+    {
+      path: `${ALERTS_PATH}`,
+      strict: false,
+    },
+    pathname
+  );
 };
 
 const isCaseDetailsPath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `${CASES_PATH}/:detailName`,
-    strict: false,
-  });
+  return !!matchPath(
+    {
+      path: `${CASES_PATH}/:detailName`,
+      strict: false,
+    },
+    pathname
+  );
 };
 export const isTourPath = (pathname: string): boolean =>
   isAlertsPath(pathname) || isCaseDetailsPath(pathname);
 
 export const isThreatIntelligencePath = (pathname: string): boolean => {
-  return !!matchPath(pathname, {
-    path: `(${THREAT_INTELLIGENCE_PATH})`,
-    strict: false,
-  });
+  return !!matchPath(
+    {
+      path: `(${THREAT_INTELLIGENCE_PATH})`,
+      strict: false,
+    },
+    pathname
+  );
 };
 
 export const getSubPluginRoutesByCapabilities = (
@@ -220,8 +232,8 @@ export const getSubPluginRoutesByCapabilities = (
       ];
     }, []),
     {
-      path: '',
-      component: () => <RedirectRoute capabilities={capabilities} />,
+      index: true,
+      element: <RedirectRoute capabilities={capabilities} />,
     },
   ];
 };
@@ -237,12 +249,12 @@ export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capab
   const overviewAvailable = isSubPluginAvailable('overview', capabilities);
   const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
   if (overviewAvailable) {
-    return <Redirect to={LANDING_PATH} />;
+    return <Navigate to={LANDING_PATH} />;
   }
   if (casesAvailable) {
-    return <Redirect to={CASES_PATH} />;
+    return <Navigate to={CASES_PATH} />;
   }
-  return <Redirect to={LANDING_PATH} />;
+  return <Navigate to={LANDING_PATH} />;
 });
 RedirectRoute.displayName = 'RedirectRoute';
 

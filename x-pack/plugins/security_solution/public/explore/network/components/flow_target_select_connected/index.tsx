@@ -8,7 +8,7 @@
 import type { Location } from 'history';
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import styled from 'styled-components';
 
 import * as i18nIp from '../details/translations';
@@ -39,15 +39,15 @@ const getUpdatedFlowTargetPath = (
 };
 
 export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
 
   const updateNetworkDetailsFlowTarget = useCallback(
     (newFlowTarget: FlowTarget | FlowTargetSourceDest) => {
       const newPath = getUpdatedFlowTargetPath(location, flowTarget, newFlowTarget);
-      history.push(newPath);
+      navigate(newPath);
     },
-    [history, location, flowTarget]
+    [navigate, location, flowTarget]
   );
 
   return (

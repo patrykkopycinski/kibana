@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 
 import { getLinksWithHiddenTimeline } from '../../links';
 import { SourcererScopeName } from '../../store/sourcerer/model';
@@ -16,7 +16,7 @@ import { useKibana } from '../../lib/kibana';
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
   const hiddenTimelineRoutes = groupLinksWithHiddenTimelinePaths;
-  return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
+  return !hiddenTimelineRoutes.find((route) => matchPath(route, currentPath));
 };
 
 export const useShowTimelineForGivenPath = () => {

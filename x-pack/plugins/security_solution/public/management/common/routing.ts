@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 // FIXME: Remove references to `querystring`
 // eslint-disable-next-line import/no-nodejs-modules
 import querystring from 'querystring';
-import { generatePath } from 'react-router-dom';
+import { generatePath } from 'react-router-dom-v5-compat';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import type { ArtifactListPageUrlParams } from '../components/artifact_list_page';
 import { paginationFromUrlParams } from '../hooks/use_url_pagination';

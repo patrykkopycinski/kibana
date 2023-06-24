@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { parse, stringify } from 'query-string';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 
 /**
  * Parses `search` params and returns an object with them along with a `toUrlParams` function

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 import { createSelector } from 'reselect';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../../common/license/policy_config';

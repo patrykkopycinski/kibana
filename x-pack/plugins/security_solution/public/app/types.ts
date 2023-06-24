@@ -15,7 +15,7 @@ import type {
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
-import type { RouteProps } from 'react-router-dom';
+import type { RouteProps } from 'react-router-dom-v5-compat';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { TableState } from '@kbn/securitysolution-data-table';

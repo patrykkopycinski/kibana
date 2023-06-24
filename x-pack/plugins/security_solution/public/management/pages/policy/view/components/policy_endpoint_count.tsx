@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { useAppUrl } from '../../../../../common/lib/kibana';
 import { useNavigateByRouterEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { getEndpointListPath, getPoliciesPath } from '../../../../common/routing';

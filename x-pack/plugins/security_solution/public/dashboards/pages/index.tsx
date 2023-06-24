@@ -15,13 +15,9 @@ import { DashboardContextProvider } from '../context/dashboard_context';
 const DashboardsContainerComponent = () => {
   return (
     <DashboardContextProvider>
-      <Routes>
-        <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
-          <DashboardView />
-        </Route>
-        <Route path={`${DASHBOARDS_PATH}`}>
-          <DashboardsLandingPage />
-        </Route>
+      <Routes legacySwitch={false}>
+        <Route strict path={`${DASHBOARDS_PATH}/:detailName`} element={<DashboardView />} />
+        <Route path={`${DASHBOARDS_PATH}`} element={<DashboardsLandingPage />} />
       </Routes>
     </DashboardContextProvider>
   );

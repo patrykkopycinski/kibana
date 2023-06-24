@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
@@ -30,7 +30,8 @@ import { AlertDetailsHeader } from './components/header';
 import { DetailsSummaryTab } from './tabs/summary';
 
 export const AlertDetailsPage = memo(() => {
-  const { detailName: eventId } = useParams<{ detailName: string }>();
+  const { detailName } = useParams<{ detailName: string }>();
+  const eventId = detailName as string;
   const dispatch = useDispatch();
   const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
   const indexName = useMemo(
@@ -75,16 +76,20 @@ export const AlertDetailsPage = memo(() => {
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Routes>
-            <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
-              <DetailsSummaryTab
-                eventId={eventId}
-                dataAsNestedObject={dataAsNestedObject}
-                searchHit={searchHit}
-                detailsData={detailsData}
-                sourcererDataView={sourcererDataView}
-              />
-            </Route>
+          <Routes legacySwitch={false}>
+            <Route
+              exact
+              path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}
+              element={
+                <DetailsSummaryTab
+                  eventId={eventId}
+                  dataAsNestedObject={dataAsNestedObject}
+                  searchHit={searchHit}
+                  detailsData={detailsData}
+                  sourcererDataView={sourcererDataView}
+                />
+              }
+            />
           </Routes>
         </>
       )}

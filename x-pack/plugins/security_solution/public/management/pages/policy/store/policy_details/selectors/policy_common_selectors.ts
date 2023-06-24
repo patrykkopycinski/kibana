@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router-dom-v5-compat';
 import { createSelector } from 'reselect';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
@@ -31,10 +31,13 @@ export const isOnPolicyFormView: PolicyDetailsSelector<boolean> = createSelector
   getUrlLocationPathname,
   (pathname) => {
     return (
-      matchPath(pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-        exact: true,
-      }) !== null
+      matchPath(
+        {
+          path: MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+          exact: true,
+        },
+        pathname ?? ''
+      ) !== null
     );
   }
 );
@@ -44,10 +47,13 @@ export const isOnPolicyTrustedAppsView: PolicyDetailsSelector<boolean> = createS
   getUrlLocationPathname,
   (pathname) => {
     return (
-      matchPath(pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-        exact: true,
-      }) !== null
+      matchPath(
+        {
+          path: MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+          exact: true,
+        },
+        pathname ?? ''
+      ) !== null
     );
   }
 );
@@ -57,10 +63,13 @@ export const isOnPolicyEventFiltersView: PolicyDetailsSelector<boolean> = create
   getUrlLocationPathname,
   (pathname) => {
     return (
-      matchPath(pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
-        exact: true,
-      }) !== null
+      matchPath(
+        {
+          path: MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+          exact: true,
+        },
+        pathname ?? ''
+      ) !== null
     );
   }
 );
@@ -83,10 +92,13 @@ export const isOnBlocklistsView: PolicyDetailsSelector<boolean> = createSelector
   getUrlLocationPathname,
   (pathname) => {
     return (
-      matchPath(pathname ?? '', {
-        path: MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
-        exact: true,
-      }) !== null
+      matchPath(
+        {
+          path: MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+          exact: true,
+        },
+        pathname ?? ''
+      ) !== null
     );
   }
 );

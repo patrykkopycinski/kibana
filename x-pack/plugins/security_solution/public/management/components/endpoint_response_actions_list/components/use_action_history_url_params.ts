@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -114,7 +114,7 @@ export const actionsLogFiltersFromUrlParams = (
 export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
   // track actions and status filters
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { urlParams, toUrlParams } = useUrlParams();
 
   const getUrlActionsLogFilters = useMemo(
@@ -125,7 +125,7 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
 
   const setUrlActionsFilters = useCallback(
     (commands: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -133,12 +133,12 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   const setUrlHostsFilters = useCallback(
     (agentIds: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -146,12 +146,12 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   const setUrlWithOutputs = useCallback(
     (actionIds: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -159,12 +159,12 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   const setUrlStatusesFilters = useCallback(
     (statuses: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -172,11 +172,11 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
   const setUrlTypeFilters = useCallback(
     (types: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -184,12 +184,12 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   const setUrlUsersFilters = useCallback(
     (users: string) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -197,12 +197,12 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   const setUrlDateRangeFilters = useCallback(
     ({ startDate, endDate }: { startDate: string; endDate: string }) => {
-      history.push({
+      navigate({
         ...location,
         search: toUrlParams({
           ...urlParams,
@@ -211,7 +211,7 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         }),
       });
     },
-    [history, location, toUrlParams, urlParams]
+    [navigate, location, toUrlParams, urlParams]
   );
 
   useEffect(() => {

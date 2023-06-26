@@ -26642,7 +26642,6 @@
     "xpack.observability.breadcrumbs.overviewLinkText": "Aperçu",
     "xpack.observability.breadcrumbs.rulesLinkText": "Règles",
     "xpack.observability.breadcrumbs.sloDetailsLinkText": "Détails",
-    "xpack.observability.breadcrumbs.sloEditLinkText": "SLO",
     "xpack.observability.breadcrumbs.slosLinkText": "SLO",
     "xpack.observability.cases.caseFeatureNoPermissionsMessage": "Pour afficher les cas, vous devez disposer de privilèges pour la fonctionnalité Cas dans l'espace Kibana. Pour en savoir plus, contactez votre administrateur Kibana.",
     "xpack.observability.cases.caseFeatureNoPermissionsTitle": "Privilèges de fonctionnalité Kibana requis",

@@ -26624,7 +26624,6 @@
     "xpack.observability.breadcrumbs.overviewLinkText": "概要",
     "xpack.observability.breadcrumbs.rulesLinkText": "ルール",
     "xpack.observability.breadcrumbs.sloDetailsLinkText": "詳細",
-    "xpack.observability.breadcrumbs.sloEditLinkText": "SLO",
     "xpack.observability.breadcrumbs.slosLinkText": "SLO",
     "xpack.observability.cases.caseFeatureNoPermissionsMessage": "ケースを表示するには、Kibana スペースでケース機能の権限が必要です。詳細については、Kibana管理者に連絡してください。",
     "xpack.observability.cases.caseFeatureNoPermissionsTitle": "Kibana機能権限が必要です",

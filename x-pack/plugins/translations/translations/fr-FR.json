@@ -18160,7 +18160,7 @@
     "xpack.infra.linkTo.hostWithIp.loading": "Chargement de l'hôte avec l'adresse IP \"{hostIp}\" en cours.",
     "xpack.infra.logFlyout.flyoutSubTitle": "À partir de l'index {indexName}",
     "xpack.infra.logFlyout.flyoutTitle": "Détails de l'entrée de log {logEntryId}",
-    "xpack.infra.logs.alertDetails.chart.chartTitle": "Logs pour {field} {comparator} {value}",
+    "xpack.infra.logs.alertDetails.chart.chartTitle": "Logs pour {criteria}",
     "xpack.infra.logs.alertFlyout.groupByOptimizationWarning": "Lors de la définition d'une valeur \"regrouper par\", nous recommandons fortement d'utiliser le comparateur \"{comparator}\" pour votre seuil. Cela peut permettre d'améliorer considérablement les performances.",
     "xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription": "{actualCount, plural, one {la {actualCount} dernière entrée de log} many {les {actualCount} dernières entrées de log} other {les {actualCount} dernières entrées de log}} dans {duration} pour {groupName}. Alerte lorsque {comparator} {expectedCount}.",
     "xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription": "Le rapport des logs sélectionnés est de {actualRatio} dans les dernières {duration} pour {groupName}. Alerte lorsque {comparator} {expectedRatio}.",

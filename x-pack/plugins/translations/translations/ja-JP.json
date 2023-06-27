@@ -18159,7 +18159,7 @@
     "xpack.infra.linkTo.hostWithIp.loading": "IPアドレス「{hostIp}」のホストを読み込み中です。",
     "xpack.infra.logFlyout.flyoutSubTitle": "インデックス{indexName}から",
     "xpack.infra.logFlyout.flyoutTitle": "ログエントリ{logEntryId}の詳細",
-    "xpack.infra.logs.alertDetails.chart.chartTitle": "{field} {comparator} {value}のログ",
+    "xpack.infra.logs.alertDetails.chart.chartTitle": "{criteria} のログ",
     "xpack.infra.logs.alertFlyout.groupByOptimizationWarning": "「group by」を設定するときには、しきい値で\"{comparator}\"比較演算子を使用することを強くお勧めします。これにより、パフォーマンスを大きく改善できます。",
     "xpack.infra.logs.alerting.threshold.groupedCountAlertReasonDescription": "{groupName}の過去{duration}の{actualCount, plural, other {{actualCount}件のログエントリ}}。{comparator} {expectedCount}のときにアラートを通知します。",
     "xpack.infra.logs.alerting.threshold.groupedRatioAlertReasonDescription": "{groupName}の過去{duration}における選択されたログの比率は{actualRatio}です。{comparator} {expectedRatio}のときにアラートを通知します。",

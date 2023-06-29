@@ -20912,8 +20912,6 @@
     "xpack.lens.pie.wafflelabel": "ワッフル",
     "xpack.lens.pie.waffleSuggestionLabel": "ワッフル",
     "xpack.lens.pieChart.categoriesInLegendLabel": "ラベルを非表示",
-    "xpack.lens.pieChart.color": "色",
-    "xpack.lens.pieChart.colorPicker.auto": "自動",
     "xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy": "レイヤーに1つ以上の「グループ化基準」ディメンションが含まれる場合、個々のスライスにカスタムカラーを適用することができません。",
     "xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy": "レイヤーに1つ以上の「スライス基準」ディメンションが含まれる場合、個々のスライスにカスタムカラーを適用することができません。",
     "xpack.lens.pieChart.emptySizeRatioLabel": "内側の領域のサイズ",

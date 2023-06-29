@@ -20912,8 +20912,6 @@
     "xpack.lens.pie.wafflelabel": "Gaufre",
     "xpack.lens.pie.waffleSuggestionLabel": "Gaufre",
     "xpack.lens.pieChart.categoriesInLegendLabel": "Masquer les étiquettes",
-    "xpack.lens.pieChart.color": "Couleur",
-    "xpack.lens.pieChart.colorPicker.auto": "Auto",
     "xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy": "Vous ne pouvez pas appliquer de couleurs personnalisées à des sections individuelles lorsque le calque inclut une ou plusieurs dimensions \"Regrouper par\".",
     "xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy": "Vous ne pouvez pas appliquer de couleurs personnalisées à des sections individuelles lorsque le calque inclut une ou plusieurs dimensions \"Section par\".",
     "xpack.lens.pieChart.emptySizeRatioLabel": "Taille de la zone intérieure",

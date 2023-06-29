@@ -1189,7 +1189,6 @@
     "dashboard.listing.unsaved.editTitle": "Poursuivre les modifications",
     "dashboard.listing.unsaved.loading": "Chargement",
     "dashboard.listing.unsaved.resetTitle": "Réinitialiser les modifications",
-    "dashboard.loadingError.dashboardNotFound": "Le tableau de bord demandé est introuvable.",
     "dashboard.loadURLError.PanelTooOld": "Impossible de charger les panneaux à partir d'une URL créée dans une version antérieure à 7.3",
     "dashboard.noMatchRoute.bannerTitleText": "Page introuvable",
     "dashboard.panel.AddToLibrary": "Enregistrer dans la bibliothèque",

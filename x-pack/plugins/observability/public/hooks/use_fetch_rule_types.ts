@@ -11,26 +11,30 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
+import { camelCase, mapKeys } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import type { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
-import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 
-export interface UseFetchRuleResponse {
+export interface UseFetchRuleTypesResponse {
   isInitialLoading: boolean;
   isLoading: boolean;
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  rule: Rule | undefined;
+  ruleTypes: RuleType[] | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<Rule | undefined, unknown>>;
+  ) => Promise<QueryObserverResult<RuleType[] | undefined, unknown>>;
 }
 
-export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleResponse {
+export function useFetchRuleTypes({
+  filterByRuleTypeIds,
+}: {
+  filterByRuleTypeIds?: string[] | undefined;
+}): UseFetchRuleTypesResponse {
   const {
     http,
     notifications: { toasts },
@@ -38,25 +42,26 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: ['fetchRule', ruleId],
+      queryKey: ['fetchRuleTypes', filterByRuleTypeIds],
       queryFn: async ({ signal }) => {
         try {
-          if (!ruleId) return;
-
-          const res = await http.get<AsApiContract<Rule>>(
-            `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`,
-            {
-              signal,
-            }
+          const res = await http.get<Array<AsApiContract<RuleType<string, string>>>>(
+            `${BASE_ALERTING_API_PATH}/rule_types`,
+            { signal }
           );
 
-          return transformRule(res);
+          const response = res.map((item) => {
+            return mapKeys(item, (_, k) => camelCase(k));
+          }) as unknown as Array<RuleType<string, string>>;
+
+          return filterByRuleTypeIds && filterByRuleTypeIds.length > 0
+            ? response.filter((item) => filterByRuleTypeIds.includes(item.id))
+            : response;
         } catch (error) {
           throw error;
         }
       },
       keepPreviousData: true,
-      enabled: Boolean(ruleId),
       refetchOnWindowFocus: false,
       onError: (error: Error) => {
         toasts.addError(error, {
@@ -73,7 +78,7 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
   );
 
   return {
-    rule: data,
+    ruleTypes: data,
     isLoading,
     isInitialLoading,
     isRefetching,

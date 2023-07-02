@@ -39320,7 +39320,6 @@
     "xpack.cloudDataMigration.upgrade.text": "Effectuer la mise à niveau vers les versions plus récentes beaucoup plus facilement",
     "xpack.cloudLinks.deploymentLinkLabel": "Gérer ce déploiement",
     "xpack.cloudLinks.setupGuide": "Guides de configuration",
-    "xpack.cloudLinks.userMenuLinks.accountLinkText": "Compte et facturation",
     "xpack.cloudLinks.userMenuLinks.profileLinkText": "Modifier le profil",
     "xpack.dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard": "Choisir le tableau de bord de destination",
     "xpack.dashboard.components.DashboardDrilldownConfig.openInNewTab": "Ouvrir le tableau de bord dans un nouvel onglet",

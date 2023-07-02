@@ -39294,7 +39294,6 @@
     "xpack.cloudDataMigration.upgrade.text": "新しいバージョンへのアップグレードがより簡単に",
     "xpack.cloudLinks.deploymentLinkLabel": "このデプロイの管理",
     "xpack.cloudLinks.setupGuide": "セットアップガイド",
-    "xpack.cloudLinks.userMenuLinks.accountLinkText": "会計・請求",
     "xpack.cloudLinks.userMenuLinks.profileLinkText": "プロフィールを編集",
     "xpack.dashboard.components.DashboardDrilldownConfig.chooseDestinationDashboard": "対象ダッシュボードを選択",
     "xpack.dashboard.components.DashboardDrilldownConfig.openInNewTab": "新しいタブでダッシュボードを開く",

@@ -37734,7 +37734,6 @@
     "xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton": "コネクターの追加",
     "xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning": "カスタムアクション間隔をルールのチェック間隔よりも短くすることはできません",
     "xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle": "アラートの概要",
-    "xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl": "server.publicBaseUrlが設定されていません。アクションは相対URLを使用します。",
     "xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility": "互換性：",
     "xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle": "コネクターを選択",
     "xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText": "「{connectorName}」を作成しました",

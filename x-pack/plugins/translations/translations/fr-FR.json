@@ -37760,7 +37760,6 @@
     "xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton": "Ajouter un connecteur",
     "xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning": "Les intervalles d'action personnalisés ne peuvent pas être plus courts que l'intervalle de vérification de la règle",
     "xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle": "Résumé des alertes",
-    "xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl": "server.publicBaseUrl n'est pas défini. Les actions utiliseront des URL relatives.",
     "xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility": "Compatibilité :",
     "xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle": "Sélectionner un connecteur",
     "xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText": "Création de \"{connectorName}\" effectuée",

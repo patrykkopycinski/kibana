@@ -36368,7 +36368,6 @@
     "xpack.synthetics.totalDuration.metrics": "ステップ期間",
     "xpack.synthetics.totalDuration.transferSize": "転送サイズ",
     "xpack.synthetics.uptimeFeatureCatalogueTitle": "アップタイム",
-    "xpack.synthetics.uptimeSettings.index": "アップタイム設定 - インデックス",
     "xpack.synthetics.wait": "待機",
     "xpack.synthetics.waterfall.applyFilters.label": "フィルターを適用するアイテムを選択",
     "xpack.synthetics.waterfall.applyFilters.message": "クリックして、フィルターを追加または削除します",

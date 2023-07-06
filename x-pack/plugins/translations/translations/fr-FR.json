@@ -36383,7 +36383,6 @@
     "xpack.synthetics.totalDuration.metrics": "Durée de l’étape",
     "xpack.synthetics.totalDuration.transferSize": "Taille du transfert",
     "xpack.synthetics.uptimeFeatureCatalogueTitle": "Uptime",
-    "xpack.synthetics.uptimeSettings.index": "Paramètres Uptime - Index",
     "xpack.synthetics.wait": "Attendre",
     "xpack.synthetics.waterfall.applyFilters.label": "Sélectionner un élément auquel appliquer le filtre",
     "xpack.synthetics.waterfall.applyFilters.message": "Cliquer pour ajouter ou retirer le filtre",

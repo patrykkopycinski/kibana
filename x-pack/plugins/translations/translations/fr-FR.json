@@ -21363,7 +21363,6 @@
     "xpack.maps.sescurity.destinationLayerLabel": "{indexPatternTitle} | Point de destination",
     "xpack.maps.sescurity.lineLayerLabel": "{indexPatternTitle} | Ligne",
     "xpack.maps.sescurity.sourceLayerLabel": "{indexPatternTitle} | Point source",
-    "xpack.maps.setViewControl.outOfRangeErrorMsg": "Doit être compris entre {min} et {max}",
     "xpack.maps.source.ems_xyzDescription": "Service de cartographie d'images matricielles utilisant le modèle URL {z}/{x}/{y}.",
     "xpack.maps.source.ems.noOnPremConnectionDescription": "Connexion à {host} impossible.",
     "xpack.maps.source.emsFile.unableToFindFileIdErrorMessage": "Impossible de trouver des formes de vecteur EMS pour l'ID : {id}. {info}",

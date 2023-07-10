@@ -18325,7 +18325,6 @@
     "xpack.infra.hostsPage.goToMetricsSettings": "設定を確認",
     "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "ご意見をお聞かせください。",
     "xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel": "APMサービス",
-    "xpack.infra.hostsViewPage.flyout.uptimeLinkLabel": "アップタイム",
     "xpack.infra.hostsViewPage.hostLimit": "ホスト制限",
     "xpack.infra.hostsViewPage.hostLimit.tooltip": "クエリパフォーマンスを確実に高めるために、返されるホスト数には制限があります",
     "xpack.infra.hostsViewPage.landing.calloutReachOutToYourKibanaAdministrator": "ユーザーロールには、この機能を有効にするための十分な権限がありません。 \n                この機能を有効にするために、Kibana管理者に連絡して、このページにアクセスするように依頼してください。",

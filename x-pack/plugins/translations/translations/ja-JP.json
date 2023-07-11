@@ -32178,7 +32178,7 @@
     "xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle": "アナライザープレビュー",
     "xpack.securitySolution.flyout.documentDetails.collapseDetailButton": "アラート詳細を折りたたむ",
     "xpack.securitySolution.flyout.documentDetails.correlationsButton": "相関関係",
-    "xpack.securitySolution.flyout.documentDetails.descriptionTitle": "説明",
+    "xpack.securitySolution.flyout.documentDetails.aboutTitle": "説明",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton": "縮小",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton": "拡張",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle": "ドキュメント説明",

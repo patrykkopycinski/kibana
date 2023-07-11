@@ -32193,7 +32193,7 @@
     "xpack.securitySolution.flyout.documentDetails.analyzerPreviewTitle": "Aperçu de l'analyseur",
     "xpack.securitySolution.flyout.documentDetails.collapseDetailButton": "Réduire les détails de l'alerte",
     "xpack.securitySolution.flyout.documentDetails.correlationsButton": "Corrélations",
-    "xpack.securitySolution.flyout.documentDetails.descriptionTitle": "Description",
+    "xpack.securitySolution.flyout.documentDetails.aboutTitle": "Description",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionCollapseButton": "Réduire",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionExpandButton": "Développer",
     "xpack.securitySolution.flyout.documentDetails.documentDescriptionTitle": "Description du document",

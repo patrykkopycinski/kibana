@@ -998,7 +998,6 @@
     "core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle": "GitHubで問題を開く",
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "ヘルプ",
     "core.ui.chrome.headerGlobalNav.logoAriaLabel": "Elastic ロゴ",
-    "core.ui.enterpriseSearchNavList.label": "エンタープライズ サーチ",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "高度な設定",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle": "URLが大きく、Kibanaの動作が停止する可能性があります",
     "core.ui.errorUrlOverflow.errorTitle": "このオブジェクトのURLは長すぎます。表示できません",

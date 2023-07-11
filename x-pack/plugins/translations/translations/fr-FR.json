@@ -998,7 +998,6 @@
     "core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle": "Ouvrir un ticket dans GitHub",
     "core.ui.chrome.headerGlobalNav.helpMenuTitle": "Aide",
     "core.ui.chrome.headerGlobalNav.logoAriaLabel": "Logo Elastic",
-    "core.ui.enterpriseSearchNavList.label": "Enterprise Search",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationMessage.advancedSettingsLinkText": "paramètres avancés",
     "core.ui.errorUrlOverflow.bigUrlWarningNotificationTitle": "L'URL est longue et Kibana pourrait cesser de fonctionner.",
     "core.ui.errorUrlOverflow.errorTitle": "L'URL pour cet objet est trop longue, et nous ne pouvons pas l'afficher.",

@@ -13143,7 +13143,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink": "Découvrez l'importation et l'utilisation des modèles de ML dans Enterprise Search",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.emptyValueError": "Champ obligatoire.",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.chooseLabel": "Choisir",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledPipelineExistsDescription": "Ce pipeline ne peut pas être sélectionné car il est déjà attaché.",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.existingLabel": "Pipeline existant",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.newLabel": "Nouveau pipeline",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.placeholder": "Effectuez une sélection",

@@ -13142,7 +13142,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink": "エンタープライズ サーチでのMLモデルのインポートと使用の詳細",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.emptyValueError": "フィールドが必要です。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.chooseLabel": "選択",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.disabledPipelineExistsDescription": "このパイプラインはすでにアタッチされているため、選択できません。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.existingLabel": "既存のパイプライン",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.newLabel": "新しいパイプライン",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.placeholder": "1 つ選択してください",

@@ -37,7 +37,6 @@ import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
-import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversations/conversation_selector';
 import { PromptEditor } from './prompt_editor';
@@ -49,6 +48,7 @@ import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import { useLangchain } from './use_langchain';
 
 export interface Props {
   conversationId?: string;
@@ -73,6 +73,8 @@ const AssistantComponent: React.FC<Props> = ({
     actionTypeRegistry,
     augmentMessageCodeBlocks,
     conversations,
+    data,
+    dataViews,
     defaultAllow,
     defaultAllowReplacement,
     docLinks,
@@ -93,7 +95,6 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { appendMessage, appendReplacements, clearConversation, createConversation } =
     useConversation();
-  const { isLoading, sendMessages } = useSendMessages();
 
   // Connector details
   const {
@@ -127,6 +128,16 @@ const AssistantComponent: React.FC<Props> = ({
     () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
     [conversationId, conversations, createConversation, selectedConversationId]
   );
+
+  const { mutate: sendMessages, isLoading } = useLangchain({
+    data,
+    dataViews,
+    apiConfig: currentConversation.apiConfig,
+    appendMessage: (message) => {
+      const responseMessage: Message = getMessageFromRawResponse(message);
+      appendMessage({ conversationId: selectedConversationId, message: responseMessage });
+    },
+  });
 
   // Remember last selection for reuse after keyboard shortcut is pressed.
   // Clear it if there is no connectors
@@ -252,22 +263,20 @@ const AssistantComponent: React.FC<Props> = ({
       setSelectedPromptContexts({});
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages({
-        http,
-        apiConfig: currentConversation.apiConfig,
+      sendMessages({
         messages: updatedMessages,
+        appendMessage: (message) => {
+          const responseMessage: Message = getMessageFromRawResponse(message);
+          appendMessage({ conversationId: selectedConversationId, message: responseMessage });
+        },
       });
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
       selectedSystemPrompt,
       appendMessage,
       appendReplacements,
-      currentConversation.apiConfig,
       currentConversation.messages.length,
       currentConversation.replacements,
-      http,
       selectedConversationId,
       selectedPromptContexts,
       sendMessages,

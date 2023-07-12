@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './policy_list';
-export * from './policy_details';
+export { PolicySettingsForm } from './policy_settings_form';

@@ -18321,7 +18321,6 @@
     "xpack.infra.hosts.searchPlaceholder": "Rechercher dans les hôtes (par ex. cloud.provider:gcp AND system.load.1 > 0.5)",
     "xpack.infra.hostsPage.goToMetricsSettings": "Vérifier les paramètres",
     "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "Dites-nous ce que vous pensez !",
-    "xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel": "Service APM",
     "xpack.infra.hostsViewPage.hostLimit": "Limite de l'hôte",
     "xpack.infra.hostsViewPage.hostLimit.tooltip": "Pour garantir des performances de recherche plus rapides, le nombre d'hôtes retournés est limité.",
     "xpack.infra.hostsViewPage.landing.calloutReachOutToYourKibanaAdministrator": "Votre rôle d'utilisateur ne dispose pas des privilèges suffisants pour activer cette fonctionnalité - veuillez \n                contacter votre administrateur Kibana et lui demander de visiter cette page pour activer la fonctionnalité.",

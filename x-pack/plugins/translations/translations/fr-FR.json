@@ -39315,7 +39315,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "URL courtes",
     "xpack.features.savedObjectsManagementFeatureName": "Gestion des objets enregistrés",
     "xpack.features.visualizeFeatureName": "Bibliothèque Visualize",
-    "xpack.observability_onboarding.breadcrumbs.logs": "Logs",
     "xpack.observability_onboarding.breadcrumbs.onboarding": "Intégration",
     "xpack.observability_onboarding.fetcher.error.status": "Erreur",
     "xpack.observability_onboarding.fetcher.error.title": "Erreur lors de la récupération des ressources",

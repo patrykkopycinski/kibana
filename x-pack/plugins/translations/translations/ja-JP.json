@@ -39289,7 +39289,6 @@
     "xpack.features.ossFeatures.visualizeShortUrlSubFeatureName": "短い URL",
     "xpack.features.savedObjectsManagementFeatureName": "保存されたオブジェクトの管理",
     "xpack.features.visualizeFeatureName": "Visualizeライブラリ",
-    "xpack.observability_onboarding.breadcrumbs.logs": "ログ",
     "xpack.observability_onboarding.breadcrumbs.onboarding": "オンボーディング",
     "xpack.observability_onboarding.fetcher.error.status": "エラー",
     "xpack.observability_onboarding.fetcher.error.title": "リソースの取得中にエラーが発生しました",

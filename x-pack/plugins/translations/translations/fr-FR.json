@@ -40169,7 +40169,6 @@
     "eventAnnotation.manualAnnotation.args.lineWidth": "Largeur de la ligne d'annotation",
     "eventAnnotation.manualAnnotation.args.textVisibility": "Visibilité de l'étiquette sur la ligne d'annotation",
     "eventAnnotation.manualAnnotation.args.time": "Horodatage de l'annotation",
-    "eventAnnotation.manualAnnotation.defaultAnnotationLabel": "Événement",
     "eventAnnotation.manualAnnotation.description": "Configurer l'annotation manuelle",
     "eventAnnotation.queryAnnotation.args.color": "Couleur de la ligne",
     "eventAnnotation.queryAnnotation.args.field": "Champs supplémentaires de l'annotation",

@@ -40159,7 +40159,6 @@
     "eventAnnotation.manualAnnotation.args.lineWidth": "注釈行の幅",
     "eventAnnotation.manualAnnotation.args.textVisibility": "注釈行のラベルの表示",
     "eventAnnotation.manualAnnotation.args.time": "注釈のタイムスタンプ",
-    "eventAnnotation.manualAnnotation.defaultAnnotationLabel": "イベント",
     "eventAnnotation.manualAnnotation.description": "手動注釈の構成",
     "eventAnnotation.queryAnnotation.args.color": "行の色",
     "eventAnnotation.queryAnnotation.args.field": "注釈の追加フィールド",

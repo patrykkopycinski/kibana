@@ -2227,7 +2227,7 @@
     "discover.showingDefaultDataViewWarningDescription": "デフォルトのデータビューを表示しています：\"{loadedDataViewTitle}\"（{loadedDataViewId}）",
     "discover.showingSavedDataViewWarningDescription": "保存されたデータビューを表示しています：\"{ownDataViewTitle}\"（{ownDataViewId}）",
     "discover.singleDocRoute.errorMessage": "ID {dataViewId}の一致するデータビューが見つかりません",
-    "discover.utils.formatHit.moreFields": "およびその他{count}個の{count, plural, other {フィールド}}",
+    "discover.formatHit.moreFields": "およびその他{count}個の{count, plural, other {フィールド}}",
     "discover.valueIsNotConfiguredDataViewIDWarningTitle": "{stateVal}は設定されたデータビューIDではありません",
     "discover.advancedSettings.context.defaultSizeText": "コンテキストビューに表示される周りのエントリーの数",
     "discover.advancedSettings.context.defaultSizeTitle": "コンテキストサイズ",

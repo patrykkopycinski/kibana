@@ -2213,7 +2213,7 @@
     "discover.showingDefaultDataViewWarningDescription": "Affichage de la vue de données par défaut : \"{loadedDataViewTitle}\" ({loadedDataViewId})",
     "discover.showingSavedDataViewWarningDescription": "Affichage de la vue de données enregistrée : \"{ownDataViewTitle}\" ({ownDataViewId})",
     "discover.singleDocRoute.errorMessage": "Aucune vue de données correspondante pour l'ID {dataViewId}",
-    "discover.utils.formatHit.moreFields": "et {count} autre(s) {count, plural, one {champ} many {champs} other {champs}}",
+    "discover.formatHit.moreFields": "et {count} autre(s) {count, plural, one {champ} many {champs} other {champs}}",
     "discover.valueIsNotConfiguredDataViewIDWarningTitle": "{stateVal} n'est pas un ID de vue de données configuré",
     "discover.advancedSettings.context.defaultSizeText": "Le nombre d'entrées connexes à afficher dans la vue contextuelle",
     "discover.advancedSettings.context.defaultSizeTitle": "Taille de contexte",

@@ -25599,7 +25599,6 @@
     "xpack.ml.trainedModels.nodesList.totalAmountLabel": "Nombre total de nœuds Machine Learning",
     "xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel": "ID de déploiement",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.info1": "Testez la capacité du modèle à prédire un mot manquant dans une phrase.",
-    "xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText": "Entrez une expression à tester. Utilisez [MASK] comme espace réservé pour les mots manquants.",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.label": "Masque de remplissage",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputText": "Texte d'entrée",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputTitle": "Texte d'entrée",

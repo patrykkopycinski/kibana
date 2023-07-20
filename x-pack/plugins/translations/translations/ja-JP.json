@@ -25598,7 +25598,6 @@
     "xpack.ml.trainedModels.nodesList.totalAmountLabel": "合計機械学習ノード",
     "xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel": "デプロイID",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.info1": "モデルがフレーズの不足している単語を予測する精度をテストします。",
-    "xpack.ml.trainedModels.testModelsFlyout.fillMask.inputText": "テストするフレーズを入力してください。足りない語句のプレースホルダーとして[MASK]を使用します。",
     "xpack.ml.trainedModels.testModelsFlyout.fillMask.label": "マスクを塗りつぶす",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputText": "入力テキスト",
     "xpack.ml.trainedModels.testModelsFlyout.generalTextInput.inputTitle": "入力テキスト",

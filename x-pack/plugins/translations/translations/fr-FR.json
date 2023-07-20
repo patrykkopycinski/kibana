@@ -11352,7 +11352,6 @@
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addFilterButtonTooltip": "Ajouter un filtre {columnId}",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegatedFilterButtonTooltip": "Ajouter un filtre {columnId} négatif",
     "xpack.csp.vulnerabilities.vulnerabilitiesTableCell.addNegateFilterButton": "Ajouter un filtre {columnId} négatif",
-    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionText": "{description}",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",
     "xpack.csp.vulnerabilitiesByResource.totalResources": "{total, plural, one {# ressource} many {# ressources} other {# ressources}}",
     "xpack.csp.vulnerabilitiesByResource.totalVulnerabilities": "{total, plural, one {# vulnérabilité} many {# vulnérabilités} other {# vulnérabilités}}",

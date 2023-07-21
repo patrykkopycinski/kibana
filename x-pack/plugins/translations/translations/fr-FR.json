@@ -11645,7 +11645,6 @@
     "xpack.csp.vulnerabilityTable.column.version": "Version",
     "xpack.csp.vulnerabilityTable.column.vulnerability": "Vulnérabilité",
     "xpack.csp.vulnerabilityTable.panel.buttonText": "Afficher toutes les vulnérabilités",
-    "xpack.csp.vulnerabilityTable.panel.tooltipText": "Explorer dans les résultats",
     "xpack.csp.vulnMgmtIntegration.awsOption.nameTitle": "Amazon Web Services",
     "xpack.csp.vulnMgmtIntegration.azureOption.nameTitle": "Azure",
     "xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent": "Bientôt disponible",

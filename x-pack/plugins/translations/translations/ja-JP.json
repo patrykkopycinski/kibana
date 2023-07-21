@@ -11659,7 +11659,6 @@
     "xpack.csp.vulnerabilityTable.column.version": "バージョン",
     "xpack.csp.vulnerabilityTable.column.vulnerability": "脆弱性",
     "xpack.csp.vulnerabilityTable.panel.buttonText": "すべての脆弱性を表示",
-    "xpack.csp.vulnerabilityTable.panel.tooltipText": "調査結果を探索",
     "xpack.csp.vulnMgmtIntegration.awsOption.nameTitle": "Amazon Web Services",
     "xpack.csp.vulnMgmtIntegration.azureOption.nameTitle": "Azure",
     "xpack.csp.vulnMgmtIntegration.azureOption.tooltipContent": "まもなくリリース",

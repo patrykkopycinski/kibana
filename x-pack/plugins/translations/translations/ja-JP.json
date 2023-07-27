@@ -13610,7 +13610,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.helpText": "既存のフィールドを選択するか、フィールド名を入力してください。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder": "スキーマフィールドを選択",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel": "ソースフィールド",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue": "これは自動的に作成されます",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText": "この名前は、ソースフィールドに基づいて自動的に作成されます。",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label": "ターゲットフィールド（任意）",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldLabel": "ターゲットフィールド",

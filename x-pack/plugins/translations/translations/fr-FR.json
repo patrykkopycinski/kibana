@@ -13596,7 +13596,6 @@
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.helpText": "Sélectionnez un champ existant ou tapez un nom de champ.",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceField.placeholder": "Sélectionner un champ de schéma",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.sourceFieldLabel": "Champ source",
-    "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.defaultValue": "Ceci est créé automatiquement",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.helpText": "Ce nom est créé automatiquement en fonction de votre champ source.",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetField.label": "Champ cible (facultatif)",
     "xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.fields.targetFieldLabel": "Champ cible",

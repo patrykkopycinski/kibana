@@ -33507,7 +33507,6 @@
     "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "Version d'évaluation technique",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "Threat Intelligence",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "Threat Intelligence",
-    "xpack.securitySolution.flyout.documentDetails.viewRuleText": "Afficher la règle",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "Visualisations",
     "xpack.securitySolution.flyout.documentDetails.visualizeOptions": "Options Visualize",
     "xpack.securitySolution.flyout.documentDetails.visualizeTab": "Visualiser",

@@ -8,19 +8,21 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
-import { DEFAULT_RISK_SCORE_PAGE_SIZE, RISK_SCORE_PREVIEW_URL } from '../../../../common/constants';
-import { riskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
+import {
+  DEFAULT_RISK_SCORE_PAGE_SIZE,
+  RISK_SCORE_CALCULATION_URL,
+} from '../../../../common/constants';
+import { riskScoreCalculationRequestSchema } from '../../../../common/risk_engine/risk_score_calculation/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { riskScoreServiceFactory } from '../risk_score_service';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 
-export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
     {
-      path: RISK_SCORE_PREVIEW_URL,
-      validate: { body: buildRouteValidation(riskScorePreviewRequestSchema) },
+      path: RISK_SCORE_CALCULATION_URL,
+      validate: { body: buildRouteValidation(riskScoreCalculationRequestSchema) },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -48,7 +50,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         page_size: userPageSize,
         identifier_type: identifierType,
         filter,
-        range: userRange,
+        range,
         weights,
       } = request.body;
 
@@ -60,16 +62,15 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         });
 
         const afterKeys = userAfterKeys ?? {};
-        const range = userRange ?? { start: 'now-15d', end: 'now' };
         const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
-        const result = await riskScoreService.calculateScores({
+        const result = await riskScoreService.calculateAndPersistScores({
           afterKeys,
           debug,
-          filter,
+          pageSize,
           identifierType,
           index,
-          pageSize,
+          filter,
           range,
           runtimeMappings,
           weights,

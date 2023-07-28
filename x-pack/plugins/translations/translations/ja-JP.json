@@ -30280,7 +30280,6 @@
     "xpack.securitySolution.responseActionsList.list.item.wasSuccessful": "{command}は正常に完了しました",
     "xpack.securitySolution.responseActionsList.list.recordRange": "{total} {recordsLabel}件中{range}を表示中",
     "xpack.securitySolution.responseActionsList.list.recordRangeLabel": "{records, plural, other {対応アクション}}",
-    "xpack.securitySolution.riskEngine.calculateScores.dataViewNotFoundError": "指定したデータビュー（{dataViewId}）が見つかりませんでした。既存のデータビューを使用するか、パラメーターを省略してデフォルトのリスク入力を使用します。",
     "xpack.securitySolution.riskInformation.explanation": "この機能は変換を利用します。また、5日間の範囲で、スクリプトメトリックアグリゲーションを使用して、「オープン」ステータスの検知ルールアラートに基づいて{riskEntityLower}リスクスコアを計算します。変換は毎時実行され、新しい検知ルールアラートを受信するとスコアが常に更新されます。",
     "xpack.securitySolution.riskInformation.introduction": "{riskEntity}リスクスコア機能は、環境内のリスクが高い{riskEntityLowerPlural}を明らかにします。",
     "xpack.securitySolution.riskInformation.learnMore": "{riskEntity}リスク{riskScoreDocumentationLink}の詳細をご覧ください",

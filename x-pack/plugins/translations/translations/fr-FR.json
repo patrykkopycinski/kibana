@@ -30281,7 +30281,6 @@
     "xpack.securitySolution.responseActionsList.list.item.wasSuccessful": "{command} terminée",
     "xpack.securitySolution.responseActionsList.list.recordRange": "Affichage de {range} sur {total} {recordsLabel}",
     "xpack.securitySolution.responseActionsList.list.recordRangeLabel": "{records, plural, one {action de réponse} many {actions de réponse} other {actions de réponse}}",
-    "xpack.securitySolution.riskEngine.calculateScores.dataViewNotFoundError": "L’affichage de données spécifié ({dataViewId}) n’a pas été trouvé. Veuillez utiliser un affichage de données existant ou omettre le paramètre pour utiliser les entrées de risque par défaut.",
     "xpack.securitySolution.riskInformation.explanation": "Cette fonctionnalité utilise une transformation, avec une agrégation d'indicateurs scriptée pour calculer les scores de risque {riskEntityLower} en fonction des alertes de règle de détection ayant le statut \"ouvert\", sur une fenêtre temporelle de 5 jours. La transformation s'exécute toutes les heures afin que le score reste à jour au moment où de nouvelles alertes de règles de détection sont transmises.",
     "xpack.securitySolution.riskInformation.introduction": "La fonctionnalité de score de risque {riskEntity} détecte les {riskEntityLowerPlural} à risque depuis l'intérieur de votre environnement.",
     "xpack.securitySolution.riskInformation.learnMore": "Vous pouvez en savoir plus sur les risques de {riskEntity} {riskScoreDocumentationLink}",

@@ -6842,8 +6842,6 @@
     "visTypeVislib.vislib.legend.loadingLabel": "chargement…",
     "visTypeVislib.vislib.legend.toggleLegendButtonAriaLabel": "Basculer la légende",
     "visTypeVislib.vislib.legend.toggleLegendButtonTitle": "Afficher/Masquer la légende",
-    "visTypeVislib.vislib.tooltip.fieldLabel": "champ",
-    "visTypeVislib.vislib.tooltip.valueLabel": "valeur",
     "visTypeXy.controls.pointSeries.seriesAccordionAriaLabel": "Activer/désactiver les options {agg}",
     "visTypeXy.controls.pointSeries.valueAxes.toggleOptionsAriaLabel": "Activer/désactiver les options {axisName}",
     "visTypeXy.allDocsTitle": "Tous les docs",

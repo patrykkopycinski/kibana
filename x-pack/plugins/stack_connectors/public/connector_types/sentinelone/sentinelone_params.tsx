@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
 import {
   EuiBadge,
@@ -27,7 +26,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { Random, EuiBasicTableColumn, EuiSearchBarProps, EuiLink } from '@elastic/eui';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import type {
   SentinelOneScriptObject,
   // SentinelOneWebhooksActionParams,

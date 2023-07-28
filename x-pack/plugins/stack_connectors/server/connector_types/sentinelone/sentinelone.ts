@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
   SentinelOneConfig,
   SentinelOneSecrets,
-  SentinelOneRunActionParams,
-  SentinelOneRunActionResponse,
   SentinelOneStoriesActionResponse,
 } from '../../../common/sentinelone/types';
 import { SentinelOneBaseApiResponseSchema } from './api_schema';

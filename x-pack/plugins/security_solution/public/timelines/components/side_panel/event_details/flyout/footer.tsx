@@ -47,6 +47,7 @@ interface AddExceptionModalWrapperData {
 const getGlobalQueries = inputsSelectors.globalQuery();
 const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
 
+// eslint-disable-next-line react/display-name
 export const FlyoutFooterComponent = React.memo(
   ({
     detailsData,

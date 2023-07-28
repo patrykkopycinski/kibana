@@ -10,6 +10,7 @@ xpack.serverless.observability.enabled: true
 
 ## Configure plugins
 xpack.infra.logs.app_target: discover
+xpack.discoverLogExplorer.featureFlags.deepLinkVisible: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/observability/landing
@@ -27,3 +28,15 @@ xpack.apm.serverlessOnboarding: true
 xpack.fleet.packages:
   - name: apm
     version: latest
+## Disable APM UI components and API calls
+xpack.apm.featureFlags.agentConfigurationAvailable: false
+xpack.apm.featureFlags.configurableIndicesAvailable: false
+xpack.apm.featureFlags.infrastructureTabAvailable: false
+xpack.apm.featureFlags.infraUiAvailable: false
+xpack.apm.featureFlags.migrationToFleetAvailable: false
+xpack.apm.featureFlags.sourcemapApiAvailable: false
+xpack.apm.featureFlags.storageExplorerAvailable: false
+xpack.apm.featureFlags.fastRefreshAvailable: true
+
+# Specify in telemetry the project type
+telemetry.labels.serverless: observability

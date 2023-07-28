@@ -21,7 +21,7 @@ import { useKibana } from '../../lib/kibana';
 
 interface ResponseActionsResultsProps {
   actions: Array<LogsEndpointActionWithHosts | LogsOsqueryAction>;
-  ruleName?: string[];
+  ruleName?: string;
   ecsData?: Ecs | null;
 }
 
@@ -116,7 +116,11 @@ export const ResponseActionsResults = React.memo(
         }
         if (isEndpoint(action)) {
           return (
-            <EndpointResponseActionResults action={action} key={action.EndpointActions.action_id} />
+            <EndpointResponseActionResults
+              action={action}
+              ruleName={ruleName}
+              key={action.EndpointActions.action_id}
+            />
           );
         }
         if (action.message.includes('.sentinelone')) {

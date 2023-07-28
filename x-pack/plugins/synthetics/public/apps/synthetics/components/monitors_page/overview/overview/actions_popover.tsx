@@ -19,25 +19,16 @@ import {
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
 } from '../../../../state/manual_test_runs';
-import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
-import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-} from '../../../../../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
-import {
-  useMonitorEnableHandler,
-  useLocationName,
-  useCanUpdatePrivateMonitor,
-} from '../../../../hooks';
+import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
 import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
@@ -123,11 +114,7 @@ export function ActionsPopover({
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
-  const { monitor: monitorFields } = useSelectedMonitor(monitor.configId);
   const canEditSynthetics = useCanEditSynthetics();
-  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(
-    monitorFields as EncryptedSyntheticsMonitor
-  );
 
   const labels = useMemo(
     () => ({
@@ -206,28 +193,22 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-        >
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {actionsMenuEditMonitorName}
         </NoPermissionsTooltip>
       ),
       icon: 'pencil',
-      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
+      disabled: !canEditSynthetics,
       href: editUrl,
     },
     {
       name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-        >
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {enableLabel}
         </NoPermissionsTooltip>
       ),
       icon: 'invert',
-      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
+      disabled: !canEditSynthetics,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
@@ -252,7 +233,11 @@ export function ActionsPopover({
         if (!alertLoading) {
           updateAlertEnabledState({
             monitor: {
-              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert(monitorFields?.[ConfigKey.ALERT_CONFIG]),
+              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                status: {
+                  enabled: monitor.isStatusAlertEnabled,
+                },
+              }),
             },
             configId: monitor.configId,
             name: monitor.name,

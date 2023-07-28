@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenuPanel, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiContextMenuItem } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -26,13 +26,15 @@ import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_i
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
 import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
 import { getFieldValue } from '../host_isolation/helpers';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../common/api/detection_engine';
 import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../common/lib/kibana';
-import { OsqueryActionItem } from '../osquery/osquery_action_item';
+import { getOsqueryActionItem } from '../osquery/osquery_action_item';
+import type { AlertTableContextMenuItem } from '../alerts_table/types';
+import { useAlertTagsActions } from '../alerts_table/timeline_actions/use_alert_tags_actions';
 
 interface ActionsData {
   alertStatus: Status;
@@ -46,7 +48,6 @@ export interface TakeActionDropdownProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   ecsData?: Ecs;
   handleOnEventClosed: () => void;
-  indexName: string;
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
@@ -64,7 +65,6 @@ export const TakeActionDropdown = React.memo(
     detailsData,
     ecsData,
     handleOnEventClosed,
-    indexName,
     isHostIsolationPanelOpen,
     loadingEventDetails,
     onAddEventFilterClick,
@@ -180,9 +180,14 @@ export const TakeActionDropdown = React.memo(
       alertStatus: actionsData.alertStatus,
       closePopover: closePopoverAndFlyout,
       eventId: actionsData.eventId,
-      indexName,
       refetch,
       scopeId,
+    });
+
+    const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
+      closePopover: closePopoverHandler,
+      ecsRowData: ecsData ?? { _id: actionsData.eventId },
+      refetch,
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
@@ -201,7 +206,7 @@ export const TakeActionDropdown = React.memo(
 
     const osqueryActionItem = useMemo(
       () =>
-        OsqueryActionItem({
+        getOsqueryActionItem({
           handleClick: handleOnOsqueryClick,
         }),
       [handleOnOsqueryClick]
@@ -210,7 +215,7 @@ export const TakeActionDropdown = React.memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && actionsData.ruleId
-          ? [...statusActionItems, ...exceptionActionItems]
+          ? [...statusActionItems, ...alertTagsItems, ...exceptionActionItems]
           : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
@@ -222,6 +227,7 @@ export const TakeActionDropdown = React.memo(
         statusActionItems,
         isEvent,
         actionsData.ruleId,
+        alertTagsItems,
       ]
     );
 
@@ -244,7 +250,7 @@ export const TakeActionDropdown = React.memo(
       setIsPopoverOpen(false);
     }, [onSentinelClick, setIsPopoverOpen]);
 
-    const items: React.ReactElement[] = useMemo(
+    const items: AlertTableContextMenuItem[] = useMemo(
       () => [
         ...(tGridEnabled ? addToCaseActionItems : []),
         ...alertsActionItems,
@@ -279,6 +285,14 @@ export const TakeActionDropdown = React.memo(
       ]
     );
 
+    const panels = [
+      {
+        id: 0,
+        items,
+      },
+      ...alertTagsPanels,
+    ];
+
     const takeActionButton = useMemo(
       () => (
         <GuidedOnboardingTourStep
@@ -311,7 +325,12 @@ export const TakeActionDropdown = React.memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenuPanel data-test-subj="takeActionPanelMenu" size="s" items={items} />
+        <EuiContextMenu
+          size="s"
+          initialPanelId={0}
+          panels={panels}
+          data-test-subj="takeActionPanelMenu"
+        />
       </EuiPopover>
     ) : null;
   }

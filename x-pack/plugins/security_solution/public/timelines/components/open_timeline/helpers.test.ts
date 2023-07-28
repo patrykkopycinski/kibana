@@ -41,7 +41,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -847,6 +847,8 @@ describe('helpers', () => {
             updated: 1585233356356,
             noteId: 'note-id',
             note: 'I am a note',
+            timelineId: null,
+            version: 'testVersion',
           },
         ],
       })();
@@ -864,7 +866,7 @@ describe('helpers', () => {
             user: 'unknown',
             saveObjectId: 'note-id',
             timelineId: null,
-            version: undefined,
+            version: 'testVersion',
           },
         ],
       });

@@ -25,6 +25,7 @@ import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   kubernetesGuideId,
   kubernetesGuideConfig,
@@ -57,6 +58,7 @@ interface PluginSetup {
   share: SharePluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  cloud?: CloudSetup;
 }
 
 interface PluginStart {
@@ -173,6 +175,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
+    const savedObjectTypes = config.compositeSlo.enabled
+      ? [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE]
+      : [SO_SLO_TYPE];
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
@@ -189,7 +194,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           catalogue: [sloFeatureId, 'observability'],
           api: ['slo_write', 'slo_read', 'rac'],
           savedObject: {
-            all: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
+            all: savedObjectTypes,
             read: [],
           },
           alerting: {
@@ -208,7 +213,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           api: ['slo_read', 'rac'],
           savedObject: {
             all: [],
-            read: [SO_SLO_TYPE, SO_COMPOSITE_SLO_TYPE],
+            read: savedObjectTypes,
           },
           alerting: {
             rule: {
@@ -224,7 +229,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     core.savedObjects.registerType(slo);
-    core.savedObjects.registerType(compositeSlo);
+    if (config.compositeSlo.enabled) {
+      core.savedObjects.registerType(compositeSlo);
+    }
     core.savedObjects.registerType(threshold);
 
     registerRuleTypes(
@@ -237,18 +244,25 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     );
     registerSloUsageCollector(plugins.usageCollection);
 
-    const openAIService = config.coPilot?.enabled ? new OpenAIService(config.coPilot) : undefined;
+    const openAIService = config.aiAssistant?.enabled
+      ? new OpenAIService(config.aiAssistant)
+      : undefined;
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
+        config,
         dependencies: {
+          pluginsSetup: {
+            ...plugins,
+            core,
+          },
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
           getOpenAIClient: () => openAIService?.client,
         },
         logger: this.logger,
-        repository: getObservabilityServerRouteRepository(),
+        repository: getObservabilityServerRouteRepository(config),
       });
     });
 

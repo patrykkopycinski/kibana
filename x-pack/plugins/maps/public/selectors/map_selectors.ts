@@ -386,21 +386,6 @@ export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
   });
 });
 
-export const isLoadingPreviewLayers = createSelector(
-  getLayerList,
-  getMapZoom,
-  (layerList, zoom) => {
-    return layerList.some((layer) => {
-      return (
-        layer.isPreviewLayer() &&
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        layer.isLayerLoading()
-      );
-    });
-  }
-);
-
 export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
   layerList
     .filter((layerDescriptor) => {
@@ -496,12 +481,7 @@ export const isMapLoading = createSelector(
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        !layer.hasErrors() &&
-        layer.isLayerLoading()
-      ) {
+      if (!layer.hasErrors() && layer.isLayerLoading(zoom)) {
         return true;
       }
     }

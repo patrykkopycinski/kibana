@@ -6,7 +6,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { privateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/private_locations';
+import { privateLocationsSavedObjectId } from '@kbn/synthetics-plugin/server/saved_objects/private_locations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { KibanaSupertestProvider } from '../../../../../../test/api_integration/services/supertest';
 
@@ -61,10 +61,11 @@ export class PrivateLocationTestService {
       agentPolicyId: id,
       id,
       geo: {
-        lat: '',
-        lon: '',
+        lat: 0,
+        lon: 0,
       },
       concurrentMonitors: 1,
+      isServiceManaged: false,
     }));
 
     await server.savedObjects.create({

@@ -20,13 +20,11 @@ import type {
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
-} from '../../../../common/types/timeline/api';
+  PinnedEvent,
+  Note,
+} from '../../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import {
-  DataProviderType,
-  TimelineStatus,
-  TimelineType,
-} from '../../../../common/types/timeline/api';
+import { DataProviderType, TimelineStatus, TimelineType } from '../../../../common/api/timeline';
 
 import {
   addNotes as dispatchAddNotes,
@@ -69,8 +67,6 @@ import {
   DEFAULT_TO_MOMENT,
 } from '../../../common/utils/default_date_settings';
 import { resolveTimeline } from '../../containers/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event';
-import type { NoteResult } from '../../../../common/types/timeline/note';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -147,10 +143,7 @@ const setTimelineFilters = (filter: FilterTimelineResult) => ({
   ...(filter.script != null ? { exists: parseString(filter.script) } : {}),
 });
 
-const setEventIdToNoteIds = (
-  duplicate: boolean,
-  eventIdToNoteIds: NoteResult[] | null | undefined
-) =>
+const setEventIdToNoteIds = (duplicate: boolean, eventIdToNoteIds: Note[] | null | undefined) =>
   duplicate
     ? {}
     : eventIdToNoteIds != null
@@ -309,7 +302,7 @@ export const formatTimelineResultToModel = (
   timelineToOpen: TimelineResult,
   duplicate: boolean = false,
   timelineType?: TimelineType
-): { notes: NoteResult[] | null | undefined; timeline: TimelineModel } => {
+): { notes: Note[] | null | undefined; timeline: TimelineModel } => {
   const { notes, ...timelineModel } = timelineToOpen;
   return {
     notes,
@@ -474,7 +467,7 @@ export const dispatchUpdateTimeline =
         dispatchAddNotes({
           notes:
             notes != null
-              ? notes.map((note: NoteResult) => ({
+              ? notes.map((note: Note) => ({
                   created: note.created != null ? new Date(note.created) : new Date(),
                   id: note.noteId,
                   lastEdit: note.updated != null ? new Date(note.updated) : new Date(),

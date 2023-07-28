@@ -30,9 +30,10 @@ export interface Props {
   };
   totalSamples: number;
   totalSeconds: number;
+  samplingRate: number;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
+export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samplingRate }: Props) {
   const coPilotService = useCoPilot();
 
   const promptParams = useMemo(() => {
@@ -84,11 +85,16 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     sourceLine,
   });
 
+  // Are the results sampled? If yes, prepend a '~'.
+  const isApproximate = (samplingRate ?? 1.0) === 1.0;
+  const prependString = isApproximate ? undefined : '~';
+
   const impactRows = getImpactRows({
     countInclusive,
     countExclusive,
     totalSamples,
     totalSeconds,
+    isApproximate,
   });
 
   return (
@@ -102,21 +108,12 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
             <EuiFlexItem>
               <CoPilotPrompt
                 coPilot={coPilotService}
-                promptId={CoPilotPromptId.ProfilingExplainFunction}
-                params={promptParams}
-                title={i18n.translate('xpack.profiling.frameInformationWindow.explainFunction', {
-                  defaultMessage: 'Explain function',
-                })}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <CoPilotPrompt
-                coPilot={coPilotService}
                 promptId={CoPilotPromptId.ProfilingOptimizeFunction}
                 params={promptParams}
                 title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
                   defaultMessage: 'Optimize function',
                 })}
+                feedbackEnabled={true}
               />
             </EuiFlexItem>
           </>
@@ -138,7 +135,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList rows={impactRows} prependString={prependString} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

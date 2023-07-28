@@ -15,9 +15,9 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
-import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import type {
+  Note,
+  PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
@@ -32,8 +32,8 @@ import type {
   TimelineSavedObject,
   SavedTimeline,
   TimelineWithoutExternalRefs,
-} from '../../../../../common/types/timeline/api';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
+} from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
@@ -684,8 +684,8 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
 export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 export const timelineWithReduxProperties = (
-  notes: NoteSavedObject[],
-  pinnedEvents: PinnedEventSavedObject[],
+  notes: Note[],
+  pinnedEvents: PinnedEvent[],
   timeline: TimelineSavedObject,
   userName: string
 ): TimelineSavedObject => ({

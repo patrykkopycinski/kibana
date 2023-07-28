@@ -17,6 +17,7 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
+import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
 
 /**
  * Accepts one of the following:
@@ -38,7 +39,6 @@ export const parseFields = (fields: string | string[]): string[] => {
   }
 };
 
-const path = '/api/index_patterns/_fields_for_wildcard';
 const access = 'internal';
 
 type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
@@ -86,9 +86,13 @@ const FieldDescriptorSchema = schema.object({
       schema.literal('summary'),
       schema.literal('counter'),
       schema.literal('gauge'),
+      schema.literal('position'),
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
 });
 
 const validate: FullValidationConfig<any, any, any> = {
@@ -185,5 +189,8 @@ export const registerFieldForWildcard = (
   router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
   router.versioned
     .get({ path, access })
-    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
+    .addVersion(
+      { version, validate: { request: { query: querySchema }, response: validate.response } },
+      handler
+    );
 };

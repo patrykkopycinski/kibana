@@ -4738,7 +4738,7 @@
     "kibana-react.kibanaCodeEditor.ariaLabel": "Éditeur de code",
     "kibana-react.kibanaCodeEditor.enterKeyLabel": "Entrée",
     "kibana-react.kibanaCodeEditor.escapeKeyLabel": "Échap",
-    "kibana-react.mountPointPortal.errorMessage": "Erreur lors du rendu du contenu du portail.",
+    "reactPackages.mountPointPortal.errorMessage": "Erreur lors du rendu du contenu du portail.",
     "kibana-react.noDataPage.cantDecide.link": "Consultez la documentation pour en savoir plus.",
     "kibana-react.noDataPage.elasticAgentCard.description": "Utilisez Elastic Agent pour collecter de manière simple et unifiée les données de vos machines.",
     "kibana-react.noDataPage.elasticAgentCard.noPermission.description": "Cette intégration n'est pas encore activée. Votre administrateur possède les autorisations requises pour l'activer.",

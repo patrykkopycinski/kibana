@@ -37042,7 +37042,6 @@
     "xpack.synthetics.analyzeDataButtonLabel.message": "データの探索では、任意のディメンションの結果データを選択してフィルタリングし、パフォーマンスの問題の原因または影響を調査することができます。",
     "xpack.synthetics.app.navigateToAlertingButton.content": "ルールの管理",
     "xpack.synthetics.app.navigateToAlertingUi": "Syntheticsを離れてアラート管理ページに移動します",
-    "xpack.synthetics.app.testNow.available.private": "非公開の場所では手動でテストを開始できません。",
     "xpack.synthetics.badge.readOnly.text": "読み取り専用",
     "xpack.synthetics.badge.readOnly.tooltip": "を保存できませんでした",
     "xpack.synthetics.blocked": "ブロック",

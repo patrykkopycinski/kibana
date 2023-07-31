@@ -37043,7 +37043,6 @@
     "xpack.synthetics.analyzeDataButtonLabel.message": "La fonctionnalité Explorer les données vous permet de sélectionner et de filtrer les données de résultat dans toute dimension et de rechercher la cause ou l'impact des problèmes de performances.",
     "xpack.synthetics.app.navigateToAlertingButton.content": "Gérer les règles",
     "xpack.synthetics.app.navigateToAlertingUi": "Quitter Synthetics et accéder à la page de gestion Alerting",
-    "xpack.synthetics.app.testNow.available.private": "Vous ne pouvez pas démarrer les tests manuellement dans un emplacement privé.",
     "xpack.synthetics.badge.readOnly.text": "Lecture seule",
     "xpack.synthetics.badge.readOnly.tooltip": "Enregistrement impossible",
     "xpack.synthetics.blocked": "Bloqué",

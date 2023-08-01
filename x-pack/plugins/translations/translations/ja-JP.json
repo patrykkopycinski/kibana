@@ -19026,7 +19026,7 @@
     "xpack.infra.logs.alertDetails.chartHistory.avgTimeToRecover": "回復までの平均時間",
     "xpack.infra.logs.alertDetails.chartHistory.chartTitle": "ログしきい値アラート履歴",
     "xpack.infra.logs.alertDetails.chartHistory.last30days": "過去30日間",
-    "xpack.infra.logs.alertDetails.explainLogSpikeTitle": "考えられる原因と修正方法",
+    "xpack.infra.logs.alertDetails.logRateAnalysisTitle": "考えられる原因と修正方法",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent": "インラインログビューではアラートの作成がサポートされていません",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle": "インラインログビュー",
     "xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent": "アラートを作成するには、このアプリケーションで上位のアクセス権が必要です。",

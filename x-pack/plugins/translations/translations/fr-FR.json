@@ -19012,7 +19012,7 @@
     "xpack.infra.logs.alertDetails.chartHistory.avgTimeToRecover": "Temps moyen de récupération",
     "xpack.infra.logs.alertDetails.chartHistory.chartTitle": "Historique des alertes de seuil de logs",
     "xpack.infra.logs.alertDetails.chartHistory.last30days": "30 derniers jours",
-    "xpack.infra.logs.alertDetails.explainLogSpikeTitle": "Causes possibles et résolutions",
+    "xpack.infra.logs.alertDetails.logRateAnalysisTitle": "Causes possibles et résolutions",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent": "La création d'alertes n'est pas prise en charge avec les vues de log en ligne.",
     "xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle": "Vue de log en ligne",
     "xpack.infra.logs.alertDropdown.readOnlyCreateAlertContent": "La création d'alertes nécessite plus d'autorisations dans cette application.",

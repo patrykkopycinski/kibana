@@ -11430,7 +11430,6 @@
     "xpack.csp.cnvmDashboardTable.section.topVulnerability.column.vulnerabilities": "脆弱性",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.cve": "CVE",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.region": "地域",
-    "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.resource": "リソース",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.version": "CVSS",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilities": "脆弱性",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilityCount": "脆弱性",

@@ -11415,7 +11415,6 @@
     "xpack.csp.cnvmDashboardTable.section.topVulnerability.column.vulnerabilities": "Vulnérabilités",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.cve": "CVE",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.region": "Région",
-    "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.resource": "Ressource",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.version": "CVSS",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilities": "Vulnérabilités",
     "xpack.csp.cnvmDashboardTable.section.topVulnerableResources.column.vulnerabilityCount": "Vulnérabilités",

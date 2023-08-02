@@ -27342,7 +27342,6 @@
     "xpack.observability.threshold.rule.threshold.errorAlertReason": "{metric}のデータのクエリを試行しているときに、Elasticsearchが失敗しました",
     "xpack.observability.threshold.rule.threshold.firedAlertReason": "{metric}は最後の{duration}{group}の{currentValue}です。{comparator} {threshold}のときにアラートを通知します。",
     "xpack.observability.threshold.rule.threshold.noDataAlertReason": "{metric}は最後の{interval}{group}でデータがないことを報告しました",
-    "xpack.observability.threshold.rule.threshold.queryErrorAlertReason": "アラートは正しくない形式のKQLクエリを使用しています：{filterQueryText}",
     "xpack.observability.threshold.rule.threshold.recoveredAlertReason": "{metric} が {comparator} に、{group} が {threshold} のしきい値（現在の値は {currentValue}）になりました",
     "xpack.observability.threshold.rule.threshold.thresholdRange": "{a}および{b}",
     "xpack.observability.threshold.rule.thresholdExtraTitle": "{comparator} {threshold}のときにアラートを通知",

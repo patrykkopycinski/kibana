@@ -27342,7 +27342,6 @@
     "xpack.observability.threshold.rule.threshold.errorAlertReason": "Elasticsearch a échoué lors de l'interrogation des données pour {metric}",
     "xpack.observability.threshold.rule.threshold.firedAlertReason": "{metric} est {currentValue} dans les dernières {duration}{group}. Alerte lorsque {comparator} {threshold}.",
     "xpack.observability.threshold.rule.threshold.noDataAlertReason": "{metric} n'a signalé aucune donnée dans les dernières {interval} {group}",
-    "xpack.observability.threshold.rule.threshold.queryErrorAlertReason": "L'alerte utilise une requête KQL incorrectement formée : {filterQueryText}",
     "xpack.observability.threshold.rule.threshold.recoveredAlertReason": "{metric} est maintenant {comparator} un seuil de {threshold} (la valeur actuelle est {currentValue}) pour {group}",
     "xpack.observability.threshold.rule.threshold.thresholdRange": "{a} et {b}",
     "xpack.observability.threshold.rule.thresholdExtraTitle": "Alerte lorsque {comparator} {threshold}.",

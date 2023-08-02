@@ -20657,7 +20657,6 @@
     "xpack.lens.indexPattern.cardinalityOf": "{name}のユニークカウント",
     "xpack.lens.indexPattern.CounterRateOf": "{name}のカウンターレート",
     "xpack.lens.indexPattern.cumulativeSumOf": "{name}の累積和",
-    "xpack.lens.indexPattern.customFormat.description": "Numeral.jsのフォーマットパターン（デフォルト：{defaultPattern}）",
     "xpack.lens.indexPattern.dateHistogram.autoLongerExplanation": "間隔を選択するために、Lensでは、指定された時間範囲が{targetBarSetting}詳細設定で分割され、データに最適な間隔が計算されます。たとえば、時間範囲が4日の場合、データは1時間のバケットに分割されます。バーの最大数を設定するには、{maxBarSetting}詳細設定を使用します。",
     "xpack.lens.indexPattern.dateHistogram.restrictedInterval": "アグリゲーションの制限により間隔は {intervalValue} に固定されています。",
     "xpack.lens.indexPattern.derivativeOf": "{name}の差異",

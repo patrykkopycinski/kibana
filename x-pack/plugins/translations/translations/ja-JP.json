@@ -27613,7 +27613,6 @@
     "xpack.observability.slo.list.errorTitle": "SLOを読み込めません",
     "xpack.observability.slo.list.search": "検索",
     "xpack.observability.slo.list.sortBy": "並べ替え基準",
-
     "xpack.observability.slo.rules.actionGroupSelectorLabel": "アクショングループ",
     "xpack.observability.slo.rules.addWindowAriaLabel": "時間枠を追加",
     "xpack.observability.slo.rules.addWIndowLabel": "時間枠を追加",

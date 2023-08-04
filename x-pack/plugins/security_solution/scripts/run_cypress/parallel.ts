@@ -254,8 +254,17 @@ export const cli = () => {
 
                 if (hasFleetServerArgs) {
                   vars.kbnTestServer.serverArgs.push(
+                    `--xpack.fleet.agents.fleet_server.hosts=["https://${hostRealIp}:${fleetServerPort}"]`
+                  );
+                  vars.kbnTestServer.serverArgs.push(
                     `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
                   );
+
+                  if (vars.serverless) {
+                    vars.kbnTestServer.serverArgs.push(
+                      `--xpack.fleet.internal.fleetServerStandalone=false`
+                    );
+                  }
                 }
 
                 // Serverless Specific
@@ -432,6 +441,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   configFile: cypressConfigFilePath,
                   reporter: argv.reporter as string,
                   reporterOptions: argv.reporterOptions,
+                  headed: true,
                   config: {
                     e2e: {
                       baseUrl,

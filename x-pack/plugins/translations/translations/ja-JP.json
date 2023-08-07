@@ -1047,7 +1047,6 @@
     "core.ui.overlays.banner.attentionTitle": "注意",
     "core.ui.overlays.banner.closeButtonLabel": "閉じる",
     "core.ui.primaryNav.addData": "統合の追加",
-    "core.ui.primaryNav.cloud.linkToDeployments": "マイデプロイ",
     "core.ui.primaryNav.goToHome.ariaLabel": "ホームページに移動",
     "core.ui.primaryNav.pinnedLinksAriaLabel": "ピン留めされたリンク",
     "core.ui.primaryNav.screenReaderLabel": "プライマリ",

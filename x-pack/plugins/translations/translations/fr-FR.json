@@ -1033,7 +1033,6 @@
     "core.ui.overlays.banner.attentionTitle": "Attention",
     "core.ui.overlays.banner.closeButtonLabel": "Fermer",
     "core.ui.primaryNav.addData": "Ajouter des intégrations",
-    "core.ui.primaryNav.cloud.linkToDeployments": "Mes déploiements",
     "core.ui.primaryNav.goToHome.ariaLabel": "Accéder à la page d’accueil",
     "core.ui.primaryNav.pinnedLinksAriaLabel": "Liens épinglés",
     "core.ui.primaryNav.screenReaderLabel": "Principale",

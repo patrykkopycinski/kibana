@@ -33425,7 +33425,6 @@
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText": "champs de Threat Intelligence",
     "xpack.securitySolution.flyout.documentDetails.prevalenceButton": "Prévalence",
     "xpack.securitySolution.flyout.documentDetails.prevalenceTitle": "Prévalence",
-    "xpack.securitySolution.flyout.documentDetails.responseButton": "Réponse",
     "xpack.securitySolution.flyout.documentDetails.riskScoreTitle": "Score de risque",
     "xpack.securitySolution.flyout.documentDetails.ruleDescriptionTitle": "Description de la règle",
     "xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText": "par",

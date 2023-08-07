@@ -33424,7 +33424,6 @@
     "xpack.securitySolution.flyout.documentDetails.overviewTab.threatIntelligenceText": "脅威インテリジェンスのフィールド",
     "xpack.securitySolution.flyout.documentDetails.prevalenceButton": "発生率",
     "xpack.securitySolution.flyout.documentDetails.prevalenceTitle": "発生率",
-    "xpack.securitySolution.flyout.documentDetails.responseButton": "応答",
     "xpack.securitySolution.flyout.documentDetails.riskScoreTitle": "リスクスコア",
     "xpack.securitySolution.flyout.documentDetails.ruleDescriptionTitle": "ルールの説明",
     "xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText": "グループ基準",

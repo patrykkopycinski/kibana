@@ -20798,7 +20798,6 @@
     "xpack.lens.app.exploreDataInDiscoverDrilldown": "Ouvrir dans Discover",
     "xpack.lens.app.exploreDataInDiscoverDrilldown.newTabConfig": "Ouvrir dans un nouvel onglet",
     "xpack.lens.app.goBackModalCancelBtn": "Annuler",
-    "xpack.lens.app.goBackModalTitle": "Abandonner les modifications ?",
     "xpack.lens.app.inspect": "Inspecter",
     "xpack.lens.app.inspectAriaLabel": "inspecter",
     "xpack.lens.app.replaceInCanvas": "Remplacer dans le canvas",

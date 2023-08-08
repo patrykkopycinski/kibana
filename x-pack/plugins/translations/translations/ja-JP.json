@@ -20813,7 +20813,6 @@
     "xpack.lens.app.exploreDataInDiscoverDrilldown": "Discoverで開く",
     "xpack.lens.app.exploreDataInDiscoverDrilldown.newTabConfig": "新しいタブで開く",
     "xpack.lens.app.goBackModalCancelBtn": "キャンセル",
-    "xpack.lens.app.goBackModalTitle": "変更を破棄しますか?",
     "xpack.lens.app.inspect": "検査",
     "xpack.lens.app.inspectAriaLabel": "検査",
     "xpack.lens.app.replaceInCanvas": "キャンバスで置換",

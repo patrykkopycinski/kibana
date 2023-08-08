@@ -27279,7 +27279,6 @@
     "xpack.observability.enableInfrastructureHostsViewDescription": "{betaLabel} Activez la vue \"Hôtes\" dans l’application \"Infrastructure\".",
     "xpack.observability.inspector.stats.queryTimeValue": "{queryTime} ms",
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {détecté} Inventory {seuil dépassé} other {dépassé}}",
-    "xpack.observability.ruleDetails.ruleLoadError": "Impossible de charger la règle. Raison : {message}",
     "xpack.observability.slo.alerting.burnRate.reason": "{actionGroupName} : Le taux d'avancement pour le (les) dernier(s) {longWindowDuration} est de {longWindowBurnRate} et pour le (les) dernier(s) {shortWindowDuration} est de {shortWindowBurnRate}. Alerter si supérieur à {burnRateThreshold} pour les deux fenêtres",
     "xpack.observability.slo.burnRateWindow.thresholdTip": "Le seuil est {target}x",
     "xpack.observability.slo.clone.errorNotification": "Échec du clonage de {name}",

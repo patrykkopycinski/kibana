@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
-
-import { PageTitle } from './page_title';
-
-describe('PageTitle', () => {
-  it('should render normally', () => {
-    expect(shallowWithI18nProvider(<PageTitle />)).toMatchSnapshot();
-  });
-});
+export { SEARCH_TERMS } from './constants';

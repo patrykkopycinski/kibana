@@ -6,16 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-
-export const PageTitle = () => {
-  return (
-    <EuiText>
-      <h1 data-test-subj="managementSettingsTitle">
-        <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
-      </h1>
-    </EuiText>
-  );
-};
+export { SectionRegistry } from './section_registry';
+export type {
+  SectionRegistrySetup,
+  SectionRegistryStart,
+  RegistryComponentProps,
+  RegistryEntry,
+} from './section_registry';

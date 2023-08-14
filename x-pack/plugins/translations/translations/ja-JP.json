@@ -31154,7 +31154,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle": "インジケーター一致",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeDescription": "クエリ結果を集約し、いつ一致数がしきい値を超えるのかを検出します。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeTitle": "しきい値",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError": "保存されたクエリを読み込めませんでした。新しいクエリを選択するか、カスタムクエリを追加してください。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel": "保存されたクエリ",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source": "送信元",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel": "抑制フィールドが欠落している場合",

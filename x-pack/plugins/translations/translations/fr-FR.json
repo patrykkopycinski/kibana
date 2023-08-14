@@ -31155,7 +31155,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle": "Correspondance d'indicateur",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeDescription": "Agrégez les résultats de recherche pour détecter à quel moment le nombre de correspondances dépasse le seuil.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.thresholdTypeTitle": "Seuil",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.savedQueryFieldRequiredError": "Impossible de charger la requête enregistrée. Sélectionnez-en une nouvelle ou ajoutez une requête personnalisée.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.SavedQueryFormRowLabel": "Requête enregistrée",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source": "Source",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.suppressionMissingFieldsLabel": "Si un champ de suppression est manquant",

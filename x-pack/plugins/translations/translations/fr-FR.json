@@ -11448,7 +11448,6 @@
     "xpack.csp.emptyState.title": "Aucun résultat ne correspond à vos critères de recherche.",
     "xpack.csp.expandColumnDescriptionLabel": "Développer",
     "xpack.csp.expandColumnNameLabel": "Développer",
-    "xpack.csp.findings.betaLabel": "Cette fonctionnalité est en version bêta et susceptible d'être modifiée. La conception et le code sont moins matures que les fonctionnalités officielles en disponibilité générale et sont fournis tels quels sans aucune garantie. Les fonctionnalités en version bêta ne sont pas soumises à l'accord de niveau de service des fonctionnalités officielles en disponibilité générale.",
     "xpack.csp.findings.distributionBar.totalFailedLabel": "Échec des résultats",
     "xpack.csp.findings.distributionBar.totalPassedLabel": "Réussite des résultats",
     "xpack.csp.findings.errorCallout.pageSearchErrorTitle": "Une erreur s’est produite lors de la récupération des résultats de recherche.",

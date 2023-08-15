@@ -11463,7 +11463,6 @@
     "xpack.csp.emptyState.title": "検索条件と一致する結果がありません。",
     "xpack.csp.expandColumnDescriptionLabel": "拡張",
     "xpack.csp.expandColumnNameLabel": "拡張",
-    "xpack.csp.findings.betaLabel": "この機能はベータ段階で、変更される可能性があります。デザインとコードは正式に一般公開された機能より完成度が低く、現状のまま保証なしで提供されています。ベータ機能は、正式に一般公開された機能に適用されるサポートサービスレベル契約の対象外です。",
     "xpack.csp.findings.distributionBar.totalFailedLabel": "失敗した調査結果",
     "xpack.csp.findings.distributionBar.totalPassedLabel": "合格した調査結果",
     "xpack.csp.findings.errorCallout.pageSearchErrorTitle": "検索結果の取得中にエラーが発生しました",

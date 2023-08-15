@@ -33747,7 +33747,6 @@
     "xpack.securitySolution.navigation.findings": "Résultats",
     "xpack.securitySolution.navigation.gettingStarted": "Démarrer",
     "xpack.securitySolution.navigation.hosts": "Hôtes",
-    "xpack.securitySolution.navigation.investigate": "Examiner",
     "xpack.securitySolution.navigation.kubernetes": "Kubernetes",
     "xpack.securitySolution.navigation.mainLabel": "Sécurité",
     "xpack.securitySolution.navigation.network": "Réseau",

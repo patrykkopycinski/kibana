@@ -33746,7 +33746,6 @@
     "xpack.securitySolution.navigation.findings": "調査結果",
     "xpack.securitySolution.navigation.gettingStarted": "使ってみる",
     "xpack.securitySolution.navigation.hosts": "ホスト",
-    "xpack.securitySolution.navigation.investigate": "調査",
     "xpack.securitySolution.navigation.kubernetes": "Kubernetes",
     "xpack.securitySolution.navigation.mainLabel": "セキュリティ",
     "xpack.securitySolution.navigation.network": "ネットワーク",

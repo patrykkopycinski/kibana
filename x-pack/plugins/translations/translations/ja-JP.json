@@ -33355,8 +33355,6 @@
     "xpack.securitySolution.flyout.documentDetails.severityTitle": "深刻度",
     "xpack.securitySolution.flyout.documentDetails.share": "アラートを共有",
     "xpack.securitySolution.flyout.documentDetails.tableTab": "表",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "テクニカルプレビュー",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "脅威インテリジェンス",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "脅威インテリジェンス",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "ビジュアライゼーション",

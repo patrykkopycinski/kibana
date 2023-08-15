@@ -33356,8 +33356,6 @@
     "xpack.securitySolution.flyout.documentDetails.severityTitle": "Sévérité",
     "xpack.securitySolution.flyout.documentDetails.share": "Partager l'alerte",
     "xpack.securitySolution.flyout.documentDetails.tableTab": "Tableau",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewMessage": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale.",
-    "xpack.securitySolution.flyout.documentDetails.technicalPreviewTitle": "Version d'évaluation technique",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceButton": "Threat Intelligence",
     "xpack.securitySolution.flyout.documentDetails.threatIntelligenceTitle": "Threat Intelligence",
     "xpack.securitySolution.flyout.documentDetails.visualizationsTitle": "Visualisations",

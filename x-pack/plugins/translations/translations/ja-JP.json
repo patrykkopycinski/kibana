@@ -31105,7 +31105,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText": "カーディナリティを確認するフィールドを選択します",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "しきい値",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.licenseWarning": "アラートの非表示は、プラチナライセンス以上で有効です",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupBy.placeholderText": "フィールドを選択",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "アラートを非表示",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel": "アラートを非表示",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend": "任意（テクニカルプレビュー）",

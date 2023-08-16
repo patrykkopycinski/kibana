@@ -507,7 +507,6 @@
     "controls.rangeSlider.description": "Ajoutez un contrôle pour la sélection d'une plage de valeurs de champ.",
     "controls.rangeSlider.displayName": "Curseur de plage",
     "controls.rangeSlider.popover.noAvailableDataHelpText": "Il n'y a aucune donnée à afficher. Ajustez la plage temporelle et les filtres.",
-    "controls.rangeSlider.popover.noDataHelpText": "La plage sélectionnée n'a généré aucune donnée. Aucun filtre n'a été appliqué.",
     "controls.timeSlider.description": "Ajouter un curseur pour la sélection d'une plage temporelle",
     "controls.timeSlider.displayName": "Curseur temporel",
     "controls.timeSlider.nextLabel": "Fenêtre temporelle suivante",

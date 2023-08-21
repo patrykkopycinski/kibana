@@ -1239,7 +1239,6 @@
     "dashboard.panel.title.clonedTag": "コピー",
     "dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage": "「6.1.0」のダッシュボードの互換性のため、パネルデータを移行できませんでした。パネルには想定された列または行フィールドがありません",
     "dashboard.panel.unlinkFromLibrary": "ライブラリからのリンクを解除",
-    "dashboard.placeholder.factory.displayName": "プレースホルダー",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "ダッシュボードをリセット",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "このダッシュボードは最後に保存された状態に戻ります。 フィルターとクエリの変更が失われる場合があります。",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "ダッシュボードをリセットしますか？",

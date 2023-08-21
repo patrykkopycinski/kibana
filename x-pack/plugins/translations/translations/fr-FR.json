@@ -1225,7 +1225,6 @@
     "dashboard.panel.title.clonedTag": "copier",
     "dashboard.panel.unableToMigratePanelDataForSixOneZeroErrorMessage": "Impossible de migrer les données du panneau pour une rétro-compatibilité \"6.1.0\". Le panneau ne contient pas les champs de colonne et/ou de ligne attendus.",
     "dashboard.panel.unlinkFromLibrary": "Dissocier de la bibliothèque",
-    "dashboard.placeholder.factory.displayName": "paramètre fictif",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "Réinitialiser le tableau de bord",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "Ce tableau de bord va revenir à son dernier état d'enregistrement.  Vous risquez de perdre les modifications apportées aux filtres et aux requêtes.",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "Réinitialiser le tableau de bord ?",

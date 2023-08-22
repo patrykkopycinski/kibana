@@ -7889,7 +7889,6 @@
     "xpack.apm.apmDescription": "Collecte automatiquement les indicateurs et les erreurs de performances détaillés depuis vos applications.",
     "xpack.apm.apmSchema.index": "Schéma du serveur APM - Index",
     "xpack.apm.apmServiceGroups.title": "Groupes de services APM",
-    "xpack.apm.apmSettings.index": "Paramètres APM - Index",
     "xpack.apm.apmSettings.save.error": "Une erreur s'est produite lors de l'enregistrement des paramètres",
     "xpack.apm.apmSettings.saveButton": "Enregistrer les modifications",
     "xpack.apm.appName": "APM",

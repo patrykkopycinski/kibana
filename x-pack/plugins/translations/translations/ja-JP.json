@@ -11947,8 +11947,6 @@
     "xpack.elasticAssistant.dataAnonymizationEditor.stats.availableStat.availableTooltip": "このコンテキストの{total}個のフィールドを会話に含めることができます",
     "xpack.elasticAssistant.assistant.apiErrorTitle": "メッセージの送信中にエラーが発生しました。問題が解決しない場合は、コネクター構成をテストしてください。",
     "xpack.elasticAssistant.assistant.clearChat": "チャットを消去",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedDescription": "会話を続行する準備ができました...",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedTitle": "生成AIコネクターが追加されました。",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.description": "会話を続行するようにコネクターを構成",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.title": "生成AIコネクターを追加",
     "xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel": "会話セレクター",

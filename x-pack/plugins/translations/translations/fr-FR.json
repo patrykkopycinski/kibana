@@ -11933,8 +11933,6 @@
     "xpack.elasticAssistant.dataAnonymizationEditor.stats.availableStat.availableTooltip": "{total} champs dans ce contexte sont disponibles pour être inclus dans la conversation",
     "xpack.elasticAssistant.assistant.apiErrorTitle": "Une erreur s’est produite lors de l’envoi de votre message. Si le problème persiste, veuillez tester la configuration du connecteur.",
     "xpack.elasticAssistant.assistant.clearChat": "Effacer le chat",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedDescription": "Prêt à continuer la conversation...",
-    "xpack.elasticAssistant.assistant.connectors.addConnectorButton.connectorAddedTitle": "Connecteur d'intelligence artificielle générative ajouté.",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.description": "Configurez un connecteur pour continuer la conversation",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.title": "Ajouter un connecteur d'intelligence artificielle générative",
     "xpack.elasticAssistant.assistant.connectors.connectorSelector.ariaLabel": "Sélecteur de conversation",

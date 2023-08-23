@@ -34683,7 +34683,6 @@
     "xpack.serverlessSearch.apiKey.userFieldLabel": "Utilisateur",
     "xpack.serverlessSearch.back": "Retour",
     "xpack.serverlessSearch.cancel": "Annuler",
-    "xpack.serverlessSearch.configureClient.advancedConfigLabel": "Configuration avancée",
     "xpack.serverlessSearch.configureClient.basicConfigLabel": "Configuration de base",
     "xpack.serverlessSearch.configureClient.description": "Initialiser votre client avec votre clé d’API et votre identifiant de cloud uniques",
     "xpack.serverlessSearch.configureClient.title": "Configurer votre client",

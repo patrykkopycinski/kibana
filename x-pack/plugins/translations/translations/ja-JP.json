@@ -34682,7 +34682,6 @@
     "xpack.serverlessSearch.apiKey.userFieldLabel": "ユーザー",
     "xpack.serverlessSearch.back": "戻る",
     "xpack.serverlessSearch.cancel": "キャンセル",
-    "xpack.serverlessSearch.configureClient.advancedConfigLabel": "高度な構成",
     "xpack.serverlessSearch.configureClient.basicConfigLabel": "基本構成",
     "xpack.serverlessSearch.configureClient.description": "一意のAPIキーとCloud IDでクライアントを初期化",
     "xpack.serverlessSearch.configureClient.title": "クライアントを構成",

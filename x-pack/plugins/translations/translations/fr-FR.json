@@ -28433,7 +28433,6 @@
     "xpack.remoteClusters.remoteClusterForm.sectionModeTitle": "Mode de connexion",
     "xpack.remoteClusters.remoteClusterForm.sectionNameDescription": "Nom unique pour le cluster.",
     "xpack.remoteClusters.remoteClusterForm.sectionNameTitle": "Nom",
-    "xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText": "port de transport",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel": "En savoir plus.",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel": "Ignorer si indisponible",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel": "Ignorer si indisponible",

@@ -28433,7 +28433,6 @@
     "xpack.remoteClusters.remoteClusterForm.sectionModeTitle": "接続モード",
     "xpack.remoteClusters.remoteClusterForm.sectionNameDescription": "クラスターの固有の名前です。",
     "xpack.remoteClusters.remoteClusterForm.sectionNameTitle": "名前",
-    "xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText": "トランスポートポート",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel": "詳細情報",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel": "利用不可の場合スキップ",
     "xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableLabel": "利用不可の場合スキップ",

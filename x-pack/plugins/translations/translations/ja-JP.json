@@ -2349,7 +2349,6 @@
     "discover.docViews.table.tableTitle": "表",
     "discover.docViews.table.toggleColumnInTableButtonAriaLabel": "表の列を切り替える",
     "discover.docViews.table.toggleColumnInTableButtonTooltip": "表の列を切り替える",
-    "discover.docViews.table.toggleFieldDetails": "フィールド詳細を切り替える",
     "discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip": "メタフィールドの有無でフィルタリングできません",
     "discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip": "スクリプトフィールドの有無でフィルタリングできません",
     "discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip": "インデックスがないフィールドまたは無視された値は検索できません",

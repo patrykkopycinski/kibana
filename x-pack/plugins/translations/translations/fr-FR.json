@@ -2334,7 +2334,6 @@
     "discover.docViews.table.tableTitle": "Tableau",
     "discover.docViews.table.toggleColumnInTableButtonAriaLabel": "Afficher/Masquer la colonne dans le tableau",
     "discover.docViews.table.toggleColumnInTableButtonTooltip": "Afficher/Masquer la colonne dans le tableau",
-    "discover.docViews.table.toggleFieldDetails": "Afficher/Masquer les détails du champ",
     "discover.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip": "Impossible de filtrer sur les champs méta",
     "discover.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip": "Impossible de filtrer sur les champs scriptés",
     "discover.docViews.table.unindexedFieldsCanNotBeSearchedTooltip": "Les champs non indexés ou les valeurs ignorées ne peuvent pas être recherchés",

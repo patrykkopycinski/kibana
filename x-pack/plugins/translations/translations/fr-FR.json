@@ -33307,7 +33307,6 @@
     "xpack.securitySolution.flyout.documentDetails.entitiesButton": "Entités",
     "xpack.securitySolution.flyout.documentDetails.entitiesTitle": "Entités",
     "xpack.securitySolution.flyout.documentDetails.expandDetailButton": "Développer les détails de l'alerte",
-    "xpack.securitySolution.flyout.documentDetails.headerTitle": "Détails des documents",
     "xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle": "Champs en surbrillance",
     "xpack.securitySolution.flyout.documentDetails.insightsOptions": "Options des informations exploitables",
     "xpack.securitySolution.flyout.documentDetails.insightsTab": "Informations exploitables",

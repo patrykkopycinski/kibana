@@ -33306,7 +33306,6 @@
     "xpack.securitySolution.flyout.documentDetails.entitiesButton": "エンティティ",
     "xpack.securitySolution.flyout.documentDetails.entitiesTitle": "エンティティ",
     "xpack.securitySolution.flyout.documentDetails.expandDetailButton": "アラート詳細を展開",
-    "xpack.securitySolution.flyout.documentDetails.headerTitle": "ドキュメント詳細",
     "xpack.securitySolution.flyout.documentDetails.highlightedFieldsTitle": "ハイライトされたフィールド",
     "xpack.securitySolution.flyout.documentDetails.insightsOptions": "インサイトオプション",
     "xpack.securitySolution.flyout.documentDetails.insightsTab": "インサイト",

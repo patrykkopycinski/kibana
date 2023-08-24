@@ -10461,7 +10461,6 @@
     "xpack.cases.caseTable.caseDetailsLinkAria": "cliquez pour visiter le cas portant le titre {detailName}",
     "xpack.cases.caseTable.pushLinkAria": "cliquez pour afficher l'incident relatif à {thirdPartyName}.",
     "xpack.cases.caseTable.selectedCasesTitle": "{totalRules} {totalRules, plural, =1 {cas} one {aux cas suivants} many {cas} other {cas}} sélectionné(s)",
-    "xpack.cases.caseTable.showingCasesTitle": "Affichage de {totalRules} {totalRules, plural, =1 {cas} one {aux cas suivants} many {cas} other {cas}}",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {cas} one {aux cas suivants} many {cas} other {cas}}",
     "xpack.cases.caseView.actionLabel.selectedThirdParty": "{thirdParty} sélectionné comme système de gestion des incidents",
     "xpack.cases.caseView.actionLabel.viewIncident": "Afficher {incidentNumber}",

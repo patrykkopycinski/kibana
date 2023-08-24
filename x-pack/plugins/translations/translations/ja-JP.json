@@ -10476,7 +10476,6 @@
     "xpack.cases.caseTable.caseDetailsLinkAria": "クリックすると、タイトル{detailName}のケースを表示します",
     "xpack.cases.caseTable.pushLinkAria": "クリックすると、{thirdPartyName}でインシデントを表示します。",
     "xpack.cases.caseTable.selectedCasesTitle": "{totalRules}件の{totalRules, plural, =1 {ケース} other {ケース}}が選択済み",
-    "xpack.cases.caseTable.showingCasesTitle": "{totalRules} {totalRules, plural, =1 {ケース} other {ケース}}を表示中",
     "xpack.cases.caseTable.unit": "{totalCount, plural, =1 {ケース} other {ケース}}",
     "xpack.cases.caseView.actionLabel.selectedThirdParty": "{thirdParty}をインシデント管理システムとして選択しました",
     "xpack.cases.caseView.actionLabel.viewIncident": "{incidentNumber}を表示",

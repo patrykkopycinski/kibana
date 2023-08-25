@@ -34704,7 +34704,6 @@
     "xpack.serverlessSearch.languages.ruby": "Ruby",
     "xpack.serverlessSearch.learnMore": "詳細",
     "xpack.serverlessSearch.nav.content": "コンテンツ",
-    "xpack.serverlessSearch.nav.content.indexingApi": "インデックスAPI",
     "xpack.serverlessSearch.nav.content.indices": "インデックス",
     "xpack.serverlessSearch.nav.devTools": "開発ツール",
     "xpack.serverlessSearch.nav.explore": "探索",

@@ -33569,7 +33569,6 @@
     "xpack.securitySolution.kubernetes.columnPod": "Pod",
     "xpack.securitySolution.kubernetes.columnSessionStart": "Date de démarrage",
     "xpack.securitySolution.landing.threatHunting.hostsDescription": "Aperçu complet de tous les hôtes et événements de sécurité des hôtes.",
-    "xpack.securitySolution.lastEventTime.errorSearchDescription": "Une erreur s'est produite sur la recherche de dernière heure de l'événement",
     "xpack.securitySolution.lastEventTime.failSearchDescription": "Impossible de lancer une recherche sur la dernière heure de l'événement",
     "xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title": "Aucune donnée à afficher",
     "xpack.securitySolution.licensing.unsupportedMachineLearningMessage": "Votre licence ne prend pas en charge le Machine Learning. Veuillez mettre votre licence à niveau.",

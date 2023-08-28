@@ -33568,7 +33568,6 @@
     "xpack.securitySolution.kubernetes.columnPod": "ポッド",
     "xpack.securitySolution.kubernetes.columnSessionStart": "開始日",
     "xpack.securitySolution.landing.threatHunting.hostsDescription": "すべてのホストとホスト関連のセキュリティイベントに関する包括的な概要。",
-    "xpack.securitySolution.lastEventTime.errorSearchDescription": "前回のイベント時刻検索でエラーが発生しました。",
     "xpack.securitySolution.lastEventTime.failSearchDescription": "前回のイベント時刻で検索を実行できませんでした",
     "xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title": "表示するデータがありません",
     "xpack.securitySolution.licensing.unsupportedMachineLearningMessage": "ご使用のライセンスは機械翻訳をサポートしていません。ライセンスをアップグレードしてください。",

@@ -31003,7 +31003,6 @@
     "xpack.securitySolution.detectionEngine.createRule.savedQueryFiltersLabel": "Filtres de requête enregistrés",
     "xpack.securitySolution.detectionEngine.createRule.savedQueryLabel": "Requête enregistrée",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.authorFieldEmptyError": "L'auteur doit être renseigné",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector": "Vue de données",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError": "Une description est requise.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel": "Modèles d'indexation",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel": "Ajouter des exceptions de point de terminaison existantes à la règle",

@@ -31002,7 +31002,6 @@
     "xpack.securitySolution.detectionEngine.createRule.savedQueryFiltersLabel": "保存されたクエリフィルター",
     "xpack.securitySolution.detectionEngine.createRule.savedQueryLabel": "保存されたクエリ",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.authorFieldEmptyError": "作成者は空にする必要があります",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.dataViewSelector": "データビュー",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.descriptionFieldRequiredError": "説明が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel": "インデックスパターン",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAssociatedToEndpointListLabel": "既存のエンドポイント例外をルールに追加",

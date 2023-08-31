@@ -37587,7 +37587,6 @@
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.wait": "待機中（TTFB）",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors": "アップタイム - モニター",
     "xpack.synthetics.testDetails.after": "後 ",
     "xpack.synthetics.testDetails.codeExecuted": "コードが実行されました",
     "xpack.synthetics.testDetails.console": "コンソール",

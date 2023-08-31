@@ -37588,7 +37588,6 @@
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.synthetics.synthetics.waterfallChart.labels.timings.wait": "En attente (TTFB)",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors": "Uptime - Moniteur",
     "xpack.synthetics.testDetails.after": "Après ",
     "xpack.synthetics.testDetails.codeExecuted": "Code exécuté",
     "xpack.synthetics.testDetails.console": "Console",

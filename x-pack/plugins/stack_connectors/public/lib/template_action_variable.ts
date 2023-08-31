@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { StackConnectorsPublicPlugin } from './plugin';
+import { ActionVariable } from '@kbn/alerting-plugin/common';
 
-export const plugin = (context: PluginInitializerContext) =>
-  new StackConnectorsPublicPlugin(context);
+export function templateActionVariable(variable: ActionVariable) {
+  return variable.useWithTripleBracesInTemplates
+    ? `{{{${variable.name}}}}`
+    : `{{${variable.name}}}`;
+}

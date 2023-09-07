@@ -27683,7 +27683,6 @@
     "xpack.observability.threshold.rule.createInventoryRuleButton": "Créer une règle d'inventaire",
     "xpack.observability.threshold.rule.createThresholdRuleButton": "Créer une règle de seuil",
     "xpack.observability.threshold.rule.groupByKeysActionVariableDescription": "Objet contenant les groupes qui fournissent les données",
-    "xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder": "Rechercher des données d'infrastructure… (par exemple host.name:host-1)",
     "xpack.observability.threshold.rule.hostActionVariableDescription": "Objet hôte défini par ECS s'il est disponible dans la source.",
     "xpack.observability.threshold.rule.infrastructureDropdownMenu": "Infrastructure",
     "xpack.observability.threshold.rule.infrastructureDropdownTitle": "Règles d'infrastructure",

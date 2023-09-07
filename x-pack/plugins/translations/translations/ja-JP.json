@@ -27683,7 +27683,6 @@
     "xpack.observability.threshold.rule.createInventoryRuleButton": "インベントリルールの作成",
     "xpack.observability.threshold.rule.createThresholdRuleButton": "しきい値ルールを作成",
     "xpack.observability.threshold.rule.groupByKeysActionVariableDescription": "データを報告しているグループを含むオブジェクト",
-    "xpack.observability.threshold.rule.homePage.toolbar.kqlSearchFieldPlaceholder": "インフラストラクチャーデータを検索…（例：host.name:host-1）",
     "xpack.observability.threshold.rule.hostActionVariableDescription": "ソースで使用可能な場合に、ECSで定義されたホストオブジェクト。",
     "xpack.observability.threshold.rule.infrastructureDropdownMenu": "インフラストラクチャー",
     "xpack.observability.threshold.rule.infrastructureDropdownTitle": "インフラストラクチャールール",

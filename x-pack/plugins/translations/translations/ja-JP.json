@@ -16578,8 +16578,6 @@
     "xpack.fleet.policyDetailsPackagePolicies.createFirstTitle": "最初の統合を追加",
     "xpack.fleet.policyForm.deletePolicyActionText": "ポリシーを削除",
     "xpack.fleet.policyForm.deletePolicyActionText.disabled": "管理されたパッケージポリシーのエージェントポリシーは削除できません。",
-    "xpack.fleet.policyForm.deletePolicyGroupDescription": "既存のデータは削除されません。",
-    "xpack.fleet.policyForm.deletePolicyGroupTitle": "ポリシーを削除",
     "xpack.fleet.policyForm.generalSettingsGroupDescription": "エージェントポリシーの名前と説明を選択してください。",
     "xpack.fleet.policyForm.generalSettingsGroupTitle": "一般設定",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "タグ名の変更が失敗しました",

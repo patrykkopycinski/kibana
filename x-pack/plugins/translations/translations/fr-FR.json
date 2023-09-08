@@ -16564,8 +16564,6 @@
     "xpack.fleet.policyDetailsPackagePolicies.createFirstTitle": "Ajouter votre première intégration",
     "xpack.fleet.policyForm.deletePolicyActionText": "Supprimer la stratégie",
     "xpack.fleet.policyForm.deletePolicyActionText.disabled": "La politique d'agent avec les politiques de package géré ne peut pas être supprimée.",
-    "xpack.fleet.policyForm.deletePolicyGroupDescription": "Les données existantes ne sont pas supprimées.",
-    "xpack.fleet.policyForm.deletePolicyGroupTitle": "Supprimer la stratégie",
     "xpack.fleet.policyForm.generalSettingsGroupDescription": "Attribuez un nom et ajoutez une description à votre stratégie d'agent.",
     "xpack.fleet.policyForm.generalSettingsGroupTitle": "Paramètres généraux",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "La balise n’a pas pu être renommée",

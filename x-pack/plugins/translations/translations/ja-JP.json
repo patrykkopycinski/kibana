@@ -7599,7 +7599,7 @@
     "xpack.apm.tutorial.windowsServerInstructions.textPre": "1.[ダウンロードページ]({downloadPageLink})からAPM Server Windows zipファイルをダウンロードします。\n2.zipファイルのコンテンツを{zipFileExtractFolder}に解凍します。\n3.「{apmServerDirectory}」ディレクトリの名前を「APM-Server」に変更します。\n4.管理者としてPowerShellプロンプトを開きます（PowerShellアイコンを右クリックして「管理者として実行」を選択します）。Windows XPをご使用の場合、PowerShellのダウンロードとインストールが必要な場合があります。\n5.PowerShellプロンプトで次のコマンドを実行し、APM ServerをWindowsサービスとしてインストールします。",
     "xpack.apm.unifiedSearchBar.placeholder": "{event, select, transaction {トランザクション} metric {メトリック} error {エラー} other {トランザクション、エラー、およびメトリック}}を検索（例：{queryExample}）",
     "xpack.apm.waterfall.errorCount": "{errorCount, plural, other {#件の関連エラーを表示}}",
-    "xpack.apm.waterfall.exceedsMax": "このトレースの項目数は{traceItemCount}であり、現在の制限値{maxTraceItems}より大きくなっています。トレース全体を表示するには、制限を大きくしてください",
+    "xpack.apm.waterfall.exceedsMax": "このトレースの項目数は{traceDocsTotal}であり、現在の制限値{maxTraceItems}より大きくなっています。トレース全体を表示するには、制限を大きくしてください",
     "xpack.apm.waterfall.spanLinks.badge": "{total} {total, plural, other {スパンリンク}}",
     "xpack.apm.waterfall.spanLinks.tooltip.linkedChildren": "{linkedChildren}受信",
     "xpack.apm.waterfall.spanLinks.tooltip.linkedParents": "{linkedParents}送信",

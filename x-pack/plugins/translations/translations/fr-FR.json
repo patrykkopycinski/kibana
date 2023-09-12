@@ -21050,7 +21050,6 @@
     "xpack.lens.indexPattern.percentFormatLabel": "Pourcent",
     "xpack.lens.indexPattern.percentile": "Centile",
     "xpack.lens.indexPattern.percentile.documentation.quick": "\n      La plus grande valeur qui est inférieure à n pour cent des valeurs présentes dans tous les documents.\n      ",
-    "xpack.lens.indexPattern.percentile.errorMessage": "Le centile doit être un entier compris entre 1 et 99",
     "xpack.lens.indexPattern.percentile.percentileRanksValue": "Valeur des rangs centiles",
     "xpack.lens.indexPattern.percentile.percentileValue": "Centile",
     "xpack.lens.indexPattern.percentile.signature": "champ : chaîne, [percentile] : nombre",

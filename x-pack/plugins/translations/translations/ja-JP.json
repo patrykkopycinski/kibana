@@ -2410,7 +2410,6 @@
     "discover.serverLocatorExtension.titleFromLocatorUnknown": "不明な検索",
     "discover.singleDocRoute.errorTitle": "エラーが発生しました",
     "discover.skipToBottomButtonLabel": "テーブルの最後に移動",
-    "discover.toggleSidebarAriaLabel": "サイドバーを切り替える",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "検索の管理",
     "discover.topNav.openSearchPanel.noSearchesFoundDescription": "一致する検索が見つかりませんでした。",
     "discover.topNav.openSearchPanel.openSearchTitle": "検索を開く",

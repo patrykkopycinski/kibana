@@ -33165,7 +33165,6 @@
     "xpack.securitySolution.flyout.entities.relatedHostsTitle": "Hôtes associés",
     "xpack.securitySolution.flyout.entities.relatedUsersTitle": "Utilisateurs associés",
     "xpack.securitySolution.flyout.entities.usersInfoTitle": "Informations sur l’utilisateur",
-    "xpack.securitySolution.flyout.prevalenceErrorMessage": "prévalence",
     "xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitle": "Nombre d'alertes",
     "xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle": "Compte du document",
     "xpack.securitySolution.flyout.response.title": "Réponses",

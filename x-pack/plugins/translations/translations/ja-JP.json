@@ -33164,7 +33164,6 @@
     "xpack.securitySolution.flyout.entities.relatedHostsTitle": "関連するホスト",
     "xpack.securitySolution.flyout.entities.relatedUsersTitle": "関連するユーザー",
     "xpack.securitySolution.flyout.entities.usersInfoTitle": "ユーザー情報",
-    "xpack.securitySolution.flyout.prevalenceErrorMessage": "発生率",
     "xpack.securitySolution.flyout.prevalenceTableAlertCountColumnTitle": "アラート件数",
     "xpack.securitySolution.flyout.prevalenceTableDocCountColumnTitle": "ドキュメントカウント",
     "xpack.securitySolution.flyout.response.title": "対応",

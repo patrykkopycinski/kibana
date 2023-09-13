@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { initSampleDataSets } from './sample_data_sets';
+import { useMlKibana } from './kibana_context';
+
+export function useIsServerless(): boolean {
+  return useMlKibana().services.mlServices.isServerless;
+}

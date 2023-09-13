@@ -4150,7 +4150,7 @@
     "indexPatternEditor.rollupDataView.warning.textParagraphOne": "Kibana propose un support bêta pour les vues de données basées sur les cumuls. Vous pourriez rencontrer des problèmes lors de l'utilisation de ces vues dans les recherches enregistrées, les visualisations et les tableaux de bord. Ils ne sont pas compatibles avec certaines fonctionnalités avancées, telles que Timelion et le Machine Learning.",
     "indexPatternEditor.rollupDataView.warning.textParagraphTwo": "Vous pouvez mettre une vue de données de cumul en correspondance avec un index de cumul et zéro index régulier ou plus. Une vue de données de cumul dispose d'indicateurs, de champs, d'intervalles et d'agrégations limités. Un index de cumul se limite aux index disposant d'une configuration de tâche ou de plusieurs tâches avec des configurations compatibles.",
     "indexPatternEditor.rollupIndexPattern.warning.title": "Fonctionnalité bêta",
-    "indexPatternEditor.saved": "'{indexPatternName}' enregistré",
+    "indexPatternEditor.saved": "Enregistré",
     "indexPatternEditor.status.noSystemIndicesLabel": "Aucun flux de données, index ni alias d'index ne correspond à votre modèle d'indexation.",
     "indexPatternEditor.status.noSystemIndicesWithPromptLabel": "Aucun flux de données, index ni alias d'index ne correspond à votre modèle d'indexation.",
     "indexPatternEditor.status.notMatchLabel.notMatchNoIndicesDetail": "Le modèle d'indexation spécifié ne correspond à aucun flux de données, index ni alias d'index.",

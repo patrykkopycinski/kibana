@@ -27097,7 +27097,6 @@
     "xpack.observability_onboarding.selectLogs.useOwnShipper.description": "Utilisez votre propre agent de transfert pour collecter des données de logs en générant une clé d’API.",
     "xpack.observability_onboarding.steps.back": "Retour",
     "xpack.observability_onboarding.steps.exploreLogs": "Explorer les logs",
-    "xpack.observability_onboarding.steps.inspect": "Inspecter",
     "xpack.observability_onboarding.title.collectCustomLogs": "Collectez des logs personnalisés",
     "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel} Lorsque les cumuls continus sont activés, l'interface utilisateur sélectionne des indicateurs ayant la résolution appropriée. Sur des plages temporelles plus larges, des indicateurs de résolution inférieure sont utilisés, ce qui améliore les temps de chargement.",
     "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} Permet l'utilisation d'indicateurs de transaction de service. Il s'agit d'indicateurs à faible cardinalité qui peuvent être utilisés par certaines vues, comme l'inventaire de service, pour accélérer le chargement.",

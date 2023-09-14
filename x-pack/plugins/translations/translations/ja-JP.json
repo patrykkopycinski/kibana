@@ -27097,7 +27097,6 @@
     "xpack.observability_onboarding.selectLogs.useOwnShipper.description": "APIキーを生成し、ログデータを収集するために独自のシッパーを使用します。",
     "xpack.observability_onboarding.steps.back": "戻る",
     "xpack.observability_onboarding.steps.exploreLogs": "ログを探索",
-    "xpack.observability_onboarding.steps.inspect": "検査",
     "xpack.observability_onboarding.title.collectCustomLogs": "カスタムログを収集",
     "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel}連続ロールアップが有効な場合、UIは適切な解像度でメトリックを選択します。より大きな時間範囲では、より低い解像度の測定基準が使用され、読み込み時間が改善されます。",
     "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel}サービストランザクションメトリックの使用を有効にします。これは、サービスインベントリなどの特定のビューで使用できる低カーディナリティのメトリックで、読み込み時間を短縮します。",

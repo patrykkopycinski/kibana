@@ -17361,7 +17361,6 @@
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "データストリームに作成されたバッキングインデックスの累積数",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "ヘルス",
     "xpack.idxMgmt.dataStreamDetailPanel.healthToolTip": "データストリームの現在のバッキングインデックスのヘルス",
-    "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage": "なし",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle": "インデックスライフサイクルポリシー",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip": "データストリームのデータを管理するインデックスライフサイクルポリシー",
     "xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle": "インデックステンプレート",

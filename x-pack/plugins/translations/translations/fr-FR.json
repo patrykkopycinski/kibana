@@ -17347,7 +17347,6 @@
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "Nombre cumulatif d'index de sauvegarde créés pour le flux de données",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "Intégrité",
     "xpack.idxMgmt.dataStreamDetailPanel.healthToolTip": "Intégrité des index de sauvegarde actuels du flux de données",
-    "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage": "Aucun",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyTitle": "Stratégie de cycle de vie des index",
     "xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip": "Stratégie de cycle de vie de l'index qui gère les données du flux de données",
     "xpack.idxMgmt.dataStreamDetailPanel.indexTemplateTitle": "Modèle d'index",

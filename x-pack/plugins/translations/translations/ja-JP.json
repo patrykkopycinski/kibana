@@ -665,7 +665,6 @@
     "core.deprecations.elasticsearchUsername.manualSteps2": "「elasticsearch.serviceAccountToken」設定をkibana.ymlに追加します。",
     "core.deprecations.elasticsearchUsername.manualSteps3": "kibana.ymlから「elasticsearch.username」と「elasticsearch.password」を削除します。",
     "core.deprecations.noCorrectiveAction": "この廃止予定は自動的に解決できません。",
-    "core.euiAccordion.isLoading": "読み込み中",
     "core.euiAutoRefresh.autoRefreshLabel": "自動更新",
     "core.euiAutoRefresh.buttonLabelOff": "自動更新はオフです",
     "core.euiBasicTable.noItemsMessage": "項目が見つかりません",

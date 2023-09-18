@@ -651,6 +651,7 @@
     "core.deprecations.elasticsearchUsername.manualSteps2": "Ajoutez le paramètre \"elasticsearch.serviceAccountToken\" à kibana.yml.",
     "core.deprecations.elasticsearchUsername.manualSteps3": "Supprimez \"elasticsearch.username\" et \"elasticsearch.password\" de kibana.yml.",
     "core.deprecations.noCorrectiveAction": "Ce déclassement ne peut pas être résolu automatiquement.",
+    "core.euiAccordion.isLoading": "Chargement",
     "core.euiAutoRefresh.autoRefreshLabel": "Actualisation automatique",
     "core.euiAutoRefresh.buttonLabelOff": "L'actualisation automatique est désactivée",
     "core.euiBasicTable.noItemsMessage": "Aucun élément n'a été trouvé",

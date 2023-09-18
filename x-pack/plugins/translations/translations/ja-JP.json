@@ -8287,7 +8287,6 @@
     "xpack.apm.mobile.location.metrics.http.requests.title": "最も使用されている",
     "xpack.apm.mobile.location.metrics.launches": "最も多い起動",
     "xpack.apm.mobile.location.metrics.sessions": "最も多いセッション",
-    "xpack.apm.mobile.metrics.crash.rate": "クラッシュ率（毎分のクラッシュ数）",
     "xpack.apm.mobile.metrics.http.requests": "HTTPリクエスト",
     "xpack.apm.mobile.metrics.load.time": "最も遅いアプリ読み込み時間",
     "xpack.apm.mobile.metrics.sessions": "セッション",

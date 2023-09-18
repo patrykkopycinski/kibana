@@ -8271,7 +8271,6 @@
     "xpack.apm.mobile.location.metrics.http.requests.title": "Le plus utilisé dans",
     "xpack.apm.mobile.location.metrics.launches": "La plupart des lancements",
     "xpack.apm.mobile.location.metrics.sessions": "La plupart des sessions",
-    "xpack.apm.mobile.metrics.crash.rate": "Taux de panne (pannes par minute)",
     "xpack.apm.mobile.metrics.http.requests": "Requêtes HTTP",
     "xpack.apm.mobile.metrics.load.time": "Temps de chargement de l'application le plus lent",
     "xpack.apm.mobile.metrics.sessions": "Sessions",

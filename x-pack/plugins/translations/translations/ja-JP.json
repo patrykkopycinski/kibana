@@ -31387,7 +31387,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootkitDescription": "Bootkit (T1067)",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootOrLogonAutostartExecutionDescription": "ブートまたはログオン自動起動実行（T1547）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootOrLogonInitializationScriptsDescription": "ブートまたはログオン初期化スクリプト（T1037）",
-    "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserBookmarkDiscoveryDescription": "ブラウザーブックマーク検出（T1217）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserExtensionsDescription": "ブラウザー拡張（T1176）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserSessionHijackingDescription": "ブラウザーセッションハイジャック（T1185）",
     "xpack.securitySolution.detectionEngine.mitreAttackTechniques.bruteForceDescription": "Brute Force（T1110）",

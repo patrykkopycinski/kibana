@@ -18554,7 +18554,7 @@
     "xpack.infra.logSourceConfiguration.missingDataViewsLabel": "データビュー{indexPatternId}が見つかりません",
     "xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage": "データビューには{messageField}フィールドが必要です。",
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "{savedObjectType}が見つかりませんでした：{savedObjectId}",
-    "xpack.infra.metadataEmbeddable.errorMessage": "データの読み込みエラーが発生しました。{reload}し、ホスト詳細をもう一度開いてください。",
+    "xpack.infra.metadataEmbeddable.errorMessage": "データの読み込みエラーが発生しました。{refetch}し、ホスト詳細をもう一度開いてください。",
     "xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle": "最後の{lookback} {timeLabel}",
     "xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError": "フィルタークエリには{groupCount, plural, other {これらのフィールド}}に対する一致が含まれているため、このルールによって、想定を下回る{matchedGroups}に関するアラートが発行される場合があります。詳細については、{filteringAndGroupingLink}を参照してください。",
     "xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel": "アグリゲーション{name}",

@@ -18540,7 +18540,7 @@
     "xpack.infra.logSourceConfiguration.missingDataViewsLabel": "Type de données manquant {indexPatternId}",
     "xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage": "La vue de données doit contenir un champ {messageField}.",
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "Impossible de localiser ce {savedObjectType} : {savedObjectId}",
-    "xpack.infra.metadataEmbeddable.errorMessage": "Une erreur s'est produite lors du chargement des données. Essayez de {reload} et d'ouvrir à nouveau les détails de l'hôte.",
+    "xpack.infra.metadataEmbeddable.errorMessage": "Une erreur s'est produite lors du chargement des données. Essayez de {refetch} et d'ouvrir à nouveau les détails de l'hôte.",
     "xpack.infra.metrics.alertDetailsAppSection.criterion.subtitle": "Dernière {lookback} {timeLabel}",
     "xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError": "Il est possible que cette règle signale {matchedGroups} moins que prévu, car la requête de filtre comporte une correspondance pour {groupCount, plural, one {ce champ} many {ces champs} other {ces champs}}. Pour en savoir plus, consultez notre {filteringAndGroupingLink}.",
     "xpack.infra.metrics.alertFlyout.customEquationEditor.aggregationLabel": "Agrégation {name}",

@@ -16,8 +16,10 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { EventAnnotationGroupTableList } from '@kbn/event-annotation-components';
-import type { EventAnnotationServiceType } from '.';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
+import { ISessionService } from '@kbn/data-plugin/public';
+import { EventAnnotationGroupTableList } from './components/table_list';
 
 export interface EventAnnotationListingPageServices {
   core: CoreStart;
@@ -27,6 +29,8 @@ export interface EventAnnotationListingPageServices {
   dataViews: DataView[];
   createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
+  LensEmbeddableComponent: LensEmbeddableComponent;
+  sessionService: ISessionService;
 }
 
 export const getTableList = (
@@ -54,6 +58,8 @@ export const getTableList = (
           createDataView={services.createDataView}
           queryInputServices={services.queryInputServices}
           navigateToLens={() => services.core.application.navigateToApp('lens')}
+          LensEmbeddableComponent={services.LensEmbeddableComponent}
+          sessionService={services.sessionService}
         />
       </TableListViewKibanaProvider>
     </RootDragDropProvider>

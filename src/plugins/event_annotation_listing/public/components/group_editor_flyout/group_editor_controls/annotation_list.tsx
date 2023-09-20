@@ -24,7 +24,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { createCopiedAnnotation } from '@kbn/event-annotation-common';
-import { getAnnotationAccessor } from '..';
+import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 
 export const AnnotationList = ({
   annotations,
@@ -40,7 +40,7 @@ export const AnnotationList = ({
     setNewAnnotationId(uuidv4());
   }, [annotations.length]);
 
-  const addAnnotationText = i18n.translate('eventAnnotationComponents.annotationList.add', {
+  const addAnnotationText = i18n.translate('eventAnnotationListing.annotationList.add', {
     defaultMessage: 'Add annotation',
   });
 
@@ -88,14 +88,26 @@ export const AnnotationList = ({
   const [{ dragging }] = useDragDropContext();
 
   return (
-    <div>
+    <div
+      css={css`
+        background-color: ${euiThemeVars.euiColorLightestShade};
+        padding: ${euiThemeVars.euiSizeS};
+        border-radius: ${euiThemeVars.euiBorderRadius};
+        overflow: hidden;
+
+        .domDragDrop-isActiveGroup {
+          padding: ${euiThemeVars.euiSizeS};
+          margin: -${euiThemeVars.euiSizeS} -${euiThemeVars.euiSizeS} 0 -${euiThemeVars.euiSizeS};
+        }
+      `}
+    >
       <ReorderProvider>
         {annotations.map((annotation, index) => (
           <div
             key={index}
             css={css`
-              margin-top: ${euiThemeVars.euiSizeS};
               position: relative; // this is to properly contain the absolutely-positioned drop target in DragDrop
+              margin-bottom: ${euiThemeVars.euiSizeS};
             `}
           >
             <DragDrop
@@ -119,7 +131,7 @@ export const AnnotationList = ({
               }}
             >
               <DimensionButton
-                groupLabel={i18n.translate('eventAnnotationComponents.groupEditor.addAnnotation', {
+                groupLabel={i18n.translate('eventAnnotationListing.groupEditor.addAnnotation', {
                   defaultMessage: 'Annotations',
                 })}
                 onClick={() => selectAnnotation(annotation)}
@@ -136,34 +148,28 @@ export const AnnotationList = ({
         ))}
       </ReorderProvider>
 
-      <div
-        css={css`
-          margin-top: ${euiThemeVars.euiSizeS};
-        `}
+      <DragDrop
+        order={[annotations.length]}
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
+        dropTypes={dragging ? ['duplicate_compatible'] : []}
+        value={{
+          id: 'addAnnotation',
+          humanData: {
+            label: addAnnotationText,
+          },
+        }}
+        onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
       >
-        <DragDrop
-          order={[annotations.length]}
-          getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
-          getAdditionalClassesOnDroppable={
-            DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
-          }
-          dropTypes={dragging ? ['duplicate_compatible'] : []}
-          value={{
-            id: 'addAnnotation',
-            humanData: {
-              label: addAnnotationText,
-            },
-          }}
-          onDrop={({ id: sourceId }) => addNewAnnotation(sourceId)}
-        >
-          <EmptyDimensionButton
-            dataTestSubj="addAnnotation"
-            label={addAnnotationText}
-            ariaLabel={addAnnotationText}
-            onClick={() => addNewAnnotation()}
-          />
-        </DragDrop>
-      </div>
+        <EmptyDimensionButton
+          dataTestSubj="addAnnotation"
+          label={addAnnotationText}
+          ariaLabel={addAnnotationText}
+          onClick={() => addNewAnnotation()}
+        />
+      </DragDrop>
     </div>
   );
 };

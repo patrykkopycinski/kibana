@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { i18n } from '@kbn/i18n';
@@ -16,13 +16,16 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { EuiButton, EuiEmptyPrompt, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EmbeddableComponent as LensEmbeddableComponent } from '@kbn/lens-plugin/public';
 import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
-import type { EventAnnotationServiceType } from '../types';
+import { ISessionService, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import { css } from '@emotion/react';
 import { GroupEditorFlyout } from './group_editor_flyout';
 
 export const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
@@ -35,7 +38,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
 
   return {
     field: 'dataView',
-    name: i18n.translate('eventAnnotationComponents.tableList.dataView', {
+    name: i18n.translate('eventAnnotationListing.tableList.dataView', {
       defaultMessage: 'Data view',
     }),
     sortable: false,
@@ -44,7 +47,24 @@ const getCustomColumn = (dataViews: DataView[]) => {
       <div>
         {record.attributes.dataViewSpec
           ? record.attributes.dataViewSpec.name
-          : dataViewNameMap[record.attributes.indexPatternId]}
+          : dataViewNameMap[record.attributes.indexPatternId] ?? (
+              <EuiText size="s" color={'danger'}>
+                <FormattedMessage
+                  id="eventAnnotationListing.tableList.dataView.missing"
+                  defaultMessage="{errorIcon} No longer exists"
+                  values={{
+                    errorIcon: (
+                      <EuiIcon
+                        type="error"
+                        css={css`
+                          margin-top: -3px;
+                        `}
+                      />
+                    ),
+                  }}
+                />
+              </EuiText>
+            )}
       </div>
     ),
   };
@@ -53,6 +73,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
 export const EventAnnotationGroupTableList = ({
   uiSettings,
   eventAnnotationService,
+  sessionService,
   visualizeCapabilities,
   savedObjectsTagging,
   parentProps,
@@ -61,9 +82,11 @@ export const EventAnnotationGroupTableList = ({
   queryInputServices,
   toasts,
   navigateToLens,
+  LensEmbeddableComponent,
 }: {
   uiSettings: IUiSettingsClient;
   eventAnnotationService: EventAnnotationServiceType;
+  sessionService: ISessionService;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   savedObjectsTagging: SavedObjectsTaggingApi;
   parentProps: TableListTabParentProps;
@@ -72,9 +95,22 @@ export const EventAnnotationGroupTableList = ({
   queryInputServices: QueryInputServices;
   toasts: IToasts;
   navigateToLens: () => void;
+  LensEmbeddableComponent: LensEmbeddableComponent;
 }) => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
+
+  const [searchSessionId, setSearchSessionId] = useState<string>(sessionService.start());
+
+  const refreshSearchSession = useCallback(() => {
+    setSearchSessionId(sessionService.start());
+  }, [sessionService]);
+
+  useEffect(() => {
+    return () => {
+      sessionService.clear();
+    };
+  }, [sessionService]);
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
 
@@ -138,15 +174,20 @@ export const EventAnnotationGroupTableList = ({
       savedObjectsTagging={savedObjectsTagging}
       dataViews={dataViews}
       createDataView={createDataView}
+      LensEmbeddableComponent={LensEmbeddableComponent}
       queryInputServices={queryInputServices}
+      searchSessionId={searchSessionId}
+      refreshSearchSession={refreshSearchSession}
+      timePickerQuickRanges={uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)}
     />
   ) : undefined;
 
   return (
     <>
       <TableListViewTable<EventAnnotationGroupContent>
+        id="eventAnnotation"
         refreshListBouncer={refreshListBouncer}
-        tableCaption={i18n.translate('eventAnnotationComponents.tableList.listTitle', {
+        tableCaption={i18n.translate('eventAnnotationListing.tableList.listTitle', {
           defaultMessage: 'Annotation Library',
         })}
         findItems={fetchItems}
@@ -162,11 +203,12 @@ export const EventAnnotationGroupTableList = ({
         customTableColumn={getCustomColumn(dataViews)}
         emptyPrompt={
           <EuiEmptyPrompt
+            color="transparent"
             title={
               <EuiTitle>
                 <h2>
                   <FormattedMessage
-                    id="eventAnnotationComponents.tableList.emptyPrompt.title"
+                    id="eventAnnotationListing.tableList.emptyPrompt.title"
                     defaultMessage="Create your first annotation in Lens"
                   />
                 </h2>
@@ -175,27 +217,26 @@ export const EventAnnotationGroupTableList = ({
             body={
               <p>
                 <FormattedMessage
-                  id="eventAnnotationComponents.tableList.emptyPrompt.body"
-                  defaultMessage="You can create and save annotations for use across multiple visualization in the
-                    Lens visualization editor."
+                  id="eventAnnotationListing.tableList.emptyPrompt.body"
+                  defaultMessage="You can create and save annotations for use across multiple visualizations in the Lens editor."
                 />
               </p>
             }
             actions={
               <EuiButton onClick={navigateToLens}>
                 <FormattedMessage
-                  id="eventAnnotationComponents.tableList.emptyPrompt.cta"
-                  defaultMessage="Create new annotation in Lens"
+                  id="eventAnnotationListing.tableList.emptyPrompt.cta"
+                  defaultMessage="Create annotation in Lens"
                 />
               </EuiButton>
             }
             iconType="flag"
           />
         }
-        entityName={i18n.translate('eventAnnotationComponents.tableList.entityName', {
+        entityName={i18n.translate('eventAnnotationListing.tableList.entityName', {
           defaultMessage: 'annotation group',
         })}
-        entityNamePlural={i18n.translate('eventAnnotationComponents.tableList.entityNamePlural', {
+        entityNamePlural={i18n.translate('eventAnnotationListing.tableList.entityNamePlural', {
           defaultMessage: 'annotation groups',
         })}
         onClickTitle={editItem}

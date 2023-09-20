@@ -16,26 +16,30 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SavedObjectsTaggingApiUiComponent } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { QueryInputServices } from '@kbn/visualization-ui-components';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-common';
-import { EVENT_ANNOTATION_APP_NAME } from '../../constants';
-import { AnnotationEditorControls } from '../annotation_editor_controls';
+import {
+  EVENT_ANNOTATION_APP_NAME,
+  AnnotationEditorControls,
+} from '@kbn/event-annotation-components';
 import { AnnotationList } from './annotation_list';
-
-export const ENABLE_INDIVIDUAL_ANNOTATION_EDITING = false;
 
 const isTitleValid = (title: string) => Boolean(title.length);
 
-export const isGroupValid = (group: EventAnnotationGroupConfig) => isTitleValid(group.title);
+const isDataViewValid = (dataView: DataView | undefined) => Boolean(dataView?.id);
+
+export const isGroupValid = (group: EventAnnotationGroupConfig, dataViews: DataView[]) =>
+  isTitleValid(group.title) &&
+  isDataViewValid(dataViews.find(({ id }) => id === group.indexPatternId));
 
 export const GroupEditorControls = ({
   group,
@@ -43,10 +47,10 @@ export const GroupEditorControls = ({
   setSelectedAnnotation: _setSelectedAnnotation,
   selectedAnnotation,
   TagSelector,
-  dataViews: globalDataViews,
-  createDataView,
+  dataViews,
   queryInputServices,
   showValidation,
+  isAdHocDataView,
 }: {
   group: EventAnnotationGroupConfig;
   update: (group: EventAnnotationGroupConfig) => void;
@@ -54,19 +58,10 @@ export const GroupEditorControls = ({
   setSelectedAnnotation: (annotation: EventAnnotationConfig) => void;
   TagSelector: SavedObjectsTaggingApiUiComponent['SavedObjectSaveModalTagSelector'];
   dataViews: DataView[];
-  createDataView: (spec: DataViewSpec) => Promise<DataView>;
   queryInputServices: QueryInputServices;
   showValidation: boolean;
+  isAdHocDataView: (id: string) => boolean;
 }) => {
-  // save the spec for the life of the component since the user might change their mind after selecting another data view
-  const [adHocDataView, setAdHocDataView] = useState<DataView>();
-
-  useEffect(() => {
-    if (group.dataViewSpec) {
-      createDataView(group.dataViewSpec).then(setAdHocDataView);
-    }
-  }, [createDataView, group.dataViewSpec]);
-
   const setSelectedAnnotation = useCallback(
     (newSelection: EventAnnotationConfig) => {
       update({
@@ -80,45 +75,38 @@ export const GroupEditorControls = ({
     [_setSelectedAnnotation, group, update]
   );
 
-  const dataViews = useMemo(() => {
-    const items = [...globalDataViews];
-    if (adHocDataView) {
-      items.push(adHocDataView);
-    }
-    return items;
-  }, [adHocDataView, globalDataViews]);
-
   const currentDataView = useMemo(
-    () => dataViews.find((dataView) => dataView.id === group.indexPatternId) || dataViews[0],
+    () => dataViews.find((dataView) => dataView.id === group.indexPatternId),
     [dataViews, group.indexPatternId]
   );
 
   return !selectedAnnotation ? (
     <>
       <EuiTitle
-        size="xs"
+        size="xxs"
         css={css`
           margin-bottom: ${euiThemeVars.euiSize};
         `}
       >
-        <h4>
+        <h3>
           <FormattedMessage
-            id="eventAnnotationComponents.groupEditor.details"
+            id="eventAnnotationListing.groupEditor.details"
             defaultMessage="Details"
           />
-        </h4>
+        </h3>
       </EuiTitle>
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationComponents.groupEditor.title', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.title', {
             defaultMessage: 'Title',
           })}
           isInvalid={showValidation && !isTitleValid(group.title)}
-          error={i18n.translate('eventAnnotationComponents.groupEditor.titleRequired', {
+          error={i18n.translate('eventAnnotationListing.groupEditor.titleRequired', {
             defaultMessage: 'A title is required.',
           })}
         >
           <EuiFieldText
+            compressed
             data-test-subj="annotationGroupTitle"
             value={group.title}
             isInvalid={showValidation && !isTitleValid(group.title)}
@@ -131,19 +119,20 @@ export const GroupEditorControls = ({
           />
         </EuiFormRow>
         <EuiFormRow
-          label={i18n.translate('eventAnnotationComponents.groupEditor.description', {
+          label={i18n.translate('eventAnnotationListing.groupEditor.description', {
             defaultMessage: 'Description',
           })}
           labelAppend={
             <EuiText color="subdued" size="xs">
               <FormattedMessage
-                id="eventAnnotationComponents.groupEditor.optional"
+                id="eventAnnotationListing.groupEditor.optional"
                 defaultMessage="Optional"
               />
             </EuiText>
           }
         >
           <EuiTextArea
+            compressed
             data-test-subj="annotationGroupDescription"
             value={group.description}
             onChange={({ target: { value } }) =>
@@ -158,6 +147,7 @@ export const GroupEditorControls = ({
           <TagSelector
             initialSelection={group.tags}
             markOptional
+            compressed
             onTagsSelected={(tags: string[]) =>
               update({
                 ...group,
@@ -166,46 +156,92 @@ export const GroupEditorControls = ({
             }
           />
         </EuiFormRow>
-        {ENABLE_INDIVIDUAL_ANNOTATION_EDITING && (
-          <>
-            <EuiFormRow
-              label={i18n.translate('eventAnnotationComponents.groupEditor.dataView', {
-                defaultMessage: 'Data view',
-              })}
-            >
-              <EuiSelect
-                data-test-subj="annotationDataViewSelection"
-                options={dataViews.map(({ id: value, title, name }) => ({
-                  value,
-                  text: name ?? title,
-                }))}
-                value={group.indexPatternId}
-                onChange={({ target: { value } }) =>
-                  update({
-                    ...group,
-                    indexPatternId: value,
-                    dataViewSpec:
-                      value === adHocDataView?.id ? adHocDataView.toSpec(false) : undefined,
-                  })
-                }
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              label={i18n.translate('eventAnnotationComponents.groupEditor.addAnnotation', {
-                defaultMessage: 'Annotations',
-              })}
-            >
-              <AnnotationList
-                annotations={group.annotations}
-                selectAnnotation={setSelectedAnnotation}
-                update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
-              />
-            </EuiFormRow>
-          </>
-        )}
+        <EuiFormRow
+          label={i18n.translate('eventAnnotationListing.groupEditor.dataView', {
+            defaultMessage: 'Data view',
+          })}
+          isInvalid={!isDataViewValid(currentDataView)}
+          error={
+            !isDataViewValid(currentDataView)
+              ? i18n.translate('eventAnnotationListing.groupEditor.dataViewMissingError', {
+                  defaultMessage: 'The previously selected data view no longer exists.',
+                })
+              : ''
+          }
+        >
+          <EuiSelect
+            compressed
+            data-test-subj="annotationDataViewSelection"
+            isInvalid={!isDataViewValid(currentDataView)}
+            options={dataViews.map(({ id: value, title, name }) => ({
+              value,
+              text: name ?? title,
+            }))}
+            value={isDataViewValid(currentDataView) ? group.indexPatternId : undefined}
+            hasNoInitialSelection={true}
+            onChange={({ target: { value } }) => {
+              const selectedDataView = dataViews.find(({ id }) => id === value);
+
+              if (!selectedDataView?.id) {
+                return;
+              }
+
+              update({
+                ...group,
+                indexPatternId: value,
+                dataViewSpec: isAdHocDataView(selectedDataView.id)
+                  ? selectedDataView.toSpec(false)
+                  : undefined,
+              });
+            }}
+          />
+        </EuiFormRow>
       </EuiForm>
+      <div
+        css={css`
+          margin-top: ${euiThemeVars.euiSize};
+          padding-top: ${euiThemeVars.euiSize};
+          position: relative;
+
+          &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -${euiThemeVars.euiSize};
+            left: -${euiThemeVars.euiSize};
+            border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+          }
+        `}
+      >
+        <EuiTitle
+          size="xxs"
+          css={css`
+            margin-bottom: ${euiThemeVars.euiSize};
+          `}
+        >
+          <h3>
+            <FormattedMessage
+              id="eventAnnotationListing.groupEditor.annotations"
+              defaultMessage="Annotations"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiForm>
+          <EuiFormRow
+            label={i18n.translate('eventAnnotationListing.groupEditor.annotationGroupLabel', {
+              defaultMessage: 'Date histogram axis',
+            })}
+          >
+            <AnnotationList
+              annotations={group.annotations}
+              selectAnnotation={currentDataView ? setSelectedAnnotation : () => {}}
+              update={(newAnnotations) => update({ ...group, annotations: newAnnotations })}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </div>
     </>
-  ) : (
+  ) : currentDataView ? (
     <AnnotationEditorControls
       annotation={selectedAnnotation}
       onAnnotationChange={(changes) => setSelectedAnnotation({ ...selectedAnnotation, ...changes })}
@@ -214,5 +250,5 @@ export const GroupEditorControls = ({
       queryInputServices={queryInputServices}
       appName={EVENT_ANNOTATION_APP_NAME}
     />
-  );
+  ) : null;
 };

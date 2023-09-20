@@ -6,19 +6,21 @@
  * Side Public License, v 1.
  */
 
-export {
-  AnnotationEditorControls,
-  annotationsIconSet,
-} from './components/annotation_editor_controls';
-export { getAnnotationAccessor } from './components';
+import { EventAnnotationListingPlugin } from './plugin';
+export const plugin = () => new EventAnnotationListingPlugin();
+export type {
+  EventAnnotationListingPluginSetup as eventAnnotationListingPluginSetup,
+  EventAnnotationListingPluginStart as eventAnnotationListingPluginStart,
+} from './plugin';
 export {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
-  defaultAnnotationLabel,
-  createCopiedAnnotation,
   isRangeAnnotationConfig,
   isManualPointAnnotationConfig,
   isQueryAnnotationConfig,
 } from '@kbn/event-annotation-common';
-export { EVENT_ANNOTATION_APP_NAME } from './constants';
-export type { EventAnnotationServiceType } from './types';
+export {
+  AnnotationEditorControls,
+  annotationsIconSet,
+  getAnnotationAccessor,
+} from '@kbn/event-annotation-components';

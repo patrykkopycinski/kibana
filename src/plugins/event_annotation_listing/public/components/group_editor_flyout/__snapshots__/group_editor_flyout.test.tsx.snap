@@ -3,7 +3,6 @@
 exports[`group editor flyout renders controls 1`] = `
 Object {
   "TagSelector": [MockFunction],
-  "createDataView": [MockFunction],
   "dataViews": Array [
     Object {
       "id": "some-id",
@@ -29,6 +28,7 @@ Object {
     "tags": Array [],
     "title": "My group",
   },
+  "isAdHocDataView": [Function],
   "queryInputServices": Object {},
   "selectedAnnotation": undefined,
   "setSelectedAnnotation": [Function],

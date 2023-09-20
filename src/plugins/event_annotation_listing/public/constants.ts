@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-event-annotation-components'],
-  setupFiles: ['jest-canvas-mock'],
-};
+export const EVENT_ANNOTATION_APP_NAME = 'annotations';

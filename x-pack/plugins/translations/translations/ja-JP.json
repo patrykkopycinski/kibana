@@ -3227,7 +3227,7 @@
     "guidedOnboardingPackage.gettingStarted.cards.progressLabel": "{numberSteps}ステップ中{numberCompleteSteps}ステップ完了",
     "guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title": "SIEMで{lineBreak}データの脅威を検出",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "ガイド完了",
-    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "セマンティック検索エクスペリエンスを構築",
+    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "AI を活用した検索エクスペリエンスを構築する",
     "guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title": "ホストメトリックを監視",
     "guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title": "Kubernetesクラスターの監視",
     "guidedOnboardingPackage.gettingStarted.cards.logsObservability.title": "ログを収集して分析",

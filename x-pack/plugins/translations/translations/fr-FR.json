@@ -3212,7 +3212,7 @@
     "guidedOnboardingPackage.gettingStarted.cards.progressLabel": "{numberCompleteSteps} étape(s) terminée(s) sur {numberSteps}",
     "guidedOnboardingPackage.gettingStarted.cards.siemSecurity.title": "Détecter les menaces dans {lineBreak} mes données avec SIEM",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "Guide terminé",
-    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "Créer une expérience de recherche sémantique",
+    "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "Créer une expérience de recherche basée sur l'IA",
     "guidedOnboardingPackage.gettingStarted.cards.hostsObservability.title": "Monitorer mes indicateurs d'hôte",
     "guidedOnboardingPackage.gettingStarted.cards.kubernetesObservability.title": "Monitorer les clusters Kubernetes",
     "guidedOnboardingPackage.gettingStarted.cards.logsObservability.title": "Collecter et analyser mes logs",

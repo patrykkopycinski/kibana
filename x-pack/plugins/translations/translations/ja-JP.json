@@ -1222,7 +1222,6 @@
     "dashboard.panel.clonedToast": "クローンパネル",
     "dashboard.panel.clonePanel": "パネルのクローン",
     "dashboard.panel.copyToDashboard.cancel": "キャンセル",
-    "dashboard.panel.copyToDashboard.description": "対象ダッシュボードを選択します。",
     "dashboard.panel.copyToDashboard.existingDashboardOptionLabel": "<b>既存のダッシュボード</b>",
     "dashboard.panel.copyToDashboard.goToDashboard": "コピーしてダッシュボードを開く",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "新規ダッシュボード",

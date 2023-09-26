@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { pluginServices } from './plugin_services';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
-export type { PresentationCapabilitiesService, PresentationLabsService } from './types';
+export interface PresentationContentManagementService {
+  client: ContentManagementPublicStart['client'];
+}

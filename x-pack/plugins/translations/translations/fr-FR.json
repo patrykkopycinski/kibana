@@ -1208,7 +1208,6 @@
     "dashboard.panel.clonedToast": "Panneau cloné",
     "dashboard.panel.clonePanel": "Cloner le panneau",
     "dashboard.panel.copyToDashboard.cancel": "Annuler",
-    "dashboard.panel.copyToDashboard.description": "Choisissez le tableau de bord de destination.",
     "dashboard.panel.copyToDashboard.existingDashboardOptionLabel": "Tableau de bord existant",
     "dashboard.panel.copyToDashboard.goToDashboard": "Copier et accéder au tableau de bord",
     "dashboard.panel.copyToDashboard.newDashboardOptionLabel": "Nouveau tableau de bord",

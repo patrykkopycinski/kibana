@@ -11626,7 +11626,6 @@
     "xpack.dataVisualizer.nameCollisionMsg": "\"{name}\" existe déjà, veuillez fournir un nom unique",
     "xpack.dataVisualizer.randomSamplerSettingsPopUp.probabilityLabel": "Probabilité utilisée : {samplingProbability} %",
     "xpack.dataVisualizer.searchPanel.ofFieldsTotal": "sur un total de {totalCount}",
-    "xpack.dataVisualizer.searchPanel.totalDocCountLabel": "Total des documents : {prepend}{strongTotalCount}",
     "xpack.dataVisualizer.searchPanel.totalDocCountNumber": "{totalCount, plural, one {#} many {#} other {#}}",
     "xpack.dataVisualizer.addCombinedFieldsLabel": "Ajouter un champ combiné",
     "xpack.dataVisualizer.chrome.help.appName": "Data Visualizer (Visualiseur de données)",

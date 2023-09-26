@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './datavisualizer';
-export * from './data_drift';
-export * from './index_based';
-export * from './file_based';
+export const getDataTestSubject = (testSubject: string, id?: string) => {
+  if (!id) return testSubject;
+  return `${testSubject}-${id}`;
+};

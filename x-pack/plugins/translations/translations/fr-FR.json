@@ -38510,7 +38510,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.editButtonTooltip": "Modifier",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalIconAriaLabel": "Au-dessous de l'intervalle minimal configuré",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.intervalTooltipTitle": "Au-dessous de l'intervalle minimal configuré",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastExecutionDateTitle": "Heure de début de la dernière exécution.",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastResponseTitle": "Dernière réponse",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.nameTitle": "Nom",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle": "Notifier",

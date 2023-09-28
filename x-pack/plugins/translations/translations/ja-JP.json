@@ -11392,7 +11392,6 @@
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "CISセクション別のコンプライアンス",
     "xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription": "評価されたアカウント",
     "xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription": "評価されたクラスター",
-    "xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription": "失敗した調査結果",
     "xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription": "評価されたリソース",
     "xpack.csp.dashboardTabs.cloudTab.tabTitle": "クラウド",
     "xpack.csp.dashboardTabs.kubernetesTab.tabTitle": "Kubernetes",

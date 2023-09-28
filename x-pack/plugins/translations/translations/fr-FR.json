@@ -11377,7 +11377,6 @@
     "xpack.csp.dashboard.summarySection.complianceByCisSectionPanelTitle": "Conformité par section CIS",
     "xpack.csp.dashboard.summarySection.counterCard.accountsEvaluatedDescription": "Comptes évalués",
     "xpack.csp.dashboard.summarySection.counterCard.clustersEvaluatedDescription": "Clusters évalués",
-    "xpack.csp.dashboard.summarySection.counterCard.failingFindingsDescription": "Résultats en échec",
     "xpack.csp.dashboard.summarySection.counterCard.resourcesEvaluatedDescription": "Ressources évaluées",
     "xpack.csp.dashboardTabs.cloudTab.tabTitle": "Cloud",
     "xpack.csp.dashboardTabs.kubernetesTab.tabTitle": "Kubernetes",

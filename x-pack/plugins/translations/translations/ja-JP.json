@@ -21337,7 +21337,6 @@
     "xpack.lens.table.dynamicColoring.text": "テキスト",
     "xpack.lens.table.hide.hideLabel": "非表示",
     "xpack.lens.table.palettePanelContainer.back": "戻る",
-    "xpack.lens.table.palettePanelTitle": "色",
     "xpack.lens.table.resize.reset": "幅のリセット",
     "xpack.lens.table.rowHeight.auto": "自動的に合わせる",
     "xpack.lens.table.rowHeight.custom": "カスタム",

@@ -16425,8 +16425,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "Note",
     "xpack.fleet.initializationErrorMessageTitle": "Initialisation de Fleet impossible",
     "xpack.fleet.integrations.customInputsLink": "entrées personnalisées",
-    "xpack.fleet.integrations.deploymentButton": "Voir les détails du déploiement",
-    "xpack.fleet.integrations.deploymentDescription": "Envoyez des données à Elastic à partir de vos applications en référençant votre déploiement.",
     "xpack.fleet.integrations.discussForumLink": "forum",
     "xpack.fleet.integrations.installPackage.uploadedTooltip": "Cette intégration a été installée par le biais d'un chargement et ne peut pas être réinstallée automatiquement. Veuillez la charger à nouveau pour la réinstaller.",
     "xpack.fleet.integrations.integrationSaved": "Paramètres de l'intégration enregistrés",

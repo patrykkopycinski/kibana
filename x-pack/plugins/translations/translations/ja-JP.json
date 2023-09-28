@@ -16439,8 +16439,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "注",
     "xpack.fleet.initializationErrorMessageTitle": "Fleet を初期化できません",
     "xpack.fleet.integrations.customInputsLink": "カスタム入力",
-    "xpack.fleet.integrations.deploymentButton": "デプロイ詳細の表示",
-    "xpack.fleet.integrations.deploymentDescription": "デプロイを参照し、アプリケーションのデータをElasticに送信します。",
     "xpack.fleet.integrations.discussForumLink": "フォーラム",
     "xpack.fleet.integrations.installPackage.uploadedTooltip": "この統合はアップロードによってインストールされたため、自動的に再インストールできません。再インストールするには、もう一度アップロードしてください。",
     "xpack.fleet.integrations.integrationSaved": "統合設定が保存されました",

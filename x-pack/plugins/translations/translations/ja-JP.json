@@ -17329,7 +17329,6 @@
     "xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle": "レガシーテンプレートの作成",
     "xpack.idxMgmt.createTemplate.createTemplatePageTitle": "テンプレートを作成",
     "xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel": "閉じる",
-    "xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel": "データストリームを削除",
     "xpack.idxMgmt.dataStreamDetailPanel.generationTitle": "生成",
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "データストリームに作成されたバッキングインデックスの累積数",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "ヘルス",

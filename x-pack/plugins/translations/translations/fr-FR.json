@@ -17315,7 +17315,6 @@
     "xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle": "Créer un modèle hérité",
     "xpack.idxMgmt.createTemplate.createTemplatePageTitle": "Créer un modèle",
     "xpack.idxMgmt.dataStreamDetailPanel.closeButtonLabel": "Fermer",
-    "xpack.idxMgmt.dataStreamDetailPanel.deleteButtonLabel": "Supprimer le flux de données",
     "xpack.idxMgmt.dataStreamDetailPanel.generationTitle": "Génération",
     "xpack.idxMgmt.dataStreamDetailPanel.generationToolTip": "Nombre cumulatif d'index de sauvegarde créés pour le flux de données",
     "xpack.idxMgmt.dataStreamDetailPanel.healthTitle": "Intégrité",

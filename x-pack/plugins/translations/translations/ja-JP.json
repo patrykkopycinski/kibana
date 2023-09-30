@@ -31615,7 +31615,6 @@
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense": "アラート非表示が構成されていますが、ライセンス不足のため適用されません",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution": "1つのルール実行",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription": "フィールドが欠落しているイベントのアラートを抑制してグループ化",
-    "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview": "テクニカルプレビュー",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel": "イベントカテゴリーフィールド",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTiebreakerFieldLabel": "タイブレーカーフィールド",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel": "タイムスタンプフィールド",

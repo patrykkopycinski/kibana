@@ -31616,7 +31616,6 @@
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionInsufficientLicense": "La suppression d'alertes est configurée mais elle ne sera pas appliquée en raison d'une licence insuffisante",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution": "Exécution d'une règle",
     "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionSuppressOnMissingFieldsDescription": "Supprimer et regrouper les alertes pour les événements avec des champs manquants",
-    "xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionTechnicalPreview": "Version d'évaluation technique",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel": "Champ de catégorie d'événement",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTiebreakerFieldLabel": "Champ de départage",
     "xpack.securitySolution.detectionEngine.ruleDescription.eqlTimestampFieldLabel": "Champ d'horodatage",

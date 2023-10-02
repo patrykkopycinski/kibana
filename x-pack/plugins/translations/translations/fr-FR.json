@@ -2061,7 +2061,6 @@
     "data.search.searchSource.dataViewDescription": "La vue de données qui a été interrogée.",
     "data.search.searchSource.dataViewIdLabel": "ID de vue de données",
     "data.search.searchSource.dataViewLabel": "Vue de données",
-    "data.search.searchSource.fetch.shardsFailedModal.tableColReason": "Raison",
     "data.search.searchSource.hitsDescription": "Le nombre de documents renvoyés par la requête.",
     "data.search.searchSource.hitsLabel": "Résultats",
     "data.search.searchSource.hitsTotalDescription": "Le nombre de documents correspondant à la requête.",

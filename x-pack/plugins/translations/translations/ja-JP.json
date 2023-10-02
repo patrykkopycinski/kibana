@@ -2075,7 +2075,6 @@
     "data.search.searchSource.dataViewDescription": "照会されたデータビュー。",
     "data.search.searchSource.dataViewIdLabel": "データビューID",
     "data.search.searchSource.dataViewLabel": "データビュー",
-    "data.search.searchSource.fetch.shardsFailedModal.tableColReason": "理由",
     "data.search.searchSource.hitsDescription": "クエリにより返されたドキュメントの数です。",
     "data.search.searchSource.hitsLabel": "ヒット数",
     "data.search.searchSource.hitsTotalDescription": "クエリに一致するドキュメントの数です。",

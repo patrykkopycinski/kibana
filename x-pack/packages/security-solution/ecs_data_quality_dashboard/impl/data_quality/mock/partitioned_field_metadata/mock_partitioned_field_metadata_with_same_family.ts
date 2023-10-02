@@ -7,11 +7,8 @@
 
 import { PartitionedFieldMetadata } from '../../types';
 
-/**
- * Note: this mock does NOT have any `sameFamily` entries.
- * See `mockPartitionedFieldMetadataWithSameFamily` for an example of a mock with `sameFamily` entries.
- */
-export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
+/** This mock `PartitionedFieldMetadata` has a sameFamily[] field */
+export const mockPartitionedFieldMetadataWithSameFamily: PartitionedFieldMetadata = {
   all: [
     {
       dashed_name: 'timestamp',
@@ -30,7 +27,26 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexInvalidValues: [],
       hasEcsMetadata: true,
       isEcsCompliant: true,
-      isInSameFamily: false, // `date` is not a member of any families
+      isInSameFamily: false,
+    },
+    {
+      dashed_name: 'agent-type',
+      description:
+        'Type of the agent.\nThe agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+      example: 'filebeat',
+      flat_name: 'agent.type',
+      ignore_above: 1024,
+      level: 'core',
+      name: 'type',
+      normalize: [],
+      short: 'Type of the agent.',
+      type: 'keyword',
+      indexFieldName: 'agent.type',
+      indexFieldType: 'constant_keyword',
+      indexInvalidValues: [],
+      hasEcsMetadata: true,
+      isEcsCompliant: false,
+      isInSameFamily: true,
     },
     {
       allowed_values: [
@@ -172,14 +188,16 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       short: 'Event category. The second categorization field in the hierarchy.',
       type: 'keyword',
       indexFieldName: 'event.category',
-      indexFieldType: 'keyword',
+      indexFieldType: 'constant_keyword',
       indexInvalidValues: [
-        { count: 2, fieldName: 'an_invalid_category' },
-        { count: 1, fieldName: 'theory' },
+        {
+          count: 2,
+          fieldName: 'an_invalid_category',
+        },
       ],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // this index has unallowed values
-      isInSameFamily: false, // keyword and keyword
+      isEcsCompliant: false, // because it has invalid values
+      isInSameFamily: false,
     },
     {
       dashed_name: 'host-name',
@@ -196,32 +214,32 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // text !== keyword
-      isInSameFamily: false, // `keyword` and `text` are not are members of the same family
+      isEcsCompliant: false, // text is not keyword
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'host.name.keyword',
       indexFieldType: 'keyword',
       indexInvalidValues: [],
-      hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      hasEcsMetadata: false, // unknown field
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'some.field',
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      isEcsCompliant: false, // unknown field
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'some.field.keyword',
       indexFieldType: 'keyword',
       indexInvalidValues: [],
-      hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      hasEcsMetadata: false, // unknown field
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       dashed_name: 'source-ip',
@@ -236,16 +254,16 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // text !== ip
-      isInSameFamily: false, // `ip` is not a member of any families
+      isEcsCompliant: false, // text is not ip
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'source.ip.keyword',
       indexFieldType: 'keyword',
       indexInvalidValues: [],
-      hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      hasEcsMetadata: false, // unknown field
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       dashed_name: 'source-port',
@@ -261,7 +279,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'long',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
+      isEcsCompliant: true,
       isInSameFamily: false,
     },
   ],
@@ -282,7 +300,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'date',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
+      isEcsCompliant: true,
       isInSameFamily: false,
     },
     {
@@ -299,7 +317,7 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'long',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: true, // indexFieldType === type, and no indexInvalidValues
+      isEcsCompliant: true,
       isInSameFamily: false,
     },
   ],
@@ -309,32 +327,32 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'keyword',
       indexInvalidValues: [],
       hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'some.field',
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'some.field.keyword',
       indexFieldType: 'keyword',
       indexInvalidValues: [],
       hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
     {
       indexFieldName: 'source.ip.keyword',
       indexFieldType: 'keyword',
       indexInvalidValues: [],
       hasEcsMetadata: false,
-      isEcsCompliant: false, // custom field
-      isInSameFamily: false, // custom fields are never in the same family
+      isEcsCompliant: false,
+      isInSameFamily: false,
     },
   ],
   incompatible: [
@@ -478,13 +496,15 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       short: 'Event category. The second categorization field in the hierarchy.',
       type: 'keyword',
       indexFieldName: 'event.category',
-      indexFieldType: 'keyword',
+      indexFieldType: 'constant_keyword',
       indexInvalidValues: [
-        { count: 2, fieldName: 'an_invalid_category' },
-        { count: 1, fieldName: 'theory' },
+        {
+          count: 2,
+          fieldName: 'an_invalid_category',
+        },
       ],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // indexFieldType === type, but there are indexInvalidValues
+      isEcsCompliant: false, // has invalid values
       isInSameFamily: false,
     },
     {
@@ -502,8 +522,8 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // text !== keyword
-      isInSameFamily: false, // `keyword` and `text` are not in the same family
+      isEcsCompliant: false, // text is not keyword
+      isInSameFamily: false,
     },
     {
       dashed_name: 'source-ip',
@@ -518,9 +538,29 @@ export const mockPartitionedFieldMetadata: PartitionedFieldMetadata = {
       indexFieldType: 'text',
       indexInvalidValues: [],
       hasEcsMetadata: true,
-      isEcsCompliant: false, // text !== ip
-      isInSameFamily: false, // `ip` is not a member of any families
+      isEcsCompliant: false, // text is not ip
+      isInSameFamily: false,
     },
   ],
-  sameFamily: [],
+  sameFamily: [
+    {
+      dashed_name: 'agent-type',
+      description:
+        'Type of the agent.\nThe agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+      example: 'filebeat',
+      flat_name: 'agent.type',
+      ignore_above: 1024,
+      level: 'core',
+      name: 'type',
+      normalize: [],
+      short: 'Type of the agent.',
+      type: 'keyword',
+      indexFieldName: 'agent.type',
+      indexFieldType: 'constant_keyword',
+      indexInvalidValues: [],
+      hasEcsMetadata: true,
+      isEcsCompliant: false, // types are not an exact match
+      isInSameFamily: true, // types are in the same family
+    },
+  ],
 };

@@ -10776,8 +10776,6 @@
     "xpack.cases.getCurrentUser.unknownUser": "Inconnu",
     "xpack.cases.header.badge.betaDesc": "Cette fonctionnalité est actuellement en version bêta. Si vous rencontrez des bugs ou si vous souhaitez apporter des commentaires, ouvrez un ticket de problème ou visitez notre forum de discussion.",
     "xpack.cases.header.badge.betaLabel": "Bêta",
-    "xpack.cases.header.badge.experimentalDesc": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera au maximum de corriger tout problème, mais les fonctionnalités en version d'évaluation technique ne sont pas soumises aux accords de niveau de service d'assistance des fonctionnalités officielles en disponibilité générale.",
-    "xpack.cases.header.badge.experimentalLabel": "Version d'évaluation technique",
     "xpack.cases.header.editableTitle.cancel": "Annuler",
     "xpack.cases.header.editableTitle.save": "Enregistrer",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "Ajouter une visualisation",

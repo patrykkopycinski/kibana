@@ -10791,8 +10791,6 @@
     "xpack.cases.getCurrentUser.unknownUser": "不明",
     "xpack.cases.header.badge.betaDesc": "現在、この機能はベータです。不具合を見つけた場合やご意見がある場合、サポートに問い合わせるか、またはディスカッションフォーラムにご報告ください。",
     "xpack.cases.header.badge.betaLabel": "ベータ",
-    "xpack.cases.header.badge.experimentalDesc": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticは最善の努力を講じてすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.cases.header.badge.experimentalLabel": "テクニカルプレビュー",
     "xpack.cases.header.editableTitle.cancel": "キャンセル",
     "xpack.cases.header.editableTitle.save": "保存",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "ビジュアライゼーションを追加",

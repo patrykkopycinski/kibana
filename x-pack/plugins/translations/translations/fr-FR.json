@@ -30606,7 +30606,7 @@
     "xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription": "Machine Learning",
     "xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription": "Nouveaux termes",
     "xpack.securitySolution.detectionEngine.createRule.pageTitle": "Créer une nouvelle règle",
-    "xpack.securitySolution.detectionEngine.createRule.QueryLabel": "Requête personnalisée",
+    "xpack.securitySolution.detectionEngine.createRule.queryLabel": "Requête personnalisée",
     "xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription": "Requête",
     "xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle": "Veuillez corriger les problèmes répertoriés ci-dessous",
     "xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription": "L'aperçu des règles reflète la configuration actuelle de vos paramètres et exceptions de règles. Cliquez sur l'icône d'actualisation pour afficher l'aperçu mis à jour.",

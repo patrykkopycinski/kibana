@@ -30605,7 +30605,7 @@
     "xpack.securitySolution.detectionEngine.createRule.mlRuleTypeDescription": "機械学習",
     "xpack.securitySolution.detectionEngine.createRule.newTermsRuleTypeDescription": "新しい用語",
     "xpack.securitySolution.detectionEngine.createRule.pageTitle": "新規ルールを作成",
-    "xpack.securitySolution.detectionEngine.createRule.QueryLabel": "カスタムクエリ",
+    "xpack.securitySolution.detectionEngine.createRule.queryLabel": "カスタムクエリ",
     "xpack.securitySolution.detectionEngine.createRule.queryRuleTypeDescription": "クエリ",
     "xpack.securitySolution.detectionEngine.createRule.ruleActionsField.ruleActionsFormErrorsTitle": "次の一覧の問題を解決してください",
     "xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription": "ルールプレビューには、ルール設定と例外の現在の構成が反映されます。更新アイコンをクリックすると、更新されたプレビューが表示されます。",

@@ -13656,7 +13656,6 @@
     "xpack.enterpriseSearch.content.newIndex.types.crawler": "Robot d'indexation",
     "xpack.enterpriseSearch.content.newIndex.types.elasticsearch": "Index Elasticsearch",
     "xpack.enterpriseSearch.content.newIndex.types.json": "JSON",
-    "xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink": "Afficher des intégrations supplémentaires",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.createNew": "Créer une clé d’API",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.viewAll": "Afficher toutes les clés d’API",
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.dotnet": ".NET",

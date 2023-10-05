@@ -13670,7 +13670,6 @@
     "xpack.enterpriseSearch.content.newIndex.types.crawler": "Webクローラー",
     "xpack.enterpriseSearch.content.newIndex.types.elasticsearch": "Elasticsearchインデックス",
     "xpack.enterpriseSearch.content.newIndex.types.json": "JSON",
-    "xpack.enterpriseSearch.content.newIndex.viewIntegrationsLink": "追加の統合を表示",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.createNew": "新しいAPIキーを作成",
     "xpack.enterpriseSearch.content.overview.documementExample.generateApiKeyButton.viewAll": "すべてのAPIキーを表示",
     "xpack.enterpriseSearch.content.overview.documentExample.clientLibraries.dotnet": ".NET",

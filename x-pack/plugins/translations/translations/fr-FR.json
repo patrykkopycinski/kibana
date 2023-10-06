@@ -38306,7 +38306,6 @@
     "xpack.triggersActionsUI.sections.rulesList.monthsLabel": "mois",
     "xpack.triggersActionsUI.sections.rulesList.multipleTitle": "règles",
     "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateDescription": "Contactez votre administrateur système.",
-    "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateTitle": "Aucune autorisation pour créer des règles",
     "xpack.triggersActionsUI.sections.rulesList.previousSnooze": "Précédent",
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "Actualiser",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "Indéfiniment",

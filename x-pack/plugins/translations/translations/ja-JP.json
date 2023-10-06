@@ -38297,7 +38297,6 @@
     "xpack.triggersActionsUI.sections.rulesList.monthsLabel": "月",
     "xpack.triggersActionsUI.sections.rulesList.multipleTitle": "ルール",
     "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateDescription": "システム管理者にお問い合わせください。",
-    "xpack.triggersActionsUI.sections.rulesList.noPermissionToCreateTitle": "ルールを作成する権限がありません",
     "xpack.triggersActionsUI.sections.rulesList.previousSnooze": "前へ",
     "xpack.triggersActionsUI.sections.rulesList.refreshRulesButtonLabel": "更新",
     "xpack.triggersActionsUI.sections.rulesList.remainingSnoozeIndefinite": "永久",

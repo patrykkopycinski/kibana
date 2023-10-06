@@ -229,6 +229,8 @@
     "coloring.dynamicColoring.rangeType.label": "Type de valeur",
     "coloring.dynamicColoring.rangeType.number": "Numéro",
     "coloring.dynamicColoring.rangeType.percent": "Pourcent",
+    "coloring.colorMapping.terms.otherBucketLabel": "Autre",
+    "coloring.colorMapping.terms.emptyLabel": "(vide)",
     "console.helpPage.learnAboutConsoleAndQueryDslText": "En savoir plus sur {console} et {queryDsl}",
     "console.historyPage.itemOfRequestListAriaLabel": "Requête : {historyItem}",
     "console.settingsPage.refreshInterval.everyNMinutesTimeInterval": "Toutes les {value} {value, plural, one {minute} many {minutes} other {minutes}}",

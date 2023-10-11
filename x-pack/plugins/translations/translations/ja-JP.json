@@ -229,7 +229,7 @@
     "coloring.dynamicColoring.rangeType.label": "値型",
     "coloring.dynamicColoring.rangeType.number": "数字",
     "coloring.dynamicColoring.rangeType.percent": "割合（%）",
-    "coloring.colorMapping.terms.otherBucketLabel":"その他",
+    "coloring.colorMapping.terms.otherBucketLabel": "その他",
     "coloring.colorMapping.terms.emptyLabel": "（空）",
     "console.helpPage.learnAboutConsoleAndQueryDslText": "{console}と{queryDsl}についてさらに詳しく",
     "console.historyPage.itemOfRequestListAriaLabel": "リクエスト：{historyItem}",

@@ -4792,8 +4792,6 @@
     "presentationUtil.labs.components.titleLabel": "Ateliers",
     "presentationUtil.labs.enableByValueEmbeddableDescription": "Active la prise en charge pour les éléments d'incorporation by-value dans Canvas",
     "presentationUtil.labs.enableByValueEmbeddableName": "Éléments d'incorporation By-Value",
-    "presentationUtil.labs.enableDashboardControlsProjectDescription": "Active le système de contrôles pour le tableau de bord, ce qui permet à ses auteurs de créer plus facilement des éléments interactifs pour leurs utilisateurs.",
-    "presentationUtil.labs.enableDashboardControlsProjectName": "Activer les contrôles pour le tableau de bord",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "Les panneaux sous \"le pli\" (la zone masquée en dessous de la fenêtre accessible en faisant défiler), ne se chargeront pas immédiatement, mais seulement lorsqu'ils entreront dans la fenêtre d'affichage.",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "Différer le chargement des panneaux sous \"le pli\"",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "Ajouter au tableau de bord",

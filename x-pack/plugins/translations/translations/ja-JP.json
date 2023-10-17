@@ -4808,8 +4808,6 @@
     "presentationUtil.labs.components.titleLabel": "ラボ",
     "presentationUtil.labs.enableByValueEmbeddableDescription": "キャンバスでby-value埋め込み可能オブジェクトのサポートを有効にします",
     "presentationUtil.labs.enableByValueEmbeddableName": "By-Value埋め込み可能オブジェクト",
-    "presentationUtil.labs.enableDashboardControlsProjectDescription": "ダッシュボードのコントロールシステムを有効にします。これにより、ダッシュボードの作成者は、ユーザー向けのインタラクティブな要素をより簡単に構築できます。",
-    "presentationUtil.labs.enableDashboardControlsProjectName": "ダッシュボードコントロールを有効にする",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "「区切り」の下のすべてのパネル（ウィンドウ下部の下にある非表示の領域）はすぐに読み込まれません。ビューポートを入力するときにのみ読み込まれます",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "「区切り」の下のパネルの読み込みを延期",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "ダッシュボードに追加",

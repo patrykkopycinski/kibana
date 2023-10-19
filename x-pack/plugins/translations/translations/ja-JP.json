@@ -2460,7 +2460,6 @@
     "unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel": "{timeFieldName} - このフィールドはイベントの発生時刻を表します。",
     "unifiedDataTable.searchGenerationWithDescription": "検索{searchTitle}で生成されたテーブル",
     "unifiedDataTable.searchGenerationWithDescriptionGrid": "検索{searchTitle}で生成されたテーブル（{searchDescription}）",
-    "unifiedDataTable.selectedDocumentsNumber": "{nr}個のドキュメントが選択されました",
     "unifiedDataTable.clearSelection": "選択した項目をクリア",
     "unifiedDataTable.controlColumnHeader": "列の制御",
     "unifiedDataTable.copyToClipboardJSON": "ドキュメントをクリップボードにコピー（JSON）",

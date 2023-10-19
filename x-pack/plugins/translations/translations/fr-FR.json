@@ -2445,7 +2445,6 @@
     "unifiedDataTable.tableHeader.timeFieldIconTooltipAriaLabel": "{timeFieldName} – Ce champ représente l'heure à laquelle les événements se sont produits.",
     "unifiedDataTable.searchGenerationWithDescription": "Tableau généré par la recherche {searchTitle}",
     "unifiedDataTable.searchGenerationWithDescriptionGrid": "Tableau généré par la recherche {searchTitle} ({searchDescription})",
-    "unifiedDataTable.selectedDocumentsNumber": "{nr} documents sélectionnés",
     "unifiedDataTable.clearSelection": "Effacer la sélection",
     "unifiedDataTable.controlColumnHeader": "Colonne de commande",
     "unifiedDataTable.copyToClipboardJSON": "Copier les documents dans le presse-papiers (JSON)",

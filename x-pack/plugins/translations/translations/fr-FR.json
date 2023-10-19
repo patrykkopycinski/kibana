@@ -14070,8 +14070,6 @@
     "xpack.enterpriseSearch.errorConnectingState.setupGuideCta": "Consulter le guide de configuration",
     "xpack.enterpriseSearch.errorConnectingState.title": "Impossible d'établir une connexion",
     "xpack.enterpriseSearch.errorConnectingState.troubleshootAuth": "Vérifiez votre authentification utilisateur :",
-    "xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative": "Vous devez vous authentifier à l'aide d'une authentification native d'Elasticsearch, de SSO/SAML ou d'OpenID Connect.",
-    "xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML": "Si vous utilisez un fournisseur de SSO externe, tel que SAML ou OpenID Connect, votre domaine SAML/OIDC doit également être configuré sur Enterprise Search.",
     "xpack.enterpriseSearch.aiSearch.description": "Le kit d’outils permettant aux développeurs de créer des applications d’IA optimisées pour la recherche à l’aide de la plateforme Elastic.",
     "xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText": "Elastic Learned Sparse Encoder v2",
     "xpack.enterpriseSearch.aiSearch.elserAccordion.description": "Fonctionnalités de recherche sémantique instantanée",

@@ -14084,8 +14084,6 @@
     "xpack.enterpriseSearch.errorConnectingState.setupGuideCta": "セットアップガイドを確認",
     "xpack.enterpriseSearch.errorConnectingState.title": "接続できません",
     "xpack.enterpriseSearch.errorConnectingState.troubleshootAuth": "ユーザー認証を確認してください。",
-    "xpack.enterpriseSearch.errorConnectingState.troubleshootAuthNative": "Elasticsearchネイティブ認証、SSO/SAML、またはOpenID Connectを使用して認証する必要があります。",
-    "xpack.enterpriseSearch.errorConnectingState.troubleshootAuthSAML": "SAMLやOpenID Connectなどの外部SSOプロバイダーを使用している場合は、エンタープライズ サーチでSAML/OIDCレルムを設定できる必要があります。",
     "xpack.enterpriseSearch.aiSearch.description": "開発者がElasticプラットフォームを使ってAI検索エンジンを搭載したアプリケーションを構築するためのツールキット。",
     "xpack.enterpriseSearch.aiSearch.elser.description.elserLinkText": "Elastic Learned Sparse Encoder v2",
     "xpack.enterpriseSearch.aiSearch.elserAccordion.description": "即時セマンティック検索機能",

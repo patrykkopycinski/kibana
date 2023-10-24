@@ -37777,7 +37777,6 @@
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel": "Navigation dans les alertes",
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason": "Raison",
     "xpack.triggersActionsUI.sections.alertsTable.column.actions": "Actions",
-    "xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails": "Afficher les détails",
     "xpack.triggersActionsUI.sections.alertsTable.title": "Tableau d’alertes",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel": "Annuler",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.confirmConnectorCloseMessage": "Vous ne pouvez pas récupérer de modifications non enregistrées.",

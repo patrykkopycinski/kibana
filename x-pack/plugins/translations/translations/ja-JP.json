@@ -37768,7 +37768,6 @@
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel": "アラートナビゲーション",
     "xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.reason": "理由",
     "xpack.triggersActionsUI.sections.alertsTable.column.actions": "アクション",
-    "xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails": "詳細を表示",
     "xpack.triggersActionsUI.sections.alertsTable.title": "アラートテーブル",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.cancelButtonLabel": "キャンセル",
     "xpack.triggersActionsUI.sections.confirmConnectorEditClose.confirmConnectorCloseMessage": "保存されていない変更は回復できません。",

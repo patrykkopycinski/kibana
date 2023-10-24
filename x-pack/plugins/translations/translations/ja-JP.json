@@ -18590,7 +18590,6 @@
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "このプロセスの概要",
     "xpack.infra.hosts.searchPlaceholder": "ホストを検索（例：cloud.provider:gcp AND system.load.1 > 0.5）",
     "xpack.infra.hostsPage.goToMetricsSettings": "設定を確認",
-    "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "ご意見をお聞かせください。",
     "xpack.infra.hostsViewPage.betaBadgeDescription": "現在、この機能はベータです。バグが発生した場合やフィードバックがある場合は、お問い合わせください。サポートの問題およびフィードバックについては、［ご意見をお聞かせください］フィードバックを使用して、お問い合わせください。",
     "xpack.infra.hostsViewPage.error.detailsButton": "詳細を入力",
     "xpack.infra.hostsViewPage.error.kqlErrorMessage": "フィルターを適用できなかったため、結果を表示できません。",

@@ -18576,7 +18576,6 @@
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "Quel est ce processus ?",
     "xpack.infra.hosts.searchPlaceholder": "Rechercher dans les hôtes (par ex. cloud.provider:gcp AND system.load.1 > 0.5)",
     "xpack.infra.hostsPage.goToMetricsSettings": "Vérifier les paramètres",
-    "xpack.infra.hostsPage.tellUsWhatYouThinkLink": "Dites-nous ce que vous pensez !",
     "xpack.infra.hostsViewPage.betaBadgeDescription": "Cette fonctionnalité est actuellement en version bêta. Nous aimerions beaucoup savoir si vous avez des commentaires ou si vous rencontrez des bugs. Veuillez ouvrir un ticket pour signaler votre problème et/ou partager vos commentaires grâce au bouton \"Dites-nous ce que vous en pensez !\".",
     "xpack.infra.hostsViewPage.error.detailsButton": "Détails de l'erreur",
     "xpack.infra.hostsViewPage.error.kqlErrorMessage": "Nous ne pouvons vous montrer aucun résultat car nous n’avons pas pu appliquer votre filtre.",

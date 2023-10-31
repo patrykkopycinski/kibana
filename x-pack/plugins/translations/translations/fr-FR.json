@@ -22522,7 +22522,6 @@
     "xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel": "Afficher la prévision créée le {createdDate}",
     "xpack.ml.jobsList.jobFilterBar.invalidSearchErrorMessage": "Recherche non valide : {errorMessage}",
     "xpack.ml.jobsList.jobFilterBar.jobGroupTitle": "({jobsCount, plural, one {# tâche} many {# tâches} other {# tâches}})",
-    "xpack.ml.jobsList.managementActions.noSourceDataViewForClone": "Impossible de cloner la tâche de détection des anomalies {jobId}. Il n'existe aucune vue de données pour l'index {dataViewTitle}.",
     "xpack.ml.jobsList.missingSavedObjectWarning.link": " {link}",
     "xpack.ml.jobsList.multiJobActions.groupSelector.applyGroupsToJobTitle": "Appliquer des groupes {jobsCount, plural, one {tâche} many {tâches} other {aux tâches}}",
     "xpack.ml.jobsList.multiJobsActions.closeJobsLabel": "Fermer {jobsCount, plural, one {tâche} many {tâches} other {les tâches}}",

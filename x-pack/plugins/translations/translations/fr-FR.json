@@ -16283,7 +16283,6 @@
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "Modifier le déploiement",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "Activer un serveur Fleet",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "Erreur lors de l'ajout de l'hôte du serveur Fleet",
-    "xpack.fleet.fleetServerSetup.errorGeneratingTokenTitleText": "Erreur lors de la génération du jeton",
     "xpack.fleet.fleetServerSetup.errorRefreshingFleetServerStatus": "Erreur lors de l'actualisation du statut du serveur Fleet",
     "xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder": "Indiquer l’URL de l’hôte",
     "xpack.fleet.fleetServerSetup.fleetServerHostsLabel": "Hôtes du serveur Fleet",

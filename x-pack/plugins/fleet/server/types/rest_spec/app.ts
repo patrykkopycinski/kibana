@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export * from '../../../hooks';
+import { schema } from '@kbn/config-schema';
 
-export * from './use_breadcrumbs';
-export * from './use_apm_service_href';
-export * from './use_service_token';
-export * from './use_check_permissions';
+export const GenerateServiceTokenRequestSchema = {
+  body: schema.object({
+    remote: schema.boolean({ defaultValue: false }),
+  }),
+};

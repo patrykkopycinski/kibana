@@ -16297,7 +16297,6 @@
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "デプロイを編集",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "Fleetサーバーを有効にする",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "Fleetサーバーホストの追加エラー",
-    "xpack.fleet.fleetServerSetup.errorGeneratingTokenTitleText": "トークン生成エラー",
     "xpack.fleet.fleetServerSetup.errorRefreshingFleetServerStatus": "Fleetサーバーステータスの更新エラー",
     "xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder": "ホストURLを指定",
     "xpack.fleet.fleetServerSetup.fleetServerHostsLabel": "Fleetサーバーホスト",

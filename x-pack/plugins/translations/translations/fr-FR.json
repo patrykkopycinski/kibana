@@ -7956,7 +7956,7 @@
     "xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip": "Le niveau d'impact du champ sur la différence de taux de messages.",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel": "Copier dans le presse-papiers",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardGroupMessage": "Copier les éléments de groupe en tant que syntaxe KQL dans le Presse-papiers",
-    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage": "Copier la paire clé-valeur en tant que syntaxe KQL dans le Presse-papiers",
+    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantItemMessage": "Copier la paire clé-valeur en tant que syntaxe KQL dans le Presse-papiers",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover": "Afficher dans Discover",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis": "Voir dans l'analyse du modèle de log",
     "xpack.aiops.logRateAnalysis.resultsTable.logPatternLinkNotAvailableTooltipMessage": "Le lien n'est pas disponible si l'élément du tableau est lui-même un modèle de log.",

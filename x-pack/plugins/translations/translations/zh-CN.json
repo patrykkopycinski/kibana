@@ -7970,7 +7970,7 @@
     "xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip": "字段对消息速率差异的影响水平。",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel": "复制到剪贴板",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardGroupMessage": "将组项目作为 KQL 语法复制到剪贴板",
-    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage": "将字段/值对作为 KQL 语法复制到剪贴板",
+    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantItemMessage": "将字段/值对作为 KQL 语法复制到剪贴板",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover": "在 Discover 中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis": "在日志模式分析中查看",
     "xpack.aiops.logRateAnalysis.resultsTable.logPatternLinkNotAvailableTooltipMessage": "如果表项目为日志模式本身，则此链接不可用。",

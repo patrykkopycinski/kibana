@@ -7971,7 +7971,7 @@
     "xpack.aiops.logRateAnalysis.resultsTable.impactLabelColumnTooltip": "メッセージレート差異に対するフィールドの影響のレベル。",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel": "クリップボードにコピー",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardGroupMessage": "グループアイテムをKQL構文としてクリップボードにコピー",
-    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage": "フィールド/値のペアをKQL構文としてクリップボードにコピー",
+    "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantItemMessage": "フィールド/値のペアをKQL構文としてクリップボードにコピー",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover": "Discoverに表示",
     "xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInLogPatternAnalysis": "ログパターン分析で表示",
     "xpack.aiops.logRateAnalysis.resultsTable.logPatternLinkNotAvailableTooltipMessage": "テーブル項目がログパターン自体の場合は、このリンクは使用できません。",

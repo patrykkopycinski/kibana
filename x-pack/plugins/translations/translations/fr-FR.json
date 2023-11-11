@@ -29135,7 +29135,6 @@
     "xpack.observability.slo.list.sortByType": "Trier par {type}",
     "xpack.observability.slo.partitionByBadge": "Partition par {partitionKey}",
     "xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue": "Le seuil du taux d'avancement doit être compris entre 1 et {maxBurnRate}.",
-    "xpack.observability.slo.rules.errorBudgetExhaustion.text": "{formatedHours} heures restantes avant l'épuisement du budget d'erreurs.",
     "xpack.observability.slo.rules.groupByMessage": "Le SLO que vous avez sélectionné a été créé avec une partition sur \"{groupByField}\". Cette règle surveille et génère une alerte pour chaque instance trouvée dans le champ de partition.",
     "xpack.observability.slo.rules.longWindowDuration.tooltip": "Période historique sur laquelle le taux d'avancement est calculé. Une période historique plus courte de {shortWindowDuration} minutes (1/12 de la période historique) sera utilisée pour une récupération plus rapide",
     "xpack.observability.slo.slo.activeAlertsBadge.label": "{count, plural, one {# alerte} many {# alertes} other {Alertes #}}",

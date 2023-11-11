@@ -29134,7 +29134,6 @@
     "xpack.observability.slo.list.sortByType": "{type}で並べ替え",
     "xpack.observability.slo.partitionByBadge": "{partitionKey}でパーティション",
     "xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue": "バーンレートしきい値は1以上{maxBurnRate}以下でなければなりません。",
-    "xpack.observability.slo.rules.errorBudgetExhaustion.text": "予算オーバーエラーまで{formatedHours}時間。",
     "xpack.observability.slo.rules.groupByMessage": "選択したSLOは\"{groupByField}\"にパーティションが作成されました。このルールは、パーティションフィールドで見つかったすべてのインスタンスを監視し、アラートを生成します。",
     "xpack.observability.slo.rules.longWindowDuration.tooltip": "バーンレートが計算されるルックバック期間。ルックバック期間を{shortWindowDuration}分（ルックバック期間の1/12）と短くすることで、より高速な復帰が可能になります",
     "xpack.observability.slo.slo.activeAlertsBadge.label": "{count, plural, other {#件のアラート}}",

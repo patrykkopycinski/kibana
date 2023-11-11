@@ -29132,7 +29132,6 @@
     "xpack.observability.slo.list.sortByType": "按 {type} 排序",
     "xpack.observability.slo.partitionByBadge": "按 {partitionKey} 分区",
     "xpack.observability.slo.rules.burnRate.errors.invalidThresholdValue": "消耗速度阈值必须介于 1 和 {maxBurnRate} 之间。",
-    "xpack.observability.slo.rules.errorBudgetExhaustion.text": "{formatedHours} 小时，直到错误预算耗尽。",
     "xpack.observability.slo.rules.groupByMessage": "已使用分区在“{groupByField}”上创建您选定的 SLO。此规则将监测在分区字段中发现的每个实例并为其生成告警。",
     "xpack.observability.slo.rules.longWindowDuration.tooltip": "在其间计算消耗速度的回顾期。将使用 {shortWindowDuration} 分钟的较短回顾期（1/12 的回顾期）以便更快恢复",
     "xpack.observability.slo.slo.activeAlertsBadge.label": "{count, plural, other {# 个告警}}",

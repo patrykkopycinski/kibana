@@ -2469,7 +2469,6 @@
     "discover.notifications.notSavedSearchTitle": "検索「{savedSearchTitle}」は保存されませんでした。",
     "discover.notifications.savedSearchTitle": "検索「{savedSearchTitle}」が保存されました。",
     "discover.pageTitleWithoutSavedSearch": "Discover - 検索は保存されていません",
-    "discover.reloadSavedSearchButton": "検索をリセット",
     "discover.rootBreadcrumb": "Discover",
     "discover.sampleData.viewLinkLabel": "Discover",
     "discover.savedSearch.savedObjectName": "保存検索",

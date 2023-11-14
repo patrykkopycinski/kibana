@@ -23609,7 +23609,6 @@
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "找不到文档，_id：{docId}",
     "xpack.maps.source.esSearch.mvtScalingJoinMsg": "矢量磁贴支持一个词联接。您的图层具有 {numberOfJoins} 个联接。切换到矢量磁贴会保留第一个词联接，并从图层配置中移除所有其他联接。",
     "xpack.maps.source.esSource.noGeoFieldErrorMessage": "数据视图“{indexPatternLabel}”不再包含地理字段“{geoField}”",
-    "xpack.maps.source.esSource.requestFailedErrorMessage": "Elasticsearch 搜索请求失败，错误：{message}",
     "xpack.maps.source.esSource.stylePropsMetaRequestName": "{layerName} - 元数据",
     "xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlHelpMessage": ".mvt 矢量磁帖服务的 URL。例如 {url}",
     "xpack.maps.source.pewPew.inspectorDescription": "获取路径的数据视图：{dataViewName}、源：{sourceFieldName}、目标：{destFieldName}",

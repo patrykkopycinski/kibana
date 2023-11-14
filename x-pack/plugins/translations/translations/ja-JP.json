@@ -23609,7 +23609,6 @@
     "xpack.maps.source.esSearch.loadTooltipPropertiesErrorMsg": "ドキュメントが見つかりません。_id: {docId}",
     "xpack.maps.source.esSearch.mvtScalingJoinMsg": "ベクトルタイルは1つの用語結合をサポートします。レイヤーには{numberOfJoins}個の結合があります。ベクトルタイルに切り替えると、最初の結合が保持され、すべての他の用語結合がレイヤー構成から削除されます。",
     "xpack.maps.source.esSource.noGeoFieldErrorMessage": "データビュー\"{indexPatternLabel}\"には現在ジオフィールド\"{geoField}\"が含まれていません",
-    "xpack.maps.source.esSource.requestFailedErrorMessage": "Elasticsearch検索リクエストを実行できませんでした。エラー：{message}",
     "xpack.maps.source.esSource.stylePropsMetaRequestName": "{layerName} - メタデータ",
     "xpack.maps.source.MVTSingleLayerVectorSourceEditor.urlHelpMessage": ".mvtベクトルタイルサービスのURL。例：{url}",
     "xpack.maps.source.pewPew.inspectorDescription": "データビューからパスを取得します：{dataViewName}、ソース：{sourceFieldName}、デスティネーション：{destFieldName}",

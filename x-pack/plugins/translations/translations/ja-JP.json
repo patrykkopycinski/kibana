@@ -35043,7 +35043,6 @@
     "xpack.securitySolution.endpoint.policyNotFound": "ポリシーが見つかりません。",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "エンドポイント詳細",
     "xpack.securitySolution.endpoint.policyResponse.title": "ポリシー応答",
-    "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled": "マニフェストは利用可能な最新バージョンに常に更新されます。更新を手動で管理する場合は、\"マニフェストを自動的に更新\"を無効にします。",
     "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabledTitle": "自動更新が有効です",
     "xpack.securitySolution.endpoint.protectionUpdates.cancel": "キャンセル",
     "xpack.securitySolution.endpoint.protectionUpdates.deployedVersion.label": "現在デプロイされているバージョン",

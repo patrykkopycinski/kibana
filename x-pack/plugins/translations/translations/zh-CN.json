@@ -35039,7 +35039,6 @@
     "xpack.securitySolution.endpoint.policyNotFound": "未找到策略！",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "终端详情",
     "xpack.securitySolution.endpoint.policyResponse.title": "策略响应",
-    "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled": "会始终将清单更新到可用的最新版本。如果不想手动控制更新，请禁用“自动更新清单”。",
     "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabledTitle": "已启用自动更新",
     "xpack.securitySolution.endpoint.protectionUpdates.cancel": "取消",
     "xpack.securitySolution.endpoint.protectionUpdates.deployedVersion.label": "当前部署的版本",

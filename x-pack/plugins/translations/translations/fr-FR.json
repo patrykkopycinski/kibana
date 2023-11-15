@@ -35045,7 +35045,6 @@
     "xpack.securitySolution.endpoint.policyNotFound": "Politique introuvable !",
     "xpack.securitySolution.endpoint.policyResponse.backLinkTitle": "Détails de point de terminaison",
     "xpack.securitySolution.endpoint.policyResponse.title": "Réponse de politique",
-    "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled": "Le manifeste est toujours mis à jour vers la dernière version disponible. Si vous voulez contrôler manuellement les mises à jour, désactivez \"Mettre à jour le manifeste automatiquement\".",
     "xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabledTitle": "Mises à jour automatiques activées",
     "xpack.securitySolution.endpoint.protectionUpdates.cancel": "Annuler",
     "xpack.securitySolution.endpoint.protectionUpdates.deployedVersion.label": "Version actuellement déployée",

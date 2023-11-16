@@ -4937,7 +4937,6 @@
     "management.settings.categoryNames.visualizationsLabel": "Visualisations",
     "management.settings.changeImageLinkText": "Modifier l'image",
     "management.settings.customSettingTooltip": "Paramètre personnalisé",
-    "management.settings.field.codeEditorSyntaxErrorMessage": "Syntaxe JSON non valide",
     "management.settings.field.customSettingAriaLabel": "Paramètre personnalisé",
     "management.settings.field.imageChangeErrorMessage": "Impossible d’enregistrer l'image",
     "management.settings.field.invalidIconLabel": "Non valide",

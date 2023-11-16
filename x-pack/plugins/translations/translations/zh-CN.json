@@ -4951,7 +4951,6 @@
     "management.settings.categoryNames.visualizationsLabel": "可视化",
     "management.settings.changeImageLinkText": "更改图片",
     "management.settings.customSettingTooltip": "定制设置",
-    "management.settings.field.codeEditorSyntaxErrorMessage": "JSON 语法无效",
     "management.settings.field.customSettingAriaLabel": "定制设置",
     "management.settings.field.imageChangeErrorMessage": "图片无法保存",
     "management.settings.field.invalidIconLabel": "无效",

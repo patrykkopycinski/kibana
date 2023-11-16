@@ -4952,7 +4952,6 @@
     "management.settings.categoryNames.visualizationsLabel": "ビジュアライゼーション",
     "management.settings.changeImageLinkText": "画像を変更",
     "management.settings.customSettingTooltip": "カスタム設定",
-    "management.settings.field.codeEditorSyntaxErrorMessage": "無効な JSON 構文",
     "management.settings.field.customSettingAriaLabel": "カスタム設定",
     "management.settings.field.imageChangeErrorMessage": "画像を保存できませんでした",
     "management.settings.field.invalidIconLabel": "無効",

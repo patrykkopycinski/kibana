@@ -8699,7 +8699,6 @@
     "xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip": "このオプションを有効にすると、選択したサービスと環境に基づいてダッシュボードにフィルターが適用されます。",
     "xpack.apm.data_view.creation_failed": "データビューの作成中にエラーが発生しました",
     "xpack.apm.dataView.alreadyExistsInActiveSpace": "アクティブなスペースにはすでにデータビューが存在します",
-    "xpack.apm.dataView.alreadyExistsInAnotherSpace": "データビューはすでに別のスペースに存在しますが、このスペースでは使用できません",
     "xpack.apm.dataView.autoCreateDisabled": "データビューの自動作成は、「autoCreateApmDataView」構成オプションによって無効化されています",
     "xpack.apm.dataView.noApmData": "APMデータがありません",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "すべての演算",

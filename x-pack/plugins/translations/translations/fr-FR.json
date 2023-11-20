@@ -8684,7 +8684,6 @@
     "xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip": "L'activation de cette option applique des filtres au tableau de bord en fonction du service et de l'environnement choisis.",
     "xpack.apm.data_view.creation_failed": "Une erreur s'est produite lors de la création de la vue de données",
     "xpack.apm.dataView.alreadyExistsInActiveSpace": "La vue de données existe déjà dans l'espace actif",
-    "xpack.apm.dataView.alreadyExistsInAnotherSpace": "La vue de données existe déjà dans un autre espace mais elle n'est pas disponible dans cet espace",
     "xpack.apm.dataView.autoCreateDisabled": "La création automatique des vues de données a été désactivée via l'option de configuration \"autoCreateApmDataView\"",
     "xpack.apm.dataView.noApmData": "Aucune donnée APM",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "Toutes les opérations",

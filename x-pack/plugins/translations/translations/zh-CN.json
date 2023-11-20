@@ -8698,7 +8698,6 @@
     "xpack.apm.dashboard.addDashboard.useContextFilterLabel.tooltip": "启用此选项会根据您选择的服务和环境，将筛选应用于仪表板。",
     "xpack.apm.data_view.creation_failed": "创建数据视图时出错",
     "xpack.apm.dataView.alreadyExistsInActiveSpace": "活动工作区中已存在数据视图",
-    "xpack.apm.dataView.alreadyExistsInAnotherSpace": "数据视图已在另一工作区中存在，但在此工作区中不可用",
     "xpack.apm.dataView.autoCreateDisabled": "已通过“autoCreateApmDataView”配置选项禁止自动创建数据视图",
     "xpack.apm.dataView.noApmData": "无 APM 数据",
     "xpack.apm.dependecyOperationDetailView.header.backLinkLabel": "所有操作",

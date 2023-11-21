@@ -17100,7 +17100,6 @@
     "xpack.fleet.agentActivityFlyout.inProgressTitle": "En cours",
     "xpack.fleet.agentActivityFlyout.noActivityDescription": "Le fil d'activités s'affichera ici au fur et à mesure que les agents seront réaffectés, mis à niveau ou désenregistrés.",
     "xpack.fleet.agentActivityFlyout.noActivityText": "Aucune activité à afficher",
-    "xpack.fleet.agentActivityFlyout.reviewErrorLogs": "Vérifier les logs d'erreur",
     "xpack.fleet.agentActivityFlyout.scheduledDescription": "Planifié pour ",
     "xpack.fleet.agentActivityFlyout.title": "Activité des agents",
     "xpack.fleet.agentActivityFlyout.todayTitle": "Aujourd'hui",

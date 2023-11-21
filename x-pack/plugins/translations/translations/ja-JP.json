@@ -17113,7 +17113,6 @@
     "xpack.fleet.agentActivityFlyout.inProgressTitle": "進行中",
     "xpack.fleet.agentActivityFlyout.noActivityDescription": "エージェントが再割り当て、アップグレード、または登録解除されたときに、アクティビティフィードがここに表示されます。",
     "xpack.fleet.agentActivityFlyout.noActivityText": "表示するアクティビティがありません",
-    "xpack.fleet.agentActivityFlyout.reviewErrorLogs": "エラーログを確認",
     "xpack.fleet.agentActivityFlyout.scheduledDescription": "スケジュール済み ",
     "xpack.fleet.agentActivityFlyout.title": "エージェントアクティビティ",
     "xpack.fleet.agentActivityFlyout.todayTitle": "今日",

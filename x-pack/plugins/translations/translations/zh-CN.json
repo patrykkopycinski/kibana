@@ -17113,7 +17113,6 @@
     "xpack.fleet.agentActivityFlyout.inProgressTitle": "进行中",
     "xpack.fleet.agentActivityFlyout.noActivityDescription": "重新分配、升级或取消注册代理时，活动源将在此处显示。",
     "xpack.fleet.agentActivityFlyout.noActivityText": "没有可显示的活动",
-    "xpack.fleet.agentActivityFlyout.reviewErrorLogs": "查看错误日志",
     "xpack.fleet.agentActivityFlyout.scheduledDescription": "计划进行 ",
     "xpack.fleet.agentActivityFlyout.title": "代理活动",
     "xpack.fleet.agentActivityFlyout.todayTitle": "今日",

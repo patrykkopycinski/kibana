@@ -25328,7 +25328,7 @@
     "xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle": "クラスター横断検索を使用するデータビューはサポートされていません。",
     "xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle": "保存された検索で使用されているデータビューの読み込みエラー",
     "xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel": "一致インデックスまたは保存した検索が見つかりません。",
-    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern": "データビュー",
+    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView": "データビュー",
     "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search": "保存検索",
     "xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage": "デスティネーションインデックスのデータビューが作成されていない場合は、ジョブ結果を表示できないことがあります。",
     "xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel": "この深さを超える決定木は、損失計算でペナルティがあります。",

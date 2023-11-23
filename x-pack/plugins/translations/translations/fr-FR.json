@@ -25329,7 +25329,7 @@
     "xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle": "Les vues de données utilisant la recherche inter-clusters ne sont pas prises en charge.",
     "xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle": "Erreur lors du chargement de la vue de données utilisée par la recherche enregistrée",
     "xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel": "Aucun recherche enregistrée ni aucun index correspondants n'ont été trouvés.",
-    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern": "Vue de données",
+    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView": "Vue de données",
     "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search": "Recherche enregistrée",
     "xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage": "Vous ne pourrez peut-être pas visualiser les résultats de la tâche si aucune vue de données n'est créée pour l'index de destination.",
     "xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel": "Les arbres de décision dépassant cette profondeur sont pénalisés dans les calculs de perte.",

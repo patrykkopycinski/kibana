@@ -25327,7 +25327,7 @@
     "xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle": "不支持使用跨集群搜索的数据视图。",
     "xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle": "加载已保存搜索所使用的数据视图时出错",
     "xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel": "未找到匹配的索引或已保存搜索。",
-    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern": "数据视图",
+    "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView": "数据视图",
     "xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search": "已保存搜索",
     "xpack.ml.dataframe.analytics.create.shouldCreateDataViewMessage": "如果没有为目标索引创建数据视图，则可能无法查看作业结果。",
     "xpack.ml.dataframe.analytics.create.softTreeDepthLimitInputAriaLabel": "超过此深度的决策树将在损失计算中被罚分。",

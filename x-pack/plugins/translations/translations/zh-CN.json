@@ -29216,7 +29216,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip": "这支持基本数学 (A + B / C) 和布尔逻辑 (A < B ?A :B)。",
     "xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp": "选定数据视图没有时间戳字段，请选择其他数据视图。",
     "xpack.observability.customThreshold.rule.alertFlyout.defineTextQueryPrompt": "定义查询筛选（可选）",
-    "xpack.observability.customThreshold.rule.alertFlyout.error.aggregationRequired": "“聚合”必填。",
     "xpack.observability.customThreshold.rule.alertFlyout.error.equation.invalidCharacters": "方程字段仅支持以下字符：A-Z、+、-、/、*、(、)、?、!、&、:、|、>、<、=",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidFilterQuery": "筛选查询无效。",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidSearchConfiguration": "需要数据视图。",

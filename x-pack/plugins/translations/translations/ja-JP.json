@@ -29218,7 +29218,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip": "これは基本的な数学ロジック（A + B / C）とブールロジック（A < B ?A :B）をサポートします。",
     "xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp": "選択したデータビューにタイムスタンプフィールドがありません。他のデータビューを選択してください。",
     "xpack.observability.customThreshold.rule.alertFlyout.defineTextQueryPrompt": "クエリフィルターを定義（任意）",
-    "xpack.observability.customThreshold.rule.alertFlyout.error.aggregationRequired": "集約が必要です。",
     "xpack.observability.customThreshold.rule.alertFlyout.error.equation.invalidCharacters": "等式フィールドでは次の文字のみを使用できます：A-Z、+、-、/、*、(、)、?、!、&、:、|、>、<、=",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidFilterQuery": "フィルタークエリは無効です。",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidSearchConfiguration": "データビューが必要です。",

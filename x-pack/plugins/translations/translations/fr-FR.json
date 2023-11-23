@@ -29219,7 +29219,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationTooltip": "Ceci est compatible avec des calculs de base (A + B / C) et la logique booléenne (A < B ? A : B).",
     "xpack.observability.customThreshold.rule.alertFlyout.dataViewError.noTimestamp": "La vue de données sélectionnée ne dispose pas de champ d'horodatage. Veuillez sélectionner une autre vue de données.",
     "xpack.observability.customThreshold.rule.alertFlyout.defineTextQueryPrompt": "Définir le filtre de recherche (facultatif)",
-    "xpack.observability.customThreshold.rule.alertFlyout.error.aggregationRequired": "L'agrégation est requise.",
     "xpack.observability.customThreshold.rule.alertFlyout.error.equation.invalidCharacters": "Le champ d'équation prend en charge uniquement les caractères suivants : A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidFilterQuery": "La requête de filtre n'est pas valide.",
     "xpack.observability.customThreshold.rule.alertFlyout.error.invalidSearchConfiguration": "La vue de données est requise.",

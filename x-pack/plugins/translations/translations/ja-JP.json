@@ -22347,7 +22347,6 @@
     "xpack.lens.config.configFlyoutCallout": "現在、ES|QLでは、構成オプションは限られています。",
     "xpack.lens.config.editLabel": "構成の編集",
     "xpack.lens.config.editLinkLabel": "Lensで編集",
-    "xpack.lens.config.editVisualizationLabel": "ビジュアライゼーションを編集",
     "xpack.lens.config.experimentalLabel": "テクニカルプレビュー",
     "xpack.lens.configPanel.addLayerButton": "レイヤーを追加",
     "xpack.lens.configPanel.experimentalLabel": "テクニカルプレビュー",

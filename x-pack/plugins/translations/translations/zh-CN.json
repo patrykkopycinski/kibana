@@ -43435,7 +43435,6 @@
     "unifiedDocViewer.sourceViewer.errorMessageTitle": "发生错误",
     "unifiedDocViewer.sourceViewer.refresh": "刷新",
     "utils.filename.pathWarning": "路径的格式可能不正确；请验证值",
-    "utils.filename.wildcardWarning": "在文件路径中使用通配符可能会影响终端性能",
     "visTypeGauge.advancedSettings.visualization.legacyGaugeChartsLibrary.description": "在 Visualize 中启用仪表盘图表的旧版图表库。",
     "visTypeGauge.advancedSettings.visualization.legacyGaugeChartsLibrary.name": "仪表盘旧版图表库",
     "visTypeGauge.controls.gaugeOptions.alignmentLabel": "对齐方式",

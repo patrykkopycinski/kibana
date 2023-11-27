@@ -43451,7 +43451,6 @@
     "unifiedDocViewer.sourceViewer.errorMessageTitle": "Une erreur s'est produite.",
     "unifiedDocViewer.sourceViewer.refresh": "Actualiser",
     "utils.filename.pathWarning": "Le chemin est peut-être incorrectement formé ; vérifiez la valeur",
-    "utils.filename.wildcardWarning": "l'utilisation de caractères génériques dans les chemins de fichier peut affecter les performances du point de terminaison",
     "visTypeGauge.advancedSettings.visualization.legacyGaugeChartsLibrary.description": "Active la bibliothèque de graphiques héritée pour les graphiques de jauge dans Visualize.",
     "visTypeGauge.advancedSettings.visualization.legacyGaugeChartsLibrary.name": "Bibliothèque de graphiques héritée pour les jauges",
     "visTypeGauge.controls.gaugeOptions.alignmentLabel": "Alignement",

@@ -36671,7 +36671,7 @@
     "xpack.securitySolution.timeline.saveTimeline.modal.header": "保存时间线",
     "xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel": "可选",
     "xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel": "标题",
-    "xpack.securitySolution.timeline.saveTimeline.modal.titleTitle": "标题",
+    "xpack.securitySolution.timeline.saveTimeline.modal.title": "标题",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.discard.title": "丢弃时间线模板",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.header": "保存时间线模板",
     "xpack.securitySolution.timeline.searchOrFilter.filterDescription": "上述数据提供程序的事件按相邻 KQL 进行筛选",

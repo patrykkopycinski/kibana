@@ -36677,7 +36677,7 @@
     "xpack.securitySolution.timeline.saveTimeline.modal.header": "Enregistrer la chronologie",
     "xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel": "Facultatif",
     "xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel": "Titre",
-    "xpack.securitySolution.timeline.saveTimeline.modal.titleTitle": "Titre",
+    "xpack.securitySolution.timeline.saveTimeline.modal.title": "Titre",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.discard.title": "Abandonner le modèle de chronologie",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.header": "Enregistrer le modèle de chronologie",
     "xpack.securitySolution.timeline.searchOrFilter.filterDescription": "Les événements des fournisseurs de données ci-dessus sont filtrés par le KQL adjacent",

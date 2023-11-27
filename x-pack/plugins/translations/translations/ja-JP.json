@@ -36675,7 +36675,7 @@
     "xpack.securitySolution.timeline.saveTimeline.modal.header": "タイムラインを保存",
     "xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel": "オプション",
     "xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel": "タイトル",
-    "xpack.securitySolution.timeline.saveTimeline.modal.titleTitle": "タイトル",
+    "xpack.securitySolution.timeline.saveTimeline.modal.title": "タイトル",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.discard.title": "タイムラインテンプレートを破棄",
     "xpack.securitySolution.timeline.saveTimelineTemplate.modal.header": "タイムラインテンプレートを保存",
     "xpack.securitySolution.timeline.searchOrFilter.filterDescription": "上のデータプロバイダーからのイベントは、隣接の KQL でフィルターされます",

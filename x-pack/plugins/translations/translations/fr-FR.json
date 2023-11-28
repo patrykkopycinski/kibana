@@ -15295,7 +15295,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "Extraire, transformer, indexer et synchroniser des données issues d'une source de données tiers.",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "Robot d'indexation",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "Découvrir, extraire et indexer du contenu interrogeable provenant de sites web et de bases de connaissances.",
-    "xpack.enterpriseSearch.ingestSelector.startButton": "Début",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "Nouvelle ligne",
     "xpack.enterpriseSearch.integrations.apiDescription": "Ajouter la recherche à votre application avec les API robustes d'Elasticsearch.",
     "xpack.enterpriseSearch.integrations.apiName": "API",

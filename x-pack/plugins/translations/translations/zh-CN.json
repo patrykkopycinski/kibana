@@ -15308,7 +15308,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "提取、转换、索引和同步来自第三方数据源的数据。",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "网络爬虫",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "发现、提取和索引网站和知识库中的可搜索内容。",
-    "xpack.enterpriseSearch.ingestSelector.startButton": "启动",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "新行",
     "xpack.enterpriseSearch.integrations.apiDescription": "通过 Elasticsearch 稳健的 API 将搜索功能添加到您的应用程序。",
     "xpack.enterpriseSearch.integrations.apiName": "API",

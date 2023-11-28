@@ -15308,7 +15308,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "サードパーティのデータソースからデータを抽出、変換、インデックス化、同期します。",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "Webクローラー",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "Webサイトやナレッジベースから検索可能なコンテンツを検出、抽出、インデックス化します。",
-    "xpack.enterpriseSearch.ingestSelector.startButton": "開始",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "新しい行",
     "xpack.enterpriseSearch.integrations.apiDescription": "Elasticsearchの堅牢なAPIを使用して、検索をアプリケーションに追加します。",
     "xpack.enterpriseSearch.integrations.apiName": "API",

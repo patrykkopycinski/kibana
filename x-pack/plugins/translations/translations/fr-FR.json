@@ -38716,7 +38716,6 @@
     "xpack.stackConnectors.components.pagerDuty.componentTextFieldLabel": "Composant (facultatif)",
     "xpack.stackConnectors.components.pagerDuty.connectorTypeTitle": "Envoyer à PagerDuty",
     "xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel": "DedupKey (facultatif)",
-    "xpack.stackConnectors.components.pagerDuty.dedupKeyTextRequiredFieldLabel": "DedupKey",
     "xpack.stackConnectors.components.pagerDuty.error.requiredDedupKeyText": "DedupKey est requis lors de la résolution ou de la reconnaissance d'un incident.",
     "xpack.stackConnectors.components.pagerDuty.error.requiredRoutingKeyText": "Une clé d'intégration / clé de routage est requise.",
     "xpack.stackConnectors.components.pagerDuty.error.requiredSummaryText": "Le résumé est requis.",

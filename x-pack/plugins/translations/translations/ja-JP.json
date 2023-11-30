@@ -38715,7 +38715,6 @@
     "xpack.stackConnectors.components.pagerDuty.componentTextFieldLabel": "コンポーネント（任意）",
     "xpack.stackConnectors.components.pagerDuty.connectorTypeTitle": "PagerDuty に送信",
     "xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel": "DedupKey（任意）",
-    "xpack.stackConnectors.components.pagerDuty.dedupKeyTextRequiredFieldLabel": "DedupKey",
     "xpack.stackConnectors.components.pagerDuty.error.requiredDedupKeyText": "インシデントを解決または確認するときには、DedupKeyが必要です。",
     "xpack.stackConnectors.components.pagerDuty.error.requiredRoutingKeyText": "統合キー/ルーティングキーが必要です。",
     "xpack.stackConnectors.components.pagerDuty.error.requiredSummaryText": "概要が必要です。",

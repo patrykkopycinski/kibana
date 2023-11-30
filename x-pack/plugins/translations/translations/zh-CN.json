@@ -38708,7 +38708,6 @@
     "xpack.stackConnectors.components.pagerDuty.componentTextFieldLabel": "组件（可选）",
     "xpack.stackConnectors.components.pagerDuty.connectorTypeTitle": "发送到 PagerDuty",
     "xpack.stackConnectors.components.pagerDuty.dedupKeyTextFieldLabel": "DedupKey（可选）",
-    "xpack.stackConnectors.components.pagerDuty.dedupKeyTextRequiredFieldLabel": "DedupKey",
     "xpack.stackConnectors.components.pagerDuty.error.requiredDedupKeyText": "解决或确认事件时需要 DedupKey。",
     "xpack.stackConnectors.components.pagerDuty.error.requiredRoutingKeyText": "需要集成密钥/路由密钥。",
     "xpack.stackConnectors.components.pagerDuty.error.requiredSummaryText": "“摘要”必填。",

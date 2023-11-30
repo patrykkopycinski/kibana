@@ -2051,7 +2051,6 @@
     "data.search.esErrorTitle": "Impossible d’extraire les résultats de recherche",
     "data.search.esql.help": "Interroge Elasticsearch avec ES|QL.",
     "data.search.esql.query.help": "Une recherche ES|QL.",
-    "data.search.esql.timezone.help": "Fuseau horaire à utiliser pour les opérations de date. Les formats ISO8601 et les décalages UTC valides fonctionnent.",
     "data.search.essql.count.help": "Nombre de documents à récupérer. Pour de meilleures performances, utilisez un ensemble de données plus petit.",
     "data.search.essql.help": "Interroge Elasticsearch avec Elasticsearch SQL.",
     "data.search.essql.locale.help": "Le paramètre régional à utiliser.",

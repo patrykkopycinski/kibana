@@ -2065,7 +2065,6 @@
     "data.search.esErrorTitle": "无法检索搜索结果",
     "data.search.esql.help": "使用 ES|QL 查询 Elasticsearch。",
     "data.search.esql.query.help": "ES|QL 查询。",
-    "data.search.esql.timezone.help": "要用于日期操作的时区。有效的 ISO8601 格式和 UTC 偏移均适用。",
     "data.search.essql.count.help": "要检索的文档数目。要获取更佳的性能，请使用较小的数据集。",
     "data.search.essql.help": "使用 Elasticsearch SQL 查询 Elasticsearch。",
     "data.search.essql.locale.help": "要使用的区域设置。",

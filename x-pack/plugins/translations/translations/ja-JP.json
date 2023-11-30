@@ -2065,7 +2065,6 @@
     "data.search.esErrorTitle": "検索結果を取得できません",
     "data.search.esql.help": "ES|QLを使用してElasticsearchを照会します。",
     "data.search.esql.query.help": "ES|QLクエリ。",
-    "data.search.esql.timezone.help": "日付操作の際に使用するタイムゾーンです。有効なISO8601フォーマットとUTCオフセットの両方が機能します。",
     "data.search.essql.count.help": "取得するドキュメント数です。パフォーマンスを向上させるには、小さなデータセットを使用します。",
     "data.search.essql.help": "Elasticsearch SQLを使用してElasticsearchを照会します。",
     "data.search.essql.locale.help": "使用するロケール。",

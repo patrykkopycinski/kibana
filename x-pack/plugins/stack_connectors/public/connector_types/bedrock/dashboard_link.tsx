@@ -20,7 +20,7 @@ interface Props {
 export const DashboardLink: React.FC<Props> = ({
   connectorId,
   connectorName,
-  selectedProvider = 'OpenAI',
+  selectedProvider = 'Bedrock',
 }) => {
   const { dashboardUrl } = useGetDashboard({ connectorId, selectedProvider });
   const {

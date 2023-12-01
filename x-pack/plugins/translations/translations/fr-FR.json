@@ -38619,7 +38619,6 @@
     "xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel": "Modèle par défaut",
     "xpack.stackConnectors.components.genAi.defaultModelTooltipContent": "Si une requête ne comprend pas de modèle, le modèle par défaut est utilisé.",
     "xpack.stackConnectors.components.genAi.documentation": "documentation",
-    "xpack.stackConnectors.components.genAi.error.dashboardApiError": "Une erreur s'est produite lors de la recherche du tableau de bord de l'utilisation des tokens d'OpenAI.",
     "xpack.stackConnectors.components.genAi.error.requiredApiProviderText": "Un fournisseur d’API est nécessaire.",
     "xpack.stackConnectors.components.genAi.error.requiredGenerativeAiBodyText": "Le corps est requis.",
     "xpack.stackConnectors.components.genAi.openAi": "OpenAI",

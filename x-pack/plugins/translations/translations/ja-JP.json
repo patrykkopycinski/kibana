@@ -38618,7 +38618,6 @@
     "xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel": "デフォルトモデル",
     "xpack.stackConnectors.components.genAi.defaultModelTooltipContent": "リクエストにモデルが含まれていない場合、デフォルトが使われます。",
     "xpack.stackConnectors.components.genAi.documentation": "ドキュメンテーション",
-    "xpack.stackConnectors.components.genAi.error.dashboardApiError": "OpenAIトークン使用状況ダッシュボードの検索エラー。",
     "xpack.stackConnectors.components.genAi.error.requiredApiProviderText": "APIプロバイダーは必須です。",
     "xpack.stackConnectors.components.genAi.error.requiredGenerativeAiBodyText": "本文が必要です。",
     "xpack.stackConnectors.components.genAi.openAi": "OpenAI",

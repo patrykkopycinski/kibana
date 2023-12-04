@@ -38658,7 +38658,6 @@
     "xpack.stackConnectors.components.opsgenie.actionLabel": "アクション",
     "xpack.stackConnectors.components.opsgenie.alertFieldsLabel": "アラートフィールド",
     "xpack.stackConnectors.components.opsgenie.aliasLabel": "エイリアス",
-    "xpack.stackConnectors.components.opsgenie.aliasRequiredLabel": "エイリアス（必須）",
     "xpack.stackConnectors.components.opsgenie.apiKeySecret": "API キー",
     "xpack.stackConnectors.components.opsgenie.apiUrlTextFieldLabel": "URL",
     "xpack.stackConnectors.components.opsgenie.closeAlertAction": "アラートを閉じる",

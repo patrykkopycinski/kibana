@@ -38651,7 +38651,6 @@
     "xpack.stackConnectors.components.opsgenie.actionLabel": "操作",
     "xpack.stackConnectors.components.opsgenie.alertFieldsLabel": "告警字段",
     "xpack.stackConnectors.components.opsgenie.aliasLabel": "别名",
-    "xpack.stackConnectors.components.opsgenie.aliasRequiredLabel": "别名（必填）",
     "xpack.stackConnectors.components.opsgenie.apiKeySecret": "API 密钥",
     "xpack.stackConnectors.components.opsgenie.apiUrlTextFieldLabel": "URL",
     "xpack.stackConnectors.components.opsgenie.closeAlertAction": "关闭告警",

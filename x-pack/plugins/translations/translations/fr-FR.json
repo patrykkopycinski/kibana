@@ -38659,7 +38659,6 @@
     "xpack.stackConnectors.components.opsgenie.actionLabel": "Action",
     "xpack.stackConnectors.components.opsgenie.alertFieldsLabel": "Champs d'alerte",
     "xpack.stackConnectors.components.opsgenie.aliasLabel": "Alias",
-    "xpack.stackConnectors.components.opsgenie.aliasRequiredLabel": "Alias (requis)",
     "xpack.stackConnectors.components.opsgenie.apiKeySecret": "Clé d'API",
     "xpack.stackConnectors.components.opsgenie.apiUrlTextFieldLabel": "URL",
     "xpack.stackConnectors.components.opsgenie.closeAlertAction": "Fermer l'alerte",

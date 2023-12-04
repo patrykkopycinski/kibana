@@ -11649,7 +11649,6 @@
     "xpack.cases.server.viewCaseInKibana": "詳細については、Kibanaでこのケースを確認してください",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "オフ",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "オン",
-    "xpack.cases.severity.all": "すべての重要度",
     "xpack.cases.severity.critical": "重大",
     "xpack.cases.severity.high": "高",
     "xpack.cases.severity.low": "低",

@@ -11635,7 +11635,6 @@
     "xpack.cases.server.viewCaseInKibana": "Pour plus de détails, afficher ce cas dans Kibana",
     "xpack.cases.settings.syncAlertsSwitchLabelOff": "Désactivé",
     "xpack.cases.settings.syncAlertsSwitchLabelOn": "Activé",
-    "xpack.cases.severity.all": "Toutes les sévérités",
     "xpack.cases.severity.critical": "Critique",
     "xpack.cases.severity.high": "Élevé",
     "xpack.cases.severity.low": "Bas",

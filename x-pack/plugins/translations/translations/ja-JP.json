@@ -38783,7 +38783,6 @@
     "xpack.stackConnectors.components.serviceNow.requiredUsernameTextField": "ユーザー名が必要です。",
     "xpack.stackConnectors.components.serviceNow.resourceTextAreaFieldLabel": "リソース",
     "xpack.stackConnectors.components.serviceNow.setupDevInstance": "開発者インスタンスを設定",
-    "xpack.stackConnectors.components.serviceNow.severityRequiredSelectFieldLabel": "重要度（必須）",
     "xpack.stackConnectors.components.serviceNow.severitySelectFieldLabel": "深刻度",
     "xpack.stackConnectors.components.serviceNow.snInstanceLabel": "ServiceNowインスタンス",
     "xpack.stackConnectors.components.serviceNow.sourceTextAreaFieldLabel": "送信元",

@@ -38784,7 +38784,6 @@
     "xpack.stackConnectors.components.serviceNow.requiredUsernameTextField": "Le nom d'utilisateur est requis.",
     "xpack.stackConnectors.components.serviceNow.resourceTextAreaFieldLabel": "Ressource",
     "xpack.stackConnectors.components.serviceNow.setupDevInstance": "configurer une instance de développeur",
-    "xpack.stackConnectors.components.serviceNow.severityRequiredSelectFieldLabel": "Sévérité (requise)",
     "xpack.stackConnectors.components.serviceNow.severitySelectFieldLabel": "Sévérité",
     "xpack.stackConnectors.components.serviceNow.snInstanceLabel": "Instance ServiceNow",
     "xpack.stackConnectors.components.serviceNow.sourceTextAreaFieldLabel": "Source",

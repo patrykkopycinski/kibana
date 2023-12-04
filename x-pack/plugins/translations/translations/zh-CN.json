@@ -38776,7 +38776,6 @@
     "xpack.stackConnectors.components.serviceNow.requiredUsernameTextField": "“用户名”必填。",
     "xpack.stackConnectors.components.serviceNow.resourceTextAreaFieldLabel": "资源",
     "xpack.stackConnectors.components.serviceNow.setupDevInstance": "设置开发者实例",
-    "xpack.stackConnectors.components.serviceNow.severityRequiredSelectFieldLabel": "严重性（必需）",
     "xpack.stackConnectors.components.serviceNow.severitySelectFieldLabel": "严重性",
     "xpack.stackConnectors.components.serviceNow.snInstanceLabel": "ServiceNow 实例",
     "xpack.stackConnectors.components.serviceNow.sourceTextAreaFieldLabel": "源",

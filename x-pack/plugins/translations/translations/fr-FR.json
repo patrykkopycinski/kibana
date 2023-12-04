@@ -29577,7 +29577,6 @@
     "xpack.observability.slo.sloList.welcomePrompt.signupForCloud": "S'inscrire à Elastic Cloud",
     "xpack.observability.slo.sloList.welcomePrompt.signupForLicense": "S'inscrire pour une licence",
     "xpack.observability.slo.sloList.welcomePrompt.title": "Surveiller et respecter vos SLO",
-    "xpack.observability.slo.slosPage.headerTitle.betaBadgeDescription": "Cette fonctionnalité est en version bêta et susceptible d'être modifiée. La conception et le code sont moins matures que les fonctionnalités officielles en disponibilité générale et sont fournis tels quels sans aucune garantie. Les fonctionnalités en version bêta ne sont pas soumises à l'accord de niveau de service des fonctionnalités officielles en disponibilité générale.",
     "xpack.observability.slo.sloStatusBadge.degrading": "Dégradation",
     "xpack.observability.slo.sloStatusBadge.forecasted": "Prévu",
     "xpack.observability.slo.sloStatusBadge.healthy": "Intègre",

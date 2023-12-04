@@ -29577,7 +29577,6 @@
     "xpack.observability.slo.sloList.welcomePrompt.signupForCloud": "Elastic Cloudに登録",
     "xpack.observability.slo.sloList.welcomePrompt.signupForLicense": "ライセンスを登録",
     "xpack.observability.slo.sloList.welcomePrompt.title": "SLOを追跡して遵守",
-    "xpack.observability.slo.slosPage.headerTitle.betaBadgeDescription": "この機能はベータ段階で、変更される可能性があります。デザインとコードは正式に一般公開された機能より完成度が低く、現状のまま保証なしで提供されています。ベータ機能は、正式に一般公開された機能に適用されるサポートサービスレベル契約の対象外です。",
     "xpack.observability.slo.sloStatusBadge.degrading": "劣化",
     "xpack.observability.slo.sloStatusBadge.forecasted": "予測",
     "xpack.observability.slo.sloStatusBadge.healthy": "正常",

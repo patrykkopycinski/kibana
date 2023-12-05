@@ -3327,7 +3327,6 @@
     "guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title": "ユニバーサルプロファイリングでワークロードを最適化",
     "guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title": "ベクトル検索を設定",
     "guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title": "検索をWebサイトに追加",
-    "guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel": "すべて",
     "guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel": "Observability",
     "guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel": "検索",
     "guidedOnboardingPackage.gettingStarted.guideFilter.security.buttonLabel": "セキュリティ",

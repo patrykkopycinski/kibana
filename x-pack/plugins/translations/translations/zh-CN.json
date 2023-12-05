@@ -3326,7 +3326,6 @@
     "guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title": "使用 Universal Profiling 优化我的工作负载",
     "guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title": "设置矢量搜索",
     "guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title": "添加搜索到我的网站",
-    "guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel": "全部",
     "guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel": "Observability",
     "guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel": "搜索",
     "guidedOnboardingPackage.gettingStarted.guideFilter.security.buttonLabel": "安全",

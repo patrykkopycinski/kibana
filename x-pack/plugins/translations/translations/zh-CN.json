@@ -29610,8 +29610,6 @@
     "xpack.observability.ux.coreVitals.average": "平均值",
     "xpack.observability.ux.coreVitals.cls": "累计布局偏移",
     "xpack.observability.ux.coreVitals.cls.help": "累计布局偏移 (CLS)：衡量视觉稳定性。为了提供良好的用户体验，页面的 CLS 应小于 0.1。",
-    "xpack.observability.ux.coreVitals.fid.help": "首次输入延迟用于衡量交互性。为了提供良好的用户体验，页面的 FID 应小于 100 毫秒。",
-    "xpack.observability.ux.coreVitals.fip": "首次输入延迟",
     "xpack.observability.ux.coreVitals.good": "良好",
     "xpack.observability.ux.coreVitals.is": "是",
     "xpack.observability.ux.coreVitals.lcp": "最大内容绘制",

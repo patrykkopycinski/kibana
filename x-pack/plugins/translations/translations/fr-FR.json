@@ -29613,8 +29613,6 @@
     "xpack.observability.ux.coreVitals.average": "une moyenne",
     "xpack.observability.ux.coreVitals.cls": "Cumulative Layout Shift",
     "xpack.observability.ux.coreVitals.cls.help": "Cumulative Layout Shift (CLS) : mesure la stabilité visuelle. Pour offrir une expérience agréable aux utilisateurs, les pages doivent conserver un CLS inférieur à 0,1.",
-    "xpack.observability.ux.coreVitals.fid.help": "First Input Delay mesure l'interactivité. Pour offrir une expérience agréable aux utilisateurs, les pages doivent avoir un FID inférieur à 100 millisecondes.",
-    "xpack.observability.ux.coreVitals.fip": "First Input Delay",
     "xpack.observability.ux.coreVitals.good": "un bon",
     "xpack.observability.ux.coreVitals.is": "est",
     "xpack.observability.ux.coreVitals.lcp": "Largest Contentful Paint",

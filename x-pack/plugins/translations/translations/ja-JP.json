@@ -29613,8 +29613,6 @@
     "xpack.observability.ux.coreVitals.average": "平均",
     "xpack.observability.ux.coreVitals.cls": "累積レイアウト変更",
     "xpack.observability.ux.coreVitals.cls.help": "累積レイアウト変更（CLS）：視覚的な安定性を計測します。優れたユーザーエクスペリエンスを実現するには、ページのCLSを0.1未満に保ってください。",
-    "xpack.observability.ux.coreVitals.fid.help": "初回入力遅延（FID）は双方向性を計測します。優れたユーザーエクスペリエンスを実現するには、ページのFIDを100ミリ秒未満に保ってください。",
-    "xpack.observability.ux.coreVitals.fip": "初回入力遅延",
     "xpack.observability.ux.coreVitals.good": "優れている",
     "xpack.observability.ux.coreVitals.is": "is",
     "xpack.observability.ux.coreVitals.lcp": "最大コンテンツの描画",

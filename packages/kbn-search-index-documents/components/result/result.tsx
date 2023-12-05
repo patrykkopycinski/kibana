@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -11,11 +12,11 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '
 
 import { i18n } from '@kbn/i18n';
 
-import { ResultFields } from './result_fields';
-import { ResultHeader } from './result_header';
+import { ResultFields } from './results_fields';
 
-import { MetaDataProps, ResultFieldProps } from './types';
+import { ResultHeader } from './result_header';
 import './result.scss';
+import { MetaDataProps, ResultFieldProps } from './result_types';
 
 interface ResultProps {
   fields: ResultFieldProps[];
@@ -24,25 +25,24 @@ interface ResultProps {
 
 export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
   const tooltipText =
     fields.length <= 3
-      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.allVisible', {
+      ? i18n.translate('searchIndexDocuments.result.expandTooltip.allVisible', {
           defaultMessage: 'All fields are visible',
         })
       : isExpanded
-      ? i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showFewer', {
+      ? i18n.translate('searchIndexDocuments.result.expandTooltip.showFewer', {
           defaultMessage: 'Show {amount} fewer fields',
           values: { amount: fields.length - 3 },
         })
-      : i18n.translate('xpack.enterpriseSearch.shared.result.expandTooltip.showMore', {
+      : i18n.translate('searchIndexDocuments.result.expandTooltip.showMore', {
           defaultMessage: 'Show {amount} more fields',
           values: { amount: fields.length - 3 },
         });
   const toolTipContent = <>{tooltipText}</>;
 
   return (
-    <EuiPanel hasBorder paddingSize="s">
+    <EuiPanel hasBorder paddingSize="s" data-test-subj="search-index-documents-result">
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -50,7 +50,7 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
               <ResultHeader
                 title={
                   metaData.title ??
-                  i18n.translate('xpack.enterpriseSearch.shared.result.title.id', {
+                  i18n.translate('searchIndexDocuments.result.title.id', {
                     defaultMessage: 'Document id: {id}',
                     values: { id: metaData.id },
                   })

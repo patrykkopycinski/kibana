@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useState } from 'react';
@@ -20,10 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { MetaDataProps } from './types';
-
-import './result.scss';
+import { MetaDataProps } from './result_types';
 
 interface Props {
   metaData: MetaDataProps;
@@ -58,17 +56,17 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       iconType="iInCircle"
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-      aria-label={i18n.translate(
-        'xpack.enterpriseSearch.content.shared.result.header.metadata.icon.ariaLabel',
-        { defaultMessage: 'Metadata for document: {id}', values: { id } }
-      )}
+      aria-label={i18n.translate('searchIndexDocuments.result.header.metadata.icon.ariaLabel', {
+        defaultMessage: 'Metadata for document: {id}',
+        values: { id },
+      })}
     />
   );
 
   return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('xpack.enterpriseSearch.content.shared.result.header.metadata.title', {
+        {i18n.translate('searchIndexDocuments.result.header.metadata.title', {
           defaultMessage: 'Document metadata',
         })}
       </EuiPopoverTitle>
@@ -83,12 +81,9 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       {onDocumentDelete && (
         <EuiPopoverFooter>
           <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.shared.result.header.metadata.deleteDocument',
-              {
-                defaultMessage: 'Delete document',
-              }
-            )}
+            {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
+              defaultMessage: 'Delete document',
+            })}
           </EuiButton>
         </EuiPopoverFooter>
       )}

@@ -1,13 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import React, { useState } from 'react';
-
-import { useValues } from 'kea';
 
 import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
@@ -23,30 +21,29 @@ import {
   EuiPopover,
   EuiText,
   EuiSpacer,
+  Pagination,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { Meta } from '../../../../../../../common/types';
+import { resultMetaData } from './result/result_metadata';
 
-import { Result } from '../../../../../shared/result/result';
-import { resultMetaData } from '../../../../../shared/result/result_metadata';
-
-import { IndexViewLogic } from '../../index_view_logic';
-
+import { Result } from '..';
 interface DocumentListProps {
+  dataTelemetryIdPrefix: string;
   docs: SearchHit[];
   docsPerPage: number;
   isLoading: boolean;
   mappings: Record<string, MappingProperty> | undefined;
-  meta: Meta;
+  meta: Pagination;
   onPaginate: (newPageIndex: number) => void;
   setDocsPerPage: (docsPerPage: number) => void;
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
+  dataTelemetryIdPrefix,
   docs,
   docsPerPage,
   isLoading,
@@ -55,8 +52,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   onPaginate,
   setDocsPerPage,
 }) => {
-  const { ingestionMethod } = useValues(IndexViewLogic);
-
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const resultToField = (result: SearchHit) => {
     if (mappings && result._source && !Array.isArray(result._source)) {
@@ -77,22 +72,22 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     return size === docsPerPage ? 'check' : 'empty';
   };
 
+  const pageCount = meta?.pageSize ? Math.ceil(meta.totalItemCount / meta?.pageSize) : 0;
   return (
     <>
       <EuiPagination
-        aria-label={i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationAriaLabel',
-          { defaultMessage: 'Pagination for document list' }
-        )}
-        pageCount={meta.page.total_pages}
-        activePage={meta.page.current}
+        aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
+          defaultMessage: 'Pagination for document list',
+        })}
+        pageCount={pageCount}
+        activePage={meta.pageIndex}
         onPageClick={onPaginate}
       />
       <EuiSpacer size="m" />
       <EuiText size="xs">
         <p>
           <FormattedMessage
-            id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.description"
+            id="searchIndexDocuments.documentList.description"
             defaultMessage="Showing {results} of {total}.
             Search results maxed at {maximum} documents."
             values={{
@@ -104,7 +99,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               ),
               total: (
                 <strong>
-                  <FormattedNumber value={meta.page.total_results} />
+                  <FormattedNumber value={meta.totalItemCount} />
                 </strong>
               ),
             }}
@@ -125,24 +120,22 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiPagination
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationAriaLabel',
-              { defaultMessage: 'Pagination for document list' }
-            )}
-            pageCount={meta.page.total_pages}
-            activePage={meta.page.current}
+            aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
+              defaultMessage: 'Pagination for document list',
+            })}
+            pageCount={pageCount}
+            activePage={meta.pageIndex}
             onPageClick={onPaginate}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            aria-label={i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.documents.documentList.docsPerPage',
-              { defaultMessage: 'Document count per page dropdown' }
-            )}
+            aria-label={i18n.translate('searchIndexDocuments.documentList.docsPerPage', {
+              defaultMessage: 'Document count per page dropdown',
+            })}
             button={
               <EuiButtonEmpty
-                data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-docsPerPage`}
+                data-telemetry-id={`${dataTelemetryIdPrefix}-documents-docsPerPage`}
                 size="s"
                 iconType="arrowDown"
                 iconSide="right"
@@ -150,13 +143,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                   setIsPopoverOpen(true);
                 }}
               >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndex.documents.documentList.pagination.itemsPerPage',
-                  {
-                    defaultMessage: 'Documents per page: {docPerPage}',
-                    values: { docPerPage: docsPerPage },
-                  }
-                )}
+                {i18n.translate('searchIndexDocuments.documentList.pagination.itemsPerPage', {
+                  defaultMessage: 'Documents per page: {docPerPage}',
+                  values: { docPerPage: docsPerPage },
+                })}
               </EuiButtonEmpty>
             }
             isOpen={isPopoverOpen}
@@ -177,10 +167,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     setDocsPerPage(10);
                   }}
                 >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-                    { defaultMessage: '{docCount} documents', values: { docCount: 10 } }
-                  )}
+                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                    defaultMessage: '{docCount} documents',
+                    values: { docCount: 10 },
+                  })}
                 </EuiContextMenuItem>,
 
                 <EuiContextMenuItem
@@ -191,10 +181,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     setDocsPerPage(25);
                   }}
                 >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-                    { defaultMessage: '{docCount} documents', values: { docCount: 25 } }
-                  )}
+                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                    defaultMessage: '{docCount} documents',
+                    values: { docCount: 25 },
+                  })}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key="50 rows"
@@ -204,10 +194,10 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     setDocsPerPage(50);
                   }}
                 >
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.searchIndex.documents.documentList.paginationOptions.option',
-                    { defaultMessage: '{docCount} documents', values: { docCount: 50 } }
-                  )}
+                  {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
+                    defaultMessage: '{docCount} documents',
+                    values: { docCount: 50 },
+                  })}
                 </EuiContextMenuItem>,
               ]}
             />
@@ -216,12 +206,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer />
-      {meta.page.total_results > 9999 && (
+      {meta.totalItemCount > 9999 && (
         <EuiCallOut
           size="s"
           title={
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.resultLimitTitle"
+              id="searchIndexDocuments.documentList.resultLimitTitle"
               defaultMessage="Results are limited to {number} documents"
               values={{
                 number: <FormattedNumber value={10000} />,
@@ -232,7 +222,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         >
           <p>
             <FormattedMessage
-              id="xpack.enterpriseSearch.content.searchIndex.documents.documentList.resultLimit"
+              id="searchIndexDocuments.documentList.resultLimit"
               defaultMessage="Only the first {number} results are available for paging. Please use the search bar to filter down your results."
               values={{
                 number: <FormattedNumber value={10000} />,

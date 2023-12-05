@@ -19,22 +19,28 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableSloProps } from './types';
+
+import { SloSelector } from './slo_selector';
+import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './types';
 
 interface SloConfigurationProps {
-  onCreate: (props: EmbeddableSloProps) => void;
+  initialInput?: Partial<SloAlertsEmbeddableInput>;
+  onCreate: (props: EmbeddableSloProps) => void; // TODO check change point detection
   onCancel: () => void;
 }
 
-export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
-  const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
-  const onConfirmClick = () =>
-    onCreate({ sloId: selectedSlo?.sloId, sloInstanceId: selectedSlo?.sloInstanceId });
+export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
+  const [selectedSlos, setSelectedSlos] = useState(initialInput?.slos ?? []);
   const [hasError, setHasError] = useState(false);
+  const onConfirmClick = () => onCreate({ slos: selectedSlos });
 
   return (
-    <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
+    <EuiModal
+      onClose={onCancel}
+      css={`
+        min-width: 550px;
+      `}
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('xpack.observability.sloEmbeddable.config.sloSelector.headerTitle', {
@@ -46,12 +52,20 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
-              singleSelection={true}
+              initialSlos={selectedSlos}
               hasError={hasError}
-              onSelected={(slo) => {
-                setHasError(slo === undefined);
-                if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+              singleSelection={false}
+              onSelected={(slos) => {
+                setHasError(slos === undefined);
+                if (Array.isArray(slos)) {
+                  setSelectedSlos(
+                    slos?.map((slo) => ({
+                      id: slo?.id,
+                      instanceId: slo?.instanceId,
+                      name: slo?.name,
+                      groupBy: slo?.groupBy,
+                    })) as SloItem[]
+                  );
                 }
               }}
             />
@@ -68,7 +82,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlo || hasError}
+          isDisabled={!selectedSlos || selectedSlos.length === 0 || hasError}
           onClick={onConfirmClick}
           fill
         >

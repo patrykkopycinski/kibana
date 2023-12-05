@@ -29561,7 +29561,6 @@
     "xpack.observability.sloEmbeddable.displayName": "SLO 概览",
     "xpack.observability.sloEmbeddable.displayTitle": "SLO 概览",
     "xpack.observability.sloEmbeddable.overview.sloNotFoundText": "SLO 已删除。您可以放心从仪表板中删除小组件。",
-    "xpack.observability.sloEmbeddable.overview.sloTargetLabel": "目标",
     "xpack.observability.slos.sloDetails.headerControl.exploreInApm": "服务详情",
     "xpack.observability.slosLinkTitle": "SLO",
     "xpack.observability.slosPage.autoRefreshButtonLabel": "自动刷新",

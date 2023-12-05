@@ -5,27 +5,28 @@
  * 2.0.
  */
 import { EuiLink } from '@elastic/eui';
-import { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import {
   ALERT_DURATION,
-  ALERT_SEVERITY,
+  ALERT_RULE_NAME,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_REASON,
   TIMESTAMP,
-  ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type {
+  DeprecatedCellValueElementProps,
+  TimelineNonEcsData,
+} from '@kbn/timelines-plugin/common';
 
-import { asDuration } from '../../../common/utils/formatters';
-import { AlertSeverityBadge } from '../alert_severity_badge';
-import { AlertStatusIndicator } from '../alert_status_indicator';
-import { TimestampTooltip } from './timestamp_tooltip';
-import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import { asDuration } from '../../../../common/utils/formatters';
+import { AlertStatusIndicator } from '../../alert_status_indicator';
+import { TimestampTooltip } from '../timestamp_tooltip';
+import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
+import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../../../typings/alerts';
 
 export const getMappedNonEcsValue = ({
   data,
@@ -47,16 +48,12 @@ const getRenderValue = (mappedNonEcsValue: any) => {
 
   if (!isEmpty(value)) {
     if (typeof value === 'object') {
-      try {
-        return JSON.stringify(value);
-      } catch (e) {
-        return 'Error: Unable to parse JSON value.';
-      }
+      return JSON.stringify(value);
     }
     return value;
   }
 
-  return '—-';
+  return '—';
 };
 
 /**
@@ -69,16 +66,15 @@ export const getRenderCellValue = ({
   setFlyoutAlert,
   observabilityRuleTypeRegistry,
 }: {
-  setFlyoutAlert: (alertId: string) => void;
+  setFlyoutAlert: (data: TopAlert) => void;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}): ReturnType<GetRenderCellValue> => {
-  return ({ columnId, data }) => {
+}) => {
+  return ({ columnId, data }: DeprecatedCellValueElementProps) => {
     if (!data) return null;
     const mappedNonEcsValue = getMappedNonEcsValue({
       data,
       fieldName: columnId,
     });
-
     const value = getRenderValue(mappedNonEcsValue);
 
     switch (columnId) {
@@ -93,8 +89,8 @@ export const getRenderCellValue = ({
         return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
       case ALERT_DURATION:
         return asDuration(Number(value));
-      case ALERT_SEVERITY:
-        return <AlertSeverityBadge severityLevel={value ?? undefined} />;
+      case ALERT_RULE_NAME:
+        return value;
       case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
@@ -103,7 +99,7 @@ export const getRenderCellValue = ({
           <EuiLink
             data-test-subj="o11yGetRenderCellValueLink"
             css={{ display: 'contents' }}
-            onClick={() => setFlyoutAlert && setFlyoutAlert(alert.fields[ALERT_UUID])}
+            onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}
           >
             {alert.reason}
           </EuiLink>

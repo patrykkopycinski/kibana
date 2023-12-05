@@ -29564,7 +29564,6 @@
     "xpack.observability.sloEmbeddable.displayName": "Aperçu du SLO",
     "xpack.observability.sloEmbeddable.displayTitle": "Aperçu du SLO",
     "xpack.observability.sloEmbeddable.overview.sloNotFoundText": "Le SLO a été supprimé. Vous pouvez supprimer sans risque le widget du tableau de bord.",
-    "xpack.observability.sloEmbeddable.overview.sloTargetLabel": "Cible",
     "xpack.observability.slos.sloDetails.headerControl.exploreInApm": "Détails du service",
     "xpack.observability.slosLinkTitle": "SLO",
     "xpack.observability.slosPage.autoRefreshButtonLabel": "Actualisation automatique",

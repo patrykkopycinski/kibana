@@ -29564,7 +29564,6 @@
     "xpack.observability.sloEmbeddable.displayName": "SLO概要",
     "xpack.observability.sloEmbeddable.displayTitle": "SLO概要",
     "xpack.observability.sloEmbeddable.overview.sloNotFoundText": "SLOが削除されました。ウィジェットをダッシュボードから安全に削除できます。",
-    "xpack.observability.sloEmbeddable.overview.sloTargetLabel": "目標",
     "xpack.observability.slos.sloDetails.headerControl.exploreInApm": "サービス詳細",
     "xpack.observability.slosLinkTitle": "SLO",
     "xpack.observability.slosPage.autoRefreshButtonLabel": "自動更新",

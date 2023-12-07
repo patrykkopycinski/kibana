@@ -29549,7 +29549,6 @@
     "xpack.observabilityAiAssistant.conversationStartTitle": "会話を開始しました",
     "xpack.observabilityAiAssistant.couldNotFindConversationTitle": "会話が見つかりません",
     "xpack.observabilityAiAssistant.emptyConversationTitle": "新しい会話",
-    "xpack.observabilityAiAssistant.errorCreatingConversation": "会話を作成できませんでした",
     "xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase": "ナレッジベースをセットアップできませんでした",
     "xpack.observabilityAiAssistant.errorUpdatingConversation": "会話を更新できませんでした",
     "xpack.observabilityAiAssistant.experimentalTitle": "テクニカルプレビュー",

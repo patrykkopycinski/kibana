@@ -29549,7 +29549,6 @@
     "xpack.observabilityAiAssistant.conversationStartTitle": "a démarré une conversation",
     "xpack.observabilityAiAssistant.couldNotFindConversationTitle": "Conversation introuvable",
     "xpack.observabilityAiAssistant.emptyConversationTitle": "Nouvelle conversation",
-    "xpack.observabilityAiAssistant.errorCreatingConversation": "Impossible de créer une conversation",
     "xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase": "Impossible de configurer la base de connaissances",
     "xpack.observabilityAiAssistant.errorUpdatingConversation": "Impossible de mettre à jour la conversation",
     "xpack.observabilityAiAssistant.experimentalTitle": "Version d'évaluation technique",

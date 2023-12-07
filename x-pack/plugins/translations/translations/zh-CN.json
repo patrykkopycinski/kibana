@@ -29546,7 +29546,6 @@
     "xpack.observabilityAiAssistant.conversationStartTitle": "已开始对话",
     "xpack.observabilityAiAssistant.couldNotFindConversationTitle": "未找到对话",
     "xpack.observabilityAiAssistant.emptyConversationTitle": "新对话",
-    "xpack.observabilityAiAssistant.errorCreatingConversation": "无法创建对话",
     "xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase": "无法设置知识库",
     "xpack.observabilityAiAssistant.errorUpdatingConversation": "无法更新对话",
     "xpack.observabilityAiAssistant.experimentalTitle": "技术预览",

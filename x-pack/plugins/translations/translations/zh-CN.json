@@ -12143,7 +12143,6 @@
     "xpack.csp.azureIntegration.armTemplateSetupStep.notSupported": "当前版本的集成不支持 ARM 模板，请将集成升级到最新版本以使用 ARM 模板",
     "xpack.csp.azureIntegration.armTemplateSetupStep.save": "单击此页面底部右侧的“保存并继续”按钮。",
     "xpack.csp.azureIntegration.azureNotSupportedMessage": "当前版本的集成不支持 CIS Azure，请将集成升级到最新版本以使用 CIS Azure",
-    "xpack.csp.azureIntegration.credentialType.manualLabel": "手动",
     "xpack.csp.azureIntegration.documentationLinkText": "文档",
     "xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink": "入门指南",
     "xpack.csp.azureIntegration.setupFormatOptions.manual": "手动",

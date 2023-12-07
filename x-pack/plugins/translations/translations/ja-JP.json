@@ -12143,7 +12143,6 @@
     "xpack.csp.azureIntegration.armTemplateSetupStep.notSupported": "ARMテンプレートは現在の統合バージョンではサポートされていません。ARMテンプレートを使用するには、統合を最新バージョンにアップグレードしてください",
     "xpack.csp.azureIntegration.armTemplateSetupStep.save": "このページの右下にある\"保存して続行\"ボタンをクリックしてください。",
     "xpack.csp.azureIntegration.azureNotSupportedMessage": "CIS Azureは現在の統合バージョンではサポートされていません。CIS Azureを使用するには、統合を最新バージョンにアップグレードしてください",
-    "xpack.csp.azureIntegration.credentialType.manualLabel": "手動",
     "xpack.csp.azureIntegration.documentationLinkText": "ドキュメンテーション",
     "xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink": "入門ガイド",
     "xpack.csp.azureIntegration.setupFormatOptions.manual": "手動",

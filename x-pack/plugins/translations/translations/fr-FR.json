@@ -12129,7 +12129,6 @@
     "xpack.csp.azureIntegration.armTemplateSetupStep.notSupported": "Le modèle ARM n'est pas compatible avec la version actuelle de l'intégration. Veuillez passer à la version la plus récente de votre intégration pour utiliser le modèle ARM",
     "xpack.csp.azureIntegration.armTemplateSetupStep.save": "Cliquez sur le bouton \"Enregistrer et continuer\" en bas à droite de cette page.",
     "xpack.csp.azureIntegration.azureNotSupportedMessage": "CIS Azure n'est pas compatible avec la version actuelle de l'intégration. Veuillez passer à la version la plus récente de votre intégration pour utiliser CIS Azure",
-    "xpack.csp.azureIntegration.credentialType.manualLabel": "Manuel",
     "xpack.csp.azureIntegration.documentationLinkText": "documentation",
     "xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink": "Guide de premiers pas",
     "xpack.csp.azureIntegration.setupFormatOptions.manual": "Manuel",

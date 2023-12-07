@@ -23489,7 +23489,6 @@
     "xpack.maps.inspector.mapDetailsTitle": "地图详情",
     "xpack.maps.inspector.mapDetailsViewHelpText": "查看地图状态",
     "xpack.maps.inspector.mapDetailsViewTitle": "地图详情",
-    "xpack.maps.inspector.vectorTile.layerSelectPrepend": "图层",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.mapHasNotLoggedAnyRequestsText": "此地图没有任何矢量磁贴搜索结果。",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedTitle": "未为矢量磁贴记录任何请求",
     "xpack.maps.inspector.vectorTile.requestsView": "您正查看矢量磁贴搜索请求。要查看提交到搜索 API 的请求，请将视图设置为“请求”。",

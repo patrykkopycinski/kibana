@@ -23490,7 +23490,6 @@
     "xpack.maps.inspector.mapDetailsTitle": "マップの詳細",
     "xpack.maps.inspector.mapDetailsViewHelpText": "マップステータスを表示します",
     "xpack.maps.inspector.mapDetailsViewTitle": "マップの詳細",
-    "xpack.maps.inspector.vectorTile.layerSelectPrepend": "レイヤー",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.mapHasNotLoggedAnyRequestsText": "このマップにはベクトルタイル検索結果がありません。",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedTitle": "ベクトルタイルの要求はログに記録されません",
     "xpack.maps.inspector.vectorTile.requestsView": "ベクトルタイル検索要求を表示しています。検索APIに送信された要求を表示するには、［表示］を［要求］に設定します。",

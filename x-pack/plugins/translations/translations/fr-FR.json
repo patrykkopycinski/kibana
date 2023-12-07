@@ -23475,7 +23475,6 @@
     "xpack.maps.inspector.mapDetailsTitle": "Détails de la carte",
     "xpack.maps.inspector.mapDetailsViewHelpText": "Voir l'état de la carte",
     "xpack.maps.inspector.mapDetailsViewTitle": "Détails de la carte",
-    "xpack.maps.inspector.vectorTile.layerSelectPrepend": "Calque",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedDescription.mapHasNotLoggedAnyRequestsText": "Cette carte ne comporte aucun résultat de recherche de tuiles vectorielles.",
     "xpack.maps.inspector.vectorTile.noRequestsLoggedTitle": "Aucune requête consignée dans un log pour les tuiles vectorielles",
     "xpack.maps.inspector.vectorTile.requestsView": "Vous visualisez les requêtes de recherche de tuiles vectorielles. Pour afficher les requêtes envoyées à l'API de recherche, définissez Afficher sur Requêtes.",

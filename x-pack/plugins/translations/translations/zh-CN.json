@@ -43349,7 +43349,6 @@
     "xpack.serverlessObservability.nav.devTools": "开发者工具",
     "xpack.serverlessObservability.nav.getStarted": "添加数据",
     "xpack.serverlessObservability.nav.infrastructure": "基础设施",
-    "xpack.serverlessObservability.nav.logExplorer": "日志浏览器",
     "xpack.serverlessObservability.nav.ml.job.notifications": "作业通知",
     "xpack.serverlessObservability.nav.ml.jobs": "异常检测",
     "xpack.serverlessObservability.nav.mngt": "管理",

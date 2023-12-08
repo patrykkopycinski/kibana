@@ -43356,7 +43356,6 @@
     "xpack.serverlessObservability.nav.devTools": "開発者ツール",
     "xpack.serverlessObservability.nav.getStarted": "データの追加",
     "xpack.serverlessObservability.nav.infrastructure": "インフラストラクチャー",
-    "xpack.serverlessObservability.nav.logExplorer": "ログエクスプローラー",
     "xpack.serverlessObservability.nav.ml.job.notifications": "ジョブ通知",
     "xpack.serverlessObservability.nav.ml.jobs": "異常検知",
     "xpack.serverlessObservability.nav.mngt": "管理",

@@ -43365,7 +43365,6 @@
     "xpack.serverlessObservability.nav.devTools": "Outils de développeur",
     "xpack.serverlessObservability.nav.getStarted": "Ajouter des données",
     "xpack.serverlessObservability.nav.infrastructure": "Infrastructure",
-    "xpack.serverlessObservability.nav.logExplorer": "Explorateur de log",
     "xpack.serverlessObservability.nav.ml.job.notifications": "Notifications de tâches",
     "xpack.serverlessObservability.nav.ml.jobs": "Détection des anomalies",
     "xpack.serverlessObservability.nav.mngt": "Gestion",

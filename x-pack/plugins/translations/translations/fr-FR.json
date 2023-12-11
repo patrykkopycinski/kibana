@@ -22087,7 +22087,6 @@
     "xpack.lens.config.configFlyoutCallout": "ES|QL propose actuellement des options de configuration limitées",
     "xpack.lens.config.editLabel": "Modifier la configuration",
     "xpack.lens.config.editLinkLabel": "Modifier dans Lens",
-    "xpack.lens.config.experimentalLabel": "Version d'évaluation technique",
     "xpack.lens.configPanel.addLayerButton": "Ajouter un calque",
     "xpack.lens.configPanel.experimentalLabel": "Version d'évaluation technique",
     "xpack.lens.configPanel.loadFromLibrary": "Charger depuis la bibliothèque",

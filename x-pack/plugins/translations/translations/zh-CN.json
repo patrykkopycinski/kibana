@@ -22101,7 +22101,6 @@
     "xpack.lens.config.configFlyoutCallout": "ES|QL 当前提供的配置选项数量有限",
     "xpack.lens.config.editLabel": "编辑配置",
     "xpack.lens.config.editLinkLabel": "在 Lens 中编辑",
-    "xpack.lens.config.experimentalLabel": "技术预览",
     "xpack.lens.configPanel.addLayerButton": "添加图层",
     "xpack.lens.configPanel.experimentalLabel": "技术预览",
     "xpack.lens.configPanel.loadFromLibrary": "从库中加载",

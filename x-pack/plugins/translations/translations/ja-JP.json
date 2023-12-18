@@ -452,7 +452,6 @@
     "controls.controlGroup.manageControl.dataSource.fieldTitle": "フィールド",
     "controls.controlGroup.manageControl.dataSource.formGroupDescription": "コントロールを作成するデータビューとフィールドを選択します。",
     "controls.controlGroup.manageControl.dataSource.formGroupTitle": "データソース",
-    "controls.controlGroup.manageControl.dataSource.noControlTypeMessage": "まだフィールドが選択されていません",
     "controls.controlGroup.manageControl.dataSource.selectDataViewMessage": "データビューを選択してください",
     "controls.controlGroup.manageControl.displaySettings.formGroupDescription": "ダッシュボードにコントロールを表示する方法を変更します。",
     "controls.controlGroup.manageControl.displaySettings.formGroupTitle": "表示設定",

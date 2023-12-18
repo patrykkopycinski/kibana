@@ -452,7 +452,6 @@
     "controls.controlGroup.manageControl.dataSource.fieldTitle": "字段",
     "controls.controlGroup.manageControl.dataSource.formGroupDescription": "选择要为其创建控件的数据视图和字段。",
     "controls.controlGroup.manageControl.dataSource.formGroupTitle": "数据源",
-    "controls.controlGroup.manageControl.dataSource.noControlTypeMessage": "尚未选择字段",
     "controls.controlGroup.manageControl.dataSource.selectDataViewMessage": "请选择数据视图",
     "controls.controlGroup.manageControl.displaySettings.formGroupDescription": "更改控件在仪表板上的显示方式。",
     "controls.controlGroup.manageControl.displaySettings.formGroupTitle": "显示设置",

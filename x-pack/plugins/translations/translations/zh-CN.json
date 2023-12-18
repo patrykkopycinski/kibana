@@ -28787,8 +28787,6 @@
     "xpack.observability.slo.alerting.burnRate.reasonForInstanceId": "{actionGroupName}：过去 {longWindowDuration} 的消耗速度为 {longWindowBurnRate}，且对于 {instanceId}，过去 {shortWindowDuration} 为 {shortWindowBurnRate}。两个窗口超出 {burnRateThreshold} 时告警",
     "xpack.observability.slo.burnRate.breachedStatustSubtitle": "按照当前的速率，错误预算将在 {hour} 小时后耗尽。",
     "xpack.observability.slo.burnRate.threshold": "阈值为 {threshold}x",
-    "xpack.observability.slo.clone.errorNotification": "无法克隆 {name}",
-    "xpack.observability.slo.clone.successNotification": "已成功创建 {name}",
     "xpack.observability.slo.create.errorNotification": "创建 {name} 时出现问题",
     "xpack.observability.slo.create.successNotification": "已成功创建 {name}",
     "xpack.observability.slo.deleteConfirmationModal.title": "删除 {name}？",

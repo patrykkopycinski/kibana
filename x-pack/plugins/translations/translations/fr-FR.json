@@ -28790,8 +28790,6 @@
     "xpack.observability.slo.alerting.burnRate.reasonForInstanceId": "{actionGroupName} : Le taux d'avancement pour le (les) dernier(s) {longWindowDuration} est de {longWindowBurnRate} et pour le (les) dernier(s) {shortWindowDuration} est de {shortWindowBurnRate} pour {instanceId}. Alerter si supérieur à {burnRateThreshold} pour les deux fenêtres",
     "xpack.observability.slo.burnRate.breachedStatustSubtitle": "Au rythme actuel, le budget d'erreur sera épuisé en {hour} heures.",
     "xpack.observability.slo.burnRate.threshold": "Le seuil est {threshold}x",
-    "xpack.observability.slo.clone.errorNotification": "Échec du clonage de {name}",
-    "xpack.observability.slo.clone.successNotification": "{name} créé avec succès",
     "xpack.observability.slo.create.errorNotification": "Un problème est survenu lors de la création de {name}",
     "xpack.observability.slo.create.successNotification": "{name} créé avec succès",
     "xpack.observability.slo.deleteConfirmationModal.title": "Supprimer {name} ?",

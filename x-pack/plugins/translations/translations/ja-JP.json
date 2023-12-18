@@ -28790,8 +28790,6 @@
     "xpack.observability.slo.alerting.burnRate.reasonForInstanceId": "{actionGroupName}:過去{longWindowDuration}のバーンレートは{longWindowBurnRate}、{instanceId}の過去{shortWindowDuration}のバーンレートは{shortWindowBurnRate}です。両期間とも{burnRateThreshold}を超えたらアラート",
     "xpack.observability.slo.burnRate.breachedStatustSubtitle": "現在のレートでは、エラー予算は{hour}時間後に使い果たされます。",
     "xpack.observability.slo.burnRate.threshold": "しきい値は{threshold}xです",
-    "xpack.observability.slo.clone.errorNotification": "{name}を複製できませんでした",
-    "xpack.observability.slo.clone.successNotification": "{name}の作成が正常に完了しました",
     "xpack.observability.slo.create.errorNotification": "{name}の作成中に問題が発生しました",
     "xpack.observability.slo.create.successNotification": "{name}の作成が正常に完了しました",
     "xpack.observability.slo.deleteConfirmationModal.title": "{name}を削除しますか？",

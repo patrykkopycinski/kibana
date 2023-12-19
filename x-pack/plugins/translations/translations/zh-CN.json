@@ -26818,7 +26818,6 @@
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage": "无法创建“{pipelineName}”。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage": "已成功创建“{pipelineName}”。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.createDataViewLabel": "创建数据视图",
-    "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.description": "将使用以下配置创建此管道。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destinationIndexLabel": "目标索引名称",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty": "输入有效的目标索引",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexExists": "已存在具有此名称的索引。",

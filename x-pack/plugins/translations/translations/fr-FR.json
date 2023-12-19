@@ -26820,7 +26820,6 @@
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage": "Impossible de créer le pipeline \"{pipelineName}\".",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage": "Le pipeline \"{pipelineName}\" a été créé avec succès.",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.createDataViewLabel": "Créer une vue de données",
-    "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.description": "Ce pipeline est créé en respectant la configuration ci-dessous.",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destinationIndexLabel": "Nom de l'index de destination",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty": "Entrer un nom d'index de destination valide",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexExists": "Un index portant ce nom existe déjà.",

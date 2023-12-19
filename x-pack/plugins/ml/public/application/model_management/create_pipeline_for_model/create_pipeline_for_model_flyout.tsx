@@ -18,49 +18,61 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 
-import { ModelItem } from '../../model_management/models_list';
-import type { AddInferencePipelineSteps } from './types';
-import { ADD_INFERENCE_PIPELINE_STEPS } from './constants';
-import { AddInferencePipelineFooter } from '../shared';
-import { AddInferencePipelineHorizontalSteps } from '../shared';
-import { getInitialState, getModelType } from './state';
-import { PipelineDetails } from './components/pipeline_details';
-import { ProcessorConfiguration } from './components/processor_configuration';
-import { OnFailureConfiguration } from '../shared';
-import { TestPipeline } from './components/test_pipeline';
-import { ReviewAndCreatePipeline } from '../shared';
+import { ModelItem } from '../models_list';
+import type { AddInferencePipelineSteps } from '../../components/ml_inference/types';
+import { ADD_INFERENCE_PIPELINE_STEPS } from '../../components/ml_inference/constants';
+import { AddInferencePipelineFooter } from '../../components/shared';
+import { AddInferencePipelineHorizontalSteps } from '../../components/shared';
+import { getInitialState } from './state';
+import { PipelineDetails } from './pipeline_details';
+import { TestTrainedModel } from './test_trained_model';
+import { OnFailureConfiguration } from '../../components/shared';
+import { ReviewAndCreatePipeline } from '../../components/shared';
 import { useMlApiContext } from '../../contexts/kibana';
 import { getPipelineConfig } from './get_pipeline_config';
-import { validateInferencePipelineConfigurationStep } from './validation';
-import { type MlInferenceState, type InferenceModelTypes, TEST_PIPELINE_MODE } from './types';
-import { useFetchPipelines } from './hooks/use_fetch_pipelines';
+import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
+import { type InferecePipelineCreationState } from './state';
+import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
+import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 
-export interface AddInferencePipelineFlyoutProps {
-  onClose: () => void;
+export interface CreatePipelineForModelFlyoutProps {
+  onClose: (refreshList?: boolean) => void;
   model: ModelItem;
 }
 
-export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = ({
+export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps> = ({
   onClose,
   model,
 }) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialState = useMemo(() => getInitialState(model), [model.model_id]);
-  const [formState, setFormState] = useState<MlInferenceState>(initialState);
+  const {
+    currentContext: { pipelineConfig },
+  } = useTestTrainedModelsContext();
+
+  const initialState = useMemo(
+    () => getInitialState(model, pipelineConfig),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.model_id, pipelineConfig]
+  );
+  const [formState, setFormState] = useState<InferecePipelineCreationState>(initialState);
   const [step, setStep] = useState<AddInferencePipelineSteps>(ADD_INFERENCE_PIPELINE_STEPS.DETAILS);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const taskType = useMemo(
+    () => Object.keys(model.inference_config ?? {})[0],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [model.model_id]
+  ) as SupportedPytorchTasksType;
 
   const {
     trainedModels: { createInferencePipeline },
   } = useMlApiContext();
 
-  const modelType = getModelType(model);
-
   const createPipeline = async () => {
     setFormState({ ...formState, creatingPipeline: true });
     try {
-      await createInferencePipeline(formState.pipelineName, getPipelineConfig(formState));
+      const config = getPipelineConfig(formState);
+      await createInferencePipeline(formState.pipelineName, config);
       setFormState({
         ...formState,
         pipelineCreated: true,
@@ -81,11 +93,16 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
 
   const pipelineNames = useFetchPipelines();
 
-  const handleConfigUpdate = (configUpdate: Partial<MlInferenceState>) => {
-    setFormState({ ...formState, ...configUpdate });
+  const handleConfigUpdate = (configUpdate: Partial<InferecePipelineCreationState>) => {
+    const updatedState = { ...formState, ...configUpdate };
+    setFormState(updatedState);
   };
 
-  const { pipelineName: pipelineNameError, targetField: targetFieldError } = useMemo(() => {
+  const handleSetStep = (currentStep: AddInferencePipelineSteps) => {
+    setStep(currentStep);
+  };
+
+  const { pipelineName: pipelineNameError } = useMemo(() => {
     const errors = validateInferencePipelineConfigurationStep(
       formState.pipelineName,
       pipelineNames
@@ -93,24 +110,19 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
     return errors;
   }, [pipelineNames, formState.pipelineName]);
 
-  const sourceIndex = useMemo(
-    () =>
-      Array.isArray(model.metadata?.analytics_config.source.index)
-        ? model.metadata?.analytics_config.source.index.join()
-        : model.metadata?.analytics_config.source.index,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [model?.model_id]
-  );
-
   return (
-    <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
+    <EuiFlyout
+      onClose={onClose.bind(null, true)}
+      size="l"
+      data-test-subj="mlTrainedModelsFromTestInferencePipelineFlyout"
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h3>
             {i18n.translate(
-              'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.title',
+              'xpack.ml.trainedModels.content.indices.pipelines.createInferencePipeline.title',
               {
-                defaultMessage: 'Deploy analytics model',
+                defaultMessage: 'Create inference pipeline',
               }
             )}
           </h3>
@@ -119,10 +131,10 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
       <EuiFlyoutBody>
         <AddInferencePipelineHorizontalSteps
           step={step}
-          setStep={setStep}
-          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+          setStep={handleSetStep}
+          isDetailsStepValid={pipelineNameError === undefined}
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
-          hasProcessorStep
+          hasProcessorStep={false}
           pipelineCreated={formState.pipelineCreated}
         />
         <EuiSpacer size="m" />
@@ -133,21 +145,9 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
             pipelineNameError={pipelineNameError}
             pipelineDescription={formState.pipelineDescription}
             modelId={model.model_id}
-            targetField={formState.targetField}
-            targetFieldError={targetFieldError}
-          />
-        )}
-        {step === ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR && model && (
-          <ProcessorConfiguration
-            condition={formState.condition}
-            fieldMap={formState.fieldMap}
-            handleAdvancedConfigUpdate={handleConfigUpdate}
-            inferenceConfig={formState.inferenceConfig}
-            modelInferenceConfig={model.inference_config}
-            modelInputFields={model.input ?? []}
-            modelType={modelType as InferenceModelTypes}
+            taskType={taskType}
+            initialPipelineConfig={formState.initialPipelineConfig}
             setHasUnsavedChanges={setHasUnsavedChanges}
-            tag={formState.tag}
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE && (
@@ -159,20 +159,19 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.TEST && (
-          <TestPipeline
-            sourceIndex={sourceIndex}
-            state={formState}
-            mode={TEST_PIPELINE_MODE.STEP}
+          <TestTrainedModel
+            model={model}
+            handlePipelineConfigUpdate={handleConfigUpdate}
+            externalPipelineConfig={getPipelineConfig(formState)}
           />
         )}
         {step === ADD_INFERENCE_PIPELINE_STEPS.CREATE && (
           <ReviewAndCreatePipeline
+            highlightTargetField
             inferencePipeline={getPipelineConfig(formState)}
-            modelType={modelType}
             pipelineName={formState.pipelineName}
             pipelineCreated={formState.pipelineCreated}
             pipelineError={formState.pipelineError}
-            sourceIndex={sourceIndex}
           />
         )}
       </EuiFlyoutBody>
@@ -181,12 +180,12 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           onClose={onClose}
           onCreate={createPipeline}
           step={step}
-          setStep={setStep}
-          isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
+          setStep={handleSetStep}
+          isDetailsStepValid={pipelineNameError === undefined}
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
           pipelineCreated={formState.pipelineCreated}
           creatingPipeline={formState.creatingPipeline}
-          hasProcessorStep
+          hasProcessorStep={false}
         />
       </EuiFlyoutFooter>
     </EuiFlyout>

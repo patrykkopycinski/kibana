@@ -26820,7 +26820,6 @@
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage": "'{pipelineName}'を作成できません。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage": "'{pipelineName}'は正常に作成されました。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.createDataViewLabel": "データビューを作成",
-    "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.description": "このパイプラインは以下の構成で作成されます。",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destinationIndexLabel": "デスティネーションインデックス名",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexEmpty": "有効なデスティネーションインデックス名を入力",
     "xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.destIndexExists": "この名前のインデックスがすでに存在します。",

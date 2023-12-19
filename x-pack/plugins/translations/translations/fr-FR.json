@@ -29530,8 +29530,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "Vous n'avez pas autorisé OpenAI de manière à ce que l'assistant d'Elastic puisse formuler des réponses. Autoriser le modèle afin de continuer.",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "Informations d'identification manquantes",
     "xpack.observabilityAiAssistant.newChatButton": "Nouveau chat",
-    "xpack.observabilityAiAssistant.prompt.emptySelection": "Sélection vide",
-    "xpack.observabilityAiAssistant.prompt.functionList.callFunction": "Fonction d'appel",
     "xpack.observabilityAiAssistant.prompt.functionList.filter": "Filtre",
     "xpack.observabilityAiAssistant.prompt.functionList.functionList": "Liste de fonctions",
     "xpack.observabilityAiAssistant.prompt.placeholder": "Envoyer un message à l'assistant",

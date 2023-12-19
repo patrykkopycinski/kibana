@@ -29530,8 +29530,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "Elastic Assistantからの応答を生成するために、OpenAIを許可していません。続行するには、モデルを許可してください。",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "資格情報がありません",
     "xpack.observabilityAiAssistant.newChatButton": "新しいチャット",
-    "xpack.observabilityAiAssistant.prompt.emptySelection": "空の選択",
-    "xpack.observabilityAiAssistant.prompt.functionList.callFunction": "関数を呼び出し",
     "xpack.observabilityAiAssistant.prompt.functionList.filter": "フィルター",
     "xpack.observabilityAiAssistant.prompt.functionList.functionList": "関数リスト",
     "xpack.observabilityAiAssistant.prompt.placeholder": "アシスタントにメッセージを送信",

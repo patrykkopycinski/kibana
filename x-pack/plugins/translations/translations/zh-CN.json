@@ -29527,8 +29527,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "您尚未授权 OpenAI 以从 Elastic 助手生成响应。授权模型以继续。",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "凭据缺失",
     "xpack.observabilityAiAssistant.newChatButton": "新聊天",
-    "xpack.observabilityAiAssistant.prompt.emptySelection": "选择为空",
-    "xpack.observabilityAiAssistant.prompt.functionList.callFunction": "调用函数",
     "xpack.observabilityAiAssistant.prompt.functionList.filter": "筛选",
     "xpack.observabilityAiAssistant.prompt.functionList.functionList": "函数列表",
     "xpack.observabilityAiAssistant.prompt.placeholder": "向助手发送消息",

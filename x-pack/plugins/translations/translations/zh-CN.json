@@ -16991,7 +16991,6 @@
     "xpack.fleet.agentList.addRemoveTagsActionText": "添加/移除标签",
     "xpack.fleet.agentList.agentActivityButton": "代理活动",
     "xpack.fleet.agentList.agentInfoLinkButton": "代理信息指标",
-    "xpack.fleet.agentList.agentUpgradeLabel": "升级可用",
     "xpack.fleet.agentList.clearFiltersLinkText": "清除筛选",
     "xpack.fleet.agentList.cpuTitle": "CPU",
     "xpack.fleet.agentList.cpuTooltip": "过去 5 分钟的平均 CPU 使用率",

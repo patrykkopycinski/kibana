@@ -16978,7 +16978,6 @@
     "xpack.fleet.agentList.addRemoveTagsActionText": "Ajouter / supprimer des balises",
     "xpack.fleet.agentList.agentActivityButton": "Activité des agents",
     "xpack.fleet.agentList.agentInfoLinkButton": "Indicateurs Informations sur l'agent",
-    "xpack.fleet.agentList.agentUpgradeLabel": "Mise à niveau disponible",
     "xpack.fleet.agentList.clearFiltersLinkText": "Effacer les filtres",
     "xpack.fleet.agentList.cpuTitle": "CPU",
     "xpack.fleet.agentList.cpuTooltip": "Utilisation CPU moyenne au cours des 5 dernières minutes",

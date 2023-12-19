@@ -16991,7 +16991,6 @@
     "xpack.fleet.agentList.addRemoveTagsActionText": "タグを追加/削除",
     "xpack.fleet.agentList.agentActivityButton": "エージェントアクティビティ",
     "xpack.fleet.agentList.agentInfoLinkButton": "エージェント情報メトリック",
-    "xpack.fleet.agentList.agentUpgradeLabel": "アップグレードが利用可能です",
     "xpack.fleet.agentList.clearFiltersLinkText": "フィルターを消去",
     "xpack.fleet.agentList.cpuTitle": "CPU",
     "xpack.fleet.agentList.cpuTooltip": "過去5分間の平均CPU使用状況",

@@ -16592,7 +16592,6 @@
     "xpack.fleet.agentFlyout.standaloneRadioOption": "{standaloneMessage} – Elasticエージェントをスタンドアロンで実行して、エージェントがインストールされているホストで、手動でエージェントを構成および更新します。",
     "xpack.fleet.agentHealth.checkinMessageText": "前回のチェックインメッセージ：{lastCheckinMessage}",
     "xpack.fleet.agentHealth.checkInTooltipText": "前回確認日時：{lastCheckIn}",
-    "xpack.fleet.agentHealth.stuckUpdatingText": "エージェントはしばらく更新が止まっている可能性があります。アップグレードの再開を検討してください。{learnMore}",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "エージェントが見つかりません。{clearFiltersLink}",
     "xpack.fleet.agentLogs.logDisabledCallOutDescription": "エージェントのポリシー{settingsLink}を更新して、ログ収集を有効にします。",
     "xpack.fleet.agentLogs.oldAgentWarningTitle": "ログの表示には、Elastic Agent 7.11以降が必要です。エージェントをアップグレードするには、［アクション］メニューに移動するか、新しいバージョンを{downloadLink}。",

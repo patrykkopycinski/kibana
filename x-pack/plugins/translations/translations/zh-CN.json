@@ -16592,7 +16592,6 @@
     "xpack.fleet.agentFlyout.standaloneRadioOption": "{standaloneMessage} – 独立运行 Elastic 代理，以在安装代理的主机上手动配置和更新代理。",
     "xpack.fleet.agentHealth.checkinMessageText": "上次签入消息：{lastCheckinMessage}",
     "xpack.fleet.agentHealth.checkInTooltipText": "上次签入时间 {lastCheckIn}",
-    "xpack.fleet.agentHealth.stuckUpdatingText": "代理已更新一段时间，并可能陷入停滞。请考虑重新开始升级。{learnMore}",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "找不到代理。{clearFiltersLink}",
     "xpack.fleet.agentLogs.logDisabledCallOutDescription": "更新代理的策略 {settingsLink} 以启用日志收集。",
     "xpack.fleet.agentLogs.oldAgentWarningTitle": "“日志”视图需要 Elastic Agent 7.11 或更高版本。要升级代理，请前往“操作”菜单或{downloadLink}更新的版本。",

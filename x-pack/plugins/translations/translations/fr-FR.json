@@ -16579,7 +16579,6 @@
     "xpack.fleet.agentFlyout.standaloneRadioOption": "{standaloneMessage} – Exécutez un agent Elastic Agent de façon autonome pour le configurer et le mettre à jour manuellement sur l'hôte sur lequel il est installé.",
     "xpack.fleet.agentHealth.checkinMessageText": "Dernier message de vérification : {lastCheckinMessage}",
     "xpack.fleet.agentHealth.checkInTooltipText": "Dernier archivage le {lastCheckIn}",
-    "xpack.fleet.agentHealth.stuckUpdatingText": "L'agent effectue la mise à jour depuis un certain temps ; il est peut-être bloqué. Envisagez de redémarrer la mise à niveau. {learnMore}",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "Aucun agent trouvé. {clearFiltersLink}",
     "xpack.fleet.agentLogs.logDisabledCallOutDescription": "Mettez à jour la politique de l'agent {settingsLink} pour activer la collecte de logs.",
     "xpack.fleet.agentLogs.oldAgentWarningTitle": "La vue Logs requiert Elastic Agent 7.11 ou une version ultérieure. Pour mettre à niveau un agent, accédez au menu Actions ou {downloadLink} une version plus récente.",

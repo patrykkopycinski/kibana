@@ -40375,7 +40375,6 @@
     "xpack.transform.transformSettingsValidations.numberOfRetriesInvalidErrorMessage": "再試行回数は0～100の範囲でなければなりません。-1を指定すると、再試行回数が無制限に設定されます。",
     "xpack.transform.transformSettingValidations.maxPageSearchSizeInvalidMessage": "最大ページ検索サイズは10～65536の範囲の整数でなければなりません。",
     "xpack.transform.transformSettingValidations.numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage": "再試行回数は0～100の範囲でなければなりません。-1を指定すると、再試行回数が無制限に設定されます。",
-    "xpack.transform.transformSettingValidations.numberRange10To10000NotValidErrorMessage": "値は10～10000の範囲の整数でなければなりません。",
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "無効な最大年齢形式です。60秒以上が必要です。",
     "xpack.transform.transformsTitle": "トランスフォーム",
     "xpack.transform.transformsWizard.cloneTransformTitle": "クローントランスフォーム",

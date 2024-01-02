@@ -40355,7 +40355,6 @@
     "xpack.transform.transformSettingsValidations.numberOfRetriesInvalidErrorMessage": "重试次数需要介于 0 和 100 之间，或为 -1（表示无限重试）。",
     "xpack.transform.transformSettingValidations.maxPageSearchSizeInvalidMessage": "最大页面搜索大小需要是介于 10 到 65536 之间的整数。",
     "xpack.transform.transformSettingValidations.numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage": "重试次数需要介于 0 和 100 之间，或为 -1（表示无限重试）。",
-    "xpack.transform.transformSettingValidations.numberRange10To10000NotValidErrorMessage": "值必须是介于 10 到 10000 之间的整数。",
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "最大存在时间格式无效。至少需要 60s。",
     "xpack.transform.transformsTitle": "转换",
     "xpack.transform.transformsWizard.cloneTransformTitle": "克隆转换",

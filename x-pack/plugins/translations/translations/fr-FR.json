@@ -40376,7 +40376,6 @@
     "xpack.transform.transformSettingsValidations.numberOfRetriesInvalidErrorMessage": "Le nombre de tentatives doit être compris entre 0 et 100, ou égal à -1 pour des tentatives infinies.",
     "xpack.transform.transformSettingValidations.maxPageSearchSizeInvalidMessage": "La taille maximum de la recherche de pages doit être un nombre entier compris entre 10 et 65 536.",
     "xpack.transform.transformSettingValidations.numberGreaterThanOrEqualToNegativeOneNotValidErrorMessage": "Le nombre de tentatives doit être compris entre 0 et 100, ou égal à -1 pour des tentatives infinies.",
-    "xpack.transform.transformSettingValidations.numberRange10To10000NotValidErrorMessage": "La valeur doit être un entier compris entre 10 et 10 000.",
     "xpack.transform.transformSettingValidations.retentionPolicyMaxAgeInvalidMessage": "Format d'âge maximal non valide. Le minimum requis est de 60 s.",
     "xpack.transform.transformsTitle": "Transformations",
     "xpack.transform.transformsWizard.cloneTransformTitle": "Cloner la transformation",

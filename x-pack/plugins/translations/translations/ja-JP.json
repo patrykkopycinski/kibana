@@ -18089,7 +18089,6 @@
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "エージェントをアップグレード",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "{count, plural, other  {{count}個のエージェント} =true {すべての選択されたエージェント}}のアップグレードエラー",
     "xpack.fleet.upgradeAgents.noMaintenanceWindowOption": "直ちに実行",
-    "xpack.fleet.upgradeAgents.noVersionsText": "アップグレード対象の選択したエージェントはありません。1つ以上の対象のエージェントを選択してください。",
     "xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel": "{count, plural, other  {{count}個のエージェント} =true {すべての選択されたエージェント}}を再起動",
     "xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle": "更新が停止している{count, plural, one {エージェント} other {{count}個のエージェント} =true {すべてのエージェント}}のうち{updating}でアップグレードを再開",
     "xpack.fleet.upgradeAgents.restartUpgradeSingleTitle": "アップグレードを再開",

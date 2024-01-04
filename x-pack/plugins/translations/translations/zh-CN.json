@@ -18156,7 +18156,6 @@
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "升级代理",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "升级{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}时出错",
     "xpack.fleet.upgradeAgents.noMaintenanceWindowOption": "立即",
-    "xpack.fleet.upgradeAgents.noVersionsText": "没有任何选定的代理符合升级条件。请选择一个或多个符合条件的代理。",
     "xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel": "重新开始升级{count, plural, one {代理} other { {count} 个代理} =true {所有选定代理}}",
     "xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle": "在{count, plural, one {代理} other {{count} 个代理} =true {所有代理}}中的 {updating} 个的更新陷入停滞时重新开始升级",
     "xpack.fleet.upgradeAgents.restartUpgradeSingleTitle": "重新开始升级",

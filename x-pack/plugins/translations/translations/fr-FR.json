@@ -18076,7 +18076,6 @@
     "xpack.fleet.upgradeAgents.confirmSingleButtonLabel": "Mettre à niveau l'agent",
     "xpack.fleet.upgradeAgents.fatalErrorNotificationTitle": "Erreur lors de la mise à niveau de {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.noMaintenanceWindowOption": "Immédiatement",
-    "xpack.fleet.upgradeAgents.noVersionsText": "Aucun agent sélectionné ne peut bénéficier d’une mise à niveau. Sélectionnez un ou plusieurs agents éligibles.",
     "xpack.fleet.upgradeAgents.restartConfirmMultipleButtonLabel": "Relancer la mise à niveau {count, plural, one {l'agent} other {{count} agents} =true {tous les agents sélectionnés}}",
     "xpack.fleet.upgradeAgents.restartUpgradeMultipleTitle": "Relancer la mise à niveau {updating} sur {count, plural, one {l’agent} other {{count} agents} =true {tous les agents}} bloqué lors de la mise à niveau",
     "xpack.fleet.upgradeAgents.restartUpgradeSingleTitle": "Relancer la mise à niveau",

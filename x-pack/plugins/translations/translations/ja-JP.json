@@ -7636,7 +7636,6 @@
     "xpack.actions.availableConnectorFeatures.cases": "ケース",
     "xpack.actions.availableConnectorFeatures.compatibility.alertingRules": "アラートルール",
     "xpack.actions.availableConnectorFeatures.compatibility.cases": "ケース",
-    "xpack.actions.availableConnectorFeatures.compatibility.generativeAI": "生成AI",
     "xpack.actions.availableConnectorFeatures.securitySolution": "セキュリティソリューション",
     "xpack.actions.availableConnectorFeatures.uptime": "アップタイム",
     "xpack.actions.builtin.cases.jiraTitle": "Jira",

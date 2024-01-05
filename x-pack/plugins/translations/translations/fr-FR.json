@@ -7621,7 +7621,6 @@
     "xpack.actions.availableConnectorFeatures.cases": "Cas",
     "xpack.actions.availableConnectorFeatures.compatibility.alertingRules": "Règles d'alerting",
     "xpack.actions.availableConnectorFeatures.compatibility.cases": "Cas",
-    "xpack.actions.availableConnectorFeatures.compatibility.generativeAI": "IA générative",
     "xpack.actions.availableConnectorFeatures.securitySolution": "Solution de sécurité",
     "xpack.actions.availableConnectorFeatures.uptime": "Uptime",
     "xpack.actions.builtin.cases.jiraTitle": "Jira",

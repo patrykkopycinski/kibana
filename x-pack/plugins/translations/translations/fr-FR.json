@@ -20158,7 +20158,7 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "Voir les instructions de configuration",
     "xpack.infra.homePage.settingsTabTitle": "Paramètres",
     "xpack.infra.homePage.tellUsWhatYouThinkK8sLink": "Dites-nous ce que vous pensez ! (K8s)",
-    "xpack.infra.homePage.tellUsWhatYouThinkLink": "Dites-nous ce que vous pensez !",
+    "xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink": "Dites-nous ce que vous pensez !",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "Rechercher des données d'infrastructure… (par exemple host.name:host-1)",
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "Quel est ce processus ?",
     "xpack.infra.hosts.searchPlaceholder": "Rechercher dans les hôtes (par ex. cloud.provider:gcp AND system.load.1 > 0.5)",

@@ -20238,7 +20238,7 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "查看设置说明",
     "xpack.infra.homePage.settingsTabTitle": "设置",
     "xpack.infra.homePage.tellUsWhatYouThinkK8sLink": "告诉我们您的看法！(K8s)",
-    "xpack.infra.homePage.tellUsWhatYouThinkLink": "告诉我们您的看法！",
+    "xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink": "告诉我们您的看法！",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "搜索基础设施数据……（例如 host.name:host-1）",
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "此进程是什么？",
     "xpack.infra.hosts.searchPlaceholder": "搜索主机（例如，cloud.provider:gcp AND system.load.1 > 0.5）",

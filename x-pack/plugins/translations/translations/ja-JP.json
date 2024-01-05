@@ -20171,7 +20171,7 @@
     "xpack.infra.homePage.noMetricsIndicesInstructionsActionLabel": "セットアップの手順を表示",
     "xpack.infra.homePage.settingsTabTitle": "設定",
     "xpack.infra.homePage.tellUsWhatYouThinkK8sLink": "ご意見をお聞かせください。（K8s）",
-    "xpack.infra.homePage.tellUsWhatYouThinkLink": "ご意見をお聞かせください。",
+    "xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink": "ご意見をお聞かせください。",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "インフラストラクチャーデータを検索…（例：host.name:host-1）",
     "xpack.infra.hostFlyout.explainProcessMessageTitle": "このプロセスの概要",
     "xpack.infra.hosts.searchPlaceholder": "ホストを検索（例：cloud.provider:gcp AND system.load.1 > 0.5）",

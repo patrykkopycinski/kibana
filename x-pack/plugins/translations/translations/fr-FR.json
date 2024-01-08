@@ -8016,7 +8016,6 @@
     "xpack.apm.alertTypes.errorCount.reason": "Le nombre d'erreurs est {measured} dans le dernier {interval} pour {group}. Alerte lorsque > {threshold}.",
     "xpack.apm.alertTypes.minimumWindowSize.description": "La valeur minimale recommandée est {sizeValue} {sizeUnit}. Elle permet de s'assurer que l'alerte comporte suffisamment de données à évaluer. Si vous choisissez une valeur trop basse, l'alerte ne se déclenchera peut-être pas comme prévu.",
     "xpack.apm.alertTypes.transactionDuration.reason": "La latence de {aggregationType} est {measured} dans le dernier {interval} pour {group}. Alerte lorsque > {threshold}.",
-    "xpack.apm.alertTypes.transactionDurationAnomaly.reason": "Une anomalie {severityLevel} avec un score de {measured} a été détectée dans le dernier {interval} pour {serviceName}.",
     "xpack.apm.alertTypes.transactionErrorRate.reason": "L'échec des transactions est {measured} dans le dernier {interval} pour {group}. Alerte lorsque > {threshold}.",
     "xpack.apm.anomalyDetection.createJobs.failed.text": "Une erreur est survenue lors de la création d'une ou de plusieurs tâches de détection des anomalies pour les environnements de service APM [{environments}]. Erreur : \"{errorMessage}\"",
     "xpack.apm.anomalyDetection.createJobs.succeeded.text": "Tâches de détection des anomalies créées avec succès pour les environnements de service APM [{environments}]. Le démarrage de l'analyse du trafic à la recherche d'anomalies par le Machine Learning va prendre un certain temps.",

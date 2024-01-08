@@ -8031,7 +8031,6 @@
     "xpack.apm.alertTypes.errorCount.reason": "エラーカウントは{group}の最後の{interval}で{measured}です。> {threshold}のときにアラートを通知します。",
     "xpack.apm.alertTypes.minimumWindowSize.description": "推奨される最小値は{sizeValue} {sizeUnit}です。これにより、アラートに評価する十分なデータがあることが保証されます。低すぎる値を選択した場合、アラートが想定通りに実行されない可能性があります。",
     "xpack.apm.alertTypes.transactionDuration.reason": "{group}の{aggregationType}のレイテンシは{measured}で最後の{interval}で測定されます。> {threshold}のときにアラートを通知します。",
-    "xpack.apm.alertTypes.transactionDurationAnomaly.reason": "{severityLevel}の異常が{measured}のスコアで{serviceName}の最後の{interval}で検出されました。",
     "xpack.apm.alertTypes.transactionErrorRate.reason": "{group}の失敗したトランザクションは最後の{interval}で{measured}されます。> {threshold}のときにアラートを通知します。",
     "xpack.apm.anomalyDetection.createJobs.failed.text": "APMサービス環境[{environments}]用に1つ以上の異常検知ジョブを作成しているときに問題が発生しました。エラー「{errorMessage}」",
     "xpack.apm.anomalyDetection.createJobs.succeeded.text": "APMサービス環境[{environments}]の異常検知ジョブが正常に作成されました。機械学習がトラフィック異常値の分析を開始するには、少し時間がかかります。",

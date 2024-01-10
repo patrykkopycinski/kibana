@@ -12338,7 +12338,6 @@
     "xpack.dataVisualizer.combinedFieldsForm.mappingsParseError": "マッピングのパース中にエラーが発生しました：{error}",
     "xpack.dataVisualizer.combinedFieldsForm.pipelineParseError": "パイプラインのパース中にエラーが発生しました：{error}",
     "xpack.dataVisualizer.dataDrift.dataComparisonDistributionLabel": "{label}分布",
-    "xpack.dataVisualizer.dataDrift.dataLabel": "{label}データ",
     "xpack.dataVisualizer.dataDrift.distributionComparisonChartName": "{fieldName}の{referenceLabel}と{comparisonLabel}データの分布比較",
     "xpack.dataVisualizer.dataDrift.progress.loadingComparison": "{fieldsCount}フィールドの比較データを読み込んでいます。",
     "xpack.dataVisualizer.dataDrift.progress.loadingReference": "{fieldsCount} 個のフィールドの参照データを読み込んでいます。",

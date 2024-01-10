@@ -12432,7 +12432,6 @@
     "xpack.dataVisualizer.combinedFieldsForm.mappingsParseError": "解析映射时出错：{error}",
     "xpack.dataVisualizer.combinedFieldsForm.pipelineParseError": "解析管道时出错：{error}",
     "xpack.dataVisualizer.dataDrift.dataComparisonDistributionLabel": "{label} 分布",
-    "xpack.dataVisualizer.dataDrift.dataLabel": "{label} 数据",
     "xpack.dataVisualizer.dataDrift.distributionComparisonChartName": "{fieldName} 的{referenceLabel}和{comparisonLabel}数据的分布比较",
     "xpack.dataVisualizer.dataDrift.progress.loadingComparison": "正在加载 {fieldsCount} 个字段的比较数据。",
     "xpack.dataVisualizer.dataDrift.progress.loadingReference": "正在加载 {fieldsCount} 个字段的参考数据。",

@@ -12324,7 +12324,6 @@
     "xpack.dataVisualizer.combinedFieldsForm.mappingsParseError": "Erreur lors de l'analyse des mappings : {error}",
     "xpack.dataVisualizer.combinedFieldsForm.pipelineParseError": "Erreur lors de l'analyse du pipeline : {error}",
     "xpack.dataVisualizer.dataDrift.dataComparisonDistributionLabel": "{label} distribution",
-    "xpack.dataVisualizer.dataDrift.dataLabel": "{label} données",
     "xpack.dataVisualizer.dataDrift.distributionComparisonChartName": "Comparaison de la distribution de {referenceLabel} et {comparisonLabel} données pour {fieldName}",
     "xpack.dataVisualizer.dataDrift.progress.loadingComparison": "Chargement des données comparatives pour {fieldsCount} champs.",
     "xpack.dataVisualizer.dataDrift.progress.loadingReference": "Chargement des données de référence pour {fieldsCount} champs.",

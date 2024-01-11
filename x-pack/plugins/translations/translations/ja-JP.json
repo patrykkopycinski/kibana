@@ -35039,7 +35039,6 @@
     "xpack.securitySolution.fleetIntegration.assets.name": "ホスト",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.description": "クラウドセキュリティのイベントフィルター。Elastic Defend統合によって作成。",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.name": "非インタラクティブセッション",
-    "xpack.securitySolution.flyout.button.timeline": "タイムライン",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "関連するホストで検索を実行できませんでした",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "関連するユーザーで検索を実行できませんでした",
     "xpack.securitySolution.flyout.isolateHost.isolateTitle": "ホストの分離",

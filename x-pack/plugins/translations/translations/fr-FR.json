@@ -35040,7 +35040,6 @@
     "xpack.securitySolution.fleetIntegration.assets.name": "Hôtes",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.description": "Filtre d'événement pour Cloud Security. Créé par l'intégration Elastic Defend.",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.name": "Sessions non interactives",
-    "xpack.securitySolution.flyout.button.timeline": "chronologie",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "Impossible de lancer la recherche sur les hôtes associés",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "Impossible de lancer la recherche sur les utilisateurs associés",
     "xpack.securitySolution.flyout.isolateHost.isolateTitle": "Isoler l'hôte",

@@ -35021,7 +35021,6 @@
     "xpack.securitySolution.fleetIntegration.assets.name": "主机",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.description": "云安全事件筛选。已由 Elastic Defend 集成创建。",
     "xpack.securitySolution.fleetIntegration.elasticDefend.eventFilter.nonInteractiveSessions.name": "非交互式会话",
-    "xpack.securitySolution.flyout.button.timeline": "时间线",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "无法对相关主机执行搜索",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "无法对相关用户执行搜索",
     "xpack.securitySolution.flyout.isolateHost.isolateTitle": "隔离主机",

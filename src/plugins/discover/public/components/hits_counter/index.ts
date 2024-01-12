@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { Chart } from './chart';
-export { checkChartAvailability } from './check_chart_availability';
+export { HitsCounter, HitsCounterMode } from './hits_counter';

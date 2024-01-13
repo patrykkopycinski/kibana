@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { FindingsBaseURLQuery } from '../../../common/types';
-import { Evaluation } from '../../../../common/types_old';
+import { Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
+import { FindingsBaseURLQuery } from '../../../common/types';
 import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
-import { getFilters } from '../utils/get_filters';
-import { useLatestFindings } from './use_latest_findings';
+import { useLatestVulnerabilities } from './use_latest_vulnerabilities';
 
-const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
+const columnsLocalStorageKey = 'cloudPosture:latestVulnerabilities:columns';
 
-export const useLatestFindingsTable = ({
+export const useLatestVulnerabilitiesTable = ({
   getDefaultQuery,
   nonPersistedFilters,
-  showDistributionBar,
 }: {
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   nonPersistedFilters?: Filter[];
-  showDistributionBar?: boolean;
 }) => {
-  const { dataView } = useDataViewContext();
-
   const cloudPostureDataTable = useCloudPostureDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
@@ -35,15 +28,14 @@ export const useLatestFindingsTable = ({
     nonPersistedFilters,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages, pageSize } =
-    cloudPostureDataTable;
+  const { query, sort, queryError, getRowsFromPages, pageSize } = cloudPostureDataTable;
 
   const {
     data,
     error: fetchError,
     isFetching,
     fetchNextPage,
-  } = useLatestFindings({
+  } = useLatestVulnerabilities({
     query,
     sort,
     enabled: !queryError,
@@ -51,26 +43,9 @@ export const useLatestFindingsTable = ({
   });
 
   const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
-
-  const error = fetchError || queryError;
-
-  const passed = data?.pages[0].count.passed || 0;
-  const failed = data?.pages[0].count.failed || 0;
   const total = data?.pages[0].total || 0;
 
-  const onDistributionBarClick = (evaluation: Evaluation) => {
-    setUrlQuery({
-      filters: getFilters({
-        filters,
-        dataView,
-        field: 'result.evaluation',
-        value: evaluation,
-        negate: false,
-      }),
-    });
-  };
-
-  const canShowDistributionBar = showDistributionBar && total > 0;
+  const error = fetchError || queryError;
 
   return {
     cloudPostureDataTable,
@@ -78,10 +53,6 @@ export const useLatestFindingsTable = ({
     error,
     isFetching,
     fetchNextPage,
-    passed,
-    failed,
     total,
-    canShowDistributionBar,
-    onDistributionBarClick,
   };
 };

@@ -4,26 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { Filter } from '@kbn/es-query';
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
-import { EmptyState } from '../../../components/empty_state';
-import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
-import { FindingsSearchBar } from '../layout/findings_search_bar';
-import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
-import { LatestFindingsTable } from './latest_findings_table';
-import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
-import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { ErrorCallout } from '../layout/error_callout';
+import { useLatestVulnerabilitiesGrouping } from './hooks/use_latest_vulnerabilities_grouping';
+import { LatestVulnerabilitiesTable } from './latest_vulnerabilities_table';
+import { groupPanelRenderer, groupStatsRenderer } from './latest_vulnerabilities_group_renderer';
+import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
+import { ErrorCallout } from '../configurations/layout/error_callout';
+import { EmptyState } from '../../components/empty_state';
+import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
+import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../common/constants';
 
-export const LatestFindingsContainer = () => {
+export const LatestVulnerabilitiesContainer = () => {
   const renderChildComponent = (groupFilters: Filter[]) => {
     return (
-      <LatestFindingsTable
+      <LatestVulnerabilitiesTable
         nonPersistedFilters={groupFilters}
         height={DEFAULT_GROUPING_TABLE_HEIGHT}
-        showDistributionBar={false}
       />
     );
   };
@@ -42,11 +40,8 @@ export const LatestFindingsContainer = () => {
     isGroupLoading,
     onResetFilters,
     error,
-    totalPassedFindings,
-    onDistributionBarClick,
-    totalFailedFindings,
     isEmptyResults,
-  } = useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
+  } = useLatestVulnerabilitiesGrouping({ groupPanelRenderer, groupStatsRenderer });
 
   if (error || isEmptyResults) {
     return (
@@ -64,11 +59,6 @@ export const LatestFindingsContainer = () => {
         <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
         <div>
           <EuiSpacer size="m" />
-          <FindingsDistributionBar
-            distributionOnClick={onDistributionBarClick}
-            passed={totalPassedFindings}
-            failed={totalFailedFindings}
-          />
           <CloudSecurityGrouping
             data={groupData}
             grouping={grouping}
@@ -89,7 +79,8 @@ export const LatestFindingsContainer = () => {
   return (
     <>
       <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
-      <LatestFindingsTable groupSelectorComponent={grouping.groupSelector} />
+      <EuiSpacer size="m" />
+      <LatestVulnerabilitiesTable groupSelectorComponent={grouping.groupSelector} />
     </>
   );
 };

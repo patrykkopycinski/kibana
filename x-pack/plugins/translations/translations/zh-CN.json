@@ -5672,7 +5672,6 @@
     "telemetry.optInNoticeSeenErrorToastText": "关闭声明时发生错误",
     "telemetry.optInSuccessOff": "不再与 Elastic 共享使用情况。",
     "telemetry.optInSuccessOn": "已启用与 Elastic 共享使用情况。",
-    "telemetry.provideUsageDataAriaName": "与 Elastic 共享使用情况",
     "telemetry.provideUsageDataTitle": "与 Elastic 共享使用情况",
     "telemetry.readOurUsageDataPrivacyStatementLinkText": "隐私声明",
     "telemetry.securityData": "安全数据",

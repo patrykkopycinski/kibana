@@ -5564,7 +5564,6 @@
     "telemetry.optInNoticeSeenErrorToastText": "Une erreur s'est produite lors du rejet de l'avis.",
     "telemetry.optInSuccessOff": "Ne partage plus l’utilisation avec Elastic.",
     "telemetry.optInSuccessOn": "Le partage d’utilisation avec Elastic est activé.",
-    "telemetry.provideUsageDataAriaName": "Partager l’utilisation avec Elastic",
     "telemetry.provideUsageDataTitle": "Partager l’utilisation avec Elastic",
     "telemetry.readOurUsageDataPrivacyStatementLinkText": "Déclaration de confidentialité",
     "telemetry.securityData": "données de sécurité",

@@ -35721,8 +35721,6 @@
     "xpack.securitySolution.resolver.noProcessEvents.eventCategory": "次の項目をタイムラインクエリに追加し、プロセスイベントを確認することもできます。\n            リストに何もない場合、そのクエリで検出されたイベントからグラフを作成することはできません。",
     "xpack.securitySolution.resolver.noProcessEvents.timeRange": "\n            イベントの分析ツールは、プロセスイベントに基づいてグラフを作成します。\n            分析されたイベントが現在の時間範囲で関連付けられたプロセスがない場合、\n            またはどの時間範囲でもElasticsearchに保存されていない場合、グラフは作成されません。\n            時間範囲を展開すると、関連付けられたプロセスを確認できます。\n          ",
     "xpack.securitySolution.resolver.noProcessEvents.title": "プロセスイベントが見つかりません",
-    "xpack.securitySolution.resolver.panel.copyFailureTitle": "コピー失敗",
-    "xpack.securitySolution.resolver.panel.copyToClipboard": "クリップボードにコピー",
     "xpack.securitySolution.resolver.panel.eventDetail.requestError": "イベント詳細を取得できませんでした",
     "xpack.securitySolution.resolver.panel.nodeDetail.Error": "ノード詳細を取得できませんでした",
     "xpack.securitySolution.resolver.panel.nodeList.title": "すべてのプロセスイベント",

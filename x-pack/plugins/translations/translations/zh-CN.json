@@ -35703,8 +35703,6 @@
     "xpack.securitySolution.resolver.noProcessEvents.eventCategory": "还可以将以下内容添加到时间线查询，以检查进程事件。\n            如果未列出任何内容，将无法从该查询中找到的事件创建图表。",
     "xpack.securitySolution.resolver.noProcessEvents.timeRange": "\n            “分析事件”工具基于进程事件创建图表。\n            如果分析的事件在当前时间范围内没有关联的进程，\n            或在任何时间范围内存储在 Elasticsearch 中，则不会创建图表。\n            可以通过展开时间范围来检查是否有关联进程。\n          ",
     "xpack.securitySolution.resolver.noProcessEvents.title": "找不到任何进程事件",
-    "xpack.securitySolution.resolver.panel.copyFailureTitle": "复制失败",
-    "xpack.securitySolution.resolver.panel.copyToClipboard": "复制到剪贴板",
     "xpack.securitySolution.resolver.panel.eventDetail.requestError": "无法检索事件详情",
     "xpack.securitySolution.resolver.panel.nodeDetail.Error": "无法检索节点详情",
     "xpack.securitySolution.resolver.panel.nodeList.title": "所有进程事件",

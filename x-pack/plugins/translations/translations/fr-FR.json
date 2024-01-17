@@ -35722,8 +35722,6 @@
     "xpack.securitySolution.resolver.noProcessEvents.eventCategory": "Vous pouvez également ajouter les éléments ci-dessous à votre recherche de chronologie pour rechercher les événements de processus.\n            Si la liste n'en contient pas, il est impossible de créer un graphique à partir des événements trouvés dans cette recherche.",
     "xpack.securitySolution.resolver.noProcessEvents.timeRange": "\n            L'outil Analyze Event crée des graphiques basés sur les événements de processus.\n            Si l'événement analysé ne possède aucun processus associé dans la plage temporelle en cours\n            ou stocké dans Elasticsearch dans n'importe quelle plage temporelle, aucun graphique ne sera créé.\n            Vous pouvez rechercher les processus associés en développant votre plage temporelle.\n          ",
     "xpack.securitySolution.resolver.noProcessEvents.title": "Aucun événement de processus n'a été trouvé",
-    "xpack.securitySolution.resolver.panel.copyFailureTitle": "Échec de copie",
-    "xpack.securitySolution.resolver.panel.copyToClipboard": "Copier dans le Presse-papiers",
     "xpack.securitySolution.resolver.panel.eventDetail.requestError": "Les détails de l'événement n'ont pas pu être récupérés",
     "xpack.securitySolution.resolver.panel.nodeDetail.Error": "Les détails du nœud n'ont pas pu être récupérés",
     "xpack.securitySolution.resolver.panel.nodeList.title": "Tous les événements de processus",

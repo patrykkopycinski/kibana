@@ -11864,7 +11864,6 @@
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, one {# règle de détection} many {# règles de détection} other {# règles de détection}}",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "La collecte des résultats prend plus de temps que prévu. {docs}.",
     "xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription": "L’analyse des charges de travail prend plus de temps que prévu. Veuillez consulter {docs}",
-    "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "Affichage de {pageSize} sur {total, plural, one {# règle} many {# règles bien mises} other {# règles}}",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "Pour utiliser ces fonctionnalités de sécurité du cloud, vous devez {link}.",
     "xpack.csp.vulnerabilities.detectionRuleNamePrefix": "Vulnérabilité : {vulnerabilityId}",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",

@@ -11972,7 +11972,6 @@
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, other {# 个检测规则}}",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "收集结果所需的时间长于预期。{docs}。",
     "xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription": "扫描工作负载所需的时间长于预期。请查阅 {docs}",
-    "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "正在显示 {pageSize} 个规则（共 {total, plural, other {# 个规则}}）",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "要使用这些云安全功能，您必须 {link}。",
     "xpack.csp.vulnerabilities.detectionRuleNamePrefix": "漏洞：{vulnerabilityId}",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",

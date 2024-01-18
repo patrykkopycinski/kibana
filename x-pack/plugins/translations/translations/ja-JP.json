@@ -11878,7 +11878,6 @@
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, other {#検出ルール}}",
     "xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDescription": "調査結果の収集に想定よりも時間がかかっています。{docs}。",
     "xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription": "ワークロードのスキャンに想定よりも時間がかかっています。{docs}を確認してください",
-    "xpack.csp.rules.rulesTable.showingPageOfTotalLabel": "{total, plural, other {#個のルール}} 件中{pageSize}を表示中",
     "xpack.csp.subscriptionNotAllowed.promptDescription": "これらのクラウドセキュリティ機能を使用するには、{link}する必要があります。",
     "xpack.csp.vulnerabilities.detectionRuleNamePrefix": "脆弱性：{vulnerabilityId}",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTile.publishedDateText": "{date}",

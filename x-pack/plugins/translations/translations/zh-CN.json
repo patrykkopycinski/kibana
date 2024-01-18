@@ -4879,8 +4879,6 @@
     "links.description": "使用链接以导航到常用仪表板和网站。",
     "links.editor.addButtonLabel": "添加链接",
     "links.editor.cancelButtonLabel": "关闭",
-    "links.editor.deleteLinkTitle": "删除链接",
-    "links.editor.editLinkTitle": "编辑链接",
     "links.editor.horizontalLayout": "水平",
     "links.editor.unableToSaveToastTitle": "保存链接面板时出错",
     "links.editor.updateButtonLabel": "更新链接",

@@ -4786,8 +4786,6 @@
     "links.description": "リンクを使用して、よく使用されるダッシュボードや Web サイトに移動します。",
     "links.editor.addButtonLabel": "リンクを追加",
     "links.editor.cancelButtonLabel": "閉じる",
-    "links.editor.deleteLinkTitle": "リンクを削除",
-    "links.editor.editLinkTitle": "リンクを編集",
     "links.editor.horizontalLayout": "横",
     "links.editor.unableToSaveToastTitle": "リンクパネルの保存エラー",
     "links.editor.updateButtonLabel": "リンクを更新",

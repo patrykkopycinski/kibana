@@ -4771,8 +4771,6 @@
     "links.description": "Utiliser des liens pour accéder aux tableaux de bord et aux sites web couramment utilisés.",
     "links.editor.addButtonLabel": "Ajouter un lien",
     "links.editor.cancelButtonLabel": "Fermer",
-    "links.editor.deleteLinkTitle": "Supprimer le lien",
-    "links.editor.editLinkTitle": "Modifier le lien",
     "links.editor.horizontalLayout": "Horizontal",
     "links.editor.unableToSaveToastTitle": "Erreur lors de l'enregistrement du Panneau de liens",
     "links.editor.updateButtonLabel": "Mettre à jour le lien",

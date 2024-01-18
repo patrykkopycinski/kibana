@@ -4825,7 +4825,6 @@
     "management.settings.field.changeImageLinkAriaLabel": "{ariaLabel}の変更",
     "management.settings.field.deprecationClickAreaLabel": "クリックすると{name}のサポート終了に関するドキュメントが表示されます。",
     "management.settings.field.resetToDefaultLinkAriaLabel": "{ariaLabel}をデフォルトにリセット",
-    "management.settings.form.countOfSettingsChanged": "{unsavedCount}個の未保存の{unsavedCount, plural, other {設定}}",
     "management.breadcrumb": "スタック管理",
     "management.landing.subhead": "インデックス、データビュー、保存されたオブジェクト、Kibanaの設定、その他を管理します。",
     "management.landing.text": "アプリの一覧は左側のメニューにあります。",

@@ -4810,7 +4810,6 @@
     "management.settings.field.changeImageLinkAriaLabel": "Modifier {ariaLabel}",
     "management.settings.field.deprecationClickAreaLabel": "Cliquez ici pour afficher la documentation de déclassement pour {name}.",
     "management.settings.field.resetToDefaultLinkAriaLabel": "Réinitialiser {ariaLabel} à la valeur par défaut",
-    "management.settings.form.countOfSettingsChanged": "{unsavedCount} non enregistré(s){unsavedCount, plural, one {le paramètre d''index suivant déclassé ?} many {les paramètres d''index suivants déclassés ?} other {les paramètres d''index suivants déclassés ?}}",
     "management.breadcrumb": "Gestion de la Suite",
     "management.landing.subhead": "Gérez vos index, vues de données, objets enregistrés, paramètres Kibana et plus encore.",
     "management.landing.text": "Vous trouverez une liste complète des applications dans le menu de gauche.",

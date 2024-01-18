@@ -4918,7 +4918,6 @@
     "management.settings.field.changeImageLinkAriaLabel": "更改 {ariaLabel}",
     "management.settings.field.deprecationClickAreaLabel": "单击以查看 {name} 的过时文档。",
     "management.settings.field.resetToDefaultLinkAriaLabel": "将 {ariaLabel} 重置为默认值",
-    "management.settings.form.countOfSettingsChanged": "{unsavedCount} 个未保存{unsavedCount, plural, other {设置}}",
     "management.breadcrumb": "Stack Management",
     "management.landing.subhead": "管理您的索引、数据视图、已保存对象、Kibana 设置等等。",
     "management.landing.text": "应用的完整列表位于左侧菜单中。",

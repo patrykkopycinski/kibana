@@ -1176,7 +1176,6 @@
     "dashboard.appLeaveConfirmModal.cancelButtonLabel": "取消",
     "dashboard.appLeaveConfirmModal.unsavedChangesSubtitle": "离开有未保存工作的仪表板？",
     "dashboard.appLeaveConfirmModal.unsavedChangesTitle": "未保存的更改",
-    "dashboard.badge.managed.text": "托管",
     "dashboard.badge.managed.tooltip": "此仪表板由系统管理。克隆此仪表板以做出更改。",
     "dashboard.badge.readOnly.text": "只读",
     "dashboard.badge.readOnly.tooltip": "无法保存仪表板",

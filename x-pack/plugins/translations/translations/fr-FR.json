@@ -1162,7 +1162,6 @@
     "dashboard.appLeaveConfirmModal.cancelButtonLabel": "Annuler",
     "dashboard.appLeaveConfirmModal.unsavedChangesSubtitle": "Quitter le tableau de bord sans enregistrer ?",
     "dashboard.appLeaveConfirmModal.unsavedChangesTitle": "Modifications non enregistrées",
-    "dashboard.badge.managed.text": "Géré",
     "dashboard.badge.managed.tooltip": "Ce tableau de bord est géré par le système. Cloner ce tableau de bord pour effectuer des modifications.",
     "dashboard.badge.readOnly.text": "Lecture seule",
     "dashboard.badge.readOnly.tooltip": "Impossible d'enregistrer les tableaux de bord",

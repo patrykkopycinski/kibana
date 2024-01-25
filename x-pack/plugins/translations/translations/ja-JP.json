@@ -19953,7 +19953,6 @@
     "xpack.infra.durationUnits.weeks.singular": "週",
     "xpack.infra.durationUnits.years.plural": "年",
     "xpack.infra.durationUnits.years.singular": "年",
-    "xpack.infra.errorOnLoadingLensDependencies": "Lens Pluginを読み込む際にエラーが発生しました。",
     "xpack.infra.errorPage.errorOccurredTitle": "エラーが発生しました",
     "xpack.infra.errorPage.tryAgainButtonLabel": "再試行",
     "xpack.infra.errorPage.tryAgainDescription ": "戻るボタンをクリックして再試行してください。",

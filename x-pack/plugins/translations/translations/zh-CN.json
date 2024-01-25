@@ -20047,7 +20047,6 @@
     "xpack.infra.durationUnits.weeks.singular": "周",
     "xpack.infra.durationUnits.years.plural": "年",
     "xpack.infra.durationUnits.years.singular": "年",
-    "xpack.infra.errorOnLoadingLensDependencies": "尝试加载 Lens 插件时出错。",
     "xpack.infra.errorPage.errorOccurredTitle": "发生错误",
     "xpack.infra.errorPage.tryAgainButtonLabel": "重试",
     "xpack.infra.errorPage.tryAgainDescription ": "请点击后退按钮，然后重试。",

@@ -10,38 +10,25 @@ import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
-export const rxTx = {
+export const loadBreakdown = {
   get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
-    id: 'rxTx',
+    id: 'loadBreakdown',
     chartType: 'xy',
-    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
-      defaultMessage: 'Network',
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
+      defaultMessage: 'Load',
     }),
     layers: [
       {
         seriesType: 'area',
         type: 'series',
         xAxis: '@timestamp',
-        yAxis: [
-          {
-            ...formulas.rx,
-            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
-              defaultMessage: 'Inbound (RX)',
-            }),
-          },
-          {
-            ...formulas.tx,
-            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
-              defaultMessage: 'Outbound (TX)',
-            }),
-          },
-        ],
+        yAxis: [formulas.load1m, formulas.load5m, formulas.load15m],
       },
     ],
     fittingFunction: 'Linear',
     legend: {
-      show: true,
       position: 'bottom',
+      show: true,
     },
     axisTitleVisibility: {
       showXAxisTitle: false,

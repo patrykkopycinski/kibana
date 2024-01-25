@@ -19940,7 +19940,6 @@
     "xpack.infra.durationUnits.weeks.singular": "semaine",
     "xpack.infra.durationUnits.years.plural": "années",
     "xpack.infra.durationUnits.years.singular": "an",
-    "xpack.infra.errorOnLoadingLensDependencies": "Une erreur s'est produite lors de la tentative de chargement du plug-in Lens.",
     "xpack.infra.errorPage.errorOccurredTitle": "Une erreur s'est produite",
     "xpack.infra.errorPage.tryAgainButtonLabel": "Réessayer",
     "xpack.infra.errorPage.tryAgainDescription ": "Cliquez sur le bouton Retour et réessayez.",

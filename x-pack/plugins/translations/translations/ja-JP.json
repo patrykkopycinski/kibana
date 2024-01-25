@@ -33950,7 +33950,6 @@
     "xpack.securitySolution.endpoint.actions.agentPolicy": "エージェントポリシーを表示",
     "xpack.securitySolution.endpoint.actions.agentPolicyReassign": "エージェントポリシーを再割り当て",
     "xpack.securitySolution.endpoint.actions.console": "対応",
-    "xpack.securitySolution.endpoint.actions.disabledResponder.tooltip": "現在のバージョンのエージェントは、この機能をサポートしていません。Fleet経由でエージェントをアップグレードし、この機能と新しい対応アクション（プロセスの終了、一時停止など）を使用します。",
     "xpack.securitySolution.endpoint.actions.hostDetails": "ホスト詳細を表示",
     "xpack.securitySolution.endpoint.actions.insufficientPrivileges.error": "このコマンドを使用するための十分な権限がありません。アクセスについては、管理者に問い合わせてください。",
     "xpack.securitySolution.endpoint.actions.isolateHost": "ホストの分離",

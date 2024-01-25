@@ -33950,7 +33950,6 @@
     "xpack.securitySolution.endpoint.actions.agentPolicy": "Afficher la politique de l'agent",
     "xpack.securitySolution.endpoint.actions.agentPolicyReassign": "Réaffecter la politique de l'agent",
     "xpack.securitySolution.endpoint.actions.console": "Répondre",
-    "xpack.securitySolution.endpoint.actions.disabledResponder.tooltip": "La version actuelle de l'agent ne prend pas en charge cette fonctionnalité. Mettez à niveau votre agent via Fleet pour utiliser cette fonctionnalité et les nouvelles actions de réponse telles que l'arrêt et la suspension des processus.",
     "xpack.securitySolution.endpoint.actions.hostDetails": "Afficher les détails de l'hôte",
     "xpack.securitySolution.endpoint.actions.insufficientPrivileges.error": "Vous ne disposez pas de privilèges suffisants pour utiliser cette commande. Veuillez contacter votre administrateur pour obtenir des droits d'accès.",
     "xpack.securitySolution.endpoint.actions.isolateHost": "Isoler l'hôte",

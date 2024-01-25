@@ -33932,7 +33932,6 @@
     "xpack.securitySolution.endpoint.actions.agentPolicy": "查看代理策略",
     "xpack.securitySolution.endpoint.actions.agentPolicyReassign": "重新分配代理策略",
     "xpack.securitySolution.endpoint.actions.console": "响应",
-    "xpack.securitySolution.endpoint.actions.disabledResponder.tooltip": "当前版本的代理不支持此功能。请通过 Fleet 更新代理以使用此功能和新的响应操作，如结束和挂起进程。",
     "xpack.securitySolution.endpoint.actions.hostDetails": "查看主机详情",
     "xpack.securitySolution.endpoint.actions.insufficientPrivileges.error": "您没有足够的权限，无法使用此命令。请联系管理员获取访问权限。",
     "xpack.securitySolution.endpoint.actions.isolateHost": "隔离主机",

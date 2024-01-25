@@ -28695,7 +28695,6 @@
     "xpack.observability.alertsTable.notEnoughPermissions": "追加の権限が必要です",
     "xpack.observability.alertsTable.viewInAppTextLabel": "アプリで表示",
     "xpack.observability.alertsTGrid.durationColumnDescription": "期間",
-    "xpack.observability.alertsTGrid.lastUpdatedColumnDescription": "最終更新",
     "xpack.observability.alertsTGrid.reasonColumnDescription": "理由",
     "xpack.observability.alertsTGrid.statusActiveDescription": "アクティブ",
     "xpack.observability.alertsTGrid.statusColumnDescription": "アラートステータス",

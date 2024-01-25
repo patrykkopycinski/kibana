@@ -28679,7 +28679,6 @@
     "xpack.observability.alertsTable.notEnoughPermissions": "需要其他权限",
     "xpack.observability.alertsTable.viewInAppTextLabel": "在应用中查看",
     "xpack.observability.alertsTGrid.durationColumnDescription": "持续时间",
-    "xpack.observability.alertsTGrid.lastUpdatedColumnDescription": "上次更新时间",
     "xpack.observability.alertsTGrid.reasonColumnDescription": "原因",
     "xpack.observability.alertsTGrid.statusActiveDescription": "活动",
     "xpack.observability.alertsTGrid.statusColumnDescription": "告警状态",

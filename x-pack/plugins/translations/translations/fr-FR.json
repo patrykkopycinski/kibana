@@ -28694,7 +28694,6 @@
     "xpack.observability.alertsTable.notEnoughPermissions": "Privilèges supplémentaires requis",
     "xpack.observability.alertsTable.viewInAppTextLabel": "Afficher dans l'application",
     "xpack.observability.alertsTGrid.durationColumnDescription": "Durée",
-    "xpack.observability.alertsTGrid.lastUpdatedColumnDescription": "Dernière mise à jour",
     "xpack.observability.alertsTGrid.reasonColumnDescription": "Raison",
     "xpack.observability.alertsTGrid.statusActiveDescription": "Actif",
     "xpack.observability.alertsTGrid.statusColumnDescription": "Statut de l'alerte",

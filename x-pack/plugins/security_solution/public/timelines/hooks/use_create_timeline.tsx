@@ -5,37 +5,47 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
+import { timelineActions } from '../store';
+import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
+import { TimelineId } from '../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../common/api/timeline';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { inputsActions, inputsSelectors } from '../../common/store/inputs';
+import { sourcererActions, sourcererSelectors } from '../../common/store/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { appActions } from '../../common/store/app';
+import type { TimeRange } from '../../common/store/inputs/model';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 
-import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { defaultHeaders } from '../body/column_headers/default_headers';
-import { timelineActions } from '../../../store';
-import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { TimelineId } from '../../../../../common/types/timeline';
-import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
-import { TimelineType } from '../../../../../common/api/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
-import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { appActions } from '../../../../common/store/app';
-import type { TimeRange } from '../../../../common/store/inputs/model';
-import { useDiscoverInTimelineContext } from '../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-
-interface Props {
-  timelineId?: string;
+export interface UseCreateTimelineParams {
+  /**
+   * Id of the timeline
+   */
+  timelineId: string;
+  /**
+   * Type of the timeline (default, template)
+   */
   timelineType: TimelineTypeLiteral;
+  /**
+   * Callback to be called when the timeline is created
+   */
   onClick?: () => void;
-  timeRange?: TimeRange;
 }
 
 /**
- * Creates a new empty timeline at the given id.
+ * Creates a new empty timeline for the given id and type.
  * Can be used to create new timelines or to reset timeline state.
+ * It allows a callback to be passed in to be called when the timeline is created.
  */
-export const useCreateTimeline = ({ timelineId, timelineType, onClick }: Props) => {
+export const useCreateTimeline = ({
+  timelineId,
+  timelineType,
+  onClick,
+}: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => void) => {
   const dispatch = useDispatch();
   const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
   const { id: dataViewId, patternList: selectedPatterns } =
@@ -106,8 +116,8 @@ export const useCreateTimeline = ({ timelineId, timelineType, onClick }: Props) 
     ]
   );
 
-  const handleCreateNewTimeline = useCallback(
-    (options?: CreateNewTimelineOptions) => {
+  return useCallback(
+    (options?: { timeRange?: TimeRange }) => {
       createTimeline({ id: timelineId, show: true, timelineType, timeRange: options?.timeRange });
       if (typeof onClick === 'function') {
         onClick();
@@ -116,53 +126,4 @@ export const useCreateTimeline = ({ timelineId, timelineType, onClick }: Props) 
     },
     [createTimeline, timelineId, timelineType, onClick, resetDiscoverAppState]
   );
-
-  return handleCreateNewTimeline;
-};
-
-interface CreateNewTimelineOptions {
-  timeRange?: TimeRange;
-}
-
-export const useCreateTimelineButton = ({ timelineId, timelineType, onClick }: Props) => {
-  const handleCreateNewTimeline = useCreateTimeline({
-    timelineId,
-    timelineType,
-    onClick,
-  });
-
-  const getButton = useCallback(
-    ({
-      outline,
-      title,
-      iconType = 'plusInCircle',
-      fill = true,
-    }: {
-      outline?: boolean;
-      title?: string;
-      iconType?: string;
-      fill?: boolean;
-    }) => {
-      const buttonProps = {
-        iconType,
-        onClick: () => handleCreateNewTimeline(),
-        fill,
-      };
-      const dataTestSubjPrefix =
-        timelineType === TimelineType.template ? `template-timeline-new` : `timeline-new`;
-      const { fill: noThanks, ...propsWithoutFill } = buttonProps;
-      return outline ? (
-        <EuiButton data-test-subj={`${dataTestSubjPrefix}-with-border`} {...buttonProps}>
-          {title}
-        </EuiButton>
-      ) : (
-        <EuiButtonEmpty data-test-subj={dataTestSubjPrefix} color="text" {...propsWithoutFill}>
-          {title}
-        </EuiButtonEmpty>
-      );
-    },
-    [handleCreateNewTimeline, timelineType]
-  );
-
-  return { getButton };
 };

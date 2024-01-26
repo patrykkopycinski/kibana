@@ -36080,8 +36080,6 @@
     "xpack.securitySolution.timeline.properties.descriptionPlaceholder": "添加描述",
     "xpack.securitySolution.timeline.properties.lockDatePickerDescription": "将全局日期选取器锁定到时间线日期选取器",
     "xpack.securitySolution.timeline.properties.lockDatePickerTooltip": "禁用当前查看的页面与您的时间线之间的日期/时间范围同步",
-    "xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel": "创建新时间线模板",
-    "xpack.securitySolution.timeline.properties.newTimelineButtonLabel": "创建新时间线",
     "xpack.securitySolution.timeline.properties.notesButtonLabel": "备注",
     "xpack.securitySolution.timeline.properties.unlockDatePickerDescription": "从时间线日期选取器解锁全局日期选取器",
     "xpack.securitySolution.timeline.properties.unlockDatePickerTooltip": "启用当前查看的页面与您的时间线之间的日期/时间范围同步",

@@ -36098,8 +36098,6 @@
     "xpack.securitySolution.timeline.properties.descriptionPlaceholder": "Ajouter une description",
     "xpack.securitySolution.timeline.properties.lockDatePickerDescription": "Verrouiller le sélecteur de date global sur le sélecteur de date de chronologie",
     "xpack.securitySolution.timeline.properties.lockDatePickerTooltip": "Désactiver la synchronisation de la plage de date/heure entre la page actuellement consultée et votre chronologie",
-    "xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel": "Créer un nouveau modèle de chronologie",
-    "xpack.securitySolution.timeline.properties.newTimelineButtonLabel": "Créer une nouvelle chronologie",
     "xpack.securitySolution.timeline.properties.notesButtonLabel": "Notes",
     "xpack.securitySolution.timeline.properties.unlockDatePickerDescription": "Annuler le verrouillage du sélecteur de date global sur le sélecteur de date de chronologie",
     "xpack.securitySolution.timeline.properties.unlockDatePickerTooltip": "Activer la synchronisation de la plage de date/heure entre la page actuellement consultée et votre chronologie",

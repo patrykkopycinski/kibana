@@ -11,6 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ConversationCreateProps,
   ConversationResponse,
+  Message,
   Replacement,
   UUID,
 } from '../schemas/conversations/common_attributes.gen';
@@ -70,14 +71,13 @@ export const createConversation = async ({
   conversation,
 }: CreateConversationParams): Promise<ConversationResponse> => {
   const createdAt = new Date().toISOString();
-  const body: CreateMessageSchema = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
 
-  const response = await esClient.index({
+  const response = await esClient.create({
     body,
     id: uuidv4(),
     index: conversationIndex,
     refresh: 'wait_for',
-    op_type: 'create',
   });
 
   return {
@@ -154,7 +154,7 @@ function transform(conversationSchema: CreateMessageSchema): ConversationRespons
       presentation: message.presentation,
       reader: message.reader,
       replacements: message.replacements as Replacement[],
-      role: message.role,
+      role: message.role as Message['role'],
       traceData: {
         traceId: message.trace_data?.trace_id,
         transactionId: message.trace_data?.transaction_id,

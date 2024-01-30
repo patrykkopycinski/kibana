@@ -9255,7 +9255,6 @@
     "xpack.apm.serviceOverview.instancesTableColumnMemoryUsage": "内存使用率（平均值）",
     "xpack.apm.serviceOverview.instancesTableColumnNodeName": "节点名称",
     "xpack.apm.serviceOverview.instancesTableColumnThroughput": "吞吐量",
-    "xpack.apm.serviceOverview.instancesTableTitle": "实例",
     "xpack.apm.serviceOverview.instanceTable.details.cloudTitle": "云",
     "xpack.apm.serviceOverview.instanceTable.details.containerTitle": "容器",
     "xpack.apm.serviceOverview.instanceTable.details.serviceTitle": "服务",

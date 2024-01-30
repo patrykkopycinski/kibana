@@ -9147,7 +9147,6 @@
     "xpack.apm.serviceOverview.instancesTableColumnMemoryUsage": "Utilisation de la mémoire (moy.)",
     "xpack.apm.serviceOverview.instancesTableColumnNodeName": "Nom du nœud",
     "xpack.apm.serviceOverview.instancesTableColumnThroughput": "Rendement",
-    "xpack.apm.serviceOverview.instancesTableTitle": "Instances",
     "xpack.apm.serviceOverview.instanceTable.details.cloudTitle": "Cloud",
     "xpack.apm.serviceOverview.instanceTable.details.containerTitle": "Conteneur",
     "xpack.apm.serviceOverview.instanceTable.details.serviceTitle": "Service",

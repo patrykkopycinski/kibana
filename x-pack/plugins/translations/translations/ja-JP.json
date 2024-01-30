@@ -9161,7 +9161,6 @@
     "xpack.apm.serviceOverview.instancesTableColumnMemoryUsage": "メモリー使用状況（平均）",
     "xpack.apm.serviceOverview.instancesTableColumnNodeName": "ノード名",
     "xpack.apm.serviceOverview.instancesTableColumnThroughput": "スループット",
-    "xpack.apm.serviceOverview.instancesTableTitle": "インスタンス",
     "xpack.apm.serviceOverview.instanceTable.details.cloudTitle": "クラウド",
     "xpack.apm.serviceOverview.instanceTable.details.containerTitle": "コンテナー",
     "xpack.apm.serviceOverview.instanceTable.details.serviceTitle": "サービス",

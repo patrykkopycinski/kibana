@@ -16,7 +16,7 @@ import {
   getOptionalRequestParams,
   hasParsableResponse,
 } from '../helpers';
-import { PerformEvaluationParams } from '../settings/evaluation_settings/use_perform_evaluation';
+import { PerformEvaluationParams } from './evaluate/use_perform_evaluation';
 
 export * from './conversations';
 

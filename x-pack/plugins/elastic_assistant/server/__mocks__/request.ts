@@ -7,16 +7,14 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
-  EvaluateRequestBodyInput,
-  EvaluateRequestQueryInput,
-} from '../schemas/evaluate/post_evaluate_route.gen';
-import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+  PostEvaluateRequestBodyInput,
+  PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,
@@ -63,8 +61,8 @@ export const getPostEvaluateRequest = ({
   body,
   query,
 }: {
-  body: EvaluateRequestBodyInput;
-  query: EvaluateRequestQueryInput;
+  body: PostEvaluateRequestBodyInput;
+  query: PostEvaluateRequestQueryInput;
 }) =>
   requestMock.create({
     body,

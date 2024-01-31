@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest } from '@kbn/core/server';
+import { type IKibanaResponse, IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  INTERNAL_API_ACCESS,
+  PostEvaluateBody,
+  PostEvaluateRequestQuery,
+  PostEvaluateResponse,
+} from '@kbn/elastic-assistant-common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
-import { callAgentExecutor } from '../../lib/langchain/execute_custom_llm_chain';
-import { callOpenAIFunctionsExecutor } from '../../lib/langchain/executors/openai_functions_executor';
-import {
-  AgentExecutor,
-  AgentExecutorEvaluatorWithMetadata,
-} from '../../lib/langchain/executors/types';
+import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
 import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
 import {
   indexEvaluations,
@@ -28,21 +29,14 @@ import {
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import {
-  EvaluateRequestBody,
-  EvaluateRequestQuery,
-} from '../../schemas/evaluate/post_evaluate_route.gen';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
  * and reference your specific AgentExecutor function
  */
-const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
-  DefaultAgentExecutor: callAgentExecutor,
-  OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
-};
+import { buildRouteValidationWithZod } from '../../schemas/common';
+import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 const DEFAULT_SIZE = 20;
 
@@ -52,7 +46,7 @@ export const postEvaluateRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'internal',
+      access: INTERNAL_API_ACCESS,
       path: EVALUATE,
 
       options: {
@@ -61,15 +55,20 @@ export const postEvaluateRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(EvaluateRequestBody),
-            query: buildRouteValidationWithZod(EvaluateRequestQuery),
+            body: buildRouteValidationWithZod(PostEvaluateBody),
+            query: buildRouteValidationWithZod(PostEvaluateRequestQuery),
+          },
+          response: {
+            200: {
+              body: buildRouteValidationWithZod(PostEvaluateResponse),
+            },
           },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<PostEvaluateResponse>> => {
         const assistantContext = await context.elasticAssistant;
         const logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;

@@ -82,7 +82,6 @@ export class ElasticAssistantPlugin
 
     // this.assistantService registerKBTask
     registerRoutes(router, this.logger, plugins);
-
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {

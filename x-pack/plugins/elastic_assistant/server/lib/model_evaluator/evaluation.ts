@@ -12,10 +12,10 @@ import { chunk as createChunks } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer, RunCollectorCallbackHandler } from 'langchain/callbacks';
+import { Dataset } from '@kbn/elastic-assistant-common';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
-import { Dataset } from '../../schemas/evaluate/post_evaluate_route.gen';
 import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {
@@ -102,7 +102,6 @@ export const performEvaluation = async ({
     const chunk = requestChunks.shift() ?? [];
     const chunkNumber = totalChunks - requestChunks.length;
     logger.info(`Prediction request chunk: ${chunkNumber} of ${totalChunks}`);
-    logger.debug(chunk);
 
     // Note, order is kept between chunk and dataset, and is preserved w/ Promise.allSettled
     const chunkResults = await Promise.allSettled(chunk.map((r) => r.request()));

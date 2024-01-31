@@ -35991,7 +35991,6 @@
     "xpack.securitySolution.timeline.file.fromOriginalPathDescription": "元のパスから",
     "xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel": "{isTimeline, select, true {タイムライン} false {テンプレート}}を閉じる",
     "xpack.securitySolution.timeline.flyout.pane.removeColumnButtonLabel": "列を削除",
-    "xpack.securitySolution.timeline.flyout.pane.timelinePropertiesAriaLabel": "タイムラインのプロパティ",
     "xpack.securitySolution.timeline.flyoutTimelineTemplateLabel": "タイムラインテンプレート",
     "xpack.securitySolution.timeline.fullScreenButton": "全画面",
     "xpack.securitySolution.timeline.graphOverlay.closeAnalyzerButton": "アナライザーを閉じる",

@@ -35973,7 +35973,6 @@
     "xpack.securitySolution.timeline.file.fromOriginalPathDescription": "从其原始路径",
     "xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel": "关闭{isTimeline, select, true {时间线} false {模板}}",
     "xpack.securitySolution.timeline.flyout.pane.removeColumnButtonLabel": "移除列",
-    "xpack.securitySolution.timeline.flyout.pane.timelinePropertiesAriaLabel": "时间线属性",
     "xpack.securitySolution.timeline.flyoutTimelineTemplateLabel": "时间线模板",
     "xpack.securitySolution.timeline.fullScreenButton": "全屏",
     "xpack.securitySolution.timeline.graphOverlay.closeAnalyzerButton": "关闭分析器",

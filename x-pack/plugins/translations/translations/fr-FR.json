@@ -35991,7 +35991,6 @@
     "xpack.securitySolution.timeline.file.fromOriginalPathDescription": "depuis son chemin d'origine",
     "xpack.securitySolution.timeline.flyout.header.closeTimelineButtonLabel": "Fermer {isTimeline, select, true {la chronologie} false {le modèle}}",
     "xpack.securitySolution.timeline.flyout.pane.removeColumnButtonLabel": "Supprimer la colonne",
-    "xpack.securitySolution.timeline.flyout.pane.timelinePropertiesAriaLabel": "Propriétés de la chronologie",
     "xpack.securitySolution.timeline.flyoutTimelineTemplateLabel": "Modèle de chronologie",
     "xpack.securitySolution.timeline.fullScreenButton": "Plein écran",
     "xpack.securitySolution.timeline.graphOverlay.closeAnalyzerButton": "Fermer l'analyseur",

@@ -35626,7 +35626,6 @@
     "xpack.securitySolution.responseActionsList.list.filter.Hosts": "ホスト",
     "xpack.securitySolution.responseActionsList.list.filter.manual": "手動でトリガー済み",
     "xpack.securitySolution.responseActionsList.list.filter.statuses": "ステータス",
-    "xpack.securitySolution.responseActionsList.list.filter.type": "型",
     "xpack.securitySolution.responseActionsList.list.filter.users": "ユーザー名でフィルター",
     "xpack.securitySolution.responseActionsList.list.hosts": "ホスト",
     "xpack.securitySolution.responseActionsList.list.item.badge.failed": "失敗",

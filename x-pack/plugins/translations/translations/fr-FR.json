@@ -35626,7 +35626,6 @@
     "xpack.securitySolution.responseActionsList.list.filter.Hosts": "Hôtes",
     "xpack.securitySolution.responseActionsList.list.filter.manual": "Déclenché manuellement",
     "xpack.securitySolution.responseActionsList.list.filter.statuses": "Statuts",
-    "xpack.securitySolution.responseActionsList.list.filter.type": "Type",
     "xpack.securitySolution.responseActionsList.list.filter.users": "Filtrer par nom d'utilisateur",
     "xpack.securitySolution.responseActionsList.list.hosts": "Hôtes",
     "xpack.securitySolution.responseActionsList.list.item.badge.failed": "Échoué",

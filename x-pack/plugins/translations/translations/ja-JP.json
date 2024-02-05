@@ -21036,7 +21036,6 @@
     "xpack.ingestPipelines.list.table.emptyPromptDescription": "パイプラインを使用すると、フィールドの削除または変換、テキストからの値の抽出、インデックス前のデータの強化を行うことができます。",
     "xpack.ingestPipelines.list.table.emptyPromptDocumentionLink": "詳細",
     "xpack.ingestPipelines.list.table.emptyPromptTitle": "パイプラインを作成して開始",
-    "xpack.ingestPipelines.list.table.isManagedFilterLabel": "管理中",
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "管理中",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "名前",
     "xpack.ingestPipelines.list.table.reloadButtonLabel": "再読み込み",

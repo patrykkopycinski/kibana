@@ -21022,7 +21022,6 @@
     "xpack.ingestPipelines.list.table.emptyPromptDescription": "Utilisez des pipelines pour retirer ou transformer des champs, extraire des valeurs à partir de texte et enrichir vos données avant l’indexation.",
     "xpack.ingestPipelines.list.table.emptyPromptDocumentionLink": "En savoir plus",
     "xpack.ingestPipelines.list.table.emptyPromptTitle": "Commencer en créant un pipeline",
-    "xpack.ingestPipelines.list.table.isManagedFilterLabel": "Géré",
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "Géré",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "Nom",
     "xpack.ingestPipelines.list.table.reloadButtonLabel": "Recharger",

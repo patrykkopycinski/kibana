@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { TemplateTypeIndicator } from './template_type_indicator';
-export { TemplateDeprecatedBadge } from './template_deprecated_badge';
+export { DeprecatedBadge } from './deprecated_badge';

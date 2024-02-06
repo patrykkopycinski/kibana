@@ -124,7 +124,7 @@
     "charts.legend.toggleLegendButtonAriaLabel": "凡例を切り替える",
     "charts.legend.toggleLegendButtonTitle": "凡例を切り替える",
     "charts.noDataLabel": "結果が見つかりませんでした",
-    "charts.palettes.complimentaryLabel": "無料",
+    "charts.palettes.complementaryLabel": "無料",
     "charts.palettes.coolLabel": "Cool",
     "charts.palettes.customLabel": "カスタム",
     "charts.palettes.defaultPaletteLabel": "デフォルト",

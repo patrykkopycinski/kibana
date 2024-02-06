@@ -124,7 +124,7 @@
     "charts.legend.toggleLegendButtonAriaLabel": "Afficher/Masquer la légende",
     "charts.legend.toggleLegendButtonTitle": "Afficher/Masquer la légende",
     "charts.noDataLabel": "Résultat introuvable",
-    "charts.palettes.complimentaryLabel": "Gratuite",
+    "charts.palettes.complementaryLabel": "Gratuite",
     "charts.palettes.coolLabel": "Froide",
     "charts.palettes.customLabel": "Personnalisée",
     "charts.palettes.defaultPaletteLabel": "Par défaut",

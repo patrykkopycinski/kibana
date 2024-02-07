@@ -28995,8 +28995,6 @@
     "xpack.observability.slo.sloEdit.calendarTimeWindow.monthly": "月ごと",
     "xpack.observability.slo.sloEdit.calendarTimeWindow.weekly": "週ごと",
     "xpack.observability.slo.sloEdit.cancelButton": "キャンセル",
-    "xpack.observability.slo.sloEdit.createAlert.ruleName": "SLOバーンレートアラートルール",
-    "xpack.observability.slo.sloEdit.createAlert.title": "作成",
     "xpack.observability.slo.sloEdit.createSloButton": "SLOの作成",
     "xpack.observability.slo.sloEdit.customKql.indexSelection.label": "インデックス",
     "xpack.observability.slo.sloEdit.dataPreviewChart.errorMessage": "現在のインジケーター設定は無効です",

@@ -12187,7 +12187,6 @@
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampLetterSValidationErrorMessage": "{format}の文字{length, plural, other { グループ{lg} }}は、前にssと{sep}の区切り文字が付いていないため、サポートされません",
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampLetterValidationErrorMessage": "{format}の文字{length, plural, other { グループ{lg} }}はサポートされていません",
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage": "タイムスタンプフォーマット {timestampFormat} は、疑問符（{fieldPlaceholder}）が含まれているためサポートされていません",
-    "xpack.dataVisualizer.file.fileContents.firstLinesDescription": "最初の{numberOfLines, plural, other {#行}}件",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage": "アップロードするよう選択されたファイルのサイズが {diffFormatted} に許可された最大サイズの {maxFileSizeFormatted} を超えています",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage": "アップロードするよう選択されたファイルのサイズは {fileSizeFormatted} で、許可された最大サイズの {maxFileSizeFormatted} を超えています",
     "xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription": "{docCount}件中{importFailuresLength}件のドキュメントをインポートできません。行が Grok パターンと一致していないことが原因の可能性があります。",

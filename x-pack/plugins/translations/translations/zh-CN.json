@@ -12281,7 +12281,6 @@
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampLetterSValidationErrorMessage": "{format}的字母 {length, plural, other { 组 {lg} }} 不受支持，因为其未前置 ss 和 {sep} 中的分隔符",
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampLetterValidationErrorMessage": "{format}的字母 {length, plural, other { 组 {lg} }} 不受支持",
     "xpack.dataVisualizer.file.editFlyout.overrides.timestampQuestionMarkValidationErrorMessage": "时间戳格式 {timestampFormat} 不受支持，因为其包含问号字符 ({fieldPlaceholder})",
-    "xpack.dataVisualizer.file.fileContents.firstLinesDescription": "前 {numberOfLines, plural, other {# 行}}",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeByDiffFormatErrorMessage": "您选择用于上传的文件大小超过上限值 {maxFileSizeFormatted} 的 {diffFormatted}",
     "xpack.dataVisualizer.file.fileErrorCallouts.fileSizeExceedsAllowedSizeErrorMessage": "您选择用于上传的文件大小为 {fileSizeFormatted}，超过上限值 {maxFileSizeFormatted}",
     "xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription": "无法导入 {importFailuresLength} 个文档（共 {docCount} 个）。这可能是由于行与 Grok 模式不匹配。",

@@ -11107,7 +11107,6 @@
     "xpack.cases.allCases.comments": "注释",
     "xpack.cases.allCases.noCategoriesAvailable": "没有可用类别",
     "xpack.cases.allCases.noTagsAvailable": "没有可用标签",
-    "xpack.cases.allCasesView.filterAssignees.clearFilters": "清除筛选",
     "xpack.cases.allCasesView.filterAssignees.noAssigneesLabel": "无被分配人",
     "xpack.cases.allCasesView.filterAssigneesAriaLabel": "单击以筛选被分配人",
     "xpack.cases.allCasesView.showLessAvatars": "显示更少",

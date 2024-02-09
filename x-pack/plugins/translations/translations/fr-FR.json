@@ -10999,7 +10999,6 @@
     "xpack.cases.allCases.comments": "Commentaires",
     "xpack.cases.allCases.noCategoriesAvailable": "Pas de catégories disponibles",
     "xpack.cases.allCases.noTagsAvailable": "Aucune balise disponible",
-    "xpack.cases.allCasesView.filterAssignees.clearFilters": "Effacer les filtres",
     "xpack.cases.allCasesView.filterAssignees.noAssigneesLabel": "Aucun utilisateur affecté",
     "xpack.cases.allCasesView.filterAssigneesAriaLabel": "cliquer pour filtrer les utilisateurs affectés",
     "xpack.cases.allCasesView.showLessAvatars": "afficher moins",

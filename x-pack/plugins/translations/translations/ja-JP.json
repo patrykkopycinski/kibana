@@ -11013,7 +11013,6 @@
     "xpack.cases.allCases.comments": "コメント",
     "xpack.cases.allCases.noCategoriesAvailable": "カテゴリがありません",
     "xpack.cases.allCases.noTagsAvailable": "利用可能なタグがありません",
-    "xpack.cases.allCasesView.filterAssignees.clearFilters": "フィルターを消去",
     "xpack.cases.allCasesView.filterAssignees.noAssigneesLabel": "担当者なし",
     "xpack.cases.allCasesView.filterAssigneesAriaLabel": "クリックすると、担当者でフィルタリングします",
     "xpack.cases.allCasesView.showLessAvatars": "縮小表示",

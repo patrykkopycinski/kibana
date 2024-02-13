@@ -17817,7 +17817,6 @@
     "xpack.fleet.uninstallTokenList.loadingTokensMessage": "正在加载卸载令牌......",
     "xpack.fleet.uninstallTokenList.pageDescription": "如果需要卸载主机上的代理/终端，卸载令牌允许您获取卸载命令。",
     "xpack.fleet.uninstallTokenList.policyIdTitle": "策略 ID",
-    "xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder": "按策略 ID 搜索",
     "xpack.fleet.uninstallTokenList.tokenTitle": "令牌",
     "xpack.fleet.uninstallTokenList.viewUninstallCommandLabel": "查看卸载命令",
     "xpack.fleet.updateAgentTags.errorNotificationTitle": "标签更新失败",

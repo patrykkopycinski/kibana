@@ -42446,7 +42446,6 @@
     "searchConnectors.nativeConnectors.usernameLabel": "用户名",
     "searchConnectors.server.connectors.configuration.error": "找不到连接器",
     "searchConnectors.server.connectors.scheduling.error": "无法找到文档",
-    "searchConnectors.server.connectors.serviceType.error": "无法找到文档",
     "searchConnectors.syncJobType.full": "完整内容",
     "searchConnectors.syncJobType.incremental": "增量同步",
     "searchConnectors.syncStatus.canceled": "正在取消同步",

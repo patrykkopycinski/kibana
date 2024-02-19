@@ -42466,7 +42466,6 @@
     "searchConnectors.nativeConnectors.usernameLabel": "ユーザー名",
     "searchConnectors.server.connectors.configuration.error": "コネクターが見つかりませんでした",
     "searchConnectors.server.connectors.scheduling.error": "ドキュメントが見つかりませんでした",
-    "searchConnectors.server.connectors.serviceType.error": "ドキュメントが見つかりませんでした",
     "searchConnectors.syncJobType.full": "完全なコンテンツ",
     "searchConnectors.syncJobType.incremental": "増分コンテンツ",
     "searchConnectors.syncStatus.canceled": "同期のキャンセル中",

@@ -42474,7 +42474,6 @@
     "searchConnectors.nativeConnectors.usernameLabel": "Nom d'utilisateur",
     "searchConnectors.server.connectors.configuration.error": "Connecteur introuvable",
     "searchConnectors.server.connectors.scheduling.error": "Document introuvable",
-    "searchConnectors.server.connectors.serviceType.error": "Document introuvable",
     "searchConnectors.syncJobType.full": "Contenu entier",
     "searchConnectors.syncJobType.incremental": "Contenu progressif",
     "searchConnectors.syncStatus.canceled": "Annulation de la synchronisation",

@@ -580,7 +580,6 @@
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage} 行",
     "core.euiTourStepIndicator.ariaLabel": "第 {number} 步{status}",
-    "core.euiTreeView.ariaLabel": "{ariaLabel} 的 {nodeLabel} 子对象",
     "core.savedObjects.deprecations.unknownTypes.message": "在 Kibana 系统索引中有{objectCount, plural, other {有}}{objectCount, plural, other {# 个对象}}的类型未知。不再支持使用未知的已保存对象类型进行升级。为确保未来成功升级，请重新启用插件，或从 Kibana 索引中删除这些文档",
     "core.statusPage.loadStatus.serverStatusCodeErrorMessage": "无法使用状态代码 {responseStatus} 请求服务器状态",
     "core.statusPage.metricsTiles.columns.heapUsedHeader": "已使用堆数（共 {heapTotal} 个）",

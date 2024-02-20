@@ -580,7 +580,6 @@
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage}行",
     "core.euiTourStepIndicator.ariaLabel": "ステップ{number}{status}",
-    "core.euiTreeView.ariaLabel": "{ariaLabel}の{nodeLabel}子",
     "core.savedObjects.deprecations.unknownTypes.message": "Kibanaシステムインデックスで不明なタイプの{objectCount, plural, other {#個のオブジェクト}}{objectCount, plural, other {が}}見つかりました。不明なsavedObject型のアップグレードはサポートされていません。今後アップグレードが成功することを保証するには、プラグインを再有効化するか、これらのドキュメントをKibanaインデックスから削除してください",
     "core.statusPage.loadStatus.serverStatusCodeErrorMessage": "サーバーステータスのリクエストに失敗しました。ステータスコード：{responseStatus}",
     "core.statusPage.metricsTiles.columns.heapUsedHeader": "{heapTotal}中使用済みのヒープ",

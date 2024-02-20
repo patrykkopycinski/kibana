@@ -566,7 +566,6 @@
     "core.euiTableHeaderCell.titleTextWithDesc": "{innerText}; {description}",
     "core.euiTablePagination.rowsPerPageOption": "{rowsPerPage} lignes",
     "core.euiTourStepIndicator.ariaLabel": "Étape {number} {status}",
-    "core.euiTreeView.ariaLabel": "{nodeLabel} enfant de {ariaLabel}",
     "core.savedObjects.deprecations.unknownTypes.message": "{objectCount, plural, one {# objet} many {# objets} other {# objets}} avec des types inconnus {objectCount, plural, one {a été trouvé} many {sont introuvables} other {ont été trouvés}} dans les index système Kibana. La mise à niveau avec des types savedObject inconnus n'est plus compatible. Pour assurer la réussite des mises à niveau à l'avenir, réactivez les plug-ins ou supprimez ces documents dans les indices de Kibana",
     "core.statusPage.loadStatus.serverStatusCodeErrorMessage": "Échec de requête du statut du serveur avec le code de statut {responseStatus}",
     "core.statusPage.metricsTiles.columns.heapUsedHeader": "Tas utilisé sur {heapTotal}",

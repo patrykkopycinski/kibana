@@ -12031,7 +12031,6 @@
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.overviewTabLabel": "概要",
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.tableTabLabel": "表",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.alertsTitle": "アラート",
-    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.cvsScore.unknownVendorName": "不明なベンダー",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionTitle": "説明",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.emptyFixesMessage": "まだ利用可能な修正はありません。",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.fixes": "修正",

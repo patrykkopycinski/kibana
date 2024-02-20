@@ -12017,7 +12017,6 @@
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.overviewTabLabel": "Aperçu",
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.tableTabLabel": "Tableau",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.alertsTitle": "Alertes",
-    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.cvsScore.unknownVendorName": "Fournisseur inconnu",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionTitle": "Description",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.emptyFixesMessage": "Aucun correctif n'est disponible pour l'instant.",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.fixes": "Correctifs",

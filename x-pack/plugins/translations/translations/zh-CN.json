@@ -12125,7 +12125,6 @@
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.overviewTabLabel": "概览",
     "xpack.csp.vulnerabilities.vulnerabilityFindingFlyout.tableTabLabel": "表",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.alertsTitle": "告警",
-    "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.cvsScore.unknownVendorName": "未知供应商",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.descriptionTitle": "描述",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.emptyFixesMessage": "尚没有修复可用。",
     "xpack.csp.vulnerabilities.vulnerabilityOverviewTab.fixes": "修复",

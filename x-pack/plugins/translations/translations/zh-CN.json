@@ -28317,7 +28317,6 @@
     "xpack.observability.slo.burnRate.breachedStatustSubtitle": "按照当前的速率，错误预算将在 {hour} 小时后耗尽。",
     "xpack.observability.slo.burnRate.threshold": "阈值为 {threshold}x",
     "xpack.observability.slo.create.errorNotification": "创建 {name} 时出现问题",
-    "xpack.observability.slo.create.successNotification": "已成功创建 {name}",
     "xpack.observability.slo.deleteConfirmationModal.title": "删除 {name}？",
     "xpack.observability.slo.duration.day": "{duration, plural, other {# 天}}",
     "xpack.observability.slo.duration.hour": "{duration, plural, other {# 小时}}",

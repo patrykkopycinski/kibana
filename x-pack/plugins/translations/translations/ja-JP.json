@@ -28333,7 +28333,6 @@
     "xpack.observability.slo.burnRate.breachedStatustSubtitle": "現在のレートでは、エラー予算は{hour}時間後に使い果たされます。",
     "xpack.observability.slo.burnRate.threshold": "しきい値は{threshold}xです",
     "xpack.observability.slo.create.errorNotification": "{name}の作成中に問題が発生しました",
-    "xpack.observability.slo.create.successNotification": "{name}の作成が正常に完了しました",
     "xpack.observability.slo.deleteConfirmationModal.title": "{name}を削除しますか？",
     "xpack.observability.slo.duration.day": "{duration, plural, other {#日}}",
     "xpack.observability.slo.duration.hour": "{duration, plural, other {#時間}}",

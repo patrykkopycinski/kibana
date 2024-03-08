@@ -28237,8 +28237,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.condition": "Condition {conditionNumber}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel": "Agrégation {name}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel": "Filtre KQL {name}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabel": "Dernière {lookback} {timeLabel}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabelWithGrouping": "Dernières {lookback} {timeLabel} de données pour {id}",
     "xpack.observability.customThreshold.rule.threshold.errorAlertReason": "Elasticsearch a échoué lors de l'interrogation des données pour {metric}",
     "xpack.observability.customThreshold.rule.threshold.thresholdRange": "{a} et {b}",
     "xpack.observability.customThreshold.rule.thresholdExtraTitle": "Alerte lorsque {comparator} {threshold}.",

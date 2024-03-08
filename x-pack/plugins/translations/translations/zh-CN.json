@@ -28222,8 +28222,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.condition": "条件 {conditionNumber}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel": "聚合 {name}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel": "KQL 筛选 {name}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabel": "过去 {lookback} {timeLabel}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabelWithGrouping": "{id} 过去 {lookback} {timeLabel}的数据",
     "xpack.observability.customThreshold.rule.threshold.errorAlertReason": "Elasticsearch 尝试查询 {metric} 的数据时出现故障",
     "xpack.observability.customThreshold.rule.threshold.thresholdRange": "{a} 和 {b}",
     "xpack.observability.customThreshold.rule.thresholdExtraTitle": "{comparator} {threshold} 时告警",

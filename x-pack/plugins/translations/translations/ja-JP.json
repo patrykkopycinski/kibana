@@ -28238,8 +28238,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.condition": "条件{conditionNumber}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel": "アグリゲーション{name}",
     "xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel": "KQLフィルター{name}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabel": "最後の{lookback} {timeLabel}",
-    "xpack.observability.customThreshold.rule.alerts.dataTimeRangeLabelWithGrouping": "{id}のデータの最後の{lookback} {timeLabel}",
     "xpack.observability.customThreshold.rule.threshold.errorAlertReason": "{metric}のデータのクエリを試行しているときに、Elasticsearchが失敗しました",
     "xpack.observability.customThreshold.rule.threshold.thresholdRange": "{a}および{b}",
     "xpack.observability.customThreshold.rule.thresholdExtraTitle": "{comparator} {threshold}のときにアラートを通知",

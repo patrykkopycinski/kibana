@@ -33510,7 +33510,6 @@
     "xpack.securitySolution.detectionResponse.userAlertsUserName": "Nom d'utilisateur",
     "xpack.securitySolution.detectionResponse.userSectionTooltip": "Maximum de 100 utilisateurs. Veuillez consulter la page Alertes pour plus d'informations.",
     "xpack.securitySolution.detectionResponse.viewCases": "Afficher les cas",
-    "xpack.securitySolution.detectionResponse.viewRecentCases": "Afficher les cas récents",
     "xpack.securitySolution.detections.alerts.agentStatus": "Statut de l'agent",
     "xpack.securitySolution.detections.alerts.quarantinedFilePath": "Chemin de fichiers en quarantaine",
     "xpack.securitySolution.detections.alerts.ruleType": "Type de règle",

@@ -33492,7 +33492,6 @@
     "xpack.securitySolution.detectionResponse.userAlertsUserName": "用户名",
     "xpack.securitySolution.detectionResponse.userSectionTooltip": "最多 100 个用户。请访问“告警”页面获取更多信息。",
     "xpack.securitySolution.detectionResponse.viewCases": "查看案例",
-    "xpack.securitySolution.detectionResponse.viewRecentCases": "查看最近案例",
     "xpack.securitySolution.detections.alerts.agentStatus": "代理状态",
     "xpack.securitySolution.detections.alerts.quarantinedFilePath": "已隔离文件路径",
     "xpack.securitySolution.detections.alerts.ruleType": "规则类型",

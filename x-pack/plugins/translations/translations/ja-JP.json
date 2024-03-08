@@ -33510,7 +33510,6 @@
     "xpack.securitySolution.detectionResponse.userAlertsUserName": "ユーザー名",
     "xpack.securitySolution.detectionResponse.userSectionTooltip": "最大100ユーザー。詳細については、「アラート」ページを参照してください。",
     "xpack.securitySolution.detectionResponse.viewCases": "ケースの表示",
-    "xpack.securitySolution.detectionResponse.viewRecentCases": "最近のケースを表示",
     "xpack.securitySolution.detections.alerts.agentStatus": "エージェントステータス",
     "xpack.securitySolution.detections.alerts.quarantinedFilePath": "隔離されたファイルパス",
     "xpack.securitySolution.detections.alerts.ruleType": "ルールタイプ",

@@ -13868,7 +13868,6 @@
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "ベータ版コネクター",
     "xpack.enterpriseSearch.betaLabel": "ベータ",
     "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy": "コピー",
-    "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.tryInConsole": "コンソールで試す",
     "xpack.enterpriseSearch.connector.connectorTypePanel.title": "コネクタータイプ",
     "xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label": "不明",
     "xpack.enterpriseSearch.connector.ingestionStatus.title": "インジェスチョンステータス",

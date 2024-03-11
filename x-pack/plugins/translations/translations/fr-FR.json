@@ -13855,7 +13855,6 @@
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "Connecteur en version bêta",
     "xpack.enterpriseSearch.betaLabel": "Bêta",
     "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy": "Copier",
-    "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.tryInConsole": "Essayer dans la console",
     "xpack.enterpriseSearch.connector.connectorTypePanel.title": "Type de connecteur",
     "xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label": "Inconnu",
     "xpack.enterpriseSearch.connector.ingestionStatus.title": "Statut de l'ingestion",

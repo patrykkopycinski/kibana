@@ -13962,7 +13962,6 @@
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "公测版连接器",
     "xpack.enterpriseSearch.betaLabel": "公测版",
     "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.copy": "复制",
-    "xpack.enterpriseSearch.component.devToolsConsoleCodeBlock.tryInConsole": "在 Console 中试用",
     "xpack.enterpriseSearch.connector.connectorTypePanel.title": "连接器类型",
     "xpack.enterpriseSearch.connector.connectorTypePanel.unknown.label": "未知",
     "xpack.enterpriseSearch.connector.ingestionStatus.title": "采集状态",

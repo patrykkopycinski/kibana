@@ -28911,7 +28911,6 @@
     "xpack.observabilityAiAssistant.suggestedFunctionEvent": "a demandé la fonction {functionName}",
     "xpack.observabilityAiAssistant.userExecutedFunctionEvent": "a exécuté la fonction {functionName}",
     "xpack.observabilityAiAssistant.userSuggestedFunctionEvent": "a demandé la fonction {functionName}",
-    "xpack.observabilityAiAssistant.actionMenuItemLabel": "Assistant d'intelligence artificielle",
     "xpack.observabilityAiAssistant.appTitle": "Assistant d'intelligence artificielle d'Observability",
     "xpack.observabilityAiAssistant.askAssistantButton.buttonLabel": "Demander à l'assistant",
     "xpack.observabilityAiAssistant.askAssistantButton.popoverContent": "Obtenez des informations relatives à vos données grâce à l'assistant d'Elastic",

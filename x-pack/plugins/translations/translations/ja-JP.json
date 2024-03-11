@@ -28912,7 +28912,6 @@
     "xpack.observabilityAiAssistant.suggestedFunctionEvent": "関数{functionName}を要求しました",
     "xpack.observabilityAiAssistant.userExecutedFunctionEvent": "関数{functionName}を実行しました",
     "xpack.observabilityAiAssistant.userSuggestedFunctionEvent": "関数{functionName}を要求しました",
-    "xpack.observabilityAiAssistant.actionMenuItemLabel": "AI Assistant",
     "xpack.observabilityAiAssistant.appTitle": "オブザーバビリティAI Assistant",
     "xpack.observabilityAiAssistant.askAssistantButton.buttonLabel": "アシスタントに聞く",
     "xpack.observabilityAiAssistant.askAssistantButton.popoverContent": "Elastic Assistantでデータに関するインサイトを得ましょう",

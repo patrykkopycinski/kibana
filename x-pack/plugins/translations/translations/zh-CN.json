@@ -28896,7 +28896,6 @@
     "xpack.observabilityAiAssistant.suggestedFunctionEvent": "已请求函数 {functionName}",
     "xpack.observabilityAiAssistant.userExecutedFunctionEvent": "已执行函数 {functionName}",
     "xpack.observabilityAiAssistant.userSuggestedFunctionEvent": "已请求函数 {functionName}",
-    "xpack.observabilityAiAssistant.actionMenuItemLabel": "AI 助手",
     "xpack.observabilityAiAssistant.appTitle": "Observability AI 助手",
     "xpack.observabilityAiAssistant.askAssistantButton.buttonLabel": "询问助手",
     "xpack.observabilityAiAssistant.askAssistantButton.popoverContent": "使用 Elastic 助手深入了解您的数据",

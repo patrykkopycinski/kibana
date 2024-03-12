@@ -3130,7 +3130,6 @@
     "grouping.eventsTab.unit": "{totalCount, plural, =1 {イベント} other {イベント}}",
     "grouping.groupByPanelTitle": "最大{groupingLevelsCount}個のグループ分けを選択してください",
     "grouping.nullGroup.title": "選択されたグループ分けフィールド\"{selectedGroup}\"には、このグループ\"{unit}\"の値がありません。",
-    "grouping.total.unit": "{totalCount, plural, =1 {グループ} other {グループ}}",
     "grouping.additionalActions.takeAction": "アクションを実行",
     "grouping.alerts.label": "アラートのグループ化条件",
     "grouping.customGroupByOptionName": "カスタムフィールド",

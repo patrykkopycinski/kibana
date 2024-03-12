@@ -3116,7 +3116,6 @@
     "grouping.eventsTab.unit": "{totalCount, plural, =1 {événement} one {événements} many {événements} other {événements}}",
     "grouping.groupByPanelTitle": "Sélectionner jusqu'à {groupingLevelsCount} regroupements",
     "grouping.nullGroup.title": "Le groupe par champ sélectionné, {selectedGroup}, a une valeur manquante de {unit} pour ce groupe.",
-    "grouping.total.unit": "{totalCount, plural, =1 {regrouper} one {des groupes} many {groupes} other {groupes}}",
     "grouping.additionalActions.takeAction": "Entreprendre des actions",
     "grouping.alerts.label": "Regrouper les alertes par",
     "grouping.customGroupByOptionName": "Champ personnalisé",

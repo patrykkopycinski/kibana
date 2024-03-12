@@ -3129,7 +3129,6 @@
     "grouping.eventsTab.unit": "{totalCount, plural, =1 {事件} other {事件}}",
     "grouping.groupByPanelTitle": "最多选择 {groupingLevelsCount} 个分组",
     "grouping.nullGroup.title": "选定分组依据字段 {selectedGroup} 缺少此 {unit} 组的值。",
-    "grouping.total.unit": "{totalCount, plural, =1 {组} other {组}}",
     "grouping.additionalActions.takeAction": "采取操作",
     "grouping.alerts.label": "告警分组依据",
     "grouping.customGroupByOptionName": "定制字段",

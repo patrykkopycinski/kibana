@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-export type {
-  GridData,
-  DashboardItem,
-  DashboardCrudTypes,
-  DashboardAttributes,
-  SavedDashboardPanel,
-} from './types';
-
 export {
   serviceDefinition,
   dashboardSavedObjectSchema,
-  controlGroupInputSchema,
   dashboardAttributesSchema,
 } from './cm_services';
+
+export type { GridData, DashboardItem, SavedDashboardPanel } from '../v1/types'; // no changes made to types from v1 to v2
+export type { DashboardCrudTypes, DashboardAttributes } from './types';

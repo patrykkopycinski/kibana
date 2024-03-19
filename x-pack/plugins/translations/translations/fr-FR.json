@@ -21474,7 +21474,6 @@
     "xpack.lens.chart.labelVisibility.auto": "Auto",
     "xpack.lens.chart.labelVisibility.custom": "Personnalisé",
     "xpack.lens.chart.labelVisibility.none": "Aucun",
-    "xpack.lens.chartSwitch.dataLossDescription": "La sélection de ce type de visualisation entraîne la suppression des options de configuration incompatibles et des calques multiples, le cas échéant.",
     "xpack.lens.chartSwitch.dataLossLabel": "Avertissement",
     "xpack.lens.chartSwitch.experimentalLabel": "Version d'évaluation technique",
     "xpack.lens.chartTitle.unsaved": "Visualisation non enregistrée",

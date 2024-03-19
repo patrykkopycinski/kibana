@@ -21488,7 +21488,6 @@
     "xpack.lens.chart.labelVisibility.auto": "自動",
     "xpack.lens.chart.labelVisibility.custom": "カスタム",
     "xpack.lens.chart.labelVisibility.none": "なし",
-    "xpack.lens.chartSwitch.dataLossDescription": "ビジュアライゼーションタイプを選択すると、互換性のない構成オプションと複数のレイヤーが削除されます（存在する場合）。",
     "xpack.lens.chartSwitch.dataLossLabel": "警告",
     "xpack.lens.chartSwitch.experimentalLabel": "テクニカルプレビュー",
     "xpack.lens.chartTitle.unsaved": "保存されていないビジュアライゼーション",

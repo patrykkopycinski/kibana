@@ -6124,7 +6124,6 @@
     "unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel": "フィルター値を編集",
     "unifiedSearch.filter.filterEditor.editQueryDslButtonLabel": "クエリ DSL として編集",
     "unifiedSearch.filter.filterEditor.existsOperatorOptionLabel": "存在する",
-    "unifiedSearch.filter.filterEditor.experimentalLabel": "テクニカルプレビュー",
     "unifiedSearch.filter.filterEditor.falseOptionLabel": "false",
     "unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel": "is between",
     "unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel": "is not between",

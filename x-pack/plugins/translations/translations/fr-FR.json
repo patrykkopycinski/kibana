@@ -6109,7 +6109,6 @@
     "unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel": "Modifier les valeurs du filtre",
     "unifiedSearch.filter.filterEditor.editQueryDslButtonLabel": "Modifier en tant que Query DSL",
     "unifiedSearch.filter.filterEditor.existsOperatorOptionLabel": "existe",
-    "unifiedSearch.filter.filterEditor.experimentalLabel": "Version d'évaluation technique",
     "unifiedSearch.filter.filterEditor.falseOptionLabel": "faux",
     "unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel": "est entre",
     "unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel": "n'est pas entre",

@@ -6217,7 +6217,6 @@
     "unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel": "编辑筛选值",
     "unifiedSearch.filter.filterEditor.editQueryDslButtonLabel": "编辑为查询 DSL",
     "unifiedSearch.filter.filterEditor.existsOperatorOptionLabel": "存在",
-    "unifiedSearch.filter.filterEditor.experimentalLabel": "技术预览",
     "unifiedSearch.filter.filterEditor.falseOptionLabel": "false",
     "unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel": "介于",
     "unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel": "不介于",

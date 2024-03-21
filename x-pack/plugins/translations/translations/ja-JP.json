@@ -29475,7 +29475,6 @@
     "xpack.remoteClusters.clusterWizard.trustStep.modal.checkbox": "はい。信頼を設定しました",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.createCluster": "リモートクラスターを追加",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.title": "構成を確認",
-    "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.badge": "BETA",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.description": "リモートインデックスへのきめ細かいアクセス。リモートクラスター管理者が提供するAPIキーが必要です。",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.title": "APIキー",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithCert.description": "リモートクラスターへのフルアクセスリモートクラスターのTLS証明書が必要です。",

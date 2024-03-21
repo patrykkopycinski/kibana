@@ -29459,7 +29459,6 @@
     "xpack.remoteClusters.clusterWizard.trustStep.modal.checkbox": "是，我已建立信任",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.createCluster": "添加远程集群",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.title": "确认您的配置",
-    "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.badge": "公测版",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.description": "远程索引的细粒度访问权限。您需要由远程集群管理员提供的 API 密钥。",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.title": "API 密钥",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithCert.description": "远程集群的完全访问权限。您需要来自远程集群的 TLS 证书。",

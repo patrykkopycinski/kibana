@@ -29474,7 +29474,6 @@
     "xpack.remoteClusters.clusterWizard.trustStep.modal.checkbox": "Oui, j'ai mis en place un système de confiance",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.createCluster": "Ajouter un cluster distant",
     "xpack.remoteClusters.clusterWizard.trustStep.modal.title": "Confirmer votre configuration",
-    "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.badge": "BÊTA",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.description": "Accès fin aux index distants. Il vous faut une clé d'API fournie par l'administrateur du cluster distant.",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithApiKeys.title": "Clés d'API",
     "xpack.remoteClusters.clusterWizard.trustStep.setupWithCert.description": "Accès complet au cluster distant. Il vous faut les certificats TLS du cluster distant.",

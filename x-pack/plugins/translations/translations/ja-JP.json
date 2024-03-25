@@ -40505,7 +40505,6 @@
     "xpack.upgradeAssistant.overview.cloudBackup.hasSnapshotMessage": "前回のスナップショットは{lastBackupTime}に作成されました。",
     "xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription": "廃止予定ログのインデックスは続行されますが、次の読み取りインデックス{privilegesCount, plural, other {権限}}が付与されるまでは分析できません：{missingPrivileges}",
     "xpack.upgradeAssistant.overview.logsStep.countDescription": "{checkpoint}以降に{deprecationCount, plural, =0 {いいえ} other {{deprecationCount}}}個の廃止予定の{deprecationCount, plural, other {問題}}があります。",
-    "xpack.upgradeAssistant.overview.logsStep.missingPrivilegesDescription": "廃止予定ログのインデックスは続行されますが、次の読み取りインデックス{privilegesCount, plural, other {権限}}が付与されるまでは分析できません：{missingPrivileges}",
     "xpack.upgradeAssistant.overview.systemIndices.body": "アップグレードの内部情報を格納するシステムインデックスを準備します。これはメジャーバージョンアップグレード中にのみ必要です。インデックスを再作成する必要があるすべての{hiddenIndicesLink}は次のステップで表示されます。",
     "xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody": "{feature}のシステムインデックスの移行中にエラーが発生しました：{failureCause}",
     "xpack.upgradeAssistant.overview.verifyChanges.calloutTitle": "{previousCheck}以降の{warningsCount, plural, =0 {いいえ} other {{warningsCount}}}廃止予定の{warningsCount, plural, other {問題}}",

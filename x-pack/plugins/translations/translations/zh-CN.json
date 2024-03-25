@@ -40485,7 +40485,6 @@
     "xpack.upgradeAssistant.overview.cloudBackup.hasSnapshotMessage": "上次创建快照的时间为 {lastBackupTime}。",
     "xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeDescription": "将继续索引弃用日志，但您无法分析这些日志，直到您具有索引读取{privilegesCount, plural, other {权限}}：{missingPrivileges}",
     "xpack.upgradeAssistant.overview.logsStep.countDescription": "自 {checkpoint} 以来出现 {deprecationCount, plural, =0 {否} other {{deprecationCount}}} 个弃用{deprecationCount, plural, other {问题}}。",
-    "xpack.upgradeAssistant.overview.logsStep.missingPrivilegesDescription": "将继续索引弃用日志，但您无法分析这些日志，直到您具有索引读取{privilegesCount, plural, other {权限}}：{missingPrivileges}",
     "xpack.upgradeAssistant.overview.systemIndices.body": "为升级准备存储内部信息的系统索引。仅在主要版本升级期间需要此项。将在下一步中显示任何需要重新索引的{hiddenIndicesLink}。",
     "xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody": "迁移 {feature} 的系统索引时出错：{failureCause}",
     "xpack.upgradeAssistant.overview.verifyChanges.calloutTitle": "自 {previousCheck} 以来出现 {warningsCount, plural, =0 {否} other {{warningsCount}}} 个弃用{warningsCount, plural, other {问题}}",

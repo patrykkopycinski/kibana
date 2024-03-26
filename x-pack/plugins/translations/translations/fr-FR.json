@@ -2758,7 +2758,6 @@
     "expressionError.renderer.debug.displayName": "Déboguer",
     "expressionError.renderer.error.displayName": "Informations sur l'erreur",
     "expressionError.renderer.error.helpDescription": "Présenter les données de l'erreur d'une manière utile pour les utilisateurs",
-    "expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError": "Les champs \"centralMajor\" et \"centralMajorMode\" ne sont pas pris en charge par la forme \"{shape}\"",
     "expressionGauge.functions.gauge.args.centralMajor.help": "Spécifie la valeur centralMajor du graphique de jauge affiché dans le graphique.",
     "expressionGauge.functions.gauge.args.centralMajorMode.help": "Spécifie le mode de centralMajor",
     "expressionGauge.functions.gauge.args.colorMode.help": "Si la valeur est définie sur palette, les couleurs de celles-ci seront appliquées aux bandes",

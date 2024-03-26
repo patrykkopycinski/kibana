@@ -2752,7 +2752,6 @@
     "expressionError.renderer.debug.displayName": "デバッグ",
     "expressionError.renderer.error.displayName": "エラー情報",
     "expressionError.renderer.error.helpDescription": "エラーデータをユーザーにわかるようにレンダリングします",
-    "expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError": "\"centralMajor\" および \"centralMajorMode\" フィールドは図形 \"{shape}\" でサポートされていません",
     "expressionGauge.functions.gauge.args.centralMajor.help": "グラフ内に表示されるゲージグラフのcentralMajorを指定します。",
     "expressionGauge.functions.gauge.args.centralMajorMode.help": "centralMajorのモードを指定します",
     "expressionGauge.functions.gauge.args.colorMode.help": "パレットに設定した場合、パレットの色が帯に適用されます",

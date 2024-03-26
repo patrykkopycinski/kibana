@@ -2760,7 +2760,6 @@
     "expressionError.renderer.debug.displayName": "故障排查",
     "expressionError.renderer.error.displayName": "错误信息",
     "expressionError.renderer.error.helpDescription": "以用户友好的方式呈现错误数据",
-    "expressionGauge.functions.gauge.errors.centralMajorNotSupportedForShapeError": "形状“{shape}”不支持“centralMajor”和“centralMajorMode”字段",
     "expressionGauge.functions.gauge.args.centralMajor.help": "指定在图表内部显示的仪表盘图表的 centralMajor。",
     "expressionGauge.functions.gauge.args.centralMajorMode.help": "指定 centralMajor 的模式",
     "expressionGauge.functions.gauge.args.colorMode.help": "如果设置为调色板，将对带应用调色板颜色",

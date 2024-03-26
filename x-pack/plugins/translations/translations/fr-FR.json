@@ -38430,7 +38430,6 @@
     "xpack.serverlessSearch.searchQuery.title": "Créer votre première requête de recherche",
     "xpack.serverlessSearch.selectClient.connectorsCallout.cta": "Créer un connecteur",
     "xpack.serverlessSearch.selectClient.connectorsCallout.description": "Synchronisez une gamme de sources de données tierces avec Elasticsearch en déployant des connecteurs Elastic sur votre propre infrastructure.",
-    "xpack.serverlessSearch.selectClient.connectorsCallout.etc": "et plus",
     "xpack.serverlessSearch.selectClient.connectorsCallout.title": "Synchroniser vos données en utilisant un client de connecteur",
     "xpack.serverlessSearch.testConnection.description": "Envoyez une requête de test pour confirmer que votre client de langage et votre instance Elasticsearch sont opérationnels.",
     "xpack.serverlessSearch.testConnection.title": "Tester votre connexion",

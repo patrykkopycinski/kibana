@@ -38399,7 +38399,6 @@
     "xpack.serverlessSearch.searchQuery.title": "最初の検索クエリを作成",
     "xpack.serverlessSearch.selectClient.connectorsCallout.cta": "コネクターを作成する",
     "xpack.serverlessSearch.selectClient.connectorsCallout.description": "さまざまな一般的なサードパーティのデータソースをElasticsearchに同期するには、Elasticコネクターをお客様のインフラにデプロイします。",
-    "xpack.serverlessSearch.selectClient.connectorsCallout.etc": "など",
     "xpack.serverlessSearch.selectClient.connectorsCallout.title": "コネクタークライアントを使用してデータを同期",
     "xpack.serverlessSearch.testConnection.description": "テストリクエストを送信して、言語クライアントとElasticsearchインスタンスが起動し、実行中であることを確認してください。",
     "xpack.serverlessSearch.testConnection.title": "接続をテスト",

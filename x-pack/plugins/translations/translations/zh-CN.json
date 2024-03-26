@@ -38443,7 +38443,6 @@
     "xpack.serverlessSearch.searchQuery.title": "构建您的首个搜索查询",
     "xpack.serverlessSearch.selectClient.connectorsCallout.cta": "创建连接器",
     "xpack.serverlessSearch.selectClient.connectorsCallout.description": "通过在您自己的基础设施上部署开源 Elastic 连接器，将一系列常用第三方数据源同步到 Elasticsearch。",
-    "xpack.serverlessSearch.selectClient.connectorsCallout.etc": "以及更多",
     "xpack.serverlessSearch.selectClient.connectorsCallout.title": "使用连接器客户端同步数据",
     "xpack.serverlessSearch.testConnection.description": "发送测试请求，以确认您的语言客户端和 Elasticsearch 实例已启动并正在运行。",
     "xpack.serverlessSearch.testConnection.title": "测试您的连接",

@@ -13595,7 +13595,6 @@
     "xpack.dataVisualizer.removeCombinedFieldsLabel": "Retirer le champ combiné",
     "xpack.dataVisualizer.samplingOptionsButton": "Options d’échantillonnage",
     "xpack.dataVisualizer.searchPanel.allFieldsLabel": "Tous les champs",
-    "xpack.dataVisualizer.searchPanel.esql.analyzeAll": "Tout analyser",
     "xpack.dataVisualizer.searchPanel.esql.limitSizeAriaLabel": "Limiter la taille",
     "xpack.dataVisualizer.searchPanel.esql.limitSizeLabel": "Limiter l'analyse à",
     "xpack.dataVisualizer.searchPanel.invalidSyntax": "Syntaxe non valide",

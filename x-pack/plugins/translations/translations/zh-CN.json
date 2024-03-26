@@ -13601,7 +13601,6 @@
     "xpack.dataVisualizer.removeCombinedFieldsLabel": "移除组合字段",
     "xpack.dataVisualizer.samplingOptionsButton": "采样选项",
     "xpack.dataVisualizer.searchPanel.allFieldsLabel": "所有字段",
-    "xpack.dataVisualizer.searchPanel.esql.analyzeAll": "全部分析",
     "xpack.dataVisualizer.searchPanel.esql.limitSizeAriaLabel": "限制大小",
     "xpack.dataVisualizer.searchPanel.esql.limitSizeLabel": "将分析限定为",
     "xpack.dataVisualizer.searchPanel.invalidSyntax": "语法无效",

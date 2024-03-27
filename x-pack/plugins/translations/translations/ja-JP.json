@@ -39733,7 +39733,6 @@
     "xpack.stackConnectors.components.bedrock.bodyFieldLabel": "本文",
     "xpack.stackConnectors.components.bedrock.connectorTypeTitle": "Amazon Bedrock",
     "xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel": "デフォルトモデル",
-    "xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel": "AWSリージョン",
     "xpack.stackConnectors.components.bedrock.documentation": "ドキュメンテーション",
     "xpack.stackConnectors.components.bedrock.error.requiredBedrockBodyText": "本文が必要です。",
     "xpack.stackConnectors.components.bedrock.model": "モデル",

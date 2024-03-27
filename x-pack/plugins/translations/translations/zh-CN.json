@@ -39779,7 +39779,6 @@
     "xpack.stackConnectors.components.bedrock.bodyFieldLabel": "正文",
     "xpack.stackConnectors.components.bedrock.connectorTypeTitle": "Amazon Bedrock",
     "xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel": "默认模型",
-    "xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel": "AWS 区域",
     "xpack.stackConnectors.components.bedrock.documentation": "文档",
     "xpack.stackConnectors.components.bedrock.error.requiredBedrockBodyText": "“正文”必填。",
     "xpack.stackConnectors.components.bedrock.model": "模型",

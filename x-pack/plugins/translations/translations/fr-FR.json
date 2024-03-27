@@ -39767,7 +39767,6 @@
     "xpack.stackConnectors.components.bedrock.bodyFieldLabel": "Corps",
     "xpack.stackConnectors.components.bedrock.connectorTypeTitle": "Amazon Bedrock",
     "xpack.stackConnectors.components.bedrock.defaultModelTextFieldLabel": "Modèle par défaut",
-    "xpack.stackConnectors.components.bedrock.defaultRegionTextFieldLabel": "Région AWS",
     "xpack.stackConnectors.components.bedrock.documentation": "documentation",
     "xpack.stackConnectors.components.bedrock.error.requiredBedrockBodyText": "Le corps est requis.",
     "xpack.stackConnectors.components.bedrock.model": "Modèle",

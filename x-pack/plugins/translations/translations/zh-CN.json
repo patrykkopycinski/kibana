@@ -6169,7 +6169,6 @@
     "sharedUXPackages.card.noData.title": "添加 Elastic 代理",
     "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "公测版",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "切换面板导航",
     "sharedUXPackages.codeEditor.ariaLabel": "代码编辑器",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Enter",
     "sharedUXPackages.codeEditor.escapeKeyLabel": "Esc",

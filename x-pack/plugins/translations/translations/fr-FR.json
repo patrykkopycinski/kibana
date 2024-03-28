@@ -6166,7 +6166,6 @@
     "sharedUXPackages.card.noData.title": "Ajouter Elastic Agent",
     "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "Bêta",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "Récent",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "Afficher/Masquer le panneau de navigation",
     "sharedUXPackages.codeEditor.ariaLabel": "Éditeur de code",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Entrée",
     "sharedUXPackages.codeEditor.escapeKeyLabel": "Échap",

@@ -6156,7 +6156,6 @@
     "sharedUXPackages.card.noData.title": "Elasticエージェントの追加",
     "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "ベータ",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "パネルナビゲーションを切り替える",
     "sharedUXPackages.codeEditor.ariaLabel": "コードエディター",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Enter",
     "sharedUXPackages.codeEditor.escapeKeyLabel": "Esc",

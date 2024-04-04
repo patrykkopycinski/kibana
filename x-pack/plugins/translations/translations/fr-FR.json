@@ -22451,7 +22451,6 @@
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "Géré",
     "xpack.ingestPipelines.list.table.managedFilterLabel": "Géré",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "Nom",
-    "xpack.ingestPipelines.list.table.reloadButtonLabel": "Recharger",
     "xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors": "Erreur lors de la lecture du fichier. Un problème est survenu lors du traitement du fichier.",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentButtonLabel": "Ajouter un document",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentErrorMessage": "Erreur lors de l'ajout du document",

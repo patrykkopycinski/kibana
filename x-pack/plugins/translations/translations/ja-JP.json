@@ -22425,7 +22425,6 @@
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "管理中",
     "xpack.ingestPipelines.list.table.managedFilterLabel": "管理中",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "名前",
-    "xpack.ingestPipelines.list.table.reloadButtonLabel": "再読み込み",
     "xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors": "ファイル読み取りエラー：ファイルの処理中に予期しない問題が発生しました。",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentButtonLabel": "ドキュメントを追加",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentErrorMessage": "ドキュメントの追加エラー",

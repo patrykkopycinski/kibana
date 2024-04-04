@@ -22457,7 +22457,6 @@
     "xpack.ingestPipelines.list.table.managedBadgeLabel": "托管",
     "xpack.ingestPipelines.list.table.managedFilterLabel": "托管",
     "xpack.ingestPipelines.list.table.nameColumnTitle": "名称",
-    "xpack.ingestPipelines.list.table.reloadButtonLabel": "重新加载",
     "xpack.ingestPipelines.mapToIngestPipeline.error.parseErrors": "读取文件时出错：处理文件时出现意外问题。",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentButtonLabel": "添加文档",
     "xpack.ingestPipelines.pipelineEditor.addDocuments.addDocumentErrorMessage": "添加文档时出错",

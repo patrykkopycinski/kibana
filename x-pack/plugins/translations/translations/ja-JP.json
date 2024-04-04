@@ -20560,7 +20560,6 @@
     "xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription": "明確なnull値の代わりに使用される、フィールドと同じタイプの数値を受け入れます。",
     "xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzerFieldLabel": "インデックスアナライザー",
     "xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel": "タイプを選択",
-    "xpack.idxMgmt.mappingsEditor.typeFieldLabel": "フィールド型",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription": "型の変更を確認",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title": "'{fieldName}'型から'{fieldType}'への変更を確認",
     "xpack.idxMgmt.mappingsEditor.useNormsFieldDescription": "クエリをスコアリングするときにフィールドの長さを考慮します。Normsには大量のメモリが必要です。フィルタリングまたは集約専用のフィールドは必要ありません。",

@@ -20583,7 +20583,6 @@
     "xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription": "Accepte une valeur numérique du même type que le champ qui remplace une valeur nulle explicite.",
     "xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzerFieldLabel": "Analyseur d'index",
     "xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel": "Sélectionner un type",
-    "xpack.idxMgmt.mappingsEditor.typeFieldLabel": "Type du champ",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription": "Confirmer le changement de type",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title": "Confirmez le changement du type \"{fieldName}\" en \"{fieldType}\".",
     "xpack.idxMgmt.mappingsEditor.useNormsFieldDescription": "Tenez compte de la longueur du champ lors de la notation des requêtes. Les normes nécessitent une mémoire importante. Elles ne sont pas obligatoires pour les champs utilisés uniquement pour le filtrage ou les agrégations.",

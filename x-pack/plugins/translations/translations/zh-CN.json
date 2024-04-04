@@ -20589,7 +20589,6 @@
     "xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription": "接受类型与替换任何显式 null 值的字段相同的数值。",
     "xpack.idxMgmt.mappingsEditor.tokenCountRequired.analyzerFieldLabel": "索引分析器",
     "xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel": "选择类型",
-    "xpack.idxMgmt.mappingsEditor.typeFieldLabel": "字段类型",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.confirmDescription": "确认类型更改",
     "xpack.idxMgmt.mappingsEditor.updateField.confirmationModal.title": "确认将“{fieldName}”类型更改为“{fieldType}”。",
     "xpack.idxMgmt.mappingsEditor.useNormsFieldDescription": "对查询评分时解释字段长度。Norms 需要很大的内存，对于仅用于筛选或聚合的字段，其不是必需的。",

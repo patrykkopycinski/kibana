@@ -5581,7 +5581,6 @@
     "searchConnectors.index.syncJobs.documents.added": "Ajouté",
     "searchConnectors.index.syncJobs.documents.removed": "Retiré",
     "searchConnectors.index.syncJobs.documents.title": "Documents",
-    "searchConnectors.index.syncJobs.documents.total": "Total",
     "searchConnectors.index.syncJobs.documents.value": "Valeur",
     "searchConnectors.index.syncJobs.documents.volume": "Volume",
     "searchConnectors.index.syncJobs.documents.volume.lessThanOneMBLabel": "Inférieur à 1 Mo",

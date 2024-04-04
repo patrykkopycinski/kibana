@@ -5585,7 +5585,6 @@
     "searchConnectors.index.syncJobs.documents.added": "已添加",
     "searchConnectors.index.syncJobs.documents.removed": "已移除",
     "searchConnectors.index.syncJobs.documents.title": "文档",
-    "searchConnectors.index.syncJobs.documents.total": "合计",
     "searchConnectors.index.syncJobs.documents.value": "值",
     "searchConnectors.index.syncJobs.documents.volume": "卷",
     "searchConnectors.index.syncJobs.documents.volume.lessThanOneMBLabel": "小于 1mb",

@@ -5574,7 +5574,6 @@
     "searchConnectors.index.syncJobs.documents.added": "追加",
     "searchConnectors.index.syncJobs.documents.removed": "削除しました",
     "searchConnectors.index.syncJobs.documents.title": "ドキュメント",
-    "searchConnectors.index.syncJobs.documents.total": "合計",
     "searchConnectors.index.syncJobs.documents.value": "値",
     "searchConnectors.index.syncJobs.documents.volume": "量",
     "searchConnectors.index.syncJobs.documents.volume.lessThanOneMBLabel": "1mb未満",

@@ -18752,7 +18752,6 @@
     "xpack.fleet.multiRowInput.addRow": "添加行",
     "xpack.fleet.multiRowInput.deleteButton": "删除行",
     "xpack.fleet.multiTextInput.addRow": "添加行",
-    "xpack.fleet.multiTextInput.deleteRowButton": "删除行",
     "xpack.fleet.namespaceValidation.invalidCharactersErrorMessage": "命名空间包含无效字符",
     "xpack.fleet.namespaceValidation.lowercaseErrorMessage": "命名空间必须小写",
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "“命名空间”必填",

@@ -25569,7 +25569,6 @@
     "xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage": "Un filtre ayant l'ID {filterId} existe déjà",
     "xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription": "Les listes de filtres contiennent des valeurs que vous pouvez utiliser pour inclure ou exclure des événements dans l'analyse de Machine Learning. Vous pouvez utiliser une même liste de filtres dans plusieurs tâches.{br}{learnMoreLink}",
     "xpack.ml.settings.filterLists.listHeader.filterListsDescription": "{totalCount} en tout",
-    "xpack.ml.singleMetricViewerEmbeddable.title": "Graphique de visionneuse d'indicateur unique pour {jobIds}",
     "xpack.ml.splom.arrayFieldsWarningMessage": "{filteredDocsCount} sur {originalDocsCount} documents récupérés incluent des champs avec des tableaux de valeurs et ne peuvent pas être visualisés.",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "Rechercher par ex. {example}",
     "xpack.ml.stepDefineForm.queryPlaceholderLucene": "Rechercher par ex. {example}",

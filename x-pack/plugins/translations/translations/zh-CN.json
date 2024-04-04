@@ -25580,7 +25580,6 @@
     "xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage": "ID 为 {filterId} 的筛选已存在",
     "xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription": "筛选列表包含可用于在 Machine Learning 分析中包括或排除事件的值。您可以在多个作业中使用相同的筛选列表。{br}{learnMoreLink}",
     "xpack.ml.settings.filterLists.listHeader.filterListsDescription": "合计 {totalCount} 个",
-    "xpack.ml.singleMetricViewerEmbeddable.title": "{jobIds} 的 ML Single Metric Viewer 图表",
     "xpack.ml.splom.arrayFieldsWarningMessage": "{originalDocsCount} 个提取的文档中有 {filteredDocsCount} 个包含具有值数组的字段，无法可视化。",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "搜索，如 {example}）",
     "xpack.ml.stepDefineForm.queryPlaceholderLucene": "搜索，如 {example}）",

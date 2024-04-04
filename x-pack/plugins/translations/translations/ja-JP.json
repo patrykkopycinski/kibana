@@ -25543,7 +25543,6 @@
     "xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage": "ID {filterId} のフィルターがすでに存在します",
     "xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription": "フィルターリストには、イベントを機械学習分析に含める、または除外するのに使用する値が含まれています。同じフィルターリストを複数ジョブに使用できます。{br}{learnMoreLink}",
     "xpack.ml.settings.filterLists.listHeader.filterListsDescription": "合計 {totalCount}",
-    "xpack.ml.singleMetricViewerEmbeddable.title": "{jobIds}のMLシングルメトリックビューアーグラフ",
     "xpack.ml.splom.arrayFieldsWarningMessage": "{originalDocsCount}件中{filteredDocsCount}件の取得されたドキュメントには配列の値のフィールドが含まれ、可視化できません。",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "{example}の検索",
     "xpack.ml.stepDefineForm.queryPlaceholderLucene": "{example}の検索",

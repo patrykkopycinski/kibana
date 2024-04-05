@@ -34411,7 +34411,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1588Description": "Digital Certificates (T1588.004)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1596Description": "Digital Certificates (T1596.003)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.directNetworkFloodT1498Description": "Direct Network Flood (T1498.001)",
-    "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCloudLogsT1562Description": "Disable Cloud Logs (T1562.008)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCryptoHardwareT1600Description": "Disable Crypto Hardware (T1600.002)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyCloudFirewallT1562Description": "Disable or Modify Cloud Firewall (T1562.007)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifySystemFirewallT1562Description": "Disable or Modify System Firewall (T1562.004)",

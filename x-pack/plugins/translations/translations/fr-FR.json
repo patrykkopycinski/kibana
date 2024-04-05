@@ -34399,7 +34399,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1588Description": "Certificats numériques (T1588.004)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1596Description": "Certificats numériques (T1596.003)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.directNetworkFloodT1498Description": "Flux de réseau direct (T1498.001)",
-    "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCloudLogsT1562Description": "Désactivation des logs de cloud (T1562.008)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCryptoHardwareT1600Description": "Désactivation du matériel de crypto (T1600.002)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyCloudFirewallT1562Description": "Désactivation ou modification du pare-feu du cloud (T1562.007)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifySystemFirewallT1562Description": "Désactivation ou modification du pare-feu du système (T1562.004)",

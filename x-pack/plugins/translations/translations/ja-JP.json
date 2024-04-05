@@ -34368,7 +34368,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1588Description": "デジタル証明書（T1588.004）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.digitalCertificatesT1596Description": "デジタル証明書（T1596.003）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.directNetworkFloodT1498Description": "ダイレクトネットワークフラッド（T1498.001）",
-    "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCloudLogsT1562Description": "クラウドログの無効化（T1562.008）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableCryptoHardwareT1600Description": "暗号ハードウェアの無効化（T1600.002）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifyCloudFirewallT1562Description": "クラウドファイアウォールの無効化または修正（T1562.007）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.disableOrModifySystemFirewallT1562Description": "システムファイアウォールの無効化または修正（T1562.004）",

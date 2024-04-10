@@ -38342,7 +38342,6 @@
     "xpack.serverlessSearch.nav.mngt": "管理",
     "xpack.serverlessSearch.nav.performance": "性能",
     "xpack.serverlessSearch.nav.projectSettings": "项目设置",
-    "xpack.serverlessSearch.nav.visualize": "可视化",
     "xpack.serverlessSearch.next": "下一步",
     "xpack.serverlessSearch.optional": "可选",
     "xpack.serverlessSearch.overview.footer.description": "已设置您的 Elasticsearch 终端，并且您已提出一些基本查询。现在您已准备就绪，可以更深入地了解更多高级工具和用例。",
@@ -45134,7 +45133,6 @@
     "xpack.serverlessObservability.nav.ml.jobs": "异常检测",
     "xpack.serverlessObservability.nav.mngt": "管理",
     "xpack.serverlessObservability.nav.projectSettings": "项目设置",
-    "xpack.serverlessObservability.nav.synthetics": "Synthetics",
-    "xpack.serverlessObservability.nav.visualizations": "可视化"
+    "xpack.serverlessObservability.nav.synthetics": "Synthetics"
   }
 }

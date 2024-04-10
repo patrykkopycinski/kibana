@@ -38330,7 +38330,6 @@
     "xpack.serverlessSearch.nav.mngt": "Gestion",
     "xpack.serverlessSearch.nav.performance": "Performances",
     "xpack.serverlessSearch.nav.projectSettings": "Paramètres de projet",
-    "xpack.serverlessSearch.nav.visualize": "Visualisations",
     "xpack.serverlessSearch.next": "Suivant",
     "xpack.serverlessSearch.optional": "Facultatif",
     "xpack.serverlessSearch.overview.footer.description": "Votre point de terminaison Elasticsearch est configuré et vous avez effectué quelques requêtes de base. Vous voilà prêt à approfondir les outils et les cas d'utilisation avancés.",
@@ -45116,7 +45115,6 @@
     "xpack.serverlessObservability.nav.ml.jobs": "Détection des anomalies",
     "xpack.serverlessObservability.nav.mngt": "Gestion",
     "xpack.serverlessObservability.nav.projectSettings": "Paramètres de projet",
-    "xpack.serverlessObservability.nav.synthetics": "Synthetics",
-    "xpack.serverlessObservability.nav.visualizations": "Visualisations"
+    "xpack.serverlessObservability.nav.synthetics": "Synthetics"
   }
 }

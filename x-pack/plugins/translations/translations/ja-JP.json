@@ -38298,7 +38298,6 @@
     "xpack.serverlessSearch.nav.mngt": "管理",
     "xpack.serverlessSearch.nav.performance": "パフォーマンス",
     "xpack.serverlessSearch.nav.projectSettings": "プロジェクト設定",
-    "xpack.serverlessSearch.nav.visualize": "ビジュアライゼーション",
     "xpack.serverlessSearch.next": "次へ",
     "xpack.serverlessSearch.optional": "オプション",
     "xpack.serverlessSearch.overview.footer.description": "Elasticsearchエンドポイントが設定され、いくつかの基本的なクエリが作成されました。これで、より高度なツールやユースケースを使いこなす準備が整いました。",
@@ -45086,7 +45085,6 @@
     "xpack.serverlessObservability.nav.ml.jobs": "異常検知",
     "xpack.serverlessObservability.nav.mngt": "管理",
     "xpack.serverlessObservability.nav.projectSettings": "プロジェクト設定",
-    "xpack.serverlessObservability.nav.synthetics": "Synthetics",
-    "xpack.serverlessObservability.nav.visualizations": "ビジュアライゼーション"
+    "xpack.serverlessObservability.nav.synthetics": "Synthetics"
   }
 }

@@ -44981,8 +44981,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.cpuUsage": "Utilisation CPU",
     "xpack.metricsData.assetDetails.metricsCharts.diskIOPS": "Entrées et sorties par seconde (IOPS) sur le disque",
     "xpack.metricsData.assetDetails.metricsCharts.diskThroughput": "Rendement du disque",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage": "Utilisation du disque",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available": "Disponible",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used": "Utilisé",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint": "Utilisation du disque par point de montage",
     "xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity": "Capacité CPU du nœud",

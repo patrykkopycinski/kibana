@@ -44951,8 +44951,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.cpuUsage": "CPU使用状況",
     "xpack.metricsData.assetDetails.metricsCharts.diskIOPS": "Disk IOPS",
     "xpack.metricsData.assetDetails.metricsCharts.diskThroughput": "Disk Throughput",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage": "ディスク使用量",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available": "利用可能",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used": "使用中",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint": "マウントポイント別ディスク使用量",
     "xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity": "ノード CPU 処理能力",

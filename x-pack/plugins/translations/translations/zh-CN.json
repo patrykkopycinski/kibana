@@ -44999,8 +44999,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.cpuUsage": "CPU 使用率",
     "xpack.metricsData.assetDetails.metricsCharts.diskIOPS": "磁盘 IOPS",
     "xpack.metricsData.assetDetails.metricsCharts.diskThroughput": "磁盘吞吐量",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage": "磁盘使用率",
-    "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available": "可用",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used": "已使用",
     "xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint": "磁盘使用率（按装载点）",
     "xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity": "节点 CPU 容量",

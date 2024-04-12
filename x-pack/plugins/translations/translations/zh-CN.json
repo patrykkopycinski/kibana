@@ -36081,7 +36081,6 @@
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.highImpact": "高影响度",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.lowImpact": "低影响度",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.mediumImpact": "中等影响度",
-    "xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality": "未分配关键度",
     "xpack.securitySolution.entityAnalytics.assetCriticality.pickerText": "更改资产关键度",
     "xpack.securitySolution.entityAnalytics.assetCriticality.saveButton": "保存",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "异常",

@@ -36038,7 +36038,6 @@
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.highImpact": "高い影響",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.lowImpact": "低い影響",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.mediumImpact": "中程度の影響",
-    "xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality": "重要度が割り当てられていません",
     "xpack.securitySolution.entityAnalytics.assetCriticality.pickerText": "アセット重要度を変更",
     "xpack.securitySolution.entityAnalytics.assetCriticality.saveButton": "保存",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "異常",

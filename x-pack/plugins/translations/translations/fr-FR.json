@@ -36069,7 +36069,6 @@
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.highImpact": "Fort impact",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.lowImpact": "Faible impact",
     "xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.mediumImpact": "Impact modéré",
-    "xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality": "Criticité non affectée",
     "xpack.securitySolution.entityAnalytics.assetCriticality.pickerText": "Modifier la criticité des ressources",
     "xpack.securitySolution.entityAnalytics.assetCriticality.saveButton": "Enregistrer",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "Anomalies",

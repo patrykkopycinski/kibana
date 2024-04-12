@@ -19877,7 +19877,6 @@
     "xpack.idxMgmt.enrichPolicies.executeModal.executeButton": "Exécuter",
     "xpack.idxMgmt.enrichPolicies.list.docsLink": "En savoir plus",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptButtonLabel": "Ajouter une politique d'enrichissement",
-    "xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription": "Utiliser une politique d'enrichissement pour ajouter des données à partir d'index existants dans des documents entrants lors de l'ingestion.",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptTitle": "Ajouter votre première politique d'enrichissement",
     "xpack.idxMgmt.enrichPolicies.list.errorReloadButton": "Recharger",
     "xpack.idxMgmt.enrichPolicies.list.errorTitle": "Impossible de charger les politiques d'enrichissement",

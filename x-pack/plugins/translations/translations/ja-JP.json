@@ -19854,7 +19854,6 @@
     "xpack.idxMgmt.enrichPolicies.executeModal.executeButton": "実行",
     "xpack.idxMgmt.enrichPolicies.list.docsLink": "詳細",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptButtonLabel": "エンリッチポリシーを追加",
-    "xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription": "エンリッチポリシーを使用して、インジェスト中に既存のインデックスのデータを受信ドキュメントに追加します。",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptTitle": "最初のエンリッチポリシーを追加",
     "xpack.idxMgmt.enrichPolicies.list.errorReloadButton": "再読み込み",
     "xpack.idxMgmt.enrichPolicies.list.errorTitle": "エンリッチポリシーを読み込めません",

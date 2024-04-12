@@ -19883,7 +19883,6 @@
     "xpack.idxMgmt.enrichPolicies.executeModal.executeButton": "执行",
     "xpack.idxMgmt.enrichPolicies.list.docsLink": "了解详情",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptButtonLabel": "添加扩充策略",
-    "xpack.idxMgmt.enrichPolicies.list.emptyPromptDescription": "使用扩充策略在采集期间将现在索引中的数据添加到传入文档中。",
     "xpack.idxMgmt.enrichPolicies.list.emptyPromptTitle": "添加您的首个扩充策略",
     "xpack.idxMgmt.enrichPolicies.list.errorReloadButton": "重新加载",
     "xpack.idxMgmt.enrichPolicies.list.errorTitle": "无法加载扩充策略",

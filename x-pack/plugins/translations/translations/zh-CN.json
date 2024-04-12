@@ -6888,7 +6888,6 @@
     "unifiedHistogram.lensTitle": "编辑可视化",
     "unifiedHistogram.saveVisualizationButton": "保存可视化",
     "unifiedHistogram.showChartButton": "显示图表",
-    "unifiedHistogram.suggestionSelectorPlaceholder": "选择可视化",
     "unifiedHistogram.timeIntervalSelector.autoIntervalButtonLabel": "自动时间间隔",
     "unifiedHistogram.timeIntervalSelector.timeIntervalPopoverTitle": "选择时间间隔",
     "unifiedHistogram.timeIntervalWithValueWarning": "警告",

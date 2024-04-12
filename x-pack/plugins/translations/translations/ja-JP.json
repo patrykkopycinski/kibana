@@ -6874,7 +6874,6 @@
     "unifiedHistogram.lensTitle": "ビジュアライゼーションを編集",
     "unifiedHistogram.saveVisualizationButton": "ビジュアライゼーションを保存",
     "unifiedHistogram.showChartButton": "グラフを表示",
-    "unifiedHistogram.suggestionSelectorPlaceholder": "ビジュアライゼーションを選択",
     "unifiedHistogram.timeIntervalSelector.autoIntervalButtonLabel": "自動間隔",
     "unifiedHistogram.timeIntervalSelector.timeIntervalPopoverTitle": "時間間隔を選択",
     "unifiedHistogram.timeIntervalWithValueWarning": "警告",

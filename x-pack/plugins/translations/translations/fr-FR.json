@@ -6885,7 +6885,6 @@
     "unifiedHistogram.lensTitle": "Modifier la visualisation",
     "unifiedHistogram.saveVisualizationButton": "Enregistrer la visualisation",
     "unifiedHistogram.showChartButton": "Afficher le graphique",
-    "unifiedHistogram.suggestionSelectorPlaceholder": "Sélectionner la visualisation",
     "unifiedHistogram.timeIntervalSelector.autoIntervalButtonLabel": "Intervalle automatique",
     "unifiedHistogram.timeIntervalSelector.timeIntervalPopoverTitle": "Sélectionner un intervalle de temps",
     "unifiedHistogram.timeIntervalWithValueWarning": "Avertissement",

@@ -40410,7 +40410,6 @@
     "xpack.synthetics.rules.tls.validAfterExpiringString": "Expire le {date}, dans {relativeDate} jours.",
     "xpack.synthetics.rules.tls.validBeforeExpiredString": "Valide depuis le {date}, il y a {relativeDate} jours.",
     "xpack.synthetics.rules.tls.validBeforeExpiringString": "Non valide jusqu'au {date}, dans {relativeDate} jours.",
-    "xpack.synthetics.server.monitors.invalidScheduleDetails": "Les minutes de la planification {schedule} fournies à la configuration du moniteur ne sont pas valides. Veuillez utiliser une planification moniteur prise en charge.",
     "xpack.synthetics.server.monitors.invalidSchemaError": "Le moniteur n'est pas un moniteur valide de type {type}",
     "xpack.synthetics.server.projectMonitors.invalidPrivateLocationError": "Emplacement privé non valide : \"{location}\". Supprimez-le ou remplacez-le par un emplacement privé valide.",
     "xpack.synthetics.server.projectMonitors.invalidPublicLocationError": "Emplacement non valide : \"{location}\". Supprimez-le ou remplacez-le par un emplacement valide.",

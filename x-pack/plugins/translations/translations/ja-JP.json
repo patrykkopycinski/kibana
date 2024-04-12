@@ -40381,7 +40381,6 @@
     "xpack.synthetics.rules.tls.validAfterExpiringString": "{relativeDate}日以内、{date}に期限切れになります。",
     "xpack.synthetics.rules.tls.validBeforeExpiredString": "{relativeDate}日前、{date}以降有効です。",
     "xpack.synthetics.rules.tls.validBeforeExpiringString": "今から{relativeDate}日間、{date}まで無効です。",
-    "xpack.synthetics.server.monitors.invalidScheduleDetails": "無効なスケジュール{schedule}分がモニター構成に入力されました。サポートされているモニタースケジュールを使用してください。",
     "xpack.synthetics.server.monitors.invalidSchemaError": "モニターは有効なタイプ{type}のモニターではありません。",
     "xpack.synthetics.server.projectMonitors.invalidPrivateLocationError": "非公開の場所\"{location}\"が無効です。削除するか、有効な非公開の場所で置換してください。",
     "xpack.synthetics.server.projectMonitors.invalidPublicLocationError": "場所\"{location}\"が無効です。削除するか、有効な場所で置換してください。",

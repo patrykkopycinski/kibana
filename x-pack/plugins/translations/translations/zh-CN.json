@@ -40427,7 +40427,6 @@
     "xpack.synthetics.rules.tls.validAfterExpiringString": "将在{relativeDate} 天后，即 {date}到期。",
     "xpack.synthetics.rules.tls.validBeforeExpiredString": "自 {relativeDate} 天前，即 {date}开始生效。",
     "xpack.synthetics.rules.tls.validBeforeExpiringString": "从现在到 {date}的 {relativeDate} 天里无效。",
-    "xpack.synthetics.server.monitors.invalidScheduleDetails": "提供给监测配置的 {schedule} 分钟计划无效。请使用受支持的监测计划。",
     "xpack.synthetics.server.monitors.invalidSchemaError": "监测不是 {type} 类型的有效监测",
     "xpack.synthetics.server.projectMonitors.invalidPrivateLocationError": "以下专用位置无效：“{location}”。请将其移除或替换为有效的专用位置。",
     "xpack.synthetics.server.projectMonitors.invalidPublicLocationError": "位置无效：“{location}”。请将其移除或替换为有效位置。",

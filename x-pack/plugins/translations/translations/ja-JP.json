@@ -30534,7 +30534,6 @@
     "xpack.observabilityAiAssistant.conversationStartTitle": "会話を開始しました",
     "xpack.observabilityAiAssistant.couldNotFindConversationTitle": "会話が見つかりません",
     "xpack.observabilityAiAssistant.disclaimer.disclaimerLabel": "このチャットは、LLMプロバイダーとの統合によって提供されています。LLMは、正しくない情報を正しい情報であるかのように表示する場合があることが知られています。Elasticは、構成やLLMプロバイダーへの接続、お客様のナレッジベースへの接続はサポートしますが、LLMの応答については責任を負いません。",
-    "xpack.observabilityAiAssistant.disclaimer.title": "AI Assistant for Observabilityへようこそ",
     "xpack.observabilityAiAssistant.emptyConversationTitle": "新しい会話",
     "xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase": "ナレッジベースをセットアップできませんでした",
     "xpack.observabilityAiAssistant.errorUpdatingConversation": "会話を更新できませんでした",

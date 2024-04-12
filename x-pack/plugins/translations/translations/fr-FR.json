@@ -30562,7 +30562,6 @@
     "xpack.observabilityAiAssistant.conversationStartTitle": "a démarré une conversation",
     "xpack.observabilityAiAssistant.couldNotFindConversationTitle": "Conversation introuvable",
     "xpack.observabilityAiAssistant.disclaimer.disclaimerLabel": "Ce chat est soutenu par une intégration avec votre fournisseur LLM. Il arrive que les grands modèles de langage (LLM) présentent comme correctes des informations incorrectes. Elastic prend en charge la configuration ainsi que la connexion au fournisseur LLM et à votre base de connaissances, mais n'est pas responsable des réponses fournies par le LLM.",
-    "xpack.observabilityAiAssistant.disclaimer.title": "Bienvenue dans le nouvel assistant IA pour Observability",
     "xpack.observabilityAiAssistant.emptyConversationTitle": "Nouvelle conversation",
     "xpack.observabilityAiAssistant.errorSettingUpKnowledgeBase": "Impossible de configurer la base de connaissances",
     "xpack.observabilityAiAssistant.errorUpdatingConversation": "Impossible de mettre à jour la conversation",

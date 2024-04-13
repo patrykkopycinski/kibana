@@ -6056,8 +6056,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.warmDescription": "不再更新但仍会查询此索引",
     "securitySolutionPackages.entityAnalytics.navigation": "实体分析",
     "securitySolutionPackages.entityAnalytics.pageDesc": "通过实体分析检测来自您网络中用户和主机的威胁",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails": "创建对话",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName": "创建对话",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails": "编辑案例设置",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName": "案例设置",
     "securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails": "删除案例和注释",

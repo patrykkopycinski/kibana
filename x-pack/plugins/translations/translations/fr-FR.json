@@ -6053,8 +6053,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.warmDescription": "L'index n'est plus mis à jour mais il est toujours interrogé",
     "securitySolutionPackages.entityAnalytics.navigation": "Analyse des entités",
     "securitySolutionPackages.entityAnalytics.pageDesc": "Détecter les menaces des utilisateurs et des hôtes de votre réseau avec l'Analyse des entités",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails": "Créer des conversations",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName": "Créer des Conversations",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails": "Modifier les paramètres du cas",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName": "Paramètres du cas",
     "securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails": "Supprimer les cas et les commentaires",

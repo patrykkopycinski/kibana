@@ -6043,8 +6043,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.warmDescription": "インデックスは更新されませんが、まだ照会されています",
     "securitySolutionPackages.entityAnalytics.navigation": "エンティティ分析",
     "securitySolutionPackages.entityAnalytics.pageDesc": "Entity Analyticsを使用して、ネットワーク内のユーザーとホストから脅威を検出",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureDetails": "会話を作成",
-    "securitySolutionPackages.features.featureRegistry.assistant.createConversationSubFeatureName": "会話を作成",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails": "ケース設定の編集",
     "securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName": "ケース設定",
     "securitySolutionPackages.features.featureRegistry.deleteSubFeatureDetails": "ケースとコメントを削除",

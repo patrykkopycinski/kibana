@@ -6467,7 +6467,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription": "ES|QLは以下の演算子をサポートしています。",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommands": "処理コマンド",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription": "処理コマンドは、行や列を追加、削除、変更することによって入力テーブルを変更します。ES|QLは以下の処理コマンドをサポートしています。",
-    "textBasedEditor.query.textBasedLanguagesEditor.run": "実行",
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "クエリを実行",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "ソースコマンド",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "フィードバックを送信",

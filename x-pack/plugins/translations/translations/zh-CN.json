@@ -6481,7 +6481,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription": "ES|QL 支持以下运算符：",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommands": "处理命令",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription": "处理命令会通过添加、移除或更改行和列来更改输入表。ES|QL 支持以下处理命令。",
-    "textBasedEditor.query.textBasedLanguagesEditor.run": "运行",
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "运行查询",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "源命令",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "提交反馈",

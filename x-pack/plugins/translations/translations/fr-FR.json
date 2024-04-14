@@ -6478,7 +6478,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.operatorsDocumentationESQLDescription": "ES|QL est compatible avec les opérateurs suivants :",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommands": "Traitement des commandes",
     "textBasedEditor.query.textBasedLanguagesEditor.processingCommandsDescription": "Le traitement des commandes transforme un tableau des entrées par l'ajout, le retrait ou la modification des lignes et des colonnes. ES|QL est compatible avec le traitement des commandes suivant.",
-    "textBasedEditor.query.textBasedLanguagesEditor.run": "Exécuter",
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "Exécuter la requête",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "Commandes sources",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "Soumettre un commentaire",

@@ -42252,7 +42252,6 @@
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsRange": "{start, number} - {end, number}",
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsType": "日志{total, plural, other {条目}}",
     "xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption": "{value} 次运行",
-    "xpack.triggersActionsUI.sections.globalAlertsPage.featureRuleTypes": "{feature} 规则类型",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage": "规则类型 {ruleTypeId} 已禁用，因为它需要{licenseRequired}许可证。继续前往“许可证管理”查看升级选项。",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle": "需要{licenseRequired}许可证",
     "xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle": "{connectorName}",

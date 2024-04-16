@@ -42236,7 +42236,6 @@
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsRange": "{start, number} - {end, number}",
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsType": "{total, plural, one {entrée} other {entrées}} de log",
     "xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption": "{value} exécutions",
-    "xpack.triggersActionsUI.sections.globalAlertsPage.featureRuleTypes": "{feature} types de règles",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage": "Le type de règle {ruleTypeId} est désactivé, car il requiert une licence {licenseRequired}. Continuez vers Gestion des licences pour afficher les options de mise à niveau.",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle": "Licence {licenseRequired} requise",
     "xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle": "{connectorName}",

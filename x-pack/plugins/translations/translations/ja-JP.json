@@ -42205,7 +42205,6 @@
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsRange": "{start, number} - {end, number}",
     "xpack.triggersActionsUI.sections.eventLogPaginationStatus.paginationResultsType": "ログ{total, plural, other {エントリ}}",
     "xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption": "{value}実行",
-    "xpack.triggersActionsUI.sections.globalAlertsPage.featureRuleTypes": "{feature}ルールタイプ",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseMessage": "ルールタイプ{ruleTypeId}は無効です。{licenseRequired}ライセンスが必要です。アップグレードオプションを表示するには、［ライセンス管理］に移動してください。",
     "xpack.triggersActionsUI.sections.manageLicense.manageLicenseTitle": "{licenseRequired}ライセンスが必要です",
     "xpack.triggersActionsUI.sections.preconfiguredConnectorForm.flyoutTitle": "{connectorName}",

@@ -38043,8 +38043,6 @@
     "xpack.securitySolution.timeline.source": "Source",
     "xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle": "Analyseur",
     "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline": "ES|QL",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel": "Version d'évaluation technique",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
     "xpack.securitySolution.timeline.tabs.eqlTabTimelineTitle": "Corrélation",
     "xpack.securitySolution.timeline.tabs.notesTabTimelineTitle": "Notes",
     "xpack.securitySolution.timeline.tabs.pinnedTabTimelineTitle": "Épinglé",

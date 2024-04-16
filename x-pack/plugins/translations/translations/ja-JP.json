@@ -38012,8 +38012,6 @@
     "xpack.securitySolution.timeline.source": "送信元",
     "xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle": "アナライザー",
     "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline": "ES|QL",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel": "テクニカルプレビュー",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.securitySolution.timeline.tabs.eqlTabTimelineTitle": "相関関係",
     "xpack.securitySolution.timeline.tabs.notesTabTimelineTitle": "メモ",
     "xpack.securitySolution.timeline.tabs.pinnedTabTimelineTitle": "ピン付け済み",

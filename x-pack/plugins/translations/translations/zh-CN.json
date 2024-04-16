@@ -38055,8 +38055,6 @@
     "xpack.securitySolution.timeline.source": "源",
     "xpack.securitySolution.timeline.tabs.analyserTabTimelineTitle": "分析器",
     "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline": "ES|QL",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewLabel": "技术预览",
-    "xpack.securitySolution.timeline.tabs.discoverEsqlInTimeline.technicalPreviewTooltip": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.securitySolution.timeline.tabs.eqlTabTimelineTitle": "相关性",
     "xpack.securitySolution.timeline.tabs.notesTabTimelineTitle": "备注",
     "xpack.securitySolution.timeline.tabs.pinnedTabTimelineTitle": "已固定",

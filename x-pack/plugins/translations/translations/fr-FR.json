@@ -15267,7 +15267,6 @@
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription": "Ces règles s'appliquent aux documents pendant la phrase de filtrage de l'intégration.",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesTitle": "Règles de base",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicTabTitle": "Règles de base",
-    "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.betaDescription": "Les règles de synchronisation sont une fonctionnalité en version bêta. Les fonctionnalités bêta sont susceptibles d'être modifiées et ne sont pas couvertes par l'accord de niveau de service (SLA) des fonctionnalités de la version générale (GA). Elastic prévoit de faire passer cette fonctionnalité en disponibilité générale dans une prochaine version.",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.description": "Planifiez et modifiez les règles ici avant de les appliquer à la prochaine synchronisation.",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.revertButtonTitle": "Revenir aux règles actives",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title": "Ébauches de règles",

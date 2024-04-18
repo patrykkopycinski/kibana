@@ -15245,7 +15245,6 @@
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription": "これらのルールは、統合フィルタリングフェーズ中にドキュメントに適用されます。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesTitle": "基本ルール",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicTabTitle": "基本ルール",
-    "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.betaDescription": "同期ルールはベータ機能です。ベータ版の機能は変更される可能性があり、一般リリース（GA）機能のサポートSLAではカバーされません。Elasticは将来のリリースでこの機能をGAに昇格させる予定です。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.description": "次回の同期に適用する前に、ここでルールを計画して編集してください。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.revertButtonTitle": "アクティブなルールに戻す",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title": "ドラフトルール",

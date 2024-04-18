@@ -15272,7 +15272,6 @@
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesDescription": "在集成筛选阶段，这些规则适用于文档。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicRulesTitle": "基本规则",
     "xpack.enterpriseSearch.content.index.connector.syncRules.basicTabTitle": "基本规则",
-    "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.betaDescription": "同步规则为公测版功能。公测版功能可能会有所更改，并且不受公开发行版 (GA) 功能支持 SLA 的约束。Elastic 计划在未来版本中将此功能提升到 GA 版本。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.description": "在此规划和编辑规则，然后将其应用到下次同步。",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.revertButtonTitle": "恢复为活动规则",
     "xpack.enterpriseSearch.content.index.connector.syncRules.flyout.title": "起草规则",

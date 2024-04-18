@@ -692,7 +692,6 @@
     "core.euiAutoRefresh.buttonLabelOff": "自動更新はオフです",
     "core.euiBasicTable.noItemsMessage": "項目が見つかりません",
     "core.euiBasicTable.selectAllRows": "すべての行を選択",
-    "core.euiBasicTable.selectThisRow": "この行を選択",
     "core.euiBottomBar.screenReaderAnnouncement": "ドキュメントの最後には、新しいリージョンランドマークとページレベルのコントロールがあります。",
     "core.euiBottomBar.screenReaderHeading": "ページレベルのコントロール",
     "core.euiBreadcrumb.collapsedBadge.ariaLabel": "折りたたまれたブレッドクラムを表示",

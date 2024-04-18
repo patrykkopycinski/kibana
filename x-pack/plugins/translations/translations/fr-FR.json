@@ -692,7 +692,6 @@
     "core.euiAutoRefresh.buttonLabelOff": "L'actualisation automatique est désactivée",
     "core.euiBasicTable.noItemsMessage": "Aucun élément n'a été trouvé",
     "core.euiBasicTable.selectAllRows": "Sélectionner toutes les lignes",
-    "core.euiBasicTable.selectThisRow": "Sélectionner cette ligne",
     "core.euiBottomBar.screenReaderAnnouncement": "Il y a un nouveau repère de région avec des commandes de niveau de page à la fin du document.",
     "core.euiBottomBar.screenReaderHeading": "Commandes de niveau de page",
     "core.euiBreadcrumb.collapsedBadge.ariaLabel": "Voir le fil d’Ariane réduit",

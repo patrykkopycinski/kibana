@@ -694,7 +694,6 @@
     "core.euiAutoRefresh.buttonLabelOff": "自动刷新已关闭",
     "core.euiBasicTable.noItemsMessage": "找不到项目",
     "core.euiBasicTable.selectAllRows": "选择所有行",
-    "core.euiBasicTable.selectThisRow": "选择此行",
     "core.euiBottomBar.screenReaderAnnouncement": "有页面级别控件位于文档结尾的新地区地标。",
     "core.euiBottomBar.screenReaderHeading": "页面级别控件",
     "core.euiBreadcrumb.collapsedBadge.ariaLabel": "查看折叠的痕迹导航",

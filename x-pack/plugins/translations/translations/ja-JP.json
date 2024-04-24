@@ -2558,7 +2558,6 @@
     "domDragDrop.dropTargets.swap": "入れ替える",
     "domDragDrop.keyboardInstructions": "スペースまたはEnterを押してドラッグを開始します。ドラッグするときには、左右の矢印キーを使用して、ドロップ対象間を移動します。もう一度スペースまたはEnterを押すと終了します。",
     "domDragDrop.keyboardInstructionsReorder": "スペースまたはEnterを押してドラッグを開始します。ドラッグするときには、上下矢印キーを使用すると、グループの項目を並べ替えます。左右矢印キーを使用すると、グループの外側でドロップ対象を選択します。もう一度スペースまたはEnterを押すと終了します。",
-    "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} が追加されました",
     "embeddableApi.attributeService.saveToLibraryError": "保存中にエラーが発生しました。エラー：{errorMessage}",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} を読み込めません。Elasticsearch と Kibanaのデフォルトのディストリビューションを適切なライセンスでアップグレードしてください。",
     "embeddableApi.reactEmbeddable.factoryAlreadyExistsError": "タイプ\"{key}\"の埋め込み可能ファクトリはすでに登録されています。",

@@ -2564,7 +2564,6 @@
     "domDragDrop.dropTargets.swap": "Permuter",
     "domDragDrop.keyboardInstructions": "Appuyez sur la barre d'espace ou sur Entrée pour commencer à faire glisser. Lors du glissement, utilisez les touches fléchées gauche/droite pour vous déplacer entre les cibles de dépôt. Appuyez à nouveau sur la barre d'espace ou sur Entrée pour terminer.",
     "domDragDrop.keyboardInstructionsReorder": "Appuyez sur la barre d'espace ou sur Entrée pour commencer à faire glisser. Lors du glissement, utilisez les touches fléchées haut/bas pour réorganiser les éléments dans le groupe et les touches gauche/droite pour choisir les cibles de dépôt à l'extérieur du groupe. Appuyez à nouveau sur la barre d'espace ou sur Entrée pour terminer.",
-    "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} a été ajouté.",
     "embeddableApi.attributeService.saveToLibraryError": "Une erreur s'est produite lors de l'enregistrement. Erreur : {errorMessage}.",
     "embeddableApi.errors.embeddableFactoryNotFound": "Impossible de charger {type}. Veuillez effectuer une mise à niveau vers la distribution par défaut d'Elasticsearch et de Kibana avec la licence appropriée.",
     "embeddableApi.reactEmbeddable.factoryAlreadyExistsError": "Une usine incorporable pour le type {key} est déjà enregistrée.",

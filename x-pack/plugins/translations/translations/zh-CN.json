@@ -2566,7 +2566,6 @@
     "domDragDrop.dropTargets.swap": "交换",
     "domDragDrop.keyboardInstructions": "按空格键或 enter 键开始拖动。拖动时，请左右箭头键在拖动目标之间移动。再次按空格键或 enter 键结束操作。",
     "domDragDrop.keyboardInstructionsReorder": "按空格键或 enter 键开始拖动。拖动时，请使用上下箭头键重新排列组中的项目，使用左右箭头键在组之外选择拖动目标。再次按空格键或 enter 键结束操作。",
-    "embeddableApi.addPanel.savedObjectAddedToContainerSuccessMessageTitle": "{savedObjectName} 已添加",
     "embeddableApi.attributeService.saveToLibraryError": "保存时出错。错误：{errorMessage}",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} 无法加载。请升级到具有适当许可的默认 Elasticsearch 和 Kibana 分发。",
     "embeddableApi.reactEmbeddable.factoryAlreadyExistsError": "已注册类型为 {key} 的可嵌入工厂。",

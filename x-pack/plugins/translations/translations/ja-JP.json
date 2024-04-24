@@ -5612,7 +5612,6 @@
     "searchConnectors.nativeConnectors.databaseLabel": "データベース",
     "searchConnectors.nativeConnectors.dropbox.name": "Dropbox",
     "searchConnectors.nativeConnectors.enableDLS.label": "ドキュメントレベルのセキュリティを有効化",
-    "searchConnectors.nativeConnectors.enableDLS.tooltip": "ドキュメントレベルのセキュリティにより、Google Driveで設定されたIDと権限がElasticsearchでも維持されます。これにより、このインデックス内のドキュメントに対するユーザーやグループの読み取りアクセスを制限し、パーソナライズすることができます。アクセス制御の同期により、Elasticsearchドキュメント内のメタデータは常に最新の状態に保たれます。",
     "searchConnectors.nativeConnectors.enableSSL.label": "SSLを有効にする",
     "searchConnectors.nativeConnectors.gdrive.label": "Google DriveサービスアカウントJSON",
     "searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.label": "最大同時HTTPリクエスト数",

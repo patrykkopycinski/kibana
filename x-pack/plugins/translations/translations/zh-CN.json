@@ -5623,7 +5623,6 @@
     "searchConnectors.nativeConnectors.databaseLabel": "数据库",
     "searchConnectors.nativeConnectors.dropbox.name": "Dropbox",
     "searchConnectors.nativeConnectors.enableDLS.label": "启用文档级别安全性",
-    "searchConnectors.nativeConnectors.enableDLS.tooltip": "文档级别安全性确保在 Elasticsearch 中维护在 Google 云端硬盘中设置的身份和权限。这样，您就可以限制用户和组对此索引中的文档具有的读取访问权限并对其进行个性化。访问控制同步将确保此元数据在 Elasticsearch 文档中保持最新。",
     "searchConnectors.nativeConnectors.enableSSL.label": "启用 SSL",
     "searchConnectors.nativeConnectors.gdrive.label": "Google 云端硬盘服务帐户 JSON",
     "searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.label": "最大并发 HTTP 请求数",

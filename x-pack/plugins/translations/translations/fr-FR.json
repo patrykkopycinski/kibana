@@ -5619,7 +5619,6 @@
     "searchConnectors.nativeConnectors.databaseLabel": "Base de données",
     "searchConnectors.nativeConnectors.dropbox.name": "Dropbox",
     "searchConnectors.nativeConnectors.enableDLS.label": "Activer la sécurité au niveau du document",
-    "searchConnectors.nativeConnectors.enableDLS.tooltip": "La sécurité au niveau du document préserve dans Elasticsearch les identités et permissions paramétrées dans Google Drive. Vous pouvez ainsi restreindre et personnaliser l'accès en lecture des utilisateurs et des groupes pour les documents dans cet index. La synchronisation de contrôle d'accès garantit que ces métadonnées sont correctement actualisées dans vos documents Elasticsearch.",
     "searchConnectors.nativeConnectors.enableSSL.label": "Activer SSL",
     "searchConnectors.nativeConnectors.gdrive.label": "Compte de service JSON Google Drive",
     "searchConnectors.nativeConnectors.gdrive.maxHTTPRequest.label": "Requêtes HTTP simultanées maximales",

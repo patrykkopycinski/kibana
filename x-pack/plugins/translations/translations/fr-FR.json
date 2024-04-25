@@ -34397,7 +34397,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "Seuil",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "Supprimer les alertes pour",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel": "Supprimer les alertes par",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend": "Facultatif (version d'évaluation technique)",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel": "Taille de la fenêtre d’historique",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle": "Importer la requête à partir de la chronologie enregistrée",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton": "Importer la requête à partir de la chronologie enregistrée",

@@ -34366,7 +34366,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "しきい値",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "アラートを非表示",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel": "アラートを非表示",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend": "任意（テクニカルプレビュー）",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel": "履歴ウィンドウサイズ",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle": "保存されたタイムラインからクエリをインポート",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton": "保存されたタイムラインからクエリをインポート",

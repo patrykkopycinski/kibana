@@ -34409,7 +34409,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "阈值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "阻止以下项的告警",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel": "阻止告警的依据",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend": "可选（技术预览）",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.historyWindowSizeLabel": "历史记录窗口大小",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineModalTitle": "从已保存时间线导入查询",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.importTimelineQueryButton": "从已保存时间线导入查询",

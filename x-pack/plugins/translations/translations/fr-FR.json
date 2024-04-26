@@ -25931,8 +25931,6 @@
     "xpack.ml.components.jobAnomalyScoreEmbeddable.displayName": "Couloir d'anomalie",
     "xpack.ml.components.mlAnomalyExplorerEmbeddable.description": "Affichez les résultats de détection des anomalies dans un graphique.",
     "xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName": "Graphique d'anomalie",
-    "xpack.ml.components.mlSingleMetricViewerEmbeddable.description": "Affichez dans un graphique les résultats d'indicateurs uniques de détection des anomalies.",
-    "xpack.ml.components.mlSingleMetricViewerEmbeddable.displayName": "Visionneuse d’indicateur unique",
     "xpack.ml.controls.checkboxShowCharts.showChartsCheckboxLabel": "Afficher les graphiques",
     "xpack.ml.controls.selectInterval.ariaLabel": "Sélectionner l'intervalle",
     "xpack.ml.controls.selectInterval.autoLabel": "Auto",

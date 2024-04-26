@@ -25904,8 +25904,6 @@
     "xpack.ml.components.jobAnomalyScoreEmbeddable.displayName": "異常スイムレーン",
     "xpack.ml.components.mlAnomalyExplorerEmbeddable.description": "グラフに異常検知結果を表示します。",
     "xpack.ml.components.mlAnomalyExplorerEmbeddable.displayName": "異常グラフ",
-    "xpack.ml.components.mlSingleMetricViewerEmbeddable.description": "グラフに異常検知単一メトリック結果を表示します。",
-    "xpack.ml.components.mlSingleMetricViewerEmbeddable.displayName": "シングルメトリックビューアー",
     "xpack.ml.controls.checkboxShowCharts.showChartsCheckboxLabel": "チャートを表示",
     "xpack.ml.controls.selectInterval.ariaLabel": "間隔を選択",
     "xpack.ml.controls.selectInterval.autoLabel": "自動",

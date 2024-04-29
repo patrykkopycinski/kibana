@@ -13180,8 +13180,6 @@
     "xpack.customBranding.settings.subscriptionRequiredLink.text": "Abonnement requis.",
     "xpack.customBranding.uiSettings.validate.customLogo.badFile": "Désolé, ce fichier ne convient pas. Veuillez essayer un autre fichier image.",
     "xpack.customBranding.uiSettings.validate.customLogo.tooLarge": "Désolé, ce fichier est trop volumineux. Le fichier image doit être inférieur à 200 kilo-octets.",
-    "xpack.datasetQuality.degradedDocsColumnTooltip": "Le pourcentage de documents dégradés – des documents avec la propriété {ignoredProperty} – dans votre ensemble de données. {visualQueue}",
-    "xpack.datasetQuality.degradedDocsQualityDescription": "plus grand que {minimimPercentage} %",
     "xpack.datasetQuality.tableSummary": "Affichage de {items} ensembles de données",
     "xpack.datasetQuality.actionsColumnName": "Actions",
     "xpack.datasetQuality.appTitle": "Ensembles de données",

@@ -13185,8 +13185,6 @@
     "xpack.customBranding.settings.subscriptionRequiredLink.text": "需要订阅。",
     "xpack.customBranding.uiSettings.validate.customLogo.badFile": "抱歉，该文件无效。请尝试其他图像文件。",
     "xpack.customBranding.uiSettings.validate.customLogo.tooLarge": "抱歉，该文件过大。图像文件必须小于 200 千字节。",
-    "xpack.datasetQuality.degradedDocsColumnTooltip": "您的数据集中已降级文档的百分比，即包含 {ignoredProperty} 属性的文档。{visualQueue}",
-    "xpack.datasetQuality.degradedDocsQualityDescription": "大于 {minimimPercentage}%",
     "xpack.datasetQuality.tableSummary": "显示 {items} 个数据集",
     "xpack.datasetQuality.actionsColumnName": "操作",
     "xpack.datasetQuality.appTitle": "数据集",

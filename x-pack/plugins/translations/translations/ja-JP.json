@@ -13160,8 +13160,6 @@
     "xpack.customBranding.settings.subscriptionRequiredLink.text": "サブスクリプションが必要です。",
     "xpack.customBranding.uiSettings.validate.customLogo.badFile": "このファイルは動作しません。別の画像ファイルを試してください。",
     "xpack.customBranding.uiSettings.validate.customLogo.tooLarge": "このファイルは大きすぎます。画像ファイルは200キロバイト未満でなければなりません。",
-    "xpack.datasetQuality.degradedDocsColumnTooltip": "データセットにおける劣化したドキュメント（{ignoredProperty}プロパティのドキュメント）の割合。{visualQueue}",
-    "xpack.datasetQuality.degradedDocsQualityDescription": "{minimimPercentage}%を超える",
     "xpack.datasetQuality.tableSummary": "{items}データセットを表示中",
     "xpack.datasetQuality.actionsColumnName": "アクション",
     "xpack.datasetQuality.appTitle": "データセット",

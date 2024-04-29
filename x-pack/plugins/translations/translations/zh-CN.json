@@ -24142,7 +24142,6 @@
     "xpack.logsExplorer.flyoutDetail.accordion.title.cloud": "云",
     "xpack.logsExplorer.flyoutDetail.accordion.title.other": "其他",
     "xpack.logsExplorer.flyoutDetail.accordion.title.serviceInfra": "服务和基础设施",
-    "xpack.logsExplorer.flyoutDetail.docViews.overview": "概览",
     "xpack.logsExplorer.flyoutDetail.label.cloudAvailabilityZone": "云可用区",
     "xpack.logsExplorer.flyoutDetail.label.cloudInstanceId": "云实例 ID",
     "xpack.logsExplorer.flyoutDetail.label.cloudProjectId": "云项目 ID",

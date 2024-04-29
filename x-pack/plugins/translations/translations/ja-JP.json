@@ -24109,7 +24109,6 @@
     "xpack.logsExplorer.flyoutDetail.accordion.title.cloud": "クラウド",
     "xpack.logsExplorer.flyoutDetail.accordion.title.other": "その他",
     "xpack.logsExplorer.flyoutDetail.accordion.title.serviceInfra": "サービスとインフラストラクチャー",
-    "xpack.logsExplorer.flyoutDetail.docViews.overview": "概要",
     "xpack.logsExplorer.flyoutDetail.label.cloudAvailabilityZone": "クラウドアベイラビリティゾーン",
     "xpack.logsExplorer.flyoutDetail.label.cloudInstanceId": "クラウドインスタンスID",
     "xpack.logsExplorer.flyoutDetail.label.cloudProjectId": "クラウドプロジェクトID",

@@ -24134,7 +24134,6 @@
     "xpack.logsExplorer.flyoutDetail.accordion.title.cloud": "Cloud",
     "xpack.logsExplorer.flyoutDetail.accordion.title.other": "Autre",
     "xpack.logsExplorer.flyoutDetail.accordion.title.serviceInfra": "Service et Infrastructure",
-    "xpack.logsExplorer.flyoutDetail.docViews.overview": "Aperçu",
     "xpack.logsExplorer.flyoutDetail.label.cloudAvailabilityZone": "Zone de disponibilité du cloud",
     "xpack.logsExplorer.flyoutDetail.label.cloudInstanceId": "ID d'instance du cloud",
     "xpack.logsExplorer.flyoutDetail.label.cloudProjectId": "ID de projet du cloud",

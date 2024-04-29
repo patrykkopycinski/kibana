@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { LogsOverview } from './logs_overview';
 
-export * from './constants';
-export * as fieldConstants from './field_constants';
-export * from './hooks';
-export * from './utils';
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default LogsOverview;

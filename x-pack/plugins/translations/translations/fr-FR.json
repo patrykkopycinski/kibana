@@ -26460,7 +26460,6 @@
     "xpack.ml.datavisualizer.selector.startTrialButtonLabel": "Commencer l'essai",
     "xpack.ml.datavisualizer.selector.startTrialTitle": "Commencer l'essai",
     "xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg": "Utilisez les requêtes ES|QL pour visualiser les informations de n'importe quel ensemble de données.",
-    "xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg": "ES|QL est en version d'évaluation technique.",
     "xpack.ml.datavisualizer.selector.uploadFileButtonLabel": "Sélectionner un fichier",
     "xpack.ml.datavisualizer.selector.useESQLButtonLabel": "Utiliser ES|QL",
     "xpack.ml.datavisualizer.startTrial.subscriptionsLinkText": "Abonnement Platinum ou Enterprise",

@@ -26433,7 +26433,6 @@
     "xpack.ml.datavisualizer.selector.startTrialButtonLabel": "トライアルを開始",
     "xpack.ml.datavisualizer.selector.startTrialTitle": "トライアルを開始",
     "xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg": "ES|QLクエリを使用して、データセットに関する情報を可視化します。",
-    "xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg": "ES|QLはテクニカルプレビューです。",
     "xpack.ml.datavisualizer.selector.uploadFileButtonLabel": "ファイルを選択",
     "xpack.ml.datavisualizer.selector.useESQLButtonLabel": "ES|QLを使用",
     "xpack.ml.datavisualizer.startTrial.subscriptionsLinkText": "PlatinumまたはEnterprise サブスクリプション",

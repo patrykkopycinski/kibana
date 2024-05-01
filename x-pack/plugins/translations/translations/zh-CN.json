@@ -26471,7 +26471,6 @@
     "xpack.ml.datavisualizer.selector.startTrialButtonLabel": "开始试用",
     "xpack.ml.datavisualizer.selector.startTrialTitle": "开始试用",
     "xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg": "使用 ES|QL 查询可视化有关任何数据集的信息。",
-    "xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg": "ES|QL 处于技术预览状态。",
     "xpack.ml.datavisualizer.selector.uploadFileButtonLabel": "选择文件",
     "xpack.ml.datavisualizer.selector.useESQLButtonLabel": "使用 ES|QL",
     "xpack.ml.datavisualizer.startTrial.subscriptionsLinkText": "白金级或企业级订阅",

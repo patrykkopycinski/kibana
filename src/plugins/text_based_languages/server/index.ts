@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// we are expecting to retrieve this from an API instead
-// https://github.com/elastic/elasticsearch/issues/107069
-export const ESQL_LATEST_VERSION = '2024.04.01';
-export const ENABLE_ESQL = 'enableESQL';
+export const plugin = async () => {
+  const { TextBasedLanguagesServerPlugin } = await import('./plugin');
+  return new TextBasedLanguagesServerPlugin();
+};

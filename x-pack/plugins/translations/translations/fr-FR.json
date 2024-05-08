@@ -17660,7 +17660,6 @@
     "xpack.fleet.fleetServerSetupPermissionDeniedErrorMessage": "Le serveur Fleet doit être configuré. Pour cela, le privilège de cluster {roleName} est requis. Contactez votre administrateur.",
     "xpack.fleet.googleCloudShell.guide.description": "La commande Google Cloud Shell ci-dessous permet de créer toutes les ressources nécessaires à l'évaluation de la sécurité de vos projets GCP. En savoir plus sur {learnMore}.",
     "xpack.fleet.homeIntegration.tutorialModule.noticeText": "{notePrefix} Une version plus récente de ce module est {availableAsIntegrationLink}. Pour en savoir plus sur les intégrations et le nouvel agent Elastic Agent, lisez notre {blogPostLink}.",
-    "xpack.fleet.integration.settings.versionInfo.updatesAvailableBody": "Passez à la version {latestVersion} pour bénéficier des fonctionnalités les plus récentes.",
     "xpack.fleet.integrations.confirmUpdateModal.body.agentCount": "{agentCount, plural, one {# agent} other {# agents}}",
     "xpack.fleet.integrations.confirmUpdateModal.body.policyCount": "{packagePolicyCount, plural, one {# politique d’intégration} other {# politiques d’intégration}}",
     "xpack.fleet.integrations.installPackage.installingPackageButtonLabel": "Installation des ressources {title} en cours",

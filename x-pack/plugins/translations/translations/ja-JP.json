@@ -17637,7 +17637,6 @@
     "xpack.fleet.fleetServerSetupPermissionDeniedErrorMessage": "Fleetサーバーを設定する必要があります。これには{roleName}クラスター権限が必要です。管理者にお問い合わせください。",
     "xpack.fleet.googleCloudShell.guide.description": "以下のGoogle Cloud Shellコマンドは、GCPプロジェクトのセキュリティ態勢を評価するために必要なすべてのリソースを作成します。{learnMore}の詳細をご覧ください。",
     "xpack.fleet.homeIntegration.tutorialModule.noticeText": "{notePrefix}このモジュールの新しいバージョンは{availableAsIntegrationLink}です。統合と新しいElasticエージェントの詳細については、{blogPostLink}をお読みください。",
-    "xpack.fleet.integration.settings.versionInfo.updatesAvailableBody": "バージョン{latestVersion}にアップグレードして最新の機能を入手してください。",
     "xpack.fleet.integrations.confirmUpdateModal.body.agentCount": "{agentCount, plural, other  {# 個のエージェント}}",
     "xpack.fleet.integrations.confirmUpdateModal.body.policyCount": "{packagePolicyCount, plural, other  {# 個の統合ポリシー}}",
     "xpack.fleet.integrations.installPackage.installingPackageButtonLabel": "{title} アセットをインストールしています",

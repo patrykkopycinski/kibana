@@ -25593,7 +25593,6 @@
     "xpack.ml.actions.createADJobFromLens": "Créer une tâche de détection des anomalies",
     "xpack.ml.actions.createADJobFromPatternAnalysis": "Créer une tâche de catégorisation et de détection des anomalies",
     "xpack.ml.actions.editAnomalyChartsTitle": "Modifier les graphiques d'anomalies",
-    "xpack.ml.actions.editSwimlaneTitle": "Modifier le couloir",
     "xpack.ml.actions.openInAnomalyExplorerTitle": "Ouvrir dans Anomaly Explorer",
     "xpack.ml.actions.runPatternAnalysis.description": "Déclenché lorsque l'utilisateur souhaite effectuer une analyse du modèle sur un champ.",
     "xpack.ml.actions.runPatternAnalysis.title": "Exécuter l'analyse du modèle",

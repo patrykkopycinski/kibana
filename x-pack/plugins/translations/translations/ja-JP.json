@@ -25566,7 +25566,6 @@
     "xpack.ml.actions.createADJobFromLens": "異常検知ジョブの作成",
     "xpack.ml.actions.createADJobFromPatternAnalysis": "分類異常検知ジョブを作成",
     "xpack.ml.actions.editAnomalyChartsTitle": "異常グラフを編集",
-    "xpack.ml.actions.editSwimlaneTitle": "スイムレーンの編集",
     "xpack.ml.actions.openInAnomalyExplorerTitle": "異常エクスプローラーで開く",
     "xpack.ml.actions.runPatternAnalysis.description": "ユーザーがフィールドに対してパターン分析を実行する場合にトリガーされます。",
     "xpack.ml.actions.runPatternAnalysis.title": "パターン分析を実行",

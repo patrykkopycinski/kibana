@@ -25604,7 +25604,6 @@
     "xpack.ml.actions.createADJobFromLens": "创建异常检测作业",
     "xpack.ml.actions.createADJobFromPatternAnalysis": "创建归类异常检测作业",
     "xpack.ml.actions.editAnomalyChartsTitle": "编辑异常图表",
-    "xpack.ml.actions.editSwimlaneTitle": "编辑泳道",
     "xpack.ml.actions.openInAnomalyExplorerTitle": "在 Anomaly Explorer 中打开",
     "xpack.ml.actions.runPatternAnalysis.description": "在用户希望对字段运行模式分析时触发。",
     "xpack.ml.actions.runPatternAnalysis.title": "运行模式分析",

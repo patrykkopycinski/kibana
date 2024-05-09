@@ -1,25 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { AggregateQuery, Filter } from '@kbn/es-query';
-import type { Query } from '@kbn/es-query';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { type UiCounterMetricType } from '@kbn/analytics';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import type { DataVisualizerTableState } from '../../../../../common/types';
-import type { SamplingOption } from '../../../../../common/types/field_stats';
-import type { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
-import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { type BehaviorSubject } from 'rxjs';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
-export interface FieldStatisticTableEmbeddableProps {
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
+
+export interface FieldStatisticsTableEmbeddableState extends SerializedTitles {
   /**
    * Data view is required for esql:false or non-ESQL mode
    */
@@ -27,7 +42,7 @@ export interface FieldStatisticTableEmbeddableProps {
   /**
    * Kibana saved search object
    */
-  savedSearch?: SavedSearch | null;
+  savedSearch?: SavedSearch;
   /**
    * Kibana query
    */
@@ -68,7 +83,7 @@ export interface FieldStatisticTableEmbeddableProps {
    */
   fieldsToFetch?: string[];
   /**
-   * Optional total documents count provided to help table have context of the fetch size
+   * Total documents optionally provided to help table have context of the fetch size
    * so it can reduce redundant API requests
    */
   totalDocuments?: number;
@@ -89,44 +104,64 @@ export interface FieldStatisticTableEmbeddableProps {
    * For example: visibleFields: ['field1', 'field2'] => will show ['field1', 'field1.keyword', 'field2', 'field2.keyword']
    */
   shouldGetSubfields?: boolean;
+  /**
+   * Force refresh the table
+   */
   lastReloadRequestTime?: number;
-  onTableUpdate?: (update: Partial<DataVisualizerTableState>) => void;
 }
-
-export type ESQLDataVisualizerGridEmbeddableState = Omit<
-  FieldStatisticTableEmbeddableProps,
-  'query'
-> & { query?: ESQLQuery };
-
-export type FieldStatisticsTableEmbeddableState = FieldStatisticTableEmbeddableProps &
-  SerializedTitles;
 interface FieldStatisticsTableEmbeddableComponentApi {
   showDistributions$?: BehaviorSubject<boolean>;
-}
-
-export type OnAddFilter = (field: DataViewField | string, value: string, type: '+' | '-') => void;
-export interface FieldStatisticsTableEmbeddableParentApi {
-  executionContext?: { value: string };
-  embeddableState$: BehaviorSubject<FieldStatisticsTableEmbeddableState>;
-  overrideServices?: Partial<DataVisualizerStartDependencies>;
-  onAddFilter?: OnAddFilter;
 }
 
 export type FieldStatisticsTableEmbeddableApi =
   DefaultEmbeddableApi<FieldStatisticsTableEmbeddableState> &
     FieldStatisticsTableEmbeddableComponentApi;
 
-export type DataVisualizerGridEmbeddableApi = Partial<FieldStatisticsTableEmbeddableState>;
-
-export type ESQLDefaultLimitSizeOption = '5000' | '10000' | '100000';
-
-export interface ESQLDataVisualizerIndexBasedAppState
-  extends Omit<DataVisualizerIndexBasedAppState, 'query'> {
-  limitSize: ESQLDefaultLimitSizeOption;
-  query?: ESQLQuery;
-}
-
-export interface ESQLDataVisualizerIndexBasedPageUrlState {
-  pageKey: typeof DATA_VISUALIZER_INDEX_VIEWER;
-  pageUrlState: Required<ESQLDataVisualizerIndexBasedAppState>;
+export interface FieldStatisticsTableProps {
+  /**
+   * Determines which columns are displayed
+   */
+  columns: string[];
+  /**
+   * The used data view
+   */
+  dataView: DataView;
+  /**
+   * Saved search description
+   */
+  searchDescription?: string;
+  /**
+   * Saved search title
+   */
+  searchTitle?: string;
+  /**
+   * Optional saved search
+   */
+  savedSearch?: SavedSearch;
+  /**
+   * Optional query to update the table content
+   */
+  query?: Query | AggregateQuery;
+  /**
+   * Filters query to update the table content
+   */
+  filters?: Filter[];
+  /**
+   * State container with persisted settings
+   */
+  stateContainer?: DiscoverStateContainer;
+  /**
+   * Callback to add a filter to filter bar
+   */
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  /**
+   * Search session id to save to or restore from
+   */
+  searchSessionId?: string;
 }

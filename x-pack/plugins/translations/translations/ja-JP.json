@@ -13498,8 +13498,6 @@
     "xpack.dataVisualizer.index.actionsPanel.discoverAppTitle": "Discover",
     "xpack.dataVisualizer.index.actionsPanel.exploreTitle": "データの調査",
     "xpack.dataVisualizer.index.actionsPanel.viewIndexInDiscoverDescription": "インデックスのドキュメントを調査します。",
-    "xpack.dataVisualizer.index.components.grid.description": "データの可視化",
-    "xpack.dataVisualizer.index.components.grid.displayName": "データビジュアライザーグリッド",
     "xpack.dataVisualizer.index.dataGrid.actionsColumnLabel": "アクション",
     "xpack.dataVisualizer.index.dataGrid.deleteDataViewFieldTitle": "データビューフィールドを削除",
     "xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription": "データビューフィールドを削除",

@@ -13524,8 +13524,6 @@
     "xpack.dataVisualizer.index.actionsPanel.discoverAppTitle": "Discover",
     "xpack.dataVisualizer.index.actionsPanel.exploreTitle": "浏览您的数据",
     "xpack.dataVisualizer.index.actionsPanel.viewIndexInDiscoverDescription": "浏览您的索引中的文档。",
-    "xpack.dataVisualizer.index.components.grid.description": "可视化数据",
-    "xpack.dataVisualizer.index.components.grid.displayName": "数据可视化工具网格",
     "xpack.dataVisualizer.index.dataGrid.actionsColumnLabel": "操作",
     "xpack.dataVisualizer.index.dataGrid.deleteDataViewFieldTitle": "删除数据视图字段",
     "xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription": "删除数据视图字段",

@@ -13519,8 +13519,6 @@
     "xpack.dataVisualizer.index.actionsPanel.discoverAppTitle": "Discover",
     "xpack.dataVisualizer.index.actionsPanel.exploreTitle": "Explorer vos données",
     "xpack.dataVisualizer.index.actionsPanel.viewIndexInDiscoverDescription": "Explorez les documents de votre index.",
-    "xpack.dataVisualizer.index.components.grid.description": "Visualiser les données",
-    "xpack.dataVisualizer.index.components.grid.displayName": "Grille du visualiseur de données",
     "xpack.dataVisualizer.index.dataGrid.actionsColumnLabel": "Actions",
     "xpack.dataVisualizer.index.dataGrid.deleteDataViewFieldTitle": "Supprimer le champ de la vue de données",
     "xpack.dataVisualizer.index.dataGrid.deleteIndexPatternFieldDescription": "Supprimer le champ de la vue de données",

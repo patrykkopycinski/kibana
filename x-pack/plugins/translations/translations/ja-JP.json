@@ -24299,7 +24299,6 @@
     "xpack.maps.source.esGrid.compositePaginationErrorMessage": "{layerName} はリクエスト過多の原因になります。「グリッド解像度」を下げるか、またはトップ用語「メトリック」の数を減らしてください。",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "グリッド解像度パラメーターが認識されません：{resolution}",
     "xpack.maps.source.esJoin.countLabel": "{indexPatternLabel}の数",
-    "xpack.maps.source.esql.getColumnsErrorMsg": "列を読み込めません。{errorMessage}",
     "xpack.maps.source.esql.multipleGeometryColumnErrorMsg": "1のみが許可されているときには、Elasticsearch ES|QLクエリには{count}ジオメトリ列があります。DROPまたはKEEPを使用して、列を絞り込んでください。",
     "xpack.maps.source.esSearch.clusterScalingLabel": "結果が{maxResultWindow}を超えたらクラスターを表示",
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "検索への応答を geoJson 機能コレクションに変換できません。エラー：{errorMsg}",

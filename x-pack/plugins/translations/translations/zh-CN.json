@@ -24332,7 +24332,6 @@
     "xpack.maps.source.esGrid.compositePaginationErrorMessage": "{layerName} 正导致过多的请求。降低“网格分辨率”和/或减少热门词“指标”的数量。",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "无法识别网格分辨率参数：{resolution}",
     "xpack.maps.source.esJoin.countLabel": "{indexPatternLabel} 的计数",
-    "xpack.maps.source.esql.getColumnsErrorMsg": "无法加载列。{errorMessage}",
     "xpack.maps.source.esql.multipleGeometryColumnErrorMsg": "只允许 1 列时，Elasticsearch ES|QL 查询具有 {count} 个几何图形列。请使用“DROP”或“KEEP”缩小列范围。",
     "xpack.maps.source.esSearch.clusterScalingLabel": "结果超过 {maxResultWindow} 个时显示集群",
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "无法将搜索响应转换成 geoJson 功能集合，错误：{errorMsg}",

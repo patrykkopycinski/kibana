@@ -24324,7 +24324,6 @@
     "xpack.maps.source.esGrid.compositePaginationErrorMessage": "{layerName} génère trop de requêtes. Réduisez \"Résolution de la grille\" et/ou réduisez le nombre d'indicateurs de premier terme.",
     "xpack.maps.source.esGrid.resolutionParamErrorMessage": "Paramètre de résolution de grille non reconnu : {resolution}",
     "xpack.maps.source.esJoin.countLabel": "compte de {indexPatternLabel}",
-    "xpack.maps.source.esql.getColumnsErrorMsg": "Impossible de charger les colonnes. {errorMessage}",
     "xpack.maps.source.esql.multipleGeometryColumnErrorMsg": "La requête Elasticsearch ES|QL comporte {count} colonnes géométriques alors qu'une seule est autorisée. Utilisez 'DROP' (abandonner) ou 'KEEP' (conserver) pour réduire les colonnes.",
     "xpack.maps.source.esSearch.clusterScalingLabel": "Afficher les clusters lorsque les résultats dépassent {maxResultWindow}",
     "xpack.maps.source.esSearch.convertToGeoJsonErrorMsg": "Impossible de convertir la réponse de la recherche à la collecte de fonctionnalités geoJson, erreur : {errorMsg}",

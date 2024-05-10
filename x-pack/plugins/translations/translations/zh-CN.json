@@ -18077,7 +18077,6 @@
     "xpack.fleet.agentPolicyList.addButton": "创建代理策略",
     "xpack.fleet.agentPolicyList.agentsColumnTitle": "代理",
     "xpack.fleet.agentPolicyList.clearFiltersLinkText": "清除筛选",
-    "xpack.fleet.agentPolicyList.descriptionColumnTitle": "描述",
     "xpack.fleet.agentPolicyList.loadingAgentPoliciesMessage": "正在加载代理策略…...",
     "xpack.fleet.agentPolicyList.nameColumnTitle": "名称",
     "xpack.fleet.agentPolicyList.noAgentPoliciesPrompt": "无代理策略",

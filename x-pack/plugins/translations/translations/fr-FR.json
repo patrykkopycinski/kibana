@@ -18071,7 +18071,6 @@
     "xpack.fleet.agentPolicyList.addButton": "Créer une stratégie d'agent",
     "xpack.fleet.agentPolicyList.agentsColumnTitle": "Agents",
     "xpack.fleet.agentPolicyList.clearFiltersLinkText": "Effacer les filtres",
-    "xpack.fleet.agentPolicyList.descriptionColumnTitle": "Description",
     "xpack.fleet.agentPolicyList.loadingAgentPoliciesMessage": "Chargement des stratégies d'agent en cours…",
     "xpack.fleet.agentPolicyList.nameColumnTitle": "Nom",
     "xpack.fleet.agentPolicyList.noAgentPoliciesPrompt": "Aucune stratégie d'agent",

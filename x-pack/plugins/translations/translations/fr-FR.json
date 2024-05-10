@@ -2474,7 +2474,6 @@
     "discover.noResults.suggestion.syntaxPopoverDescriptionHeader": "Description",
     "discover.noResults.suggestion.syntaxPopoverExampleHeader": "Exemple",
     "discover.noResults.suggestion.tryText": "Voici quelques solutions à essayer :",
-    "discover.noResults.suggestion.viewAllMatchesButtonText": "Afficher toutes les correspondances",
     "discover.notifications.invalidTimeRangeText": "La plage temporelle spécifiée n'est pas valide (de : \"{from}\" à \"{to}\").",
     "discover.notifications.invalidTimeRangeTitle": "Plage temporelle non valide",
     "discover.notifications.notSavedSearchTitle": "La recherche \"{savedSearchTitle}\" n'a pas été enregistrée.",

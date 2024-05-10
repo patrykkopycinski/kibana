@@ -2476,7 +2476,6 @@
     "discover.noResults.suggestion.syntaxPopoverDescriptionHeader": "描述",
     "discover.noResults.suggestion.syntaxPopoverExampleHeader": "示例",
     "discover.noResults.suggestion.tryText": "这里是要尝试的一些内容：",
-    "discover.noResults.suggestion.viewAllMatchesButtonText": "查看所有匹配项",
     "discover.notifications.invalidTimeRangeText": "提供的时间范围无效。（自：“{from}”，至：“{to}”）",
     "discover.notifications.invalidTimeRangeTitle": "时间范围无效",
     "discover.notifications.notSavedSearchTitle": "搜索“{savedSearchTitle}”未保存。",

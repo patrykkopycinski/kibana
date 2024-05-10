@@ -2472,7 +2472,6 @@
     "discover.noResults.suggestion.syntaxPopoverDescriptionHeader": "説明",
     "discover.noResults.suggestion.syntaxPopoverExampleHeader": "例",
     "discover.noResults.suggestion.tryText": "次の方法を試してください：",
-    "discover.noResults.suggestion.viewAllMatchesButtonText": "すべての一致を表示",
     "discover.notifications.invalidTimeRangeText": "指定された時間範囲が無効です。（開始：'{from}'、終了：'{to}'）",
     "discover.notifications.invalidTimeRangeTitle": "無効な時間範囲",
     "discover.notifications.notSavedSearchTitle": "検索「{savedSearchTitle}」は保存されませんでした。",

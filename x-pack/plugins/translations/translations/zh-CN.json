@@ -8285,7 +8285,6 @@
     "xpack.aiops.searchPanel.sampleProbabilityNumber": "{sampleProbability, plural, other {#}}",
     "xpack.aiops.searchPanel.totalDocCountLabel": "文档总数：{strongTotalCount}",
     "xpack.aiops.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
-    "xpack.aiops.actions.editChangePointChartsName": "编辑更改点图表",
     "xpack.aiops.actions.openChangePointInMlAppName": "在 Aiops 实验室中打开",
     "xpack.aiops.analysis.analysisTypeDipCallOutContent": "选定偏差时间范围中的中位日志速率低于基线。因此，分析结果表将显示基线时间范围内数量较少或偏差时间范围内缺失的具有统计意义的项目。“文档计数”列统计基线时间范围内的文档数量。",
     "xpack.aiops.analysis.analysisTypeDipCallOutContentFallback": "偏差时间范围不包含任何文档。因此，结果将显示基线时间范围的主要日志消息类别和字段值。",

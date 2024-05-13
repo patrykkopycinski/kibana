@@ -8270,7 +8270,6 @@
     "xpack.aiops.searchPanel.sampleProbabilityNumber": "{sampleProbability, plural, other {#}}",
     "xpack.aiops.searchPanel.totalDocCountLabel": "合計ドキュメント数：{strongTotalCount}",
     "xpack.aiops.searchPanel.totalDocCountNumber": "{totalCount, plural, other  {#}}",
-    "xpack.aiops.actions.editChangePointChartsName": "変化点チャートを編集",
     "xpack.aiops.actions.openChangePointInMlAppName": "AIOps Labsで開く",
     "xpack.aiops.analysis.analysisTypeDipCallOutContent": "選択された偏差時間範囲におけるログレートの中央値は、ベースラインよりも低くなります。そのため、分析結果テーブルでは、ベースライン時間範囲内では統計的に有意な項目が、偏差値時間範囲内では数が少ないか欠落していることが示されています。\"ドキュメントカウント\"列は、基準時間範囲のドキュメント量です。",
     "xpack.aiops.analysis.analysisTypeDipCallOutContentFallback": "偏差時間範囲にはドキュメントが含まれていません。したがって、この結果は、ベースライン時間範囲の上位のログメッセージカテゴリーとフィールド値を示しています。",

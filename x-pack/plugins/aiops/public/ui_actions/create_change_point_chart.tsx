@@ -10,16 +10,10 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
-import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
-import type { MlCoreSetup } from '../plugin';
-
-export const EDIT_SWIMLANE_PANEL_ACTION = 'editSwimlanePanelAction';
-
-export type CreateSwimlanePanelActionContext = EmbeddableApiContext & {
-  embeddable: AnomalySwimLaneEmbeddableApi;
-};
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { AiopsPluginStartDeps } from '../types';
+import type { ChangePointChartActionContext } from './change_point_action_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -29,25 +23,25 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
-export function createAddSwimlanePanelAction(
-  getStartServices: MlCoreSetup['getStartServices']
-): UiActionsActionDefinition<CreateSwimlanePanelActionContext> {
+export function createAddChangePointChartAction(
+  coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps
+): UiActionsActionDefinition<ChangePointChartActionContext> {
   return {
-    id: 'create-anomaly-swimlane',
+    id: 'create-change-point-chart',
     grouping: [
       {
-        id: PLUGIN_ID,
-        getDisplayName: () => ML_APP_NAME,
-        getIconType: () => PLUGIN_ICON,
+        id: 'ml',
+        getDisplayName: () =>
+          i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
+            defaultMessage: 'Machine Learning',
+          }),
+        getIconType: () => 'machineLearningApp',
       },
     ],
     getDisplayName: () =>
-      i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.displayName', {
-        defaultMessage: 'Anomaly swim lane',
-      }),
-    getDisplayNameTooltip: () =>
-      i18n.translate('xpack.ml.components.jobAnomalyScoreEmbeddable.description', {
-        defaultMessage: 'View anomaly detection results in a timeline.',
+      i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
+        defaultMessage: 'Change point detection',
       }),
     async isCompatible(context: EmbeddableApiContext) {
       return Boolean(await parentApiIsCompatible(context.embeddable));
@@ -56,28 +50,21 @@ export function createAddSwimlanePanelAction(
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
-      const [coreStart, pluginStart] = await getStartServices();
-
       try {
-        const { resolveAnomalySwimlaneUserInput } = await import(
-          '../embeddables/anomaly_swimlane/anomaly_swimlane_setup_flyout'
+        const { resolveEmbeddableChangePointUserInput } = await import(
+          '../embeddables/change_point_chart/resolve_change_point_config_input'
         );
 
-        const initialState = await resolveAnomalySwimlaneUserInput(
-          {
-            ...coreStart,
-            ...pluginStart,
-          },
+        const initialState = await resolveEmbeddableChangePointUserInput(
+          coreStart,
+          pluginStart,
           context.embeddable,
           context.embeddable.uuid
         );
 
         presentationContainerParent.addNewPanel({
-          panelType: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-          initialState: {
-            ...initialState,
-            title: initialState.panelTitle,
-          },
+          panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+          initialState,
         });
       } catch (e) {
         return Promise.reject();

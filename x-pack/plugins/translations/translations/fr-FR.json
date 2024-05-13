@@ -8282,7 +8282,6 @@
     "xpack.aiops.searchPanel.sampleProbabilityNumber": "{sampleProbability, plural, other {#}}",
     "xpack.aiops.searchPanel.totalDocCountLabel": "Total des documents : {strongTotalCount}",
     "xpack.aiops.searchPanel.totalDocCountNumber": "{totalCount, plural, other {#}}",
-    "xpack.aiops.actions.editChangePointChartsName": "Modifier les graphiques de points de modification",
     "xpack.aiops.actions.openChangePointInMlAppName": "Ouvrir dans AIOps Labs",
     "xpack.aiops.analysis.analysisTypeDipCallOutContent": "Le taux de log médian pour la plage temporelle d'écart-type sélectionnée est inférieur à la référence de base. Le tableau des résultats de l'analyse présente donc des éléments statistiquement significatifs inclus dans la plage temporelle de base qui sont moins nombreux ou manquant dans la plage temporelle d'écart-type. La colonne \"doc count\" (décompte de documents) renvoie à la quantité de documents dans la plage temporelle de base.",
     "xpack.aiops.analysis.analysisTypeDipCallOutContentFallback": "La plage temporelle de déviation ne contient aucun document. Les résultats montrent donc les catégories de message des meilleurs logs et les valeurs des champs pour la période de référence.",

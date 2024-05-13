@@ -9,20 +9,17 @@
     ]
   },
   "include": [
+    "index.ts",
     "**/*.ts",
     "**/*.tsx",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/i18n",
     "@kbn/core-application-browser",
+    "@kbn/i18n",
     "@kbn/share-plugin",
-    "@kbn/i18n-react",
-    "@kbn/security-plugin",
     "@kbn/console-plugin",
-    "@kbn/ui-theme",
-    "@kbn/try-in-console"
   ]
 }

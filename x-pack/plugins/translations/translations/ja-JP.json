@@ -13163,7 +13163,6 @@
     "xpack.datasetQuality.expandLabel": "拡張",
     "xpack.datasetQuality.fetchDatasetDetailsFailed": "データセット詳細を取得できませんでした。",
     "xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected": "データセットが選択されていません",
-    "xpack.datasetQuality.fetchDatasetsEstimatedDataFailed": "データセット推定データを取得できませんでした。デフォルト値が表示されます。",
     "xpack.datasetQuality.fetchDatasetStatsFailed": "データセットを取得できませんでした。",
     "xpack.datasetQuality.fetchDegradedStatsFailed": "劣化したドキュメント情報を取得できませんでした。",
     "xpack.datasetQuality.flyoutCancelText": "キャンセル",

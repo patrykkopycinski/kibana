@@ -13188,7 +13188,6 @@
     "xpack.datasetQuality.expandLabel": "展开",
     "xpack.datasetQuality.fetchDatasetDetailsFailed": "无法获取数据集详情。",
     "xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected": "尚未选择任何数据集",
-    "xpack.datasetQuality.fetchDatasetsEstimatedDataFailed": "无法获取数据集估计数据。将显示默认值。",
     "xpack.datasetQuality.fetchDatasetStatsFailed": "无法获取数据集。",
     "xpack.datasetQuality.fetchDegradedStatsFailed": "无法获取已降级文档信息。",
     "xpack.datasetQuality.flyoutCancelText": "取消",

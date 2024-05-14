@@ -27803,7 +27803,6 @@
     "xpack.ml.severitySelector.formControlAriaLabel": "选择严重性阈值",
     "xpack.ml.severitySelector.formControlLabel": "严重性",
     "xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel": "面板标题",
-    "xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel": "取消",
     "xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel": "确认配置",
     "xpack.ml.SingleMetricViewerEmbeddable.setupModal.title": "Single Metric Viewer 配置",
     "xpack.ml.singleMetricViewerPageLabel": "Single Metric Viewer",

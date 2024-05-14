@@ -27765,7 +27765,6 @@
     "xpack.ml.severitySelector.formControlAriaLabel": "重要度のしきい値を選択",
     "xpack.ml.severitySelector.formControlLabel": "深刻度",
     "xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel": "パネルタイトル",
-    "xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel": "キャンセル",
     "xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel": "構成を確認",
     "xpack.ml.SingleMetricViewerEmbeddable.setupModal.title": "シングルメトリックビューアー構成",
     "xpack.ml.singleMetricViewerPageLabel": "シングルメトリックビューアー",

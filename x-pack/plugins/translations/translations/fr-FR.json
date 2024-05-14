@@ -27792,7 +27792,6 @@
     "xpack.ml.severitySelector.formControlAriaLabel": "Sélectionner le seuil de sévérité",
     "xpack.ml.severitySelector.formControlLabel": "Sévérité",
     "xpack.ml.singleMetricViewerEmbeddable.panelTitleLabel": "Titre du panneau",
-    "xpack.ml.singleMetricViewerEmbeddable.setupModal.cancelButtonLabel": "Annuler",
     "xpack.ml.singleMetricViewerEmbeddable.setupModal.confirmButtonLabel": "Confirmer les configurations",
     "xpack.ml.SingleMetricViewerEmbeddable.setupModal.title": "Configuration de la visionneuse d'indicateur unique",
     "xpack.ml.singleMetricViewerPageLabel": "Single Metric Viewer (Visionneuse d'indicateur unique)",

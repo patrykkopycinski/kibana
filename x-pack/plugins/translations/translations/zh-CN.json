@@ -29909,7 +29909,6 @@
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.incompleteTitle": "传输日志到 Elastic Observability",
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle": "等待传输日志......",
     "xpack.observability_onboarding.installElasticAgent.troubleshooting": "故障排除",
-    "xpack.observability_onboarding.steps.back": "返回",
     "xpack.observability_onboarding.steps.exploreLogs": "浏览日志",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.description": "集成会精简将您的数据连接到 Elastic Stack 的过程。",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.label": "集成详情",

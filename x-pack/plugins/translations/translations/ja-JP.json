@@ -29869,7 +29869,6 @@
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.incompleteTitle": "Elasticオブザーバビリティにログを送信",
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle": "ログの送信を待機中...",
     "xpack.observability_onboarding.installElasticAgent.troubleshooting": "トラブルシューティング",
-    "xpack.observability_onboarding.steps.back": "戻る",
     "xpack.observability_onboarding.steps.exploreLogs": "ログを探索",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.description": "統合により、Elastic Stackへのデータ接続が効率化されます。",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.label": "統合の詳細",

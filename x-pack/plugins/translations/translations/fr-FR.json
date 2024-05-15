@@ -29898,7 +29898,6 @@
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.incompleteTitle": "Transfert des logs dans Elastic Observability",
     "xpack.observability_onboarding.installElasticAgent.progress.logsIngest.loadingTitle": "En attente du transfert des logs…",
     "xpack.observability_onboarding.installElasticAgent.troubleshooting": "Résolution des problèmes",
-    "xpack.observability_onboarding.steps.back": "Retour",
     "xpack.observability_onboarding.steps.exploreLogs": "Explorer les logs",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.description": "Les intégrations rationalisent la connexion de vos donnés avec la Suite Elastic.",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.label": "Détails de l'intégration",

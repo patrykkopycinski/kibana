@@ -23077,7 +23077,6 @@
     "xpack.lens.app.saveVisualization.successNotificationText": "保存された'{visTitle}'",
     "xpack.lens.app.settings": "設定",
     "xpack.lens.app.settingsAriaLabel": "Lens設定メニューを開く",
-    "xpack.lens.app.share.panelTitle": "ビジュアライゼーション",
     "xpack.lens.app.shareButtonDisabledWarning": "ビジュアライゼーションには共有するデータがありません。",
     "xpack.lens.app.shareTitle": "共有",
     "xpack.lens.app.shareTitleAria": "ビジュアライゼーションを共有",

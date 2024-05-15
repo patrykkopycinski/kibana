@@ -23110,7 +23110,6 @@
     "xpack.lens.app.saveVisualization.successNotificationText": "已保存“{visTitle}”",
     "xpack.lens.app.settings": "设置",
     "xpack.lens.app.settingsAriaLabel": "打开 Lens 设置菜单",
-    "xpack.lens.app.share.panelTitle": "可视化",
     "xpack.lens.app.shareButtonDisabledWarning": "此可视化没有可共享的数据。",
     "xpack.lens.app.shareTitle": "共享",
     "xpack.lens.app.shareTitleAria": "共享可视化",

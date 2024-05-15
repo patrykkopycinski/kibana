@@ -23102,7 +23102,6 @@
     "xpack.lens.app.saveVisualization.successNotificationText": "\"{visTitle}\" enregistré",
     "xpack.lens.app.settings": "Paramètres",
     "xpack.lens.app.settingsAriaLabel": "Ouvrir le menu de paramètres Lens",
-    "xpack.lens.app.share.panelTitle": "visualisation",
     "xpack.lens.app.shareButtonDisabledWarning": "La visualisation ne comprend aucune donnée à partager.",
     "xpack.lens.app.shareTitle": "Partager",
     "xpack.lens.app.shareTitleAria": "Partager la visualisation",

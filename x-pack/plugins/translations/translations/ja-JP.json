@@ -5770,7 +5770,6 @@
     "searchConnectors.searchIndices.identitySync.columnTitle": "IDが同期されました",
     "searchConnectors.searchIndices.syncJobType.columnTitle": "コンテンツ同期タイプ",
     "searchConnectors.searchIndices.syncStatus.columnTitle": "ステータス",
-    "searchConnectors.server.connectors.configuration.error": "コネクターが見つかりませんでした",
     "searchConnectors.server.connectors.scheduling.error": "ドキュメントが見つかりませんでした",
     "searchConnectors.syncJobs.flyout.canceledTitle": "同期がキャンセルされました",
     "searchConnectors.syncJobs.flyout.completedTitle": "同期完了",

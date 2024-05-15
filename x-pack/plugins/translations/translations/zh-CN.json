@@ -5781,7 +5781,6 @@
     "searchConnectors.searchIndices.identitySync.columnTitle": "身份已同步",
     "searchConnectors.searchIndices.syncJobType.columnTitle": "内容同步类型",
     "searchConnectors.searchIndices.syncStatus.columnTitle": "状态",
-    "searchConnectors.server.connectors.configuration.error": "找不到连接器",
     "searchConnectors.server.connectors.scheduling.error": "无法找到文档",
     "searchConnectors.syncJobs.flyout.canceledTitle": "同步已取消",
     "searchConnectors.syncJobs.flyout.completedTitle": "同步已完成",

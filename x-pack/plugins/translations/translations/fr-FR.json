@@ -5777,7 +5777,6 @@
     "searchConnectors.searchIndices.identitySync.columnTitle": "Identités synchronisées",
     "searchConnectors.searchIndices.syncJobType.columnTitle": "Type de synchronisation de contenu",
     "searchConnectors.searchIndices.syncStatus.columnTitle": "Statut",
-    "searchConnectors.server.connectors.configuration.error": "Connecteur introuvable",
     "searchConnectors.server.connectors.scheduling.error": "Document introuvable",
     "searchConnectors.syncJobs.flyout.canceledTitle": "Synchronisation annulée",
     "searchConnectors.syncJobs.flyout.completedTitle": "Synchronisation terminée",

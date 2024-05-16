@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { EuiText, useEuiTheme } from '@elastic/eui';
@@ -13,10 +14,10 @@ import {
   contentHeaderTooltipParagraph1,
   contentHeaderTooltipParagraph2,
   contentLabel,
-} from '../../common/translations';
+} from '../../../../data_types/logs/translations';
+import * as constants from '../../../../../../common/data_types/logs/constants';
 import { TooltipButton } from './tooltip_button';
 import { FieldWithToken } from './field_with_token';
-import * as constants from '../../../../common/constants';
 
 export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const { euiTheme } = useEuiTheme();

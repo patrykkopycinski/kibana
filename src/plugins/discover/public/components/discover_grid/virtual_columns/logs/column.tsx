@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
+import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
 import { ContentColumnTooltip } from './column_tooltips/content_column_tooltip';
-import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../common/constants';
 import { ResourceColumnTooltip } from './column_tooltips/resource_column_tooltip';
 
 export const renderColumn =

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './constants';
-export * as fieldConstants from './field_constants';
-export * from './hooks';
-export * from './utils';
-export * from './data_types';
+export interface SmartFieldGridColumnOptions {
+  type: 'smart-field';
+  smartField: 'content' | 'resource';
+  fallbackFields: string[];
+  width?: number;
+}

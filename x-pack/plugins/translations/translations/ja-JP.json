@@ -24075,7 +24075,6 @@
     "xpack.logsExplorer.dataTable.header.popover.resource": "リソース",
     "xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph": "次のようなドキュメントのソースに関する情報を提供するフィールド：",
     "xpack.logsExplorer.flyoutDetail.title": "ログの詳細",
-    "xpack.logsExplorer.grid.closePopover": "ポップオーバーを閉じる",
     "xpack.logsExplorer.popoverAction.closePopover": "ポップオーバーを閉じる",
     "xpack.logsExplorer.popoverAction.copyValue": "値をコピー",
     "xpack.logsExplorer.popoverAction.filterFor": "フィルター",

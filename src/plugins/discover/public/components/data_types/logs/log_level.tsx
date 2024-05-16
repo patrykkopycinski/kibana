@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { FlyoutDoc } from '../../../common/document';
+import { LogFlyoutDoc } from '@kbn/discover-utils/src';
+import * as constants from '../../../../common/data_types/logs/constants';
 import { ChipWithPopover } from './popover_chip';
-import * as constants from '../../../common/constants';
 
 const LEVEL_DICT = {
   error: 'danger',
@@ -19,7 +20,7 @@ const LEVEL_DICT = {
 } as const;
 
 interface LogLevelProps {
-  level: FlyoutDoc['log.level'];
+  level: LogFlyoutDoc['log.level'];
   dataTestSubj?: string;
   renderInFlyout?: boolean;
 }

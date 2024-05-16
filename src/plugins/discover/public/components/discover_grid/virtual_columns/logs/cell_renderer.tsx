@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { LogsExplorerDiscoverServices } from '../../controller';
-import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
-import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../common/constants';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { VirtualColumnServiceProvider } from '../../../../application/main/hooks/grid_customisations/use_virtual_column_services';
+import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
 import { Content } from './content';
 import { Resource } from './resource';
 
 export const renderCell =
-  (type: string, { data }: { data: LogsExplorerDiscoverServices['data'] }) =>
+  (type: string, { data }: { data: DataPublicPluginStart }) =>
   (props: DataGridCellValueElementProps) => {
     const { dataView } = props;
     const virtualColumnServices = {

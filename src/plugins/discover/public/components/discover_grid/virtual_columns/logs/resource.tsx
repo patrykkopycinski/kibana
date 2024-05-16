@@ -1,18 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ChipWithPopover } from '../common/popover_chip';
-import * as constants from '../../../common/constants';
-import { getUnformattedResourceFields } from '../../utils/resource';
-import { LogDocument } from '../../../common/document';
+import { LogDocument } from '@kbn/discover-utils/src';
+import * as constants from '../../../../../common/data_types/logs/constants';
+import { getUnformattedResourceFields } from './utils/resource';
+import { ChipWithPopover } from '../../../data_types/logs/popover_chip';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 

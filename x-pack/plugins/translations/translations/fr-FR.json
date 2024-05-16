@@ -24100,7 +24100,6 @@
     "xpack.logsExplorer.dataTable.header.popover.resource": "Ressource",
     "xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph": "Les champs fournissant des informations sur la source du document, comme :",
     "xpack.logsExplorer.flyoutDetail.title": "Détails du log",
-    "xpack.logsExplorer.grid.closePopover": "Fermer la fenêtre contextuelle",
     "xpack.logsExplorer.popoverAction.closePopover": "Fermer la fenêtre contextuelle",
     "xpack.logsExplorer.popoverAction.copyValue": "Copier la valeur",
     "xpack.logsExplorer.popoverAction.filterFor": "Filtrer sur",

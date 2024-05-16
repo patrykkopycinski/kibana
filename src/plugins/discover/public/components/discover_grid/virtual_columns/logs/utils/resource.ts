@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { LogDocument, ResourceFields } from '../../common/document';
-import * as constants from '../../common/constants';
-import { getFieldFromDoc } from './get_field_from_flattened_doc';
+import { getFieldFromDoc, LogDocument, ResourceFields } from '@kbn/discover-utils/src';
+import * as constants from '../../../../../../common/data_types/logs/constants';
 
 export const getUnformattedResourceFields = (doc: LogDocument): ResourceFields => {
   const serviceName = getFieldFromDoc(doc, constants.SERVICE_NAME_FIELD);

@@ -12,8 +12,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
   const security = getService('security');
-
-  describe('Indices', function () {
+  const testIndexName = `index-ftr-test-${Math.random()}`;
+  describe('Index Details ', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
-    const testIndexName = `index-ftr-test-${Math.random()}`;
+
     it('renders the indices tab', async () => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
@@ -33,14 +33,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickCreateIndexSaveButton();
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
     });
-    it('can manage index', async () => {
-      await pageObjects.indexManagement.selectIndex(testIndexName);
-      await pageObjects.indexManagement.clickManageButton();
-      await pageObjects.indexManagement.contextMenuIsVisible();
-    });
-    it('can delete index', async () => {
-      await pageObjects.indexManagement.confirmDeleteModalIsVisible();
-      await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);
+    it('index with no documents', async () => {
+      await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
+      await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
     });
   });
 };

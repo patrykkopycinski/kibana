@@ -18595,7 +18595,6 @@
     "xpack.fleet.fleetServerSetup.addFleetServerHostButton": "Ajouter un hôte",
     "xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle": "Ajouter l'hôte de votre serveur Fleet",
     "xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle": "Hôte du serveur Fleet ajouté",
-    "xpack.fleet.fleetServerSetup.calloutTitle": "Diagnostic de l'agent",
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "Modifier le déploiement",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "Activer un serveur Fleet",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "Erreur lors de l'ajout de l'hôte du serveur Fleet",

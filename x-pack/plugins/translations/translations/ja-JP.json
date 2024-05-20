@@ -18572,7 +18572,6 @@
     "xpack.fleet.fleetServerSetup.addFleetServerHostButton": "ホストの追加",
     "xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle": "Fleetサーバーホストの追加",
     "xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle": "追加されたFleetサーバーホスト",
-    "xpack.fleet.fleetServerSetup.calloutTitle": "エージェント診断",
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "デプロイを編集",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "Fleetサーバーを有効にする",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "Fleetサーバーホストの追加エラー",

@@ -18601,7 +18601,6 @@
     "xpack.fleet.fleetServerSetup.addFleetServerHostButton": "添加主机",
     "xpack.fleet.fleetServerSetup.addFleetServerHostStepTitle": "添加您的 Fleet 服务器主机",
     "xpack.fleet.fleetServerSetup.addFleetServerHostSuccessTitle": "已添加 Fleet 服务器主机",
-    "xpack.fleet.fleetServerSetup.calloutTitle": "代理诊断",
     "xpack.fleet.fleetServerSetup.cloudDeploymentLink": "编辑部署",
     "xpack.fleet.fleetServerSetup.cloudSetupTitle": "启用 Fleet 服务器",
     "xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle": "添加 Fleet 服务器主机时出错",

@@ -6781,7 +6781,6 @@
     "unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel": "{field}を除外：\"{value}\"",
     "unifiedFieldList.fieldStats.filterValueButtonAriaLabel": "{field}を除外：\"{value}\"",
     "unifiedFieldList.fieldStats.noFieldDataInSampleDescription": "{sampledDocumentsFormatted}サンプル{sampledDocuments, plural, other {レコード}}のフィールドデータがありません。",
-    "unifiedFieldList.fieldCategorizeButton.label": "パターン分析を実行",
     "unifiedFieldList.fieldItemButton.mappingConflictDescription": "このフィールドは、このパターンと一致するインデックス全体に対して複数の型（文字列、整数など）として定義されています。この競合フィールドを使用することはできますが、Kibana で型を認識する必要がある関数では使用できません。この問題を修正するにはデータのレンダリングが必要です。",
     "unifiedFieldList.fieldItemButton.mappingConflictTitle": "マッピングの矛盾",
     "unifiedFieldList.fieldList.noFieldsCallout.noDataLabel": "フィールドがありません。",

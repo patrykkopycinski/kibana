@@ -6795,7 +6795,6 @@
     "unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel": "筛除 {field}：“{value}”",
     "unifiedFieldList.fieldStats.filterValueButtonAriaLabel": "筛留 {field}：“{value}”",
     "unifiedFieldList.fieldStats.noFieldDataInSampleDescription": "{sampledDocumentsFormatted} 个样例{sampledDocuments, plural, other {记录}}无字段数据。",
-    "unifiedFieldList.fieldCategorizeButton.label": "运行模式分析",
     "unifiedFieldList.fieldItemButton.mappingConflictDescription": "此字段在匹配此模式的各个索引中已定义为若干类型（字符串、整数等）。您可能仍可以使用此冲突字段，但它无法用于需要 Kibana 知道其类型的函数。要解决此问题，需要重新索引您的数据。",
     "unifiedFieldList.fieldItemButton.mappingConflictTitle": "映射冲突",
     "unifiedFieldList.fieldList.noFieldsCallout.noDataLabel": "无字段。",

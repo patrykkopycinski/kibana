@@ -6792,7 +6792,6 @@
     "unifiedFieldList.fieldStats.filterOutValueButtonAriaLabel": "Exclure le {field} : \"{value}\"",
     "unifiedFieldList.fieldStats.filterValueButtonAriaLabel": "Filtrer sur le {field} : \"{value}\"",
     "unifiedFieldList.fieldStats.noFieldDataInSampleDescription": "Aucune donnée de champ pour {sampledDocumentsFormatted} {sampledDocuments, plural, one {exemple d'enregistrement} other {exemples d'enregistrement}}.",
-    "unifiedFieldList.fieldCategorizeButton.label": "Exécuter l'analyse du modèle",
     "unifiedFieldList.fieldItemButton.mappingConflictDescription": "Ce champ est défini avec plusieurs types (chaîne, entier, etc.) dans les différents index qui correspondent à ce modèle. Vous pouvez toujours utiliser ce champ conflictuel, mais il sera indisponible pour les fonctions qui nécessitent que Kibana en connaisse le type. Pour corriger ce problème, vous devrez réindexer vos données.",
     "unifiedFieldList.fieldItemButton.mappingConflictTitle": "Conflit de mapping",
     "unifiedFieldList.fieldList.noFieldsCallout.noDataLabel": "Aucun champ.",

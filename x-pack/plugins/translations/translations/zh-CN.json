@@ -5883,7 +5883,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.unmanagedPatternTooltip": "与 {pattern} 模式匹配的 {indices} 个{indices, plural, other {索引}}{indices, plural, other {}}不通过索引生命周期管理 (ILM) 进行管理",
     "securitySolutionPackages.ecsDataQualityDashboard.warmPatternTooltip": "{indices} 个匹配 {pattern} 模式的{indices, plural, other {索引}}{indices, plural, other {为}}温索引。不再更新但仍会查询温索引。",
     "securitySolutionPackages.entityAnalytics.paywall.upgradeButton": "升级到 {requiredLicenseOrProduct}",
-    "securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage": "{requiredLicense}或更高级订阅可以使用此功能",
     "securitySolutionPackages.markdown.insight.upsell": "升级到{requiredLicense}以利用调查指南中的洞见",
     "securitySolutionPackages.alertSuppressionRuleDetails.upsell": "已配置告警阻止，但由于许可不足而无法应用",
     "securitySolutionPackages.beta.label": "公测版",

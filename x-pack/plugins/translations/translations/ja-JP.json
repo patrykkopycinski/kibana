@@ -5870,8 +5870,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.unmanagedPatternTooltip": "{pattern}パターンと一致する{indices} {indices, plural, other {インデックス}}{indices, plural, other {は}}インデックスライフサイクル管理（ILM）によって管理されていません",
     "securitySolutionPackages.ecsDataQualityDashboard.warmPatternTooltip": "{pattern}パターンと一致する{indices} {indices, plural, other {インデックス}}{indices, plural, other {は}}ウォームです。ウォームインデックスは更新されませんが、まだ照会されています。",
     "securitySolutionPackages.entityAnalytics.paywall.upgradeButton": "{requiredLicenseOrProduct}にアップグレード",
-    "securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage": "この機能は、{requiredLicense}以上のサブスクリプションでご利用いただけます",
-    "securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage": "エンティティリスクスコアリング機能は、{requiredProduct}ライセンスティアで利用可能です",
     "securitySolutionPackages.alertSuppressionRuleDetails.upsell": "アラート非表示が構成されていますが、ライセンス不足のため適用されません",
     "securitySolutionPackages.beta.label": "ベータ",
     "securitySolutionPackages.dataTable.ariaLabel": "アラート",

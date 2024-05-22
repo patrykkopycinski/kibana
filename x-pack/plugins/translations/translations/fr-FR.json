@@ -5879,8 +5879,6 @@
     "securitySolutionPackages.ecsDataQualityDashboard.unmanagedPatternTooltip": "{indices} {indices, plural, =1 {L'index correspondant} other {Les index correspondants}} au modèle {pattern} {indices, plural, =1 {n'est pas géré} other {ne sont pas gérés}} par la gestion du cycle de vie des index (ILM)",
     "securitySolutionPackages.ecsDataQualityDashboard.warmPatternTooltip": "{indices} {indices, plural, =1 {L'index correspondant} other {Les index correspondants}} au modèle {pattern} {indices, plural, =1 {est} other {sont}} \"warm\". Les index \"warm\" ne sont plus mis à jour, mais ils sont toujours interrogés.",
     "securitySolutionPackages.entityAnalytics.paywall.upgradeButton": "Passer à {requiredLicenseOrProduct}",
-    "securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage": "Cette fonctionnalité est disponible avec l'abonnement {requiredLicense} ou supérieur",
-    "securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage": "La capacité d'évaluation du risque des entités est disponible dans notre niveau de licence {requiredProduct}",
     "securitySolutionPackages.markdown.insight.upsell": "Passez au niveau {requiredLicense} pour pouvoir utiliser les informations des guides d'investigation",
     "securitySolutionPackages.alertSuppressionRuleDetails.upsell": "La suppression d'alertes est configurée mais elle ne sera pas appliquée en raison d'une licence insuffisante",
     "securitySolutionPackages.beta.label": "Bêta",

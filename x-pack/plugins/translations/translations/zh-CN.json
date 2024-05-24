@@ -13876,7 +13876,6 @@
     "xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description": "首先，生成一个 Elasticsearch API 密钥。此 {apiKeyName} 密钥将为连接器启用读取和写入权限，以便将文档索引到已创建的 {indexName} 索引。请将该密钥保存到安全位置，因为您需要它来配置连接器。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description": "此本机连接器的 API 密钥 {apiKeyName} 由 Elasticsearch 内部托管。该连接器使用此 API 密钥将文档索引到 {indexName} 索引。要滚动更新 API 密钥，请单击“生成 API 密钥”。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel": "{name} 身份验证",
-    "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected": "您的连接器 {name} 已成功连接到 Search。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.description": "是否要自我托管此本机连接器？将其转换为将在您自己的基础设施上进行自我管理的 {link}。如果希望使用我们的 Python 框架定制代码，您需要转换此连接器。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel": "{name} 文档",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.page.description": "现已部署您的连接器。在此处计划重复内容和访问控制同步。如果要运行快速测试，请使用 {sync} 按钮启动一次性同步。",

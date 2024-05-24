@@ -13849,7 +13849,6 @@
     "xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description": "まず、Elasticsearch APIキーを生成します。この{apiKeyName}は、コネクターがドキュメントを作成された{indexName}インデックスにインデックスするための読み書き権限を有効にします。キーは安全な場所に保管してください。コネクターを構成するときに必要になります。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description": "このネイティブコネクターのAPIキー{apiKeyName}は、Elasticsearchによって内部的に管理されています。コネクターは、このAPIキーを使用して、ドキュメントを\"{indexName}\"インデックスにインデックス化します。APIキーを展開するには、\"APIキーを生成\"をクリックしてください。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel": "{name}認証",
-    "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected": "コネクター{name}は、正常にSearchに接続されました。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.convertConnector.description": "このセルフホスティングコネクターをカスタマイズしますか？独自のインフラで自己管理される{link}に変換します。Pythonフレームワークを使用してコードをカスタマイズしたい場合は、このコネクターを変換する必要があります。",
     "xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel": "{name}ドキュメンテーション",
     "xpack.enterpriseSearch.content.indices.connectorScheduling.page.description": "コネクターがデプロイされました。ここで、繰り返しコンテンツとアクセス制御同期をスケジュールします。簡易テストを実行する場合は、{sync}ボタンを使用してワンタイム同期を実行します。",

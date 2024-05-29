@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY = 'pageState';
+export const plugin = async () => {
+  const { DataQualityPlugin } = await import('./plugin');
+  return new DataQualityPlugin();
+};

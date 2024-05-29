@@ -44884,7 +44884,6 @@
     "xpack.observabilityLogsExplorer.appTitle": "Explorateur de logs",
     "xpack.observabilityLogsExplorer.betaBadgeDescription": "Il s'agit du stade bêta de l'application, qui est donc susceptible d'évoluer.",
     "xpack.observabilityLogsExplorer.betaBadgeTitle": "Bêta",
-    "xpack.observabilityLogsExplorer.datasetQuality.InitializingTitle": "Initialisation de la qualité de l'ensemble de données",
     "xpack.observabilityLogsExplorer.discoverLinkTitle": "Ouvrir dans Discover",
     "xpack.observabilityLogsExplorer.feedbackLinkTitle": "Donner un retour",
     "xpack.observabilityLogsExplorer.feedbackToast.buttonText": "Répondre à une enquête rapide",

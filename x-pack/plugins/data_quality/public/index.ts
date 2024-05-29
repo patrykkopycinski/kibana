@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY = 'pageState';
+import { DataQualityPlugin } from './plugin';
+
+export function plugin() {
+  return new DataQualityPlugin();
+}
+export type { DataQualityPluginSetup, DataQualityPluginStart } from './types';

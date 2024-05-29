@@ -44903,7 +44903,6 @@
     "xpack.observabilityLogsExplorer.appTitle": "日志浏览器",
     "xpack.observabilityLogsExplorer.betaBadgeDescription": "此应用程序为公测版，因此可能会进行更改。",
     "xpack.observabilityLogsExplorer.betaBadgeTitle": "公测版",
-    "xpack.observabilityLogsExplorer.datasetQuality.InitializingTitle": "正在初始化数据集质量",
     "xpack.observabilityLogsExplorer.discoverLinkTitle": "在 Discover 中打开",
     "xpack.observabilityLogsExplorer.feedbackLinkTitle": "反馈",
     "xpack.observabilityLogsExplorer.feedbackToast.buttonText": "参加快速调查",

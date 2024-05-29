@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY = 'pageState';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+
+export interface Dependencies {
+  features: FeaturesPluginSetup;
+}

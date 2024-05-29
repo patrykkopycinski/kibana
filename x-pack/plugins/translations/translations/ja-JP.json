@@ -44854,7 +44854,6 @@
     "xpack.observabilityLogsExplorer.appTitle": "ログエクスプローラー",
     "xpack.observabilityLogsExplorer.betaBadgeDescription": "このアプリケーションはベータ版であるため、変更される場合があります。",
     "xpack.observabilityLogsExplorer.betaBadgeTitle": "ベータ",
-    "xpack.observabilityLogsExplorer.datasetQuality.InitializingTitle": "データセット品質を初期化しています",
     "xpack.observabilityLogsExplorer.discoverLinkTitle": "Discoverで開く",
     "xpack.observabilityLogsExplorer.feedbackLinkTitle": "フィードバックを作成する",
     "xpack.observabilityLogsExplorer.feedbackToast.buttonText": "簡単なアンケートに答える",

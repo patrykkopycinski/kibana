@@ -8567,7 +8567,6 @@
     "xpack.alerting.maintenanceWindows.upcoming": "À venir",
     "xpack.alerting.maintenanceWindowsArchiveFailure": "Impossible d'archiver la fenêtre de maintenance.",
     "xpack.alerting.maintenanceWindowsArchiveSuccess": "Fenêtre de maintenance archivée \"{title}\"",
-    "xpack.alerting.maintenanceWindowsCreateFailure": "Impossible de créer la fenêtre de maintenance.",
     "xpack.alerting.maintenanceWindowsCreateSuccess": "Fenêtre de maintenance créée \"{title}\"",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveFailure": "Impossible d'annuler et d'archiver la fenêtre de maintenance.",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveSuccess": "Fenêtre de maintenance en cours d'exécution annulée et archivée \"{title}\"",

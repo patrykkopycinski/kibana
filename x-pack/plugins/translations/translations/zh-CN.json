@@ -8571,7 +8571,6 @@
     "xpack.alerting.maintenanceWindows.upcoming": "即将发生",
     "xpack.alerting.maintenanceWindowsArchiveFailure": "无法归档维护窗口。",
     "xpack.alerting.maintenanceWindowsArchiveSuccess": "已归档维护窗口“{title}”",
-    "xpack.alerting.maintenanceWindowsCreateFailure": "无法创建维护窗口。",
     "xpack.alerting.maintenanceWindowsCreateSuccess": "已创建维护窗口“{title}”",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveFailure": "无法取消并归档维护窗口。",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveSuccess": "已取消并归档正在运行的维护窗口“{title}”",

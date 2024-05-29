@@ -8554,7 +8554,6 @@
     "xpack.alerting.maintenanceWindows.upcoming": "予定",
     "xpack.alerting.maintenanceWindowsArchiveFailure": "保守時間枠をアーカイブできませんでした。",
     "xpack.alerting.maintenanceWindowsArchiveSuccess": "アーカイブされた保守時間枠'{title}'",
-    "xpack.alerting.maintenanceWindowsCreateFailure": "保守時間枠を作成できませんでした。",
     "xpack.alerting.maintenanceWindowsCreateSuccess": "作成された保守時間枠'{title}'",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveFailure": "保守時間枠をキャンセルしてアーカイブできませんでした。",
     "xpack.alerting.maintenanceWindowsFinishedAndArchiveSuccess": "キャンセルされ、アーカイブされた実行中の保守時間枠'{title}'",

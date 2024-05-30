@@ -36699,7 +36699,6 @@
     "xpack.securitySolution.hostsTable.osLastSeenToolTip": "Dernier système d'exploitation observé",
     "xpack.securitySolution.hostsTable.osTitle": "Système d'exploitation",
     "xpack.securitySolution.hostsTable.versionTitle": "Version",
-    "xpack.securitySolution.hoverActions.checkboxForRowAriaLabel": "Case {checked, select, false {non cochée} true {cochée}} pour l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "Analyser l'événement",
     "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "{isEventPinned, select, false {Épingler} true {Désépingler}} l'événement de la ligne {ariaRowindex} {isEventPinned, select, false{dans} true {de}} la chronologie, avec les colonnes {columnValues}",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "Afficher les détails",

@@ -36668,7 +36668,6 @@
     "xpack.securitySolution.hostsTable.osLastSeenToolTip": "前回観察されたオペレーティングシステム",
     "xpack.securitySolution.hostsTable.osTitle": "オペレーティングシステム",
     "xpack.securitySolution.hostsTable.versionTitle": "バージョン",
-    "xpack.securitySolution.hoverActions.checkboxForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントのチェックボックスを{checked, select, false {オフ} true {オン}}",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "イベントを分析します",
     "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のイベントを{isEventPinned, select, false {固定} true {固定解除}}",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "詳細を表示",

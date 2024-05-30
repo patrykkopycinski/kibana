@@ -36712,7 +36712,6 @@
     "xpack.securitySolution.hostsTable.osLastSeenToolTip": "上次观察的操作系统",
     "xpack.securitySolution.hostsTable.osTitle": "操作系统",
     "xpack.securitySolution.hostsTable.versionTitle": "版本",
-    "xpack.securitySolution.hoverActions.checkboxForRowAriaLabel": "告警或事件第 {ariaRowindex} 行的{checked, select, false {已取消选中} true {已选中}}复选框，其中列为 {columnValues}",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "分析事件",
     "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "将第 {ariaRowindex} 行的事件{isEventPinned, select, false {固定} true {取消固定}}到时间线，其中列为 {columnValues}",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "查看详情",

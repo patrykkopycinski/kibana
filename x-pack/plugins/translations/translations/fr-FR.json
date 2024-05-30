@@ -12786,7 +12786,6 @@
     "xpack.csp.dataTable.fieldsModal.viewLabel": "Afficher",
     "xpack.csp.dataTable.fieldsModal.viewSelected": "sélectionné",
     "xpack.csp.dataTable.fieldsModalClose": "Fermer",
-    "xpack.csp.dataTable.fieldsModalCustomLabel": "Étiquette personnalisée",
     "xpack.csp.dataTable.fieldsModalError": "Aucun champ trouvé dans l'affichage de données",
     "xpack.csp.dataTable.fieldsModalFieldsShowing": "Affichage",
     "xpack.csp.dataTable.fieldsModalName": "Nom",

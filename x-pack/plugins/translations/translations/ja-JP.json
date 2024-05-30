@@ -12766,7 +12766,6 @@
     "xpack.csp.dataTable.fieldsModal.viewLabel": "表示",
     "xpack.csp.dataTable.fieldsModal.viewSelected": "選択済み",
     "xpack.csp.dataTable.fieldsModalClose": "閉じる",
-    "xpack.csp.dataTable.fieldsModalCustomLabel": "カスタムラベル",
     "xpack.csp.dataTable.fieldsModalError": "データビューでフィールドが見つかりません",
     "xpack.csp.dataTable.fieldsModalFieldsShowing": "表示中",
     "xpack.csp.dataTable.fieldsModalName": "名前",

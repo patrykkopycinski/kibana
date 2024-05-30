@@ -12792,7 +12792,6 @@
     "xpack.csp.dataTable.fieldsModal.viewLabel": "查看",
     "xpack.csp.dataTable.fieldsModal.viewSelected": "已选定",
     "xpack.csp.dataTable.fieldsModalClose": "关闭",
-    "xpack.csp.dataTable.fieldsModalCustomLabel": "定制标签",
     "xpack.csp.dataTable.fieldsModalError": "在数据视图中找不到任何字段",
     "xpack.csp.dataTable.fieldsModalFieldsShowing": "正在显示",
     "xpack.csp.dataTable.fieldsModalName": "名称",

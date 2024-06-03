@@ -13119,8 +13119,6 @@
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueBetweenLabel": "{percent}% 的文档具有介于 {minValFormatted} 和 {maxValFormatted} 之间的值",
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueEqualLabel": "{percent}% 的文档的值为 {valFormatted}",
     "xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel": "筛除 {fieldName}：“{value}”",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel": "基于 {sampledDocumentsFormatted} 个样例{sampledDocuments, plural, other {记录}}计算。",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel": "基于 {totalDocumentsFormatted} 个样例{totalDocuments, plural, other {记录}}计算。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleRecordsLabel": "基于 {sampledDocumentsFormatted} 个样例{sampledDocuments, plural, other {记录}}计算。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromTotalRecordsLabel": "基于 {totalDocumentsFormatted} 个样例{totalDocuments, plural, other {记录}}计算。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel": "正在显示 {minPercent} - {maxPercent} 百分位数",

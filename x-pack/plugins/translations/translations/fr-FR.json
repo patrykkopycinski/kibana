@@ -13113,8 +13113,6 @@
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueBetweenLabel": "{percent} % des documents ont des valeurs comprises entre {minValFormatted} et {maxValFormatted}",
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueEqualLabel": "{percent} % des documents ont une valeur de {valFormatted}",
     "xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel": "Exclure {fieldName} : \"{value}\"",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel": "Calculé à partir de {sampledDocumentsFormatted} {sampledDocuments, plural, one {exemple d'enregistrement} other {exemples d'enregistrement}}.",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel": "Calculé à partir de {totalDocumentsFormatted} {totalDocuments, plural, one {enregistrement} other {enregistrements}}.",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleRecordsLabel": "Calculé à partir de {sampledDocumentsFormatted} {sampledDocuments, plural, one {exemple d'enregistrement} other {exemples d'enregistrement}}.",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromTotalRecordsLabel": "Calculé à partir de {totalDocumentsFormatted} {totalDocuments, plural, one {enregistrement} other {enregistrements}}.",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel": "Affichage de {minPercent} - {maxPercent} centiles",

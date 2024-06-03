@@ -13094,8 +13094,6 @@
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueBetweenLabel": "{percent}% のドキュメントに {minValFormatted} から {maxValFormatted} の間の値があります",
     "xpack.dataVisualizer.dataGrid.field.metricDistributionChart.tooltipValueEqualLabel": "{percent}% のドキュメントに {valFormatted} の値があります",
     "xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel": "{fieldName}の除外：\"{value}\"",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromSampleRecordsLabel": "{sampledDocumentsFormatted}サンプル{sampledDocuments, plural, other {レコード}}から計算されました。",
-    "xpack.dataVisualizer.dataGrid.field.topValues.calculatedFromTotalRecordsLabel": "{totalDocumentsFormatted} {totalDocuments, plural, other {レコード}}から計算されました。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromSampleRecordsLabel": "{sampledDocumentsFormatted}サンプル{sampledDocuments, plural, other {レコード}}から計算されました。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.choroplethMapTopValues.calculatedFromTotalRecordsLabel": "{totalDocumentsFormatted} {totalDocuments, plural, other {レコード}}から計算されました。",
     "xpack.dataVisualizer.dataGrid.fieldExpandedRow.numberContent.displayingPercentilesLabel": "{minPercent} - {maxPercent} パーセンタイルを表示中",

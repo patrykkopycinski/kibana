@@ -42252,7 +42252,7 @@
     "xpack.triggersActionsUI.sections.alertsTable.observability": "Observability",
     "xpack.triggersActionsUI.sections.alertsTable.security": "セキュリティ",
     "xpack.triggersActionsUI.sections.alertsTable.slos": "SLO",
-    "xpack.triggersActionsUI.sections.alertsTable.stackManagement": "スタック管理",
+    "xpack.triggersActionsUI.sections.alertsTable.stack": "スタック管理",
     "xpack.triggersActionsUI.sections.alertsTable.stackMonitoring": "スタック監視",
     "xpack.triggersActionsUI.sections.alertsTable.title": "アラートテーブル",
     "xpack.triggersActionsUI.sections.alertsTable.uptime": "アップタイム",

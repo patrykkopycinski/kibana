@@ -42300,7 +42300,7 @@
     "xpack.triggersActionsUI.sections.alertsTable.observability": "Observability",
     "xpack.triggersActionsUI.sections.alertsTable.security": "安全",
     "xpack.triggersActionsUI.sections.alertsTable.slos": "SLO",
-    "xpack.triggersActionsUI.sections.alertsTable.stackManagement": "Stack Management",
+    "xpack.triggersActionsUI.sections.alertsTable.stack": "Stack Management",
     "xpack.triggersActionsUI.sections.alertsTable.stackMonitoring": "堆栈监测",
     "xpack.triggersActionsUI.sections.alertsTable.title": "告警表",
     "xpack.triggersActionsUI.sections.alertsTable.uptime": "运行时间",

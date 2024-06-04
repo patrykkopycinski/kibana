@@ -42282,7 +42282,7 @@
     "xpack.triggersActionsUI.sections.alertsTable.observability": "Observabilité",
     "xpack.triggersActionsUI.sections.alertsTable.security": "Sécurité",
     "xpack.triggersActionsUI.sections.alertsTable.slos": "SLO",
-    "xpack.triggersActionsUI.sections.alertsTable.stackManagement": "Gestion de la Suite",
+    "xpack.triggersActionsUI.sections.alertsTable.stack": "Gestion de la Suite",
     "xpack.triggersActionsUI.sections.alertsTable.stackMonitoring": "Monitoring de la Suite",
     "xpack.triggersActionsUI.sections.alertsTable.title": "Tableau d’alertes",
     "xpack.triggersActionsUI.sections.alertsTable.uptime": "Uptime",

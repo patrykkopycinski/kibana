@@ -22786,7 +22786,7 @@
     "xpack.lens.indexPattern.formulaExpressionNotHandled": "式{operation}の演算には次のパラメーターがありません：{params}",
     "xpack.lens.indexPattern.formulaExpressionParseError": "式{expression}を解析できません",
     "xpack.lens.indexPattern.formulaExpressionWrongType": "式の演算{operation}のパラメーターの型が正しくありません：{params}",
-    "xpack.lens.indexPattern.formulaFieldNotFound": "{variablesLength, plural, other  {フィールド}} {variablesList}が見つかりません",
+    "xpack.lens.indexPattern.formulaFieldNotFound": "{missingFieldCount, plural, other  {フィールド}} {missingFieldList}が見つかりません",
     "xpack.lens.indexPattern.formulaFieldNotRequired": "演算{operation}ではどのフィールドも引数として使用できません",
     "xpack.lens.indexPattern.formulaMathMissingArgument": "式{operation}の演算には{count}個の引数がありません：{params}",
     "xpack.lens.indexPattern.formulaOperationDuplicateParams": "演算{operation}のパラメーターが複数回宣言されました：{params}",

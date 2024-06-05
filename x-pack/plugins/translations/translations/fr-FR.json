@@ -22810,7 +22810,7 @@
     "xpack.lens.indexPattern.formulaExpressionParseError": "La formule {expression} ne peut pas être analysée",
     "xpack.lens.indexPattern.formulaExpressionWrongType": "Les paramètres de l'opération {operation} dans la formule ont un type incorrect : {params}",
     "xpack.lens.indexPattern.formulaExpressionWrongTypeArgument": "Le type de l'argument {name} pour l'opération {operation} dans la formule est incorrect : {type} au lieu de {expectedType}",
-    "xpack.lens.indexPattern.formulaFieldNotFound": "{variablesLength, plural, one {Champ} other {Champs}} {variablesList} introuvable(s)",
+    "xpack.lens.indexPattern.formulaFieldNotFound": "{missingFieldCount, plural, one {Champ} other {Champs}} {missingFieldList} introuvable(s)",
     "xpack.lens.indexPattern.formulaFieldNotRequired": "L'opération {operation} n'accepte aucun champ comme argument",
     "xpack.lens.indexPattern.formulaMathMissingArgument": "L'opération {operation} dans la formule ne comprend pas les arguments {count} : {params}",
     "xpack.lens.indexPattern.formulaOperationDuplicateParams": "Les paramètres de l'opération {operation} ont été déclarés plusieurs fois : {params}",

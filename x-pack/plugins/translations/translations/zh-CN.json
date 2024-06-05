@@ -22819,7 +22819,7 @@
     "xpack.lens.indexPattern.formulaExpressionParseError": "公式 {expression} 无法解析",
     "xpack.lens.indexPattern.formulaExpressionWrongType": "公式中运算 {operation} 的参数的类型不正确：{params}",
     "xpack.lens.indexPattern.formulaExpressionWrongTypeArgument": "公式中运算 {operation} 的 {name} 参数的类型不正确：{type} 而非 {expectedType}",
-    "xpack.lens.indexPattern.formulaFieldNotFound": "找不到{variablesLength, plural, other {字段}} {variablesList}",
+    "xpack.lens.indexPattern.formulaFieldNotFound": "找不到{missingFieldCount, plural, other {字段}} {missingFieldList}",
     "xpack.lens.indexPattern.formulaFieldNotRequired": "运算 {operation} 不接受任何字段作为参数",
     "xpack.lens.indexPattern.formulaMathMissingArgument": "公式中的运算 {operation} 缺失 {count} 个参数：{params}",
     "xpack.lens.indexPattern.formulaOperationDuplicateParams": "运算 {operation} 的参数已声明多次：{params}",

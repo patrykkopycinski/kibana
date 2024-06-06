@@ -44767,8 +44767,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.read": "读取",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.used": "已使用",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.write": "写入",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.rx": "入站 (RX)",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.tx": "出站 (TX)",
     "xpack.metricsData.hostsPage.goToMetricsSettings": "检查设置",
     "xpack.metricsData.inventoryModel.container.displayName": "Docker 容器",
     "xpack.metricsData.inventoryModel.container.singularDisplayName": "Docker 容器",

@@ -44747,8 +44747,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.read": "Lire",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.used": "Utilisé",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.write": "Écrire",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.rx": "Entrant (RX)",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.tx": "Sortant (TX)",
     "xpack.metricsData.hostsPage.goToMetricsSettings": "Vérifier les paramètres",
     "xpack.metricsData.inventoryModel.container.displayName": "Conteneurs Docker",
     "xpack.metricsData.inventoryModel.container.singularDisplayName": "Conteneur Docker",

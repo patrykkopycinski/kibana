@@ -44719,8 +44719,6 @@
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.read": "読み取り",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.used": "使用中",
     "xpack.metricsData.assetDetails.metricsCharts.metric.label.write": "書き込み",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.rx": "受信（RX）",
-    "xpack.metricsData.assetDetails.metricsCharts.network.label.tx": "送信（TX）",
     "xpack.metricsData.hostsPage.goToMetricsSettings": "設定を確認",
     "xpack.metricsData.inventoryModel.container.displayName": "Dockerコンテナー",
     "xpack.metricsData.inventoryModel.container.singularDisplayName": "Docker コンテナー",

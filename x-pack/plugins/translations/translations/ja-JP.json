@@ -18675,7 +18675,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "ホストを指定",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "名前",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "名前を指定",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge": "ベータ",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdPlaceholder": "プロキシを選択",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription": "ダウンロードソースへのアクセスに使用されるプロキシ。現在はプロキシURLのみが使用され、ヘッダーや証明書はサポートされていません。",
     "xpack.fleet.settings.editDownloadSourcesFlyout.saveButton": "設定を保存して適用",

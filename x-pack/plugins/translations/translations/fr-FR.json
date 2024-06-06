@@ -18696,7 +18696,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "Indiquer l’hôte",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "Nom",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "Indiquer le nom",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge": "Bêta",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdPlaceholder": "Sélectionner un proxy",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription": "Proxy utilisé pour accéder à la source de téléchargement. Actuellement, seule l’URL du proxy est utilisée, les en-têtes et les certificats ne sont pas compatibles.",
     "xpack.fleet.settings.editDownloadSourcesFlyout.saveButton": "Enregistrer et appliquer les paramètres",

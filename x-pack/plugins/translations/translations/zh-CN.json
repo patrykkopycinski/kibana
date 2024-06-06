@@ -18704,7 +18704,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "指定主机",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "名称",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "指定名称",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge": "公测版",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdPlaceholder": "选择代理",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyInputDescription": "用于访问下载源的代理。当前仅使用代理 URL，不支持标题和证书。",
     "xpack.fleet.settings.editDownloadSourcesFlyout.saveButton": "保存并应用设置",

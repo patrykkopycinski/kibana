@@ -12791,8 +12791,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "インデックス",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "根拠",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "修正",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle": "リソースID",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle": "リソース名",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "ルール名",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip": "ルールの管理",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "ルールタグ",

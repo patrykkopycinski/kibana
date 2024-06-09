@@ -12816,8 +12816,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "索引",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "理由",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "补救",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle": "资源 ID",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle": "资源名称",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "规则名称",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip": "管理规则",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "规则标签",

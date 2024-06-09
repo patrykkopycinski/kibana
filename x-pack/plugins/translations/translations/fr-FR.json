@@ -12810,8 +12810,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "Index",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "Environnement",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "Résolution",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle": "ID ressource",
-    "xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle": "Nom de ressource",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "Nom de règle",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip": "Gérer la règle",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "Balises de règle",

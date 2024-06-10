@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverCustomizationContext } from './types';
-
-export const defaultCustomizationContext: DiscoverCustomizationContext = {
-  solutionNavId: null,
-  displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+export { useProfileAccessor } from './use_profile_accessor';
+export { useRootProfile } from './use_root_profile';

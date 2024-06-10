@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DiscoverCustomizationContext } from './types';
+import type { CustomCellRenderer } from '@kbn/unified-data-table';
 
-export const defaultCustomizationContext: DiscoverCustomizationContext = {
-  solutionNavId: null,
-  displayMode: 'standalone',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+export interface Profile {
+  getCellRenderers: () => CustomCellRenderer;
+}

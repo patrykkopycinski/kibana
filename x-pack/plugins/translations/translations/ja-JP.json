@@ -40507,7 +40507,6 @@
     "xpack.synthetics.management.enableLabel": "有効にする",
     "xpack.synthetics.management.enableMonitorLabel": "モニターを有効にする",
     "xpack.synthetics.management.enableStatusAlert": "ステータスアラートを有効にする",
-    "xpack.synthetics.management.location.clickMessage": "クリックすると、この場所の詳細が表示されます。",
     "xpack.synthetics.management.monitorDeleteFailureMessage": "モニターを削除できませんでした。しばらくたってから再試行してください。",
     "xpack.synthetics.management.monitorDeleteLoadingMessage": "モニターを削除しています...",
     "xpack.synthetics.management.monitorDeleteSuccessMessage": "モニターが正常に削除されました。",

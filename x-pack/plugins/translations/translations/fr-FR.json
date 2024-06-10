@@ -40534,7 +40534,6 @@
     "xpack.synthetics.management.enableLabel": "Activer",
     "xpack.synthetics.management.enableMonitorLabel": "Activer le moniteur",
     "xpack.synthetics.management.enableStatusAlert": "Activer les alertes de statut",
-    "xpack.synthetics.management.location.clickMessage": "Cliquez pour afficher les détails de cet emplacement.",
     "xpack.synthetics.management.monitorDeleteFailureMessage": "Impossible de supprimer le moniteur. Réessayez plus tard.",
     "xpack.synthetics.management.monitorDeleteLoadingMessage": "Suppression du moniteur...",
     "xpack.synthetics.management.monitorDeleteSuccessMessage": "Moniteur supprimé.",

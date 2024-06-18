@@ -36118,8 +36118,6 @@
     "xpack.securitySolution.flyout.entityDetails.userDetails.tableTabLabel": "表",
     "xpack.securitySolution.flyout.entityDetails.userDetails.tabsLegend": "アセットドキュメントタブ",
     "xpack.securitySolution.flyout.entityDetails.valuesColumnTitle": "値",
-    "xpack.securitySolution.flyout.isolateHost.isolateTitle": "ホストの分離",
-    "xpack.securitySolution.flyout.isolateHost.releaseTitle": "ホストのリリース",
     "xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel": "インサイトオプション",
     "xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription": "上位項目に関連するアラートはありません。",
     "xpack.securitySolution.flyout.left.insights.correlations.nameColumnLabel": "名前",

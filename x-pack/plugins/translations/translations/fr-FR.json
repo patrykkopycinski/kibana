@@ -36143,8 +36143,6 @@
     "xpack.securitySolution.flyout.entityDetails.userDetails.tableTabLabel": "Tableau",
     "xpack.securitySolution.flyout.entityDetails.userDetails.tabsLegend": "Onglets des documents de ressources",
     "xpack.securitySolution.flyout.entityDetails.valuesColumnTitle": "Valeurs",
-    "xpack.securitySolution.flyout.isolateHost.isolateTitle": "Isoler l'hôte",
-    "xpack.securitySolution.flyout.isolateHost.releaseTitle": "Libérer l'hôte",
     "xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel": "Options des informations exploitables",
     "xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription": "Aucune alerte associée par ancêtre.",
     "xpack.securitySolution.flyout.left.insights.correlations.nameColumnLabel": "Nom",

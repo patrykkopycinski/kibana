@@ -36161,8 +36161,6 @@
     "xpack.securitySolution.flyout.entityDetails.userDetails.tableTabLabel": "表",
     "xpack.securitySolution.flyout.entityDetails.userDetails.tabsLegend": "资产文档选项卡",
     "xpack.securitySolution.flyout.entityDetails.valuesColumnTitle": "值",
-    "xpack.securitySolution.flyout.isolateHost.isolateTitle": "隔离主机",
-    "xpack.securitySolution.flyout.isolateHost.releaseTitle": "释放主机",
     "xpack.securitySolution.flyout.left.insights.buttonGroupLegendLabel": "洞见选项",
     "xpack.securitySolution.flyout.left.insights.correlations.ancestryAlertsNoDataDescription": "无告警与体系相关。",
     "xpack.securitySolution.flyout.left.insights.correlations.nameColumnLabel": "名称",

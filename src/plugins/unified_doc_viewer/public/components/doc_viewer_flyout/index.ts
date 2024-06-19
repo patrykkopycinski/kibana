@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {
-  FieldDescriptionIconButton,
-  type FieldDescriptionIconButtonProps,
-} from './field_description_icon_button';
+import { UnifiedDocViewerFlyout } from './doc_viewer_flyout';
+
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default UnifiedDocViewerFlyout;

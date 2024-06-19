@@ -23460,7 +23460,6 @@
     "xpack.lens.shared.tickLabels": "Étiquettes de graduation",
     "xpack.lens.shared.ticksPositionOptions": "Coches sur les bandes",
     "xpack.lens.shared.ticksPositionOptionsTooltip": "Place les coches sur chaque bordure de bande au lieu de les répartir de manière homogène.",
-    "xpack.lens.shared.valueInLegendLabel": "Afficher la valeur",
     "xpack.lens.shared.valueLabelsVisibility.auto": "Masquer",
     "xpack.lens.shared.valueLabelsVisibility.inside": "Afficher",
     "xpack.lens.staticValue.headingLabel": "Placement",

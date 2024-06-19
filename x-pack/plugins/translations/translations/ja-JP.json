@@ -23441,7 +23441,6 @@
     "xpack.lens.shared.tickLabels": "目盛ラベル",
     "xpack.lens.shared.ticksPositionOptions": "帯の目盛",
     "xpack.lens.shared.ticksPositionOptionsTooltip": "目盛を均等に分布するのではなく、各帯の境界に目盛を表示します",
-    "xpack.lens.shared.valueInLegendLabel": "値を表示",
     "xpack.lens.shared.valueLabelsVisibility.auto": "非表示",
     "xpack.lens.shared.valueLabelsVisibility.inside": "表示",
     "xpack.lens.staticValue.headingLabel": "配置",

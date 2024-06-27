@@ -35692,7 +35692,6 @@
     "xpack.securitySolution.endpoint.resolver.terminatedTrigger": "Déclenchement arrêté",
     "xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title": "Applications de confiance",
     "xpack.securitySolution.endpoint.updateCases.emptyComment": "Aucun commentaire fourni",
-    "xpack.securitySolution.endpointActionFailureMessage.unknownFailure": "Action en échec",
     "xpack.securitySolution.endpointActionResponseCodes.execute.diskQuotaError": "Les fichiers zip de sortie d'exécution de commande en attente sont trop nombreux.",
     "xpack.securitySolution.endpointActionResponseCodes.execute.failure": "Échec inconnu lors de l'exécution de la commande.",
     "xpack.securitySolution.endpointActionResponseCodes.execute.outputUploadTimeout": "Impossible de charger le fichier zip de sortie d'exécution de la commande Le chargement a expiré",

@@ -35710,7 +35710,6 @@
     "xpack.securitySolution.endpoint.resolver.terminatedTrigger": "已终止触发器",
     "xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title": "受信任的应用程序",
     "xpack.securitySolution.endpoint.updateCases.emptyComment": "未提供注释",
-    "xpack.securitySolution.endpointActionFailureMessage.unknownFailure": "操作失败",
     "xpack.securitySolution.endpointActionResponseCodes.execute.diskQuotaError": "待处理的命令执行输出 zip 文件过多。",
     "xpack.securitySolution.endpointActionResponseCodes.execute.failure": "执行命令时出现未知故障。",
     "xpack.securitySolution.endpointActionResponseCodes.execute.outputUploadTimeout": "无法上传命令执行输出 zip 文件。上传超时",

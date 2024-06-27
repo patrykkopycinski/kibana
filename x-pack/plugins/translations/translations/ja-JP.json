@@ -35667,7 +35667,6 @@
     "xpack.securitySolution.endpoint.resolver.terminatedTrigger": "トリガーを中断しました",
     "xpack.securitySolution.endpoint.trustedApps.fleetIntegration.title": "信頼できるアプリケーション",
     "xpack.securitySolution.endpoint.updateCases.emptyComment": "コメントがありません",
-    "xpack.securitySolution.endpointActionFailureMessage.unknownFailure": "アクションが失敗しました",
     "xpack.securitySolution.endpointActionResponseCodes.execute.diskQuotaError": "保留中のコマンド実行出力zipファイルが多すぎます。",
     "xpack.securitySolution.endpointActionResponseCodes.execute.failure": "コマンドの実行中に不明な障害が発生しました。",
     "xpack.securitySolution.endpointActionResponseCodes.execute.outputUploadTimeout": "コマンド実行出力zipファイルをアップロードできませんでした。アップロードがタイムアウトしました",

@@ -43883,7 +43883,6 @@
     "aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel": "Elastic AI Assistant for Observability",
     "aiAssistantManagementSelection.aiAssistantSettingsPage.descriptionTextLabel": "AI Assistantは、生成AIを使用して、エラーを説明したり、改善策を提案したり、データのリクエスト、分析、可視化を支援したりすることで、チームを支援します。",
     "aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel": "AI Assistant",
-    "aiAssistantManagementSelection.aiAssistantSettingsPage.obsAssistant.documentationLinkLabel": "ドキュメント",
     "aiAssistantManagementSelection.app.description": "AI Assistantを管理します。",
     "aiAssistantManagementSelection.app.title": "AI Assistant",
     "aiAssistantManagementSelection.app.titleBar": "AI Assistant",

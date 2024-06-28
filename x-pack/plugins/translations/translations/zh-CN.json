@@ -43931,7 +43931,6 @@
     "aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel": "适用于 Observability 的 Elastic AI 助手",
     "aiAssistantManagementSelection.aiAssistantSettingsPage.descriptionTextLabel": "通过解释错误，建议补救措施并帮助您请求、分析和可视化数据，AI 助手使用生成式 AI 来为您的团队提供帮助。",
     "aiAssistantManagementSelection.aiAssistantSettingsPage.h2.aIAssistantLabel": "AI 助手",
-    "aiAssistantManagementSelection.aiAssistantSettingsPage.obsAssistant.documentationLinkLabel": "文档",
     "aiAssistantManagementSelection.app.description": "管理您的 AI 助手。",
     "aiAssistantManagementSelection.app.title": "AI 助手",
     "aiAssistantManagementSelection.app.titleBar": "AI 助手",

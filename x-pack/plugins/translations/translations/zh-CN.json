@@ -34039,7 +34039,6 @@
     "xpack.securitySolution.detectionEngine.eqlValidation.requestError": "验证 EQL 查询时发生错误",
     "xpack.securitySolution.detectionEngine.eqlValidation.showErrorsLabel": "显示 EQL 验证错误",
     "xpack.securitySolution.detectionEngine.eqlValidation.title": "EQL 验证错误",
-    "xpack.securitySolution.detectionEngine.esqlValidation.missingIdInQueryError": "未使用 STATS...BY 函数的查询（非聚合查询）必须在源命令后包括 [metadata _id, _version, _index] 运算符。例如：FROM logs* [metadata _id, _version, _index]。 此外，还必须在查询响应中返回元数据属性（_id、_version 和 _index）。",
     "xpack.securitySolution.detectionEngine.esqlValidation.unknownError": "验证 ES|QL 时发生未知错误",
     "xpack.securitySolution.detectionEngine.goToDocumentationButton": "查看文档",
     "xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction": "采取操作",

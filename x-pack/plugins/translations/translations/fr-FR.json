@@ -34021,7 +34021,6 @@
     "xpack.securitySolution.detectionEngine.eqlValidation.requestError": "Une erreur s'est produite lors de la validation de votre requête EQL",
     "xpack.securitySolution.detectionEngine.eqlValidation.showErrorsLabel": "Afficher les erreurs de validation EQL",
     "xpack.securitySolution.detectionEngine.eqlValidation.title": "Erreurs de validation EQL",
-    "xpack.securitySolution.detectionEngine.esqlValidation.missingIdInQueryError": "Les requêtes n'utilisant pas la fonction STATS...BY (requêtes non-agrégées) doivent inclurent l'opérateur [metadata _id, _version, _index] après la commande de la source. Par exemple : FROM logs* [metadata _id, _version, _index].  En plus les propriétés de métadonnées (_id, _version, and _index)  doivent être retournées dans la réponse de requête.",
     "xpack.securitySolution.detectionEngine.esqlValidation.unknownError": "Erreur inconnue lors de la validation ES|QL",
     "xpack.securitySolution.detectionEngine.goToDocumentationButton": "Afficher la documentation",
     "xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction": "Entreprendre des actions",

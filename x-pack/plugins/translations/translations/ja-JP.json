@@ -33675,7 +33675,6 @@
     "xpack.securitySolution.dashboards.description": "説明",
     "xpack.securitySolution.dashboards.landing.createButton": "ダッシュボードを作成",
     "xpack.securitySolution.dashboards.landing.section.custom": "カスタム",
-    "xpack.securitySolution.dashboards.landing.section.default": "デフォルト",
     "xpack.securitySolution.dashboards.pageTitle": "ダッシュボード",
     "xpack.securitySolution.dashboards.queryError": "セキュリティダッシュボードの取得エラー",
     "xpack.securitySolution.dashboards.title": "タイトル",

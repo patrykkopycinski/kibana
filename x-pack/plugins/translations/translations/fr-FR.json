@@ -33700,7 +33700,6 @@
     "xpack.securitySolution.dashboards.description": "Description",
     "xpack.securitySolution.dashboards.landing.createButton": "Créer un tableau de bord",
     "xpack.securitySolution.dashboards.landing.section.custom": "PERSONNALISÉ",
-    "xpack.securitySolution.dashboards.landing.section.default": "PAR DÉFAUT",
     "xpack.securitySolution.dashboards.pageTitle": "Tableaux de bord",
     "xpack.securitySolution.dashboards.queryError": "Erreur lors de la récupération des tableaux de bord de sécurité",
     "xpack.securitySolution.dashboards.title": "Titre",

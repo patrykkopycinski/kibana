@@ -29459,7 +29459,6 @@
     "xpack.observability_onboarding.installElasticAgent.installStep.description": "プラットフォームを選択し、ターミナルでinstallコマンドを実行してElasticエージェントを登録、起動します。各ホストでこの手順を実行します。インストール前に{hostRequirementsLink}を確認してください。",
     "xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title": "{integrationName}統合がインストールされました。",
     "xpack.observability_onboarding.installElasticAgent.progress.eaConfig.completedTitle": "Elasticエージェント構成が{configPath}に書き込まれました",
-    "xpack.observability_onboarding.installSystemIntegration.error.unauthorized": "必要なkibana権限{requiredKibanaPrivileges}がありません。認証されたユーザーのロールに必要な権限を追加してください。",
     "xpack.observability_onboarding.systemIntegration.installed": "システム統合がインストールされました。{systemIntegrationTooltip}",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.link": "システム統合を使用して収集できるデータについて{learnMoreLink}。",
     "xpack.observability_onboarding.apiKeyBanner.created": "APIキーが作成されました。",

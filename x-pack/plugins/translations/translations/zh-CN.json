@@ -29499,7 +29499,6 @@
     "xpack.observability_onboarding.installElasticAgent.installStep.description": "选择平台并在终端中运行安装命令，以注册并启动 Elastic 代理。对每台主机执行此操作。请在安装之前复查{hostRequirementsLink}。",
     "xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title": "已安装 {integrationName} 集成。",
     "xpack.observability_onboarding.installElasticAgent.progress.eaConfig.completedTitle": "Elastic 代理配置已写入到 {configPath}",
-    "xpack.observability_onboarding.installSystemIntegration.error.unauthorized": "缺失所需的 Kibana 权限 {requiredKibanaPrivileges}，请将所需权限添加到已通过身份验证的用户的角色。",
     "xpack.observability_onboarding.systemIntegration.installed": "已安装系统集成。{systemIntegrationTooltip}",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.link": "使用系统集成{learnMoreLink}有关您可收集的数据的信息。",
     "xpack.observability_onboarding.apiKeyBanner.created": "已创建 API 密钥。",

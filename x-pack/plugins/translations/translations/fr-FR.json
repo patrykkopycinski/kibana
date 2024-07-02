@@ -29482,7 +29482,6 @@
     "xpack.observability_onboarding.installElasticAgent.installStep.description": "Sélectionnez votre plateforme et exécutez la commande install dans votre terminal pour enregistrer, puis démarrez Elastic Agent. Faites ceci pour chaque hôte. Vérifiez {hostRequirementsLink} avant l'installation.",
     "xpack.observability_onboarding.installElasticAgent.integrationSuccessCallout.title": "Intégration {integrationName} installée.",
     "xpack.observability_onboarding.installElasticAgent.progress.eaConfig.completedTitle": "La configuration Elastic Agent est écrite dans {configPath}",
-    "xpack.observability_onboarding.installSystemIntegration.error.unauthorized": "Le privilège Kibana {requiredKibanaPrivileges} requis est manquant. Veuillez ajouter le privilège requis au rôle de l'utilisateur authentifié.",
     "xpack.observability_onboarding.systemIntegration.installed": "Intégration du système installée. {systemIntegrationTooltip}",
     "xpack.observability_onboarding.systemIntegration.installed.tooltip.link": "{learnMoreLink} sur les données que vous pouvez collecter à l'aide de l'intégration des systèmes.",
     "xpack.observability_onboarding.apiKeyBanner.created": "Clé d’API créée.",

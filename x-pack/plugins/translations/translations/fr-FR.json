@@ -1069,7 +1069,6 @@
     "core.ui.searchNavList.label": "Recherche",
     "core.ui.securityNavList.label": "Sécurité",
     "core.ui.skipToMainButton": "Passer au contenu principal",
-    "core.ui.welcomeErrorMessage": "Elastic ne s'est pas chargé correctement. Vérifiez la sortie du serveur pour plus d'informations.",
     "core.ui.welcomeMessage": "Chargement d'Elastic",
     "customIntegrations.components.replacementAccordion.recommendationDescription": "Les intégrations d'Elastic Agent sont recommandées, mais vous pouvez également utiliser Beats. Pour plus de détails, consultez notre {link}.",
     "customIntegrations.languageClients.DotnetElasticsearch.readme.connectingText": "Vous pouvez vous connecter à Elastic Cloud à l'aide d'une {api_key} et d'un {cloud_id} :",

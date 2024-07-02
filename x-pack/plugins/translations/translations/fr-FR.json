@@ -44225,8 +44225,6 @@
     "uiActions.errors.incompatibleAction": "Action non compatible",
     "uiActions.triggers.rowClickkDescription": "Un clic sur une ligne de tableau",
     "uiActions.triggers.rowClickTitle": "Clic sur ligne de tableau",
-    "uiActions.triggers.dashboard.addPanelMenu.description": "Une nouvelle action apparaîtra dans le menu Ajouter un panneau du tableau de bord",
-    "uiActions.triggers.dashboard.addPanelMenu.title": "Menu Ajouter un panneau",
     "unsavedChangesBadge.contextMenu.openButton": "Afficher les actions disponibles",
     "unsavedChangesBadge.contextMenu.revertChangesButton": "Restaurer les modifications",
     "unsavedChangesBadge.contextMenu.revertingChangesButtonStatus": "Annuler les modifications",

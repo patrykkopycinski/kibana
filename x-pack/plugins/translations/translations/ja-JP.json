@@ -13320,8 +13320,6 @@
     "xpack.elasticAssistant.assistant.content.prompts.system.superheroPersonality": "サイバーセキュリティの専門家に情報を伝えるつもりで、できるだけ詳細で関連性のある回答を入力してください。",
     "xpack.elasticAssistant.assistant.content.prompts.system.superheroSystemPromptName": "拡張システムプロンプト",
     "xpack.elasticAssistant.assistant.content.prompts.system.youAreAHelpfulExpertAssistant": "あなたはElasticセキュリティに関する質問に答える、親切で専門的なアシスタントです。",
-    "xpack.elasticAssistant.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "説明、推奨されるアクション、箇条書きのトリアージステップを追加します。提供された MITRE ATT&CKデータを使用して、MITREからのコンテキストや推奨事項を追加し、MITREのWebサイトの関連ページにハイパーリンクを貼ります。コンテキストのユーザーとホストのリスクスコアデータを必ず含めてください。回答には、エンドポイント対応アクション、ElasticエージェントOSQueryマネージャー統合（osqueryクエリの例を付けて）、タイムライン、エンティティ分析など、Elasticセキュリティ固有の機能を指す手順を含め、関連するElasticセキュリティのドキュメントすべてにリンクしてください。",
-    "xpack.elasticAssistant.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "上記のコンテキストからイベントを評価し、Elasticセキュリティのケース用に、出力をマークダウン構文で正しく書式設定してください。",
     "xpack.elasticAssistant.assistant.conversations.settings.connectorTitle": "コネクター",
     "xpack.elasticAssistant.assistant.conversations.settings.promptHelpTextTitle": "すべての会話の一部として提供されたコンテキスト",
     "xpack.elasticAssistant.assistant.conversations.settings.promptTitle": "システムプロンプト",

@@ -5,14 +5,5 @@
  * 2.0.
  */
 
-export interface KnowledgeBaseConfig {
-  isEnabledRAGAlerts: boolean;
-  isEnabledKnowledgeBase: boolean;
-  latestAlerts: number;
-}
-
-export interface TraceOptions {
-  apmUrl: string;
-  langSmithProject: string;
-  langSmithApiKey: string;
-}
+export * from './bulk_update_prompts';
+export * from './use_fetch_prompts';

@@ -18159,7 +18159,6 @@
     "xpack.fleet.epm.featuresLabel": "機能",
     "xpack.fleet.epm.InputTemplates.guideLink": "FleetおよびElasticエージェントガイド",
     "xpack.fleet.epm.InputTemplates.installCallout": "次の構成を使用するために、統合をインストールします。",
-    "xpack.fleet.epm.InputTemplates.loadingErro": "エラー入力テンプレート",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "Beatsのみ",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "Elasticエージェントのみ",
     "xpack.fleet.epm.integrationPreference.recommendedLabel": "推奨",

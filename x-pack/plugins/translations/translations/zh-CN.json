@@ -18188,7 +18188,6 @@
     "xpack.fleet.epm.featuresLabel": "功能",
     "xpack.fleet.epm.InputTemplates.guideLink": "Fleet 和 Elastic 代理指南",
     "xpack.fleet.epm.InputTemplates.installCallout": "安装集成以使用以下配置。",
-    "xpack.fleet.epm.InputTemplates.loadingErro": "输入模板出错",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "仅限 Beats",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "仅限 Elastic 代理",
     "xpack.fleet.epm.integrationPreference.recommendedLabel": "推荐",

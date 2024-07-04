@@ -18181,7 +18181,6 @@
     "xpack.fleet.epm.featuresLabel": "Fonctionnalités",
     "xpack.fleet.epm.InputTemplates.guideLink": "Guide de Fleet et d'Elastic Agent",
     "xpack.fleet.epm.InputTemplates.installCallout": "Installer l'intégration pour utiliser les configurations suivantes.",
-    "xpack.fleet.epm.InputTemplates.loadingErro": "Modèles d'entrée d'erreur",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "Beats uniquement",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "Elastic Agent uniquement",
     "xpack.fleet.epm.integrationPreference.recommendedLabel": "Recommandé",

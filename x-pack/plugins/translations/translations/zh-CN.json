@@ -23439,7 +23439,7 @@
     "xpack.lens.shared.axisNameLabel": "轴标题",
     "xpack.lens.shared.chartValueLabelVisibilityLabel": "标签",
     "xpack.lens.shared.chartValueLabelVisibilityTooltip": "如果没有足够的空间，可能会隐藏值标签",
-    "xpack.lens.shared.curveLabel": "视觉选项",
+    "xpack.lens.shared.visualOptionsLabel": "视觉选项",
     "xpack.lens.shared.legendAlignmentLabel": "对齐方式",
     "xpack.lens.shared.legendInsideColumnsLabel": "列数目",
     "xpack.lens.shared.legendInsideLocationAlignmentLabel": "对齐方式",

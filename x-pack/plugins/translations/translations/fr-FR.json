@@ -23425,7 +23425,7 @@
     "xpack.lens.shared.axisNameLabel": "Titre de l'axe",
     "xpack.lens.shared.chartValueLabelVisibilityLabel": "Étiquettes",
     "xpack.lens.shared.chartValueLabelVisibilityTooltip": "Si l'espace est insuffisant, les étiquettes de valeurs pourront être masquées",
-    "xpack.lens.shared.curveLabel": "Options visuelles",
+    "xpack.lens.shared.visualOptionsLabel": "Options visuelles",
     "xpack.lens.shared.legendAlignmentLabel": "Alignement",
     "xpack.lens.shared.legendInsideColumnsLabel": "Nombre de colonnes",
     "xpack.lens.shared.legendInsideLocationAlignmentLabel": "Alignement",

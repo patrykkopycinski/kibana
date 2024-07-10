@@ -17675,7 +17675,6 @@
     "xpack.fleet.agentLogs.downloadLink": "下载",
     "xpack.fleet.agentLogs.logDisabledCallOutTitle": "日志收集已禁用",
     "xpack.fleet.agentLogs.logLevelSelectText": "日志级别",
-    "xpack.fleet.agentLogs.openInDiscoverUiLinkText": "在 Discover 中打开",
     "xpack.fleet.agentLogs.openInLogsUiLinkText": "在日志中打开",
     "xpack.fleet.agentLogs.searchPlaceholderText": "搜索日志……",
     "xpack.fleet.agentLogs.selectLogLevel.errorTitleText": "更新代理日志记录级别时出错",

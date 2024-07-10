@@ -17668,7 +17668,6 @@
     "xpack.fleet.agentLogs.downloadLink": "télécharger",
     "xpack.fleet.agentLogs.logDisabledCallOutTitle": "La collecte de logs est désactivée",
     "xpack.fleet.agentLogs.logLevelSelectText": "Niveau du log",
-    "xpack.fleet.agentLogs.openInDiscoverUiLinkText": "Ouvrir dans Discover",
     "xpack.fleet.agentLogs.openInLogsUiLinkText": "Ouvrir dans Logs",
     "xpack.fleet.agentLogs.searchPlaceholderText": "Rechercher dans les logs…",
     "xpack.fleet.agentLogs.selectLogLevel.errorTitleText": "Erreur lors de la mise à jour du niveau de logging de l'agent",

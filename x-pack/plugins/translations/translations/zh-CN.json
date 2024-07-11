@@ -36241,7 +36241,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel": "显示调查指南",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel": "显示调查指南",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideLoadingAriaLabel": "调查指南",
-    "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideTitle": "调查指南",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription": "没有适用于此规则的调查指南。",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "调查指南在告警预览中不可用。",
     "xpack.securitySolution.flyout.right.investigation.sectionTitle": "调查",

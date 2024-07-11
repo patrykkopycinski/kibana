@@ -36223,7 +36223,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonAriaLabel": "Afficher le guide d'investigation",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideButtonLabel": "Afficher le guide d'investigation",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideLoadingAriaLabel": "guide d'investigation",
-    "xpack.securitySolution.flyout.right.investigation.investigationGuide.investigationGuideTitle": "Guide d'investigation",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription": "Il n'existe pas de guide d'investigation pour cette règle.",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "Le guide d'investigation n'est pas disponible dans l'aperçu des alertes.",
     "xpack.securitySolution.flyout.right.investigation.sectionTitle": "Investigation",

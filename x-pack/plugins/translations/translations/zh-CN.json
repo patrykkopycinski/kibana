@@ -782,7 +782,6 @@
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "（在新选项卡或窗口中打开）",
     "core.euiFieldPassword.maskPassword": "屏蔽密码",
     "core.euiFieldPassword.showPassword": "将密码显示为纯文本。注意：这会将您的密码暴露在屏幕上。",
-    "core.euiFilePicker.clearSelectedFiles": "清除选定的文件",
     "core.euiFilePicker.promptText": "选择或拖放文件",
     "core.euiFilePicker.removeSelected": "移除",
     "core.euiFlyoutCloseButton.ariaLabel": "关闭此对话框",

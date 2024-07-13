@@ -780,7 +780,6 @@
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "(s’ouvre dans un nouvel onglet ou une nouvelle fenêtre)",
     "core.euiFieldPassword.maskPassword": "Masquer le mot de passe",
     "core.euiFieldPassword.showPassword": "Afficher le mot de passe en texte brut. Remarque : votre mot de passe sera visible à l'écran.",
-    "core.euiFilePicker.clearSelectedFiles": "Effacer les fichiers sélectionnés",
     "core.euiFilePicker.promptText": "Sélectionner ou glisser-déposer un fichier",
     "core.euiFilePicker.removeSelected": "Supprimer",
     "core.euiFlyoutCloseButton.ariaLabel": "Fermer cette boîte de dialogue",

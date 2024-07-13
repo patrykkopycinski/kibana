@@ -780,7 +780,6 @@
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "（新しいタブまたはウィンドウで開く）",
     "core.euiFieldPassword.maskPassword": "パスワードをマスク",
     "core.euiFieldPassword.showPassword": "プレーンテキストとしてパスワードを表示します。注記：パスワードは画面上に見えるように表示されます。",
-    "core.euiFilePicker.clearSelectedFiles": "選択したファイルを消去",
     "core.euiFilePicker.promptText": "ファイルを選択するかドラッグ&ドロップしてください",
     "core.euiFilePicker.removeSelected": "削除",
     "core.euiFlyoutCloseButton.ariaLabel": "このダイアログを閉じる",

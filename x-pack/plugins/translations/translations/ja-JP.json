@@ -21057,7 +21057,7 @@
     "xpack.infra.legendControls.reverseDirectionLabel": "逆方向",
     "xpack.infra.legendControls.stepsLabel": "色の数",
     "xpack.infra.legendControls.switchLabel": "自動計算範囲",
-    "xpack.infra.legnedControls.boundRangeError": "最小値は最大値よりも小さくなければなりません",
+    "xpack.infra.legendControls.boundRangeError": "最小値は最大値よりも小さくなければなりません",
     "xpack.infra.logAnomalies.logEntryExamplesMenuLabel": "ログエントリのアクションを表示",
     "xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel": "メッセージ",
     "xpack.infra.logs.alertDetails.chart.ratioTitle": "クエリAとクエリBの比率",

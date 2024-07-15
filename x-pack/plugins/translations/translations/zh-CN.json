@@ -21089,7 +21089,7 @@
     "xpack.infra.legendControls.reverseDirectionLabel": "反向",
     "xpack.infra.legendControls.stepsLabel": "颜色个数",
     "xpack.infra.legendControls.switchLabel": "自动计算范围",
-    "xpack.infra.legnedControls.boundRangeError": "最小值必须小于最大值",
+    "xpack.infra.legendControls.boundRangeError": "最小值必须小于最大值",
     "xpack.infra.logAnomalies.logEntryExamplesMenuLabel": "查看日志条目的操作",
     "xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel": "消息",
     "xpack.infra.logs.alertDetails.chart.ratioTitle": "查询 A 到查询 B 的比率",

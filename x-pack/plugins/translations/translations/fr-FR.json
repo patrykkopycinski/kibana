@@ -21082,7 +21082,7 @@
     "xpack.infra.legendControls.reverseDirectionLabel": "Inverser la direction",
     "xpack.infra.legendControls.stepsLabel": "Nombre de couleurs",
     "xpack.infra.legendControls.switchLabel": "Calculer automatiquement la plage",
-    "xpack.infra.legnedControls.boundRangeError": "La valeur minimale doit être inférieure à la valeur maximale",
+    "xpack.infra.legendControls.boundRangeError": "La valeur minimale doit être inférieure à la valeur maximale",
     "xpack.infra.logAnomalies.logEntryExamplesMenuLabel": "Afficher les actions de l'entrée du log",
     "xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel": "Message",
     "xpack.infra.logs.alertDetails.chart.ratioTitle": "Ratio de Requête A à Requête B",

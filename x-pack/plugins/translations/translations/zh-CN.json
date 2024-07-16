@@ -23334,7 +23334,6 @@
     "xpack.lens.metric.iconSelect.tagIconLabel": "标签",
     "xpack.lens.metric.iconSelect.temperatureLabel": "温度",
     "xpack.lens.metric.label": "指标",
-    "xpack.lens.metric.labels": "标签",
     "xpack.lens.metric.layerType.trendLine": "趋势线",
     "xpack.lens.metric.max": "最大值",
     "xpack.lens.metric.maxColumns": "布局列",

@@ -23320,7 +23320,6 @@
     "xpack.lens.metric.iconSelect.tagIconLabel": "Balise",
     "xpack.lens.metric.iconSelect.temperatureLabel": "Température",
     "xpack.lens.metric.label": "Indicateur",
-    "xpack.lens.metric.labels": "Étiquettes",
     "xpack.lens.metric.layerType.trendLine": "Courbe de tendance",
     "xpack.lens.metric.max": "Valeur maximale",
     "xpack.lens.metric.maxColumns": "Colonnes du calque",

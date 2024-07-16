@@ -23301,7 +23301,6 @@
     "xpack.lens.metric.iconSelect.tagIconLabel": "タグ",
     "xpack.lens.metric.iconSelect.temperatureLabel": "温度",
     "xpack.lens.metric.label": "メトリック",
-    "xpack.lens.metric.labels": "ラベル",
     "xpack.lens.metric.layerType.trendLine": "トレンドライン",
     "xpack.lens.metric.max": "最高値",
     "xpack.lens.metric.maxColumns": "レイアウト列",

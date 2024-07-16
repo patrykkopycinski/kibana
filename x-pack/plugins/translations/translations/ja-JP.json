@@ -37448,8 +37448,6 @@
     "xpack.securitySolution.timeline.sidePanel.networkDetails.close": "閉じる",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.networkDetailsPageLink": "詳細ページを表示",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.title": "ネットワーク詳細",
-    "xpack.securitySolution.timeline.sidePanel.networkDetails.userDetails": "詳細ページを表示",
-    "xpack.securitySolution.timeline.sidePanel.userDetails.title": "ユーザー詳細",
     "xpack.securitySolution.timeline.sortAZLabel": "A-Zの昇順で並べ替え",
     "xpack.securitySolution.timeline.sortFieldsButton": "フィールドの並べ替え",
     "xpack.securitySolution.timeline.sortZALabel": "ZｰAの降順で並べ替え",

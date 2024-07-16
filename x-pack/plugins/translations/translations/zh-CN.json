@@ -37491,8 +37491,6 @@
     "xpack.securitySolution.timeline.sidePanel.networkDetails.close": "关闭",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.networkDetailsPageLink": "查看详情页面",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.title": "网络详情",
-    "xpack.securitySolution.timeline.sidePanel.networkDetails.userDetails": "查看详情页面",
-    "xpack.securitySolution.timeline.sidePanel.userDetails.title": "用户详情",
     "xpack.securitySolution.timeline.sortAZLabel": "A-Z 排序",
     "xpack.securitySolution.timeline.sortFieldsButton": "排序字段",
     "xpack.securitySolution.timeline.sortZALabel": "Z-A 排序",

@@ -37473,8 +37473,6 @@
     "xpack.securitySolution.timeline.sidePanel.networkDetails.close": "fermer",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.networkDetailsPageLink": "Afficher la page de détails",
     "xpack.securitySolution.timeline.sidePanel.networkDetails.title": "Détails réseau",
-    "xpack.securitySolution.timeline.sidePanel.networkDetails.userDetails": "Afficher la page de détails",
-    "xpack.securitySolution.timeline.sidePanel.userDetails.title": "Détails de l'utilisateur",
     "xpack.securitySolution.timeline.sortAZLabel": "Trier A-Z",
     "xpack.securitySolution.timeline.sortFieldsButton": "Trier les champs",
     "xpack.securitySolution.timeline.sortZALabel": "Trier Z-A",

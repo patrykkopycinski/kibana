@@ -6662,7 +6662,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "运行查询",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "源命令",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "提交反馈",
-    "textBasedEditor.query.textBasedLanguagesEditor.timestampDetected": "找到 @timestamp",
     "textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected": "未找到 @timestamp",
     "textBasedEditor.query.textBasedLanguagesEditor.warningCount": "{count} 个{count, plural, other {警告}}",
     "textBasedEditor.query.textBasedLanguagesEditor.warningsTitle": "警告",

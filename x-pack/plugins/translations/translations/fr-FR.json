@@ -6653,7 +6653,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "Exécuter la requête",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "Commandes sources",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "Soumettre un commentaire",
-    "textBasedEditor.query.textBasedLanguagesEditor.timestampDetected": "@timestamp trouvé",
     "textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected": "@timestamp non trouvé",
     "textBasedEditor.query.textBasedLanguagesEditor.warningCount": "{count} {count, plural, one {avertissement} other {avertissements}}",
     "textBasedEditor.query.textBasedLanguagesEditor.warningsTitle": "Avertissements",

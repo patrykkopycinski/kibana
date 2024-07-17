@@ -6629,7 +6629,7 @@
     "textBasedEditor.query.textBasedLanguagesEditor.runQuery": "クエリを実行",
     "textBasedEditor.query.textBasedLanguagesEditor.sourceCommands": "ソースコマンド",
     "textBasedEditor.query.textBasedLanguagesEditor.submitFeedback": "フィードバックを送信",
-    "textBasedEditor.query.textBasedLanguagesEditor.timestampDetected": "@timestampが見つかりました",
+    "": "@timestampが見つかりました",
     "textBasedEditor.query.textBasedLanguagesEditor.timestampNotDetected": "@timestampが見つかりません",
     "textBasedEditor.query.textBasedLanguagesEditor.warningCount": "{count} {count, plural, other  {件の警告}}",
     "textBasedEditor.query.textBasedLanguagesEditor.warningsTitle": "警告",

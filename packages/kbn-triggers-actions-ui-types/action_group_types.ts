@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './rule_types';
-export * from './action_variable_types';
-export * from './action_group_types';
+import { ActionGroup } from '@kbn/alerting-types';
+
+export type OmitMessageVariablesType = 'all' | 'keepContext';
+
+export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
+  omitMessageVariables?: OmitMessageVariablesType;
+  defaultActionMessage?: string;
+}

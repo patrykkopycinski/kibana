@@ -14,3 +14,5 @@ export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
 export const EMPTY_AAD_FIELDS: DataViewField[] = [];
 export const BASE_TRIGGERS_ACTIONS_UI_API_PATH = '/internal/triggers_actions_ui';
+export const BASE_ACTION_API_PATH = '/api/actions';
+export const INTERNAL_BASE_ACTION_API_PATH = '/internal/actions';

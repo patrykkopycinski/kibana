@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { RuleAction, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/css'; // We can't use @emotion/react - this component gets used with plugins that use both styled-components and Emotion
 import { i18n } from '@kbn/i18n';
@@ -24,12 +24,20 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   useEuiTheme,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getTimeOptions } from '../../../common/lib/get_time_options';
-import { RuleNotifyWhenType, NotifyWhenSelectOptions } from '../../../types';
-import { DEFAULT_FREQUENCY } from '../../../common/constants';
+import { RuleNotifyWhenType, RuleNotifyWhen } from '@kbn/alerting-types';
+import { DEFAULT_FREQUENCY } from '../constants';
+import { getTimeOptions } from '../utils';
+import { RuleAction } from '../../common';
+
+export interface NotifyWhenSelectOptions {
+  isSummaryOption?: boolean;
+  isForEachAlertOption?: boolean;
+  value: EuiSuperSelectOption<RuleNotifyWhenType>;
+}
 
 export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   {
@@ -37,26 +45,23 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActionGroupChange',
-      inputDisplay: i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.display',
-        {
-          defaultMessage: 'On status changes',
-        }
-      ),
+      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onActionGroupChange.display', {
+        defaultMessage: 'On status changes',
+      }),
       'data-test-subj': 'onActionGroupChange',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On status changes"
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.label"
+              id="alertsUIShared.ruleForm.onActionGroupChange.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if the alert status changes."
-                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActionGroupChange.description"
+                id="alertsUIShared.ruleForm.onActionGroupChange.description"
               />
             </p>
           </EuiText>
@@ -69,26 +74,23 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onActiveAlert',
-      inputDisplay: i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.display',
-        {
-          defaultMessage: 'On check intervals',
-        }
-      ),
+      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onActiveAlert.display', {
+        defaultMessage: 'On check intervals',
+      }),
       'data-test-subj': 'onActiveAlert',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On check intervals"
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.label"
+              id="alertsUIShared.ruleForm.onActiveAlert.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onActiveAlert.description"
+                id="alertsUIShared.ruleForm.onActiveAlert.description"
               />
             </p>
           </EuiText>
@@ -101,26 +103,23 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
     isForEachAlertOption: true,
     value: {
       value: 'onThrottleInterval',
-      inputDisplay: i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.display',
-        {
-          defaultMessage: 'On custom action intervals',
-        }
-      ),
+      inputDisplay: i18n.translate('alertsUIShared.ruleForm.onThrottleInterval.display', {
+        defaultMessage: 'On custom action intervals',
+      }),
       'data-test-subj': 'onThrottleInterval',
       dropdownDisplay: (
         <>
           <strong>
             <FormattedMessage
               defaultMessage="On custom action intervals"
-              id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.label"
+              id="alertsUIShared.ruleForm.onThrottleInterval.label"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
                 defaultMessage="Actions run if rule conditions are met."
-                id="xpack.triggersActionsUI.sections.ruleForm.ruleNotifyWhen.onThrottleInterval.description"
+                id="alertsUIShared.ruleForm.onThrottleInterval.description"
               />
             </p>
           </EuiText>
@@ -130,7 +129,7 @@ export const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   },
 ];
 
-interface ActionNotifyWhenProps {
+interface RuleActionsNotifyWhenProps {
   frequency: RuleAction['frequency'];
   throttle: number | null;
   throttleUnit: string;
@@ -144,7 +143,7 @@ interface ActionNotifyWhenProps {
   defaultNotifyWhenValue?: RuleNotifyWhenType;
 }
 
-export const ActionNotifyWhen = ({
+export const RuleActionsNotifyWhen = ({
   hasAlertsMappings,
   frequency = DEFAULT_FREQUENCY,
   throttle,
@@ -156,7 +155,7 @@ export const ActionNotifyWhen = ({
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   defaultNotifyWhenValue = DEFAULT_FREQUENCY.notifyWhen,
-}: ActionNotifyWhenProps) => {
+}: RuleActionsNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
     useState<RuleNotifyWhenType>(defaultNotifyWhenValue);
@@ -288,7 +287,7 @@ export const ActionNotifyWhen = ({
       anchorPosition="downLeft"
       aria-label={frequency.summary ? SUMMARY_OF_ALERTS : FOR_EACH_ALERT}
       aria-roledescription={i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOrRulePerSelectRoleDescription',
+        'alertsUIShared.ruleActionsNotifyWhen.summaryOrRulePerSelectRoleDescription',
         { defaultMessage: 'Action frequency type select' }
       )}
       button={
@@ -309,10 +308,9 @@ export const ActionNotifyWhen = ({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate(
-        'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.actionFrequencyLabel',
-        { defaultMessage: 'Action frequency' }
-      )}
+      label={i18n.translate('alertsUIShared.ruleActionsNotifyWhen.actionFrequencyLabel', {
+        defaultMessage: 'Action frequency',
+      })}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -338,7 +336,7 @@ export const ActionNotifyWhen = ({
                       name="throttle"
                       data-test-subj="throttleInput"
                       prepend={i18n.translate(
-                        'xpack.triggersActionsUI.sections.ruleForm.frequencyNotifyWhen.label',
+                        'alertsUIShared.ruleActionsNotifyWhen.frequencyNotifyWhen.label',
                         {
                           defaultMessage: 'Run every',
                         }
@@ -374,7 +372,7 @@ export const ActionNotifyWhen = ({
                   <EuiSpacer size="xs" />
                   <EuiText size="xs" color="danger">
                     {i18n.translate(
-                      'xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning',
+                      'alertsUIShared.ruleActionsNotifyWhen.notifyWhenThrottleWarning',
                       {
                         defaultMessage:
                           "Custom action intervals cannot be shorter than the rule's check interval",
@@ -391,11 +389,9 @@ export const ActionNotifyWhen = ({
   );
 };
 
-const FOR_EACH_ALERT = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.forEachOption',
-  { defaultMessage: 'For each alert' }
-);
-const SUMMARY_OF_ALERTS = i18n.translate(
-  'xpack.triggersActionsUI.sections.ruleForm.actionNotifyWhen.summaryOption',
-  { defaultMessage: 'Summary of alerts' }
-);
+const FOR_EACH_ALERT = i18n.translate('alertsUIShared.ruleActionsNotifyWhen.forEachOption', {
+  defaultMessage: 'For each alert',
+});
+const SUMMARY_OF_ALERTS = i18n.translate('alertsUIShared.ruleActionsNotifyWhen.summaryOption', {
+  defaultMessage: 'Summary of alerts',
+});

@@ -5812,7 +5812,6 @@
     "searchApiPanels.pipeline.overview.extAndStandard.description": "Analysez les informations depuis vos documents pour assurer qu'ils sont conformes au format standardisé.",
     "searchApiPanels.pipeline.overview.extAndStandard.title": "Extraire et standardiser",
     "searchApiPanels.welcomeBanner.codeBox.copyButtonLabel": "Copier",
-    "searchApiPanels.welcomeBanner.codeBox.selectAriaLabel": "Sélectionner un langage de programmation",
     "searchApiPanels.welcomeBanner.header.description": "Configurez votre client de langage de programmation, ingérez des données, et vous serez prêt à commencer vos recherches en quelques minutes.",
     "searchApiPanels.welcomeBanner.header.greeting.customTitle": "👋 Bonjour {name} !",
     "searchApiPanels.welcomeBanner.header.greeting.defaultTitle": "👋 Bonjour",

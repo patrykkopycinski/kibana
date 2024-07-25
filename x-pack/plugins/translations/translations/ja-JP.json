@@ -5792,7 +5792,6 @@
     "searchApiPanels.pipeline.overview.extAndStandard.description": "ドキュメントから情報を解析し、標準化された形式に準拠していることを確認します。",
     "searchApiPanels.pipeline.overview.extAndStandard.title": "抽出と標準化",
     "searchApiPanels.welcomeBanner.codeBox.copyButtonLabel": "コピー",
-    "searchApiPanels.welcomeBanner.codeBox.selectAriaLabel": "プログラミング言語を選択",
     "searchApiPanels.welcomeBanner.header.description": "プログラミング言語のクライアントを設定し、データを取り込めば、数分で検索を開始できます。",
     "searchApiPanels.welcomeBanner.header.greeting.customTitle": "👋 こんにちは、{name}さん!",
     "searchApiPanels.welcomeBanner.header.greeting.defaultTitle": "👋 こんにちは",

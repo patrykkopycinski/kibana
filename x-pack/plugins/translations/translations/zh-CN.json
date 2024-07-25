@@ -5821,7 +5821,6 @@
     "searchApiPanels.pipeline.overview.extAndStandard.description": "解析您文档中的信息以确保它们遵循标准化格式。",
     "searchApiPanels.pipeline.overview.extAndStandard.title": "提取并标准化",
     "searchApiPanels.welcomeBanner.codeBox.copyButtonLabel": "复制",
-    "searchApiPanels.welcomeBanner.codeBox.selectAriaLabel": "选择编程语言",
     "searchApiPanels.welcomeBanner.header.description": "设置您的编程语言客户端，采集一些数据，如此即可在数分钟内开始搜索。",
     "searchApiPanels.welcomeBanner.header.greeting.customTitle": "👋 {name} 您好！",
     "searchApiPanels.welcomeBanner.header.greeting.defaultTitle": "👋 您好",

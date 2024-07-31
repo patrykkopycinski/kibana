@@ -39566,8 +39566,6 @@
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel": "選択をキャンセル",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription": "ES|QLを使用して、テキストベースのクエリを定義します。",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel": "ES|QL",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalDescription": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalLabel": "テクニカルプレビュー",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription": "KQLまたはLuceneを使用して、テキストベースのクエリを定義します。",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel": "KQLまたはLucene",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription": "ElasticsearchクエリDSLを使用して、クエリを定義します。",

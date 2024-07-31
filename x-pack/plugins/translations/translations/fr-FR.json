@@ -39706,8 +39706,6 @@
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel": "Annuler la sélection",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription": "Utiliser ES|QL pour définir une requête de type texte.",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel": "ES|QL",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalDescription": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalLabel": "Version d'évaluation technique",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription": "Utilisez KQL ou Lucene pour définir une requête de type texte.",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel": "KQL ou Lucene",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription": "Utilisez Elasticsearch Query DSL pour définir une requête.",

@@ -39751,8 +39751,6 @@
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel": "取消选择",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeDescription": "使用 ES|QL 定义基于文本的查询。",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.esqlFormTypeLabel": "ES|QL",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalDescription": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.stackAlerts.esQuery.ui.selectQueryFormType.experimentalLabel": "技术预览",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeDescription": "使用 KQL 或 Lucene 定义基于文本的查询。",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.kqlOrLuceneFormTypeLabel": "KQL 或 Lucene",
     "xpack.stackAlerts.esQuery.ui.selectQueryFormType.queryDslFormTypeDescription": "使用 Elasticsearch 查询 DSL 定义查询。",

@@ -33226,8 +33226,6 @@
     "xpack.securitySolution.components.chartSelect.chartsOption": "チャート",
     "xpack.securitySolution.components.chartSelect.chartsOptionTitle": "まとめ",
     "xpack.securitySolution.components.chartSelect.legendTitle": "タブを選択",
-    "xpack.securitySolution.components.chartSelect.selectAChartAriaLabel": "アラートを選択",
-    "xpack.securitySolution.components.chartSelect.tableOption": "表",
     "xpack.securitySolution.components.chartSelect.tableOptionTitle": "カウント",
     "xpack.securitySolution.components.chartSelect.treemapOption": "ツリーマップ",
     "xpack.securitySolution.components.chartSelect.trendOption": "傾向",

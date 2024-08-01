@@ -33393,8 +33393,6 @@
     "xpack.securitySolution.components.chartSelect.chartsOption": "图表",
     "xpack.securitySolution.components.chartSelect.chartsOptionTitle": "摘要",
     "xpack.securitySolution.components.chartSelect.legendTitle": "选择选项卡",
-    "xpack.securitySolution.components.chartSelect.selectAChartAriaLabel": "选择图表",
-    "xpack.securitySolution.components.chartSelect.tableOption": "表",
     "xpack.securitySolution.components.chartSelect.tableOptionTitle": "计数",
     "xpack.securitySolution.components.chartSelect.treemapOption": "树状图",
     "xpack.securitySolution.components.chartSelect.trendOption": "趋势",

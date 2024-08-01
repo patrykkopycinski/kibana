@@ -33353,8 +33353,6 @@
     "xpack.securitySolution.components.chartSelect.chartsOption": "Graphiques",
     "xpack.securitySolution.components.chartSelect.chartsOptionTitle": "Résumé",
     "xpack.securitySolution.components.chartSelect.legendTitle": "Sélectionner un onglet",
-    "xpack.securitySolution.components.chartSelect.selectAChartAriaLabel": "Sélectionner un graphique",
-    "xpack.securitySolution.components.chartSelect.tableOption": "Tableau",
     "xpack.securitySolution.components.chartSelect.tableOptionTitle": "Comptes",
     "xpack.securitySolution.components.chartSelect.treemapOption": "Compartimentage",
     "xpack.securitySolution.components.chartSelect.trendOption": "Tendance",

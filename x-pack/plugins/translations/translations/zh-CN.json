@@ -5840,8 +5840,6 @@
     "searchApiPanels.welcomeBanner.selectClient.callout.description": "借助 Console，您可以立即开始使用我们的 REST API。无需进行安装。",
     "searchApiPanels.welcomeBanner.selectClient.callout.link": "立即试用 Console",
     "searchApiPanels.welcomeBanner.selectClient.callout.title": "立即在 Console 中试用",
-    "searchApiPanels.welcomeBanner.selectClient.description": "Elastic 以几种流行语言构建和维护客户端，我们的社区也做出了许多贡献。选择您常用的语言客户端或深入分析 {console} 以开始使用。",
-    "searchApiPanels.welcomeBanner.selectClient.description.console.link": "控制台",
     "searchApiPanels.welcomeBanner.selectClient.elasticsearchClientDocLink": "Elasticsearch 客户端 ",
     "searchApiPanels.welcomeBanner.selectClient.heading": "选择一个",
     "searchApiPanels.welcomeBanner.selectClient.title": "选择客户端",

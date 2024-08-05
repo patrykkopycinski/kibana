@@ -5811,8 +5811,6 @@
     "searchApiPanels.welcomeBanner.selectClient.callout.description": "コンソールでは、REST APIを使用してすぐに開始できます。インストールは不要です。",
     "searchApiPanels.welcomeBanner.selectClient.callout.link": "今すぐコンソールを試す",
     "searchApiPanels.welcomeBanner.selectClient.callout.title": "今すぐコンソールで試す",
-    "searchApiPanels.welcomeBanner.selectClient.description": "Elasticは複数の一般的な言語でクライアントを構築および保守します。Elasticのコミュニティはさらに多くを提供しています。お気に入りの言語クライアントを選択するか、{console}起動して開始します。",
-    "searchApiPanels.welcomeBanner.selectClient.description.console.link": "コンソール",
     "searchApiPanels.welcomeBanner.selectClient.elasticsearchClientDocLink": "Elasticsearchクライアント ",
     "searchApiPanels.welcomeBanner.selectClient.heading": "1つ選択",
     "searchApiPanels.welcomeBanner.selectClient.title": "クライアントを選択",

@@ -5831,8 +5831,6 @@
     "searchApiPanels.welcomeBanner.selectClient.callout.description": "Avec la console, vous pouvez directement commencer à utiliser nos API REST. Aucune installation n’est requise.",
     "searchApiPanels.welcomeBanner.selectClient.callout.link": "Essayez la console maintenant",
     "searchApiPanels.welcomeBanner.selectClient.callout.title": "Lancez-vous dans la console",
-    "searchApiPanels.welcomeBanner.selectClient.description": "Elastic construit et assure la maintenance des clients dans plusieurs langues populaires et notre communauté a contribué à beaucoup d'autres. Sélectionnez votre client de langage favori ou explorez la {console} pour commencer.",
-    "searchApiPanels.welcomeBanner.selectClient.description.console.link": "Console",
     "searchApiPanels.welcomeBanner.selectClient.elasticsearchClientDocLink": "Clients d'Elasticsearch ",
     "searchApiPanels.welcomeBanner.selectClient.heading": "Choisissez-en un",
     "searchApiPanels.welcomeBanner.selectClient.title": "Sélectionner votre client",

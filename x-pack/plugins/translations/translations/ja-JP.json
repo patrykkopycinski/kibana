@@ -33534,7 +33534,6 @@
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "基本アラートを含める",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showOnlyThreatIndicatorAlerts": "脅威インジケーターアラートのみを表示",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersTitle": "追加のフィルター",
-    "xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle": "アクションを実行",
     "xpack.securitySolution.detectionEngine.alertTitle": "アラート",
     "xpack.securitySolution.detectionEngine.body.forEachAlert.message": "ルール{ruleName}はアラート{alertId}を生成しました",
     "xpack.securitySolution.detectionEngine.body.summary.message": "ルール{ruleName}は{signalsCount}件のアラートを生成しました",

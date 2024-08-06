@@ -33662,7 +33662,6 @@
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "Inclure les alertes fondamentales",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showOnlyThreatIndicatorAlerts": "Afficher uniquement les alertes d'indicateur de menaces",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersTitle": "Filtres supplémentaires",
-    "xpack.securitySolution.detectionEngine.alerts.utilityBar.takeActionTitle": "Entreprendre une action",
     "xpack.securitySolution.detectionEngine.alertTitle": "Alertes",
     "xpack.securitySolution.detectionEngine.body.forEachAlert.message": "La règle {ruleName} a généré l'alerte {alertId}",
     "xpack.securitySolution.detectionEngine.body.summary.message": "La règle {ruleName} a généré {signalsCount} alertes",

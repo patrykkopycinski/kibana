@@ -22264,7 +22264,6 @@
     "xpack.infra.waffle.maxGroupByTooltip": "一度に選択できるグループは 2 つのみです",
     "xpack.infra.waffle.metriclabel": "メトリック",
     "xpack.infra.waffle.metricOptions.countText": "カウント",
-    "xpack.infra.waffle.metricOptions.cpuUsageText": "CPU 使用状況",
     "xpack.infra.waffle.metricOptions.diskIOReadBytes": "ディスク読み取り",
     "xpack.infra.waffle.metricOptions.diskIOWriteBytes": "ディスク書き込み",
     "xpack.infra.waffle.metricOptions.hostLogRateText": "ログレート",

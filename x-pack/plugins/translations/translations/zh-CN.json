@@ -22368,7 +22368,6 @@
     "xpack.infra.waffle.maxGroupByTooltip": "一次只能选择两个分组",
     "xpack.infra.waffle.metriclabel": "指标",
     "xpack.infra.waffle.metricOptions.countText": "计数",
-    "xpack.infra.waffle.metricOptions.cpuUsageText": "CPU 使用",
     "xpack.infra.waffle.metricOptions.diskIOReadBytes": "磁盘读取数",
     "xpack.infra.waffle.metricOptions.diskIOWriteBytes": "磁盘写入数",
     "xpack.infra.waffle.metricOptions.hostLogRateText": "日志速率",

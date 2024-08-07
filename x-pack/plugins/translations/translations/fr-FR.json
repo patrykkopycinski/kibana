@@ -22340,7 +22340,6 @@
     "xpack.infra.waffle.maxGroupByTooltip": "Seuls deux regroupements peuvent être sélectionnés en même temps",
     "xpack.infra.waffle.metriclabel": "Indicateur",
     "xpack.infra.waffle.metricOptions.countText": "compte",
-    "xpack.infra.waffle.metricOptions.cpuUsageText": "Utilisation CPU",
     "xpack.infra.waffle.metricOptions.diskIOReadBytes": "lectures du disque",
     "xpack.infra.waffle.metricOptions.diskIOWriteBytes": "écritures sur le disque",
     "xpack.infra.waffle.metricOptions.hostLogRateText": "taux de log",

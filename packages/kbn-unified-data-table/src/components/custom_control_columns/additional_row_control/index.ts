@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  getColorIndicatorControlColumn,
-  type ColorIndicatorControlColumnParams,
-} from './color_indicator';
-
-export { getAdditionalRowControlColumns } from './additional_row_control';
+export { getAdditionalRowControlColumns } from './get_additional_row_control_columns';

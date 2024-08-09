@@ -21281,7 +21281,6 @@
     "xpack.infra.analysisSetup.endTimeAfterStartTimeErrorMessage": "終了時刻は開始時刻よりも後でなければなりません。",
     "xpack.infra.analysisSetup.endTimeDefaultDescription": "永久",
     "xpack.infra.analysisSetup.endTimeLabel": "終了時刻",
-    "xpack.infra.analysisSetup.indicesSelectionDescription": "既定では、機械学習は、ソースに対して構成されたすべてのログインデックスにあるログメッセージを分析します。インデックス名のサブセットのみを分析することを選択できます。すべての選択したインデックス名は、ログエントリを含む1つ以上のインデックスと一致する必要があります。特定のデータセットのサブセットのみを含めることを選択できます。データセットフィルターはすべての選択したインデックスに適用されます。",
     "xpack.infra.analysisSetup.indicesSelectionIndexNotFound": "インデックスがパターン{index}と一致しません",
     "xpack.infra.analysisSetup.indicesSelectionLabel": "インデックス",
     "xpack.infra.analysisSetup.indicesSelectionNetworkError": "インデックス構成を読み込めませんでした",

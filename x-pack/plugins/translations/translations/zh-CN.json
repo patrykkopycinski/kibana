@@ -21379,7 +21379,6 @@
     "xpack.infra.analysisSetup.endTimeAfterStartTimeErrorMessage": "结束时间必须晚于开始时间。",
     "xpack.infra.analysisSetup.endTimeDefaultDescription": "无限期",
     "xpack.infra.analysisSetup.endTimeLabel": "结束时间",
-    "xpack.infra.analysisSetup.indicesSelectionDescription": "默认情况下，Machine Learning 分析为源配置的所有日志索引中的日志消息。可以选择仅分析一部分索引名称。每个选定索引名称必须至少匹配一个具有日志条目的索引。还可以选择仅包括数据集的某个子集。注意，数据集筛选应用于所有选定索引。",
     "xpack.infra.analysisSetup.indicesSelectionIndexNotFound": "没有索引匹配模式 {index}",
     "xpack.infra.analysisSetup.indicesSelectionLabel": "索引",
     "xpack.infra.analysisSetup.indicesSelectionNetworkError": "我们无法加载您的索引配置",

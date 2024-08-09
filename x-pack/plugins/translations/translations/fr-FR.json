@@ -21352,7 +21352,6 @@
     "xpack.infra.analysisSetup.endTimeAfterStartTimeErrorMessage": "L'heure de fin doit être ultérieure à l'heure de début.",
     "xpack.infra.analysisSetup.endTimeDefaultDescription": "Indéfiniment",
     "xpack.infra.analysisSetup.endTimeLabel": "Heure de fin",
-    "xpack.infra.analysisSetup.indicesSelectionDescription": "Par défaut, le Machine Learning analyse les messages de logs dans tous les index de logs configurés pour la source. Vous pouvez choisir de n'analyser qu'un sous-ensemble de noms d'index. Tous les noms d'index sélectionnés doivent correspondre à au moins un index avec des entrées de logs. Vous pouvez également choisir de n'inclure qu'un certain sous-ensemble d'ensembles de données. Notez que le filtre d'ensembles de données s'applique à tous les index sélectionnés.",
     "xpack.infra.analysisSetup.indicesSelectionIndexNotFound": "Aucun index ne correspond au modèle {index}",
     "xpack.infra.analysisSetup.indicesSelectionLabel": "Index",
     "xpack.infra.analysisSetup.indicesSelectionNetworkError": "Nous n'avons pas pu charger votre configuration d'index",

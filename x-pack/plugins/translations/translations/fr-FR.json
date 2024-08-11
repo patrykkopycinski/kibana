@@ -13222,7 +13222,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle": "Preuve",
     "xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle": "Sources du framework",
     "xpack.csp.findings.findingsFlyout.overviewTab.impactTitle": "Impact",
-    "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "Index",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "Environnement",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "Résolution",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "Nom de règle",

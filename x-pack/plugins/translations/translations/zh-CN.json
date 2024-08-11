@@ -13242,7 +13242,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle": "证据",
     "xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle": "框架源",
     "xpack.csp.findings.findingsFlyout.overviewTab.impactTitle": "影响",
-    "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "索引",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "理由",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "补救",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "规则名称",

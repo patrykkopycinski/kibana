@@ -13182,7 +13182,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle": "証拠",
     "xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle": "フレームワークソース",
     "xpack.csp.findings.findingsFlyout.overviewTab.impactTitle": "インパクト",
-    "xpack.csp.findings.findingsFlyout.overviewTab.indexTitle": "インデックス",
     "xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle": "根拠",
     "xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle": "修正",
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle": "ルール名",

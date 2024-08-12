@@ -14449,7 +14449,6 @@
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription": "部署到单个项目适用于初始 POC。为确保全面覆盖，强烈建议在组织级别部署 CSPM，这会自动连接所有项目（当前和未来）。",
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel": "单个帐户",
     "xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel": "选择单个帐户或组织，然后填写名称和描述以帮助标识此集成。",
-    "xpack.csp.fleetIntegration.gcpCloudCredentials.cloudFormationSupportedMessage": "当前集成版本不支持为自动化凭据启动 Cloud Shell。请升级到最新版本以启用为自动化凭据启动 Cloud Shell。",
     "xpack.csp.fleetIntegration.integrationDescriptionLabel": "描述",
     "xpack.csp.fleetIntegration.integrationNameLabel": "名称",
     "xpack.csp.fleetIntegration.integrationSettingsTitle": "集成设置",

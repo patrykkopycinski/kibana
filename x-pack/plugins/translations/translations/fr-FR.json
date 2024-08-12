@@ -14438,7 +14438,6 @@
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription": "Un déploiement vers un seul projet suffit pour une démonstration de faisabilité initiale. Pour garantir une couverture complète, il est fortement recommandé de déployer la gestion du niveau de sécurité du cloud au niveau de l'organisation, ce qui connecte automatiquement tous les projets (actuels et futurs).",
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel": "Compte unique",
     "xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel": "Sélectionnez un compte unique ou une organisation, puis saisissez un nom et une description pour permettre l'identification de cette intégration.",
-    "xpack.csp.fleetIntegration.gcpCloudCredentials.cloudFormationSupportedMessage": "La fonctionnalité Lancer Cloud Shell pour obtenir les informations d'identification de façon automatisée n’est pas pris en charge dans la version d'intégration actuelle. Veuillez effectuer une mise à niveau vers la dernière version pour activer Lancer Cloud Shell pour les informations d'identification automatisées.",
     "xpack.csp.fleetIntegration.integrationDescriptionLabel": "Description",
     "xpack.csp.fleetIntegration.integrationNameLabel": "Nom",
     "xpack.csp.fleetIntegration.integrationSettingsTitle": "Paramètres de l'intégration",

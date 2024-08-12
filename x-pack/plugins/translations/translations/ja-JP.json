@@ -14427,7 +14427,6 @@
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription": "1つのプロジェクトへのデプロイは、最初のPOCに適しています。完全に対応するためには、組織レベルでCSPMをデプロイし、すべてのプロジェクト（現在と将来の両方）を自動的に接続することを強くお勧めします。",
     "xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel": "1つのアカウント",
     "xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel": "1つのアカウントまたは組織のいずれかを選択し、この統合を識別するための名前と説明を入力します。",
-    "xpack.csp.fleetIntegration.gcpCloudCredentials.cloudFormationSupportedMessage": "Launch Cloud ShellLaunch Cloud Formation for Automated Credentialsは、現在の統合バージョンではサポートされていません。Launch Cloud Shell for Automated Credentialsを有効化するには、最新バージョンにアップグレードしてください。",
     "xpack.csp.fleetIntegration.integrationDescriptionLabel": "説明",
     "xpack.csp.fleetIntegration.integrationNameLabel": "名前",
     "xpack.csp.fleetIntegration.integrationSettingsTitle": "統合設定",

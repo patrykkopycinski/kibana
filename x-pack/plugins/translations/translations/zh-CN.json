@@ -6926,7 +6926,6 @@
     "unifiedDataTable.copyColumnValuesToClipboard.toastTitle": "“{column}”列的值已复制到剪贴板",
     "unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText": "值可能包含已转义的公式。",
     "unifiedDataTable.copyFailedErrorText": "无法在此浏览器中复制到剪贴板",
-    "unifiedDataTable.copyToClipboardJSON": "将文档复制到剪贴板 (JSON)",
     "unifiedDataTable.copyValueToClipboard.toastTitle": "已复制到剪贴板",
     "unifiedDataTable.grid.closePopover": "关闭弹出框",
     "unifiedDataTable.grid.copyCellValueButton": "复制值",

@@ -6914,7 +6914,6 @@
     "unifiedDataTable.copyColumnValuesToClipboard.toastTitle": "Valeurs de la colonne \"{column}\" copiées dans le presse-papiers",
     "unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText": "Les valeurs peuvent contenir des formules avec échappement.",
     "unifiedDataTable.copyFailedErrorText": "Impossible de copier dans le presse-papiers avec ce navigateur",
-    "unifiedDataTable.copyToClipboardJSON": "Copier les documents dans le presse-papiers (JSON)",
     "unifiedDataTable.copyValueToClipboard.toastTitle": "Copié dans le presse-papiers",
     "unifiedDataTable.grid.closePopover": "Fermer la fenêtre contextuelle",
     "unifiedDataTable.grid.copyCellValueButton": "Copier la valeur",

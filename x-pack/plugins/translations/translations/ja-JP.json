@@ -6893,7 +6893,6 @@
     "unifiedDataTable.copyColumnValuesToClipboard.toastTitle": "\"{column}\"列の値がクリップボードにコピーされました",
     "unifiedDataTable.copyEscapedValueWithFormulasToClipboardWarningText": "値にはエスケープされた式を含めることができます。",
     "unifiedDataTable.copyFailedErrorText": "このブラウザーではクリップボードにコピーできません",
-    "unifiedDataTable.copyToClipboardJSON": "ドキュメントをクリップボードにコピー（JSON）",
     "unifiedDataTable.copyValueToClipboard.toastTitle": "クリップボードにコピーされました",
     "unifiedDataTable.grid.closePopover": "ポップオーバーを閉じる",
     "unifiedDataTable.grid.copyCellValueButton": "値をコピー",

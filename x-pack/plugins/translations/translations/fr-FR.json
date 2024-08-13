@@ -7697,7 +7697,6 @@
     "timelion.vis.invalidIntervalErrorMessage": "Format d'intervalle non valide.",
     "timelion.vis.selectIntervalHelpText": "Choisissez une option ou créez une valeur personnalisée. Exemples : 30s, 20m, 24h, 2d, 1w, 1M",
     "timelion.vis.selectIntervalPlaceholder": "Choisir un intervalle",
-    "tryInConsole.button": "Essayer dans la console",
     "uiActions.actionPanel.more": "Plus",
     "uiActions.actionPanel.title": "Options",
     "uiActions.errors.incompatibleAction": "Action non compatible",

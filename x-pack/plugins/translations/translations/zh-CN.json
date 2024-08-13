@@ -7704,7 +7704,6 @@
     "timelion.vis.invalidIntervalErrorMessage": "时间间隔格式无效。",
     "timelion.vis.selectIntervalHelpText": "选择选项或创建定制值。示例：30s、20m、24h、2d、1w、1M",
     "timelion.vis.selectIntervalPlaceholder": "选择时间间隔",
-    "tryInConsole.button": "在 Console 中试用",
     "uiActions.actionPanel.more": "更多",
     "uiActions.actionPanel.title": "选项",
     "uiActions.errors.incompatibleAction": "操作不兼容",

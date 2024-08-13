@@ -7691,7 +7691,6 @@
     "timelion.vis.invalidIntervalErrorMessage": "無効な間隔フォーマット。",
     "timelion.vis.selectIntervalHelpText": "オプションを選択するかカスタム値を作成します。例：30s、20m、24h、2d、1w、1M",
     "timelion.vis.selectIntervalPlaceholder": "間隔を選択",
-    "tryInConsole.button": "コンソールで試す",
     "uiActions.actionPanel.more": "詳細",
     "uiActions.actionPanel.title": "オプション",
     "uiActions.errors.incompatibleAction": "操作に互換性がありません",

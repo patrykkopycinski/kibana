@@ -32438,8 +32438,6 @@
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "默认日志路径为 /var/log/*。如果需要，可以在 otel.yml 文件中更改此路径。",
     "xpack.observability_onboarding.otelLogsPanel.kubernetesApplyCommandPromptLabel": "从下载清单的目录中，运行以下命令以在您集群的每个节点上安装收集器：",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "配置信息",
-    "xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel": "OpenTelemetry",
-    "xpack.observability_onboarding.otelLogsPanel.p.collectLogsWithOpenTelemetryLabel": "使用 OTel 收集器的 Elastic 发行版收集日志和主机指标。",
     "xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel": "在您的主机上运行以下命令，以下载和配置收集器。",
     "xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel": "运行以下命令以启动收集器",
     "xpack.observability_onboarding.otelLogsPanel.steps.downloadManifest": "下载清单：",

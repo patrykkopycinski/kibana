@@ -32414,8 +32414,6 @@
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "Le chemin des logs par défaut est /var/log/*. Vous pouvez si nécessaire modifier ce chemin dans le fichier otel.yml.",
     "xpack.observability_onboarding.otelLogsPanel.kubernetesApplyCommandPromptLabel": "À partir du répertoire où le manifeste est téléchargé, exécutez la commande suivante pour installer le collecteur sur chaque nœud de votre cluster :",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "Informations sur la configuration",
-    "xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel": "OpenTelemetry",
-    "xpack.observability_onboarding.otelLogsPanel.p.collectLogsWithOpenTelemetryLabel": "Collectez les logs et les métriques de l'hôte à l'aide de la distribution Elastic du collecteur OTel.",
     "xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel": "Exécutez la commande suivante sur votre hôte pour télécharger et configurer le collecteur.",
     "xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel": "Exécutez la commande suivante pour lancer le collecteur",
     "xpack.observability_onboarding.otelLogsPanel.steps.downloadManifest": "Télécharger le manifeste :",

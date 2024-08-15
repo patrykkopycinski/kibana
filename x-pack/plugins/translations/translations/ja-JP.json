@@ -32398,8 +32398,6 @@
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "デフォルトのログのパスは/var/log/*です。必要に応じて、otel.ymlファイルでこのパスを変更できます。",
     "xpack.observability_onboarding.otelLogsPanel.kubernetesApplyCommandPromptLabel": "マニフェストがダウンロードされるディレクトリから、次のコマンドを実行し、クラスターのすべてのノードでコレクターをインストールします。",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "構成情報",
-    "xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel": "OpenTelemetry",
-    "xpack.observability_onboarding.otelLogsPanel.p.collectLogsWithOpenTelemetryLabel": "OTelコレクターのElasticディストリビューションを使用して、ログとホストメトリックを収集します。",
     "xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel": "ホストで次のコマンドを実行して、コレクターをダウンロード、構成します。",
     "xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorLabel": "コレクターを開始するには、次のコマンドを実行してください",
     "xpack.observability_onboarding.otelLogsPanel.steps.downloadManifest": "マニフェストをダウンロード：",

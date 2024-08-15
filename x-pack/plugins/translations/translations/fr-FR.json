@@ -5301,7 +5301,6 @@
     "kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabelsFound": "Cliquez pour créer",
     "kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc": "Barre verticale (|)",
     "kbn-esql-validation-autocomplete.esql.autocomplete.semiColonDoc": "Point-virgule (;)",
-    "kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition": "Index",
     "kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition": "Valeur littérale",
     "kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition": "Variable spécifiée par l'utilisateur dans la requête ES|QL",
     "kbn-esql-validation-autocomplete.esql.definition.addDoc": "Ajouter (+)",

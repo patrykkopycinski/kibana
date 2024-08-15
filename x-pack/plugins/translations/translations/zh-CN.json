@@ -5306,7 +5306,6 @@
     "kbn-esql-validation-autocomplete.esql.autocomplete.pipeDoc": "管道符 (|)",
     "kbn-esql-validation-autocomplete.esql.autocomplete.policyDefinition": "策略在{count, plural, other {索引}}上定义：{indices}",
     "kbn-esql-validation-autocomplete.esql.autocomplete.semiColonDoc": "分号 (;)",
-    "kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition": "索引",
     "kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition": "文本值",
     "kbn-esql-validation-autocomplete.esql.autocomplete.variableDefinition": "用户在 ES|QL 查询中指定的变量",
     "kbn-esql-validation-autocomplete.esql.definition.addDoc": "添加 (+)",

@@ -7923,7 +7923,6 @@
     "unifiedDocViewer.json.codeEditorAriaLabel": "Elasticsearch ドキュメントの JSON ビューのみを読み込む",
     "unifiedDocViewer.json.copyToClipboardLabel": "クリップボードにコピー",
     "unifiedDocViewer.loadingJSON": "JSONを読み込んでいます",
-    "unifiedDocViewer.pinnedFieldTooltipContent": "固定されたフィールド",
     "unifiedDocViewer.sourceViewer.errorMessage": "現在データを取得できませんでした。タブを更新して、再試行してください。",
     "unifiedDocViewer.sourceViewer.errorMessageTitle": "エラーが発生しました",
     "unifiedDocViewer.sourceViewer.refresh": "更新",

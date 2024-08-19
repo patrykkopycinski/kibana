@@ -7936,7 +7936,6 @@
     "unifiedDocViewer.json.codeEditorAriaLabel": "Elasticsearch 文档的只读 JSON 视图",
     "unifiedDocViewer.json.copyToClipboardLabel": "复制到剪贴板",
     "unifiedDocViewer.loadingJSON": "正在加载 JSON",
-    "unifiedDocViewer.pinnedFieldTooltipContent": "已固定字段",
     "unifiedDocViewer.sourceViewer.errorMessage": "当前无法获取数据。请刷新选项卡以重试。",
     "unifiedDocViewer.sourceViewer.errorMessageTitle": "发生错误",
     "unifiedDocViewer.sourceViewer.refresh": "刷新",

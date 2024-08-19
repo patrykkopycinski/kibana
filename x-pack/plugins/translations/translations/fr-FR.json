@@ -7929,7 +7929,6 @@
     "unifiedDocViewer.json.codeEditorAriaLabel": "Affichage JSON en lecture seule d’un document Elasticsearch",
     "unifiedDocViewer.json.copyToClipboardLabel": "Copier dans le presse-papiers",
     "unifiedDocViewer.loadingJSON": "Chargement de JSON",
-    "unifiedDocViewer.pinnedFieldTooltipContent": "Champ épinglé",
     "unifiedDocViewer.sourceViewer.errorMessage": "Impossible de récupérer les données pour le moment. Actualisez l'onglet et réessayez.",
     "unifiedDocViewer.sourceViewer.errorMessageTitle": "Une erreur s'est produite.",
     "unifiedDocViewer.sourceViewer.refresh": "Actualiser",

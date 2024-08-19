@@ -7,15 +7,14 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
+import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useCreateKnowledgeBaseEntry() {
+export function useCreateKnowledgeBaseUserInstruction() {
   const {
     observabilityAIAssistant,
     notifications: { toasts },
@@ -24,26 +23,18 @@ export function useCreateKnowledgeBaseEntry() {
   const queryClient = useQueryClient();
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
-  return useMutation<
-    void,
-    ServerError,
-    {
-      entry: Omit<
-        KnowledgeBaseEntry,
-        '@timestamp' | 'confidence' | 'is_correction' | 'role' | 'doc_id'
-      >;
-    }
-  >(
+  return useMutation<void, ServerError, { entry: Instruction & { public: boolean } }>(
     [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
     ({ entry }) => {
       return observabilityAIAssistantApi(
-        'POST /internal/observability_ai_assistant/kb/entries/save',
+        'PUT /internal/observability_ai_assistant/kb/user_instructions',
         {
           signal: null,
           params: {
             body: {
-              ...entry,
-              role: 'user_entry',
+              id: entry.doc_id,
+              text: entry.text,
+              public: entry.public,
             },
           },
         }
@@ -53,25 +44,25 @@ export function useCreateKnowledgeBaseEntry() {
       onSuccess: (_data, { entry }) => {
         toasts.addSuccess(
           i18n.translate(
-            'xpack.observabilityAiAssistantManagement.kb.addManualEntry.successNotification',
+            'xpack.observabilityAiAssistantManagement.kb.addUserInstruction.successNotification',
             {
-              defaultMessage: 'Entry saved',
+              defaultMessage: 'User instruction saved',
             }
           )
         );
 
         queryClient.invalidateQueries({
-          queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES],
+          queryKey: [REACT_QUERY_KEYS.GET_KB_USER_INSTRUCTIONS],
           refetchType: 'all',
         });
       },
       onError: (error, { entry }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate(
-            'xpack.observabilityAiAssistantManagement.kb.addManualEntry.errorNotification',
+            'xpack.observabilityAiAssistantManagement.kb.addUserInstruction.errorNotification',
             {
               defaultMessage: 'Something went wrong while creating {name}',
-              values: { name: entry.id },
+              values: { name: entry.doc_id },
             }
           ),
         });

@@ -9,43 +9,26 @@ import { useQuery } from '@tanstack/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
-export function useGetKnowledgeBaseEntries({
-  query,
-  sortBy,
-  sortDirection,
-}: {
-  query: string;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
-}) {
+export function useGetUserInstructions() {
   const { observabilityAIAssistant } = useKibana().services;
-
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
-    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
+    queryKey: [REACT_QUERY_KEYS.GET_KB_USER_INSTRUCTIONS],
     queryFn: async ({ signal }) => {
       if (!signal) {
         throw new Error('Abort signal missing');
       }
 
-      return observabilityAIAssistantApi(`GET /internal/observability_ai_assistant/kb/entries`, {
-        signal,
-        params: {
-          query: {
-            query,
-            sortBy,
-            sortDirection,
-          },
-        },
-      });
+      return observabilityAIAssistantApi(
+        `GET /internal/observability_ai_assistant/kb/user_instructions`,
+        { signal }
+      );
     },
-    keepPreviousData: true,
-    refetchOnWindowFocus: false,
   });
 
   return {
-    entries: data?.entries,
+    userInstructions: data?.userInstructions,
     refetch,
     isLoading,
     isRefetching,

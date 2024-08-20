@@ -18065,7 +18065,6 @@
     "xpack.enterpriseSearch.searchNav.mngt": "スタック管理",
     "xpack.enterpriseSearch.searchNav.relevance": "<b>関連性</b>",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "検索AI",
-    "xpack.enterpriseSearch.searchProvider.appSearch.name": "App Search",
     "xpack.enterpriseSearch.searchProvider.type.name": "検索",
     "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Elastic Webクローラー",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "クリックすると、コネクター説明ポップオーバーが開きます",

@@ -18079,7 +18079,6 @@
     "xpack.enterpriseSearch.searchNav.mngt": "Gestion de la Suite",
     "xpack.enterpriseSearch.searchNav.relevance": "Pertinence",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "Intelligence artificielle de recherche",
-    "xpack.enterpriseSearch.searchProvider.appSearch.name": "App Search",
     "xpack.enterpriseSearch.searchProvider.type.name": "Recherche",
     "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Robot d'indexation d'Elastic",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "Cliquer pour ouvrir la fenêtre contextuelle d'explication du connecteur",

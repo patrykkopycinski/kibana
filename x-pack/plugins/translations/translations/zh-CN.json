@@ -18091,7 +18091,6 @@
     "xpack.enterpriseSearch.searchNav.mngt": "Stack Management",
     "xpack.enterpriseSearch.searchNav.relevance": "相关性",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "搜索 AI",
-    "xpack.enterpriseSearch.searchProvider.appSearch.name": "App Search",
     "xpack.enterpriseSearch.searchProvider.type.name": "搜索",
     "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Elastic 网络爬虫",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "单击以打开连接器说明弹出框",

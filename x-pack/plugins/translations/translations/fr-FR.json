@@ -44939,7 +44939,6 @@
     "xpack.synthetics.monitorManagement.deleteLocation": "Supprimer l’emplacement",
     "xpack.synthetics.monitorManagement.deleteLocationLabel": "Supprimer l’emplacement",
     "xpack.synthetics.monitorManagement.deleteLocationName": "Supprimer \"{location}\"",
-    "xpack.synthetics.monitorManagement.deleteMonitorNameLabel": "Supprimer le moniteur \"{name}\"",
     "xpack.synthetics.monitorManagement.disabled.label": "Désactivé",
     "xpack.synthetics.monitorManagement.discardLabel": "Annuler",
     "xpack.synthetics.monitorManagement.editMonitorCrumb": "Modifier le moniteur",

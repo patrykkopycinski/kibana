@@ -1307,7 +1307,6 @@
     "dashboard.appLeaveConfirmModal.cancelButtonLabel": "取消",
     "dashboard.appLeaveConfirmModal.unsavedChangesSubtitle": "离开有未保存工作的仪表板？",
     "dashboard.appLeaveConfirmModal.unsavedChangesTitle": "未保存的更改",
-    "dashboard.badge.managed.tooltip": "Elastic 将管理此仪表板。进行克隆以做出更改。",
     "dashboard.badge.readOnly.text": "只读",
     "dashboard.badge.readOnly.tooltip": "无法保存仪表板",
     "dashboard.createConfirmModal.cancelButtonLabel": "取消",

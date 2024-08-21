@@ -1307,7 +1307,6 @@
     "dashboard.appLeaveConfirmModal.cancelButtonLabel": "Annuler",
     "dashboard.appLeaveConfirmModal.unsavedChangesSubtitle": "Quitter Dashboard sans enregistrer ?",
     "dashboard.appLeaveConfirmModal.unsavedChangesTitle": "Modifications non enregistrées",
-    "dashboard.badge.managed.tooltip": "Elastic gère ce tableau de bord. Clonez-le pour effectuer des modifications.",
     "dashboard.badge.readOnly.text": "Lecture seule",
     "dashboard.badge.readOnly.tooltip": "Impossible d'enregistrer les tableaux de bord",
     "dashboard.createConfirmModal.cancelButtonLabel": "Annuler",

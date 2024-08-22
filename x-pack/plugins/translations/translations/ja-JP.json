@@ -41475,7 +41475,6 @@
     "xpack.sessionView.alertFilteredCountStatusLabel": " {count}件のアラートを表示しています",
     "xpack.sessionView.alerts": "アラート",
     "xpack.sessionView.alertsLoadMoreButton": "その他のアラートを読み込む",
-    "xpack.sessionView.alertTotalCountStatusLabel": "{count}件のアラートを表示しています",
     "xpack.sessionView.backToInvestigatedAlert": "調査されたアラートに戻る",
     "xpack.sessionView.blockedBadge": "ブロック",
     "xpack.sessionView.childProcesses": "子プロセス",

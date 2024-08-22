@@ -41491,7 +41491,6 @@
     "xpack.sessionView.alertFilteredCountStatusLabel": " Affichage de {count} alertes",
     "xpack.sessionView.alerts": "Alertes",
     "xpack.sessionView.alertsLoadMoreButton": "Charger plus d'alertes",
-    "xpack.sessionView.alertTotalCountStatusLabel": "Affichage de {count} alertes",
     "xpack.sessionView.backToInvestigatedAlert": "Retour à l'alerte examinée",
     "xpack.sessionView.blockedBadge": "Bloqué",
     "xpack.sessionView.childProcesses": "Processus enfants",

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export interface CombinedField {
-  mappingType: string;
-  delimiter?: string;
-  combinedFieldName: string;
-  fieldNames: string[];
-}
+export { AdvancedSettings } from './advanced';

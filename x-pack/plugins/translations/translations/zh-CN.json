@@ -15003,8 +15003,6 @@
     "xpack.dataVisualizer.file.welcomeContent.delimitedTextFilesDescription": "分隔的文本文件，例如 CSV 和 TSV",
     "xpack.dataVisualizer.file.welcomeContent.logFilesWithCommonFormatDescription": "具有时间戳通用格式的日志文件",
     "xpack.dataVisualizer.file.welcomeContent.newlineDelimitedJsonDescription": "换行符分隔的 JSON",
-    "xpack.dataVisualizer.file.welcomeContent.supportedFileFormatDescription": "支持以下文件格式：",
-    "xpack.dataVisualizer.file.welcomeContent.uploadedFilesAllowedSizeDescription": "您可以上传不超过 {maxFileSize} 的文件。",
     "xpack.dataVisualizer.file.welcomeContent.visualizeAndImportDataFromLogFileDescription": "上传文件、分析文件数据，然后根据需要将数据导入 Elasticsearch 索引。",
     "xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileDescription": "上传您的文件并分析其数据。",
     "xpack.dataVisualizer.file.welcomeContent.visualizeDataFromLogFileTitle": "从文件上传数据",

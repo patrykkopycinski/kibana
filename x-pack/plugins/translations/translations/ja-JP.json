@@ -32347,8 +32347,6 @@
     "xpack.observability.alertDetailContextualInsights.InsightButtonLabel": "このアラートを理解できるように支援してください",
     "xpack.observability.alertDetails.actionsButtonLabel": "アクション",
     "xpack.observability.alertDetails.addToCase": "ケースに追加",
-    "xpack.observability.alertDetails.alertSummaryField.moreTags": "その他{number}",
-    "xpack.observability.alertDetails.alertSummaryField.moreTags.ariaLabel": "その他のタグバッジ",
     "xpack.observability.alertDetails.alertSummaryField.rule": "ルール",
     "xpack.observability.alertDetails.alertSummaryField.source": "送信元",
     "xpack.observability.alertDetails.alertSummaryField.tags": "タグ",

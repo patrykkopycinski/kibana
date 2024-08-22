@@ -32387,8 +32387,6 @@
     "xpack.observability.alertDetailContextualInsights.InsightButtonLabel": "帮助我了解此告警",
     "xpack.observability.alertDetails.actionsButtonLabel": "操作",
     "xpack.observability.alertDetails.addToCase": "添加到案例",
-    "xpack.observability.alertDetails.alertSummaryField.moreTags": "+ 另外 {number} 个",
-    "xpack.observability.alertDetails.alertSummaryField.moreTags.ariaLabel": "更多标签徽章",
     "xpack.observability.alertDetails.alertSummaryField.rule": "规则",
     "xpack.observability.alertDetails.alertSummaryField.source": "源",
     "xpack.observability.alertDetails.alertSummaryField.tags": "标签",

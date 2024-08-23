@@ -23102,8 +23102,6 @@
     "xpack.infra.assetDetails.table.services.tooltip.tutorialLink": "APM-instrumented",
     "xpack.infra.assetDetails.table.tooltip.alertsLink": "告警。",
     "xpack.infra.assetDetails.tabs.anomalies": "异常",
-    "xpack.infra.assetDetails.tabs.apmLink": "APM",
-    "xpack.infra.assetDetails.tabs.linkToApm": "APM",
     "xpack.infra.assetDetails.tabs.logs": "日志",
     "xpack.infra.assetDetails.tabs.metadata": "元数据",
     "xpack.infra.assetDetails.tabs.metadata.seeLess": "显示更少",

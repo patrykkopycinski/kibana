@@ -23074,8 +23074,6 @@
     "xpack.infra.assetDetails.table.services.tooltip.tutorialLink": "APMがインストルメンテーションされました",
     "xpack.infra.assetDetails.table.tooltip.alertsLink": "アラート。",
     "xpack.infra.assetDetails.tabs.anomalies": "異常",
-    "xpack.infra.assetDetails.tabs.apmLink": "APM",
-    "xpack.infra.assetDetails.tabs.linkToApm": "APM",
     "xpack.infra.assetDetails.tabs.logs": "ログ",
     "xpack.infra.assetDetails.tabs.metadata": "メタデータ",
     "xpack.infra.assetDetails.tabs.metadata.seeLess": "簡易表示",

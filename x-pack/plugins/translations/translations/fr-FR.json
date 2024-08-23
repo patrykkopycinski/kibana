@@ -23084,8 +23084,6 @@
     "xpack.infra.assetDetails.table.services.tooltip.tutorialLink": "Instrumenté par APM",
     "xpack.infra.assetDetails.table.tooltip.alertsLink": "alertes.",
     "xpack.infra.assetDetails.tabs.anomalies": "Anomalies",
-    "xpack.infra.assetDetails.tabs.apmLink": "APM",
-    "xpack.infra.assetDetails.tabs.linkToApm": "APM",
     "xpack.infra.assetDetails.tabs.logs": "Logs",
     "xpack.infra.assetDetails.tabs.metadata": "Métadonnées",
     "xpack.infra.assetDetails.tabs.metadata.seeLess": "Afficher moins",

@@ -10939,7 +10939,7 @@
     "xpack.apm.onboarding.shared_clients.configure.commands.serverUrlHint": "设置定制 APM Server URL（默认值：{defaultApmServerUrl}）。此 URL 必须为完全限定 URL，包括协议（http 或 https）和端口。",
     "xpack.apm.onboarding.shared_clients.configure.commands.serviceEnvironmentHint": "在其中部署此服务的环境的名称，如“生产”或“暂存”。在 APM UI 中，您可以通过环境在全局级别轻松筛选数据。跨代理命名环境时，保持一致至关重要。",
     "xpack.apm.onboarding.shared_clients.configure.commands.serviceNameHint": "服务名称是 APM UI 中的初级筛选，用于分组错误并跟踪数据。允许使用的字符包括 a-z、A-Z、0-9、-、_ 和空格。",
-    "xpack.apm.onboarding.specProvider.longDescription": "应用程序性能监测 (APM) 从您的应用程序内收集深入全面的性能指标和错误。其允许您实时监测数以千计的应用程序的性能。[了解详情]({learnMoreLink})。",
+    "xpack.apm.onboarding.specProvider.longDescription": "应用程序性能监测 (APM) 从您的应用程序内收集深入全面的性能指标和错误。其允许您实时监测数以千计的应用程序的性能。{learnMoreLink}。",
     "xpack.apm.pages.alertDetails.alertSummary.actualValue": "实际值",
     "xpack.apm.pages.alertDetails.alertSummary.expectedValue": "预期值",
     "xpack.apm.percentOfParent": "({parentType, select, transaction {事务} trace {追溯} other {parentType 未知}}的 {value})",

@@ -10920,7 +10920,7 @@
     "xpack.apm.onboarding.shared_clients.configure.commands.serverUrlHint": "カスタム APM Server URL（デフォルト：{defaultApmServerUrl}）を設定します。URLはプロトコル（httpまたはhttps）とポートを含む完全修飾URLでなければなりません。",
     "xpack.apm.onboarding.shared_clients.configure.commands.serviceEnvironmentHint": "このサービスがデプロイされている環境の名前（例：「本番」、「ステージング」）。環境では、APM UIでグローバルレベルで簡単にデータをフィルタリングできます。すべてのエージェントで環境の命名方法を統一することが重要です。",
     "xpack.apm.onboarding.shared_clients.configure.commands.serviceNameHint": "このサービス名はAPM UIの主フィルターであり、エラーとトレースデータをグループ化するために使用されます。使用できる文字はA-Z、0-9、-、_、スペースです。",
-    "xpack.apm.onboarding.specProvider.longDescription": "アプリケーションパフォーマンスモニタリング（APM）は、アプリケーション内から詳細なパフォーマンスメトリックやエラーを収集します。何千ものアプリケーションのパフォーマンスをリアルタイムで監視できます。[詳細]（{learnMoreLink}）。",
+    "xpack.apm.onboarding.specProvider.longDescription": "アプリケーションパフォーマンスモニタリング（APM）は、アプリケーション内から詳細なパフォーマンスメトリックやエラーを収集します。何千ものアプリケーションのパフォーマンスをリアルタイムで監視できます。{learnMoreLink}。",
     "xpack.apm.pages.alertDetails.alertSummary.actualValue": "実際の値",
     "xpack.apm.pages.alertDetails.alertSummary.expectedValue": "想定された値",
     "xpack.apm.percentOfParent": "（{value} of {parentType, select, transaction { トランザクション } trace {トレース} other {不明なparentType} }）",

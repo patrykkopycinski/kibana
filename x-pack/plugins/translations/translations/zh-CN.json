@@ -14463,7 +14463,6 @@
     "xpack.csp.gcpIntegration.projectidFieldLabel": "项目 ID",
     "xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell": "Google Cloud Shell",
     "xpack.csp.gcpIntegration.setupFormatOptions.manual": "手动",
-    "xpack.csp.gcpIntegration.setupInfoContent": "该集成需要提升访问权限才能运行某些 CIS 基准规则。选择提供此集成将使用的 GCP 凭据的首选方法。您可以按照这些分步说明生成所需凭据。",
     "xpack.csp.gcpIntegration.setupInfoContentTitle": "设置访问权限",
     "xpack.csp.grouping.loadingGroupPanelTitle": "正在加载",
     "xpack.csp.grouping.nullGroupTooltip": "选定 {groupingTitle} 字段 {field} 缺少此 {unit} 组的值。",

@@ -14452,7 +14452,6 @@
     "xpack.csp.gcpIntegration.projectidFieldLabel": "ID de projet",
     "xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell": "Google Cloud Shell",
     "xpack.csp.gcpIntegration.setupFormatOptions.manual": "Manuel",
-    "xpack.csp.gcpIntegration.setupInfoContent": "L'intégration nécessitera des droits d'accès supérieurs pour l'exécution de certaines règles CIS Benchmarks. Sélectionnez votre méthode préférée pour la fourniture d'informations d'identification Google Cloud que cette intégration utilisera. Vous pouvez suivre ces instructions détaillées pour générer les informations d'identification nécessaires.",
     "xpack.csp.gcpIntegration.setupInfoContentTitle": "Configurer l'accès",
     "xpack.csp.grouping.loadingGroupPanelTitle": "Chargement",
     "xpack.csp.grouping.nullGroupTooltip": "Le champ {groupingTitle} sélectionné, {field}, a une valeur manquante de {unit} pour ce groupe.",

@@ -14441,7 +14441,6 @@
     "xpack.csp.gcpIntegration.projectidFieldLabel": "プロジェクト ID",
     "xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell": "Google Cloud Shell",
     "xpack.csp.gcpIntegration.setupFormatOptions.manual": "手動",
-    "xpack.csp.gcpIntegration.setupInfoContent": "この統合では、一部のCISベンチマークルールを実行するために昇格されたアクセス権が必要です。この統合で使用するGCP資格情報を提供するための任意の方法を選択します。これらの段階的な手順に従い、必要な資格情報を作成できます。",
     "xpack.csp.gcpIntegration.setupInfoContentTitle": "アクセスの設定",
     "xpack.csp.grouping.loadingGroupPanelTitle": "読み込み中",
     "xpack.csp.grouping.nullGroupTooltip.groupingTitle": "グループ分けの条件",

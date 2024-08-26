@@ -40661,7 +40661,6 @@
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment": "将使用具有告警 ID (_id) 的告警中的相关数据预填充例外条件：{alertId}。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessText": "例外已添加到规则 - {ruleName}。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessTitle": "已添加规则例外",
-    "xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails": "规则例外已添加到共享列表：{listNames}。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.commentsTitle": "添加注释 ({comments})",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.activeDetectionsLabel": "活动例外",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.addExceptionsEmptyPromptTitle": "将例外添加到此规则",

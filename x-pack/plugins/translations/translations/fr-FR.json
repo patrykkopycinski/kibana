@@ -40635,7 +40635,6 @@
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment": "Les conditions d'exceptions sont préremplies avec les données pertinentes d'une alerte possédant l'identifiant d'alerte (_id) : {alertId}.",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessText": "L'exception a été ajoutée aux règles - {ruleName}.",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessTitle": "Exception à la règle ajoutée",
-    "xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails": "L'exception de la règle a été ajoutée aux listes partagées : {listNames}.",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.commentsTitle": "Ajouter des commentaires ({comments})",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.activeDetectionsLabel": "Exceptions actives",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.addExceptionsEmptyPromptTitle": "Ajouter des exceptions à cette règle",

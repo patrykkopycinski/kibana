@@ -40618,7 +40618,6 @@
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment": "例外条件は、アラートID(_id)のアラートからの関連データがあらかじめ入力されます：{alertId}。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessText": "例外がルール - {ruleName}に追加されました。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionToastSuccessTitle": "ルール例外が追加されました",
-    "xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails": "ルール例外が共有リストに追加されました：{listNames}。",
     "xpack.securitySolution.ruleExceptions.addExceptionFlyout.commentsTitle": "コメントの追加（{comments}）",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.activeDetectionsLabel": "アクティブな例外",
     "xpack.securitySolution.ruleExceptions.allExceptionItems.addExceptionsEmptyPromptTitle": "このルールに例外を追加",

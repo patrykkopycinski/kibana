@@ -8,7 +8,7 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 
-export const DATA_QUALITY_LOCATOR_ID = 'DATA_QUALITY_LOCATOR';
+export const DATA_QUALITY_DETAILS_LOCATOR_ID = 'DATA_QUALITY_DETAILS_LOCATOR';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type RefreshInterval = {
@@ -24,10 +24,20 @@ type TimeRangeConfig = {
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type Filters = {
-  timeRange: TimeRangeConfig;
+type DegradedFieldsTable = {
+  page?: number;
+  rowsPerPage?: number;
+  sort?: {
+    field: string;
+    direction: 'asc' | 'desc';
+  };
 };
 
-export interface DataQualityLocatorParams extends SerializableRecord {
-  filters?: Filters;
+export interface DataQualityDetailsLocatorParams extends SerializableRecord {
+  dataStream: string;
+  timeRange?: TimeRangeConfig;
+  breakdownField?: string;
+  degradedFields?: {
+    table?: DegradedFieldsTable;
+  };
 }

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   datasetNames,
@@ -38,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
   const apacheAccessDatasetName = 'apache.access';
-  const apacheAccessDatasetHumanName = 'Apache access logs';
+  const apacheAccessDataStreamName = `logs-${apacheAccessDatasetName}-${productionNamespace}`;
   const apacheIntegrationId = 'apache';
   const apachePkg = {
     name: 'apache',
@@ -46,13 +47,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-  const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
+  const bitbucketAuditDataStreamName = `logs-${bitbucketDatasetName}-${defaultNamespace}`;
   const bitbucketPkg = {
     name: 'atlassian_bitbucket',
     version: '1.14.0',
   };
 
+  const regularDatasetName = datasetNames[0];
+  const regularDataStreamName = `logs-${datasetNames[0]}-${defaultNamespace}`;
   const degradedDatasetName = datasetNames[2];
+  const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
   describe('Flyout', function () {
     before(async () => {
@@ -91,8 +95,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
-
-      await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
@@ -101,21 +103,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await synthtrace.clean();
     });
 
-    describe('open flyout', () => {
-      it('should open the flyout for the right dataset', async () => {
-        const testDatasetName = datasetNames[1];
-
-        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+    describe('navigate to dataset details', () => {
+      it('should navigate to right dataset', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({ dataStream: regularDataStreamName });
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutTitle
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
+        );
+      });
+
+      it('should navigate to details page from a main page', async () => {
+        await PageObjects.datasetQuality.navigateTo();
+
+        const synthDataset = await testSubjects.find(
+          'datasetQualityTableDetailsLink-logs-synth.1-default',
+          20 * 1000
         );
 
-        await PageObjects.datasetQuality.closeFlyout();
+        await synthDataset.click();
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
+        );
+      });
+
+      it('should show an empty prompt with error message when the dataset is not found', async () => {
+        const nonExistentDataStreamName = 'logs-non.existent-production';
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: nonExistentDataStreamName,
+        });
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsEmptyPrompt
+        );
+
+        const emptyPromptBody = await testSubjects.getVisibleText(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsEmptyPromptBody
+        );
+
+        expect(emptyPromptBody).to.contain(nonExistentDataStreamName);
       });
 
       it('reflects the breakdown field state in url', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({ dataStream: degradedDataStreamName });
 
         const breakdownField = 'service.name';
         await PageObjects.datasetQuality.selectBreakdownField(breakdownField);
@@ -134,46 +164,71 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.not.contain('breakdownField');
         });
-        await PageObjects.datasetQuality.closeFlyout();
       });
     });
 
-    describe('integrations', () => {
+    describe('overview summary panel', () => {
+      it('should show summary KPIs', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
+
+        const { docsCountTotal, degradedDocs, services, hosts } =
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis(excludeKeysFromServerless);
+        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(degradedDocs, 10)).to.be(1);
+        expect(parseInt(services, 10)).to.be(3);
+        expect(parseInt(hosts, 10)).to.be(52);
+      });
+    });
+
+    describe('overview integrations', () => {
       it('should hide the integration section for non integrations', async () => {
-        const testDatasetName = datasetNames[1];
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: regularDataStreamName,
+        });
 
-        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
+        // The Integration row should not be present
         await testSubjects.missingOrFail(
           PageObjects.datasetQuality.testSubjectSelectors
-            .datasetQualityFlyoutFieldsListIntegrationDetails
+            .datasetQualityDetailsIntegrationRowIntegration
         );
 
-        await PageObjects.datasetQuality.closeFlyout();
+        // The Version row should not be present
+        await testSubjects.missingOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationRowVersion
+        );
       });
 
       it('should shows the integration section for integrations', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
 
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors
-            .datasetQualityFlyoutFieldsListIntegrationDetails
+            .datasetQualityDetailsIntegrationRowIntegration
+        );
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationRowVersion
         );
 
         await retry.tryForTime(5000, async () => {
           const integrationNameExists = await PageObjects.datasetQuality.doesTextExist(
             PageObjects.datasetQuality.testSubjectSelectors
-              .datasetQualityFlyoutFieldsListIntegrationDetails,
+              .datasetQualityDetailsIntegrationRowIntegration,
             apacheIntegrationId
           );
           expect(integrationNameExists).to.be(true);
         });
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should show the integration actions menu with correct actions', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
+
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
         const actions = await Promise.all(
@@ -183,23 +238,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         expect(actions.length).to.eql(3);
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should hide integration dashboard for integrations without dashboards', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: bitbucketAuditDataStreamName,
+        });
+
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
         await testSubjects.missingOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
             integrationActions.viewDashboards
           )
         );
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('Should navigate to integration overview page on clicking integration overview action', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: bitbucketAuditDataStreamName,
+        });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
         const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
@@ -214,12 +272,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
         });
-
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should navigate to index template page in clicking Integration template', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
         const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
@@ -235,11 +293,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             `/app/management/data/index_management/templates/logs-${apacheAccessDatasetName}`
           );
         });
-        await PageObjects.datasetQuality.navigateTo();
       });
 
       it('should navigate to the selected dashboard on clicking integration dashboard action ', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
         await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
         const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
@@ -257,118 +316,87 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
 
         expect(breadcrumbText).to.eql(dashboardText);
-
-        await PageObjects.datasetQuality.navigateTo();
-      });
-    });
-
-    describe('summary panel', () => {
-      it('should show summary KPIs', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-        const { docsCountTotal, degradedDocs, services, hosts } =
-          await PageObjects.datasetQuality.parseFlyoutKpis(excludeKeysFromServerless);
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
     });
 
     describe('navigation', () => {
-      afterEach(async () => {
-        // Navigate back to dataset quality page after each test
-        await PageObjects.datasetQuality.navigateTo();
-      });
-
       it('should go to log explorer page when the open in log explorer button is clicked', async () => {
-        const testDatasetName = datasetNames[2];
-        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: regularDataStreamName,
+        });
 
-        const logExplorerButton = await PageObjects.datasetQuality.getFlyoutLogsExplorerButton();
+        const logExplorerButton =
+          await PageObjects.datasetQuality.getDatasetQualityDetailsHeaderButton();
 
         await logExplorerButton.click();
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(testDatasetName);
+        expect(datasetSelectorText).to.eql(regularDatasetName);
       });
 
-      it('should go log explorer for degraded docs when the show all button is clicked', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+      it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
 
-        const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
-        await testSubjects.click(degradedDocsShowAllSelector);
+        await testSubjects.click(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsLinkToDiscover
+        );
 
         // Confirm dataset selector text in observability logs explorer
         const datasetSelectorText =
           await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
         expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
       });
-
-      // Blocked by https://github.com/elastic/kibana/issues/181705
-      // Its a test written ahead of its time.
-      it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-        const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
-        await testSubjects.click(hostsShowAllSelector);
-
-        // Confirm url contains metrics/hosts
-        await retry.tryForTime(5000, async () => {
-          const currentUrl = await browser.getCurrentUrl();
-          const parsedUrl = new URL(currentUrl);
-          expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
-        });
-      });
     });
 
     describe('degraded fields table', () => {
       it(' should show empty degraded fields table when no degraded fields are present', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(datasetNames[0]);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: regularDataStreamName,
+        });
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedTableNoData
         );
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should show the degraded fields table with data when present', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+        });
 
         await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldTable
         );
 
         const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         expect(rows.length).to.eql(2);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should display Spark Plot for every row of degraded fields', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+        });
 
         const rows =
-          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+          await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();
 
         const sparkPlots = await testSubjects.findAll(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
         );
 
         expect(rows.length).to.be(sparkPlots.length);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should sort the table when the count table header is clicked', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+        });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
@@ -379,12 +407,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const sortedCellTexts = await countColumn.getCellTexts();
 
         expect(cellTexts.reverse()).to.eql(sortedCellTexts);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       it('should update the URL when the table is sorted', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+        });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
         const countColumn = table['Docs count'];
@@ -410,8 +438,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'sort:(direction:asc,field:count)'
           );
         });
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
 
       // This is the only test which ingest data during the test.
@@ -419,7 +445,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Even though this test ingest data, it can also be freely moved inside
       // this describe block, and it won't affect any of the existing tests
       it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
-        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: degradedDataStreamName,
+        });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
@@ -434,7 +462,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }),
         ]);
 
-        await PageObjects.datasetQuality.refreshFlyout();
+        await PageObjects.datasetQuality.refreshDetailsPageData();
 
         const updatedTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
         const updatedCountColumn = updatedTable['Docs count'];
@@ -445,8 +473,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
         expect(singleValueNow).to.be.greaterThan(singleValuePreviously);
-
-        await PageObjects.datasetQuality.closeFlyout();
       });
     });
   });

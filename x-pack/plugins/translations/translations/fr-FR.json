@@ -14608,7 +14608,6 @@
     "xpack.dataQuality.Initializing": "Page Initialisation de la qualité de l'ensemble de données",
     "xpack.dataQuality.name": "Qualité de l’ensemble de données",
     "xpack.datasetQuality.actionsColumnName": "Actions",
-    "xpack.datasetQuality.appDescription": "Surveillez la qualité du jeu de données pour les flux de données {logsPattern} suivant le {dsNamingSchemeLink}.",
     "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "Schéma de dénomination du flux de données",
     "xpack.datasetQuality.appTitle": "Qualité de l’ensemble de données",
     "xpack.datasetQuality.betaBadgeDescription": "Cette fonctionnalité est actuellement en version bêta. Nous aimerions beaucoup savoir si vous avez des commentaires ou si vous rencontrez des bugs. Veuillez ouvrir un dossier d'assistance et/ou consulter notre forum de discussion.",

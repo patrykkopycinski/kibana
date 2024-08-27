@@ -14620,7 +14620,6 @@
     "xpack.dataQuality.Initializing": "正在初始化“数据集质量”页面",
     "xpack.dataQuality.name": "数据集质量",
     "xpack.datasetQuality.actionsColumnName": "操作",
-    "xpack.datasetQuality.appDescription": "监测跟随 {dsNamingSchemeLink} 的 {logsPattern} 数据流的数据集质量。",
     "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "数据流命名方案",
     "xpack.datasetQuality.appTitle": "数据集质量",
     "xpack.datasetQuality.betaBadgeDescription": "此功能当前为公测版。如果遇到任何错误或有任何反馈，我们乐于倾听您的意见。请报告支持问题和/或访问我们的讨论论坛。",

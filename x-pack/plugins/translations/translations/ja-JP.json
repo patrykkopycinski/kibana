@@ -14597,7 +14597,6 @@
     "xpack.dataQuality.Initializing": "データセット品質ページを初期化中",
     "xpack.dataQuality.name": "データセット品質",
     "xpack.datasetQuality.actionsColumnName": "アクション",
-    "xpack.datasetQuality.appDescription": "{dsNamingSchemeLink}に従う{logsPattern}データストリームのデータセット品質を監視します。",
     "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "データストリーム命名スキーム",
     "xpack.datasetQuality.appTitle": "データセット品質",
     "xpack.datasetQuality.betaBadgeDescription": "現在、この機能はベータです。バグが発生した場合やフィードバックがある場合は、お問い合わせください。サポート問題をオープンするか、ディスカッションフォーラムをご覧ください。",

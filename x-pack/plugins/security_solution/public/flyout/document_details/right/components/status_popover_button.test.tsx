@@ -9,8 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { StatusPopoverButton } from './status_popover_button';
-import { TestProviders } from '../../../mock';
+import { TestProviders } from '../../../../common/mock';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+
 const props = {
   eventId: 'testid',
   contextId: 'alerts-page',

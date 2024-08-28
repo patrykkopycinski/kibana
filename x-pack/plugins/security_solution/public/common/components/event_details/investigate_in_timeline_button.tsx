@@ -12,18 +12,18 @@ import type { IconType } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { sourcererSelectors } from '../../../store';
-import { InputsModelId } from '../../../store/inputs/constants';
-import type { TimeRange } from '../../../store/inputs/model';
-import { inputsActions } from '../../../store/inputs';
-import { updateProviders, setFilters } from '../../../../timelines/store/actions';
-import { sourcererActions } from '../../../store/actions';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import type { DataProvider } from '../../../../../common/types';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineTypeEnum } from '../../../../../common/api/timeline';
-import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
+import { sourcererSelectors } from '../../store';
+import { InputsModelId } from '../../store/inputs/constants';
+import type { TimeRange } from '../../store/inputs/model';
+import { inputsActions } from '../../store/inputs';
+import { updateProviders, setFilters } from '../../../timelines/store/actions';
+import { sourcererActions } from '../../store/actions';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { DataProvider } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineTypeEnum } from '../../../../common/api/timeline';
+import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
+import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
 
 export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;

@@ -41665,7 +41665,6 @@
     "xpack.slo.permissionsCallout.readIndexPermission": "SLOの作成で使用するすべてのインデックスパターンのreadおよびview_index_metadataインデックス権限。",
     "xpack.slo.permissionsCallout.readSloPermission": "インデックスパターンのread権限：.slo-*",
     "xpack.slo.permissionsCallout.title": "不十分な権限",
-    "xpack.slo.permissionsCallout.writeClusterPermission": "manage_transformおよびmanage_ingest_pipelinesクラスター権限",
     "xpack.slo.permissionsCallout.writeSloPermission": "インデックスパターンでのall権限：.slo-*",
     "xpack.slo.queryBuilder.closeButtonLabel": "閉じる",
     "xpack.slo.queryBuilder.documentsButtonLabel": "ドキュメントを表示",

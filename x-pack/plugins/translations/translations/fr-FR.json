@@ -41680,7 +41680,6 @@
     "xpack.slo.permissionsCallout.readIndexPermission": "Autorisations d'index 'read' ​​et 'view_index_metadata' sur tous les modèles d'index que vous souhaitez utiliser pour créer des SLO",
     "xpack.slo.permissionsCallout.readSloPermission": "Autorisation 'read' ​​sur le modèle d'index : .slo-*",
     "xpack.slo.permissionsCallout.title": "Permissions insuffisantes",
-    "xpack.slo.permissionsCallout.writeClusterPermission": "Autorisations de cluster 'manage_transform' et 'manage_ingest_pipelines'",
     "xpack.slo.permissionsCallout.writeSloPermission": "Autorisation 'all' sur le modèle d'index : .slo-*",
     "xpack.slo.queryBuilder.closeButtonLabel": "Fermer",
     "xpack.slo.queryBuilder.documentsButtonLabel": "Afficher les documents",

@@ -41709,7 +41709,6 @@
     "xpack.slo.permissionsCallout.readIndexPermission": "您要用于创建 SLO 的任何索引模式上的“read”和“view_index_metadata”索引权限",
     "xpack.slo.permissionsCallout.readSloPermission": "索引模式上的“read”权限：.slo-*",
     "xpack.slo.permissionsCallout.title": "权限不足",
-    "xpack.slo.permissionsCallout.writeClusterPermission": "“manage_transform”和“manage_ingest_pipelines”集群权限",
     "xpack.slo.permissionsCallout.writeSloPermission": "索引模式上的“all”权限：.slo-*",
     "xpack.slo.queryBuilder.closeButtonLabel": "关闭",
     "xpack.slo.queryBuilder.documentsButtonLabel": "查看文档",

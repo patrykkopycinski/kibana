@@ -34445,7 +34445,6 @@
     "xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess": "Le point de terminaison d’inférence a été supprimé avec succès.",
     "xpack.searchInferenceEndpoints.deleteEndpoint.endpointDeletionFailed": "Échec de la suppression du point de terminaison",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelDeployed": "Le modèle est déployé",
-    "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelFailedToBeDeployed": "Le modèle ne peut être déployé",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelNotDeployed": "Le modèle n’est pas déployé",
     "xpack.searchInferenceEndpoints.elasticsearch.allocations": "Allocations : {numAllocations}",
     "xpack.searchInferenceEndpoints.elasticsearch.threads": "Threads : {numThreads}",

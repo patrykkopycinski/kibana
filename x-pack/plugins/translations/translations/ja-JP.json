@@ -34430,7 +34430,6 @@
     "xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess": "推論エンドポイントは正常に削除されました。",
     "xpack.searchInferenceEndpoints.deleteEndpoint.endpointDeletionFailed": "エンドポイントの削除が失敗しました",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelDeployed": "モデルはデプロイされます",
-    "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelFailedToBeDeployed": "モデルをデプロイできません",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelNotDeployed": "モデルはデプロイされません",
     "xpack.searchInferenceEndpoints.elasticsearch.allocations": "割り当て：{numAllocations}",
     "xpack.searchInferenceEndpoints.elasticsearch.threads": "スレッド：{numThreads}",

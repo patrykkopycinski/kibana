@@ -34471,7 +34471,6 @@
     "xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess": "推理终端已成功删除。",
     "xpack.searchInferenceEndpoints.deleteEndpoint.endpointDeletionFailed": "终端删除失败",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelDeployed": "已部署模型",
-    "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelFailedToBeDeployed": "无法部署模型",
     "xpack.searchInferenceEndpoints.deploymentStatus.tooltip.modelNotDeployed": "未部署模型",
     "xpack.searchInferenceEndpoints.elasticsearch.allocations": "分配：{numAllocations}",
     "xpack.searchInferenceEndpoints.elasticsearch.threads": "线程：{numThreads}",

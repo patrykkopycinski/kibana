@@ -33971,7 +33971,6 @@
     "xpack.reporting.diagnostic.noUsableSandbox": "Impossible d'utiliser la sandbox Chromium. Vous pouvez la désactiver à vos risques et périls avec \"xpack.screenshotting.browser.chromium.disableSandbox\". Veuillez consulter {url}",
     "xpack.reporting.errorHandler.unknownError": "Erreur inconnue",
     "xpack.reporting.features.reportingFeatureName": "Reporting",
-    "xpack.reporting.jobResponse.errorHandler.notAuthorized": "Désolé, vous n'êtes pas autorisé à afficher ou supprimer les rapports {jobtype}",
     "xpack.reporting.jobResponse.errorHandler.unknownError": "Erreur inconnue",
     "xpack.reporting.jobsQuery.deleteError": "Impossible de supprimer le rapport : {error}",
     "xpack.reporting.listing.diagnosticApiCallFailure": "Un problème est survenu lors de l'exécution du diagnostic : {error}",

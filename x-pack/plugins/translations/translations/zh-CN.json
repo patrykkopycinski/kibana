@@ -33997,7 +33997,6 @@
     "xpack.reporting.diagnostic.noUsableSandbox": "无法使用 Chromium 沙盒。您自行承担使用“xpack.screenshotting.browser.chromium.disableSandbox”禁用此项的风险。请参见 {url}",
     "xpack.reporting.errorHandler.unknownError": "未知错误",
     "xpack.reporting.features.reportingFeatureName": "Reporting",
-    "xpack.reporting.jobResponse.errorHandler.notAuthorized": "抱歉，您无权查看或删除 {jobtype} 报告",
     "xpack.reporting.jobResponse.errorHandler.unknownError": "未知错误",
     "xpack.reporting.jobsQuery.deleteError": "无法删除报告：{error}",
     "xpack.reporting.listing.diagnosticApiCallFailure": "运行诊断时出现问题：{error}",

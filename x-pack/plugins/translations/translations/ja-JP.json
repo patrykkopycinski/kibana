@@ -33956,7 +33956,6 @@
     "xpack.reporting.diagnostic.noUsableSandbox": "Chromiumサンドボックスを使用できません。これは「xpack.screenshotting.browser.chromium.disableSandbox」で無効にすることができます。この作業はご自身の責任で行ってください。{url}を参照してください",
     "xpack.reporting.errorHandler.unknownError": "不明なエラー",
     "xpack.reporting.features.reportingFeatureName": "レポート",
-    "xpack.reporting.jobResponse.errorHandler.notAuthorized": "{jobtype}レポートを表示または削除する権限がありません",
     "xpack.reporting.jobResponse.errorHandler.unknownError": "不明なエラー",
     "xpack.reporting.jobsQuery.deleteError": "レポートを削除できません：{error}",
     "xpack.reporting.listing.diagnosticApiCallFailure": "診断の実行中に問題が発生しました：{error}",

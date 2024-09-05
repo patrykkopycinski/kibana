@@ -41555,7 +41555,6 @@
     "xpack.slo.burnRateRuleEditor.h5.chooseASLOToMonitorLabel": "选择要监测的 SLO",
     "xpack.slo.burnRateRuleEditor.h5.defineMultipleBurnRateLabel": "定义多个消耗速度窗口",
     "xpack.slo.burnRates.fromRange.label": "{duration}h",
-    "xpack.slo.common.constants.grouping.legacy": "Observability",
     "xpack.slo.create.errorNotification": "创建 {name} 时出现问题",
     "xpack.slo.deleteConfirmationModal.cancelButtonLabel": "取消",
     "xpack.slo.deleteConfirmationModal.deleteAllButtonLabel": "删除 SLO 和所有实例",

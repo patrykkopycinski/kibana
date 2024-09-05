@@ -41512,7 +41512,6 @@
     "xpack.slo.burnRateRuleEditor.h5.chooseASLOToMonitorLabel": "監視するSLOを選択",
     "xpack.slo.burnRateRuleEditor.h5.defineMultipleBurnRateLabel": "複数のバーンレート時間枠を定義",
     "xpack.slo.burnRates.fromRange.label": "{duration}h",
-    "xpack.slo.common.constants.grouping.legacy": "Observability",
     "xpack.slo.create.errorNotification": "{name}の作成中に問題が発生しました",
     "xpack.slo.deleteConfirmationModal.cancelButtonLabel": "キャンセル",
     "xpack.slo.deleteConfirmationModal.deleteAllButtonLabel": "SLOとすべてのインスタンスを削除",

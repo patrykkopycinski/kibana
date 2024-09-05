@@ -41526,7 +41526,6 @@
     "xpack.slo.burnRateRuleEditor.h5.chooseASLOToMonitorLabel": "Choisir un SLO pour monitorer",
     "xpack.slo.burnRateRuleEditor.h5.defineMultipleBurnRateLabel": "Définir des fenêtres du taux d'avancement multiples",
     "xpack.slo.burnRates.fromRange.label": "{duration}h",
-    "xpack.slo.common.constants.grouping.legacy": "Observabilité",
     "xpack.slo.create.errorNotification": "Un problème est survenu lors de la création de {name}",
     "xpack.slo.deleteConfirmationModal.cancelButtonLabel": "Annuler",
     "xpack.slo.deleteConfirmationModal.deleteAllButtonLabel": "Supprimer le SLO et toutes les instances",

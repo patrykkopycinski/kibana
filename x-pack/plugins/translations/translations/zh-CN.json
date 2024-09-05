@@ -39658,7 +39658,6 @@
     "xpack.securitySolution.management.policiesSelector.label": "策略",
     "xpack.securitySolution.management.policiesSelector.unassignedEntries": "未分配的条目",
     "xpack.securitySolution.management.search.button": "刷新",
-    "xpack.securitySolution.manualRuleRun.alertLimitations": "要查看由此次运行生成的告警，请按为这次手动规则运行选定的时间范围筛选“告警”页面。",
     "xpack.securitySolution.manualRuleRun.cancelButton": "取消",
     "xpack.securitySolution.manualRuleRun.confirmButton": "运行",
     "xpack.securitySolution.manualRuleRun.endAtTitle": "完成时间",

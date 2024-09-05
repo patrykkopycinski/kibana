@@ -39615,7 +39615,6 @@
     "xpack.securitySolution.management.policiesSelector.label": "ポリシー",
     "xpack.securitySolution.management.policiesSelector.unassignedEntries": "割り当てられていないエントリ",
     "xpack.securitySolution.management.search.button": "更新",
-    "xpack.securitySolution.manualRuleRun.alertLimitations": "この実行で生成されたアラートを表示するには、この手動ルール実行に対して選択された時間範囲で、［アラート］ページをフィルタリングします。",
     "xpack.securitySolution.manualRuleRun.cancelButton": "キャンセル",
     "xpack.securitySolution.manualRuleRun.confirmButton": "実行",
     "xpack.securitySolution.manualRuleRun.endAtTitle": "終了日時",

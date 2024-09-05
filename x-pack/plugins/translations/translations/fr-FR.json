@@ -39631,7 +39631,6 @@
     "xpack.securitySolution.management.policiesSelector.label": "Politiques",
     "xpack.securitySolution.management.policiesSelector.unassignedEntries": "Entrées non affectées",
     "xpack.securitySolution.management.search.button": "Actualiser",
-    "xpack.securitySolution.manualRuleRun.alertLimitations": "Pour afficher les alertes générées par cette exécution, filtrez la page Alertes par la plage temporelle sélectionnée pour cette exécution de règle manuelle.",
     "xpack.securitySolution.manualRuleRun.cancelButton": "Annuler",
     "xpack.securitySolution.manualRuleRun.confirmButton": "Exécuter",
     "xpack.securitySolution.manualRuleRun.endAtTitle": "Terminer à",

@@ -14622,8 +14622,6 @@
     "xpack.datasetQuality.degradedDocsColumnName": "已降级文档 (%)",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "您的数据集中包含 {ignoredProperty} 属性的文档的百分比。",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
-    "xpack.datasetQuality.emptyState.noData.message": "找不到日志数据集。要开始，请确保具有与 {datasetPattern} 匹配的可用日志数据流。",
-    "xpack.datasetQuality.emptyState.noData.title": "找不到数据集",
     "xpack.datasetQuality.emptyState.noPrivileges.message": "您没有查看日志数据所需的权限。请确保您具有足够的权限，可以查看 {datasetPattern}。",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "无法加载数据集",
     "xpack.datasetQuality.fetchDatasetStatsFailed": "无法获取数据集。",

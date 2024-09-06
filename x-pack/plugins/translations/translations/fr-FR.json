@@ -14610,8 +14610,6 @@
     "xpack.datasetQuality.degradedDocsColumnName": "Documents dégradés (%)",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "Le pourcentage de documents avec la propriété {ignoredProperty} dans votre ensemble de données.",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
-    "xpack.datasetQuality.emptyState.noData.message": "Aucun log d'ensemble de données n'a été trouvé. Pour commencer, assurez-vous d'avoir des logs de flux de données disponibles correspondant à {datasetPattern}.",
-    "xpack.datasetQuality.emptyState.noData.title": "Aucun ensemble de données trouvé",
     "xpack.datasetQuality.emptyState.noPrivileges.message": "Vous ne disposez pas des autorisations requises pour voir les données de logs. Assurez-vous d'avoir les autorisations requises pour voir {datasetPattern}.",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "Impossible de charger les ensembles de données",
     "xpack.datasetQuality.fetchDatasetStatsFailed": "Nous n'avons pas pu obtenir vos ensembles de données.",

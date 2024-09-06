@@ -14599,8 +14599,6 @@
     "xpack.datasetQuality.degradedDocsColumnName": "劣化したドキュメント（%）",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "データセットにおける{ignoredProperty}プロパティのドキュメントの割合。",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",
-    "xpack.datasetQuality.emptyState.noData.message": "ログデータセットが見つかりません。開始するには、{datasetPattern}と一致するログデータストリームがあることを確認してください。",
-    "xpack.datasetQuality.emptyState.noData.title": "データセットが見つかりません",
     "xpack.datasetQuality.emptyState.noPrivileges.message": "ログデータを表示するために必要な権限がありません。{datasetPattern}を表示するための十分な権限があることを確認してください。",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "データセットを読み込めませんでした",
     "xpack.datasetQuality.fetchDatasetStatsFailed": "データセットを取得できませんでした。",

@@ -15297,8 +15297,6 @@
     "xpack.elasticAssistant.prompts.getPromptsError": "提取提示时出错",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "Elastic AI 助手仅对企业用户可用。请升级许可证以使用此功能。",
     "xpack.elasticAssistantPlugin.server.newChat": "新聊天",
-    "xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns": "面板有 {count} 个向下钻取",
-    "xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown": "面板有 1 个向下钻取",
     "xpack.embeddableEnhanced.Drilldowns": "向下钻取",
     "xpack.enterpriseSearch.actions.backButtonLabel": "返回",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "取消",

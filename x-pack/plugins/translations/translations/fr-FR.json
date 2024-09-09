@@ -15285,8 +15285,6 @@
     "xpack.elasticAssistant.prompts.getPromptsError": "Erreur lors de la récupération des invites",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "L'assistant d'IA d'Elastic n'est accessible qu'aux entreprises. Veuillez mettre votre licence à niveau pour bénéficier de cette fonctionnalité.",
     "xpack.elasticAssistantPlugin.server.newChat": "Nouveau chat",
-    "xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns": "Le panneau comporte {count} recherches",
-    "xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown": "Le panneau comporte 1 recherche",
     "xpack.embeddableEnhanced.Drilldowns": "Explorations",
     "xpack.enterpriseSearch.actions.backButtonLabel": "Retour",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "Annuler",

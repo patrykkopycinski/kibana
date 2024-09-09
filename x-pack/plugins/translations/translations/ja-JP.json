@@ -15272,8 +15272,6 @@
     "xpack.elasticAssistant.prompts.getPromptsError": "プロンプト取得エラー",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "Elastic AI Assistantはエンタープライズユーザーのみご利用いただけます。この機能を使用するには、ライセンスをアップグレードしてください。",
     "xpack.elasticAssistantPlugin.server.newChat": "新しいチャット",
-    "xpack.embeddableEnhanced.actions.panelNotifications.manyDrilldowns": "パネルには{count}個のドリルダウンがあります",
-    "xpack.embeddableEnhanced.actions.panelNotifications.oneDrilldown": "パネルには 1 個のドリルダウンがあります",
     "xpack.embeddableEnhanced.Drilldowns": "ドリルダウン",
     "xpack.enterpriseSearch.actions.backButtonLabel": "戻る",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "キャンセル",

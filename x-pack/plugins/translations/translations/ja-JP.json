@@ -7456,7 +7456,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions": "グループ関数",
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription": "これらのグループ関数はSTATS...BYで使用できます。",
     "textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel": "最近のクエリーを非表示",
-    "textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel": "前回の期間",
     "textBasedEditor.query.textBasedLanguagesEditor.lineCount": "{count} {count, plural, other {行}}",
     "textBasedEditor.query.textBasedLanguagesEditor.lineNumber": "行{lineNumber}",
     "textBasedEditor.query.textBasedLanguagesEditor.operators": "演算子",

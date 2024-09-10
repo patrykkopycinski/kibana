@@ -7462,7 +7462,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions": "Fonctions de groupage",
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription": "Ces fonctions de regroupement peuvent être utilisées avec `STATS...BY` :",
     "textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel": "Masquer les recherches récentes",
-    "textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel": "Dernière durée",
     "textBasedEditor.query.textBasedLanguagesEditor.lineCount": "{count} {count, plural, one {ligne} other {lignes}}",
     "textBasedEditor.query.textBasedLanguagesEditor.lineNumber": "Ligne {lineNumber}",
     "textBasedEditor.query.textBasedLanguagesEditor.operators": "Opérateurs",

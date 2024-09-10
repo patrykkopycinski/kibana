@@ -7469,7 +7469,6 @@
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions": "分组函数",
     "textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription": "这些分组函数可以与 `STATS...BY` 搭配使用：",
     "textBasedEditor.query.textBasedLanguagesEditor.hideQueriesLabel": "隐藏最近查询",
-    "textBasedEditor.query.textBasedLanguagesEditor.lastDurationColumnLabel": "上次持续时间",
     "textBasedEditor.query.textBasedLanguagesEditor.lineCount": "{count} {count, plural, other {行}}",
     "textBasedEditor.query.textBasedLanguagesEditor.lineNumber": "第 {lineNumber} 行",
     "textBasedEditor.query.textBasedLanguagesEditor.operators": "运算符",

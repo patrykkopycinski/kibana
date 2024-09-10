@@ -767,7 +767,7 @@
     "core.euiDataGridCell.position": "{columnId}, 列{col}, 行{row}",
     "core.euiDataGridCellActions.expandButtonTitle": "クリックするか enter を押すと、セルのコンテンツとインタラクトできます。",
     "core.euiDataGridHeaderCell.actionsPopoverScreenReaderText": "列アクションのリストを移動するには、Tabまたは上下矢印キーを押します。",
-    "core.euiDataGridHeaderCell.headerActions": "クリックすると、列ヘッダーアクションが表示されます",
+    "core.euiDataGridHeaderCell.actionsButtonAriaLabel": "{title}。クリックすると、列ヘッダーアクションが表示されます",
     "core.euiDataGridHeaderCell.sortedByAscendingFirst": "{columnId}の昇順で並べ替え",
     "core.euiDataGridHeaderCell.sortedByAscendingMultiple": "、{columnId}の昇順で並べ替え",
     "core.euiDataGridHeaderCell.sortedByAscendingSingle": "昇順で並べ替えます",

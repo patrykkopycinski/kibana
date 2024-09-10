@@ -765,7 +765,7 @@
     "core.euiDataGridCell.position": "{columnId}, colonne {col}, ligne {row}",
     "core.euiDataGridCellActions.expandButtonTitle": "Cliquez ou appuyez sur Entrée pour interagir avec le contenu de la cellule.",
     "core.euiDataGridHeaderCell.actionsPopoverScreenReaderText": "Pour naviguer dans la liste des actions de la colonne, appuyez sur la touche Tab ou sur les flèches vers le haut et vers le bas.",
-    "core.euiDataGridHeaderCell.headerActions": "Cliquez pour afficher les actions d'en-tête de colonne",
+    "core.euiDataGridHeaderCell.actionsButtonAriaLabel": "{title}. Cliquez pour afficher les actions d'en-tête de colonne",
     "core.euiDataGridHeaderCell.sortedByAscendingFirst": "Trié par {columnId}, ordre croissant",
     "core.euiDataGridHeaderCell.sortedByAscendingMultiple": ", puis par {columnId}, ordre croissant",
     "core.euiDataGridHeaderCell.sortedByAscendingSingle": "Trié par ordre croissant",

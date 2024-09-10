@@ -765,7 +765,7 @@
     "core.euiDataGridCell.position": "{columnId}，列 {col}，行 {row}",
     "core.euiDataGridCellActions.expandButtonTitle": "单击或按 Enter 键以便与单元格内容进行交互",
     "core.euiDataGridHeaderCell.actionsPopoverScreenReaderText": "要在列操作列表中导航，请按 Tab 键或向上和向下箭头键。",
-    "core.euiDataGridHeaderCell.headerActions": "单击以查看列标题操作",
+    "core.euiDataGridHeaderCell.actionsButtonAriaLabel": "{title}。单击以查看列标题操作",
     "core.euiDataGridHeaderCell.sortedByAscendingFirst": "按 {columnId} 排序，升序",
     "core.euiDataGridHeaderCell.sortedByAscendingMultiple": "，然后按 {columnId} 排序，升序",
     "core.euiDataGridHeaderCell.sortedByAscendingSingle": "已升序",

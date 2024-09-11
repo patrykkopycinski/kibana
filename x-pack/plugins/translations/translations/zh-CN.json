@@ -39145,7 +39145,6 @@
     "xpack.securitySolution.flyout.preview.rule.viewDetailsLabel": "显示完整规则详情",
     "xpack.securitySolution.flyout.right.about.description.documentTitle": "文档描述",
     "xpack.securitySolution.flyout.right.about.description.noRuleDescription": "此规则没有订阅。",
-    "xpack.securitySolution.flyout.right.about.description.rulePreviewTitle": "预览规则详情",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel": "显示规则摘要",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel": "显示规则摘要",
     "xpack.securitySolution.flyout.right.about.description.ruleTitle": "规则描述",

@@ -39118,7 +39118,6 @@
     "xpack.securitySolution.flyout.preview.rule.viewDetailsLabel": "Afficher l’ensemble des détails de la règle",
     "xpack.securitySolution.flyout.right.about.description.documentTitle": "Description du document",
     "xpack.securitySolution.flyout.right.about.description.noRuleDescription": "Il n'existe pas de description pour cette règle.",
-    "xpack.securitySolution.flyout.right.about.description.rulePreviewTitle": "Afficher les détails de la règle",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel": "Afficher le résumé de la règle",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel": "Afficher le résumé de la règle",
     "xpack.securitySolution.flyout.right.about.description.ruleTitle": "Description de la règle",

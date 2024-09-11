@@ -39101,7 +39101,6 @@
     "xpack.securitySolution.flyout.preview.rule.viewDetailsLabel": "完全なルール詳細を表示",
     "xpack.securitySolution.flyout.right.about.description.documentTitle": "ドキュメント説明",
     "xpack.securitySolution.flyout.right.about.description.noRuleDescription": "このルールに関する説明はありません。",
-    "xpack.securitySolution.flyout.right.about.description.rulePreviewTitle": "ルール詳細をプレビュー",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonAriaLabel": "ルール概要を表示",
     "xpack.securitySolution.flyout.right.about.description.ruleSummaryButtonLabel": "ルール概要を表示",
     "xpack.securitySolution.flyout.right.about.description.ruleTitle": "ルールの説明",

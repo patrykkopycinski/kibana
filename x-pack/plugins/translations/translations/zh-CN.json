@@ -25120,7 +25120,6 @@
     "xpack.lens.config.editLabel": "编辑配置",
     "xpack.lens.config.editLinkLabel": "在 Lens 中编辑",
     "xpack.lens.config.editVisualizationLabel": "编辑 {lang} 可视化",
-    "xpack.lens.config.experimentalLabelDataview": "技术预览，内联编辑当前提供的配置选项数量有限",
     "xpack.lens.config.visualizationConfigurationLabel": "可视化配置",
     "xpack.lens.configPanel.addLayerButton": "添加图层",
     "xpack.lens.configPanel.loadFromLibrary": "从库中加载",

@@ -25089,7 +25089,6 @@
     "xpack.lens.config.editLabel": "構成の編集",
     "xpack.lens.config.editLinkLabel": "Lensで編集",
     "xpack.lens.config.editVisualizationLabel": "{lang}ビジュアライゼーションを編集",
-    "xpack.lens.config.experimentalLabelDataview": "テクニカルプレビュー。現在、インライン編集では、構成オプションは限られています。",
     "xpack.lens.config.visualizationConfigurationLabel": "ビジュアライゼーション構成",
     "xpack.lens.configPanel.addLayerButton": "レイヤーを追加",
     "xpack.lens.configPanel.loadFromLibrary": "ライブラリから読み込み",

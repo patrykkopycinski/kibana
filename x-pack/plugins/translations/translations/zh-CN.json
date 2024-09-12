@@ -13116,7 +13116,6 @@
     "xpack.cases.actions.viewCase": "查看案例",
     "xpack.cases.actions.visualizationActions.addToExistingCase.displayName": "添加到案例",
     "xpack.cases.addConnector.title": "添加连接器",
-    "xpack.cases.additionalFields": "其他字段",
     "xpack.cases.allCases.actions": "操作",
     "xpack.cases.allCases.comments": "注释",
     "xpack.cases.allCases.noCategoriesAvailable": "没有可用类别",

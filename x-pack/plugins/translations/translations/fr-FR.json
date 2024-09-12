@@ -13103,7 +13103,6 @@
     "xpack.cases.actions.viewCase": "Afficher le cas",
     "xpack.cases.actions.visualizationActions.addToExistingCase.displayName": "Ajouter au cas",
     "xpack.cases.addConnector.title": "Ajouter un connecteur",
-    "xpack.cases.additionalFields": "Champs supplémentaires",
     "xpack.cases.allCases.actions": "Actions",
     "xpack.cases.allCases.comments": "Commentaires",
     "xpack.cases.allCases.noCategoriesAvailable": "Pas de catégories disponibles",

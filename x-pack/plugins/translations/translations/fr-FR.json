@@ -20663,7 +20663,6 @@
     "xpack.fleet.settings.outputForm.kafkaPartitioningGroupEventsFormattingMessage": "Le nombre d’événements doit être indiqué en chiffres",
     "xpack.fleet.settings.outputForm.kafkaPasswordIsRequired": "Le mot de passe est requis",
     "xpack.fleet.settings.outputForm.kafkaPortError": "Numéro de port non valide. Nombre compris entre 1 et 65535 attendu",
-    "xpack.fleet.settings.outputForm.kafkaTopicConditionRequired": "Il doit s'agir d'une clé, paire de valeurs c.-à-d. \"http.response.code: 200\"",
     "xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage": "Un sujet est requis",
     "xpack.fleet.settings.outputForm.kafkaUsernameIsRequired": "Le nom d'utilisateur est requis",
     "xpack.fleet.settings.outputForm.logstashHostDuplicateError": "Hôte en double",

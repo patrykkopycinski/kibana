@@ -20653,7 +20653,6 @@
     "xpack.fleet.settings.outputForm.kafkaPartitioningGroupEventsFormattingMessage": "イベント数は数値でなければなりません",
     "xpack.fleet.settings.outputForm.kafkaPasswordIsRequired": "パスワードが必要です",
     "xpack.fleet.settings.outputForm.kafkaPortError": "無効なポート番号です。1から65535までの数字でなければなりません",
-    "xpack.fleet.settings.outputForm.kafkaTopicConditionRequired": "キーと値のペアでなければなりません。例：\"http.response.code:200\"",
     "xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage": "トピックは必須です",
     "xpack.fleet.settings.outputForm.kafkaUsernameIsRequired": "ユーザー名が必要です",
     "xpack.fleet.settings.outputForm.logstashHostDuplicateError": "重複するホスト",

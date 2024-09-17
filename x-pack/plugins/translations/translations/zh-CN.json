@@ -20681,7 +20681,6 @@
     "xpack.fleet.settings.outputForm.kafkaPartitioningGroupEventsFormattingMessage": "事件数必须为数字",
     "xpack.fleet.settings.outputForm.kafkaPasswordIsRequired": "“密码”必填",
     "xpack.fleet.settings.outputForm.kafkaPortError": "端口号无效。应为介于 1 和 65535 之间的数字",
-    "xpack.fleet.settings.outputForm.kafkaTopicConditionRequired": "必须为键值对，例如“http.response.code:200”",
     "xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage": "“主题”必填",
     "xpack.fleet.settings.outputForm.kafkaUsernameIsRequired": "“用户名”必填",
     "xpack.fleet.settings.outputForm.logstashHostDuplicateError": "主机重复",

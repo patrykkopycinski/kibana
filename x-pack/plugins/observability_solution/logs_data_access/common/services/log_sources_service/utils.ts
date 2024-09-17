@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export interface LogSource {
-  indexPattern: string;
-}
+import { LogSource } from './types';
 
-export interface LogSourcesService {
-  getLogSources: () => Promise<LogSource[]>;
-  getFlattenedLogSources: () => Promise<string>;
-  setLogSources: (sources: LogSource[]) => Promise<void>;
-}
+export const flattenLogSources = (logSources: LogSource[]) =>
+  logSources.map((source) => source.indexPattern).join(',');

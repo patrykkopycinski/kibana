@@ -47276,7 +47276,6 @@
     "xpack.uptime.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.uptime.synthetics.waterfallChart.labels.timings.wait": "En attente (TTFB)",
     "xpack.uptime.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.uptime.title": "Uptime",
     "xpack.uptime.tls.ageExpression.description": "ou antérieur à (jours) : ",
     "xpack.uptime.tls.criteriaExpression.value": "le moniteur correspondant",
     "xpack.uptime.tls.expirationExpression.description": "possède un certificat expirant dans (jours) : ",

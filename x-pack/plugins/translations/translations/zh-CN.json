@@ -47309,7 +47309,6 @@
     "xpack.uptime.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.uptime.synthetics.waterfallChart.labels.timings.wait": "等待中 (TTFB)",
     "xpack.uptime.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.uptime.title": "运行时间",
     "xpack.uptime.tls.ageExpression.description": "或早于以下天数：",
     "xpack.uptime.tls.criteriaExpression.value": "正在匹配监测",
     "xpack.uptime.tls.expirationExpression.description": "具有的证书将在以下天数内到期：",

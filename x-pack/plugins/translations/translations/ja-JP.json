@@ -47258,7 +47258,6 @@
     "xpack.uptime.synthetics.waterfallChart.labels.timings.ssl": "TLS",
     "xpack.uptime.synthetics.waterfallChart.labels.timings.wait": "待機中（TTFB）",
     "xpack.uptime.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.uptime.title": "アップタイム",
     "xpack.uptime.tls.ageExpression.description": "または次の日数を経過：",
     "xpack.uptime.tls.criteriaExpression.value": "一致するモニター",
     "xpack.uptime.tls.expirationExpression.description": "次の日数以内に有効期限切れになる証明書があります：",

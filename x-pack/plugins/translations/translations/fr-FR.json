@@ -39079,7 +39079,6 @@
     "xpack.securitySolution.flyout.right.title.otherEventTitle": "Détails de {eventKind}",
     "xpack.securitySolution.flyout.right.user.userPreviewTitle": "Prévisualiser l'utilisateur",
     "xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTitle": "Aperçu de l'analyseur",
-    "xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip": "Investiguer dans la chronologie",
     "xpack.securitySolution.flyout.right.visualizations.analyzerPreview.errorDescription": "Une erreur empêche l'analyse de cette alerte.",
     "xpack.securitySolution.flyout.right.visualizations.analyzerPreview.loadingAriaLabel": "aperçu de l'analyseur",
     "xpack.securitySolution.flyout.right.visualizations.analyzerPreview.noDataDescription": "Vous pouvez uniquement visualiser les événements déclenchés par les hôtes configurés avec l'intégration Elastic Defend ou les données {sysmon} provenant de {winlogbeat}. Pour en savoir plus, consultez {link}.",

@@ -6,8 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-export { LanguageDocumentationPopover } from './src/components/as_popover';
-export { LanguageDocumentationPopoverContent } from './src/components/as_popover/popover_content';
-export { LanguageDocumentationFlyout } from './src/components/as_flyout';
-export { LanguageDocumentationInline } from './src/components/as_inline';
-export type { LanguageDocumentationSections } from './src/types';
+
+export interface LanguageDocumentationSections {
+  groups: Array<{
+    label: string;
+    description?: string;
+    items: Array<{ label: string; description?: JSX.Element }>;
+  }>;
+  initialSection: JSX.Element;
+}

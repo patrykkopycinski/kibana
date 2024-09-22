@@ -20371,8 +20371,6 @@
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle": "Niveau de logging de l'agent",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription": "Fréquence de logging des indicateurs internes d'Elastic Agent.",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodTitle": "Période de mesure de logging de l'agent",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription": "Active un point de terminaison HTTP actif qui renvoie l'état d’intégrité global d'Elastic Agent. Il peut par exemple être utilisé par Kubernetes pour redémarrer le conteneur.",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle": "Point de terminaison de surveillance HTTP",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription": "Le délai d'expiration pour le téléchargement du binaire des agents.",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle": "Délai d'expiration de téléchargement du binaire des agents",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage": "Doit être une chaîne avec une unité de temps, par exemple 30 s, 5 m, 2 h, 1 d",

@@ -20388,8 +20388,6 @@
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle": "代理日志记录级别",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription": "记录内部 Elastic 代理指标的频率。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodTitle": "代理日志记录指标期间",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription": "启用返回 Elastic 代理的整体运行状况的活性 HTTP 终端。例如，这可由 Kubernetes 用于重新启动容器。",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle": "HTTP 监测终端",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription": "下载代理二进制文件时的超时值。",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle": "代理二进制文件下载超时",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage": "必须为带时间单位的字符串，如 30s、5m、2h、1d",

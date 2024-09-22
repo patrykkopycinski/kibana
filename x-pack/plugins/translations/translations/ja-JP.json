@@ -20361,8 +20361,6 @@
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingLevelTitle": "エージェントログレベル",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodDescription": "内部Elasticエージェントメトリックをログに記録する頻度。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingMetricsPeriodTitle": "エージェントログメトリック期間",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpDescription": "Elasticエージェントの全体的な正常性を返すライブネスHTTPエンドポイントを有効化します。これは、たとえば、コンテナーを再起動するためにKubernetesによって使用されることがあります。",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentMonitoringHttpTitle": "HTTP監視エンドポイント",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription": "エージェントバイナリのダウンロードに関するタイムアウト。",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutTitle": "エージェントバイナリダウンロードタイムアウト",
     "xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutValidationMessage": "30s、5m、2h、1dなどの時間単位の文字列でなければなりません",

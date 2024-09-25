@@ -14817,7 +14817,6 @@
     "xpack.elasticAssistant.assistant.settings.flyout.cancelButtonTitle": "取消",
     "xpack.elasticAssistant.assistant.settings.flyout.saveButtonTitle": "保存",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSetting.knowledgeBaseDescription": "使用由 ELSER 提供支持的知识库，AI 助手可以在对话中重复调用文档和其他相关上下文。有关用户访问权限的更多信息，请参阅我们的 {documentation}。",
-    "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription": "使用由 ELSER 提供支持的知识库，AI 助手可以在对话中重复调用文档和其他相关上下文。有关用户访问权限的更多信息，请参阅我们的 {documentation}。",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettings.knowledgeBaseDescription": "在 {machineLearning} 中配置 ELSER 以开始。{seeDocs}",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel": "告警",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel": "告警范围",

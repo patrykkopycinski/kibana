@@ -14789,7 +14789,6 @@
     "xpack.elasticAssistant.assistant.settings.flyout.cancelButtonTitle": "キャンセル",
     "xpack.elasticAssistant.assistant.settings.flyout.saveButtonTitle": "保存",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSetting.knowledgeBaseDescription": "ELSERを活用したナレッジベースは、AI Assistantによって、会話の中でドキュメントやその他の関連するコンテキストを呼び出すことができます。ユーザーアクセスの詳細については、{documentation}を参照してください。",
-    "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription": "ELSERを活用したナレッジベースは、AI Assistantによって、会話の中でドキュメントやその他の関連するコンテキストを呼び出すことができます。ユーザーアクセスの詳細については、{documentation}を参照してください。",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettings.knowledgeBaseDescription": "{machineLearning}内でELSERを構成して開始します。{seeDocs}",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel": "アラート",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel": "アラート範囲",

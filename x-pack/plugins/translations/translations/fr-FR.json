@@ -15043,7 +15043,6 @@
     "xpack.elasticAssistant.assistant.settings.flyout.cancelButtonTitle": "Annuler",
     "xpack.elasticAssistant.assistant.settings.flyout.saveButtonTitle": "Enregistrer",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSetting.knowledgeBaseDescription": "Propulsée par ELSER, la base de connaissances permet à l'Assistant d'IA de rappeler des documents et d'autres contextes pertinents dans votre conversation. Pour plus d'informations sur l'accès utilisateur, consultez notre {documentation}.",
-    "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettingManagements.knowledgeBaseDescription": "Propulsée par ELSER, la base de connaissances permet à l'Assistant d'IA de rappeler des documents et d'autres contextes pertinents dans votre conversation. Pour plus d'informations sur l'accès utilisateur, consultez notre {documentation}.",
     "xpack.elasticAssistant.assistant.settings.knowledgeBasedSettings.knowledgeBaseDescription": "Pour commencer, configurez ELSER dans {machineLearning}. {seeDocs}",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsLabel": "Alertes",
     "xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.alertsRangeSliderLabel": "Plage d'alertes",

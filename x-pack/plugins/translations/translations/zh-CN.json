@@ -38305,7 +38305,6 @@
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "用户缺少风险引擎权限。",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合计",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "合计",
-    "xpack.securitySolution.entityAnalytics.severityFilter.ariaLabel": "选择要依据其进行筛选的严重性级别",
     "xpack.securitySolution.entityAnalytics.technicalPreviewLabel": "技术预览",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "用户风险分数",
     "xpack.securitySolution.entityDetails.userPanel.error": "计算 {entity} 风险分数时出现问题",

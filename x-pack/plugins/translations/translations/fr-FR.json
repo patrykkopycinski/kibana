@@ -38517,7 +38517,6 @@
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "L'utilisateur ne dispose pas des privilèges requis pour modifier le moteur de risque.",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "Total",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "Total",
-    "xpack.securitySolution.entityAnalytics.severityFilter.ariaLabel": "Sélectionner le filtre à appliquer pour le niveau de sévérité",
     "xpack.securitySolution.entityAnalytics.technicalPreviewLabel": "Version d'évaluation technique",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "Scores de risque de l'utilisateur",
     "xpack.securitySolution.entityDetails.userPanel.error": "Une erreur a été rencontrée lors du calcul du score de risque de {entity}",

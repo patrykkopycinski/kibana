@@ -38258,7 +38258,6 @@
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "ユーザーにはリスクエンジン権限がありません。",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合計",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "合計",
-    "xpack.securitySolution.entityAnalytics.severityFilter.ariaLabel": "フィルタリングする重要度レベルを選択",
     "xpack.securitySolution.entityAnalytics.technicalPreviewLabel": "テクニカルプレビュー",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "ユーザーリスクスコア",
     "xpack.securitySolution.entityDetails.userPanel.error": "{entity}リスクスコアの計算中に問題が発生しました",

@@ -2525,7 +2525,6 @@
     "discover.logs.flyoutDetail.value.hover.filterForFieldPresent": "フィールド表示のフィルター",
     "discover.logs.flyoutDetail.value.hover.filterOut": "この{value}を除外",
     "discover.logs.flyoutDetail.value.hover.toggleColumn": "表の列を切り替える",
-    "discover.logs.grid.closePopover": "ポップオーバーを閉じる",
     "discover.logs.popoverAction.closePopover": "ポップオーバーを閉じる",
     "discover.logs.popoverAction.copyValue": "値をコピー",
     "discover.logs.popoverAction.copyValueAriaText": "{fieldName}の値をコピー",

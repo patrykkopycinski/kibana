@@ -2526,7 +2526,6 @@
     "discover.logs.flyoutDetail.value.hover.filterForFieldPresent": "Filtrer sur le champ",
     "discover.logs.flyoutDetail.value.hover.filterOut": "Exclure cette {value}",
     "discover.logs.flyoutDetail.value.hover.toggleColumn": "Afficher/Masquer la colonne dans le tableau",
-    "discover.logs.grid.closePopover": "Fermer la fenêtre contextuelle",
     "discover.logs.popoverAction.closePopover": "Fermer la fenêtre contextuelle",
     "discover.logs.popoverAction.copyValue": "Copier la valeur",
     "discover.logs.popoverAction.copyValueAriaText": "Copier la valeur de {fieldName}",

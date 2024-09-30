@@ -2527,7 +2527,6 @@
     "discover.logs.flyoutDetail.value.hover.filterForFieldPresent": "筛留存在的字段",
     "discover.logs.flyoutDetail.value.hover.filterOut": "筛除此 {value}",
     "discover.logs.flyoutDetail.value.hover.toggleColumn": "在表中切换列",
-    "discover.logs.grid.closePopover": "关闭弹出框",
     "discover.logs.popoverAction.closePopover": "关闭弹出框",
     "discover.logs.popoverAction.copyValue": "复制值",
     "discover.logs.popoverAction.copyValueAriaText": "复制 {fieldName} 的值",

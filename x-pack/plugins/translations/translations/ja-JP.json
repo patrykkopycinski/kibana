@@ -37517,7 +37517,6 @@
     "xpack.securitySolution.endpoint.list.loadingPolicies": "統合を読み込んでいます",
     "xpack.securitySolution.endpoint.list.noEndpointsInstructions": "Elastic Defend統合を追加しました。次の手順を使用して、エージェントを登録してください。",
     "xpack.securitySolution.endpoint.list.noEndpointsPrompt": "次のステップ：Elastic Defendにエージェントを登録する",
-    "xpack.securitySolution.endpoint.list.noPolicies": "統合はありません。",
     "xpack.securitySolution.endpoint.list.os": "OS",
     "xpack.securitySolution.endpoint.list.pageSubTitle": "Elastic Defendを実行しているホスト",
     "xpack.securitySolution.endpoint.list.pageTitle": "エンドポイント",

@@ -37563,7 +37563,6 @@
     "xpack.securitySolution.endpoint.list.loadingPolicies": "正在加载集成",
     "xpack.securitySolution.endpoint.list.noEndpointsInstructions": "您已添加 Elastic Defend 集成。现在，按照以下步骤注册您的代理。",
     "xpack.securitySolution.endpoint.list.noEndpointsPrompt": "下一步：将代理注册到 Elastic Defend",
-    "xpack.securitySolution.endpoint.list.noPolicies": "没有集成。",
     "xpack.securitySolution.endpoint.list.os": "OS",
     "xpack.securitySolution.endpoint.list.pageSubTitle": "运行 Elastic Defend 的主机",
     "xpack.securitySolution.endpoint.list.pageTitle": "终端",

@@ -37775,7 +37775,6 @@
     "xpack.securitySolution.endpoint.list.loadingPolicies": "Chargement des intégrations",
     "xpack.securitySolution.endpoint.list.noEndpointsInstructions": "Vous avez ajouté l'intégration Elastic Defend. Vous pouvez maintenant enregistrer vos agents en suivant la procédure ci-dessous.",
     "xpack.securitySolution.endpoint.list.noEndpointsPrompt": "Étape suivante : Enregistrer un agent avec Elastic Defend",
-    "xpack.securitySolution.endpoint.list.noPolicies": "Il n'existe aucune intégration.",
     "xpack.securitySolution.endpoint.list.os": "Système d'exploitation",
     "xpack.securitySolution.endpoint.list.pageSubTitle": "Hôtes exécutant Elastic Defend",
     "xpack.securitySolution.endpoint.list.pageTitle": "Points de terminaison",

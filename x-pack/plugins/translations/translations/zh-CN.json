@@ -34498,7 +34498,6 @@
     "xpack.security.management.editRole.roleNameFormRowHelpText": "创建角色名称后无法更改。",
     "xpack.security.management.editRole.roleNameFormRowTitle": "角色名称",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "已删除角色",
-    "xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage": "保存的角色",
     "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "设置 Elasticsearch 数据的权限并控制对项目空间的访问权限。",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "全部",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "授予对 Kibana 全部功能的完全权限",

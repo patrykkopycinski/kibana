@@ -34710,7 +34710,6 @@
     "xpack.security.management.editRole.roleNameFormRowHelpText": "Un nom de rôle ne peut pas être modifié après sa création.",
     "xpack.security.management.editRole.roleNameFormRowTitle": "Nom de rôle",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "Rôle supprimé",
-    "xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage": "Rôle enregistré",
     "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "Définissez les privilèges sur vos données Elasticsearch et contrôlez l'accès à vos espaces \"Projet\".",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "Tous",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "Accorde un accès complet à la totalité de Kibana",

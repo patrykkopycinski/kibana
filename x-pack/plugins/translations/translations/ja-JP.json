@@ -34454,7 +34454,6 @@
     "xpack.security.management.editRole.roleNameFormRowHelpText": "ロール名は作成後変更できません。",
     "xpack.security.management.editRole.roleNameFormRowTitle": "ロール名",
     "xpack.security.management.editRole.roleSuccessfullyDeletedNotificationMessage": "ロールを削除しました",
-    "xpack.security.management.editRole.roleSuccessfullySavedNotificationMessage": "ロールを保存しました",
     "xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription": "Elasticsearchデータの権限を設定し、プロジェクトスペースへのアクセスを管理します。",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown": "すべて",
     "xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription": "Kibana 全体への完全アクセスを許可します",

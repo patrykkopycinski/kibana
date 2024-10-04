@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public';
-import { PartialRuleParams } from '../../../../../common/alerting/logs/log_threshold';
+import { ReactNode } from 'react';
+
+export interface AlertDetailsSource {
+  label: ReactNode | string;
+  value: ReactNode | string | number;
+}
 
 export interface AlertDetailsAppSectionProps {
-  rule: Rule<PartialRuleParams>;
-  alert: TopAlert<Record<string, any>>;
+  setSources: React.Dispatch<React.SetStateAction<AlertDetailsSource[] | undefined>>;
 }

@@ -6122,8 +6122,6 @@
     "reporting.printablePdfV2.generateButtonLabel": "Exporter un fichier",
     "reporting.printablePdfV2.helpText": "Sélectionnez le type de fichier que vous souhaitez exporter pour cette visualisation.",
     "reporting.share.contextMenu.export.csvReportsButtonLabel": "Exporter",
-    "reporting.share.contextMenu.pdfReportsButtonLabel": "Rapports PDF",
-    "reporting.share.contextMenu.pngReportsButtonLabel": "Rapports PNG",
     "reporting.share.csv.reporting.helpTextCSV": "Exporter un fichier CSV à partir de ce {objectType}.",
     "reporting.share.generateButtonLabelCSV": "Générer un CSV",
     "reporting.share.modalContent.notification.reportingErrorTitle": "Impossible de créer le rapport",

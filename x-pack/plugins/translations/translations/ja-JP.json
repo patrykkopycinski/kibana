@@ -5876,8 +5876,6 @@
     "reporting.printablePdfV2.generateButtonLabel": "ファイルのエクスポート",
     "reporting.printablePdfV2.helpText": "このビジュアライゼーションでエクスポートするファイルタイプを選択します。",
     "reporting.share.contextMenu.export.csvReportsButtonLabel": "エクスポート",
-    "reporting.share.contextMenu.pdfReportsButtonLabel": "PDF レポート",
-    "reporting.share.contextMenu.pngReportsButtonLabel": "PNG レポート",
     "reporting.share.csv.reporting.helpTextCSV": "この{objectType}のCSVをエクスポートします。",
     "reporting.share.generateButtonLabelCSV": "CSVを生成",
     "reporting.share.modalContent.notification.reportingErrorTitle": "レポートを作成できません",

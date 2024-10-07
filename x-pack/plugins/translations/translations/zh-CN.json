@@ -5889,8 +5889,6 @@
     "reporting.printablePdfV2.generateButtonLabel": "导出文件",
     "reporting.printablePdfV2.helpText": "为此可视化选择您要导出的文件类型。",
     "reporting.share.contextMenu.export.csvReportsButtonLabel": "导出",
-    "reporting.share.contextMenu.pdfReportsButtonLabel": "PDF 报告",
-    "reporting.share.contextMenu.pngReportsButtonLabel": "PNG 报告",
     "reporting.share.csv.reporting.helpTextCSV": "导出此 {objectType} 的 CSV。",
     "reporting.share.generateButtonLabelCSV": "生成 CSV",
     "reporting.share.modalContent.notification.reportingErrorTitle": "无法创建报告",

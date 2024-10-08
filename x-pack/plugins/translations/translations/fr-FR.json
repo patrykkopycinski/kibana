@@ -43196,7 +43196,7 @@
     "xpack.stackConnectors.components.gemini.bodyCodeEditorAriaLabel": "Éditeur de code",
     "xpack.stackConnectors.components.gemini.bodyFieldLabel": "Corps",
     "xpack.stackConnectors.components.gemini.connectorTypeTitle": "Google Gemini",
-    "xpack.stackConnectors.components.gemini.credentialsJSON": "Informations d'identification JSON",
+    "xpack.stackConnectors.components.gemini.credentialsJson": "Informations d'identification JSON",
     "xpack.stackConnectors.components.gemini.dashboardLink": "Affichez le tableau de bord d'utilisation de {apiProvider} pour le connecteur \"{ connectorName }\"",
     "xpack.stackConnectors.components.gemini.defaultModelTextFieldLabel": "Modèle par défaut",
     "xpack.stackConnectors.components.gemini.documentation": "documentation",

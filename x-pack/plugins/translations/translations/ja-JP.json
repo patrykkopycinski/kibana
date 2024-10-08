@@ -42935,7 +42935,7 @@
     "xpack.stackConnectors.components.gemini.bodyCodeEditorAriaLabel": "コードエディター",
     "xpack.stackConnectors.components.gemini.bodyFieldLabel": "本文",
     "xpack.stackConnectors.components.gemini.connectorTypeTitle": "Google Gemini",
-    "xpack.stackConnectors.components.gemini.credentialsJSON": "資格情報JSON",
+    "xpack.stackConnectors.components.gemini.credentialsJson": "資格情報JSON",
     "xpack.stackConnectors.components.gemini.dashboardLink": "\"{ connectorName }\"コネクターの{apiProvider}使用状況ダッシュボードを表示",
     "xpack.stackConnectors.components.gemini.defaultModelTextFieldLabel": "デフォルトモデル",
     "xpack.stackConnectors.components.gemini.documentation": "ドキュメンテーション",

@@ -42986,7 +42986,7 @@
     "xpack.stackConnectors.components.gemini.bodyCodeEditorAriaLabel": "代码编辑器",
     "xpack.stackConnectors.components.gemini.bodyFieldLabel": "正文",
     "xpack.stackConnectors.components.gemini.connectorTypeTitle": "Google Gemini",
-    "xpack.stackConnectors.components.gemini.credentialsJSON": "凭据 JSON",
+    "xpack.stackConnectors.components.gemini.credentialsJson": "凭据 JSON",
     "xpack.stackConnectors.components.gemini.dashboardLink": "查看“{ connectorName }”连接器的 {apiProvider} 使用情况仪表板",
     "xpack.stackConnectors.components.gemini.defaultModelTextFieldLabel": "默认模型",
     "xpack.stackConnectors.components.gemini.documentation": "文档",

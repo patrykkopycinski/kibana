@@ -22994,7 +22994,6 @@
     "xpack.infra.logs.highlights.highlightTermsFieldLabel": "要突出显示的词",
     "xpack.infra.logs.index.anomaliesTabTitle": "异常",
     "xpack.infra.logs.index.logCategoriesBetaBadgeTitle": "类别",
-    "xpack.infra.logs.index.logsLabel": "日志",
     "xpack.infra.logs.index.settingsTabTitle": "设置",
     "xpack.infra.logs.index.streamTabTitle": "流式传输",
     "xpack.infra.logs.logCategoriesTitle": "类别",

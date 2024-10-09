@@ -23213,7 +23213,6 @@
     "xpack.infra.logs.highlights.highlightTermsFieldLabel": "Termes à mettre en surbrillance",
     "xpack.infra.logs.index.anomaliesTabTitle": "Anomalies",
     "xpack.infra.logs.index.logCategoriesBetaBadgeTitle": "Catégories",
-    "xpack.infra.logs.index.logsLabel": "Logs",
     "xpack.infra.logs.index.settingsTabTitle": "Paramètres",
     "xpack.infra.logs.index.streamTabTitle": "Flux",
     "xpack.infra.logs.logCategoriesTitle": "Catégories",

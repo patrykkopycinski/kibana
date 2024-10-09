@@ -22963,7 +22963,6 @@
     "xpack.infra.logs.highlights.highlightTermsFieldLabel": "ハイライトする用語",
     "xpack.infra.logs.index.anomaliesTabTitle": "異常",
     "xpack.infra.logs.index.logCategoriesBetaBadgeTitle": "カテゴリー",
-    "xpack.infra.logs.index.logsLabel": "ログ",
     "xpack.infra.logs.index.settingsTabTitle": "設定",
     "xpack.infra.logs.index.streamTabTitle": "ストリーム",
     "xpack.infra.logs.logCategoriesTitle": "カテゴリー",

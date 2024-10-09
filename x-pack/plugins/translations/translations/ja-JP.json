@@ -28390,7 +28390,6 @@
     "xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel": "処理時間",
     "xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel": "ステータス",
     "xpack.ml.jobsList.jobDetails.forecastsTable.toLabel": "終了：",
-    "xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel": "{createdDate} に作成された予測を表示",
     "xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel": "表示",
     "xpack.ml.jobsList.jobDetails.generalTitle": "一般",
     "xpack.ml.jobsList.jobDetails.influencersTitle": "影響",

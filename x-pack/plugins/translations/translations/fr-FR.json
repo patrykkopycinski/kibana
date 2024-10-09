@@ -28641,7 +28641,6 @@
     "xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel": "Temps de traitement",
     "xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel": "Statut",
     "xpack.ml.jobsList.jobDetails.forecastsTable.toLabel": "À",
-    "xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel": "Afficher la prévision créée le {createdDate}",
     "xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel": "Afficher",
     "xpack.ml.jobsList.jobDetails.generalTitle": "Général",
     "xpack.ml.jobsList.jobDetails.influencersTitle": "Influenceurs",

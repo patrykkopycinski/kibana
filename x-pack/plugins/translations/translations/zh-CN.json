@@ -28427,7 +28427,6 @@
     "xpack.ml.jobsList.jobDetails.forecastsTable.processingTimeLabel": "处理时间",
     "xpack.ml.jobsList.jobDetails.forecastsTable.statusLabel": "状态",
     "xpack.ml.jobsList.jobDetails.forecastsTable.toLabel": "至",
-    "xpack.ml.jobsList.jobDetails.forecastsTable.viewAriaLabel": "查看在 {createdDate} 创建的预测",
     "xpack.ml.jobsList.jobDetails.forecastsTable.viewLabel": "查看",
     "xpack.ml.jobsList.jobDetails.generalTitle": "常规",
     "xpack.ml.jobsList.jobDetails.influencersTitle": "影响因素",

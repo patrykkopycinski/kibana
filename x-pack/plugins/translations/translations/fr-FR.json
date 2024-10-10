@@ -36129,8 +36129,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError": "Toutes les correspondances requièrent un champ et un champ d'index des menaces.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError": "Au moins une correspondance d'indicateur est requise.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired": "Veuillez sélectionner une vue des données ou un modèle d'index disponible.",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel": "Supprimer les alertes par champs sélectionnés : {fieldsString} (version d'évaluation technique)",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel": "Supprimer les alertes (version d'évaluation technique)",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel": "Requête EQL",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError": "Une requête EQL est requise.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText": "La suppression n'est pas prise en charge pour les requêtes de séquence EQL.",

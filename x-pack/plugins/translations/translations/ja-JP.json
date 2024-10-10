@@ -35873,8 +35873,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError": "すべての一致には、フィールドと脅威インデックスフィールドの両方が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError": "1 つ以上のインジケーター一致が必要です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired": "使用可能なデータビューまたはインデックスパターンを選択してください。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel": "選択したフィールドでアラートを非表示：{fieldsString}（テクニカルプレビュー）",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel": "アラートを抑制（テクニカルプレビュー）",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel": "EQL クエリ",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError": "EQLクエリは必須です。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText": "EQLシーケンスクエリでは抑制はサポートされていません。",

@@ -35917,8 +35917,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError": "所有匹配项都需要字段和威胁索引字段。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError": "至少需要一个指标匹配。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.dataViewSelectorFieldRequired": "请选择可用的数据视图或索引模式。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel": "选定字段阻止告警：{fieldsString}（技术预览）",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel": "阻止告警（技术预览）",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel": "EQL 查询",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError": "EQL 查询必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText": "EQL 序列查询不支持阻止。",

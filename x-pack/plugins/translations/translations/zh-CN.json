@@ -15973,8 +15973,6 @@
     "xpack.enterpriseSearch.appSearch.enginesOverview.table.column.lastUpdated": "上次更新时间",
     "xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name": "名称",
     "xpack.enterpriseSearch.appSearch.enginesOverview.title": "引擎概览",
-    "xpack.enterpriseSearch.appSearch.integrations.jsonDescription": "通过 App Search 搜索您的 JSON 数据。",
-    "xpack.enterpriseSearch.appSearch.integrations.jsonName": "JSON",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsDetail": "要管理分析和日志记录，请{visitSettingsLink}。",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsLinkText": "访问您的设置",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.disabledSinceTitle": "自 {disabledDate}后，{logsTitle} 已禁用。",

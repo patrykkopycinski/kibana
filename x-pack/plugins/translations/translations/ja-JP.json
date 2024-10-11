@@ -15945,8 +15945,6 @@
     "xpack.enterpriseSearch.appSearch.enginesOverview.table.column.lastUpdated": "最終更新",
     "xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name": "名前",
     "xpack.enterpriseSearch.appSearch.enginesOverview.title": "エンジン概要",
-    "xpack.enterpriseSearch.appSearch.integrations.jsonDescription": "App Searchを使用して、JSONデータを検索します。",
-    "xpack.enterpriseSearch.appSearch.integrations.jsonName": "JSON",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsDetail": "分析とログを管理するには、{visitSettingsLink}してください。",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.description.manageSettingsLinkText": "設定を表示",
     "xpack.enterpriseSearch.appSearch.logRetention.callout.disabledSinceTitle": "{logsTitle}は、{disabledDate}以降に無効にされました。",

@@ -720,7 +720,6 @@
     "core.euiDisplaySelector.rowHeightLabel": "Hauteur de la ligne",
     "core.euiDualRange.sliderScreenReaderInstructions": "Vous êtes dans un curseur de plage personnalisé. Utilisez les flèches vers le haut et vers le bas pour modifier la valeur minimale. Appuyez sur Tabulation pour interagir avec la valeur maximale.",
     "core.euiErrorBoundary.error": "Erreur",
-    "core.euiExternalLinkIcon.ariaLabel": "Lien externe",
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "(s’ouvre dans un nouvel onglet ou une nouvelle fenêtre)",
     "core.euiFieldPassword.maskPassword": "Masquer le mot de passe",
     "core.euiFieldPassword.showPassword": "Afficher le mot de passe en texte brut. Remarque : votre mot de passe sera visible à l'écran.",

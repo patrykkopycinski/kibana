@@ -720,7 +720,6 @@
     "core.euiDisplaySelector.rowHeightLabel": "行高",
     "core.euiDualRange.sliderScreenReaderInstructions": "您正使用定制范围滑块。使用向上和向下箭头键可更改最小值。按 Tab 键与最大值进行交互。",
     "core.euiErrorBoundary.error": "错误",
-    "core.euiExternalLinkIcon.ariaLabel": "外部链接",
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "（在新选项卡或窗口中打开）",
     "core.euiFieldPassword.maskPassword": "屏蔽密码",
     "core.euiFieldPassword.showPassword": "将密码显示为纯文本。注意：这会将您的密码暴露在屏幕上。",

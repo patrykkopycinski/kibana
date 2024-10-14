@@ -721,7 +721,6 @@
     "core.euiDisplaySelector.rowHeightLabel": "行高さ",
     "core.euiDualRange.sliderScreenReaderInstructions": "カスタム範囲スライダーを操作しています。上下矢印キーを使用すると、最小値を変更できます。Tabを押すと、最大値を操作できます。",
     "core.euiErrorBoundary.error": "エラー",
-    "core.euiExternalLinkIcon.ariaLabel": "外部リンク",
     "core.euiExternalLinkIcon.newTarget.screenReaderOnlyText": "（新しいタブまたはウィンドウで開く）",
     "core.euiFieldPassword.maskPassword": "パスワードをマスク",
     "core.euiFieldPassword.showPassword": "プレーンテキストとしてパスワードを表示します。注記：パスワードは画面上に見えるように表示されます。",

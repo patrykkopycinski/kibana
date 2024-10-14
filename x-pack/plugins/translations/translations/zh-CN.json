@@ -17160,7 +17160,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "提取、转换、索引和同步来自第三方数据源的数据。",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "网络爬虫",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "发现、提取和索引网站和知识库中的可搜索内容。",
-    "xpack.enterpriseSearch.ingestSelector.method.crawlerButtonLabel": "爬网 URL",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload": "上传文件",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload.description": "分隔的文本文件，例如 CSV 和 TSV、换行符分隔的 JSON。",
     "xpack.enterpriseSearch.ingestSelector.method.fileUploadLabel": "选择文件",

@@ -17131,7 +17131,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "サードパーティのデータソースからデータを抽出、変換、インデックス化、同期します。",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "Webクローラー",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "Webサイトやナレッジベースから検索可能なコンテンツを検出、抽出、インデックス化します。",
-    "xpack.enterpriseSearch.ingestSelector.method.crawlerButtonLabel": "クロールURL",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload": "ファイルをアップロード",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload.description": "CSVやTSV、改行区切りのJSONなどの区切られたテキストファイル。",
     "xpack.enterpriseSearch.ingestSelector.method.fileUploadLabel": "ファイルを選択",

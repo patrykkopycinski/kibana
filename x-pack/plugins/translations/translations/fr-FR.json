@@ -17385,7 +17385,6 @@
     "xpack.enterpriseSearch.ingestSelector.method.connectors.description": "Extraire, transformer, indexer et synchroniser des données issues d'une source de données tiers.",
     "xpack.enterpriseSearch.ingestSelector.method.crawler": "Robot d'indexation",
     "xpack.enterpriseSearch.ingestSelector.method.crawler.description": "Découvrir, extraire et indexer du contenu interrogeable provenant de sites web et de bases de connaissances.",
-    "xpack.enterpriseSearch.ingestSelector.method.crawlerButtonLabel": "Indexer l'URL",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload": "Charger un fichier",
     "xpack.enterpriseSearch.ingestSelector.method.fileUpload.description": "Fichiers texte délimités, tels que CSV et TSV, JSON délimité par une nouvelle ligne.",
     "xpack.enterpriseSearch.ingestSelector.method.fileUploadLabel": "Choisir un fichier",

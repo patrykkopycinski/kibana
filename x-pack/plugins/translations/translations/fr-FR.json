@@ -24773,7 +24773,6 @@
     "xpack.integrationAssistant.step.dataStream.integrationNameDescription": "Le nom du package est utilisé pour faire référence à l'intégration dans le pipeline d'ingestion d'Elastic",
     "xpack.integrationAssistant.step.dataStream.integrationNameTitle": "Définir le nom du package",
     "xpack.integrationAssistant.step.dataStream.logsSample.description": "Glissez et déposez un fichier ou parcourez les fichiers.",
-    "xpack.integrationAssistant.step.dataStream.logsSample.description2": "Format JSON/NDJSON",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead": "Impossible de lire le fichier de logs exemple",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorEmpty": "Le fichier de logs exemple est vide",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "Le fichier de logs exemple n'est pas un tableau",

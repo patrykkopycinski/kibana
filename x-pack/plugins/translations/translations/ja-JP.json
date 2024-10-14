@@ -24520,7 +24520,6 @@
     "xpack.integrationAssistant.step.dataStream.integrationNameDescription": "このパッケージ名は、Elasticのインジェストパイプラインの統合を参照するために使用されます",
     "xpack.integrationAssistant.step.dataStream.integrationNameTitle": "パッケージ名を定義",
     "xpack.integrationAssistant.step.dataStream.logsSample.description": "ファイルをドラッグアンドドロップするか、ファイルを参照します",
-    "xpack.integrationAssistant.step.dataStream.logsSample.description2": "JSON/NDJSON形式",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead": "ログサンプルファイルを読み取れませんでした",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorEmpty": "ログサンプルファイルが空です",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "ログサンプルファイルは配列ではありません",

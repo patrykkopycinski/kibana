@@ -24554,7 +24554,6 @@
     "xpack.integrationAssistant.step.dataStream.integrationNameDescription": "软件包名称用于在 Elastic 采集管道中引用集成",
     "xpack.integrationAssistant.step.dataStream.integrationNameTitle": "定义软件包名称",
     "xpack.integrationAssistant.step.dataStream.logsSample.description": "拖放文件或浏览文件。",
-    "xpack.integrationAssistant.step.dataStream.logsSample.description2": "JSON/NDJSON 格式",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorCanNotRead": "无法读取日志样例文件",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorEmpty": "日志样例文件为空",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "日志样例文件不是数组",

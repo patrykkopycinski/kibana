@@ -24514,7 +24514,6 @@
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "ログサンプルファイルは配列ではありません",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotObject": "ログサンプルファイルには、オブジェクト以外のエントリが含まれています",
     "xpack.integrationAssistant.step.dataStream.logsSample.label": "ログ",
-    "xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning": "ログサンプルは{maxRows}行に切り詰められました。",
     "xpack.integrationAssistant.step.dataStream.logsSample.warning": "このデータは、サードパーティAIツールによって分析されます。データを選択するときには、プライバシーおよびセキュリティガイドラインに準拠していることを確認してください。",
     "xpack.integrationAssistant.step.dataStream.nameAlreadyExistsError": "この統合名はすでに使用中です。別の名前を選択してください。",
     "xpack.integrationAssistant.step.dataStream.noSpacesHelpText": "名前には、小文字、数字、アンダースコア（_）のみを使用できます。",

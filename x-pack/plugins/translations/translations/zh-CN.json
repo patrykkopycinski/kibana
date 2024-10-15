@@ -24548,7 +24548,6 @@
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "日志样例文件不是数组",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotObject": "日志样例文件包含非对象条目",
     "xpack.integrationAssistant.step.dataStream.logsSample.label": "日志",
-    "xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning": "日志样例已被截短为 {maxRows} 行。",
     "xpack.integrationAssistant.step.dataStream.logsSample.warning": "请注意，此数据将由第三方 AI 工具进行分析。选择数据时，请确保遵循隐私和安全指引。",
     "xpack.integrationAssistant.step.dataStream.nameAlreadyExistsError": "此集成名称已在使用中。请选择其他名称。",
     "xpack.integrationAssistant.step.dataStream.noSpacesHelpText": "名称只能包含小写字母、数字和下划线 (_)",

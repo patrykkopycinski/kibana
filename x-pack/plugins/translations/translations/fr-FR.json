@@ -24767,7 +24767,6 @@
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotArray": "Le fichier de logs exemple n'est pas un tableau",
     "xpack.integrationAssistant.step.dataStream.logsSample.errorNotObject": "Le fichier de logs exemple contient des entrées n’étant pas des objets",
     "xpack.integrationAssistant.step.dataStream.logsSample.label": "Logs",
-    "xpack.integrationAssistant.step.dataStream.logsSample.truncatedWarning": "L'échantillon de logs a été tronqué pour contenir {maxRows} lignes.",
     "xpack.integrationAssistant.step.dataStream.logsSample.warning": "Veuillez noter que ces données seront analysées par un outil d'IA tiers. Assurez-vous de respecter les directives de confidentialité et de sécurité lors de la sélection des données.",
     "xpack.integrationAssistant.step.dataStream.nameAlreadyExistsError": "Ce nom d'intégration est déjà utilisé. Veuillez choisir un autre nom.",
     "xpack.integrationAssistant.step.dataStream.noSpacesHelpText": "Les noms peuvent contenir uniquement des lettres minuscules, des chiffres et des traits de soulignement (_)",

@@ -40340,8 +40340,6 @@
     "xpack.securitySolution.uiSettings.defaultThreatIndexLabel": "脅威インデックス",
     "xpack.securitySolution.uiSettings.defaultTimeRangeDescription": "<p>セキュリティ時間フィルダーのデフォルトの期間です。</p>",
     "xpack.securitySolution.uiSettings.defaultTimeRangeLabel": "時間フィルターの期間",
-    "xpack.securitySolution.uiSettings.enableAssetCriticalityDescription": "<p>アセット重要度割り当てワークフローとエンティティリスクへの寄与を有効化します </p>",
-    "xpack.securitySolution.uiSettings.enableAssetCriticalityTitle": "アセット重要度",
     "xpack.securitySolution.uiSettings.enableCcsReadWarningLabel": "CCSルール権限警告",
     "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>CCSインデックスのルールで権限チェック警告を有効にします</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>ニュースフィードを有効にします</p>",

@@ -40385,8 +40385,6 @@
     "xpack.securitySolution.uiSettings.defaultThreatIndexLabel": "威胁索引",
     "xpack.securitySolution.uiSettings.defaultTimeRangeDescription": "<p>Security 时间筛选中的默认时段。</p>",
     "xpack.securitySolution.uiSettings.defaultTimeRangeLabel": "时间筛选时段",
-    "xpack.securitySolution.uiSettings.enableAssetCriticalityDescription": "<p>启用资产关键度分配工作流及其对实体风险的贡献率 </p>",
-    "xpack.securitySolution.uiSettings.enableAssetCriticalityTitle": "资产关键度",
     "xpack.securitySolution.uiSettings.enableCcsReadWarningLabel": "CCS 规则权限警告",
     "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>在规则中为 CCS 索引启用权限检查警告</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>启用新闻源</p>",

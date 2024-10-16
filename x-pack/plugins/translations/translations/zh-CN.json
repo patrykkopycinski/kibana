@@ -20112,7 +20112,6 @@
     "xpack.fleet.preconfiguration.packageMissingError": "无法添加 [{agentPolicyName}]。[{pkgName}] 未安装，请将 [{pkgName}] 添加到 [{packagesConfigValue}] 或将其从 [{packagePolicyName}] 中移除。",
     "xpack.fleet.preconfiguration.packageRejectedError": "无法添加 [{agentPolicyName}]。无法安装 [{pkgName}]，因为出现错误：[{errorMessage}]",
     "xpack.fleet.preconfiguration.policyDeleted": "预配置的策略 {id} 已删除；将跳过创建",
-    "xpack.fleet.preconfiguration.support_agentless": "只有支持无代理功能的无服务器环境才允许使用 `supports_agentless`",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "标签重命名失败",
     "xpack.fleet.renameAgentTags.successNotificationTitle": "标签已重命名",
     "xpack.fleet.requestDiagnostics.calloutText": "诊断文件存储在 Elasticsearch 中，因此可能产生存储成本。默认情况下，会通过 ILM 策略定期删除文件。",

@@ -20332,7 +20332,6 @@
     "xpack.fleet.preconfiguration.packageMissingError": "Impossible d'ajouter [{agentPolicyName}]. [{pkgName}] n'est pas installé. Veuillez ajouter [{pkgName}] à [{packagesConfigValue}] ou le retirer de [{packagePolicyName}].",
     "xpack.fleet.preconfiguration.packageRejectedError": "Impossible d'ajouter [{agentPolicyName}]. [{pkgName}] n'a pas pu être installé en raison d’une erreur : [{errorMessage}].",
     "xpack.fleet.preconfiguration.policyDeleted": "La politique préconfigurée {id} a été supprimée ; ignorer la création",
-    "xpack.fleet.preconfiguration.support_agentless": "`supports_agentless` n'est autorisé que dans les environnements sans serveur prenant en charge la fonctionnalité sans agent",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "La balise n’a pas pu être renommée",
     "xpack.fleet.renameAgentTags.successNotificationTitle": "Balise renommée",
     "xpack.fleet.requestDiagnostics.calloutText": "Les fichiers de diagnostics sont stockés dans Elasticsearch, et ils peuvent donc engendrer des coûts de stockage. Par défaut, les fichiers sont périodiquement supprimés via une stratégie ILM.",

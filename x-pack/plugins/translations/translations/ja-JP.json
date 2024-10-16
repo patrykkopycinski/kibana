@@ -20082,7 +20082,6 @@
     "xpack.fleet.preconfiguration.packageMissingError": "[{agentPolicyName}]を追加できませんでした。[{pkgName}]がインストールされていません。[{pkgName}]を[{packagesConfigValue}]に追加するか、[{packagePolicyName}]から削除してください。",
     "xpack.fleet.preconfiguration.packageRejectedError": "[{agentPolicyName}]を追加できませんでした。エラーのため、[{pkgName}]をインストールできませんでした：[{errorMessage}]",
     "xpack.fleet.preconfiguration.policyDeleted": "構成済みのポリシー{id}が削除されました。作成をスキップしています",
-    "xpack.fleet.preconfiguration.support_agentless": "supports_agentlessは、エージェントレス機能をサポートするサーバーレス環境でのみ許可されます",
     "xpack.fleet.renameAgentTags.errorNotificationTitle": "タグ名の変更が失敗しました",
     "xpack.fleet.renameAgentTags.successNotificationTitle": "タグ名が変更されました",
     "xpack.fleet.requestDiagnostics.calloutText": "診断ファイルはElasticsearchに保存されるため、ストレージコストが発生する可能性があります。デフォルトでは、ILMポリシーによって、ファイルが定期的に削除されます。",

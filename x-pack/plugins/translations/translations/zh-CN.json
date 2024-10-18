@@ -5225,7 +5225,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.assignDoc": "分配 (=)",
     "kbn-esql-validation-autocomplete.esql.definition.divideDoc": "除 (/)",
     "kbn-esql-validation-autocomplete.esql.definition.equalToDoc": "等于",
-    "kbn-esql-validation-autocomplete.esql.definition.functionsDoc": "显示带签名的 ES|QL 可用函数",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "大于",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "大于或等于",
     "kbn-esql-validation-autocomplete.esql.definition.inDoc": "测试某表达式接受的值是否包含在其他表达式列表中",

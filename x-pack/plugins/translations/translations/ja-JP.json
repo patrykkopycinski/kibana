@@ -5214,7 +5214,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.assignDoc": "割り当て（=）",
     "kbn-esql-validation-autocomplete.esql.definition.divideDoc": "除算（/）",
     "kbn-esql-validation-autocomplete.esql.definition.equalToDoc": "等しい",
-    "kbn-esql-validation-autocomplete.esql.definition.functionsDoc": "ES|QLで使用可能な関数と署名を表示",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "より大きい",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "よりも大きいまたは等しい",
     "kbn-esql-validation-autocomplete.esql.definition.inDoc": "ある式が取る値が、他の式のリストに含まれているかどうかをテストします",

@@ -5221,7 +5221,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.assignDoc": "Affecter (=)",
     "kbn-esql-validation-autocomplete.esql.definition.divideDoc": "Diviser (/)",
     "kbn-esql-validation-autocomplete.esql.definition.equalToDoc": "Égal à",
-    "kbn-esql-validation-autocomplete.esql.definition.functionsDoc": "Afficher les fonctions ES|QL disponibles avec signatures",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "Supérieur à",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "Supérieur ou égal à",
     "kbn-esql-validation-autocomplete.esql.definition.inDoc": "Teste si la valeur d'une expression est contenue dans une liste d'autres expressions",

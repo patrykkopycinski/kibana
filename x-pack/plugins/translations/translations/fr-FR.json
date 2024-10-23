@@ -44455,7 +44455,6 @@
     "xpack.synthetics.overview.status.filters.legend": "Statut du moniteur",
     "xpack.synthetics.overview.status.filters.pending": "En attente",
     "xpack.synthetics.overview.status.filters.up": "Opérationnel",
-    "xpack.synthetics.overview.status.headingText": "Statut actuel",
     "xpack.synthetics.overview.status.pending.description": "En attente",
     "xpack.synthetics.overview.status.up.description": "Opérationnel",
     "xpack.synthetics.overview.SyntheticsHeading": "Moniteurs",

@@ -44195,7 +44195,6 @@
     "xpack.synthetics.overview.status.filters.legend": "監視ステータス",
     "xpack.synthetics.overview.status.filters.pending": "保留中",
     "xpack.synthetics.overview.status.filters.up": "アップ",
-    "xpack.synthetics.overview.status.headingText": "現在のステータス",
     "xpack.synthetics.overview.status.pending.description": "保留中",
     "xpack.synthetics.overview.status.up.description": "アップ",
     "xpack.synthetics.overview.SyntheticsHeading": "監視",

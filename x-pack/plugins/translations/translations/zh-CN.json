@@ -44245,7 +44245,6 @@
     "xpack.synthetics.overview.status.filters.legend": "监测状态",
     "xpack.synthetics.overview.status.filters.pending": "待处理",
     "xpack.synthetics.overview.status.filters.up": "运行",
-    "xpack.synthetics.overview.status.headingText": "当前状态",
     "xpack.synthetics.overview.status.pending.description": "待处理",
     "xpack.synthetics.overview.status.up.description": "运行",
     "xpack.synthetics.overview.SyntheticsHeading": "监测",

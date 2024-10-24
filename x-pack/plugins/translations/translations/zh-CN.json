@@ -23875,6 +23875,7 @@
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeLabel": "ICMP 代码（可选）",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeHelpText": "包含目标 ICMP 类型的字段。默认为 {defaultValue}。",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeLabel": "ICMP 类型（可选）",
+    "xpack.ingestPipelines.pipelineEditor.communityId.integerRequiredError": "仅允许使用整数。",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedHelpText": "社区 ID 哈希的种子。默认为 {defaultValue}。",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedLabel": "种子（可选）",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError": "此数字必须等于或小于 {maxValue}。",

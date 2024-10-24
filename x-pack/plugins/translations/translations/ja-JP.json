@@ -23841,6 +23841,7 @@
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeLabel": "ICMPコード（任意）",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeHelpText": "デスティネーションICMPタイプを含むフィールド。デフォルトは{defaultValue}です。",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeLabel": "ICMPタイプ（任意）",
+    "xpack.ingestPipelines.pipelineEditor.communityId.integerRequiredError": "整数のみを使用できます。",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedHelpText": "コミュニティIDハッシュのシード。デフォルトは{defaultValue}です。",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedLabel": "シード（任意）",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError": "この数は{maxValue}以下でなければなりません。",

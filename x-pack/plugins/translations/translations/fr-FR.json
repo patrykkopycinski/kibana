@@ -24094,6 +24094,7 @@
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpCodeLabel": "Code ICMP (facultatif)",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeHelpText": "Champ contenant le type ICMP de la destination. La valeur par défaut est {defaultValue}.",
     "xpack.ingestPipelines.pipelineEditor.communityId.icmpTypeLabel": "Type ICMP (facultatif)",
+    "xpack.ingestPipelines.pipelineEditor.communityId.integerRequiredError": "Seuls les entiers sont autorisés.",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedHelpText": "Valeur initiale du hachage de l'ID de communauté. La valeur par défaut est {defaultValue}.",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedLabel": "Valeur initiale (facultatif)",
     "xpack.ingestPipelines.pipelineEditor.communityId.seedMaxNumberError": "Ce nombre doit être inférieur ou égal à {maxValue}.",

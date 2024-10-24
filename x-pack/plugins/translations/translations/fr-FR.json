@@ -31964,8 +31964,6 @@
     "xpack.observability_onboarding.otelLogsPanel.documentationLink": "Ouvrir la documentation",
     "xpack.observability_onboarding.otelLogsPanel.exploreLogs": "Ouvrir Logs Explorer",
     "xpack.observability_onboarding.otelLogsPanel.exploreMetrics": "Ouvrir les hôtes",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label": "Est-ce que ces informations ont été utiles ou y a-t-il eu des problèmes ?",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title": "Donner un retour",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription": "Les nouveaux messages de log sont collectés à partir de la configuration.",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "Le chemin des logs par défaut est /var/log/*. Vous pouvez si nécessaire modifier ce chemin dans le fichier otel.yml.",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "Informations sur la configuration",

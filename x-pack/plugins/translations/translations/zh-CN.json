@@ -31751,8 +31751,6 @@
     "xpack.observability_onboarding.otelLogsPanel.documentationLink": "打开文档",
     "xpack.observability_onboarding.otelLogsPanel.exploreLogs": "打开日志浏览器",
     "xpack.observability_onboarding.otelLogsPanel.exploreMetrics": "打开主机",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label": "这是否有用，或是否存在任何问题？",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title": "反馈",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription": "将从设置完成后收集新的日志消息。",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "默认日志路径为 /var/log/*。如果需要，可以在 otel.yml 文件中更改此路径。",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "配置信息",

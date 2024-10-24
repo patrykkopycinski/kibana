@@ -31709,8 +31709,6 @@
     "xpack.observability_onboarding.otelLogsPanel.documentationLink": "ドキュメントを開く",
     "xpack.observability_onboarding.otelLogsPanel.exploreLogs": "ログエクスプローラーを開く",
     "xpack.observability_onboarding.otelLogsPanel.exploreMetrics": "ホストを開く",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.label": "これは役に立ちましたか、それとも問題がありましたか？",
-    "xpack.observability_onboarding.otelLogsPanel.feedbackButtons.title": "フィードバックを作成する",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription": "今後、新しいログメッセージはセットアップから収集されます。",
     "xpack.observability_onboarding.otelLogsPanel.historicalDataDescription2": "デフォルトのログのパスは/var/log/*です。必要に応じて、otel.ymlファイルでこのパスを変更できます。",
     "xpack.observability_onboarding.otelLogsPanel.limitationTitle": "構成情報",

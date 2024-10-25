@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import type { UpgradeableThreatMatchFields } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { KqlQueryEditForm } from './fields/kql_query';
+import type { UpgradeableEqlFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { DataSourceEditForm } from './fields/data_source';
 
-interface ThreatMatchRuleFieldEditProps {
-  fieldName: UpgradeableThreatMatchFields;
+interface EqlRuleFieldEditProps {
+  fieldName: UpgradeableEqlFields;
 }
 
-export function ThreatMatchRuleFieldEdit({ fieldName }: ThreatMatchRuleFieldEditProps) {
+export function EqlRuleFieldEdit({ fieldName }: EqlRuleFieldEditProps) {
   switch (fieldName) {
-    case 'kql_query':
-      return <KqlQueryEditForm />;
     case 'data_source':
       return <DataSourceEditForm />;
     default:

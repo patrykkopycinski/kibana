@@ -5983,7 +5983,6 @@
     "presentationPanel.contextMenu.ariaLabel": "Options de panneau",
     "presentationPanel.contextMenu.ariaLabelWithIndex": "Options pour le panneau {index}",
     "presentationPanel.contextMenu.ariaLabelWithTitle": "Options de panneau pour {title}",
-    "presentationPanel.contextMenu.loadingTitle": "Options",
     "presentationPanel.contextMenuTrigger.description": "Une nouvelle action sera ajoutée au menu contextuel du panneau",
     "presentationPanel.contextMenuTrigger.title": "Menu contextuel",
     "presentationPanel.emptyErrorMessage": "Erreur",

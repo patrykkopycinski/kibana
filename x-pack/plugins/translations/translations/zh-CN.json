@@ -5750,7 +5750,6 @@
     "presentationPanel.contextMenu.ariaLabel": "面板选项",
     "presentationPanel.contextMenu.ariaLabelWithIndex": "面板 {index} 的选项",
     "presentationPanel.contextMenu.ariaLabelWithTitle": "{title} 的面板选项",
-    "presentationPanel.contextMenu.loadingTitle": "选项",
     "presentationPanel.contextMenuTrigger.description": "会将一个新操作添加到该面板的上下文菜单",
     "presentationPanel.contextMenuTrigger.title": "上下文菜单",
     "presentationPanel.emptyErrorMessage": "错误",

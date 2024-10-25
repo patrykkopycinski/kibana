@@ -5737,7 +5737,6 @@
     "presentationPanel.contextMenu.ariaLabel": "パネルオプション",
     "presentationPanel.contextMenu.ariaLabelWithIndex": "パネル{index}のオプション",
     "presentationPanel.contextMenu.ariaLabelWithTitle": "{title} のパネルオプション",
-    "presentationPanel.contextMenu.loadingTitle": "オプション",
     "presentationPanel.contextMenuTrigger.description": "新しいアクションがパネルのコンテキストメニューに追加されます",
     "presentationPanel.contextMenuTrigger.title": "コンテキストメニュー",
     "presentationPanel.emptyErrorMessage": "エラー",

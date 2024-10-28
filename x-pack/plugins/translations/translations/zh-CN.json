@@ -2424,7 +2424,6 @@
     "discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel": "切换行详细信息",
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "查看单个文档",
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "查看周围文档",
-    "discover.docTable.totalDocuments": "{totalDocuments} 个文档",
     "discover.documentsAriaLabel": "文档",
     "discover.docViews.table.scoreSortWarningTooltip": "要检索 _score 的值，必须按其筛选。",
     "discover.dropZoneTableLabel": "放置区域以将字段作为列添加到表中",

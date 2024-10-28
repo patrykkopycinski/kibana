@@ -2423,7 +2423,6 @@
     "discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel": "Afficher/Masquer les détails de la ligne",
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "Afficher un seul document",
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "Afficher les documents alentour",
-    "discover.docTable.totalDocuments": "{totalDocuments} documents",
     "discover.documentsAriaLabel": "Documents",
     "discover.docViews.table.scoreSortWarningTooltip": "Filtrez sur _score pour pouvoir récupérer les valeurs correspondantes.",
     "discover.dropZoneTableLabel": "Abandonner la zone pour ajouter un champ en tant que colonne dans la table",

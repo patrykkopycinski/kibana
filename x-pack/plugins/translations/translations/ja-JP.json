@@ -2422,7 +2422,6 @@
     "discover.docTable.tableRow.toggleRowDetailsButtonAriaLabel": "行の詳細を切り替える",
     "discover.docTable.tableRow.viewSingleDocumentLinkText": "単一のドキュメントを表示",
     "discover.docTable.tableRow.viewSurroundingDocumentsLinkText": "周りのドキュメントを表示",
-    "discover.docTable.totalDocuments": "{totalDocuments}ドキュメント",
     "discover.documentsAriaLabel": "ドキュメント",
     "discover.docViews.table.scoreSortWarningTooltip": "_scoreの値を取得するには、並べ替える必要があります。",
     "discover.dropZoneTableLabel": "フィールドを列として表に追加するには、ゾーンをドロップします",

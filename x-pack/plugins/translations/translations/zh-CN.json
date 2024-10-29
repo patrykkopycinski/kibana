@@ -43401,7 +43401,6 @@
     "xpack.synthetics.badge.readOnly.text": "只读",
     "xpack.synthetics.badge.readOnly.tooltip": "无法保存",
     "xpack.synthetics.blocked": "已阻止",
-    "xpack.synthetics.breadcrumbs.observabilityText": "Observability",
     "xpack.synthetics.breadcrumbs.overviewBreadcrumbText": "Synthetics",
     "xpack.synthetics.certificates.heading": "TLS 证书 ({total})",
     "xpack.synthetics.certificates.loading": "正在加载证书......",

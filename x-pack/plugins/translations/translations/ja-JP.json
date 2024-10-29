@@ -43351,7 +43351,6 @@
     "xpack.synthetics.badge.readOnly.text": "読み取り専用",
     "xpack.synthetics.badge.readOnly.tooltip": "を保存できませんでした",
     "xpack.synthetics.blocked": "ブロック",
-    "xpack.synthetics.breadcrumbs.observabilityText": "Observability",
     "xpack.synthetics.breadcrumbs.overviewBreadcrumbText": "Synthetics",
     "xpack.synthetics.certificates.heading": "TLS証明書（{total}）",
     "xpack.synthetics.certificates.loading": "証明書を読み込んでいます...",

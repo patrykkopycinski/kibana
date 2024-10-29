@@ -43613,7 +43613,6 @@
     "xpack.synthetics.badge.readOnly.text": "Lecture seule",
     "xpack.synthetics.badge.readOnly.tooltip": "Enregistrement impossible",
     "xpack.synthetics.blocked": "Bloqué",
-    "xpack.synthetics.breadcrumbs.observabilityText": "Observabilité",
     "xpack.synthetics.breadcrumbs.overviewBreadcrumbText": "Synthetics",
     "xpack.synthetics.certificates.heading": "Certificats TLS ({total})",
     "xpack.synthetics.certificates.loading": "Chargement des certificats...",

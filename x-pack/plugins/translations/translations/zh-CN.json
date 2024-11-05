@@ -9383,7 +9383,6 @@
     "xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel": "基线中 {deviationBucketRate} {deviationBucketRate, plural, other {文档}}速率从 0 上升",
     "xpack.aiops.logRateAnalysisTimeSeriesWarning.description": "日志速率分析仅在基于时间的索引上运行。",
     "xpack.aiops.miniHistogram.noDataLabel": "不可用",
-    "xpack.aiops.navMenu.mlAppNameText": "Machine Learning 和分析",
     "xpack.aiops.observabilityAIAssistantContextualInsight.logRateAnalysisTitle": "可能的原因和补救措施",
     "xpack.aiops.progressAriaLabel": "进度",
     "xpack.aiops.progressTitle": "进度：{progress}% — {progressMessage}",

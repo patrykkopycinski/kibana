@@ -6,9 +6,9 @@
  */
 
 import {
-  CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-} from '@kbn/aiops-change-point-detection/constants';
+  EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+  LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
+} from '@kbn/aiops-log-rate-analysis/constants';
 import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -28,31 +28,29 @@ import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
-import { getChangePointDetectionComponent } from '../../shared_components';
+import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
-import { initializeChangePointControls } from './initialize_change_point_controls';
+import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
 import type {
-  ChangePointEmbeddableApi,
-  ChangePointEmbeddableRuntimeState,
-  ChangePointEmbeddableState,
+  LogRateAnalysisEmbeddableApi,
+  LogRateAnalysisEmbeddableRuntimeState,
+  LogRateAnalysisEmbeddableState,
 } from './types';
 
-export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
-
-export const getChangePointChartEmbeddableFactory = (
+export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
   const factory: ReactEmbeddableFactory<
-    ChangePointEmbeddableState,
-    ChangePointEmbeddableRuntimeState,
-    ChangePointEmbeddableApi
+    LogRateAnalysisEmbeddableState,
+    LogRateAnalysisEmbeddableRuntimeState,
+    LogRateAnalysisEmbeddableApi
   > = {
-    type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+    type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     deserializeState: (state) => {
       const serializedState = cloneDeep(state.rawState);
       // inject the reference
       const dataViewIdRef = state.references?.find(
-        (ref) => ref.name === CHANGE_POINT_CHART_DATA_VIEW_REF_NAME
+        (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
       );
       // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
       if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
@@ -72,43 +70,48 @@ export const getChangePointChartEmbeddableFactory = (
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
       const {
-        changePointControlsApi,
-        changePointControlsComparators,
-        serializeChangePointChartState,
-      } = initializeChangePointControls(state);
+        logRateAnalysisControlsApi,
+        serializeLogRateAnalysisChartState,
+        logRateAnalysisControlsComparators,
+      } = initializeLogRateAnalysisControls(state);
 
       const dataLoading = new BehaviorSubject<boolean | undefined>(true);
       const blockingError = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(state.dataViewId),
+        await pluginStart.data.dataViews.get(
+          state.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId())
+        ),
       ]);
 
       const api = buildApi(
         {
           ...timeRangeApi,
           ...titlesApi,
-          ...changePointControlsApi,
+          ...logRateAnalysisControlsApi,
           getTypeDisplayName: () =>
-            i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
-              defaultMessage: 'change point charts',
+            i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
+              defaultMessage: 'log rate analysis',
             }),
           isEditingEnabled: () => true,
           onEdit: async () => {
             try {
-              const { resolveEmbeddableChangePointUserInput } = await import(
-                './resolve_change_point_config_input'
+              const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
+                './resolve_log_rate_analysis_config_input'
               );
 
-              const result = await resolveEmbeddableChangePointUserInput(
+              const result = await resolveEmbeddableLogRateAnalysisUserInput(
                 coreStart,
                 pluginStart,
                 parentApi,
                 uuid,
-                serializeChangePointChartState()
+                false,
+                logRateAnalysisControlsApi,
+                undefined,
+                serializeLogRateAnalysisChartState()
               );
 
-              changePointControlsApi.updateUserInput(result);
+              logRateAnalysisControlsApi.updateUserInput(result);
             } catch (e) {
               return Promise.reject();
             }
@@ -117,12 +120,12 @@ export const getChangePointChartEmbeddableFactory = (
           blockingError,
           dataViews: dataViews$,
           serializeState: () => {
-            const dataViewId = changePointControlsApi.dataViewId.getValue();
+            const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
             const references: Reference[] = dataViewId
               ? [
                   {
                     type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
+                    name: LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
                     id: dataViewId,
                   },
                 ]
@@ -132,7 +135,7 @@ export const getChangePointChartEmbeddableFactory = (
                 timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
-                ...serializeChangePointChartState(),
+                ...serializeLogRateAnalysisChartState(),
               },
               references,
             };
@@ -141,11 +144,11 @@ export const getChangePointChartEmbeddableFactory = (
         {
           ...timeRangeComparators,
           ...titleComparators,
-          ...changePointControlsComparators,
+          ...logRateAnalysisControlsComparators,
         }
       );
 
-      const ChangePointDetectionComponent = getChangePointDetectionComponent(
+      const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(
         coreStart,
         pluginStart
       );
@@ -161,16 +164,7 @@ export const getChangePointChartEmbeddableFactory = (
             throw new Error('Parent API does not have execution context');
           }
 
-          const [dataViewId, viewType, fn, metricField, splitField, maxSeriesToPlot, partitions] =
-            useBatchedPublishingSubjects(
-              api.dataViewId,
-              api.viewType,
-              api.fn,
-              api.metricField,
-              api.splitField,
-              api.maxSeriesToPlot,
-              api.partitions
-            );
+          const [dataViewId] = useBatchedPublishingSubjects(api.dataViewId);
 
           const reload$ = useMemo(
             () =>
@@ -198,15 +192,9 @@ export const getChangePointChartEmbeddableFactory = (
             : undefined;
 
           return (
-            <ChangePointDetectionComponent
-              viewType={viewType}
-              timeRange={timeRange}
-              fn={fn}
-              metricField={metricField}
-              splitField={splitField}
-              maxSeriesToPlot={maxSeriesToPlot}
+            <LogRateAnalysisEmbeddableWrapper
               dataViewId={dataViewId}
-              partitions={partitions}
+              timeRange={timeRange}
               onLoading={onLoading}
               onRenderComplete={onRenderComplete}
               onError={onError}

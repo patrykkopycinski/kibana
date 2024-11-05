@@ -9366,7 +9366,6 @@
     "xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel": "ベースラインの0からの{deviationBucketRate} {deviationBucketRate, plural, other {ドキュメント}}レート上昇",
     "xpack.aiops.logRateAnalysisTimeSeriesWarning.description": "ログレートは、時間ベースのインデックスに対してのみ実行されます。",
     "xpack.aiops.miniHistogram.noDataLabel": "N/A",
-    "xpack.aiops.navMenu.mlAppNameText": "機械学習と分析",
     "xpack.aiops.observabilityAIAssistantContextualInsight.logRateAnalysisTitle": "考えられる原因と修正方法",
     "xpack.aiops.progressAriaLabel": "進捗",
     "xpack.aiops.progressTitle": "進行状況：{progress}% — {progressMessage}",

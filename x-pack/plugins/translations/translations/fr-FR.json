@@ -9612,7 +9612,6 @@
     "xpack.aiops.logRateAnalysis.resultsTableGroups.logRateDocIncreaseLabel": "{deviationBucketRate} {deviationBucketRate, plural, one {doc} other {docs}} remontent de 0 au niveau de référence",
     "xpack.aiops.logRateAnalysisTimeSeriesWarning.description": "L'analyse des taux de log ne fonctionne que sur des index temporels.",
     "xpack.aiops.miniHistogram.noDataLabel": "S. O.",
-    "xpack.aiops.navMenu.mlAppNameText": "Machine Learning et Analytique",
     "xpack.aiops.observabilityAIAssistantContextualInsight.logRateAnalysisTitle": "Causes possibles et résolutions",
     "xpack.aiops.progressAriaLabel": "Progression",
     "xpack.aiops.progressTitle": "Progression : {progress} % — {progressMessage}",

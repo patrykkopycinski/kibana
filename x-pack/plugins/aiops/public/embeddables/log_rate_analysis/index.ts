@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { getGroupTableItems } from './get_group_table_items';
-export { LogRateAnalysisResultsTable } from './log_rate_analysis_results_table';
-export { LogRateAnalysisResultsGroupsTable } from './log_rate_analysis_results_table_groups';
+export { getLogRateAnalysisEmbeddableFactory } from './embeddable_log_rate_analysis_factory';

@@ -10,12 +10,17 @@ import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
+import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
+import type {
+  LogRateAnalysisEmbeddableApi,
+  LogRateAnalysisEmbeddableInitialState,
+} from '../embeddables/log_rate_analysis/types';
 import type { AiopsPluginStartDeps } from '../types';
 
-import type { ChangePointChartActionContext } from './change_point_action_context';
+import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -25,27 +30,17 @@ const parentApiIsCompatible = async (
   return apiIsPresentationContainer(parentApi) ? (parentApi as PresentationContainer) : undefined;
 };
 
-export function createAddChangePointChartAction(
+export function createAddLogRateAnalysisEmbeddableAction(
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
-): UiActionsActionDefinition<ChangePointChartActionContext> {
+): UiActionsActionDefinition<LogRateAnalysisActionContext> {
   return {
-    id: 'create-change-point-chart',
-    grouping: [
-      {
-        id: 'ml',
-        getDisplayName: () =>
-          i18n.translate('xpack.aiops.navMenu.mlAppNameText', {
-            defaultMessage: 'Machine Learning and Analytics',
-          }),
-        getIconType: () => 'machineLearningApp',
-      },
-    ],
-    order: 10,
-    getIconType: () => 'changePointDetection',
+    id: 'create-log-rate-analysis-embeddable',
+    grouping: AIOPS_EMBEDDABLE_GROUPING,
+    getIconType: () => 'logRateAnalysis',
     getDisplayName: () =>
-      i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-        defaultMessage: 'Change point detection',
+      i18n.translate('xpack.aiops.embeddableLogRateAnalysisDisplayName', {
+        defaultMessage: 'Log rate analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
       return Boolean(await parentApiIsCompatible(context.embeddable));
@@ -55,21 +50,39 @@ export function createAddChangePointChartAction(
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       try {
-        const { resolveEmbeddableChangePointUserInput } = await import(
-          '../embeddables/change_point_chart/resolve_change_point_config_input'
+        const { resolveEmbeddableLogRateAnalysisUserInput } = await import(
+          '../embeddables/log_rate_analysis/resolve_log_rate_analysis_config_input'
         );
 
-        const initialState = await resolveEmbeddableChangePointUserInput(
+        const initialState: LogRateAnalysisEmbeddableInitialState = {
+          dataViewId: undefined,
+        };
+
+        const embeddable = await presentationContainerParent.addNewPanel<
+          object,
+          LogRateAnalysisEmbeddableApi
+        >({
+          panelType: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+          initialState,
+        });
+
+        if (!embeddable) {
+          return;
+        }
+
+        const deletePanel = () => {
+          presentationContainerParent.removePanel(embeddable.uuid);
+        };
+
+        resolveEmbeddableLogRateAnalysisUserInput(
           coreStart,
           pluginStart,
           context.embeddable,
-          context.embeddable.uuid
+          embeddable.uuid,
+          true,
+          embeddable,
+          deletePanel
         );
-
-        presentationContainerParent.addNewPanel({
-          panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-          initialState,
-        });
       } catch (e) {
         return Promise.reject();
       }

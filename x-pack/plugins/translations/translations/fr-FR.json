@@ -15289,7 +15289,7 @@
     "xpack.enterpriseSearch.analytics.productDescription": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche.",
     "xpack.enterpriseSearch.analytics.productName": "Behavioral Analytics",
     "xpack.enterpriseSearch.analytics.searchPlaceholder": "Rechercher des noms de collection",
-    "xpack.enterpriseSearch.apiKey.activeKeys": "{number} clés d'API actives.",
+    "xpack.enterpriseSearch.apiKey.activeKeys": "{number} clés d'API actives",
     "xpack.enterpriseSearch.apiKey.apiKeyStepDescription": "Cette clé ne s’affichera qu’une fois, conservez-la donc en lieu sûr. Nous ne conservons pas vos clés d’API, vous devrez donc générer une clé de remplacement si vous la perdez.",
     "xpack.enterpriseSearch.apiKey.apiKeyStepTitle": "Stocker cette clé d'API",
     "xpack.enterpriseSearch.apiKey.cloudId": "Identifiant du cloud :",

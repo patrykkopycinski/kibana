@@ -15035,7 +15035,7 @@
     "xpack.enterpriseSearch.analytics.productDescription": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール。",
     "xpack.enterpriseSearch.analytics.productName": "Behavioral Analytics",
     "xpack.enterpriseSearch.analytics.searchPlaceholder": "コレクション名を検索",
-    "xpack.enterpriseSearch.apiKey.activeKeys": "{number}個のアクティブなAPIキー。",
+    "xpack.enterpriseSearch.apiKey.activeKeys": "{number}個のアクティブなAPIキー",
     "xpack.enterpriseSearch.apiKey.apiKeyStepDescription": "このキーは一度しか表示されないため、安全な場所に保存しておいてください。当社はお客様のAPIキーを保存しません。キーを紛失した場合は、代替キーを生成する必要があります。",
     "xpack.enterpriseSearch.apiKey.apiKeyStepTitle": "このAPIキーを保存",
     "xpack.enterpriseSearch.apiKey.cloudId": "クラウドID：",

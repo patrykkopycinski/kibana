@@ -15063,7 +15063,7 @@
     "xpack.enterpriseSearch.analytics.productDescription": "用于对最终用户行为进行可视化并评估搜索应用程序性能的仪表板和工具。",
     "xpack.enterpriseSearch.analytics.productName": "行为分析",
     "xpack.enterpriseSearch.analytics.searchPlaceholder": "搜索集合名称",
-    "xpack.enterpriseSearch.apiKey.activeKeys": "{number} 个活动 API 密钥。",
+    "xpack.enterpriseSearch.apiKey.activeKeys": "{number} 个活动 API 密钥",
     "xpack.enterpriseSearch.apiKey.apiKeyStepDescription": "此密钥仅显示一次，因此请将其保存到某个安全位置。我们不存储您的 API 密钥，因此，如果您丢失了密钥，则需要生成替代密钥。",
     "xpack.enterpriseSearch.apiKey.apiKeyStepTitle": "存储此 API 密钥",
     "xpack.enterpriseSearch.apiKey.cloudId": "云 ID：",

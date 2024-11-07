@@ -41273,8 +41273,6 @@
     "xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle": "アラートテーブルの検査",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourContent": "［ケースの作成］を押して続行します。",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourTitle": "ケースを作成",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent": "ケースはアラート詳細の［インサイト］の下に表示されます。",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourTitle": "ケースを表示",
     "xpack.securitySolution.handleInputAreaState.inputPlaceholderText": "対応アクションを送信",
     "xpack.securitySolution.header.editableTitle.cancel": "キャンセル",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "クリックすると {title} を編集できます",

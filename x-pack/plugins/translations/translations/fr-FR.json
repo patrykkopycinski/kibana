@@ -41308,8 +41308,6 @@
     "xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle": "Examiner le tableau d'alertes",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourContent": "Appuyez sur \"Créer un cas\" pour continuer.",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourTitle": "Créer un cas",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent": "Les cas s'affichent sous Insights, dans les détails de l'alerte.",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourTitle": "Afficher le cas",
     "xpack.securitySolution.handleInputAreaState.inputPlaceholderText": "Soumettre l’action de réponse",
     "xpack.securitySolution.header.editableTitle.cancel": "Annuler",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "Vous pouvez modifier {title} en cliquant",

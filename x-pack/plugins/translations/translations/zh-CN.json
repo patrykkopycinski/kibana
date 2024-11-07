@@ -40634,8 +40634,6 @@
     "xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle": "检查告警表",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourContent": "按'创建案例'继续。",
     "xpack.securitySolution.guided_onboarding.tour.submitCase.tourTitle": "创建案例",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent": "在告警详情中，案例在洞见下显示。",
-    "xpack.securitySolution.guided_onboarding.tour.viewCase.tourTitle": "查看案例",
     "xpack.securitySolution.handleInputAreaState.inputPlaceholderText": "提交响应操作",
     "xpack.securitySolution.header.editableTitle.cancel": "取消",
     "xpack.securitySolution.header.editableTitle.editButtonAria": "通过单击，可以编辑 {title}",

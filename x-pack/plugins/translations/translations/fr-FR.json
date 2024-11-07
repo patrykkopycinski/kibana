@@ -32566,7 +32566,6 @@
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.contentsLabel": "Contenu",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.idLabel": "Nom",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiMarkdownEditor.enterContentsLabel": "Entrer du contenu",
-    "xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.editEntryLabel": "Modifier {id}",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.newEntryLabel": "Nouvelle entrée",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.cancelButtonEmptyLabel": "Annuler",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.euiMarkdownEditor.observabilityAiAssistantKnowledgeBaseViewMarkdownEditorLabel": "observabilityAiAssistantKnowledgeBaseViewMarkdownEditor",

@@ -32355,7 +32355,6 @@
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.contentsLabel": "内容",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiFormRow.idLabel": "名称",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiMarkdownEditor.enterContentsLabel": "输入内容",
-    "xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.editEntryLabel": "编辑 {id}",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewEntryFlyout.h2.newEntryLabel": "新条目",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.cancelButtonEmptyLabel": "取消",
     "xpack.observabilityAiAssistantManagement.knowledgeBaseNewManualEntryFlyout.euiMarkdownEditor.observabilityAiAssistantKnowledgeBaseViewMarkdownEditorLabel": "observabilityAiAssistantKnowledgeBaseViewMarkdownEditor",

@@ -44331,8 +44331,6 @@
     "xpack.synthetics.paramForm.namespaces": "Espaces de noms",
     "xpack.synthetics.paramForm.sharedAcrossSpacesLabel": "Partager entre les espaces",
     "xpack.synthetics.paramManagement.deleteParamNameLabel": "Supprimer le paramètre \"{name}\" ?",
-    "xpack.synthetics.paramManagement.paramDeleteFailuresMessage.name": "Impossible de supprimer le paramètre {name}.",
-    "xpack.synthetics.paramManagement.paramDeleteSuccessMessage.name": "Paramètre {name} supprimé avec succès.",
     "xpack.synthetics.params.description": "Définissez les variables et paramètres que vous pouvez utiliser dans la configuration du navigateur et des moniteurs légers, tels que des informations d'identification ou des URL. {learnMore}",
     "xpack.synthetics.params.unprivileged.unprivilegedDescription": "Vous devez disposer de privilèges supplémentaires pour voir les paramètres d'utilisation et de conservation des données des applications Synthetics. {docsLink}",
     "xpack.synthetics.pingList.collapseRow": "Réduire",

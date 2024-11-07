@@ -44069,8 +44069,6 @@
     "xpack.synthetics.paramForm.namespaces": "名前空間",
     "xpack.synthetics.paramForm.sharedAcrossSpacesLabel": "複数のスペース間で共有",
     "xpack.synthetics.paramManagement.deleteParamNameLabel": "\"{name}\"パラメーターを削除しますか？",
-    "xpack.synthetics.paramManagement.paramDeleteFailuresMessage.name": "パラメーター{name}の削除に失敗しました。",
-    "xpack.synthetics.paramManagement.paramDeleteSuccessMessage.name": "パラメーター\"{name}\"が正常に削除されました。",
     "xpack.synthetics.params.description": "ブラウザーや軽量モニターの設定に使用できる変数やパラメーター（認証情報やURLなど）を定義します。{learnMore}",
     "xpack.synthetics.params.unprivileged.unprivilegedDescription": "Syntheticsアプリデータの使用状況と保持設定を表示する追加の権限が必要です。{docsLink}",
     "xpack.synthetics.pingList.collapseRow": "縮小",

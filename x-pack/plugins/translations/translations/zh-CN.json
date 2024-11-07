@@ -44119,8 +44119,6 @@
     "xpack.synthetics.paramForm.namespaces": "命名空间",
     "xpack.synthetics.paramForm.sharedAcrossSpacesLabel": "跨工作区共享",
     "xpack.synthetics.paramManagement.deleteParamNameLabel": "删除“{name}”参数？",
-    "xpack.synthetics.paramManagement.paramDeleteFailuresMessage.name": "无法删除参数 {name}。",
-    "xpack.synthetics.paramManagement.paramDeleteSuccessMessage.name": "已成功删除参数 {name}。",
     "xpack.synthetics.params.description": "定义可在浏览器和轻量级监测的配置中使用的变量和参数，如凭据或 URL。{learnMore}",
     "xpack.synthetics.params.unprivileged.unprivilegedDescription": "您需要其他权限才能查看 Synthetics 应用数据使用情况和保留设置。{docsLink}",
     "xpack.synthetics.pingList.collapseRow": "折叠",

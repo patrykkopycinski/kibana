@@ -8455,7 +8455,6 @@
     "unifiedFieldList.fieldsAccordion.existenceTimeoutLabel": "Les informations de champ ont pris trop de temps",
     "unifiedFieldList.fieldStats.bucketPercentageTooltip": "{formattedPercentage} ({count, plural, one {# enregistrement} other {# enregistrements}})",
     "unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel": "Calculé à partir de {sampledDocumentsFormatted} {sampledDocuments, plural, one {exemple d'enregistrement} other {exemples d'enregistrement}}.",
-    "unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel": "Calculé à partir {sampledValuesFormatted} {sampledValues, plural, one {d'un exemple de valeur} other {d’exemples de valeur}}.",
     "unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel": "Calculé à partir de {totalDocumentsFormatted} {totalDocuments, plural, one {enregistrement} other {enregistrements}}.",
     "unifiedFieldList.fieldStats.countLabel": "Décompte",
     "unifiedFieldList.fieldStats.displayToggleLegend": "Basculer soit",

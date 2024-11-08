@@ -8279,7 +8279,6 @@
     "unifiedFieldList.fieldsAccordion.existenceTimeoutLabel": "字段信息花费时间过久",
     "unifiedFieldList.fieldStats.bucketPercentageTooltip": "{formattedPercentage}（{count, plural, other {# 条记录}}）",
     "unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel": "基于 {sampledDocumentsFormatted} 个样例{sampledDocuments, plural, other {记录}}计算。",
-    "unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel": "基于 {sampledValuesFormatted} 个样例{sampledValues, plural, other {值}}计算。",
     "unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel": "基于 {totalDocumentsFormatted} 个样例{totalDocuments, plural, other {记录}}计算。",
     "unifiedFieldList.fieldStats.countLabel": "计数",
     "unifiedFieldList.fieldStats.displayToggleLegend": "切换",

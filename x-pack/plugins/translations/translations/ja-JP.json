@@ -8444,7 +8444,6 @@
     "unifiedFieldList.fieldsAccordion.existenceTimeoutLabel": "フィールド情報に時間がかかりすぎました",
     "unifiedFieldList.fieldStats.bucketPercentageTooltip": "{formattedPercentage} ({count, plural, other {# レコード}})",
     "unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel": "{sampledDocumentsFormatted}サンプル{sampledDocuments, plural, other {レコード}}から計算されました。",
-    "unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel": "{sampledValuesFormatted}サンプル{sampledValues, plural, other {値}}から計算されました。",
     "unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel": "{totalDocumentsFormatted} {totalDocuments, plural, other {レコード}}から計算されました。",
     "unifiedFieldList.fieldStats.countLabel": "カウント",
     "unifiedFieldList.fieldStats.displayToggleLegend": "次のどちらかを切り替えます：",

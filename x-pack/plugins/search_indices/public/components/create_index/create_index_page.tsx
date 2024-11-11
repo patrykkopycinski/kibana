@@ -14,18 +14,17 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-
-import { useIndicesRedirect } from './hooks/use_indices_redirect';
-import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
-import { usePageChrome } from '../../hooks/use_page_chrome';
 
-const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
-  defaultMessage: 'Create your first index',
+import { CreateIndex } from './create_index';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+
+const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
+  defaultMessage: 'Create Index',
 });
 
-export const ElasticsearchStartPage = () => {
+export const CreateIndexPage = () => {
   const { console: consolePlugin } = useKibana().services;
   const {
     data: indicesData,
@@ -34,26 +33,25 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
   const { data: userPrivileges } = useUserPrivilegesQuery();
-  usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  useIndicesRedirect(indicesData);
+  usePageChrome(CreateIndexLabel, [...IndexManagementBreadcrumbs, { text: CreateIndexLabel }]);
 
   return (
     <EuiPageTemplate
       offset={0}
       restrictWidth={false}
-      data-test-subj="elasticsearchStartPage"
+      data-test-subj="elasticsearchCreateIndexPage"
       grow={false}
     >
       <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (
-          <ElasticsearchStart indicesData={indicesData} userPrivileges={userPrivileges} />
+          <CreateIndex indicesData={indicesData} userPrivileges={userPrivileges} />
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}

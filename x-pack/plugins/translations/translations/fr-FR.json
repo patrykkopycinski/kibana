@@ -9090,8 +9090,6 @@
     "visTypeTimeseries.addDeleteButtons.deleteButtonDefaultTooltip": "Supprimer",
     "visTypeTimeseries.addDeleteButtons.reEnableTooltip": "Réactiver",
     "visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip": "Désactiver temporairement",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsText": "Afficher un message d'avertissement pour les données partielles dans les graphiques TSVB si la requête réussit pour certaines partitions, mais échoue pour d'autres.",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle": "Afficher les échecs de partition de requête TSVB",
     "visTypeTimeseries.advancedSettings.allowStringIndicesText": "Vous permet d'interroger les index Elasticsearch dans les visualisations <strong>TSVB</strong>.",
     "visTypeTimeseries.advancedSettings.allowStringIndicesTitle": "Autoriser les index de chaîne dans TSVB",
     "visTypeTimeseries.advancedSettings.maxBucketsText": "A un impact sur la densité de l'histogramme TSVB. Doit être défini sur une valeur supérieure à \"histogram:maxBars\".",

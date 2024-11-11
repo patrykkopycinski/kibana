@@ -9079,8 +9079,6 @@
     "visTypeTimeseries.addDeleteButtons.deleteButtonDefaultTooltip": "削除",
     "visTypeTimeseries.addDeleteButtons.reEnableTooltip": "再度有効にする",
     "visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip": "一時的に無効にする",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsText": "一部のシャードでリクエストが成功し、その他のシャードで失敗した場合に、TSVBグラフの部分データに関する警告メッセージを表示します。",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle": "TSVBリクエストシャード失敗",
     "visTypeTimeseries.advancedSettings.allowStringIndicesText": "<strong>TSVB</strong>ビジュアライゼーションでElasticsearchインデックスをクエリーできます。",
     "visTypeTimeseries.advancedSettings.allowStringIndicesTitle": "TSVBで文字列インデックスを許可",
     "visTypeTimeseries.advancedSettings.maxBucketsText": "TSVBヒストグラム密度に影響します。「histogram:maxBars」よりも大きく設定する必要があります。",

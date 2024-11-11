@@ -8902,8 +8902,6 @@
     "visTypeTimeseries.addDeleteButtons.deleteButtonDefaultTooltip": "删除",
     "visTypeTimeseries.addDeleteButtons.reEnableTooltip": "重新启用",
     "visTypeTimeseries.addDeleteButtons.temporarilyDisableTooltip": "暂时禁用",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsText": "如果请求对某些分片成功，但对其他分片失败，将对 TSVB 图表中的部分数据显示警告消息。",
-    "visTypeTimeseries.advancedSettings.allowCheckingForFailedShardsTitle": "显示 TSVB 请求分片失败",
     "visTypeTimeseries.advancedSettings.allowStringIndicesText": "允许您在 <strong>TSVB</strong> 可视化中查询 Elasticsearch 索引。",
     "visTypeTimeseries.advancedSettings.allowStringIndicesTitle": "TSVB 中允许字符串索引",
     "visTypeTimeseries.advancedSettings.maxBucketsText": "影响 TSVB 直方图密度。必须设置为高于'histogram:maxBars'。",

@@ -16200,7 +16200,6 @@
     "xpack.elasticAssistant.evaluation.fetchEvaluationDataError": "Erreur lors de la récupération des données d'évaluation…",
     "xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel": "Masquer les chats",
     "xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel": "Afficher les chats",
-    "xpack.elasticAssistant.knowledgeBase.deleteError": "Erreur lors de la suppression de la base de connaissances",
     "xpack.elasticAssistant.knowledgeBase.entries.createErrorTitle": "Erreur lors de la création d’une entrée de la base de connaissances",
     "xpack.elasticAssistant.knowledgeBase.entries.createSuccessTitle": "Entrée de la base de connaissances créée",
     "xpack.elasticAssistant.knowledgeBase.entries.deleteErrorTitle": "Erreur lors de la suppression d’entrées de la base de connaissances",

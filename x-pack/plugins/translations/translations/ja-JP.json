@@ -16176,7 +16176,6 @@
     "xpack.elasticAssistant.evaluation.fetchEvaluationDataError": "評価データの取得エラー...",
     "xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel": "チャットを非表示",
     "xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel": "チャットを表示",
-    "xpack.elasticAssistant.knowledgeBase.deleteError": "ナレッジベースの削除エラー",
     "xpack.elasticAssistant.knowledgeBase.entries.createErrorTitle": "ナレッジベースエントリの作成エラー",
     "xpack.elasticAssistant.knowledgeBase.entries.createSuccessTitle": "ナレッジベースエントリが作成されました",
     "xpack.elasticAssistant.knowledgeBase.entries.deleteErrorTitle": "ナレッジベースエントリの削除エラー",

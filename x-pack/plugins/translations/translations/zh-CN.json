@@ -15859,7 +15859,6 @@
     "xpack.elasticAssistant.evaluation.fetchEvaluationDataError": "提取评估数据时出错......",
     "xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel": "隐藏聊天",
     "xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel": "显示聊天",
-    "xpack.elasticAssistant.knowledgeBase.deleteError": "删除知识库时出错",
     "xpack.elasticAssistant.knowledgeBase.entries.createErrorTitle": "创建知识库条目时出错",
     "xpack.elasticAssistant.knowledgeBase.entries.createSuccessTitle": "已创建知识库条目",
     "xpack.elasticAssistant.knowledgeBase.entries.deleteErrorTitle": "删除知识库条目时出错",

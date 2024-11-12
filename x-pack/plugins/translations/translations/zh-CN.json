@@ -44332,7 +44332,7 @@
     "xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle": "更改当前空间",
     "xpack.spaces.navControl.spacesMenu.findSpacePlaceholder": "查找工作区",
     "xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle": "未找到工作区",
-    "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "您的工作区",
+    "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "工作区",
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "工作区",
     "xpack.spaces.navControl.tour.closeBtn": "关闭",
     "xpack.spaces.navControl.tour.content": "它提供了您需要的所有分析和 {solution} 功能。您可以切换视图，或从工作区设置中返回到经典导航，或创建其他具有不同视图的工作区。{learnMore}",

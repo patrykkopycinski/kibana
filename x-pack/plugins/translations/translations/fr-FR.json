@@ -45064,7 +45064,7 @@
     "xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle": "Modifier l'espace en cours",
     "xpack.spaces.navControl.spacesMenu.findSpacePlaceholder": "Rechercher un espace",
     "xpack.spaces.navControl.spacesMenu.noSpacesFoundTitle": "aucun espace trouvé",
-    "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "Vos espaces",
+    "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "Espaces",
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "Espaces",
     "xpack.spaces.navControl.tour.closeBtn": "Fermer",
     "xpack.spaces.navControl.tour.content": "Il offre toutes les analyses et les fonctionnalités {solution} dont vous avez besoin. Vous pouvez changer de vue ou revenir à la navigation classique à partir des paramètres de votre espace, ou créer d'autres espaces avec des vues différentes. {learnMore}",

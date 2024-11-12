@@ -38130,7 +38130,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideLabel": "Remplacement de l'horodatage",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideHelpText": "Fournissez des informations utiles aux analystes qui étudient les alertes de détection. Ce guide s'affichera sur la page de détails de la règle et dans les chronologies (sous forme de notes) créés à partir des alertes de détection générées par cette règle.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "Guide d'investigation",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldGreaterThanError": "Le nombre maximum d'alertes doit être supérieur à 0.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning": "Kibana ne permet qu'un maximum de {maxNumber} {maxNumber, plural, =1 {alerte} other {alertes}} par exécution de règle.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "Nom obligatoire.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "Ajouter un guide d'investigation sur les règles...",

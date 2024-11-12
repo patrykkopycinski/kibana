@@ -37488,7 +37488,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldTimestampOverrideLabel": "时间戳覆盖",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideHelpText": "为正在调查检测告警的分析人员提供有用的信息。本指南（作为备注）将显示在规则详情页面上以及从此规则所生成的检测告警创建的时间线中。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "调查指南",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldGreaterThanError": "最大告警数必须大于 0。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning": "每次规则运行时，Kibana 最多只允许 {maxNumber} 个{maxNumber, plural, other {告警}}。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "名称必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "添加规则调查指南......",

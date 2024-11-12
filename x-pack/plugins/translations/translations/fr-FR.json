@@ -26269,8 +26269,6 @@
     "xpack.inventory.entitiesGrid.euiDataGrid.lastSeenTooltip": "Horodatage des dernières données reçues pour l'entité (entity.lastSeenTimestamp)",
     "xpack.inventory.entitiesGrid.euiDataGrid.typeLabel": "Type",
     "xpack.inventory.entitiesGrid.euiDataGrid.typeTooltip": "Type d'entité (entity.type)",
-    "xpack.inventory.entityTypesControls.euiComboBox.accessibleScreenReaderLabel": "Filtre des types d'entités",
-    "xpack.inventory.entityTypesControls.euiComboBox.placeHolderLabel": "Types",
     "xpack.inventory.featureRegistry.inventoryFeatureName": "Inventory",
     "xpack.inventory.home.serviceAlertsTable.tooltip.activeAlertsExplanation": "Alertes actives",
     "xpack.inventory.inventoryLinkTitle": "Inventory",

@@ -7307,7 +7307,6 @@
     "searchIndexDocuments.result.expandTooltip.showMore": "显示多于 {amount} 个字段",
     "searchIndexDocuments.result.header.metadata.deleteDocument": "删除文档",
     "searchIndexDocuments.result.header.metadata.icon.ariaLabel": "以下文档的元数据：{id}",
-    "searchIndexDocuments.result.header.metadata.score": "分数",
     "searchIndexDocuments.result.header.metadata.title": "文档元数据",
     "searchIndexDocuments.result.title.id": "文档 ID：{id}",
     "searchIndexDocuments.result.value.denseVector.copy": "复制向量",

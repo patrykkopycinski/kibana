@@ -7463,7 +7463,6 @@
     "searchIndexDocuments.result.expandTooltip.showMore": "表示するフィールド数を{amount}個増やす",
     "searchIndexDocuments.result.header.metadata.deleteDocument": "ドキュメントを削除",
     "searchIndexDocuments.result.header.metadata.icon.ariaLabel": "ドキュメント{id}のメタデータ",
-    "searchIndexDocuments.result.header.metadata.score": "スコア",
     "searchIndexDocuments.result.header.metadata.title": "ドキュメントメタデータ",
     "searchIndexDocuments.result.title.id": "ドキュメントID：{id}",
     "searchIndexDocuments.result.value.denseVector.copy": "ベクトルをコピー",

@@ -7471,7 +7471,6 @@
     "searchIndexDocuments.result.expandTooltip.showMore": "Afficher {amount} champs en plus",
     "searchIndexDocuments.result.header.metadata.deleteDocument": "Supprimer le document",
     "searchIndexDocuments.result.header.metadata.icon.ariaLabel": "Métadonnées pour le document : {id}",
-    "searchIndexDocuments.result.header.metadata.score": "Score",
     "searchIndexDocuments.result.header.metadata.title": "Métadonnées du document",
     "searchIndexDocuments.result.title.id": "ID de document : {id}",
     "searchIndexDocuments.result.value.denseVector.copy": "Copier le vecteur",

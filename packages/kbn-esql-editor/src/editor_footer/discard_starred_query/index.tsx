@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  registerFavorites,
-  type GetFavoritesResponse,
-  type FavoritesSetup,
-  type AddFavoriteResponse,
-  type RemoveFavoriteResponse,
-} from './src';
+import React from 'react';
+import type { DiscardStarredQueryModalProps } from './discard_starred_query_modal';
+
+const Fallback = () => <div />;
+
+const LazyDiscardStarredQueryModal = React.lazy(() => import('./discard_starred_query_modal'));
+export const DiscardStarredQueryModal = (props: DiscardStarredQueryModalProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyDiscardStarredQueryModal {...props} />
+  </React.Suspense>
+);

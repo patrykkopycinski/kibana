@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -22,11 +22,26 @@ import {
   EuiCopy,
   EuiToolTip,
   euiScrollBarStyles,
+  EuiTab,
+  EuiTabs,
+  EuiNotificationBadge,
+  EuiText,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
+import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import { css, Interpolation, Theme } from '@emotion/react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import { type QueryHistoryItem, getHistoryItems } from '../history_local_storage';
-import { getReducedSpaceStyling, swapArrayElements } from './query_history_helpers';
+import {
+  type QueryHistoryItem,
+  getHistoryItems,
+  MAX_HISTORY_QUERIES_NUMBER,
+  dateFormat,
+} from '../history_local_storage';
+import type { ESQLEditorDeps } from '../types';
+import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
+import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
+import { DiscardStarredQueryModal } from './discard_starred_query';
 
 export function QueryHistoryAction({
   toggleHistory,
@@ -99,9 +114,22 @@ export function QueryHistoryAction({
 export const getTableColumns = (
   width: number,
   isOnReducedSpaceLayout: boolean,
-  actions: Array<CustomItemAction<QueryHistoryItem>>
+  actions: Array<CustomItemAction<QueryHistoryItem>>,
+  isStarredTab = false,
+  starredQueriesService?: EsqlStarredQueriesService
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
   const columnsArray = [
+    {
+      'data-test-subj': 'favoriteBtn',
+      render: (item: QueryHistoryItem) => {
+        const StarredQueryButton = starredQueriesService?.renderStarredButton(item);
+        if (!StarredQueryButton) {
+          return null;
+        }
+        return StarredQueryButton;
+      },
+      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+    },
     {
       field: 'status',
       name: '',
@@ -167,7 +195,7 @@ export const getTableColumns = (
       field: 'queryString',
       'data-test-subj': 'queryString',
       name: i18n.translate('esqlEditor.query.recentQueriesColumnLabel', {
-        defaultMessage: 'Recent queries',
+        defaultMessage: 'Query',
       }),
       render: (queryString: QueryHistoryItem['queryString']) => (
         <QueryColumn
@@ -180,11 +208,15 @@ export const getTableColumns = (
     {
       field: 'timeRan',
       'data-test-subj': 'timeRan',
-      name: i18n.translate('esqlEditor.query.timeRanColumnLabel', {
-        defaultMessage: 'Time ran',
-      }),
+      name: isStarredTab
+        ? i18n.translate('esqlEditor.query.dateAddedColumnLabel', {
+            defaultMessage: 'Date Added',
+          })
+        : i18n.translate('esqlEditor.query.timeRanColumnLabel', {
+            defaultMessage: 'Time ran',
+          }),
       sortable: true,
-      render: (timeRan: QueryHistoryItem['timeRan']) => timeRan,
+      render: (timeRan: QueryHistoryItem['timeRan']) => moment(timeRan).format(dateFormat),
       width: isOnReducedSpaceLayout ? 'auto' : '240px',
     },
     {
@@ -196,22 +228,33 @@ export const getTableColumns = (
   ];
 
   // I need to swap the elements here to get the desired design
-  return isOnReducedSpaceLayout ? swapArrayElements(columnsArray, 1, 2) : columnsArray;
+  return isOnReducedSpaceLayout ? swapArrayElements(columnsArray, 2, 3) : columnsArray;
 };
 
-export function QueryHistory({
+export function QueryList({
   containerCSS,
   containerWidth,
   onUpdateAndSubmit,
   height,
+  listItems,
+  starredQueriesService,
+  tableCaption,
+  dataTestSubj,
+  isStarredTab = false,
 }: {
+  listItems: QueryHistoryItem[];
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
   height: number;
+  starredQueriesService?: EsqlStarredQueriesService;
+  tableCaption?: string;
+  dataTestSubj?: string;
+  isStarredTab?: boolean;
 }) {
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
+  const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
 
   const { sorting, onTableChange } = useEuiTablePersist<QueryHistoryItem>({
     tableId: 'esqlQueryHistory',
@@ -220,8 +263,6 @@ export function QueryHistory({
       direction: 'desc',
     },
   });
-
-  const historyItems: QueryHistoryItem[] = getHistoryItems(sorting.sort.direction);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -232,16 +273,16 @@ export function QueryHistory({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate('esqlEditor.query.querieshistoryRun', {
+                  content={i18n.translate('esqlEditor.query.esqlQueriesListRun', {
                     defaultMessage: 'Run query',
                   })}
                 >
                   <EuiButtonIcon
                     iconType="play"
-                    aria-label={i18n.translate('esqlEditor.query.querieshistoryRun', {
+                    aria-label={i18n.translate('esqlEditor.query.esqlQueriesListRun', {
                       defaultMessage: 'Run query',
                     })}
-                    data-test-subj="ESQLEditor-queryHistory-runQuery-button"
+                    data-test-subj="ESQLEditor-history-starred-queries-run-button"
                     role="button"
                     iconSize="m"
                     onClick={() => onUpdateAndSubmit(item.queryString)}
@@ -254,7 +295,7 @@ export function QueryHistory({
               <EuiFlexItem grow={false}>
                 <EuiCopy
                   textToCopy={item.queryString}
-                  content={i18n.translate('esqlEditor.query.querieshistoryCopy', {
+                  content={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                     defaultMessage: 'Copy query to clipboard',
                   })}
                 >
@@ -266,7 +307,7 @@ export function QueryHistory({
                       css={css`
                         cursor: pointer;
                       `}
-                      aria-label={i18n.translate('esqlEditor.query.querieshistoryCopy', {
+                      aria-label={i18n.translate('esqlEditor.query.esqlQueriesCopy', {
                         defaultMessage: 'Copy query to clipboard',
                       })}
                     />
@@ -279,13 +320,22 @@ export function QueryHistory({
       },
     ];
   }, [onUpdateAndSubmit]);
+
   const isOnReducedSpaceLayout = containerWidth < 560;
   const columns = useMemo(() => {
-    return getTableColumns(containerWidth, isOnReducedSpaceLayout, actions);
-  }, [actions, containerWidth, isOnReducedSpaceLayout]);
+    return getTableColumns(
+      containerWidth,
+      isOnReducedSpaceLayout,
+      actions,
+      isStarredTab,
+      starredQueriesService
+    );
+  }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab, starredQueriesService]);
 
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
+
+  const starredQueriesCellStyling = cssFavoriteHoverWithinEuiTableRow(theme.euiTheme);
 
   const tableStyling = css`
     .euiTable {
@@ -305,22 +355,40 @@ export function QueryHistory({
     overflow-y: auto;
     ${scrollBarStyles}
     ${extraStyling}
+    ${starredQueriesCellStyling}
   `;
 
+  starredQueriesService?.discardModalVisibility$.subscribe((nextVisibility) => {
+    if (isDiscardQueryModalVisible !== nextVisibility) {
+      setIsDiscardQueryModalVisible(nextVisibility);
+    }
+  });
+
   return (
-    <div data-test-subj="ESQLEditor-queryHistory" css={containerCSS}>
+    <div data-test-subj={dataTestSubj ?? 'ESQLEditor-queryList'} css={containerCSS}>
       <EuiInMemoryTable
-        tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
-          defaultMessage: 'Queries history table',
-        })}
+        tableCaption={
+          tableCaption ||
+          i18n.translate('esqlEditor.query.queriesListTable', {
+            defaultMessage: 'ES|QL Queries table',
+          })
+        }
         responsiveBreakpoint={false}
-        items={historyItems}
+        items={listItems}
         columns={columns}
         sorting={sorting}
         onChange={onTableChange}
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
+      {isDiscardQueryModalVisible && (
+        <DiscardStarredQueryModal
+          onClose={async (dismissFlag, removeQuery) =>
+            (await starredQueriesService?.onDiscardModalClose(dismissFlag, removeQuery)) ??
+            Promise.resolve()
+          }
+        />
+      )}
     </div>
   );
 }
@@ -354,7 +422,7 @@ export function QueryColumn({
           onClick={() => {
             setIsRowExpanded(!isRowExpanded);
           }}
-          data-test-subj="ESQLEditor-queryHistory-queryString-expanded"
+          data-test-subj="ESQLEditor-queryList-queryString-expanded"
           aria-label={
             isRowExpanded
               ? i18n.translate('esqlEditor.query.collapseLabel', {
@@ -384,6 +452,174 @@ export function QueryColumn({
       >
         {queryString}
       </span>
+    </>
+  );
+}
+
+export function HistoryAndStarredQueriesTabs({
+  containerCSS,
+  containerWidth,
+  onUpdateAndSubmit,
+  height,
+}: {
+  containerCSS: Interpolation<Theme>;
+  containerWidth: number;
+  onUpdateAndSubmit: (qs: string) => void;
+  height: number;
+}) {
+  const kibana = useKibana<ESQLEditorDeps>();
+  const { core, usageCollection, storage } = kibana.services;
+
+  const [starredQueriesService, setStarredQueriesService] = useState<EsqlStarredQueriesService>();
+  const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+
+  useEffect(() => {
+    const initializeService = async () => {
+      const starredService = await EsqlStarredQueriesService.initialize({
+        http: core.http,
+        usageCollection,
+        storage,
+      });
+      setStarredQueriesService(starredService);
+    };
+    if (!starredQueriesService) {
+      initializeService();
+    }
+  }, [core.http, starredQueriesService, storage, usageCollection]);
+
+  starredQueriesService?.queries$.subscribe((nextQueries) => {
+    if (nextQueries.length !== starredQueries.length) {
+      setStarredQueries(nextQueries);
+    }
+  });
+
+  const { euiTheme } = useEuiTheme();
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'history-queries-tab',
+        name: i18n.translate('esqlEditor.query.historyQueriesTabLabel', {
+          defaultMessage: 'Recent',
+        }),
+        dataTestSubj: 'history-queries-tab',
+        content: (
+          <QueryList
+            containerCSS={containerCSS}
+            onUpdateAndSubmit={onUpdateAndSubmit}
+            containerWidth={containerWidth}
+            height={height}
+            listItems={getHistoryItems('desc')}
+            dataTestSubj="ESQLEditor-queryHistory"
+            tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
+              defaultMessage: 'Queries history table',
+            })}
+            starredQueriesService={starredQueriesService}
+          />
+        ),
+      },
+      {
+        id: 'starred-queries-tab',
+        dataTestSubj: 'starred-queries-tab',
+        name: i18n.translate('esqlEditor.query.starredQueriesTabLabel', {
+          defaultMessage: 'Starred',
+        }),
+        append: (
+          <EuiNotificationBadge className="eui-alignCenter" size="m" color="subdued">
+            {starredQueries?.length}
+          </EuiNotificationBadge>
+        ),
+        content: (
+          <QueryList
+            containerCSS={containerCSS}
+            onUpdateAndSubmit={onUpdateAndSubmit}
+            containerWidth={containerWidth}
+            height={height}
+            listItems={starredQueries}
+            dataTestSubj="ESQLEditor-starredQueries"
+            tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
+              defaultMessage: 'Starred queries table',
+            })}
+            starredQueriesService={starredQueriesService}
+            isStarredTab={true}
+          />
+        ),
+      },
+    ];
+  }, [
+    containerCSS,
+    containerWidth,
+    height,
+    onUpdateAndSubmit,
+    starredQueries,
+    starredQueriesService,
+  ]);
+
+  const [selectedTabId, setSelectedTabId] = useState('history-queries-tab');
+  const selectedTabContent = useMemo(() => {
+    return tabs.find((obj) => obj.id === selectedTabId)?.content;
+  }, [selectedTabId, tabs]);
+
+  const onSelectedTabChanged = (id: string) => {
+    setSelectedTabId(id);
+  };
+
+  const renderTabs = useCallback(() => {
+    return tabs.map((tab, index) => (
+      <EuiTab
+        key={index}
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        append={tab.append}
+        data-test-subj={tab.dataTestSubj}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
+  }, [selectedTabId, tabs]);
+
+  return (
+    <>
+      <EuiFlexGroup
+        responsive={false}
+        alignItems="center"
+        justifyContent="spaceBetween"
+        css={css`
+          background-color: ${euiTheme.colors.lightestShade};
+          padding-left: ${euiTheme.size.s};
+          padding-right: ${euiTheme.size.s};
+          border-block-end: ${euiTheme.border.thin};
+        `}
+      >
+        <EuiTabs bottomBorder={false} size="s">
+          {renderTabs()}
+        </EuiTabs>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj="ESQLEditor-history-starred-queries-helpText"
+            >
+              <p>
+                {selectedTabId === 'history-queries-tab'
+                  ? i18n.translate('esqlEditor.history.historyItemslimit', {
+                      defaultMessage: 'Showing last {historyItemsLimit} queries',
+                      values: { historyItemsLimit: MAX_HISTORY_QUERIES_NUMBER },
+                    })
+                  : i18n.translate('esqlEditor.history.starredItemslimit', {
+                      defaultMessage:
+                        'Showing {starredItemsCount} queries (max {starredItemsLimit})',
+                      values: {
+                        starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
+                        starredItemsCount: starredQueries.length ?? 0,
+                      },
+                    })}
+              </p>
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {selectedTabContent}
     </>
   );
 }

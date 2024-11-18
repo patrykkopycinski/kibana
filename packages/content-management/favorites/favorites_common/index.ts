@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  registerFavorites,
-  type GetFavoritesResponse,
-  type FavoritesSetup,
-  type AddFavoriteResponse,
-  type RemoveFavoriteResponse,
-} from './src';
+// Limit the number of favorites to prevent too large objects due to metadata
+export const FAVORITES_LIMIT = 100;

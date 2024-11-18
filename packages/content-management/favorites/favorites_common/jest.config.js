@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  registerFavorites,
-  type GetFavoritesResponse,
-  type FavoritesSetup,
-  type AddFavoriteResponse,
-  type RemoveFavoriteResponse,
-} from './src';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/content-management/favorites/favorites_common'],
+};

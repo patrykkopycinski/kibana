@@ -8,8 +8,15 @@
  */
 
 import React from 'react';
-import { QueryHistoryAction, getTableColumns, QueryColumn } from './query_history';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { render, screen } from '@testing-library/react';
+import {
+  QueryHistoryAction,
+  getTableColumns,
+  QueryColumn,
+  HistoryAndStarredQueriesTabs,
+} from './history_starred_queries';
 
 jest.mock('../history_local_storage', () => {
   const module = jest.requireActual('../history_local_storage');
@@ -18,7 +25,6 @@ jest.mock('../history_local_storage', () => {
     getHistoryItems: () => [
       {
         queryString: 'from kibana_sample_data_flights | limit 10',
-        timeZone: 'Browser',
         timeRan: 'Mar. 25, 24 08:45:27',
         queryRunning: false,
         status: 'success',
@@ -27,7 +33,7 @@ jest.mock('../history_local_storage', () => {
   };
 });
 
-describe('QueryHistory', () => {
+describe('Starred and History queries components', () => {
   describe('QueryHistoryAction', () => {
     it('should render the history action component as a button if is spaceReduced is undefined', () => {
       render(<QueryHistoryAction toggleHistory={jest.fn()} isHistoryOpen />);
@@ -47,9 +53,14 @@ describe('QueryHistory', () => {
   });
 
   describe('getTableColumns', () => {
-    it('should get the history table columns correctly', async () => {
+    it('should get the table columns correctly', async () => {
       const columns = getTableColumns(50, false, []);
       expect(columns).toEqual([
+        {
+          'data-test-subj': 'favoriteBtn',
+          render: expect.anything(),
+          width: '40px',
+        },
         {
           css: {
             height: '100%',
@@ -64,7 +75,7 @@ describe('QueryHistory', () => {
         {
           'data-test-subj': 'queryString',
           field: 'queryString',
-          name: 'Recent queries',
+          name: 'Query',
           render: expect.anything(),
         },
         {
@@ -83,11 +94,58 @@ describe('QueryHistory', () => {
         },
       ]);
     });
+
+    it('should get the table columns correctly for the starred list', async () => {
+      const columns = getTableColumns(50, false, [], true);
+      expect(columns).toEqual([
+        {
+          'data-test-subj': 'favoriteBtn',
+          render: expect.anything(),
+          width: '40px',
+        },
+        {
+          css: {
+            height: '100%',
+          },
+          'data-test-subj': 'status',
+          field: 'status',
+          name: '',
+          render: expect.anything(),
+          sortable: false,
+          width: '40px',
+        },
+        {
+          'data-test-subj': 'queryString',
+          field: 'queryString',
+          name: 'Query',
+          render: expect.anything(),
+        },
+        {
+          'data-test-subj': 'timeRan',
+          field: 'timeRan',
+          name: 'Date Added',
+          render: expect.anything(),
+          sortable: true,
+          width: '240px',
+        },
+        {
+          actions: [],
+          'data-test-subj': 'actions',
+          name: '',
+          width: '60px',
+        },
+      ]);
+    });
   });
 
   it('should get the history table columns correctly for reduced space', async () => {
     const columns = getTableColumns(50, true, []);
     expect(columns).toEqual([
+      {
+        'data-test-subj': 'favoriteBtn',
+        render: expect.anything(),
+        width: 'auto',
+      },
       {
         css: {
           height: '100%',
@@ -110,7 +168,7 @@ describe('QueryHistory', () => {
       {
         'data-test-subj': 'queryString',
         field: 'queryString',
-        name: 'Recent queries',
+        name: 'Query',
         render: expect.anything(),
       },
       {
@@ -132,7 +190,7 @@ describe('QueryHistory', () => {
         />
       );
       expect(
-        screen.queryByTestId('ESQLEditor-queryHistory-queryString-expanded')
+        screen.queryByTestId('ESQLEditor-queryList-queryString-expanded')
       ).not.toBeInTheDocument();
     });
 
@@ -152,9 +210,66 @@ describe('QueryHistory', () => {
           isOnReducedSpaceLayout={true}
         />
       );
-      expect(
-        screen.getByTestId('ESQLEditor-queryHistory-queryString-expanded')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-queryList-queryString-expanded')).toBeInTheDocument();
+    });
+  });
+
+  describe('HistoryAndStarredQueriesTabs', () => {
+    const services = {
+      core: coreMock.createStart(),
+    };
+    it('should render two tabs', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+      expect(screen.getByTestId('history-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('history-queries-tab')).toHaveTextContent('Recent');
+      expect(screen.getByTestId('starred-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('starred-queries-tab')).toHaveTextContent('Starred');
+    });
+
+    it('should render the history queries tab by default', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+      expect(screen.getByTestId('ESQLEditor-queryHistory')).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
+        'Showing last 20 queries'
+      );
+    });
+
+    it('should render the starred queries if the corresponding btn is clicked', () => {
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+      // click the starred queries tab
+      screen.getByTestId('starred-queries-tab').click();
+
+      expect(screen.getByTestId('ESQLEditor-starredQueries')).toBeInTheDocument();
+      expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
+        'Showing 0 queries (max 100)'
+      );
     });
   });
 });

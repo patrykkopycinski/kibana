@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,35 +18,22 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../common/doc_links';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-import { useConnectors } from '../../hooks/api/use_connectors';
+
+import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../../constants';
 import { DecorativeHorizontalStepper } from '../common/decorative_horizontal_stepper';
-import { ConnectorIcon } from './connector_icon';
 
-import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
-
-export const EmptyConnectorsPrompt: React.FC = () => {
-  const connectorTypes = useConnectorTypes();
-
-  const connectorExamples = connectorTypes.filter((connector) =>
-    ['Gmail', 'Sharepoint Online', 'Jira Cloud', 'Dropbox'].includes(connector.name)
-  );
-  const { createConnector, isLoading } = useCreateConnector();
-  const { data } = useConnectors();
-
-  const assetBasePath = useAssetBasePath();
-  const connectorsPath = assetBasePath + '/connectors.svg';
-
+export const EmptyWebCrawlersPrompt: React.FC = () => {
   const {
     application: { navigateToUrl },
   } = useKibanaServices();
+
+  const assetBasePath = useAssetBasePath();
+  const webCrawlersIcon = assetBasePath + '/web_crawlers.svg';
+  const githubIcon = assetBasePath + '/github_white.svg';
 
   return (
     <EuiFlexGroup alignItems="center" direction="column">
@@ -58,13 +46,13 @@ export const EmptyConnectorsPrompt: React.FC = () => {
             gutterSize="l"
           >
             <EuiFlexItem>
-              <EuiIcon size="xxl" type={connectorsPath} />
+              <EuiIcon size="xxl" type={webCrawlersIcon} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle>
                 <h2>
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.title', {
-                    defaultMessage: 'Set up a new connector',
+                  {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.title', {
+                    defaultMessage: 'Set up a web crawler',
                   })}
                 </h2>
               </EuiTitle>
@@ -72,9 +60,9 @@ export const EmptyConnectorsPrompt: React.FC = () => {
             <EuiFlexItem>
               <EuiText textAlign="center" color="subdued">
                 <p>
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.description', {
+                  {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.description', {
                     defaultMessage:
-                      "To set up and deploy a connector you'll be working between the third-party data source, your terminal, and the Elasticsearch serverless UI. The high level process looks like this:",
+                      "To set up and deploy a web crawler you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
                   })}
                 </p>
               </EuiText>
@@ -97,52 +85,6 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                         alignItems="center"
                         direction="column"
                       >
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup
-                            justifyContent="center"
-                            alignItems="center"
-                            direction="row"
-                            gutterSize="s"
-                          >
-                            {connectorExamples.map((connector, index) => (
-                              <React.Fragment key={connector.serviceType}>
-                                {index === Math.floor(connectorExamples.length / 2) && (
-                                  <EuiFlexItem grow={false}>
-                                    <EuiIcon color="primary" size="l" type="documents" />
-                                  </EuiFlexItem>
-                                )}
-                                <EuiFlexItem grow={false}>
-                                  <ConnectorIcon
-                                    name={connector.name}
-                                    serviceType={connector.serviceType}
-                                    iconPath={connector.iconPath}
-                                  />
-                                </EuiFlexItem>
-                              </React.Fragment>
-                            ))}
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText>
-                            <p>
-                              {i18n.translate(
-                                'xpack.serverlessSearch.connectorsEmpty.guideOneDescription',
-                                {
-                                  defaultMessage:
-                                    "Choose from over 30 third-party data sources you'd like to sync",
-                                }
-                              )}
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiFlexGroup
-                        justifyContent="flexStart"
-                        alignItems="center"
-                        direction="column"
-                      >
                         <EuiFlexGroup
                           gutterSize="s"
                           direction="row"
@@ -150,7 +92,7 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                           justifyContent="center"
                         >
                           <EuiFlexItem grow={false}>
-                            <EuiIcon color="primary" size="l" type={connectorsPath} />
+                            <EuiIcon color="primary" size="l" type={webCrawlersIcon} />
                           </EuiFlexItem>
                           <EuiFlexItem>
                             <EuiIcon size="m" type="sortRight" />
@@ -163,17 +105,17 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                           <EuiText>
                             <p>
                               <FormattedMessage
-                                id="xpack.serverlessSearch.connectorsEmpty.guideTwoDescription"
-                                defaultMessage="Deploy connector code on your own infrastructure by running from {source}, or using {docker}"
+                                id="xpack.serverlessSearch.webCrawlersEmpty.guideTwoDescription"
+                                defaultMessage="Deploy web crawler code on your own infrastructure by running from {source}, or using {docker}"
                                 values={{
                                   source: (
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptSourceLink"
-                                      href={docLinks.connectorsRunFromSource}
+                                      href={'https://github.com/elastic/crawler'}
                                     >
                                       {i18n.translate(
-                                        'xpack.serverlessSearch.connectorsEmpty.sourceLabel',
+                                        'xpack.serverlessSearch.webCrawlersEmpty.sourceLabel',
                                         { defaultMessage: 'source' }
                                       )}
                                     </EuiLink>
@@ -182,10 +124,12 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                                     <EuiLink
                                       target="_blank"
                                       data-test-subj="serverlessSearchEmptyConnectorsPromptDockerLink"
-                                      href={docLinks.connectorsRunWithDocker}
+                                      href={
+                                        'https://github.com/elastic/crawler?tab=readme-ov-file#running-open-crawler-with-docker'
+                                      }
                                     >
                                       {i18n.translate(
-                                        'xpack.serverlessSearch.connectorsEmpty.dockerLabel',
+                                        'xpack.serverlessSearch.webCrawlersEmpty.dockerLabel',
                                         { defaultMessage: 'Docker' }
                                       )}
                                     </EuiLink>
@@ -205,25 +149,58 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                       >
                         <EuiFlexItem grow={false}>
                           <EuiFlexGroup
+                            justifyContent="center"
+                            alignItems="center"
+                            direction="row"
+                            gutterSize="s"
+                          >
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon color="primary" size="l" type="globe" />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText>
+                            <p>
+                              {i18n.translate(
+                                'xpack.serverlessSearch.webCrawlersEmpty.guideOneDescription',
+                                {
+                                  defaultMessage: 'Set one or more domain URLs you want to crawl',
+                                }
+                              )}
+                            </p>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+
+                    <EuiFlexItem>
+                      <EuiFlexGroup
+                        justifyContent="flexStart"
+                        alignItems="center"
+                        direction="column"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiFlexGroup
                             gutterSize="s"
                             direction="row"
                             alignItems="center"
                             justifyContent="center"
                           >
                             <EuiFlexItem>
-                              <EuiIcon color="primary" size="l" type="documents" />
+                              <EuiIcon color="primary" size="l" type="globe" />
                             </EuiFlexItem>
                             <EuiFlexItem>
                               <EuiIcon size="m" type="sortRight" />
                             </EuiFlexItem>
                             <EuiFlexItem>
-                              <EuiIcon color="primary" size="l" type={connectorsPath} />
+                              <EuiIcon color="primary" size="l" type={webCrawlersIcon} />
                             </EuiFlexItem>
                             <EuiFlexItem>
                               <EuiIcon size="m" type="sortRight" />
                             </EuiFlexItem>
                             <EuiFlexItem>
-                              <EuiIcon color="primary" size="l" type="logoElastic" />
+                              <EuiIcon color="primary" size="l" type="logoElasticsearch" />
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiFlexItem>
@@ -231,10 +208,10 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                           <EuiText>
                             <p>
                               {i18n.translate(
-                                'xpack.serverlessSearch.connectorsEmpty.guideThreeDescription',
+                                'xpack.serverlessSearch.webCrawlersEmpty.guideThreeDescription',
                                 {
                                   defaultMessage:
-                                    'Enter access and connection details for your data source and run your first sync',
+                                    'Configure your web crawler and connect it to Elasticsearch',
                                 }
                               )}
                             </p>
@@ -249,15 +226,13 @@ export const EmptyConnectorsPrompt: React.FC = () => {
             <EuiFlexGroup direction="row" gutterSize="m">
               <EuiFlexItem>
                 <EuiButton
-                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateConnectorButton"
-                  disabled={!data?.canManageConnectors}
+                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
                   fill
-                  iconType="plusInCircle"
-                  onClick={() => createConnector()}
-                  isLoading={isLoading}
+                  iconType={githubIcon}
+                  href={'https://github.com/elastic/crawler'}
                 >
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.selfManagedButton', {
-                    defaultMessage: 'Self-managed connector',
+                  {i18n.translate('xpack.serverlessSearch.webCrawlersEmpty.selfManagedButton', {
+                    defaultMessage: 'Self-managed web crawler',
                   })}
                 </EuiButton>
               </EuiFlexItem>
@@ -266,15 +241,16 @@ export const EmptyConnectorsPrompt: React.FC = () => {
                   <EuiFlexItem>
                     <EuiButton
                       data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
-                      isLoading={isLoading}
                       onClick={() =>
-                        navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
+                        navigateToUrl(
+                          `${BASE_WEB_CRAWLERS_PATH}/${ELASTIC_MANAGED_WEB_CRAWLERS_PATH}`
+                        )
                       }
                     >
                       {i18n.translate(
-                        'xpack.serverlessSearch.connectorsEmpty.elasticManagedButton',
+                        'xpack.serverlessSearch.webCrawlersEmpty.elasticManagedButton',
                         {
-                          defaultMessage: 'Elastic managed connector',
+                          defaultMessage: 'Elastic managed web crawler',
                         }
                       )}
                     </EuiButton>

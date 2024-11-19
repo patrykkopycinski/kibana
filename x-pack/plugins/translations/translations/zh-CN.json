@@ -42429,8 +42429,6 @@
     "xpack.serverlessSearch.connectors.typeLabel": "类型",
     "xpack.serverlessSearch.connectors.variablesTitle": "您的 {url} 的变量",
     "xpack.serverlessSearch.connectors.waitingForConnection": "等待连接",
-    "xpack.serverlessSearch.connectorsEmpty.availableConnectors": "可用连接器",
-    "xpack.serverlessSearch.connectorsEmpty.createConnector": "创建连接器",
     "xpack.serverlessSearch.connectorsEmpty.description": "要设置并部署连接器，您需要在第三方数据源、终端与 Elasticsearch 无服务器 UI 之间开展工作。高级流程类似于这样：",
     "xpack.serverlessSearch.connectorsEmpty.dockerLabel": "Docker",
     "xpack.serverlessSearch.connectorsEmpty.guideOneDescription": "选择要同步的数据源",

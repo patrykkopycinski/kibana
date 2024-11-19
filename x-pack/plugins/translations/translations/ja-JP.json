@@ -43081,8 +43081,6 @@
     "xpack.serverlessSearch.connectors.typeLabel": "型",
     "xpack.serverlessSearch.connectors.variablesTitle": "{url}の変数",
     "xpack.serverlessSearch.connectors.waitingForConnection": "接続を待機中",
-    "xpack.serverlessSearch.connectorsEmpty.availableConnectors": "使用可能なコネクター",
-    "xpack.serverlessSearch.connectorsEmpty.createConnector": "コネクターを作成",
     "xpack.serverlessSearch.connectorsEmpty.description": "コネクターを設定およびデプロイするには、サードパーティのデータソース、端末、ElasticsearchサーバーレスUI の間で作業することになります。プロセスの概要は次のとおりです。",
     "xpack.serverlessSearch.connectorsEmpty.dockerLabel": "Docker",
     "xpack.serverlessSearch.connectorsEmpty.guideOneDescription": "同期したいデータソースを選択します。",

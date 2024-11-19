@@ -43115,8 +43115,6 @@
     "xpack.serverlessSearch.connectors.typeLabel": "Type",
     "xpack.serverlessSearch.connectors.variablesTitle": "Variable pour votre {url}",
     "xpack.serverlessSearch.connectors.waitingForConnection": "En attente de connexion",
-    "xpack.serverlessSearch.connectorsEmpty.availableConnectors": "Connecteurs disponibles",
-    "xpack.serverlessSearch.connectorsEmpty.createConnector": "Créer un connecteur",
     "xpack.serverlessSearch.connectorsEmpty.description": "La configuration et le déploiement d'un connecteur se passe entre la source de données tierce, votre terminal et l'UI sans serveur d'Elasticsearch. Le processus à haut niveau ressemble à ça :",
     "xpack.serverlessSearch.connectorsEmpty.dockerLabel": "Docker",
     "xpack.serverlessSearch.connectorsEmpty.guideOneDescription": "Choisissez une source de données à synchroniser",

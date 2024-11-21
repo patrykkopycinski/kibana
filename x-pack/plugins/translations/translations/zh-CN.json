@@ -46722,7 +46722,6 @@
     "xpack.transform.groupBy.popoverForm.fieldLabel": "字段",
     "xpack.transform.groupBy.popoverForm.intervalError": "时间间隔无效。",
     "xpack.transform.groupBy.popoverForm.intervalLabel": "时间间隔",
-    "xpack.transform.groupBy.popoverForm.intervalPercents": "输入百分位数的逗号分隔列表",
     "xpack.transform.groupBy.popoverForm.invalidSizeErrorMessage": "输入有效的正数",
     "xpack.transform.groupBy.popoverForm.missingBucketCheckboxHelpText": "选择包括没有值的文档。",
     "xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel": "包括缺失的存储桶",

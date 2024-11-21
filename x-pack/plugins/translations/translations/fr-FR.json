@@ -47488,7 +47488,6 @@
     "xpack.transform.groupBy.popoverForm.fieldLabel": "Champ",
     "xpack.transform.groupBy.popoverForm.intervalError": "Intervalle non valide.",
     "xpack.transform.groupBy.popoverForm.intervalLabel": "Intervalle",
-    "xpack.transform.groupBy.popoverForm.intervalPercents": "Entrer une liste de centiles séparés par des virgules",
     "xpack.transform.groupBy.popoverForm.invalidSizeErrorMessage": "Entrer un nombre positif valide",
     "xpack.transform.groupBy.popoverForm.missingBucketCheckboxHelpText": "Cochez cette case pour inclure les documents sans valeur.",
     "xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel": "Inclure les compartiments manquants",

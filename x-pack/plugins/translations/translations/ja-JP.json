@@ -47448,7 +47448,6 @@
     "xpack.transform.groupBy.popoverForm.fieldLabel": "フィールド",
     "xpack.transform.groupBy.popoverForm.intervalError": "無効な間隔。",
     "xpack.transform.groupBy.popoverForm.intervalLabel": "間隔",
-    "xpack.transform.groupBy.popoverForm.intervalPercents": "パーセンタイルをコンマで区切って列記します。",
     "xpack.transform.groupBy.popoverForm.invalidSizeErrorMessage": "有効な正の数値を入力してください",
     "xpack.transform.groupBy.popoverForm.missingBucketCheckboxHelpText": "選択すると、値がないドキュメントを含めます。",
     "xpack.transform.groupby.popoverForm.missingBucketCheckboxLabel": "不足しているバケットを含める",

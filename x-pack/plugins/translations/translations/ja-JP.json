@@ -18563,7 +18563,6 @@
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.description": "テストリクエストを送信して、言語クライアントとElasticsearchインスタンスが起動し、実行中であることを確認してください。",
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.title": "接続をテスト",
     "xpack.enterpriseSearch.overview.navTitle": "概要",
-    "xpack.enterpriseSearch.overview.setupCta.description": "Elastic App Search および Workplace Search を使用して、アプリまたは社内組織に検索を追加できます。検索が簡単になるとどのような利点があるのかについては、動画をご覧ください。",
     "xpack.enterpriseSearch.pageTemplate.endpointsButtonLabel": "エンドポイントとAPIキー",
     "xpack.enterpriseSearch.passwordLabel": "パスワード",
     "xpack.enterpriseSearch.pipeline.title": "データの変換とエンリッチ",

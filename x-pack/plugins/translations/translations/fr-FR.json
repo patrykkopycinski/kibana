@@ -18591,7 +18591,6 @@
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.description": "Envoyez une requête de test pour confirmer que votre client de langage et votre instance Elasticsearch sont opérationnels.",
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.title": "Tester votre connexion",
     "xpack.enterpriseSearch.overview.navTitle": "Aperçu",
-    "xpack.enterpriseSearch.overview.setupCta.description": "Ajoutez des fonctions de recherche à votre application ou à votre organisation interne avec Elastic App Search et Workplace Search. Regardez la vidéo pour savoir ce qu'il est possible de faire lorsque la recherche est facilitée.",
     "xpack.enterpriseSearch.pageTemplate.endpointsButtonLabel": "Points de terminaison et clés d'API",
     "xpack.enterpriseSearch.passwordLabel": "Mot de passe",
     "xpack.enterpriseSearch.pipeline.title": "Transformer et enrichir vos données",

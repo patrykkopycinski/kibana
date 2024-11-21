@@ -18227,7 +18227,6 @@
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.description": "发送测试请求，以确认您的语言客户端和 Elasticsearch 实例已启动并正在运行。",
     "xpack.enterpriseSearch.overview.gettingStarted.testConnection.title": "测试您的连接",
     "xpack.enterpriseSearch.overview.navTitle": "概览",
-    "xpack.enterpriseSearch.overview.setupCta.description": "通过 Elastic App Search 和 Workplace Search，将搜索添加到您的应用或内部组织中。观看视频，了解方便易用的搜索功能可以帮您做些什么。",
     "xpack.enterpriseSearch.pageTemplate.endpointsButtonLabel": "终端和 API 密钥",
     "xpack.enterpriseSearch.passwordLabel": "密码",
     "xpack.enterpriseSearch.pipeline.title": "转换和扩充数据",

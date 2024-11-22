@@ -38073,7 +38073,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoAriaLabel": "Ouvrir une fenêtre contextuelle d'aide",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent": "Consultez {createEsqlRuleTypeLink} pour commencer à utiliser les règles ES|QL.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipLink": "documentation",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError": "Une requête ES|QL est requise.",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel": "Requête ES|QL",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel": "Seuil de score d'anomalie",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel": "Tâche de Machine Learning",

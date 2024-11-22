@@ -37435,7 +37435,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoAriaLabel": "打开帮助弹出框",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipContent": "请访问我们的{createEsqlRuleTypeLink}以开始使用 ES|QL 规则。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlInfoTooltipLink": "文档",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError": "ES|QL 查询必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel": "ES|QL 查询",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel": "异常分数阈值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel": "Machine Learning 作业",

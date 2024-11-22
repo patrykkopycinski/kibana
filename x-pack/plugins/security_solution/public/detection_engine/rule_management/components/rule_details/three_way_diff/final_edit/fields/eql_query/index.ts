@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export type {
-  TimelineEqlResponse,
-  EqlFieldsComboBoxOptions,
-  EqlOptions,
-  FieldsEqlOptions,
-} from '@kbn/timelines-plugin/common';
+export * from './eql_query_edit_form';

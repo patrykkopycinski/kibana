@@ -34896,8 +34896,6 @@
     "xpack.remoteClusters.updateRemoteCluster.noRemoteClusterErrorMessage": "没有该名称的远程集群。",
     "xpack.remoteClusters.updateRemoteCluster.unknownRemoteClusterErrorMessage": "无法编辑集群，ES 未返回任何响应。",
     "xpack.reporting.breadcrumb": "Reporting",
-    "xpack.reporting.deprecations.csvPanelActionDownload.manualStep2": "在 Dashboard 应用程序中使用替代面板操作从已保存搜索面板生成 CSV 报告。",
-    "xpack.reporting.deprecations.csvPanelActionDownload.title": "在仪表板中从已保存搜索面板启用 CSV 下载的设置已弃用。",
     "xpack.reporting.deprecations.migrateIndexIlmPolicyActionTitle": "找到由定制 ILM 策略管理的报告索引。",
     "xpack.reporting.deprecations.reportingRole.forbiddenErrorCorrectiveAction": "请确保您分配有'manage_security'集群权限。",
     "xpack.reporting.deprecations.reportingRole.forbiddenErrorMessage": "您没有足够的权限来修复此弃用。",

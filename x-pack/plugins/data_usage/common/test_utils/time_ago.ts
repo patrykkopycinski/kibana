@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export {
-  PLUGIN_ID,
-  DEFAULT_SELECTED_OPTIONS,
-  DATA_USAGE_API_ROUTE_PREFIX,
-  DATA_USAGE_METRICS_API_ROUTE,
-  DATA_USAGE_DATA_STREAMS_API_ROUTE,
-} from './constants';
+export const timeXMinutesAgo = (x: number) =>
+  new Date(new Date().getTime() - x * 60 * 1000).toISOString();

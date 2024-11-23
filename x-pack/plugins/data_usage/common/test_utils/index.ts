@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export {
-  PLUGIN_ID,
-  DEFAULT_SELECTED_OPTIONS,
-  DATA_USAGE_API_ROUTE_PREFIX,
-  DATA_USAGE_METRICS_API_ROUTE,
-  DATA_USAGE_DATA_STREAMS_API_ROUTE,
-} from './constants';
+export { TestProvider } from './test_provider';
+export { dataUsageTestQueryClientOptions } from './test_query_client_options';
+export { timeXMinutesAgo } from './time_ago';

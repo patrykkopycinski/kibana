@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export {
-  PLUGIN_ID,
-  DEFAULT_SELECTED_OPTIONS,
-  DATA_USAGE_API_ROUTE_PREFIX,
-  DATA_USAGE_METRICS_API_ROUTE,
-  DATA_USAGE_DATA_STREAMS_API_ROUTE,
-} from './constants';
+import React, { memo } from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+export const TestProvider = memo(({ children }: { children?: React.ReactNode }) => {
+  return <I18nProvider>{children}</I18nProvider>;
+});

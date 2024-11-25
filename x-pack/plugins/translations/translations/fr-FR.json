@@ -20488,7 +20488,6 @@
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "Nouveau nom de la stratégie d'agent",
     "xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText": "La sortie {outputType} pour l'intégration des agents n'est pas prise en charge pour Fleet Server, Synthetics ou APM.",
     "xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText": "La sortie {outputType} pour l'intégration des agents n'est pas prise en charge pour Fleet Server, Synthetics ou APM.",
-    "xpack.fleet.agentPolicyForm.spaceDescription": "Sélectionnez un ou plusieurs espaces pour cette politique ou créez un nouvel espace. {link}",
     "xpack.fleet.agentPolicyForm.spaceFieldLabel": "Espaces",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "Collecte des logs et des mesures du système",
     "xpack.fleet.agentPolicyForm.systemMonitoringTooltipText": "Cela ajoutera également une intégration {system} pour collecter les logs et les indicateurs du système.",

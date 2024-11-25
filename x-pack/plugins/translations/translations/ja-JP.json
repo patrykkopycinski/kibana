@@ -20457,7 +20457,6 @@
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "新しいエージェントポリシー名",
     "xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText": "Fleet Server、Synthetics、APMではエージェント統合の{outputType}出力はサポートされていません。",
     "xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText": "Fleet Server、Synthetics、APMではエージェント統合の{outputType}出力はサポートされていません。",
-    "xpack.fleet.agentPolicyForm.spaceDescription": "このポリシーに1つ以上のスペースを選択するか、新しいスペースを作成します。{link}",
     "xpack.fleet.agentPolicyForm.spaceFieldLabel": "スペース",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "システムログとメトリックの収集",
     "xpack.fleet.agentPolicyForm.systemMonitoringTooltipText": "これにより、{system}統合も追加され、システムログとメトリックを収集します。",

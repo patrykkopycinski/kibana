@@ -20112,7 +20112,6 @@
     "xpack.fleet.agentPolicyForm.newAgentPolicyFieldLabel": "新代理策略名称",
     "xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText": "Fleet 服务器、Synthetics 或 APM 不支持代理集成的 {outputType} 输出。",
     "xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText": "Fleet 服务器、Synthetics 或 APM 不支持代理集成的 {outputType} 输出。",
-    "xpack.fleet.agentPolicyForm.spaceDescription": "为此策略选择一个或多个工作区，或创建新工作区。{link}",
     "xpack.fleet.agentPolicyForm.spaceFieldLabel": "工作区",
     "xpack.fleet.agentPolicyForm.systemMonitoringText": "收集系统日志和指标",
     "xpack.fleet.agentPolicyForm.systemMonitoringTooltipText": "这还会添加 {system} 集成以收集系统日志和指标。",

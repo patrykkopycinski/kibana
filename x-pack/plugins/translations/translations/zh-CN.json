@@ -22886,7 +22886,6 @@
     "xpack.idxMgmt.mappingsEditor.parameters.validations.fieldDataFrequency.numberGreaterThanOneErrorMessage": "值必须大于 1。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage": "缩放因数必须大于 0。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.ignoreAboveIsRequiredErrorMessage": "字符长度限制必填。",
-    "xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage": "'推理 ID'必填。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.localeFieldRequiredErrorMessage": "指定区域设置。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.maxInputLengthFieldRequiredErrorMessage": "指定最大输入长度。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.nameIsRequiredErrorMessage": "为字段提供名称。",

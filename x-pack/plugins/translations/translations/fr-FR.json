@@ -23310,7 +23310,6 @@
     "xpack.idxMgmt.mappingsEditor.parameters.validations.fieldDataFrequency.numberGreaterThanOneErrorMessage": "La valeur doit être supérieure à un.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage": "Le facteur de montée en charge doit être supérieur à 0.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.ignoreAboveIsRequiredErrorMessage": "Limite de longueur de caractère obligatoire.",
-    "xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage": "L’ID d’inférence est requis.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.localeFieldRequiredErrorMessage": "Spécifiez un paramètre régional.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.maxInputLengthFieldRequiredErrorMessage": "Spécifiez une longueur d'entrée maximale.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.nameIsRequiredErrorMessage": "Donnez un nom au champ.",

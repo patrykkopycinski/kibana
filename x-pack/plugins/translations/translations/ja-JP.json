@@ -23282,7 +23282,6 @@
     "xpack.idxMgmt.mappingsEditor.parameters.validations.fieldDataFrequency.numberGreaterThanOneErrorMessage": "値は1よりも大きい値でなければなりません。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage": "スケーリングファクターは0よりも大きくなくてはなりません。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.ignoreAboveIsRequiredErrorMessage": "文字数制限が必要です。",
-    "xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage": "推論IDは必須です。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.localeFieldRequiredErrorMessage": "ロケールを指定します。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.maxInputLengthFieldRequiredErrorMessage": "最大入力長さを指定します。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.nameIsRequiredErrorMessage": "フィールドに名前を付けます。",

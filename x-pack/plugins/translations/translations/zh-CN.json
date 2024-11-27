@@ -44147,7 +44147,6 @@
     "xpack.spaces.management.spacesGridPage.editSpaceActionDescription": "编辑 {spaceName}。",
     "xpack.spaces.management.spacesGridPage.editSpaceActionName": "编辑",
     "xpack.spaces.management.spacesGridPage.errorTitle": "加载工作区时出错",
-    "xpack.spaces.management.spacesGridPage.identifierColumnName": "标识符",
     "xpack.spaces.management.spacesGridPage.loadingTitle": "正在加载……",
     "xpack.spaces.management.spacesGridPage.searchPlaceholder": "搜索",
     "xpack.spaces.management.spacesGridPage.solutionColumnName": "解决方案视图",

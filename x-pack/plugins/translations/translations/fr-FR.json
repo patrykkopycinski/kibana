@@ -44873,7 +44873,6 @@
     "xpack.spaces.management.spacesGridPage.editSpaceActionDescription": "Modifier {spaceName}.",
     "xpack.spaces.management.spacesGridPage.editSpaceActionName": "Modifier",
     "xpack.spaces.management.spacesGridPage.errorTitle": "Erreur lors du chargement des espaces",
-    "xpack.spaces.management.spacesGridPage.identifierColumnName": "Identificateur",
     "xpack.spaces.management.spacesGridPage.loadingTitle": "chargement…",
     "xpack.spaces.management.spacesGridPage.searchPlaceholder": "Recherche",
     "xpack.spaces.management.spacesGridPage.solutionColumnName": "Afficher la solution",

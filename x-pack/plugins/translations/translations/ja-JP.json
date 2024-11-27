@@ -22538,8 +22538,6 @@
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryLabel": "クエリー（任意）",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeOption": "Range",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeTypePopOver": "{type}は、番号、日付、またはIPアドレスの範囲と一致します。",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesLabel": "ソースインデックス",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesRequiredError": "ソースインデックスが最低1つ必要です。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeRequiredError": "ポリシータイプ値が必要です。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver": "どのようにデータを受信ドキュメントに一致させるかを決定します。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.uploadFileLink": "ファイルをアップロード",

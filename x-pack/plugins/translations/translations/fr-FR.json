@@ -22567,8 +22567,6 @@
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryLabel": "Requête (facultative)",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeOption": "Plage",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeTypePopOver": "{type} correspond à un nombre, une date ou une plage d'adresses IP.",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesLabel": "Index source",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesRequiredError": "Au moins un index source est requis.",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeRequiredError": "Une valeur est requise pour le type de politique.",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver": "Détermine comment faire correspondre les données avec les documents entrants.",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.uploadFileLink": "Charger un fichier",

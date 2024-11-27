@@ -22148,8 +22148,6 @@
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.queryLabel": "查询（可选）",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeOption": "范围",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.rangeTypePopOver": "{type} 匹配一个数字、日期或 IP 地址范围。",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesLabel": "源索引",
-    "xpack.idxMgmt.enrichPolicyCreate.configurationStep.sourceIndicesRequiredError": "至少需要一个源索引。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeRequiredError": "策略类型值必填。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.typeTitlePopOver": "确定如何将数据匹配到传入文档。",
     "xpack.idxMgmt.enrichPolicyCreate.configurationStep.uploadFileLink": "上传文件",

@@ -26135,7 +26135,6 @@
     "xpack.inventory.entitiesGrid.euiDataGrid.lastSeenTooltip": "エンティティで最後に受信したデータのタイムスタンプ（entity.lastSeenTimestamp）",
     "xpack.inventory.entitiesGrid.euiDataGrid.typeLabel": "型",
     "xpack.inventory.entitiesGrid.euiDataGrid.typeTooltip": "エンティティのタイプ（entity.type）",
-    "xpack.inventory.entityActions.discoverLink": "Discoverで開く",
     "xpack.inventory.featureRegistry.inventoryFeatureName": "インベントリ",
     "xpack.inventory.home.serviceAlertsTable.tooltip.activeAlertsExplanation": "アクティブアラート",
     "xpack.inventory.inventoryLinkTitle": "インベントリ",

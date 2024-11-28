@@ -23674,7 +23674,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText": "各インデックスシャードのセグメント数を減らし、削除したドキュメントをクリーンアップします。",
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText": "強制結合",
     "xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError": "セグメント数の評価が必要です。",
-    "xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage": "このページのエラーを修正してください。",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel": "フローズンフェーズをアクティブ化",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription": "長期間保持する場合はデータをフローズンティアに移動します。フローズンティアはデータを格納し、検索することもできる最も費用対効果が高い方法です。",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle": "フローズンフェーズ",

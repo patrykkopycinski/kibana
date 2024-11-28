@@ -23702,7 +23702,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText": "Réduisez le nombre de segments dans chaque partition d'index et nettoyez les documents supprimés.",
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText": "Forcer la fusion",
     "xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError": "Valeur obligatoire du nombre de segments.",
-    "xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage": "Veuillez corriger les erreurs sur cette page.",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel": "Activer la phase \"frozen\"",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription": "Transférez les données au niveau \"frozen\" pour les conserver sur le long terme. Le niveau \"frozen\" représente le moyen le plus rentable de conserver vos données tout en permettant d'effectuer des recherches.",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle": "Phase \"frozen\"",

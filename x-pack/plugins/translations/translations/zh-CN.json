@@ -23273,7 +23273,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableExplanationText": "减少每个索引分片中的分段数目，并清除删除的文档。",
     "xpack.indexLifecycleMgmt.editPolicy.forceMerge.enableText": "强制合并",
     "xpack.indexLifecycleMgmt.editPolicy.forcemerge.numberOfSegmentsRequiredError": "必须指定分段数的值。",
-    "xpack.indexLifecycleMgmt.editPolicy.formErrorsMessage": "请修复此页面上的错误。",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel": "激活冻结阶段",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseDescription": "将数据移到冻层以长期保留。冻层提供最有成本效益的方法存储数据，并且仍能够搜索数据。",
     "xpack.indexLifecycleMgmt.editPolicy.frozenPhase.frozenPhaseTitle": "冻结阶段",

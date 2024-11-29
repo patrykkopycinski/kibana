@@ -17436,7 +17436,6 @@
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label": "Terminer le déploiement plus tard",
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.title": "En attente de votre connecteur",
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.title": "En attente du contrôle de votre connecteur",
-    "xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title": "Clé d'API",
     "xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.configuration.title": "Configuration",
     "xpack.enterpriseSearch.content.connectors.breadcrumb": "Connecteurs",
     "xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel": "Configuration",

@@ -17079,7 +17079,6 @@
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label": "稍后完成部署",
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.title": "等候您的连接器",
     "xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.title": "等待您的连接器签入",
-    "xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title": "API 密钥",
     "xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.configuration.title": "配置",
     "xpack.enterpriseSearch.content.connectors.breadcrumb": "连接器",
     "xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel": "配置",

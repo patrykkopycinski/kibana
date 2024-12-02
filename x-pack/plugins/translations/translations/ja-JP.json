@@ -37143,8 +37143,6 @@
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "アラート要約",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "ログやイベントの収集には、どのFleet対応Elasticエージェント統合を使用すべきですか。",
     "xpack.securitySolution.assistant.quickPrompts.AutomationTitle": "エージェント統合のアドバイス",
-    "xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationPrompt": "Elasticセキュリティのエキスパートユーザーとして、以下のユースケースを検出するための正確で有効なESQLクエリを作成してください。回答は、Elasticセキュリティのタイムラインまたは検出ルールですぐに使用できるように書式設定してください。答えに時間をかけて、求められているすべての機能について、あなたの知識をよく確認してください。ES|QLの回答は、特に、あなたの個人的な知識で利用可能なもののみを答えてください。クエリが不正確であることは許容できません。Elastic Common SchemaとElasticエージェントを使用していると仮定します。回答がマークダウンの独立したコードブロックとして簡単にコピーできるように書式設定されていることを確認してください。",
-    "xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationTitle": "ES|QLクエリ生成",
     "xpack.securitySolution.assistant.quickPrompts.ruleCreationPrompt": "Elasticセキュリティのエキスパートユーザーとして、以下のユースケースを検出するための正確で有効なEQLクエリを作成してください。回答は、Elasticセキュリティのタイムラインまたは検出ルールですぐに使用できるように書式設定してください。そのユースケースに対応するルールがすでにElasticセキュリティに組み込まれている場合、または類似のルールが組み込まれている場合は、そのルールへのリンクと説明を入力してください。",
     "xpack.securitySolution.assistant.quickPrompts.ruleCreationTitle": "クエリ生成",
     "xpack.securitySolution.assistant.quickPrompts.splQueryConversionPrompt": "以前のSIEMプラットフォームから次のクエリを受け取りました。Elasticセキュリティのエキスパートユーザーとして、同等のElastic EQLを提案してください。すぐにそれをElasticのセキュリティタイムラインにコピーできます。",

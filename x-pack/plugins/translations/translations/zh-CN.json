@@ -36538,8 +36538,6 @@
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "告警汇总",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "我应使用哪个启用 Fleet 的 Elastic 代理集成从以下项中收集日志和事件：",
     "xpack.securitySolution.assistant.quickPrompts.AutomationTitle": "代理集成建议",
-    "xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationPrompt": "作为 Elastic Security 的专家用户，请生成准确、有效的 ESQL 查询来检测以下用例。应对您的响应进行格式化，以便可以立即在 Elastic Security 时间线或检测规则中使用。请花点时间提供答案，检验您是否清楚了解我所询问的所有功能。具体来说，对于 ES|QL 答案，您应仅根据自己的个人观点进行解答。我无法承担查询不准确的后果。假设我正使用 Elastic Common Schema 和 Elastic 代理。确保以可轻松复制为 Markdown 中的独立代码块的方式设置答案的格式。",
-    "xpack.securitySolution.assistant.quickPrompts.esqlQueryGenerationTitle": "ES|QL 查询生成",
     "xpack.securitySolution.assistant.quickPrompts.ruleCreationPrompt": "作为 Elastic Security 的专家用户，请生成准确、有效的 EQL 查询来检测以下用例。应对您的响应进行格式化，以便可以立即在 Elastic Security 时间线或检测规则中使用。如果 Elastic Security 已经为此用例预构建了规则，或具有类似规则，请提供该规则的链接并做出描述。",
     "xpack.securitySolution.assistant.quickPrompts.ruleCreationTitle": "查询生成",
     "xpack.securitySolution.assistant.quickPrompts.splQueryConversionPrompt": "我具有以下来自之前 SIEM 平台的查询。作为 Elastic Security 的专家用户，请提议一个 Elastic EQL 等价查询。我应能够立即将其复制到 Elastic Security 时间线。",

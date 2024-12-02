@@ -15289,7 +15289,6 @@
     "xpack.datasetQuality.details.fetchDataStreamDetailsFailed": "データストリーム詳細を取得できませんでした。",
     "xpack.datasetQuality.details.fetchDataStreamSettingsFailed": "データストリーム設定を読み込めませんでした。",
     "xpack.datasetQuality.details.fetchIntegrationDashboardsFailed": "統合ダッシュボードを取得できませんでした。",
-    "xpack.datasetQuality.details.fetchIntegrationsFailed": "{integrationName}統合情報を取得できませんでした。",
     "xpack.datasetQuality.details.indexTemplateActionText": "インデックステンプレート",
     "xpack.datasetQuality.details.integrationActionsText": "統合アクション",
     "xpack.datasetQuality.details.integrationnameText": "統合",

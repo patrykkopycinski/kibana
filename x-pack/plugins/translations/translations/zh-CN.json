@@ -14983,7 +14983,6 @@
     "xpack.datasetQuality.details.fetchDataStreamDetailsFailed": "无法获取数据流详情。",
     "xpack.datasetQuality.details.fetchDataStreamSettingsFailed": "无法加载数据流设置。",
     "xpack.datasetQuality.details.fetchIntegrationDashboardsFailed": "无法获取集成仪表板。",
-    "xpack.datasetQuality.details.fetchIntegrationsFailed": "无法获取 {integrationName} 集成信息。",
     "xpack.datasetQuality.details.indexTemplateActionText": "索引模板",
     "xpack.datasetQuality.details.integrationActionsText": "集成操作",
     "xpack.datasetQuality.details.integrationnameText": "集成",

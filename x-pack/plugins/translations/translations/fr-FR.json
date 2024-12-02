@@ -15310,7 +15310,6 @@
     "xpack.datasetQuality.details.fetchDataStreamDetailsFailed": "Nous n'avons pas pu obtenir les détails de votre flux de données.",
     "xpack.datasetQuality.details.fetchDataStreamSettingsFailed": "Les paramètres du flux de données n'ont pas pu être chargés.",
     "xpack.datasetQuality.details.fetchIntegrationDashboardsFailed": "Nous n'avons pas pu obtenir vos tableaux de bord d'intégration.",
-    "xpack.datasetQuality.details.fetchIntegrationsFailed": "Nous n'avons pas pu obtenir les informations relatives à l'intégration de {integrationName}.",
     "xpack.datasetQuality.details.indexTemplateActionText": "Modèle d'index",
     "xpack.datasetQuality.details.integrationActionsText": "Actions d'intégration",
     "xpack.datasetQuality.details.integrationnameText": "Intégration",

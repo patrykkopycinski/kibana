@@ -18288,7 +18288,6 @@
     "xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel": "Configuration",
     "xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel": "Terminer",
     "xpack.enterpriseSearch.createConnector.configurationStep.p.description": "Vous pouvez synchroniser manuellement vos données, planifier une synchronisation récurrente ou gérer vos domaines.",
-    "xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.notAvailableTitle": "Ce connecteur n'est pas disponible en tant que connecteur géré par Elastic",
     "xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel": "référence du connecteur",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.description": "Maintenant, configurez votre robot Elastic et synchronisez les données.",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.title": "Configuration",

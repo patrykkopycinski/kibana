@@ -17925,7 +17925,6 @@
     "xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel": "配置",
     "xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel": "结束",
     "xpack.enterpriseSearch.createConnector.configurationStep.p.description": "您可以手动同步数据，计划重复同步或管理您的域。",
-    "xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.notAvailableTitle": "此连接器不可用作 Elastic 托管连接器",
     "xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel": "连接器参考",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.description": "立即配置您的 Elastic 网络爬虫并同步数据。",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.title": "配置",

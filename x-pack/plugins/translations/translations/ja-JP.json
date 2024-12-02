@@ -18262,7 +18262,6 @@
     "xpack.enterpriseSearch.createConnector.configurationStep.configurationLabel": "構成",
     "xpack.enterpriseSearch.createConnector.configurationStep.h4.finishUpLabel": "終了",
     "xpack.enterpriseSearch.createConnector.configurationStep.p.description": "データを手動で同期したり、繰り返し同期をスケジュールしたり、ドメインを管理したりできます。",
-    "xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.notAvailableTitle": "このコネクターは、Elasticマネージドコネクターとして利用できません。",
     "xpack.enterpriseSearch.createConnector.connectorDocsLinkLabel": "コネクター参照",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.description": "次に、Elasticクローラーを構成し、データを同期します。",
     "xpack.enterpriseSearch.createConnector.DeploymentStep.Configuration.title": "構成",

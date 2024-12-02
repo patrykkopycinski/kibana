@@ -45500,7 +45500,6 @@
     "xpack.synthetics.failedStep.label": "失败的步骤",
     "xpack.synthetics.fcp.label": "FCP",
     "xpack.synthetics.featureRegistry.syntheticsFeatureName": "Synthetics 和 Uptime",
-    "xpack.synthetics.features.app": "Synthetics",
     "xpack.synthetics.features.elasticManagedLocations": "已启用 Elastic 托管位置",
     "xpack.synthetics.fieldLabels.cls": "累计布局偏移 (CLS)",
     "xpack.synthetics.fieldLabels.dcl": "DOMContentLoaded 事件 (DCL)",

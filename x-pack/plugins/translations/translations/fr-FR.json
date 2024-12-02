@@ -46250,7 +46250,6 @@
     "xpack.synthetics.failedStep.label": "Étape ayant échoué",
     "xpack.synthetics.fcp.label": "FCP",
     "xpack.synthetics.featureRegistry.syntheticsFeatureName": "Synthetics et Uptime",
-    "xpack.synthetics.features.app": "Synthetics",
     "xpack.synthetics.features.elasticManagedLocations": "Emplacements gérés par Elastic activés",
     "xpack.synthetics.fieldLabels.cls": "Cumulative Layout Shift (CLS)",
     "xpack.synthetics.fieldLabels.dcl": "Événement DOMContentLoaded (DCL)",

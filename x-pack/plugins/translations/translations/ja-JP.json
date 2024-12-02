@@ -46215,7 +46215,6 @@
     "xpack.synthetics.failedStep.label": "失敗したステップ",
     "xpack.synthetics.fcp.label": "FCP",
     "xpack.synthetics.featureRegistry.syntheticsFeatureName": "Syntheticsとアップタイム",
-    "xpack.synthetics.features.app": "Synthetics",
     "xpack.synthetics.features.elasticManagedLocations": "Elasticで管理されている場所が有効です",
     "xpack.synthetics.fieldLabels.cls": "累積レイアウト変更（CLS）",
     "xpack.synthetics.fieldLabels.dcl": "DOMContentLoadedイベント（DCL）",

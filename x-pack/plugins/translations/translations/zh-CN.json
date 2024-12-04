@@ -30907,7 +30907,6 @@
     "xpack.ml.trainedModels.modelsList.expandRow": "展开",
     "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "{modelsCount, plural, other {# 个模型}}删除失败",
     "xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage": "加载已训练模型时出错",
-    "xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage": "加载已训练模型统计信息时出错",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText": "取消",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText": "停止点",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning": "此模型由 _inference API 使用",

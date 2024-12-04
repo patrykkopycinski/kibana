@@ -31526,7 +31526,6 @@
     "xpack.ml.trainedModels.modelsList.expandRow": "Développer",
     "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "La suppression {modelsCount, plural, one {du modèle} other {des modèles}} a échoué",
     "xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage": "Erreur lors du chargement des modèles entraînés",
-    "xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage": "Erreur lors du chargement des statistiques des modèles entraînés",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText": "Annuler",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText": "Arrêt",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning": "Ce modèle est utilisé par l'API _inference",

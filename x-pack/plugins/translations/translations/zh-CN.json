@@ -37120,8 +37120,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError": "至少需要一个指标匹配。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel": "EQL 查询",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError": "EQL 查询必填。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText": "EQL 序列查询不支持阻止。",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionValidationText": "{EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP} 将 EQL 查询更改为非序列查询，或移除阻止字段。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel": "异常分数阈值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldMachineLearningJobIdLabel": "Machine Learning 作业",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel": "定制查询",

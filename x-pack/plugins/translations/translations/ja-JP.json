@@ -16934,7 +16934,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "メタエンジン",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "値を追加",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "値を入力",
-    "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "値を削除",
     "xpack.enterpriseSearch.appSearch.ownerRoleTypeDescription": "所有者はすべての操作を実行できます。アカウントには複数の所有者がいる場合がありますが、一度に少なくとも1人以上の所有者が必要です。",
     "xpack.enterpriseSearch.appSearch.productCardDescription": "アプリやWebサイト向けのカスタムソリューション。ユーザー向けの検索エクスペリエンスを設計、実装、効果的に管理するために必要なツールを提供します。",
     "xpack.enterpriseSearch.appSearch.productDescription": "ダッシュボード、分析、APIを活用し、高度なアプリケーション検索をシンプルにします。",

@@ -17071,7 +17071,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "Métamoteurs",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "Ajouter une valeur",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "Entrer une valeur",
-    "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "Retirer une valeur",
     "xpack.enterpriseSearch.appSearch.ownerRoleTypeDescription": "Les propriétaires peuvent tout faire. Le compte peut avoir plusieurs propriétaires, mais il doit toujours y avoir au moins un propriétaire.",
     "xpack.enterpriseSearch.appSearch.productCardDescription": "Une solution sur mesure pour les applications et les sites web, qui fournit les outils dont vous avez besoin pour concevoir, implémenter et gérer efficacement ces expériences de recherche orientées clients.",
     "xpack.enterpriseSearch.appSearch.productDescription": "Tirez parti des tableaux de bord, des analyses et des API pour simplifier la recherche d'applications avancée.",

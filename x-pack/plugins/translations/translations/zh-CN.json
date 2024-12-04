@@ -16639,7 +16639,6 @@
     "xpack.enterpriseSearch.appSearch.metaEngines.title": "元引擎",
     "xpack.enterpriseSearch.appSearch.multiInputRows.addValueButtonLabel": "添加值",
     "xpack.enterpriseSearch.appSearch.multiInputRows.inputRowPlaceholder": "输入值",
-    "xpack.enterpriseSearch.appSearch.multiInputRows.removeValueButtonLabel": "删除值",
     "xpack.enterpriseSearch.appSearch.ownerRoleTypeDescription": "所有者可以执行任何操作。该帐户可以有很多所有者，但任何时候必须至少有一个所有者。",
     "xpack.enterpriseSearch.appSearch.productCardDescription": "为应用和网站专门定制的解决方案，提供设计、实施和高效管理那些面向用户的搜索体验所需的工具。",
     "xpack.enterpriseSearch.appSearch.productDescription": "利用仪表板、分析和 API 执行高级应用程序搜索简单易行。",

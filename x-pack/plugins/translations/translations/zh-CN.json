@@ -2590,7 +2590,6 @@
     "discover.documentsAriaLabel": "文档",
     "discover.docViews.logsOverview.title": "日志概览",
     "discover.dropZoneTableLabel": "放置区域以将字段作为列添加到表中",
-    "discover.embeddable.inspectorRequestDataTitle": "数据",
     "discover.embeddable.inspectorRequestDescription": "此请求将查询 Elasticsearch 以获取搜索的数据。",
     "discover.embeddable.search.dataViewError": "缺少数据视图 {indexPatternId}",
     "discover.embeddable.search.displayName": "搜索",

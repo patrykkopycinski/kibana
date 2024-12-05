@@ -2599,7 +2599,6 @@
     "discover.documentsAriaLabel": "ドキュメント",
     "discover.docViews.logsOverview.title": "ログ概要",
     "discover.dropZoneTableLabel": "フィールドを列として表に追加するには、ゾーンをドロップします",
-    "discover.embeddable.inspectorRequestDataTitle": "データ",
     "discover.embeddable.inspectorRequestDescription": "このリクエストはElasticsearchにクエリーをかけ、検索データを取得します。",
     "discover.embeddable.search.dataViewError": "データビュー{indexPatternId}が見つかりません",
     "discover.embeddable.search.displayName": "検索",

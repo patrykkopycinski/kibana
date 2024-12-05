@@ -2600,7 +2600,6 @@
     "discover.documentsAriaLabel": "Documents",
     "discover.docViews.logsOverview.title": "Aperçu du log",
     "discover.dropZoneTableLabel": "Abandonner la zone pour ajouter un champ en tant que colonne dans la table",
-    "discover.embeddable.inspectorRequestDataTitle": "Données",
     "discover.embeddable.inspectorRequestDescription": "Cette requête interroge Elasticsearch afin de récupérer les données pour la recherche.",
     "discover.embeddable.search.dataViewError": "Vue de données {indexPatternId} manquante",
     "discover.embeddable.search.displayName": "rechercher",

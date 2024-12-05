@@ -17,32 +17,25 @@ import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
-  const module = await import('./add_panel_flyout');
-  return { default: module.AddPanelFlyout };
+  const module = await import('./add_from_library_flyout');
+  return { default: module.AddFromLibraryFlyout };
 });
 
 const htmlId = htmlIdGenerator('modalTitleId');
 
-export const openAddPanelFlyout = ({
+export const openAddFromLibraryFlyout = ({
   container,
-  onAddPanel,
   onClose,
 }: {
   container: CanAddNewPanel;
-  onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
   const modalTitleId = htmlId();
 
-  // send the overlay ref to the root embeddable if it is capable of tracking overlays
-  const flyoutSession = core.overlays.openFlyout(
+  const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyAddPanelFlyout
-          container={container}
-          onAddPanel={onAddPanel}
-          modalTitleId={modalTitleId}
-        />
+        <LazyAddPanelFlyout container={container} modalTitleId={modalTitleId} />
       </Suspense>,
       core
     ),
@@ -60,5 +53,5 @@ export const openAddPanelFlyout = ({
     }
   );
 
-  return flyoutSession;
+  return flyoutRef;
 };

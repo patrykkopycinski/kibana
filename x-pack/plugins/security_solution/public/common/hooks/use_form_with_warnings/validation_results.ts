@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import type { ValidationError } from '../../../shared_imports';
 
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
+export interface ValidationResults {
+  errors: ValidationError[];
+  warnings: ValidationError[];
+}

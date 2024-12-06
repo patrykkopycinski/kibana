@@ -647,8 +647,6 @@
     "contentManagement.userProfiles.managedAvatarTip.avatarLabel": "托管",
     "contentManagement.userProfiles.managedAvatarTip.avatarTooltip": "此 {entityName} 由 Elastic 创建和管理。进行克隆以做出更改。",
     "contentManagement.userProfiles.managedAvatarTip.defaultEntityName": "对象",
-    "contentManagement.userProfiles.noCreatorTip": "将在创建对象时分配创建者",
-    "contentManagement.userProfiles.noUpdaterTip": "将在更新对象时设置更新者",
     "controls.blockingError": "加载此控件时出错。",
     "controls.controlFactoryRegistry.factoryAlreadyExistsError": "已注册类型为 {key} 的控制工厂。",
     "controls.controlFactoryRegistry.factoryNotFoundError": "未找到类型为 {key} 的控制工厂",

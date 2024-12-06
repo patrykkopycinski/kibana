@@ -625,8 +625,6 @@
     "contentManagement.userProfiles.managedAvatarTip.avatarLabel": "管理中",
     "contentManagement.userProfiles.managedAvatarTip.avatarTooltip": "この{entityName}はElasticによって作成され、管理されています。変更するには、複製してください。",
     "contentManagement.userProfiles.managedAvatarTip.defaultEntityName": "オブジェクト",
-    "contentManagement.userProfiles.noCreatorTip": "作成担当は、オブジェクトが作成されるときに割り当てられます",
-    "contentManagement.userProfiles.noUpdaterTip": "更新は、オブジェクトが更新されるときに割り当てられます",
     "controls.blockingError": "このコントロールの読み込みエラーが発生しました。",
     "controls.controlFactoryRegistry.factoryAlreadyExistsError": "タイプ\"{key}\"のコントロールファクトリはすでに登録されています。",
     "controls.controlFactoryRegistry.factoryNotFoundError": "タイプ\"{key}\"のコントロールファクトリが見つかりません",

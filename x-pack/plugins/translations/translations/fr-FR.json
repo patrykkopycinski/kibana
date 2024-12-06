@@ -623,8 +623,6 @@
     "contentManagement.userProfiles.managedAvatarTip.avatarLabel": "Géré",
     "contentManagement.userProfiles.managedAvatarTip.avatarTooltip": "Cette entité {entityName} est créée et gérée par Elastic. Clonez-le pour effectuer des modifications.",
     "contentManagement.userProfiles.managedAvatarTip.defaultEntityName": "objet",
-    "contentManagement.userProfiles.noCreatorTip": "Les créateurs sont assignés lors de la création des objets",
-    "contentManagement.userProfiles.noUpdaterTip": "Le champ Mis à jour par est défini lors de la mise à jour des objets",
     "controls.blockingError": "Une erreur s'est produite lors du chargement de ce contrôle.",
     "controls.controlFactoryRegistry.factoryAlreadyExistsError": "Une usine de contrôle pour le type : {key} est déjà enregistrée.",
     "controls.controlFactoryRegistry.factoryNotFoundError": "Aucune usine de contrôle n'a été trouvée pour le type : {key}",

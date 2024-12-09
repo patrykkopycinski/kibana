@@ -44408,8 +44408,6 @@
     "xpack.snapshotRestore.snapshots.breadcrumbTitle": "Snapshots",
     "xpack.snapshotRestore.snapshotState.completeLabel": "Snapshot terminé",
     "xpack.snapshotRestore.snapshotState.failedLabel": "Snapshot échoué",
-    "xpack.snapshotRestore.snapshotState.incompatibleLabel": "Version incompatible",
-    "xpack.snapshotRestore.snapshotState.incompatibleTipDescription": "Le snapshot a été créé avec une version d'Elasticsearch incompatible avec la version du cluster.",
     "xpack.snapshotRestore.snapshotState.inProgressLabel": "Prise de snapshot…",
     "xpack.snapshotRestore.snapshotState.partialLabel": "Échec partiel",
     "xpack.snapshotRestore.snapshotState.partialTipDescription": "L'état du cluster global a été stocké, mais au moins une partition n'a pas été stockée correctement. Consultez l'onglet \"Index échoués\".",

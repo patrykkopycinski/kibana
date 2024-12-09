@@ -43615,8 +43615,6 @@
     "xpack.snapshotRestore.snapshots.breadcrumbTitle": "快照",
     "xpack.snapshotRestore.snapshotState.completeLabel": "快照完成",
     "xpack.snapshotRestore.snapshotState.failedLabel": "快照失败",
-    "xpack.snapshotRestore.snapshotState.incompatibleLabel": "不兼容版本",
-    "xpack.snapshotRestore.snapshotState.incompatibleTipDescription": "创建快照所用的 Elasticsearch 版本与集群的版本不兼容。",
     "xpack.snapshotRestore.snapshotState.inProgressLabel": "正在拍取快照……",
     "xpack.snapshotRestore.snapshotState.partialLabel": "部分失败",
     "xpack.snapshotRestore.snapshotState.partialTipDescription": "全局集群状态已存储，但至少一个分片未成功存储。请参阅'失败的索引'选项卡。",

@@ -44258,8 +44258,6 @@
     "xpack.snapshotRestore.snapshots.breadcrumbTitle": "スナップショット",
     "xpack.snapshotRestore.snapshotState.completeLabel": "スナップショット完了",
     "xpack.snapshotRestore.snapshotState.failedLabel": "スナップショット失敗",
-    "xpack.snapshotRestore.snapshotState.incompatibleLabel": "互換性のないバージョン",
-    "xpack.snapshotRestore.snapshotState.incompatibleTipDescription": "このスナップショットはクラスターのバージョンと互換性のないバージョンの Elasticsearch で作成されました。",
     "xpack.snapshotRestore.snapshotState.inProgressLabel": "スナップショットを撮影中…",
     "xpack.snapshotRestore.snapshotState.partialLabel": "一部失敗",
     "xpack.snapshotRestore.snapshotState.partialTipDescription": "グローバルクラスターステータスが保存されましたが、1 つまたは複数のシャードの保存に失敗しました。「失敗したインシデント」タブをご覧ください。",

@@ -1466,8 +1466,6 @@
     "dashboard.featureCatalogue.dashboardDescription": "ビジュアライゼーションと保存された検索のコレクションの表示と共有を行います。",
     "dashboard.featureCatalogue.dashboardSubtitle": "ダッシュボードでデータを分析します。",
     "dashboard.featureCatalogue.dashboardTitle": "ダッシュボード",
-    "dashboard.hasRunMigrationsBadge": "推奨を保存",
-    "dashboard.hasRunMigrationsBadgeToolTipContent": "このダッシュボードの1つ以上のパネルが新しいバージョンに更新されました。ダッシュボードを保存すると、次回の読み込みが速くなります。",
     "dashboard.labs.enableLabsDescription": "このフラグはビューアーで［ラボ］ボタンを使用できるかどうかを決定します。ダッシュボードで実験的機能を有効および無効にするための簡単な方法です。",
     "dashboard.labs.enableUI": "ダッシュボードで［ラボ］ボタンを有効にする",
     "dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription": "ダッシュボードを作成し、ビジュアライゼーションを追加して、すべてのElasticデータを1つの場所で分析します。",

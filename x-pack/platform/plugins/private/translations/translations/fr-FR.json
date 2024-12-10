@@ -1466,8 +1466,6 @@
     "dashboard.featureCatalogue.dashboardDescription": "Affichez et partagez une collection de visualisations et de recherches enregistrées.",
     "dashboard.featureCatalogue.dashboardSubtitle": "Analysez des données à l’aide de tableaux de bord.",
     "dashboard.featureCatalogue.dashboardTitle": "Dashboard",
-    "dashboard.hasRunMigrationsBadge": "Enregistrement recommandé",
-    "dashboard.hasRunMigrationsBadgeToolTipContent": "Un ou plusieurs panneaux de ce tableau de bord ont été mis à jour vers une nouvelle version. Enregistrez le tableau de bord pour qu'il charge plus rapidement la prochaine fois.",
     "dashboard.labs.enableLabsDescription": "Cet indicateur détermine si l'utilisateur a accès au bouton Ateliers, moyen rapide d'activer et de désactiver les fonctionnalités de la version d'évaluation technique dans le tableau de bord.",
     "dashboard.labs.enableUI": "Activer le bouton Ateliers dans le tableau de bord",
     "dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription": "Analysez toutes vos données Elastic en un seul endroit, en créant un tableau de bord et en ajoutant des visualisations.",

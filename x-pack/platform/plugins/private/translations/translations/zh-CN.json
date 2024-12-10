@@ -1476,8 +1476,6 @@
     "dashboard.emptyScreen.noPermissionsTitle": "此仪表板是空的。",
     "dashboard.emptyScreen.viewModeSubtitle": "进入编辑模式，然后开始添加可视化。",
     "dashboard.emptyScreen.viewModeTitle": "将可视化添加到仪表板",
-    "dashboard.factory.displayName": "仪表板",
-    "dashboard.factory.displayNameLowercase": "仪表板",
     "dashboard.featureCatalogue.dashboardDescription": "显示和共享可视化和已保存搜索的集合。",
     "dashboard.featureCatalogue.dashboardSubtitle": "在仪表板中分析数据。",
     "dashboard.featureCatalogue.dashboardTitle": "仪表板",

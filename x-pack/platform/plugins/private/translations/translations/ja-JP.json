@@ -1463,8 +1463,6 @@
     "dashboard.emptyScreen.noPermissionsTitle": "このダッシュボードは空です。",
     "dashboard.emptyScreen.viewModeSubtitle": "編集モードに切り替えて、ビジュアライゼーションの追加を開始します。",
     "dashboard.emptyScreen.viewModeTitle": "ダッシュボードにビジュアライゼーションを追加",
-    "dashboard.factory.displayName": "ダッシュボード",
-    "dashboard.factory.displayNameLowercase": "ダッシュボード",
     "dashboard.featureCatalogue.dashboardDescription": "ビジュアライゼーションと保存された検索のコレクションの表示と共有を行います。",
     "dashboard.featureCatalogue.dashboardSubtitle": "ダッシュボードでデータを分析します。",
     "dashboard.featureCatalogue.dashboardTitle": "ダッシュボード",

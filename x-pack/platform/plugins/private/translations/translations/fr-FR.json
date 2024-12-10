@@ -1463,8 +1463,6 @@
     "dashboard.emptyScreen.noPermissionsTitle": "Ce tableau de bord est vide.",
     "dashboard.emptyScreen.viewModeSubtitle": "Accédez au mode de modification, puis commencez à ajouter vos visualisations.",
     "dashboard.emptyScreen.viewModeTitle": "Ajouter des visualisations à votre tableau de bord",
-    "dashboard.factory.displayName": "Dashboard",
-    "dashboard.factory.displayNameLowercase": "tableau de bord",
     "dashboard.featureCatalogue.dashboardDescription": "Affichez et partagez une collection de visualisations et de recherches enregistrées.",
     "dashboard.featureCatalogue.dashboardSubtitle": "Analysez des données à l’aide de tableaux de bord.",
     "dashboard.featureCatalogue.dashboardTitle": "Dashboard",

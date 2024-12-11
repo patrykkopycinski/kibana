@@ -25990,7 +25990,6 @@
     "xpack.investigateApp.addObservationUI.h2.addAnObservationChartLabel": "Ajouter un graphique d'observation",
     "xpack.investigateApp.addObservationUI.p.selectADataSourceLabel": "Sélectionnez une source de données pour générer un graphique d'aperçu",
     "xpack.investigateApp.appTitle": "Investigations",
-    "xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel": "Aidez-moi à résoudre la cause de cet échec",
     "xpack.investigateApp.defaultChart.error_equation.description": "Vérifiez l'équation.",
     "xpack.investigateApp.defaultChart.error_equation.title": "Une erreur s'est produite lors de l'affichage du graphique",
     "xpack.investigateApp.defaultChart.noData.title": "Aucune donnée graphique disponible",

@@ -25412,7 +25412,6 @@
     "xpack.investigateApp.addObservationUI.h2.addAnObservationChartLabel": "添加观察图表",
     "xpack.investigateApp.addObservationUI.p.selectADataSourceLabel": "选择数据源以生成预览图表",
     "xpack.investigateApp.appTitle": "调查",
-    "xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel": "帮助我调查此故障",
     "xpack.investigateApp.defaultChart.error_equation.description": "检查方程。",
     "xpack.investigateApp.defaultChart.error_equation.title": "渲染图表时出错",
     "xpack.investigateApp.defaultChart.noData.title": "没有可用图表数据",

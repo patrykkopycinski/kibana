@@ -25849,7 +25849,6 @@
     "xpack.investigateApp.addObservationUI.h2.addAnObservationChartLabel": "観測グラフを追加",
     "xpack.investigateApp.addObservationUI.p.selectADataSourceLabel": "データソースを選択して、プレビューグラフを生成",
     "xpack.investigateApp.appTitle": "調査",
-    "xpack.investigateApp.assistantHypothesis.observabilityAIAssistantContextualInsight.helpMeInvestigateThisLabel": "このエラーの調査を支援",
     "xpack.investigateApp.defaultChart.error_equation.description": "式を確認してください。",
     "xpack.investigateApp.defaultChart.error_equation.title": "グラフの表示中にエラーが発生しました",
     "xpack.investigateApp.defaultChart.noData.title": "グラフデータがありません",

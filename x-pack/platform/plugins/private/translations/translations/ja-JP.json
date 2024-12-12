@@ -2789,7 +2789,6 @@
     "embeddableApi.addPanel.managedPanelTooltip": "Elasticはこのパネルを管理します。ダッシュボードに追加すると、ライブラリからリンクが解除されます。",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "一致するオブジェクトが見つかりませんでした。",
     "embeddableApi.addPanel.Title": "ライブラリから追加",
-    "embeddableApi.attributeService.saveToLibraryError": "保存中にエラーが発生しました。エラー：{errorMessage}",
     "embeddableApi.cellValueTrigger.description": "アクションはビジュアライゼーションのセル値オプションに表示されます",
     "embeddableApi.cellValueTrigger.title": "セル値",
     "embeddableApi.common.constants.grouping.annotations": "注釈とナビゲーション",

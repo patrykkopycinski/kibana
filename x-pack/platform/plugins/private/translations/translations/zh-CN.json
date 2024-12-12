@@ -2779,7 +2779,6 @@
     "embeddableApi.addPanel.managedPanelTooltip": "Elastic 将管理此面板。将其添加到仪表板会取消其与库的链接。",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "未找到任何匹配对象。",
     "embeddableApi.addPanel.Title": "从库中添加",
-    "embeddableApi.attributeService.saveToLibraryError": "保存时出错。错误：{errorMessage}",
     "embeddableApi.cellValueTrigger.description": "操作在可视化上的单元格值选项中显示",
     "embeddableApi.cellValueTrigger.title": "单元格值",
     "embeddableApi.common.constants.grouping.annotations": "标注和导航",

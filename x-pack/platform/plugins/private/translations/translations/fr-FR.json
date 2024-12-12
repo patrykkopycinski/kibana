@@ -2794,7 +2794,6 @@
     "embeddableApi.addPanel.managedPanelTooltip": "Elastic gère ce panneau. Le fait de l'ajouter à un tableau de bord le dissocie de la bibliothèque.",
     "embeddableApi.addPanel.noMatchingObjectsMessage": "Aucun objet correspondant trouvé.",
     "embeddableApi.addPanel.Title": "Ajouter depuis la bibliothèque",
-    "embeddableApi.attributeService.saveToLibraryError": "Une erreur s'est produite lors de l'enregistrement. Erreur : {errorMessage}.",
     "embeddableApi.cellValueTrigger.description": "Les actions apparaissent dans les options de valeur de cellule dans la visualisation",
     "embeddableApi.cellValueTrigger.title": "Valeur de cellule",
     "embeddableApi.common.constants.grouping.annotations": "Annotations et Navigation",

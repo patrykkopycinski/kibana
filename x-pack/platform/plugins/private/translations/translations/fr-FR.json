@@ -48401,8 +48401,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader": "Réindexer {index}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel": "En savoir plus",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle": "Accepter les modifications",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail": "Les types de mapping ne sont plus pris en charge dans Elastic 8.x. Assurez-vous qu'aucun code d'application ou script n'utilise {mappingType}.",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle": "Remplacer le type de mapping {mappingType} par {defaultType}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail": "Les paramètres d'index déclassés ont été détectés :",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle": "Retirer les paramètres d'index déclassés",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "Sauvegardez l'index avant de continuer. Pour poursuivre avec la réindexation, acceptez chaque modification.",

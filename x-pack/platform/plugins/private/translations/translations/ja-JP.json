@@ -48248,8 +48248,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader": "再インデックス{index}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel": "詳細",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle": "変更を承諾",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail": "マッピングタイプはElastic 8.xではサポートされていません。アプリケーションコードまたはスクリプトが{mappingType}に依存していないことを確認してください。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle": "マッピングタイプ{mappingType}を{defaultType}で置き換えます",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail": "次の廃止予定のインデックス設定が検出されました。",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle": "廃止予定のインデックス設定を削除",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "続行する前に、インデックスをバックアップしてください。再インデックスを続行するには、各変更を承諾してください。",

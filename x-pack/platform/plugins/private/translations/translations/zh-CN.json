@@ -47537,8 +47537,6 @@
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.flyoutHeader": "重新索引 {index}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel": "了解详情",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.acceptChangesTitle": "接受更改",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail": "映射类型在 Elastic 8.x 中不再受支持。确保没有应用程序代码或脚本依赖 {mappingType}。",
-    "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle": "将映射类型 {mappingType} 替换为 {defaultType}",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail": "检测到以下弃用的索引设置：",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle": "移除弃用的索引设置",
     "xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.destructiveCallout.calloutDetail": "继续前备份索引。要继续重新索引，请接受每个更改。",

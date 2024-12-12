@@ -15525,7 +15525,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "已达到最大生成尝试次数 ({generationAttempts})。尝试向此模型发送更少的告警。",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "已达到最大幻觉失败次数 ({hallucinationFailures})。尝试向此模型发送更少的告警。",
     "xpack.elasticAssistantPlugin.server.newChat": "新聊天",
-    "xpack.embeddableEnhanced.Drilldowns": "向下钻取",
     "xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel": "访问控制同步会使权限信息保持最新以实现文档级别安全性 (DLS)",
     "xpack.enterpriseSearch.actions.backButtonLabel": "返回",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "取消",

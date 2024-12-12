@@ -15805,7 +15805,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "最大生成試行回数（{generationAttempts}）に達しました。このモデルに送信するアラートの数を減らしてください。",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "最大ハルシネーション失敗回数（{hallucinationFailures}）に達しました。このモデルに送信するアラートの数を減らしてください。",
     "xpack.elasticAssistantPlugin.server.newChat": "新しいチャット",
-    "xpack.embeddableEnhanced.Drilldowns": "ドリルダウン",
     "xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel": "アクセス制御の同期により、ドキュメントレベルセキュリティ（DLS）の権限情報が最新の状態に保たれます。",
     "xpack.enterpriseSearch.actions.backButtonLabel": "戻る",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "キャンセル",

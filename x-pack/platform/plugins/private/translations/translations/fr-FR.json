@@ -15942,7 +15942,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "Nombre maximum de tentatives de génération ({generationAttempts}) atteint. Essayez d'envoyer un nombre d'alertes moins élevé à ce modèle.",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "Nombre maximum d'échecs d'hallucinations ({hallucinationFailures}) atteint. Essayez d'envoyer un nombre d'alertes moins élevé à ce modèle.",
     "xpack.elasticAssistantPlugin.server.newChat": "Nouveau chat",
-    "xpack.embeddableEnhanced.Drilldowns": "Explorations",
     "xpack.enterpriseSearch.accessControlIndexSelector.p.accessControlSyncsAreLabel": "Les synchronisations de contrôle d'accès maintiennent les informations d'autorisation à jour pour assurer la sécurité au niveau du document (DLS)",
     "xpack.enterpriseSearch.actions.backButtonLabel": "Retour",
     "xpack.enterpriseSearch.actions.cancelButtonLabel": "Annuler",

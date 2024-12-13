@@ -38897,7 +38897,6 @@
     "xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle": "インストールされたルールの更新が利用可能です。{link}で確認して更新してください。",
     "xpack.securitySolution.detectionEngine.rules.updatePrePackagedRulesAndTimelinesButton": "{updateRules} Elasticの事前構築済みの{updateRules, plural, other  {個のルール}}と{updateTimelines} Elasticの事前構築済みの{updateTimelines, plural, other  {個のタイムライン}}を更新",
     "xpack.securitySolution.detectionEngine.rules.updatePrePackagedTimelinesButton": "{updateTimelines} Elastic事前構築済み{updateTimelines, plural, other  {タイムライン}}を更新",
-    "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.dataSourceLabel": "データソース",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.eqlQueryLabel": "EQL クエリ",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.esqlQueryLabel": "EQLクエリ",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.kqlQueryLabel": "KQLクエリ",

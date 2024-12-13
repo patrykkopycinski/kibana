@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { TypeReadOnly } from './type';
+import { EuiText } from '@elastic/eui';
+import * as i18n from './translations';
 
-export default {
-  component: TypeReadOnly,
-  title: 'Rule Management/Prebuilt Rules/Upgrade Flyout/ThreeWayDiff/FieldReadOnly/type',
-};
-
-export const Default = () => <TypeReadOnly type="query" />;
+export function EmptyFieldValuePlaceholder() {
+  return (
+    <EuiText size="s" color="subdued">
+      {`<${i18n.EMPTY_FIELD_VALUE_PLACEHOLDER}>`}
+    </EuiText>
+  );
+}

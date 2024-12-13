@@ -45152,7 +45152,6 @@
     "xpack.stackConnectors.components.inference.taskTypeDetailsLabel": "Paramètres des tâches",
     "xpack.stackConnectors.components.inference.taskTypeFieldLabel": "Type de tâche",
     "xpack.stackConnectors.components.inference.taskTypeHelpLabel": "Configurer la tâche d'inférence. Ces paramètres sont spécifiques au service et au modèle sélectionnés.",
-    "xpack.stackConnectors.components.inference.taskTypeLabel": "Type de tâche",
     "xpack.stackConnectors.components.inference.unableToFindProvidersQueryMessage": "Impossible de trouver des fournisseurs",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "Token d'API",
     "xpack.stackConnectors.components.jira.apiUrlTextFieldLabel": "URL",

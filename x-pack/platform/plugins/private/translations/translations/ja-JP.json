@@ -45002,7 +45002,6 @@
     "xpack.stackConnectors.components.inference.taskTypeDetailsLabel": "タスク設定",
     "xpack.stackConnectors.components.inference.taskTypeFieldLabel": "タスクタイプ",
     "xpack.stackConnectors.components.inference.taskTypeHelpLabel": "推論タスクを構成します。これらの設定は、選択したサービスおよびモデルに固有です。",
-    "xpack.stackConnectors.components.inference.taskTypeLabel": "タスクタイプ",
     "xpack.stackConnectors.components.inference.unableToFindProvidersQueryMessage": "プロバイダーが見つかりません",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "APIトークン",
     "xpack.stackConnectors.components.jira.apiUrlTextFieldLabel": "URL",

@@ -44333,7 +44333,6 @@
     "xpack.stackConnectors.components.inference.taskTypeDetailsLabel": "任务设置",
     "xpack.stackConnectors.components.inference.taskTypeFieldLabel": "任务类型",
     "xpack.stackConnectors.components.inference.taskTypeHelpLabel": "配置推理任务。这些设置特定于选定服务和模型。",
-    "xpack.stackConnectors.components.inference.taskTypeLabel": "任务类型",
     "xpack.stackConnectors.components.inference.unableToFindProvidersQueryMessage": "找不到提供商",
     "xpack.stackConnectors.components.jira.apiTokenTextFieldLabel": "API 令牌",
     "xpack.stackConnectors.components.jira.apiUrlTextFieldLabel": "URL",

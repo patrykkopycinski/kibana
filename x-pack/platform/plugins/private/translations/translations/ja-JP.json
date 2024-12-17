@@ -42654,7 +42654,7 @@
     "xpack.serverlessSearch.languages.php": "PHP",
     "xpack.serverlessSearch.languages.php.githubLink": "elasticsearch-serverless-php",
     "xpack.serverlessSearch.languages.python": "Python",
-    "xpack.serverlessSearch.languages.python.githubLabel": "elasticsearch-serverless-python",
+    "xpack.serverlessSearch.languages.python.githubLabel": "elasticsearch-py",
     "xpack.serverlessSearch.languages.ruby": "Ruby",
     "xpack.serverlessSearch.languages.ruby.githubLabel": "elasticsearch-serverless-ruby",
     "xpack.serverlessSearch.learnMore": "詳細",

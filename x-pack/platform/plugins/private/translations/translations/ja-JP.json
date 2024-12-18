@@ -37542,7 +37542,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel": "カウント",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel": "一意の値",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText": "カーディナリティを確認するフィールドを選択します",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "しきい値",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel": "選択したフィールドでアラートを非表示：{fieldsString}",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel": "アラートを非表示",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "アラートを非表示",

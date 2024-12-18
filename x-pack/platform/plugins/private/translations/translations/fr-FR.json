@@ -37684,7 +37684,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel": "Compte",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel": "Valeurs uniques",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText": "Sélectionner un champ pour vérifier la cardinalité",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "Seuil",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel": "Supprimer les alertes par champs sélectionnés : {fieldsString}",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel": "Supprimer les alertes",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "Supprimer les alertes pour",

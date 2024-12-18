@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+export { MachineLearningJobIdEdit } from './machine_learning_job_id_edit';

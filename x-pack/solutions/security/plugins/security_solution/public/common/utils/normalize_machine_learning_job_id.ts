@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+import type { MachineLearningJobId } from '../../../common/api/detection_engine';
+
+export function normalizeMachineLearningJobId(jobId: MachineLearningJobId): string[] {
+  return typeof jobId === 'string' ? [jobId] : jobId;
+}

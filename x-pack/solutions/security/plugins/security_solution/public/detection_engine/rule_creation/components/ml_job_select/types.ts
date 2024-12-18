@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
+export interface MlJobValue {
+  id: string;
+  description: string;
+  name?: string;
+}
+
+export type MlJobOption = EuiComboBoxOptionOption<MlJobValue>;

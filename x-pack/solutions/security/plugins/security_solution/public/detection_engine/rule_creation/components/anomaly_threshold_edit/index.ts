@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+export { AnomalyThresholdEdit } from './anomaly_threshold_edit';

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { AnomalyThresholdEdit } from '../../../../../../../rule_creation/components/anomaly_threshold_edit';
 
-export const ML_JOB_SELECT_PLACEHOLDER_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.mlJobSelectPlaceholderText',
-  {
-    defaultMessage: 'Select a job',
-  }
-);
+export function AnomalyThresholdAdapter(): JSX.Element {
+  return <AnomalyThresholdEdit path="anomaly_threshold" />;
+}

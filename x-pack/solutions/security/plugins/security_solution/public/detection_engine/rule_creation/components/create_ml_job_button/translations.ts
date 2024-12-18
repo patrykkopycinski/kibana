@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+import { i18n } from '@kbn/i18n';
+
+export const CREATE_CUSTOM_JOB_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlSelectJob.createCustomJobButtonTitle',
+  {
+    defaultMessage: 'Create custom job',
+  }
+);

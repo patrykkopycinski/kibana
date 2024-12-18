@@ -36974,7 +36974,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityFieldLabel": "计数",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdCardinalityValueFieldLabel": "唯一值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdFieldCardinalityFieldHelpText": "选择字段以检查基数",
-    "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThresholdLabel": "阈值",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel": "对选定字段阻止告警：{fieldsString}",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel": "阻止告警",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByDurationValueLabel": "阻止以下项的告警",

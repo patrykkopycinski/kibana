@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+import { i18n } from '@kbn/i18n';
+
+export const ANOMALY_THRESHOLD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldAnomalyThresholdLabel',
+  {
+    defaultMessage: 'Anomaly score threshold',
+  }
+);

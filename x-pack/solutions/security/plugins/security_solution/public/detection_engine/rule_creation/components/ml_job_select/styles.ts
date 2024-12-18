@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export { MlJobSelect } from './ml_job_select';
+import { css } from '@emotion/css';
+
+export const mlJobSelectClassName = css`
+  margin-bottom: 5px;
+`;
+
+export const jobDisplayClassName = css`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+`;

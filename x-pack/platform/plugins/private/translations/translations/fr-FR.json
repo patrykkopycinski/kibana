@@ -2772,7 +2772,6 @@
     "embeddableApi.common.constants.grouping.annotations": "Annotations et Navigation",
     "embeddableApi.common.constants.grouping.legacy": "Hérité",
     "embeddableApi.common.constants.grouping.other": "Autre",
-    "embeddableApi.compatibility.defaultTypeDisplayName": "graphique",
     "embeddableApi.contextMenuTrigger.description": "Une nouvelle action sera ajoutée au menu contextuel du panneau",
     "embeddableApi.contextMenuTrigger.title": "Menu contextuel",
     "embeddableApi.errors.embeddableFactoryNotFound": "Impossible de charger {type}. Veuillez effectuer une mise à niveau vers la distribution par défaut d'Elasticsearch et de Kibana avec la licence appropriée.",

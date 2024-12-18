@@ -2759,7 +2759,6 @@
     "embeddableApi.common.constants.grouping.annotations": "标注和导航",
     "embeddableApi.common.constants.grouping.legacy": "旧版",
     "embeddableApi.common.constants.grouping.other": "其他",
-    "embeddableApi.compatibility.defaultTypeDisplayName": "图表",
     "embeddableApi.contextMenuTrigger.description": "会将一个新操作添加到该面板的上下文菜单",
     "embeddableApi.contextMenuTrigger.title": "上下文菜单",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} 无法加载。请升级到具有适当许可的默认 Elasticsearch 和 Kibana 分发。",

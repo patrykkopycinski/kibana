@@ -2767,7 +2767,6 @@
     "embeddableApi.common.constants.grouping.annotations": "注釈とナビゲーション",
     "embeddableApi.common.constants.grouping.legacy": "レガシー",
     "embeddableApi.common.constants.grouping.other": "Other",
-    "embeddableApi.compatibility.defaultTypeDisplayName": "チャート",
     "embeddableApi.contextMenuTrigger.description": "新しいアクションがパネルのコンテキストメニューに追加されます",
     "embeddableApi.contextMenuTrigger.title": "コンテキストメニュー",
     "embeddableApi.errors.embeddableFactoryNotFound": "{type} を読み込めません。Elasticsearch と Kibanaのデフォルトのディストリビューションを適切なライセンスでアップグレードしてください。",

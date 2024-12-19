@@ -2774,7 +2774,6 @@
     "embeddableApi.common.constants.grouping.other": "Autre",
     "embeddableApi.contextMenuTrigger.description": "Une nouvelle action sera ajoutée au menu contextuel du panneau",
     "embeddableApi.contextMenuTrigger.title": "Menu contextuel",
-    "embeddableApi.errors.embeddableFactoryNotFound": "Impossible de charger {type}. Veuillez effectuer une mise à niveau vers la distribution par défaut d'Elasticsearch et de Kibana avec la licence appropriée.",
     "embeddableApi.errors.paneldoesNotExist": "Panneau introuvable",
     "embeddableApi.errors.panelIncompatibleError": "L'API du panneau n'est pas compatible",
     "embeddableApi.multiValueClickTrigger.description": "Sélection de plusieurs valeurs d'une même dimension dans la visualisation",

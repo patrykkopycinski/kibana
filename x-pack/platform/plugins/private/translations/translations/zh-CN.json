@@ -2761,7 +2761,6 @@
     "embeddableApi.common.constants.grouping.other": "其他",
     "embeddableApi.contextMenuTrigger.description": "会将一个新操作添加到该面板的上下文菜单",
     "embeddableApi.contextMenuTrigger.title": "上下文菜单",
-    "embeddableApi.errors.embeddableFactoryNotFound": "{type} 无法加载。请升级到具有适当许可的默认 Elasticsearch 和 Kibana 分发。",
     "embeddableApi.errors.paneldoesNotExist": "未找到面板",
     "embeddableApi.errors.panelIncompatibleError": "面板 API 不兼容",
     "embeddableApi.multiValueClickTrigger.description": "在可视化上选择多个单一维度的值",

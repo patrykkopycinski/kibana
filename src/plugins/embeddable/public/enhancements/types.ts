@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from '../../../common/lib/saved_object_embeddable';
-export { Embeddable } from './embeddable';
-export { EmbeddableErrorHandler } from './embeddable_error_handler';
-export { ErrorEmbeddable } from './error_embeddable';
-export type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
+
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
+  extends PersistableStateDefinition<P> {
+  id: string;
+}
+
+export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
+  extends PersistableState<P> {
+  id: string;
+}

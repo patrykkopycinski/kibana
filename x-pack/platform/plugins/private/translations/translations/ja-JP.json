@@ -2769,7 +2769,6 @@
     "embeddableApi.common.constants.grouping.other": "Other",
     "embeddableApi.contextMenuTrigger.description": "新しいアクションがパネルのコンテキストメニューに追加されます",
     "embeddableApi.contextMenuTrigger.title": "コンテキストメニュー",
-    "embeddableApi.errors.embeddableFactoryNotFound": "{type} を読み込めません。Elasticsearch と Kibanaのデフォルトのディストリビューションを適切なライセンスでアップグレードしてください。",
     "embeddableApi.errors.paneldoesNotExist": "パネルが見つかりません",
     "embeddableApi.errors.panelIncompatibleError": "パネルAPIに互換性がありません",
     "embeddableApi.multiValueClickTrigger.description": "ビジュアライゼーションの1つのディメンションの複数値を選択しています",

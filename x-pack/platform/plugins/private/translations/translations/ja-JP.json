@@ -10501,7 +10501,6 @@
     "xpack.apm.anomalyRuleType.anomalyDetector": "検知器タイプ",
     "xpack.apm.anomalyRuleType.anomalyDetector.infoLabel": "検知器を最低1つ選択する必要があります",
     "xpack.apm.anomalyScore": "{severity, select, minor {軽微な} major {重要な} critical {重大な} other {不明な重要度の}}異常",
-    "xpack.apm.api.apiKeys.securityRequired": "セキュリティプラグインが必要です",
     "xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud": "スーパーユーザーロールが付与されたElastic Cloudユーザーのみが操作できます。",
     "xpack.apm.api.fleet.fleetSecurityRequired": "FleetおよびSecurityプラグインが必要です",
     "xpack.apm.api.storageExplorer.securityRequired": "セキュリティプラグインが必要です",

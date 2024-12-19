@@ -10631,7 +10631,6 @@
     "xpack.apm.anomalyRuleType.anomalyDetector": "Types de détecteurs",
     "xpack.apm.anomalyRuleType.anomalyDetector.infoLabel": "Vous devez sélectionner au moins un détecteur",
     "xpack.apm.anomalyScore": "Anomalie {severity, select, minor {mineure} major {majeure} critical {critique} other {de sévérité inconnue}}",
-    "xpack.apm.api.apiKeys.securityRequired": "Le plug-in de sécurité est requis",
     "xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud": "Opération autorisée uniquement pour les utilisateurs Elastic Cloud disposant du rôle de superutilisateur.",
     "xpack.apm.api.fleet.fleetSecurityRequired": "Les plug-ins Fleet et Security sont requis",
     "xpack.apm.api.storageExplorer.securityRequired": "Le plug-in de sécurité est requis",

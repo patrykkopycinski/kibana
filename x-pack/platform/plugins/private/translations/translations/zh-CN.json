@@ -10319,7 +10319,6 @@
     "xpack.apm.anomalyRuleType.anomalyDetector": "检测工具类型",
     "xpack.apm.anomalyRuleType.anomalyDetector.infoLabel": "应至少选择一个检测工具",
     "xpack.apm.anomalyScore": "{severity, select, minor {轻微} major {重大} critical {严重} other {严重性未知}}异常",
-    "xpack.apm.api.apiKeys.securityRequired": "需要 Security 插件",
     "xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud": "操作仅允许具有超级用户角色的 Elastic Cloud 用户执行。",
     "xpack.apm.api.fleet.fleetSecurityRequired": "需要 Fleet 和 Security 插件",
     "xpack.apm.api.storageExplorer.securityRequired": "需要 Security 插件",

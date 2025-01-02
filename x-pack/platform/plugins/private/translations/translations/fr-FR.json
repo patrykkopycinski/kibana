@@ -36783,7 +36783,6 @@
     "xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError": "Trois colonnes attendues, {rowLength} reçues",
     "xpack.securitySolution.assetCriticality.csvUpload.idTooLongError": "L’identificateur est trop long. Il devrait contenir moins de {maxChars} caractères, mais en contient {idLength}",
     "xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError": "Niveau de criticité non valide \"{criticalityLevel}\", un des {validLevels} attendu",
-    "xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError": "Type d'entité \"{entityType}\" non valide, hôte ou utilisateur attendu",
     "xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError": "Niveau de criticité manquant",
     "xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError": "Type d'entité manquant",
     "xpack.securitySolution.assetCriticality.csvUpload.missingIdError": "Identificateur manquant",

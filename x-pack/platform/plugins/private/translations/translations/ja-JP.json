@@ -36642,7 +36642,6 @@
     "xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError": "3列でなければなりませんが、{rowLength}列でした",
     "xpack.securitySolution.assetCriticality.csvUpload.idTooLongError": "識別子が長すぎます。{maxChars}未満でなければなりませんが、{idLength}でした",
     "xpack.securitySolution.assetCriticality.csvUpload.invalidCriticalityError": "無効な重要度レベル\"{criticalityLevel}\"です。{validLevels}のいずれかでなければなりません",
-    "xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError": "無効なエンティティタイプ\"{entityType}\"です。ホストまたはユーザーでなければなりません",
     "xpack.securitySolution.assetCriticality.csvUpload.missingCriticalityError": "重要度レベルがありません",
     "xpack.securitySolution.assetCriticality.csvUpload.missingEntityTypeError": "エンティティタイプがありません",
     "xpack.securitySolution.assetCriticality.csvUpload.missingIdError": "識別子がありません",

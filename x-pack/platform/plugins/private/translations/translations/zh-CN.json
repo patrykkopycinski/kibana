@@ -20792,7 +20792,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.editTitle": "编辑代理二进制源",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostInputLabel": "主机",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputDescription": "您的代理将用于从中下载其二进制文件的地址。指定包含二进制文件的目录的路径。{guideLink}",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "指定主机",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "名称",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "指定名称",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel": "代理",

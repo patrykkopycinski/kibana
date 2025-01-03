@@ -21262,7 +21262,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.editTitle": "Modifier la source de binaire pour les agents",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostInputLabel": "Hôte",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputDescription": "Adresse que vos agents utiliseront pour télécharger les fichiers binaires. Spécifiez le chemin d'accès au répertoire contenant les fichiers binaires. {guideLink}",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "Indiquer l’hôte",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "Nom",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "Indiquer le nom",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel": "Proxy",

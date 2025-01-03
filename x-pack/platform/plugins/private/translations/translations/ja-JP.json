@@ -21121,7 +21121,6 @@
     "xpack.fleet.settings.editDownloadSourcesFlyout.editTitle": "エージェントバイナリソースを編集",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostInputLabel": "ホスト",
     "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputDescription": "エージェントがバイナリをダウンロードするために使用するダウンロード元アドレス。バイナリが含まれるディレクトリへのパスを指定します。{guideLink}",
-    "xpack.fleet.settings.editDownloadSourcesFlyout.hostsInputPlaceholder": "ホストを指定",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputLabel": "名前",
     "xpack.fleet.settings.editDownloadSourcesFlyout.nameInputPlaceholder": "名前を指定",
     "xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdLabel": "プロキシ",

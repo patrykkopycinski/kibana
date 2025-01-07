@@ -40634,7 +40634,6 @@
     "xpack.securitySolution.flyout.user.closeButton": "fermer",
     "xpack.securitySolution.flyout.user.preview.viewDetailsLabel": "Afficher tous les détails de l'utilisateur",
     "xpack.securitySolution.footer.autoRefreshActiveDescription": "Actualisation automatique active",
-    "xpack.securitySolution.footer.autoRefreshActiveTooltip": "Lorsque l'actualisation automatique est activée, la chronologie vous montrera les {numberOfItems} derniers événements correspondant à votre recherche.",
     "xpack.securitySolution.footer.cancel": "Annuler",
     "xpack.securitySolution.footer.data": "données",
     "xpack.securitySolution.footer.events": "Événements",

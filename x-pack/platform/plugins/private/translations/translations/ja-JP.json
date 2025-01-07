@@ -40491,7 +40491,6 @@
     "xpack.securitySolution.flyout.user.closeButton": "閉じる",
     "xpack.securitySolution.flyout.user.preview.viewDetailsLabel": "すべてのユーザー詳細を表示",
     "xpack.securitySolution.footer.autoRefreshActiveDescription": "自動更新アクション",
-    "xpack.securitySolution.footer.autoRefreshActiveTooltip": "自動更新が有効な間、タイムラインはクエリーに一致する最新の {numberOfItems} 件のイベントを表示します。",
     "xpack.securitySolution.footer.cancel": "キャンセル",
     "xpack.securitySolution.footer.data": "データ",
     "xpack.securitySolution.footer.events": "イベント",

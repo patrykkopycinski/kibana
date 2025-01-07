@@ -39895,7 +39895,6 @@
     "xpack.securitySolution.flyout.user.closeButton": "关闭",
     "xpack.securitySolution.flyout.user.preview.viewDetailsLabel": "显示全部用户详情",
     "xpack.securitySolution.footer.autoRefreshActiveDescription": "自动刷新已启用",
-    "xpack.securitySolution.footer.autoRefreshActiveTooltip": "自动刷新已启用时，时间线将显示匹配查询的最近 {numberOfItems} 个事件。",
     "xpack.securitySolution.footer.cancel": "取消",
     "xpack.securitySolution.footer.data": "数据",
     "xpack.securitySolution.footer.events": "事件",

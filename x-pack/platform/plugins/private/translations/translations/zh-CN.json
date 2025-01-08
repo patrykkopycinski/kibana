@@ -39919,8 +39919,6 @@
     "xpack.securitySolution.getStarted.landingCards.box.siemCard.title": "适用于现代 SOC 的 SIEM",
     "xpack.securitySolution.getStarted.landingCards.box.unify.desc": "Elastic Security 实现了安全运营现代化，能够对多年的数据进行分析，自动执行关键流程，并保护每台主机。",
     "xpack.securitySolution.getStarted.landingCards.box.unify.title": "集 SIEM、Endpoint Security 和云安全于一体",
-    "xpack.securitySolution.globalHeader.assistantHeaderLink": "AI 助手",
-    "xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip": "快捷键 {keyboardShortcut}",
     "xpack.securitySolution.globalHeader.buttonAddData": "添加集成",
     "xpack.securitySolution.goToDocumentationButton": "查看文档",
     "xpack.securitySolution.guideConfig.addDataStep.description": "在您的计算机之一上安装代理，并使用 Elastic Defend 集成对其进行配置。使用此集成，该代理将能够实时收集系统数据并将其发送到 Elastic Security。",

@@ -40515,8 +40515,6 @@
     "xpack.securitySolution.getStarted.landingCards.box.siemCard.title": "最先端を行くSOCのSIEM",
     "xpack.securitySolution.getStarted.landingCards.box.unify.desc": "Elasticセキュリティは数年分に及ぶデータの分析を可能にするほか、主要プロセスを自動化し、全ホストを保護して、最先端のセキュリティ運用を実現します。",
     "xpack.securitySolution.getStarted.landingCards.box.unify.title": "SIEM、エンドポイントセキュリティ、クラウドセキュリティを一体化",
-    "xpack.securitySolution.globalHeader.assistantHeaderLink": "AI Assistant",
-    "xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip": "キーボードショートカット{keyboardShortcut}",
     "xpack.securitySolution.globalHeader.buttonAddData": "統合の追加",
     "xpack.securitySolution.goToDocumentationButton": "ドキュメンテーションを表示",
     "xpack.securitySolution.guideConfig.addDataStep.description": "コンピューターのいずれかにエージェントをインストールし、Elastic Defend統合を構成します。この統合により、エージェントはシステムデータをリアルタイムで収集し、Elastic Securityに送信できます。",

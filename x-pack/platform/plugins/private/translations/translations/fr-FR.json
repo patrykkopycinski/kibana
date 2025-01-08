@@ -40658,8 +40658,6 @@
     "xpack.securitySolution.getStarted.landingCards.box.siemCard.title": "SIEM pour le centre opérationnel de sécurité moderne",
     "xpack.securitySolution.getStarted.landingCards.box.unify.desc": "Elastic Security modernise les opérations de sécurité en facilitant l'analyse des données collectées au fil des ans, en automatisant les principaux processus et en protégeant chaque hôte.",
     "xpack.securitySolution.getStarted.landingCards.box.unify.title": "Unification du SIEM, de la sécurité aux points de terminaison et de la sécurité cloud",
-    "xpack.securitySolution.globalHeader.assistantHeaderLink": "Assistant d'intelligence artificielle",
-    "xpack.securitySolution.globalHeader.assistantHeaderLinkShortcutTooltip": "Raccourci clavier {keyboardShortcut}",
     "xpack.securitySolution.globalHeader.buttonAddData": "Ajouter des intégrations",
     "xpack.securitySolution.goToDocumentationButton": "Afficher la documentation",
     "xpack.securitySolution.guideConfig.addDataStep.description": "Installez un agent sur l'un de vos ordinateurs et configurez-le avec l'intégration Elastic Defend. Grâce à cette intégration, l'agent pourra collecter et envoyer les données système à Elastic Security en temps réel.",

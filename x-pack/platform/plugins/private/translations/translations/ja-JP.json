@@ -595,7 +595,6 @@
     "contentManagement.tableList.listing.userFilter.errorMessage": "ユーザーの読み込みに失敗しました",
     "contentManagement.tableList.listing.userFilter.filterLabel": "作成者",
     "contentManagement.tableList.listing.userFilter.noCreators": "作成担当なし",
-    "contentManagement.tableList.mainColumnName": "名前、説明、タグ",
     "contentManagement.tableList.managedItemNoEdit": "Elasticはこの項目を管理します。変更するには、複製してください。",
     "contentManagement.tableList.tabsFilter.allTabLabel": "すべて",
     "contentManagement.tableList.tabsFilter.favoriteTabLabel": "スター付き",

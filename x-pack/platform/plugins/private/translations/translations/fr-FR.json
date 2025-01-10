@@ -593,7 +593,6 @@
     "contentManagement.tableList.listing.userFilter.errorMessage": "Échec de chargement des utilisateurs",
     "contentManagement.tableList.listing.userFilter.filterLabel": "Créé par",
     "contentManagement.tableList.listing.userFilter.noCreators": "Aucun créateur",
-    "contentManagement.tableList.mainColumnName": "Nom, description, balises",
     "contentManagement.tableList.managedItemNoEdit": "Elastic gère cet objet. Clonez-le pour effectuer des modifications.",
     "contentManagement.tableList.tabsFilter.allTabLabel": "Tous",
     "contentManagement.tableList.tabsFilter.favoriteTabLabel": "Éléments avec étoiles",

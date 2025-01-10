@@ -617,7 +617,6 @@
     "contentManagement.tableList.listing.userFilter.errorMessage": "无法加载用户",
     "contentManagement.tableList.listing.userFilter.filterLabel": "创建者",
     "contentManagement.tableList.listing.userFilter.noCreators": "无创建者",
-    "contentManagement.tableList.mainColumnName": "名称、描述、标签",
     "contentManagement.tableList.managedItemNoEdit": "Elastic 将管理此项目。进行克隆以做出更改。",
     "contentManagement.tableList.tabsFilter.allTabLabel": "全部",
     "contentManagement.tableList.tabsFilter.favoriteTabLabel": "带星标",

@@ -4930,8 +4930,6 @@
     "indexPatternManagement.disabledCallOutHeader": "スクリプティングが無効です",
     "indexPatternManagement.disabledCallOutLabel": "Elasticsearchでのすべてのインラインスクリプティングが無効になっています。Kibanaでスクリプトフィールドを使用するには、インラインスクリプティングを有効にする必要があります。",
     "indexPatternManagement.editDataView.deleteHeader": "データビューを削除",
-    "indexPatternManagement.editDataView.deleteWarning": "データビュー{dataViewName}は削除されます。この操作は元に戻すことができません。",
-    "indexPatternManagement.editDataView.deleteWarningWithNamespaces": "共有されているすべてのスペースからデータビュー{dataViewName}を削除します。この操作は元に戻すことができません。",
     "indexPatternManagement.editDataView.detailsAria": "データビュー詳細",
     "indexPatternManagement.editDataView.editAria": "データビューフィールドを編集します。",
     "indexPatternManagement.editDataView.editTooltip": "編集",

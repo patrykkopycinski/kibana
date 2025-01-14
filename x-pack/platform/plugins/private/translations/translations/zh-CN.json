@@ -4899,8 +4899,6 @@
     "indexPatternManagement.disabledCallOutHeader": "脚本已禁用",
     "indexPatternManagement.disabledCallOutLabel": "所有内联脚本在 Elasticsearch 中已禁用。必须至少为一种语言启用内联脚本，才能在 Kibana 中使用脚本字段。",
     "indexPatternManagement.editDataView.deleteHeader": "删除数据视图",
-    "indexPatternManagement.editDataView.deleteWarning": "将删除数据视图 {dataViewName}。此操作无法撤消。",
-    "indexPatternManagement.editDataView.deleteWarningWithNamespaces": "从共享数据视图的每个工作区中删除数据视图 {dataViewName}。此操作无法撤消。",
     "indexPatternManagement.editDataView.detailsAria": "数据视图详情",
     "indexPatternManagement.editDataView.editAria": "编辑数据视图。",
     "indexPatternManagement.editDataView.editTooltip": "编辑",

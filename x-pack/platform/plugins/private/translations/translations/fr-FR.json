@@ -4935,8 +4935,6 @@
     "indexPatternManagement.disabledCallOutHeader": "Scripts désactivés",
     "indexPatternManagement.disabledCallOutLabel": "Tous les scripts en ligne ont été désactivés dans Elasticsearch. Vous devez activer les scripts en ligne pour au moins un langage afin d'utiliser des champs scriptés dans Kibana.",
     "indexPatternManagement.editDataView.deleteHeader": "Supprimer la vue de données",
-    "indexPatternManagement.editDataView.deleteWarning": "La vue de données {dataViewName} va être supprimée. Vous ne pouvez pas annuler cette action.",
-    "indexPatternManagement.editDataView.deleteWarningWithNamespaces": "Supprimer la vue de données {dataViewName} de tous les espaces dans lesquels elle est partagée. Vous ne pouvez pas annuler cette action.",
     "indexPatternManagement.editDataView.detailsAria": "Détails de la vue de données",
     "indexPatternManagement.editDataView.editAria": "Modifier la vue de données.",
     "indexPatternManagement.editDataView.editTooltip": "Modifier",

@@ -35584,7 +35584,6 @@
     "xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage": "Ouverture réussie de {totalAlerts} {totalAlerts, plural, =1 {alerte} other {alertes}}.",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTitle": "Niveaux de sévérité",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn": "Niveaux",
-    "xpack.securitySolution.detectionEngine.alerts.severity.unknown": "Inconnu",
     "xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle": "alertes",
     "xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert": "Impossible de mettre à jour l'alerte, car elle était déjà en cours de modification.",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "Inclure les alertes fondamentales",

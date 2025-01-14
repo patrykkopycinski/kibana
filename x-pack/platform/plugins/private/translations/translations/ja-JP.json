@@ -35444,7 +35444,6 @@
     "xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage": "{totalAlerts} {totalAlerts, plural, other  {件のアラート}}を正常に開きました。",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTitle": "重要度レベル",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn": "レベル",
-    "xpack.securitySolution.detectionEngine.alerts.severity.unknown": "不明",
     "xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle": "アラート",
     "xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert": "アラートを更新できませんでした。アラートはすでに修正されています。",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "基本アラートを含める",

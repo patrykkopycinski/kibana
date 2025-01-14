@@ -34903,7 +34903,6 @@
     "xpack.securitySolution.detectionEngine.alerts.openedAlertSuccessToastMessage": "已成功打开 {totalAlerts} 个{totalAlerts, plural, other {告警}}。",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityDonutTitle": "严重性级别",
     "xpack.securitySolution.detectionEngine.alerts.severity.severityTableLevelColumn": "级别",
-    "xpack.securitySolution.detectionEngine.alerts.severity.unknown": "未知",
     "xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle": "告警",
     "xpack.securitySolution.detectionEngine.alerts.updateAlertStatusFailedSingleAlert": "无法更新告警，因为它已被修改。",
     "xpack.securitySolution.detectionEngine.alerts.utilityBar.additionalFiltersActions.showBuildingBlockTitle": "包括构建块告警",

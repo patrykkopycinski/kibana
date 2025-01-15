@@ -9791,7 +9791,6 @@
     "xpack.aiAssistant.couldNotFindConversationTitle": "Conversation introuvable",
     "xpack.aiAssistant.disclaimer.disclaimerLabel": "Ce chat est soutenu par une intégration avec votre fournisseur LLM. Il arrive que les grands modèles de langage (LLM) présentent comme correctes des informations incorrectes. Elastic prend en charge la configuration ainsi que la connexion au fournisseur LLM et à votre base de connaissances, mais n'est pas responsable des réponses fournies par le LLM.",
     "xpack.aiAssistant.emptyConversationTitle": "Nouvelle conversation",
-    "xpack.aiAssistant.errorSettingUpKnowledgeBase": "Impossible de configurer la base de connaissances",
     "xpack.aiAssistant.errorUpdatingConversation": "Impossible de mettre à jour la conversation",
     "xpack.aiAssistant.executedFunctionFailureEvent": "impossible d'exécuter la fonction {functionName}",
     "xpack.aiAssistant.failedToGetStatus": "Échec de l'obtention du statut du modèle.",

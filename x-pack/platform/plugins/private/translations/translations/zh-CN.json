@@ -9509,7 +9509,6 @@
     "xpack.aiAssistant.couldNotFindConversationTitle": "未找到对话",
     "xpack.aiAssistant.disclaimer.disclaimerLabel": "通过集成 LLM 提供商来支持此聊天。众所周知，LLM 有时会提供错误信息，好像它是正确的。Elastic 支持配置并连接到 LLM 提供商和知识库，但不对 LLM 响应负责。",
     "xpack.aiAssistant.emptyConversationTitle": "新对话",
-    "xpack.aiAssistant.errorSettingUpKnowledgeBase": "无法设置知识库",
     "xpack.aiAssistant.errorUpdatingConversation": "无法更新对话",
     "xpack.aiAssistant.executedFunctionFailureEvent": "无法执行函数 {functionName}",
     "xpack.aiAssistant.failedToGetStatus": "无法获取模型状态。",

@@ -9667,7 +9667,6 @@
     "xpack.aiAssistant.couldNotFindConversationTitle": "会話が見つかりません",
     "xpack.aiAssistant.disclaimer.disclaimerLabel": "このチャットは、LLMプロバイダーとの統合によって提供されています。LLMは、正しくない情報を正しい情報であるかのように表示する場合があることが知られています。Elasticは、構成やLLMプロバイダーへの接続、お客様のナレッジベースへの接続はサポートしますが、LLMの応答については責任を負いません。",
     "xpack.aiAssistant.emptyConversationTitle": "新しい会話",
-    "xpack.aiAssistant.errorSettingUpKnowledgeBase": "ナレッジベースをセットアップできませんでした",
     "xpack.aiAssistant.errorUpdatingConversation": "会話を更新できませんでした",
     "xpack.aiAssistant.executedFunctionFailureEvent": "関数{functionName}の実行に失敗しました",
     "xpack.aiAssistant.failedToGetStatus": "モデルステータスを取得できませんでした。",

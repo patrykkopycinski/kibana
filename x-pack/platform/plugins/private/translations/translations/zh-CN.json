@@ -1480,7 +1480,6 @@
     "dashboard.listing.unsaved.resetAria": "重置对 {title} 所做的更改",
     "dashboard.listing.unsaved.resetTitle": "重置更改",
     "dashboard.listing.unsaved.unsavedChangesTitle": "在以下 {dash} 中有未保存更改：",
-    "dashboard.loadingError.dashboardGridErrorMessage": "无法加载仪表板：{message}",
     "dashboard.loadURLError.PanelTooOld": "无法通过在早于 7.3 的版本中创建的 URL 加载面板",
     "dashboard.managedContentBadge.ariaLabel": "Elastic 将管理此仪表板。进行复制以做出更改。",
     "dashboard.managedContentPopoverButton": "Elastic 管理此仪表板。{Duplicate} 它以做出更改。",

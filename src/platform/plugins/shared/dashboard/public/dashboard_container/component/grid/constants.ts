@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerDashboardPanelPlacementSetting } from './panel_placement_registry';
-
-export type { GetPanelPlacementSettings } from './types';
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DASHBOARD_MARGIN_SIZE = 8;

@@ -44590,7 +44590,6 @@
     "xpack.synthetics.server.monitors.invalidScheduleError": "La planification moniteur n’est pas valide",
     "xpack.synthetics.server.monitors.invalidSchemaError": "Le moniteur n'est pas un moniteur valide de type {type}",
     "xpack.synthetics.server.monitors.invalidTypeError": "Le type de moniteur n’est pas valide",
-    "xpack.synthetics.server.project.delete.toolarge": "La charge utile de la requête de suppression est trop volumineuse. Veuillez envoyer au maximum 250 moniteurs à supprimer par requête",
     "xpack.synthetics.server.projectMonitors.invalidPrivateLocationError": "Emplacement privé non valide : \"{location}\". Supprimez-le ou remplacez-le par un emplacement privé valide.",
     "xpack.synthetics.server.projectMonitors.invalidPublicLocationError": "Emplacement non valide : \"{location}\". Supprimez-le ou remplacez-le par un emplacement valide.",
     "xpack.synthetics.server.projectMonitors.invalidPublicOriginError": "Type d'origine non pris en charge {origin}, seul le type ui est pris en charge par l'API.",

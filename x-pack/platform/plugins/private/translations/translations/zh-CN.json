@@ -43786,7 +43786,6 @@
     "xpack.synthetics.server.monitors.invalidScheduleError": "监测计划无效",
     "xpack.synthetics.server.monitors.invalidSchemaError": "监测不是 {type} 类型的有效监测",
     "xpack.synthetics.server.monitors.invalidTypeError": "监测类型无效",
-    "xpack.synthetics.server.project.delete.toolarge": "删除请求，有效负载太大。每个请求请最多发送 250 个要删除的监测",
     "xpack.synthetics.server.projectMonitors.invalidPublicOriginError": "不支持起源类型 {origin}，仅通过 API 支持 UI 类型。",
     "xpack.synthetics.server.projectMonitors.locationEmptyError": "必须至少将一个位置或专用位置添加到此监测。",
     "xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType": "无法将监测更新为不同类型。",

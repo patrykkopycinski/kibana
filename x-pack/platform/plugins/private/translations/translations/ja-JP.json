@@ -44443,7 +44443,6 @@
     "xpack.synthetics.server.monitors.invalidScheduleError": "モニタースケジュールが無効です",
     "xpack.synthetics.server.monitors.invalidSchemaError": "モニターは有効なタイプ{type}のモニターではありません。",
     "xpack.synthetics.server.monitors.invalidTypeError": "モニタータイプが無効です",
-    "xpack.synthetics.server.project.delete.toolarge": "削除リクエストペイロードが大きすぎます。リクエストごとに送信できる削除するモニターは250以下にしてください",
     "xpack.synthetics.server.projectMonitors.invalidPrivateLocationError": "非公開の場所\"{location}\"が無効です。削除するか、有効な非公開の場所で置換してください。",
     "xpack.synthetics.server.projectMonitors.invalidPublicLocationError": "場所\"{location}\"が無効です。削除するか、有効な場所で置換してください。",
     "xpack.synthetics.server.projectMonitors.invalidPublicOriginError": "サポートされていない始点タイプ\"{origin}\"です。uiタイプのみがAPIでサポートされています。",

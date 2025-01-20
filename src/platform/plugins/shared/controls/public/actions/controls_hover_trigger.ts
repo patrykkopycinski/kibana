@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import type { ControlGroupRendererProps } from './control_group_renderer';
+import { i18n } from '@kbn/i18n';
+import { Trigger } from '@kbn/ui-actions-plugin/public';
 
-const Component = dynamic(async () => {
-  const { ControlGroupRenderer } = await import('../../controls_module');
-  return {
-    default: ControlGroupRenderer,
-  };
-});
-
-export function LazyControlGroupRenderer(props: ControlGroupRendererProps) {
-  return <Component {...props} />;
-}
+export const CONTROL_HOVER_TRIGGER = 'CONTROL_HOVER_TRIGGER';
+export const controlHoverTrigger: Trigger = {
+  id: CONTROL_HOVER_TRIGGER,
+  title: i18n.translate('controls.hoverTrigger.title', {
+    defaultMessage: 'Control hover',
+  }),
+  description: i18n.translate('controls.hoverTrigger.description', {
+    defaultMessage: "Add action to controls's hover menu",
+  }),
+};

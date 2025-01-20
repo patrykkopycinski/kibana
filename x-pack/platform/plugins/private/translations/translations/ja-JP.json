@@ -36496,7 +36496,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "有効にする",
     "xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab": "エンドポイント例外",
     "xpack.securitySolution.detectionEngine.ruleDetails.falsePositivesFieldLabel": "誤検出の例",
-    "xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel": "追加のルックバック時間",
     "xpack.securitySolution.detectionEngine.ruleDetails.historyWindowSizeFieldLabel": "履歴ウィンドウサイズ",
     "xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel": "インデックスパターン",
     "xpack.securitySolution.detectionEngine.ruleDetails.installAndEnableButtonLabel": "インストールして有効化",

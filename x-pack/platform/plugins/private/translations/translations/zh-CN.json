@@ -35954,7 +35954,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "启用",
     "xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab": "终端例外",
     "xpack.securitySolution.detectionEngine.ruleDetails.falsePositivesFieldLabel": "误报示例",
-    "xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel": "更多回查时间",
     "xpack.securitySolution.detectionEngine.ruleDetails.historyWindowSizeFieldLabel": "历史记录窗口大小",
     "xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel": "索引模式",
     "xpack.securitySolution.detectionEngine.ruleDetails.installAndEnableButtonLabel": "安装并启用",

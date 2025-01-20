@@ -36637,7 +36637,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel": "Activer",
     "xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab": "Exceptions de point de terminaison",
     "xpack.securitySolution.detectionEngine.ruleDetails.falsePositivesFieldLabel": "Exemples de faux positifs",
-    "xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel": "Temps de récupération supplémentaire",
     "xpack.securitySolution.detectionEngine.ruleDetails.historyWindowSizeFieldLabel": "Taille de la fenêtre d’historique",
     "xpack.securitySolution.detectionEngine.ruleDetails.indexFieldLabel": "Modèles d'indexation",
     "xpack.securitySolution.detectionEngine.ruleDetails.installAndEnableButtonLabel": "Installer et activer",

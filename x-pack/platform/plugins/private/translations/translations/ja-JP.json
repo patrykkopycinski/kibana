@@ -39947,7 +39947,6 @@
     "xpack.securitySolution.system.withResultDescription": "結果付き",
     "xpack.securitySolution.tables.rowItemHelper.moreDescription": "行は表示されていません",
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription": "他{count}件",
-    "xpack.securitySolution.threatIntelligence.investigateInTimelineTitle": "タイムラインで調査",
     "xpack.securitySolution.threatMatch.andDescription": "AND",
     "xpack.securitySolution.threatMatch.fieldDescription": "フィールド",
     "xpack.securitySolution.threatMatch.fieldPlaceholderDescription": "検索",

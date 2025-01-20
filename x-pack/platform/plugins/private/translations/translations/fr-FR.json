@@ -40087,7 +40087,6 @@
     "xpack.securitySolution.system.withResultDescription": "avec le résultat",
     "xpack.securitySolution.tables.rowItemHelper.moreDescription": "plus non affiché",
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription": "+ {count} de plus",
-    "xpack.securitySolution.threatIntelligence.investigateInTimelineTitle": "Investiguer dans la chronologie",
     "xpack.securitySolution.threatMatch.andDescription": "AND",
     "xpack.securitySolution.threatMatch.fieldDescription": "Champ",
     "xpack.securitySolution.threatMatch.fieldPlaceholderDescription": "Rechercher",

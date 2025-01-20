@@ -39366,7 +39366,6 @@
     "xpack.securitySolution.system.withResultDescription": "，结果为",
     "xpack.securitySolution.tables.rowItemHelper.moreDescription": "未显示",
     "xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription": "另外 {count} 个",
-    "xpack.securitySolution.threatIntelligence.investigateInTimelineTitle": "在时间线中调查",
     "xpack.securitySolution.threatMatch.andDescription": "且",
     "xpack.securitySolution.threatMatch.fieldDescription": "字段",
     "xpack.securitySolution.threatMatch.fieldPlaceholderDescription": "搜索",

@@ -17560,7 +17560,6 @@
     "xpack.enterpriseSearch.searchNav.otherTools": "Autres outils",
     "xpack.enterpriseSearch.searchNav.relevance": "Pertinence",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "Intelligence artificielle de recherche",
-    "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Robot d'indexation d'Elastic",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "Cliquer pour ouvrir la fenêtre contextuelle d'explication du connecteur",
     "xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel": "Autogéré",
     "xpack.enterpriseSearch.selectConnector.h4.connectorClientsLabel": "Connecteurs autogérés",

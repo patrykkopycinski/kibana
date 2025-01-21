@@ -17139,7 +17139,6 @@
     "xpack.enterpriseSearch.searchNav.otherTools": "其他工具",
     "xpack.enterpriseSearch.searchNav.relevance": "相关性",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "搜索 AI",
-    "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Elastic 网络爬虫",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "单击以打开连接器说明弹出框",
     "xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel": "自管型",
     "xpack.enterpriseSearch.selectConnector.h4.connectorClientsLabel": "自管型连接器",

@@ -17418,7 +17418,6 @@
     "xpack.enterpriseSearch.searchNav.mngt": "スタック管理",
     "xpack.enterpriseSearch.searchNav.otherTools": "その他のツール",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "検索AI",
-    "xpack.enterpriseSearch.searchProvider.webCrawler.name": "Elastic Webクローラー",
     "xpack.enterpriseSearch.selectConnector.badgeOnClick.ariaLabel": "クリックすると、コネクター説明ポップオーバーが開きます",
     "xpack.enterpriseSearch.selectConnector.connectorClientBadgeLabel": "セルフマネージド",
     "xpack.enterpriseSearch.selectConnector.h4.connectorClientsLabel": "セルフマネージドコネクター",

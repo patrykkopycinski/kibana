@@ -3811,7 +3811,6 @@
     "guidedOnboarding.quitGuideModal.quitButtonLabel": "Quitter le guide",
     "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "Développer une expérience de recherche optimisée par l'IA",
     "guidedOnboardingPackage.gettingStarted.cards.apmObservability.title": "Surveiller les performances {lineBreak} de mon application (APM / traçage)",
-    "guidedOnboardingPackage.gettingStarted.cards.appSearch.title": "Développer une application {lineBreak} au-dessus d'Elasticsearch",
     "guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title": "Sécuriser mes ressources cloud {lineBreak} grâce à la gestion du niveau de sécurité du cloud (CSPM)",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "Guide terminé",
     "guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title": "Rechercher dans les bases de données {lineBreak} et les systèmes d'entreprise",

@@ -3786,7 +3786,6 @@
     "guidedOnboarding.quitGuideModal.quitButtonLabel": "退出指南",
     "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "构建 AI 驱动式搜索体验",
     "guidedOnboardingPackage.gettingStarted.cards.apmObservability.title": "监测我的应用程序{lineBreak}性能（APM/跟踪）",
-    "guidedOnboardingPackage.gettingStarted.cards.appSearch.title": "在 Elasticsearch 之上{lineBreak}构建应用程序",
     "guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title": "借助云{lineBreak}安全态势管理 (CSPM) 保护我的云资产",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "指南完成",
     "guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title": "跨数据库和{lineBreak}业务系统进行搜索",

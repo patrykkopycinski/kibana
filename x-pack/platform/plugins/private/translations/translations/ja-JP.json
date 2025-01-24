@@ -3806,7 +3806,6 @@
     "guidedOnboarding.quitGuideModal.quitButtonLabel": "ガイドを終了",
     "guidedOnboardingPackage.gettingStarted.cards.aiSearch.title": "AIを活用した検索エクスペリエンスの構築",
     "guidedOnboardingPackage.gettingStarted.cards.apmObservability.title": "アプリケーション{lineBreak}パフォーマンスを監視（APM / トレース）",
-    "guidedOnboardingPackage.gettingStarted.cards.appSearch.title": "Elasticsearchの上に{lineBreak}アプリケーションを構築",
     "guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title": "クラウドセキュリティ態勢管理（CSPM）でクラウド{lineBreak}資産を保護",
     "guidedOnboardingPackage.gettingStarted.cards.completeLabel": "ガイド完了",
     "guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title": "データベースと{lineBreak}ビジネスシステムで検索",

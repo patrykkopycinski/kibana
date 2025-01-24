@@ -17430,7 +17430,6 @@
     "xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError": "このインデックスのクローラーはすでに存在します",
     "xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError": "このインデックスはすでに存在します",
     "xpack.enterpriseSearch.server.routes.checkKibanaLogsMessage": "{errorMessage}詳細については、Kibanaサーバーログを確認してください。",
-    "xpack.enterpriseSearch.server.routes.configData.errorMessage": "エンタープライズ サーチからのデータの取得エラー",
     "xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error": "高コストの検索クエリーは許可されません。\"search.allow_expensive_queries\"はfalseに設定されています。",
     "xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError": "一意のコネクター名が見つかりません",
     "xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error": "ID \"{connectorId}\"のコネクターが見つかりません。",

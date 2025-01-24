@@ -17151,7 +17151,6 @@
     "xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError": "此索引的网络爬虫已存在",
     "xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError": "此索引已存在",
     "xpack.enterpriseSearch.server.routes.checkKibanaLogsMessage": "{errorMessage} 请查阅 Kibana 服务器日志了解详情。",
-    "xpack.enterpriseSearch.server.routes.configData.errorMessage": "从 Enterprise Search 中提取数据时出错",
     "xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error": "不允许执行资源密集型搜索查询。已将'search.allow_expensive_queries'设置为 false",
     "xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError": "找不到唯一的连接器名称",
     "xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error": "找不到 ID 为 {connectorId} 的连接器。",

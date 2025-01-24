@@ -17572,7 +17572,6 @@
     "xpack.enterpriseSearch.server.routes.addCrawler.crawlerExistsError": "Un robot d'indexation existe déjà pour cet index",
     "xpack.enterpriseSearch.server.routes.addCrawler.indexExistsError": "L'index existe déjà.",
     "xpack.enterpriseSearch.server.routes.checkKibanaLogsMessage": "{errorMessage} Vérifiez les logs du serveur Kibana pour plus de détails.",
-    "xpack.enterpriseSearch.server.routes.configData.errorMessage": "Erreur lors de la récupération des données à partir d'Enterprise Search",
     "xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error": "Les requêtes de recherche lourdes ne sont pas autorisées. \"recherche.autoriser_recherches_lourdes\" est défini comme faux",
     "xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError": "Impossible de trouver un nom de connecteur unique",
     "xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error": "Le connecteur avec l'ID {connectorId} est introuvable.",

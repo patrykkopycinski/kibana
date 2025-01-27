@@ -41682,8 +41682,6 @@
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip": "Modifier la planification de conservation",
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkAriaLabel": "Exécuter la conservation maintenant",
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkTooltip": "Exécuter la conservation maintenant",
-    "xpack.snapshotRestore.policyScheduleWarningDescription": "Un seul snapshot peut être pris à la fois. Pour éviter les échecs de snapshots, modifiez ou supprimez les politiques.",
-    "xpack.snapshotRestore.policyScheduleWarningTitle": "Deux politiques ou plus possèdent la même planification",
     "xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage": "Au moins un modèle d'indexation est requis.",
     "xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage": "Vous devez sélectionner au moins un flux de données ou index.",
     "xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage": "Le nombre minimal ne peut pas être supérieur au nombre maximal.",

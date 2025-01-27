@@ -41538,8 +41538,6 @@
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleEditLinkTooltip": "保存スケジュールの編集",
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkAriaLabel": "今すぐ保存を実行",
     "xpack.snapshotRestore.policyRetentionSchedulePanel.retentionScheduleExecuteLinkTooltip": "今すぐ保存を実行",
-    "xpack.snapshotRestore.policyScheduleWarningDescription": "一度に 1 つのスナップショットしか作成できません。スナップショットのエラーを避けるために、ポリシーを編集または削除してください。",
-    "xpack.snapshotRestore.policyScheduleWarningTitle": "2 つ以上のポリシーに同じスケジュールが設定されています",
     "xpack.snapshotRestore.policyValidation.indexPatternRequiredErrorMessage": "インデックスパターンが最低 1 つ必要です。",
     "xpack.snapshotRestore.policyValidation.indicesRequiredErrorMessage": "1つ以上のデータストリームまたはインデックスを選択する必要があります。",
     "xpack.snapshotRestore.policyValidation.invalidMinCountErrorMessage": "最低カウントは最高カウントよりも大きい値にできません。",

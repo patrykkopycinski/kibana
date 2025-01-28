@@ -9406,7 +9406,6 @@
     "visualizations.badge.readOnly.text": "読み取り専用",
     "visualizations.badge.readOnly.tooltip": "ビジュアライゼーションをライブラリに保存できません",
     "visualizations.byValue_pageHeading": "{originatingApp}アプリに埋め込まれた{chartType}タイプのビジュアライゼーション",
-    "visualizations.common.constants.grouping.legacy": "ビジュアライゼーション",
     "visualizations.confirmModal.cancelButtonLabel": "キャンセル",
     "visualizations.confirmModal.confirmTextDescription": "変更を保存せずにVisualizeエディターから移動しますか？",
     "visualizations.confirmModal.overwriteButtonLabel": "上書き",

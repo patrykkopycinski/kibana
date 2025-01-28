@@ -9531,7 +9531,6 @@
     "visualizations.badge.readOnly.text": "Lecture seule",
     "visualizations.badge.readOnly.tooltip": "Impossible d'enregistrer les visualisations dans la bibliothèque",
     "visualizations.byValue_pageHeading": "Visualisation de type {chartType} intégrée à l'application {originatingApp}",
-    "visualizations.common.constants.grouping.legacy": "Visualisations",
     "visualizations.confirmModal.cancelButtonLabel": "Annuler",
     "visualizations.confirmModal.confirmTextDescription": "Quitter l'éditeur Visualize sans enregistrer les modifications ?",
     "visualizations.confirmModal.overwriteButtonLabel": "Écraser",

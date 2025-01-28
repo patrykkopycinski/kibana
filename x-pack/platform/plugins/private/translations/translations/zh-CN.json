@@ -9265,7 +9265,6 @@
     "visualizations.badge.readOnly.text": "只读",
     "visualizations.badge.readOnly.tooltip": "无法将可视化保存到库",
     "visualizations.byValue_pageHeading": "已嵌入到 {originatingApp} 应用中的 {chartType} 类型可视化",
-    "visualizations.common.constants.grouping.legacy": "可视化",
     "visualizations.confirmModal.cancelButtonLabel": "取消",
     "visualizations.confirmModal.confirmTextDescription": "离开 Visualize 编辑器而不保存更改？",
     "visualizations.confirmModal.overwriteButtonLabel": "覆盖",

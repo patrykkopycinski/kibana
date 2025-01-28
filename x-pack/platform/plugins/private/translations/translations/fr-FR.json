@@ -14776,8 +14776,6 @@
     "xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription": "Configurer l'intégration sans agent",
     "xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay": "Sans agent",
     "xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay": "Sans agent",
-    "xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.label": "Bêta",
-    "xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay.techPreviewBadge.tooltip": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée dans une future version. Nous vous remercions de bien vouloir nous aider en nous signalant tout bug.",
     "xpack.csp.fleetIntegration.setupTechnology.setupTechnologyLabel": "Technologie de configuration",
     "xpack.csp.fleetIntegration.setupTechnology.setupTechnologyPlaceholder": "Sélectionner la technologie de configuration",
     "xpack.csp.flyout.moreActionsButton": "Plus d'actions",

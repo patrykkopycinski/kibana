@@ -7883,7 +7883,6 @@
     "unifiedDataTable.removeFromComparison": "比較から削除",
     "unifiedDataTable.rowHeight.auto": "自動的に合わせる",
     "unifiedDataTable.rowHeight.custom": "カスタム",
-    "unifiedDataTable.rowHeight.single": "単一",
     "unifiedDataTable.rowHeightLabel": "セル行高さ",
     "unifiedDataTable.sampleSizeSettings.sampleSizeLabel": "サンプルサイズ",
     "unifiedDataTable.selectAllDocs": "すべての{rowsCount}を選択",

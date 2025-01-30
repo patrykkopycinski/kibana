@@ -8007,7 +8007,6 @@
     "unifiedDataTable.removeFromComparison": "Retirer de la comparaison",
     "unifiedDataTable.rowHeight.auto": "Ajustement automatique",
     "unifiedDataTable.rowHeight.custom": "Personnalisé",
-    "unifiedDataTable.rowHeight.single": "Unique",
     "unifiedDataTable.rowHeightLabel": "Hauteur de ligne de cellule",
     "unifiedDataTable.sampleSizeSettings.sampleSizeLabel": "Taille de l'échantillon",
     "unifiedDataTable.selectAllDocs": "Tout sélectionner ({rowsCount})",

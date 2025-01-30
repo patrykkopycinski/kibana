@@ -7764,7 +7764,6 @@
     "unifiedDataTable.removeFromComparison": "从对比中移除",
     "unifiedDataTable.rowHeight.auto": "自动适应",
     "unifiedDataTable.rowHeight.custom": "定制",
-    "unifiedDataTable.rowHeight.single": "单个",
     "unifiedDataTable.rowHeightLabel": "单元格行高",
     "unifiedDataTable.sampleSizeSettings.sampleSizeLabel": "样例大小",
     "unifiedDataTable.selectAllDocs": "选择所有 {rowsCount} 行",

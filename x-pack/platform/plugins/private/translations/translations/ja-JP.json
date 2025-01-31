@@ -6646,8 +6646,6 @@
     "searchConnectors.content.nativeConnectors.notion.name": "Notion",
     "searchConnectors.content.nativeConnectors.oneDrive.description": "OneDriveでコンテンツを検索します。",
     "searchConnectors.content.nativeConnectors.oneDrive.name": "OneDrive",
-    "searchConnectors.content.nativeConnectors.openTextDocumentum.description": "OpenText Documentumでコンテンツを検索します。",
-    "searchConnectors.content.nativeConnectors.openTextDocumentum.name": "OpenText Documentum",
     "searchConnectors.content.nativeConnectors.oracle.description": "Oracleでコンテンツを検索します。",
     "searchConnectors.content.nativeConnectors.oracle.name": "Oracle",
     "searchConnectors.content.nativeConnectors.outlook.description": "Outlookでコンテンツを検索します。",

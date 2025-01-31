@@ -6767,8 +6767,6 @@
     "searchConnectors.content.nativeConnectors.notion.name": "Notion",
     "searchConnectors.content.nativeConnectors.oneDrive.description": "Effectuez des recherches sur votre contenu dans OneDrive.",
     "searchConnectors.content.nativeConnectors.oneDrive.name": "OneDrive",
-    "searchConnectors.content.nativeConnectors.openTextDocumentum.description": "Recherchez votre contenu sur OpenText Documentum.",
-    "searchConnectors.content.nativeConnectors.openTextDocumentum.name": "OpenText Documentum",
     "searchConnectors.content.nativeConnectors.oracle.description": "Effectuez des recherches sur votre contenu dans Oracle.",
     "searchConnectors.content.nativeConnectors.oracle.name": "Oracle",
     "searchConnectors.content.nativeConnectors.outlook.description": "Effectuez des recherches sur votre contenu dans Outlook.",

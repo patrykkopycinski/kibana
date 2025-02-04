@@ -44763,7 +44763,6 @@
     "xpack.upgradeAssistant.esDeprecationLogs.documentationLinkText": "文档",
     "xpack.upgradeAssistant.esDeprecationLogs.pageDescription": "请复查弃用日志以确定您的应用程序是否正使用任何已弃用的 API。在升级后，请更新应用程序以防止错误或行为更改。",
     "xpack.upgradeAssistant.esDeprecationLogs.pageTitle": "Elasticsearch 弃用日志",
-    "xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription": "要在单一请求中启动多个重新索引任务，请使用 Kibana {docsLink}。",
     "xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink": "批量重新索引 API",
     "xpack.upgradeAssistant.esDeprecations.clusterDeprecationTypeLabel": "集群",
     "xpack.upgradeAssistant.esDeprecations.clusterSettings.deleteCompleteText": "过时设置已移除",

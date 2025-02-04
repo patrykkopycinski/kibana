@@ -45438,7 +45438,6 @@
     "xpack.upgradeAssistant.esDeprecationLogs.documentationLinkText": "ドキュメント",
     "xpack.upgradeAssistant.esDeprecationLogs.pageDescription": "廃止予定ログを確認し、アプリケーションが廃止予定のAPIを使用しているかどうかを判断してください。アップグレード後に、エラーまたは動作の変更を防止するには、アプリケーションを更新します。",
     "xpack.upgradeAssistant.esDeprecationLogs.pageTitle": "Elasticsearchの廃止予定ログ",
-    "xpack.upgradeAssistant.esDeprecations.batchReindexingDocsDescription": "1つの要求で複数の再インデックスタスクを開始するには、Kibana {docsLink}を使用します。",
     "xpack.upgradeAssistant.esDeprecations.batchReindexingDocsLink": "バッチ再インデックスAPI",
     "xpack.upgradeAssistant.esDeprecations.clusterDeprecationTypeLabel": "クラスター",
     "xpack.upgradeAssistant.esDeprecations.clusterSettings.deleteCompleteText": "廃止予定の設定が削除されました",

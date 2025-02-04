@@ -31100,7 +31100,6 @@
     "xpack.observability.customThreshold.rule.reason.forTheLast": "durée : {duration}",
     "xpack.observability.customThreshold.rule.reason.group": "groupe : {group}",
     "xpack.observability.customThreshold.rule.reasonActionVariableDescription": "Une description concise de la raison du signalement",
-    "xpack.observability.customThreshold.rule.schema.invalidFilterQuery": "filterQuery doit être un filtre KQL valide (erreur : {errorMessage})",
     "xpack.observability.customThreshold.rule.sourceConfiguration.missingHttp": "Échec de chargement de la source : Aucun client HTTP disponible.",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureBody": "Nous n'avons pas pu appliquer les modifications à la configuration des indicateurs. Réessayez plus tard.",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureTitle": "La mise à jour de la configuration a échoué",

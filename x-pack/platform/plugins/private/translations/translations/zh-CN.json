@@ -30511,7 +30511,6 @@
     "xpack.observability.customThreshold.rule.reason.forTheLast": "持续时间：{duration}",
     "xpack.observability.customThreshold.rule.reason.group": "组：{group}",
     "xpack.observability.customThreshold.rule.reasonActionVariableDescription": "告警原因的简洁描述",
-    "xpack.observability.customThreshold.rule.schema.invalidFilterQuery": "filterQuery 必须是有效的 KQL 筛选（错误：{errorMessage}）",
     "xpack.observability.customThreshold.rule.sourceConfiguration.missingHttp": "无法加载源：无 HTTP 客户端可用。",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureBody": "无法对指标配置应用更改。请稍后重试。",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureTitle": "配置更新失败",

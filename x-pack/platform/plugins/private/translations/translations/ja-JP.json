@@ -30964,7 +30964,6 @@
     "xpack.observability.customThreshold.rule.reason.forTheLast": "duration: {duration}",
     "xpack.observability.customThreshold.rule.reason.group": "グループ：{group}",
     "xpack.observability.customThreshold.rule.reasonActionVariableDescription": "アラートの理由の簡潔な説明",
-    "xpack.observability.customThreshold.rule.schema.invalidFilterQuery": "filterQueryは有効なKQLフィルターでなければなりません（エラー：{errorMessage}）",
     "xpack.observability.customThreshold.rule.sourceConfiguration.missingHttp": "ソースの読み込みに失敗しました：HTTPクライアントがありません。",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureBody": "変更をメトリック構成に適用できませんでした。しばらくたってから再試行してください。",
     "xpack.observability.customThreshold.rule.sourceConfiguration.updateFailureTitle": "構成の更新が失敗しました",

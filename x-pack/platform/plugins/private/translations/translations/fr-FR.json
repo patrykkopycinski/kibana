@@ -24642,8 +24642,6 @@
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLabel": "Paramètre avancé des sources de logs",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLinkText": "page des paramètres avancés",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingTitle": "Sources de log",
-    "xpack.logsExplorer.allowedDataViews": "Logs Explorer a autorisé les vues de données",
-    "xpack.logsExplorer.allowedDataViewsDescription": "Une liste de modèles de base permettant de faire correspondre et d'explorer les vues de données dans Logs Explorer. Les clusters distants seront automatiquement mis en correspondance avec les modèles de base fournis.",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastMessage": "La section par défaut a été modifiée en \"All log datasets\" (Tous les logs des ensembles de données)",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastTitle": "Nous n'avons pas pu créer de vue des données pour votre sélection.",
     "xpack.logsExplorer.dataSourceSelection.restoreDatasetSelectionFailedToastMessage": "La section par défaut a été modifiée en \"All log datasets\" (Tous les logs des ensembles de données)",

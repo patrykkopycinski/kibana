@@ -24508,8 +24508,6 @@
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLabel": "ログソース詳細設定",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLinkText": "詳細設定ページ",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingTitle": "ログソース",
-    "xpack.logsExplorer.allowedDataViews": "ログエクスプローラーで許可されたデータビュー",
-    "xpack.logsExplorer.allowedDataViewsDescription": "ログエクスプローラーでデータビューを照合および探索するための基本パターンのリスト。リモートクラスターは、指定された基本パターンに対して自動的に照合されます。",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastMessage": "\"すべてのログデータセット\"をデフォルトの選択として切り替えました。",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastTitle": "選択されたデータビューを作成できませんでした。",
     "xpack.logsExplorer.dataSourceSelection.restoreDatasetSelectionFailedToastMessage": "\"すべてのログデータセット\"をデフォルトの選択として切り替えました。",

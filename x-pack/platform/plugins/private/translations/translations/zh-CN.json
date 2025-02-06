@@ -24100,8 +24100,6 @@
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLabel": "日志源高级设置",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingLinkText": "高级设置页面",
     "xpack.logsDataAccess.logSourcesSettingInfo.logSourcesSettingTitle": "日志源",
-    "xpack.logsExplorer.allowedDataViews": "日志浏览器允许的数据视图",
-    "xpack.logsExplorer.allowedDataViewsDescription": "在日志浏览器中匹配并浏览数据视图的基本模式列表。提供的基本模式会自动匹配远程集群。",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastMessage": "我们已切换到'所有日志数据集'，将其作为默认选择。",
     "xpack.logsExplorer.dataSourceSelection.createAdHocDataViewFailedToastTitle": "无法为您选择的内容创建数据视图。",
     "xpack.logsExplorer.dataSourceSelection.restoreDatasetSelectionFailedToastMessage": "我们已切换到'所有日志数据集'，将其作为默认选择。",

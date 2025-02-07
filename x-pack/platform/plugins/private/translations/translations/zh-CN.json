@@ -22110,7 +22110,6 @@
     "xpack.ingestPipelines.list.loadingMessage": "正在加载管道……",
     "xpack.ingestPipelines.list.loadPipelineReloadButton": "重试",
     "xpack.ingestPipelines.list.manageProcessorsLinkText": "管理处理器",
-    "xpack.ingestPipelines.list.notFoundFlyoutMessage": "未找到管道",
     "xpack.ingestPipelines.list.pipelineDetails.cloneActionLabel": "克隆",
     "xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel": "关闭",
     "xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel": "删除",

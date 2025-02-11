@@ -42130,7 +42130,6 @@
     "xpack.stackConnectors.components.jira.selectMessageText": "Jira でインシデントを作成します。",
     "xpack.stackConnectors.components.jira.severitySelectFieldLabel": "優先度",
     "xpack.stackConnectors.components.jira.summaryFieldLabel": "まとめ",
-    "xpack.stackConnectors.components.jira.summaryFieldRequiredLabel": "必須",
     "xpack.stackConnectors.components.jira.unableToGetFieldsMessage": "フィールドを取得できません",
     "xpack.stackConnectors.components.jira.unableToGetIssueMessage": "ID {id}の問題を取得できません",
     "xpack.stackConnectors.components.jira.unableToGetIssuesMessage": "問題を取得できません",

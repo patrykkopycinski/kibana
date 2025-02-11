@@ -42277,7 +42277,6 @@
     "xpack.stackConnectors.components.jira.selectMessageText": "Créez un incident dans Jira.",
     "xpack.stackConnectors.components.jira.severitySelectFieldLabel": "Priorité",
     "xpack.stackConnectors.components.jira.summaryFieldLabel": "Résumé",
-    "xpack.stackConnectors.components.jira.summaryFieldRequiredLabel": "Obligatoire",
     "xpack.stackConnectors.components.jira.unableToGetFieldsMessage": "Impossible d'obtenir les champs",
     "xpack.stackConnectors.components.jira.unableToGetIssueMessage": "Impossible d'obtenir le problème ayant l'ID {id}",
     "xpack.stackConnectors.components.jira.unableToGetIssuesMessage": "Impossible d'obtenir les problèmes",

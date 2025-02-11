@@ -41502,7 +41502,6 @@
     "xpack.stackConnectors.components.jira.selectMessageText": "在 Jira 创建事件。",
     "xpack.stackConnectors.components.jira.severitySelectFieldLabel": "优先级",
     "xpack.stackConnectors.components.jira.summaryFieldLabel": "摘要",
-    "xpack.stackConnectors.components.jira.summaryFieldRequiredLabel": "必需",
     "xpack.stackConnectors.components.jira.unableToGetFieldsMessage": "无法获取字段",
     "xpack.stackConnectors.components.jira.unableToGetIssueMessage": "无法获取 ID 为 {id} 的问题",
     "xpack.stackConnectors.components.jira.unableToGetIssuesMessage": "无法获取问题",

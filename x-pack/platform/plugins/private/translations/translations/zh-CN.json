@@ -26480,7 +26480,6 @@
     "xpack.ml.indexDatavisualizer.actionsPanel.dataframeTitle": "数据帧分析",
     "xpack.ml.inference.modelsList.analyticsMapActionLabel": "分析地图",
     "xpack.ml.inference.modelsList.analyzeDataDriftLabel": "分析数据偏移",
-    "xpack.ml.inference.modelsList.downloadModelActionLabel": "下载",
     "xpack.ml.inference.modelsList.startModelDeploymentActionDescription": "开始部署",
     "xpack.ml.inference.modelsList.startModelDeploymentActionLabel": "部署",
     "xpack.ml.inference.modelsList.stopModelDeploymentActionLabel": "停止部署",

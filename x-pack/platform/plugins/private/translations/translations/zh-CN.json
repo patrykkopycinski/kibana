@@ -9469,7 +9469,6 @@
     "xpack.aiAssistant.chatTimeline.actions.editPrompt": "编辑提示",
     "xpack.aiAssistant.chatTimeline.actions.inspectPrompt": "检查提示",
     "xpack.aiAssistant.chatTimeline.messages.elasticAssistant.label": "Elastic 助手",
-    "xpack.aiAssistant.chatTimeline.messages.system.label": "系统",
     "xpack.aiAssistant.chatTimeline.messages.user.label": "您",
     "xpack.aiAssistant.checkingKbAvailability": "正在检查知识库的可用性",
     "xpack.aiAssistant.conversationList.dateGroupTitle.lastMonth": "上月",

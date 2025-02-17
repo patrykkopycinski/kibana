@@ -9623,7 +9623,6 @@
     "xpack.aiAssistant.chatTimeline.actions.editPrompt": "プロンプトを編集",
     "xpack.aiAssistant.chatTimeline.actions.inspectPrompt": "プロンプトを検査",
     "xpack.aiAssistant.chatTimeline.messages.elasticAssistant.label": "Elastic Assistant",
-    "xpack.aiAssistant.chatTimeline.messages.system.label": "システム",
     "xpack.aiAssistant.chatTimeline.messages.user.label": "あなた",
     "xpack.aiAssistant.checkingKbAvailability": "ナレッジベースの利用可能性を確認中",
     "xpack.aiAssistant.conversationList.dateGroupTitle.lastMonth": "先月",

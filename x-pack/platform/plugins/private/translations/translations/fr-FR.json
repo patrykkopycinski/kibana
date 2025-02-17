@@ -9747,7 +9747,6 @@
     "xpack.aiAssistant.chatTimeline.actions.editPrompt": "Modifier l'invite",
     "xpack.aiAssistant.chatTimeline.actions.inspectPrompt": "Inspecter l'invite",
     "xpack.aiAssistant.chatTimeline.messages.elasticAssistant.label": "Assistant d'Elastic",
-    "xpack.aiAssistant.chatTimeline.messages.system.label": "Système",
     "xpack.aiAssistant.chatTimeline.messages.user.label": "Vous",
     "xpack.aiAssistant.checkingKbAvailability": "Vérification de la disponibilité de la base de connaissances",
     "xpack.aiAssistant.conversationList.dateGroupTitle.lastMonth": "Le mois dernier",

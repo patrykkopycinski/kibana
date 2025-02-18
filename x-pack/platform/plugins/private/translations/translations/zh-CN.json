@@ -39960,7 +39960,6 @@
     "xpack.slo.timeWindowBadge.clickToFilter": "单击以按 {timeWindow} SLO 筛选",
     "xpack.slo.toggleSLOView.euiButtonGroup.sloView": "SLO 视图",
     "xpack.slo.update.errorNotification": "更新 {name} 时出现问题",
-    "xpack.slo.update.successNotification": "已成功更新 {name}",
     "xpack.slo.useCreateSlo.editSLOLinkLabel": "编辑 SLO",
     "xpack.slo.viewFormattedResourcesConfigsButtonLabel": "查看 SLO 的格式化资源配置",
     "xpack.slo.wideChart.euiIcon.noResultsLabel": "无结果",

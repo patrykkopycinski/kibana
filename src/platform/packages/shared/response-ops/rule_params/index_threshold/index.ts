@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+export { ParamsSchema } from './latest';
+export { ParamsSchema as ParamsSchemaV1 } from './latest';
 
-export * from './search_configuration_schema';
-export { dataViewSpecSchema } from './data_view_spec_schema';
-export { MAX_GROUPS } from './constants';
-export { ComparatorFns } from './utils';
+export { type Params } from './latest';
+export { type Params as ParamsV1 } from './latest';
+
+export type { CoreQueryParams } from './latest';
+export type { CoreQueryParams as CoreQueryParamsV1 } from './latest';
+
+export { CoreQueryParamsSchemaProperties } from './latest';
+export { validateCoreQueryBody } from './latest';

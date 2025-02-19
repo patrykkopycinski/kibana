@@ -38889,7 +38889,6 @@
     "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>在规则中为 CCS 索引启用权限检查警告</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>启用新闻源</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "新闻源",
-    "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription": "<em>[技术预览]</em> 在浮出控件中启用可视化（分析器和会话查看器）。",
     "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel": "在浮出控件中启用可视化",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer": "在分析器中排除冷层和冻结层",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>启用后，将在分析器查询中跳过冷层和冻结层</p>",

@@ -39603,7 +39603,6 @@
     "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>Active les avertissements de vérification des privilèges dans les règles relatives aux index CCS</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Active le fil d'actualités</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Fil d'actualités",
-    "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription": "<em>[version d'évaluation technique]</em> Activez les visualisations (analyseur et visualiseur de session) dans le menu volant.",
     "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel": "Activer les visualisations dans le menu volant",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer": "Exclure les niveaux froids de l'analyseur",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>Lorsque cette option est activée, les niveaux \"cold\" et \"frozen\" sont ignorés dans les requêtes de l'analyseur</p>",

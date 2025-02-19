@@ -39464,7 +39464,6 @@
     "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>CCSインデックスのルールで権限チェック警告を有効にします</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>ニュースフィードを有効にします</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "ニュースフィード",
-    "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription": "<em>［テクニカルプレビュー］</em>フライアウトで視覚化（アナライザーとセッションビューアー）を有効にします。",
     "xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel": "フライアウトでビジュアライゼーションを有効化",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer": "アナライザーでコールドティアとフローズンティアを除外",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>有効にすると、アナライザークエリーでコールドティアとフローズンティアがスキップされます</p>",

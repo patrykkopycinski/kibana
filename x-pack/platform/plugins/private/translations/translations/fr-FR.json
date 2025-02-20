@@ -31987,8 +31987,6 @@
     "xpack.profiling.breadcrumb.differentialFlamegraph": "Flame-graph différentiel",
     "xpack.profiling.breadcrumb.differentialFunctions": "Différentiel N premiers",
     "xpack.profiling.breadcrumb.flamegraph": "Flame-graph",
-    "xpack.profiling.breadcrumb.flamegraphs": "Flame-graphs",
-    "xpack.profiling.breadcrumb.functions": "Fonctions",
     "xpack.profiling.breadcrumb.profiling": "Universal Profiling",
     "xpack.profiling.breadcrumb.settings": "Paramètres",
     "xpack.profiling.breadcrumb.storageExplorer": "Explorateur de stockage",

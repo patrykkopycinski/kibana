@@ -31394,8 +31394,6 @@
     "xpack.profiling.breadcrumb.differentialFlamegraph": "差异火焰图",
     "xpack.profiling.breadcrumb.differentialFunctions": "差异排名前 N",
     "xpack.profiling.breadcrumb.flamegraph": "火焰图",
-    "xpack.profiling.breadcrumb.flamegraphs": "火焰图",
-    "xpack.profiling.breadcrumb.functions": "函数",
     "xpack.profiling.breadcrumb.profiling": "Universal Profiling",
     "xpack.profiling.breadcrumb.settings": "设置",
     "xpack.profiling.breadcrumb.storageExplorer": "Storage Explorer",

@@ -31851,8 +31851,6 @@
     "xpack.profiling.breadcrumb.differentialFlamegraph": "差分flamegraph",
     "xpack.profiling.breadcrumb.differentialFunctions": "差分上位N",
     "xpack.profiling.breadcrumb.flamegraph": "Flamegraph",
-    "xpack.profiling.breadcrumb.flamegraphs": "Flamegraph",
-    "xpack.profiling.breadcrumb.functions": "関数",
     "xpack.profiling.breadcrumb.profiling": "ユニバーサルプロファイリング",
     "xpack.profiling.breadcrumb.settings": "設定",
     "xpack.profiling.breadcrumb.storageExplorer": "ストレージエクスプローラー",

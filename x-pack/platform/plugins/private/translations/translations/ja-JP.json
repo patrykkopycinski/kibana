@@ -34796,8 +34796,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "調査ガイド",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning": "Kibanaで許可される最大数は、1回の実行につき、{maxNumber} {maxNumber, plural, other {アラート}}です。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "名前が必要です。",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "ルール調査ガイドを追加...",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText": "ルールセットアップガイドを追加...",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText": "必要な統合、構成ステップ、ルールが正常に動作するために必要な他のすべての項目といった、ルール前提条件に関する指示を入力します。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupLabel": "セットアップガイド",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.tagFieldEmptyError": "タグを空にすることはできません",

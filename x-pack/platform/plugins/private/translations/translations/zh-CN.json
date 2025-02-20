@@ -34266,8 +34266,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "调查指南",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning": "每次规则运行时，Kibana 最多只允许 {maxNumber} 个{maxNumber, plural, other {告警}}。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "名称必填。",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "添加规则调查指南......",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText": "添加规则设置指南......",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText": "提供有关规则先决条件的说明，如所需集成、配置步骤，以及规则正常运行所需的任何其他内容。",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupLabel": "设置指南",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.tagFieldEmptyError": "标签不得为空",

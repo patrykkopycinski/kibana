@@ -34935,8 +34935,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.guideLabel": "Guide d'investigation",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning": "Kibana ne permet qu'un maximum de {maxNumber} {maxNumber, plural, =1 {alerte} other {alertes}} par exécution de règle.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.nameFieldRequiredError": "Nom obligatoire.",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText": "Ajouter un guide d'investigation sur les règles...",
-    "xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText": "Ajouter le guide de configuration de règle...",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText": "Fournissez des instructions sur les conditions préalables à la règle, telles que les intégrations requises, les étapes de configuration et tout ce qui est nécessaire au bon fonctionnement de la règle.",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupLabel": "Guide de configuration",
     "xpack.securitySolution.detectionEngine.createRule.stepAboutRule.tagFieldEmptyError": "Une balise ne doit pas être vide",

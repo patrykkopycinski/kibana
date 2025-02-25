@@ -16041,8 +16041,6 @@
     "xpack.enterpriseSearch.attachIndexBox.orPanelLabel": "OR",
     "xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel": "Enregistrer la configuration",
     "xpack.enterpriseSearch.attachIndexBox.thisIndexWillHoldTextLabel": "Cet index contiendra le contenu de la source de données et il est optimisé avec les mappings de champ par défaut pour les expériences de recherche correspondantes. Donnez un nom unique à votre index et configurez pour lui un analyseur linguistique (facultatif).",
-    "xpack.enterpriseSearch.behavioralAnalytics.description": "Tableaux de bord et outils permettant de visualiser le comportement des utilisateurs finaux et de mesurer les performances de vos applications de recherche",
-    "xpack.enterpriseSearch.behavioralAnalytics.productCardCTA": "Explorer Behavioral Analytics",
     "xpack.enterpriseSearch.betaCalloutTitle": "Fonctionnalité bêta",
     "xpack.enterpriseSearch.betaConnectorCalloutDescription": "Ce connecteur est en version bêta. Les fonctionnalités bêta sont susceptibles d'être modifiées et ne sont pas couvertes par l'accord de niveau de service (SLA) des fonctionnalités de la version générale (GA). Elastic prévoit de faire passer cette fonctionnalité en disponibilité générale dans une prochaine version.",
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "Connecteur en version bêta",

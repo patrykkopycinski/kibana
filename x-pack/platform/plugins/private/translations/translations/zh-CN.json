@@ -15629,8 +15629,6 @@
     "xpack.enterpriseSearch.attachIndexBox.orPanelLabel": "OR",
     "xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel": "保存配置",
     "xpack.enterpriseSearch.attachIndexBox.thisIndexWillHoldTextLabel": "此索引将存放您的数据源内容，并通过默认字段映射进行优化，以提供相关搜索体验。提供唯一的索引名称，并为索引设置默认的语言分析器（可选）。",
-    "xpack.enterpriseSearch.behavioralAnalytics.description": "用于对最终用户行为进行可视化并评估搜索应用程序性能的仪表板和工具",
-    "xpack.enterpriseSearch.behavioralAnalytics.productCardCTA": "了解行为分析",
     "xpack.enterpriseSearch.betaCalloutTitle": "公测版功能",
     "xpack.enterpriseSearch.betaConnectorCalloutDescription": "此连接器为公测版。公测版功能可能会有所更改，并且不受公开发行版 (GA) 功能支持 SLA 的约束。Elastic 计划在未来版本中将此功能提升到 GA 版本。",
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "公测版连接器",

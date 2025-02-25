@@ -15903,8 +15903,6 @@
     "xpack.enterpriseSearch.attachIndexBox.optionsGroup.selectExistingIndex": "既存のインデックスを選択",
     "xpack.enterpriseSearch.attachIndexBox.orPanelLabel": "OR",
     "xpack.enterpriseSearch.attachIndexBox.saveConfigurationButtonLabel": "構成を保存",
-    "xpack.enterpriseSearch.behavioralAnalytics.description": "エンドユーザーの行動を可視化し、検索アプリケーションのパフォーマンスを測定するためのダッシュボードとツール",
-    "xpack.enterpriseSearch.behavioralAnalytics.productCardCTA": "Behavioral Analyticsの詳細",
     "xpack.enterpriseSearch.betaCalloutTitle": "ベータ機能",
     "xpack.enterpriseSearch.betaConnectorCalloutDescription": "このコネクターはベータ版です。ベータ版の機能は変更される可能性があり、一般リリース（GA）機能のサポートSLAではカバーされません。Elasticは将来のリリースでこの機能をGAに昇格させる予定です。",
     "xpack.enterpriseSearch.betaConnectorCalloutTitle": "ベータ版コネクター",

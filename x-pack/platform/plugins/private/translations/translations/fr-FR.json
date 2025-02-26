@@ -28695,7 +28695,6 @@
     "xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle": "Définition",
     "xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel": "Statistiques",
     "xpack.ml.trainedModels.modelsList.expandRow": "Développer",
-    "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "La suppression {modelsCount, plural, one {du modèle} other {des modèles}} a échoué",
     "xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage": "Erreur lors du chargement des modèles entraînés",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText": "Annuler",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText": "Arrêt",

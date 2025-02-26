@@ -28560,7 +28560,6 @@
     "xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle": "定義",
     "xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel": "統計",
     "xpack.ml.trainedModels.modelsList.expandRow": "拡張",
-    "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "{modelsCount, plural, other  {モデル}}を削除できませんでした",
     "xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage": "学習済みモデルの読み込みエラー",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText": "キャンセル",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText": "終了",

@@ -28114,7 +28114,6 @@
     "xpack.ml.trainedModels.modelsList.expandedRow.processorsTitle": "定义",
     "xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel": "统计信息",
     "xpack.ml.trainedModels.modelsList.expandRow": "展开",
-    "xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage": "{modelsCount, plural, other {# 个模型}}删除失败",
     "xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage": "加载已训练模型时出错",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.cancelText": "取消",
     "xpack.ml.trainedModels.modelsList.forceStopDialog.confirmText": "停止点",

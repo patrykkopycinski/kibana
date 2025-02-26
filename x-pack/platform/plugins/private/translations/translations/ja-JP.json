@@ -17318,7 +17318,6 @@
     "xpack.fileUpload.geoUploadWizard.outOfTotalMsg": "{totalFeaturesCount}件中",
     "xpack.fileUpload.geoUploadWizard.partialImportMsg": "{failedFeaturesCount} {outOfTotalMsg}個の特徴量をインデックス化できません",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "インデックスに書き込み中：{progress}%完了",
-    "xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage": "ID またはインデックスが提供されていません",
     "xpack.fileUpload.importComplete.copyButtonAriaLabel": "クリップボードにコピー",
     "xpack.fileUpload.importComplete.dataViewResponse": "データビュー応答",
     "xpack.fileUpload.importComplete.indexingResponse": "応答をインポート",

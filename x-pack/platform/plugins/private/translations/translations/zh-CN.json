@@ -17042,7 +17042,6 @@
     "xpack.fileUpload.geoUploadWizard.outOfTotalMsg": "，共 {totalFeaturesCount} 个",
     "xpack.fileUpload.geoUploadWizard.partialImportMsg": "无法索引 {failedFeaturesCount} 个 {outOfTotalMsg} 特征。",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "正在写入索引：已完成 {progress}%",
-    "xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage": "未提供任何 ID 或索引",
     "xpack.fileUpload.importComplete.copyButtonAriaLabel": "复制到剪贴板",
     "xpack.fileUpload.importComplete.dataViewResponse": "数据视图响应",
     "xpack.fileUpload.importComplete.indexingResponse": "导入响应",

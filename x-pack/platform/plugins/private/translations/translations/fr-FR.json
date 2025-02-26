@@ -17459,7 +17459,6 @@
     "xpack.fileUpload.geoUploadWizard.outOfTotalMsg": "sur {totalFeaturesCount}",
     "xpack.fileUpload.geoUploadWizard.partialImportMsg": "Impossible d'indexer {failedFeaturesCount} {outOfTotalMsg} fonctionnalités.",
     "xpack.fileUpload.geoUploadWizard.writingToIndex": "Écriture dans l'index : {progress} % terminé",
-    "xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage": "aucun ID ni index fournis",
     "xpack.fileUpload.importComplete.copyButtonAriaLabel": "Copier dans le presse-papiers",
     "xpack.fileUpload.importComplete.dataViewResponse": "Réponse de la vue de données",
     "xpack.fileUpload.importComplete.indexingResponse": "Importer la réponse",

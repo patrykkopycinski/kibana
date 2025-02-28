@@ -19963,7 +19963,6 @@
     "xpack.idxMgmt.indexDetails.mappings.mappingsViewButtonGroupAriaLabel": "マッピングビューボタングループ",
     "xpack.idxMgmt.indexDetails.mappings.reloadButtonLabel": "再読み込み",
     "xpack.idxMgmt.indexDetails.mappings.saveMappings": "マッピングを保存",
-    "xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.description": "{label} 開始するには、フィールドをマッピングに追加して、Semantic_textを選択してください。",
     "xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.descriptionForPlatinumLicense": "{label} semantic_textフィールド型をインデックスに追加するには、ライセンスをアップグレードしてください。'",
     "xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.dismiss": "閉じる",
     "xpack.idxMgmt.indexDetails.mappings.semanticTextBanner.semanticTextFieldAvailable": "semantic_textフィールド型が利用できるようになりました。",

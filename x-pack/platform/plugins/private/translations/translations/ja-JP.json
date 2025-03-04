@@ -18876,7 +18876,6 @@
     "xpack.fleet.settings.editOutputFlyout.kafkaCompressionTitle": "圧縮",
     "xpack.fleet.settings.editOutputFlyout.kafkaConnectionTypeLabel": "接続",
     "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicHelptext": "リストからトピックを選択してください。トピックがない場合は、カスタムトピックを作成してください。",
-    "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel": "フィールドからのトピック",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderKeyInputLabel": "キー",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeadersTitle": "ヘッダー",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderValueInputLabel": "値",

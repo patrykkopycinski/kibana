@@ -19015,7 +19015,6 @@
     "xpack.fleet.settings.editOutputFlyout.kafkaCompressionTitle": "Compression",
     "xpack.fleet.settings.editOutputFlyout.kafkaConnectionTypeLabel": "Connexion",
     "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicHelptext": "Sélectionnez un sujet dans la liste. Si un sujet n'est pas disponible, créez un sujet personnalisé.",
-    "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel": "Sujet du champ",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderKeyInputLabel": "Clé",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeadersTitle": "En-têtes",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderValueInputLabel": "Valeur",

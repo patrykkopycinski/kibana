@@ -18575,7 +18575,6 @@
     "xpack.fleet.settings.editOutputFlyout.kafkaCompressionTitle": "压缩",
     "xpack.fleet.settings.editOutputFlyout.kafkaConnectionTypeLabel": "连接",
     "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicHelptext": "从列表中选择主题。如果主题不可用，请创建定制主题。",
-    "xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel": "来自字段的主题",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderKeyInputLabel": "钥匙",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeadersTitle": "标题",
     "xpack.fleet.settings.editOutputFlyout.kafkaHeaderValueInputLabel": "值",

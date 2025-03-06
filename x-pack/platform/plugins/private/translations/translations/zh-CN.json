@@ -41303,7 +41303,6 @@
     "xpack.stackConnectors.components.genAi.bodyFieldLabel": "正文",
     "xpack.stackConnectors.components.genAi.connectorTypeTitle": "OpenAI",
     "xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel": "默认模型",
-    "xpack.stackConnectors.components.genAi.defaultModelTooltipContent": "如果请求不包含模型，它将使用默认值。",
     "xpack.stackConnectors.components.genAi.documentation": "文档",
     "xpack.stackConnectors.components.genAi.error.dashboardApiError": "查找 {apiProvider} 令牌使用情况仪表板时出错。",
     "xpack.stackConnectors.components.genAi.error.requiredApiProviderText": "'API 提供商'必填。",

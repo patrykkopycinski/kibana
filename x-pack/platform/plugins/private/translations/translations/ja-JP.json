@@ -41926,7 +41926,6 @@
     "xpack.stackConnectors.components.genAi.connectorTypeTitle": "OpenAI",
     "xpack.stackConnectors.components.genAi.dashboardLink": "\"{ connectorName }\"コネクターの{apiProvider}使用状況ダッシュボードを表示",
     "xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel": "デフォルトモデル",
-    "xpack.stackConnectors.components.genAi.defaultModelTooltipContent": "リクエストにモデルが含まれていない場合、デフォルトが使われます。",
     "xpack.stackConnectors.components.genAi.documentation": "ドキュメンテーション",
     "xpack.stackConnectors.components.genAi.error.dashboardApiError": "{apiProvider}トークン使用状況ダッシュボードの検索エラー。",
     "xpack.stackConnectors.components.genAi.error.requiredApiProviderText": "APIプロバイダーは必須です。",

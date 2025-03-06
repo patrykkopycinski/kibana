@@ -42073,7 +42073,6 @@
     "xpack.stackConnectors.components.genAi.connectorTypeTitle": "OpenAI",
     "xpack.stackConnectors.components.genAi.dashboardLink": "Affichez le tableau de bord d'utilisation de {apiProvider} pour le connecteur \"{ connectorName }\"",
     "xpack.stackConnectors.components.genAi.defaultModelTextFieldLabel": "Modèle par défaut",
-    "xpack.stackConnectors.components.genAi.defaultModelTooltipContent": "Si une requête ne comprend pas de modèle, le modèle par défaut est utilisé.",
     "xpack.stackConnectors.components.genAi.documentation": "documentation",
     "xpack.stackConnectors.components.genAi.error.dashboardApiError": "Erreur lors de la recherche du tableau de bord d'utilisation des tokens {apiProvider}.",
     "xpack.stackConnectors.components.genAi.error.requiredApiProviderText": "Un fournisseur d’API est nécessaire.",

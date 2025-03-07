@@ -14142,7 +14142,6 @@
     "xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip": "失败的结果",
     "xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip": "通过的结果",
     "xpack.csp.createDetectionRuleButton": "创建检测规则",
-    "xpack.csp.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage": "规则创建当前仅可用于 Elastic 结果",
     "xpack.csp.createDetectionRuleFromVulnerabilityFinding.createRuleErrorMessage": "规则创建当前仅可用于 Elastic 结果",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudNativeVulnerabilityManagementTitleLabel": "云原生漏洞管理",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudPostureTitleLabel": "云态势",

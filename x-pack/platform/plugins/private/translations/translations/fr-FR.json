@@ -14541,7 +14541,6 @@
     "xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip": "Échec des résultats",
     "xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip": "Réussite des résultats",
     "xpack.csp.createDetectionRuleButton": "Créer une règle de détection",
-    "xpack.csp.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage": "La création de règles n'est actuellement disponible que pour les résultats d'Elastic",
     "xpack.csp.createDetectionRuleFromVulnerabilityFinding.createRuleErrorMessage": "La création de règles n'est actuellement disponible que pour les résultats d'Elastic",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudNativeVulnerabilityManagementTitleLabel": "Gestion des vulnérabilités natives du cloud",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudPostureTitleLabel": "Niveau du cloud",

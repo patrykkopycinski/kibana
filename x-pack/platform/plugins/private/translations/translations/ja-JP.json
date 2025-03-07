@@ -14408,7 +14408,6 @@
     "xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip": "失敗した調査結果",
     "xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip": "合格した調査結果",
     "xpack.csp.createDetectionRuleButton": "検出ルールを作成",
-    "xpack.csp.createDetectionRuleFromBenchmarkRule.createRuleErrorMessage": "現在、ルール作成はElasticの調査結果のみで利用可能です。",
     "xpack.csp.createDetectionRuleFromVulnerabilityFinding.createRuleErrorMessage": "現在、ルール作成はElasticの調査結果のみで利用可能です。",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudNativeVulnerabilityManagementTitleLabel": "Cloud Native Vulnerability Management",
     "xpack.csp.createPackagePolicy.customAssetsTab.cloudPostureTitleLabel": "クラウド態勢",

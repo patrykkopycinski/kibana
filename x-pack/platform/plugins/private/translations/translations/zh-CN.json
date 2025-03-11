@@ -34951,7 +34951,6 @@
     "xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError": "无法预览规则",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel": "查看详情",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel": "查看第 {ariaRowindex} 行的告警或事件的详细信息，其中列为 {columnValues}",
-    "xpack.securitySolution.detectionEngine.relatedIntegrations.badgeTitle": "集成",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.disabledTitle": "已禁用",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTitle": "已启用",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTooltip": "集成已安装，并且存在具有所需配置的集成策略。确保 Elastic 代理已分配此策略以采集兼容的事件。",

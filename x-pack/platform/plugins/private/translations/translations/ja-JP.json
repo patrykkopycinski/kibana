@@ -35478,7 +35478,6 @@
     "xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError": "ルールをプレビューできませんでした",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel": "詳細を表示",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントの詳細を表示",
-    "xpack.securitySolution.detectionEngine.relatedIntegrations.badgeTitle": "統合",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.disabledTitle": "無効",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTitle": "有効",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTooltip": "統合はインストールされ、必要な構成が行われている統合ポリシーが存在します。Elasticエージェントにこのポリシーが割り当てられていることを確認し、互換性があるイベントを取り込みます。",

@@ -35617,7 +35617,6 @@
     "xpack.securitySolution.detectionEngine.queryPreview.rulePreviewError": "Impossible d'afficher un aperçu de la règle",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsAriaLabel": "Afficher les détails",
     "xpack.securitySolution.detectionEngine.queryPreview.viewDetailsForRowAriaLabel": "Afficher les détails pour l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",
-    "xpack.securitySolution.detectionEngine.relatedIntegrations.badgeTitle": "intégrations",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.disabledTitle": "Désactivé",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTitle": "Activé",
     "xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTooltip": "L'intégration est installée et une politique d'intégration avec la configuration requise existe. Assurez-vous que des agents Elastic sont affectés à cette politique pour ingérer des événements compatibles.",

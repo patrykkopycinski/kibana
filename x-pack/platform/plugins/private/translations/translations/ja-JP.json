@@ -5460,8 +5460,6 @@
     "kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero": "ゼロで除算できません：{left}/{right}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue": "負数の対数はNULLになります：{value}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule": "ゼロによる加群はNULL値を返すことがあります：{left}%{right}",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithQuote": "引用符を\"（二重引用符）に変更",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithSolution": "次の結果を表示しています：{solution}",
     "kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction": "集約関数[{nestedAgg}]は、別の集約関数の引数として使用できません",
     "kbn-esql-validation-autocomplete.esql.validation.dropAllColumnsError": "すべてのフィールドの削除はできません[*]",
     "kbn-esql-validation-autocomplete.esql.validation.dropTimestampWarning": "[@timestamp]を破棄すると、検索結果に対するすべての時間フィルターが削除されます",

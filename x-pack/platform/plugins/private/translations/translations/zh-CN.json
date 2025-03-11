@@ -5427,8 +5427,6 @@
     "kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero": "不能除以零：{left}/{right}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue": "负数的对数将生成 null：{value}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule": "对零取余数会返回 null 值：{left}%{right}",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithQuote": "将引号更改为 \"（双引号）",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithSolution": "您是指 {solution} 吗？",
     "kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction": "聚合函数 [{nestedAgg}] 不能用作另一聚合函数中的参数",
     "kbn-esql-validation-autocomplete.esql.validation.dropAllColumnsError": "不允许移除所有字段 [*]",
     "kbn-esql-validation-autocomplete.esql.validation.dropTimestampWarning": "丢弃 [@timestamp] 会将所有时间筛选移除到搜索结果",

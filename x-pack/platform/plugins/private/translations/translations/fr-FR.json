@@ -5464,8 +5464,6 @@
     "kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero": "Impossible de diviser par zéro : {left}/{right}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.logOfNegativeValue": "Le log d'un nombre négatif est null : {value}",
     "kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule": "Le module par zéro peut renvoyer une valeur null : {left} % {right}",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithQuote": "Remplacer les guillemets par le signe \" (double)",
-    "kbn-esql-validation-autocomplete.esql.quickfix.replaceWithSolution": "Vouliez-vous dire {solution} ?",
     "kbn-esql-validation-autocomplete.esql.validation.aggInAggFunction": "La fonction d'agrégation [{nestedAgg}] ne peut pas être utilisée comme argument pour une autre fonction d'agrégation",
     "kbn-esql-validation-autocomplete.esql.validation.dropAllColumnsError": "Il est interdit de supprimer tous les champs [*]",
     "kbn-esql-validation-autocomplete.esql.validation.dropTimestampWarning": "La suppression de [@timestamp] effacera tous les filtres de temps des résultats de la recherche",

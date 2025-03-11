@@ -18736,7 +18736,6 @@
     "xpack.fleet.packagePolicyValidation.quoteStringErrorMessage": "Les chaînes commençant par des caractères YAML spéciaux, comme * ou &, requièrent des guillemets doubles.",
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName} obligatoire",
     "xpack.fleet.pagePermissionDeniedErrorMessage": "Vous n'êtes pas autorisé à accéder à cette page. Le privilège Kibana {roleName} pour Fleet est requis.",
-    "xpack.fleet.permissionDeniedErrorMessage": "Vous n'êtes pas autorisé à accéder à Fleet. Des autorisations Kibana sont requises pour accéder à Fleet; l'autorisation {roleName2} ou {roleName1} est requise pour accéder aux intégrations.",
     "xpack.fleet.permissionDeniedErrorTitle": "Autorisation refusée",
     "xpack.fleet.permissionRequireRootMessage.guideLink": "Privilèges racine",
     "xpack.fleet.permissionsRequestErrorMessageDescription": "Un problème est survenu lors de la vérification des autorisations Fleet",

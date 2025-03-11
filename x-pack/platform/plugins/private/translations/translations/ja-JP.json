@@ -18597,7 +18597,6 @@
     "xpack.fleet.packagePolicyValidation.quoteStringErrorMessage": "*や&などの特殊YAML文字で始まる文字列は二重引用符で囲む必要があります。",
     "xpack.fleet.packagePolicyValidation.requiredErrorMessage": "{fieldName}が必要です",
     "xpack.fleet.pagePermissionDeniedErrorMessage": "このページへのアクセスが許可されていません。Fleetの\"{roleName}\" Kibana権限が必要です。",
-    "xpack.fleet.permissionDeniedErrorMessage": "Fleet へのアクセスが許可されていません。Fleetにアクセスするには、Kibana権限が必要です。統合にアクセスするには、{roleName2}または{roleName1}権限が必要です。",
     "xpack.fleet.permissionDeniedErrorTitle": "パーミッションが拒否されました",
     "xpack.fleet.permissionRequireRootMessage.guideLink": "ルート権限",
     "xpack.fleet.permissionsRequestErrorMessageDescription": "Fleet アクセス権の確認中に問題が発生しました",

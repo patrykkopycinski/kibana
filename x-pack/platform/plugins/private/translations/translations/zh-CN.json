@@ -18303,7 +18303,6 @@
     "xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage": "'名称'必填",
     "xpack.fleet.packagePolicyValidation.quoteStringErrorMessage": "以特殊 YAML 字符（* 或 &）开头的字符串需要使用双引号引起。",
     "xpack.fleet.pagePermissionDeniedErrorMessage": "您无权访问该页面。它需要 Fleet 的 {roleName} Kibana 权限。",
-    "xpack.fleet.permissionDeniedErrorMessage": "您无权访问 Fleet。需要 Kibana 权限才能访问 Fleet；需要 {roleName2} 或 {roleName1} 权限才能访问集成。",
     "xpack.fleet.permissionDeniedErrorTitle": "权限被拒绝",
     "xpack.fleet.permissionRequireRootMessage.guideLink": "根权限",
     "xpack.fleet.permissionsRequestErrorMessageDescription": "检查 Fleet 权限时遇到问题",

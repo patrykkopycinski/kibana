@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiMarkdownFormat } from '@elastic/eui';
-
-export function Content({ text }) {
-  return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;
-}
-
-Content.propTypes = {
-  text: PropTypes.string.isRequired,
-};
+export const HAS_DATA = 'HAS_DATA';
+export const FETCHING = 'FETCHING';
+export const NO_DATA = 'NO_DATA';
+export const NOT_CHECKED = 'NOT_CHECKED';
+export const ERROR = 'ERROR';

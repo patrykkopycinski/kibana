@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { EuiMarkdownFormat } from '@elastic/eui';
 
-import { Footer } from './footer';
+interface ContentProps {
+  text: string;
+}
 
-test('render', () => {
-  const component = shallow(<Footer url={'/app/myapp'} label={'launch myapp'} />);
-  expect(component).toMatchSnapshot();
-});
+export function Content({ text }: ContentProps) {
+  return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;
+}

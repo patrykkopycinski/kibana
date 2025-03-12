@@ -9,29 +9,51 @@
 
 import _ from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
-
 import { i18n } from '@kbn/i18n';
-import { Synopsis } from './synopsis';
-import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { TutorialsCategory } from '../../../common/constants';
+import { Synopsis } from './synopsis';
+import { HomeKibanaServices, getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
+import type { TutorialType } from '../../services/tutorials/types';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
-
 const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
   defaultMessage: 'Integrations',
 });
 
-class TutorialDirectoryUi extends React.Component {
-  constructor(props) {
+interface TutorialDirectoryUiProps {
+  addBasePath: HomeKibanaServices['addBasePath'];
+  openTab: string;
+  isCloudEnabled: boolean;
+  intl: InjectedIntl;
+}
+interface TutorialCard extends Pick<TutorialType, 'id' | 'category' | 'name'> {
+  url: string;
+  description: TutorialType['shortDescription'];
+  icon?: string;
+  isBeta?: boolean;
+  onClick?: () => void;
+}
+
+interface TutorialDirectoryUiState {
+  selectedTabId: TutorialDirectoryUiProps['openTab'];
+  tutorialCards: TutorialCard[];
+}
+
+class TutorialDirectoryUi extends React.Component<
+  TutorialDirectoryUiProps,
+  TutorialDirectoryUiState
+> {
+  private _isMounted: boolean;
+  tabs: Array<{ id: string; name: string; content: JSX.Element }>;
+
+  constructor(props: TutorialDirectoryUiProps) {
     super(props);
-
     const extraTabs = getServices().addDataService.getAddDataTabs();
-
     this.tabs = [
       {
         id: SAMPLE_DATA_TAB_ID,
@@ -48,6 +70,7 @@ class TutorialDirectoryUi extends React.Component {
       })),
     ];
 
+    this._isMounted = false;
     let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
@@ -69,16 +92,13 @@ class TutorialDirectoryUi extends React.Component {
 
   async componentDidMount() {
     this._isMounted = true;
-
     this.setBreadcrumbs();
-
-    const tutorialConfigs = await getTutorials();
-
+    const tutorialConfigs: TutorialType[] = await getTutorials();
     if (!this._isMounted) {
       return;
     }
 
-    let tutorialCards = tutorialConfigs.map((tutorialConfig) => {
+    let tutorialCards: TutorialCard[] = tutorialConfigs.map((tutorialConfig: TutorialType) => {
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -88,20 +108,18 @@ class TutorialDirectoryUi extends React.Component {
       return {
         id: tutorialConfig.id,
         category: tutorialConfig.category,
-        icon: icon,
+        icon,
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
-        // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
-        //isBeta: tutorialConfig.isBeta,
+        isBeta: tutorialConfig.isBeta,
       };
     });
 
     // Add card for sample data that only gets show in "all" tab
     tutorialCards.push({
       id: 'sample_data',
-
       name: this.props.intl.formatMessage({
         id: 'home.tutorial.card.sampleDataTitle',
         defaultMessage: 'Sample Data',
@@ -111,7 +129,7 @@ class TutorialDirectoryUi extends React.Component {
         defaultMessage: 'Get started exploring Kibana with these "one click" data sets.',
       }),
       url: this.props.addBasePath('#/tutorial_directory/sampleData'),
-      elasticCloud: true,
+      category: TutorialsCategory.OTHER,
       onClick: this.onSelectedTabChanged.bind(null, SAMPLE_DATA_TAB_ID),
     });
 
@@ -126,12 +144,14 @@ class TutorialDirectoryUi extends React.Component {
     });
 
     this.setState({
-      // eslint-disable-line react/no-did-mount-set-state
-      tutorialCards: tutorialCards,
+      tutorialCards,
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    _prevProps: TutorialDirectoryUiProps,
+    prevState: Readonly<TutorialDirectoryUiState>
+  ) {
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }
@@ -149,13 +169,14 @@ class TutorialDirectoryUi extends React.Component {
     if (tab?.name) {
       breadcrumbs.push({
         text: tab.name,
+        href: '',
       });
     }
 
     getServices().chrome.setBreadcrumbs(breadcrumbs);
   };
 
-  onSelectedTabChanged = (id) => {
+  onSelectedTabChanged = (id: string) => {
     this.setState({
       selectedTabId: id,
     });
@@ -198,7 +219,6 @@ class TutorialDirectoryUi extends React.Component {
                   iconType={tutorial.icon}
                   description={tutorial.description}
                   title={tutorial.name}
-                  wrapInPanel
                   url={tutorial.url}
                   onClick={tutorial.onClick}
                   isBeta={tutorial.isBeta}
@@ -230,7 +250,6 @@ class TutorialDirectoryUi extends React.Component {
     return (
       <KibanaPageTemplate
         restrictWidth={1200}
-        template="empty"
         pageHeader={{
           pageTitle: (
             <FormattedMessage
@@ -263,11 +282,5 @@ class TutorialDirectoryUi extends React.Component {
     );
   }
 }
-
-TutorialDirectoryUi.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  openTab: PropTypes.string,
-  isCloudEnabled: PropTypes.bool.isRequired,
-};
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

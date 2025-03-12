@@ -9,44 +9,78 @@
 
 import _ from 'lodash';
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+} from '@kbn/core-saved-objects-api-browser';
+import type {
+  TutorialType,
+  InstructionSetType,
+  StatusCheckType,
+  InstructionsType,
+} from '../../../services/tutorials/types';
+import { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
+import type { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
-import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { getServices, HomeKibanaServices } from '../../kibana_services';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
   ON_PREM: 'onPrem',
   ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud',
-};
+} as const;
 
 const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
   defaultMessage: 'Integrations',
 });
 
-class TutorialUi extends React.Component {
-  constructor(props) {
+interface TutorialProps {
+  addBasePath: HomeKibanaServices['addBasePath'];
+  isCloudEnabled: boolean;
+  getTutorial: (id: string) => Promise<TutorialType>;
+  replaceTemplateStrings: (text: string) => string;
+  tutorialId: string;
+  bulkCreate: (
+    objects: Array<SavedObjectsBulkCreateObject<unknown>>,
+    options?: SavedObjectsBulkCreateOptions | undefined
+  ) => Promise<SavedObjectsBatchResponse<unknown>>;
+  intl: InjectedIntl;
+}
+
+type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 'FETCHING';
+
+interface TutorialState {
+  notFound: boolean;
+  statusCheckStates: StatusCheckStatesType[];
+  tutorial: TutorialType | null;
+  visibleInstructions: string;
+}
+
+class TutorialUi extends React.Component<TutorialProps, TutorialState> {
+  private _isMounted: boolean;
+
+  constructor(props: TutorialProps) {
     super(props);
 
     this.state = {
       notFound: false,
-      paramValues: {},
       statusCheckStates: [],
       tutorial: null,
+      visibleInstructions: props.isCloudEnabled
+        ? INSTRUCTIONS_TYPE.ELASTIC_CLOUD
+        : INSTRUCTIONS_TYPE.ON_PREM,
     };
 
-    if (props.isCloudEnabled) {
-      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ELASTIC_CLOUD;
-    } else {
-      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ON_PREM;
-    }
+    this._isMounted = false;
   }
 
   UNSAFE_componentWillMount() {
@@ -58,24 +92,15 @@ class TutorialUi extends React.Component {
   }
 
   async componentDidMount() {
-    const tutorial = await this.props.getTutorial(this.props.tutorialId);
+    const tutorial: TutorialType = await this.props.getTutorial(this.props.tutorialId);
     if (!this._isMounted) {
       return;
     }
 
     if (tutorial) {
-      // eslint-disable-next-line react/no-did-mount-set-state
-      this.setState(
-        {
-          tutorial: tutorial,
-        },
-        this.initInstructionsState
-      );
+      this.setState({ tutorial }, this.initInstructionsState);
     } else {
-      // eslint-disable-next-line react/no-did-mount-set-state
-      this.setState({
-        notFound: true,
-      });
+      this.setState({ notFound: true });
     }
 
     getServices().chrome.setBreadcrumbs([
@@ -116,29 +141,23 @@ class TutorialUi extends React.Component {
     }
   };
 
-  getInstructionSets = () => this.getInstructions().instructionSets;
+  getInstructionSets = (): InstructionSetType[] => {
+    return this.getInstructions()?.instructionSets ?? [];
+  };
 
   initInstructionsState = () => {
-    const instructions = this.getInstructions();
+    const instructions: InstructionsType = this.getInstructions() || { instructionSets: [] };
 
-    const paramValues = {};
-    if (instructions.params) {
-      instructions.params.forEach((param) => {
-        paramValues[param.id] = param.defaultValue;
-      });
-    }
-
-    const statusCheckStates = new Array(instructions.instructionSets.length).fill(
+    const statusCheckStates = new Array(instructions?.instructionSets?.length ?? 0).fill(
       StatusCheckStates.NOT_CHECKED
     );
 
     this.setState({
-      paramValues,
       statusCheckStates,
     });
   };
 
-  setVisibleInstructions = (instructionsType) => {
+  setVisibleInstructions = (instructionsType: TutorialState['visibleInstructions']) => {
     this.setState(
       {
         visibleInstructions: instructionsType,
@@ -147,23 +166,21 @@ class TutorialUi extends React.Component {
     );
   };
 
-  setParameter = (paramId, newValue) => {
-    this.setState((previousState) => {
-      const paramValues = _.cloneDeep(previousState.paramValues);
-      paramValues[paramId] = newValue;
-      return { paramValues: paramValues };
-    });
-  };
+  checkInstructionSetStatus = async (instructionSetIndex: number) => {
+    const instructionSets = this.getInstructionSets();
+    if (!instructionSets) return;
 
-  checkInstructionSetStatus = async (instructionSetIndex) => {
-    const instructionSet = this.getInstructionSets()[instructionSetIndex];
-    const esHitsCheckConfig = _.get(instructionSet, `statusCheck.esHitsCheck`);
+    const instructionSet = instructionSets[instructionSetIndex];
+    if (!instructionSet) return;
 
-    //Checks if a custom status check callback  was registered in the CLIENT
-    //that matches the same name registered in the SERVER (customStatusCheckName)
-    const customStatusCheckCallback = getServices().tutorialService.getCustomStatusCheck(
-      this.state.tutorial.customStatusCheckName
-    );
+    const esHitsCheckConfig = instructionSet.statusCheck?.esHitsCheck;
+    if (!this.state.tutorial) return;
+
+    const customStatusCheckCallback = this.state.tutorial.customStatusCheckName
+      ? getServices().tutorialService.getCustomStatusCheck(
+          this.state.tutorial.customStatusCheckName
+        )
+      : undefined;
 
     const [esHitsStatusCheck, customStatusCheck] = await Promise.all([
       ...(esHitsCheckConfig ? [this.fetchEsHitsStatus(esHitsCheckConfig)] : []),
@@ -172,21 +189,22 @@ class TutorialUi extends React.Component {
         : []),
     ]);
 
-    const nextStatusCheckState =
+    const nextStatusCheckState: StatusCheckStatesType =
       esHitsStatusCheck === StatusCheckStates.HAS_DATA ||
       customStatusCheck === StatusCheckStates.HAS_DATA
         ? StatusCheckStates.HAS_DATA
         : StatusCheckStates.NO_DATA;
 
-    this.setState((prevState) => ({
-      statusCheckStates: {
-        ...prevState.statusCheckStates,
-        [instructionSetIndex]: nextStatusCheckState,
-      },
-    }));
+    this.setState((prevState) => {
+      const newStatusCheckStates = [...prevState.statusCheckStates];
+      newStatusCheckStates[instructionSetIndex] = nextStatusCheckState;
+      return {
+        statusCheckStates: newStatusCheckStates,
+      };
+    });
   };
 
-  fetchCustomStatusCheck = async (customStatusCheckCallback) => {
+  fetchCustomStatusCheck = async (customStatusCheckCallback: CustomStatusCheckCallback) => {
     try {
       const response = await customStatusCheckCallback();
       return response ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
@@ -195,20 +213,21 @@ class TutorialUi extends React.Component {
     }
   };
 
-  /**
-   *
-   * @param esHitsCheckConfig
-   * @return {Promise<string>}
-   */
-  fetchEsHitsStatus = async (esHitsCheckConfig) => {
+  fetchEsHitsStatus = async (
+    esHitsCheckConfig: StatusCheckType['esHitsCheck']
+  ): Promise<StatusCheckStatesType> => {
     const { http } = getServices();
     try {
-      const response = await http.post('/api/home/hits_status', {
+      const index = Array.isArray(esHitsCheckConfig.index)
+        ? esHitsCheckConfig.index.join(',')
+        : esHitsCheckConfig.index;
+      const response: { count: number } = await http.post('/api/home/hits_status', {
         body: JSON.stringify({
-          index: esHitsCheckConfig.index,
+          index,
           query: esHitsCheckConfig.query,
         }),
       });
+
       return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
     } catch (e) {
       return StatusCheckStates.ERROR;
@@ -216,7 +235,7 @@ class TutorialUi extends React.Component {
   };
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
+    if (!this.props.isCloudEnabled && this.state.tutorial?.onPremElasticCloud) {
       const selfManagedLabel = this.props.intl.formatMessage({
         id: 'home.tutorial.selfManagedButtonLabel',
         defaultMessage: 'Self managed',
@@ -257,22 +276,22 @@ class TutorialUi extends React.Component {
       );
     }
   };
-
-  onStatusCheck = (instructionSetIndex) => {
+  onStatusCheck = (instructionSetIndex: number) => {
     this.setState(
       (prevState) => ({
-        statusCheckStates: {
-          ...prevState.statusCheckStates,
-          [instructionSetIndex]: StatusCheckStates.FETCHING,
-        },
+        statusCheckStates: [
+          ...prevState.statusCheckStates.slice(0, instructionSetIndex),
+          StatusCheckStates.FETCHING,
+          ...prevState.statusCheckStates.slice(instructionSetIndex + 1),
+        ],
       }),
-      this.checkInstructionSetStatus.bind(null, instructionSetIndex)
+      () => this.checkInstructionSetStatus(instructionSetIndex)
     );
   };
 
-  renderInstructionSets = (instructions) => {
+  renderInstructionSets = ({ instructionSets }: { instructionSets: InstructionSetType[] }) => {
     let offset = 1;
-    return instructions.instructionSets.map((instructionSet, index) => {
+    return instructionSets.map((instructionSet: InstructionSetType, index: number) => {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
 
@@ -288,20 +307,17 @@ class TutorialUi extends React.Component {
               this.onStatusCheck(index);
             }}
             offset={currentOffset}
-            params={instructions.params}
-            paramValues={this.state.paramValues}
-            setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
             isCloudEnabled={this.props.isCloudEnabled}
           />
-          {index < instructions.instructionSets.length - 1 && <EuiSpacer />}
+          {index < instructionSets.length - 1 && <EuiSpacer />}
         </Fragment>
       );
     });
   };
 
   renderSavedObjectsInstaller = () => {
-    if (!this.state.tutorial.savedObjects) {
+    if (!this.state.tutorial?.savedObjects) {
       return;
     }
 
@@ -323,10 +339,10 @@ class TutorialUi extends React.Component {
     let label;
     let url;
     if (_.has(this.state, 'tutorial.artifacts.application')) {
-      label = this.state.tutorial.artifacts.application.label;
-      url = this.props.addBasePath(this.state.tutorial.artifacts.application.path);
+      label = this.state.tutorial?.artifacts?.application?.label ?? '';
+      url = this.props.addBasePath(this.state.tutorial!.artifacts!.application!.path);
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
-      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find((dashboard) => {
+      const overviewDashboard = this.state.tutorial?.artifacts?.dashboards.find((dashboard) => {
         return dashboard.isOverview;
       });
       if (overviewDashboard) {
@@ -347,11 +363,11 @@ class TutorialUi extends React.Component {
     }
   };
 
-  renderModuleNotices() {
+  renderModuleNotices(): React.ReactNode {
     const notices = getServices().tutorialService.getModuleNotices();
-    if (notices.length && this.state.tutorial.moduleName) {
+    if (notices.length && this.state.tutorial?.moduleName) {
       return notices.map((ModuleNotice, index) => (
-        <ModuleNotice key={index} moduleName={this.state.tutorial.moduleName} />
+        <ModuleNotice key={index} moduleName={this.state.tutorial!.moduleName!} />
       ));
     } else {
       return null;
@@ -395,14 +411,14 @@ class TutorialUi extends React.Component {
 
     if (this.state.tutorial) {
       let previewUrl;
-      if (this.state.tutorial.previewImagePath) {
+      if (this.state.tutorial!.previewImagePath) {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
 
       let exportedFieldsUrl;
       if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
         exportedFieldsUrl = this.props.replaceTemplateStrings(
-          this.state.tutorial.artifacts.exportedFields.documentationUrl
+          this.state.tutorial.artifacts?.exportedFields?.documentationUrl ?? ''
         );
       }
 
@@ -415,7 +431,7 @@ class TutorialUi extends React.Component {
       content = (
         <div>
           <Introduction
-            category={this.state.tutorial.category}
+            category={this.state.tutorial.category as TutorialCategoryType}
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
@@ -429,28 +445,18 @@ class TutorialUi extends React.Component {
           {this.renderInstructionSetsToggle()}
 
           <EuiSpacer />
-          {this.renderInstructionSets(instructions)}
+          {instructions && this.renderInstructionSets(instructions)}
           {this.renderSavedObjectsInstaller()}
           {this.renderFooter()}
         </div>
       );
     }
-
     return (
-      <KibanaPageTemplate template="empty">
+      <KibanaPageTemplate>
         <KibanaPageTemplate.Section>{content}</KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }
 }
-
-TutorialUi.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  isCloudEnabled: PropTypes.bool.isRequired,
-  getTutorial: PropTypes.func.isRequired,
-  replaceTemplateStrings: PropTypes.func.isRequired,
-  tutorialId: PropTypes.string.isRequired,
-  bulkCreate: PropTypes.func.isRequired,
-};
 
 export const Tutorial = injectI18n(TutorialUi);

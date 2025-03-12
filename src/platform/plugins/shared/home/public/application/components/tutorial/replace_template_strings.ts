@@ -10,22 +10,48 @@
 import { Writer } from 'mustache';
 import { getServices } from '../../kibana_services';
 
-const TEMPLATE_TAGS = ['{', '}'];
+const TEMPLATE_TAGS: [string, string] = ['{', '}'];
+interface TemplateContext {
+  curlyOpen: '{';
+  curlyClose: '}';
+  config: {
+    docs: {
+      base_url: string;
+      beats: {
+        filebeat: string;
+        metricbeat: string;
+        heartbeat: string;
+        winlogbeat: string;
+        auditbeat: string;
+      };
+      logstash: string;
+      version: string;
+    };
+    kibana: {
+      version: string;
+    };
+  };
+}
+
+// Extend the MustacheWriter class to include the escapedValue method
+class CustomMustacheWriter extends Writer {
+  escapedValue(
+    token: Array<string | number>,
+    context: { lookup: (name: string | number) => string }
+  ) {
+    const value = context.lookup(token[1]);
+    if (value != null) {
+      return value;
+    }
+  }
+}
 
 // Can not use 'Mustache' since its a global object
-const mustacheWriter = new Writer();
-// do not html escape output
-mustacheWriter.escapedValue = function escapedValue(token, context) {
-  const value = context.lookup(token[1]);
-  if (value != null) {
-    return value;
-  }
-};
+const mustacheWriter = new CustomMustacheWriter();
 
-export function replaceTemplateStrings(text, params = {}) {
+export function replaceTemplateStrings(text: string) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
-
-  const variables = {
+  const variables: TemplateContext = {
     // '{' and '}' can not be used in template since they are used as template tags.
     // Must use '{curlyOpen}'' and '{curlyClose}'
     curlyOpen: '{',
@@ -48,8 +74,7 @@ export function replaceTemplateStrings(text, params = {}) {
         version: kibanaVersion,
       },
     },
-    params: params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
-  return mustacheWriter.render(text, variables);
+  return mustacheWriter.render(text, variables, {});
 }

@@ -8,15 +8,19 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Footer } from './footer';
 
-import { Content } from './content';
-
-test('should render content with markdown', () => {
-  const component = shallow(
-    <Content
-      text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
-    />
+test('render Footer component', () => {
+  const { getByText, getByRole } = render(
+    <I18nProvider>
+      <Footer url={'/app/myapp'} label={'launch myapp'} />
+    </I18nProvider>
   );
-  expect(component).toMatchSnapshot();
+
+  expect(
+    getByText("When all steps are complete, you're ready to explore your data.")
+  ).toBeInTheDocument();
+  expect(getByRole('link')).toHaveAttribute('href', '/app/myapp');
 });

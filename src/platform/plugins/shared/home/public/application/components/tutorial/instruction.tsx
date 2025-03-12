@@ -8,23 +8,26 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { Content } from './content';
-
 import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
-
+import { Content } from './content';
 import { getServices } from '../../kibana_services';
+import { InstructionType } from '../../../services/tutorials/types';
+
+export interface InstructionProps extends InstructionType {
+  variantId: string;
+  isCloudEnabled: boolean;
+  replaceTemplateStrings: (text: string) => string;
+}
 
 export function Instruction({
   commands,
-  paramValues,
   textPost,
   textPre,
   replaceTemplateStrings,
   customComponentName,
   variantId,
   isCloudEnabled,
-}) {
+}: InstructionProps) {
   const { tutorialService, http, theme, getBasePath, kibanaVersion } = getServices();
 
   let pre;
@@ -46,11 +49,12 @@ export function Instruction({
       </>
     );
   }
-  const customComponent = tutorialService.getCustomComponent(customComponentName);
-  //Memoize the custom component so it wont rerender everytime
+  const customComponent = customComponentName
+    ? tutorialService.getCustomComponent(customComponentName)
+    : null;
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
-      return React.lazy(() => customComponent());
+      return React.lazy(() => customComponent().then((component) => ({ default: component })));
     }
   }, [customComponent]);
 
@@ -58,7 +62,7 @@ export function Instruction({
   if (commands) {
     const cmdText = commands
       .map((cmd) => {
-        return replaceTemplateStrings(cmd, paramValues);
+        return replaceTemplateStrings(cmd);
       })
       .join('\n');
     commandBlock = (
@@ -73,9 +77,7 @@ export function Instruction({
   return (
     <div>
       {pre}
-
       {commandBlock}
-
       {LazyCustomComponent && (
         <Suspense fallback={<EuiLoadingSpinner />}>
           <EuiErrorBoundary>
@@ -90,19 +92,7 @@ export function Instruction({
           </EuiErrorBoundary>
         </Suspense>
       )}
-
       {post}
     </div>
   );
 }
-
-Instruction.propTypes = {
-  commands: PropTypes.array,
-  paramValues: PropTypes.object.isRequired,
-  textPost: PropTypes.string,
-  textPre: PropTypes.string,
-  replaceTemplateStrings: PropTypes.func.isRequired,
-  customComponentName: PropTypes.string,
-  variantId: PropTypes.string,
-  isCloudEnabled: PropTypes.bool.isRequired,
-};

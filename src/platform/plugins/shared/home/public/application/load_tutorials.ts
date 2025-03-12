@@ -8,9 +8,10 @@
  */
 
 import _ from 'lodash';
-import { getServices } from './kibana_services';
 import { i18n } from '@kbn/i18n';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { getServices } from './kibana_services';
+import type { TutorialType } from '../services/tutorials/types';
 
 const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
@@ -19,15 +20,15 @@ headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
 headers.append(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
-let tutorials = [];
+let tutorials: TutorialType[] = [];
 let tutorialsLoaded = false;
 
-async function loadTutorials() {
+async function loadTutorials(): Promise<void> {
   try {
     const response = await fetch(baseUrl, {
       method: 'get',
       credentials: 'include',
-      headers: headers,
+      headers,
     });
     if (response.status >= 300) {
       throw new Error(
@@ -50,7 +51,7 @@ async function loadTutorials() {
   }
 }
 
-export async function getTutorials() {
+export async function getTutorials(): Promise<TutorialType[]> {
   if (!tutorialsLoaded) {
     await loadTutorials();
   }
@@ -58,16 +59,18 @@ export async function getTutorials() {
   return _.cloneDeep(tutorials);
 }
 
-export async function getTutorial(id) {
+export async function getTutorial(id: string): Promise<TutorialType> {
   if (!tutorialsLoaded) {
     await loadTutorials();
   }
 
-  const tutorial = tutorials.find((tutorial) => {
-    return tutorial.id === id;
+  const tutorial = tutorials.find((t) => {
+    return t.id === id;
   });
 
   if (tutorial) {
     return _.cloneDeep(tutorial);
+  } else {
+    throw new Error(`Tutorial with id ${id} not found`);
   }
 }

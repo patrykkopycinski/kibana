@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const HAS_DATA = 'has_data';
-export const FETCHING = 'FETCHING';
-export const NO_DATA = 'NO_DATA';
-export const NOT_CHECKED = 'NOT_CHECKED';
-export const ERROR = 'ERROR';
+import type {
+  TutorialSchema,
+  InstructionSetSchema,
+  StatusCheckSchema,
+  InstructionVariant,
+  Instruction,
+  InstructionsSchema,
+} from '../../../server';
+
+export type TutorialType = TutorialSchema;
+export type InstructionSetType = InstructionSetSchema;
+export type InstructionsType = InstructionsSchema;
+export type StatusCheckType = StatusCheckSchema;
+export type InstructionVariantType = InstructionVariant;
+export type InstructionType = Instruction;

@@ -10,13 +10,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  hasEditCapabilities,
-  HasEditCapabilities,
   EmbeddableApiContext,
   CanAccessViewMode,
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
+  HasReadOnlyCapabilities,
+  hasReadOnlyCapabilities,
 } from '@kbn/presentation-publishing';
 import {
   Action,
@@ -24,27 +24,27 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import { map } from 'rxjs';
-import { ACTION_EDIT_PANEL } from './constants';
+import { ACTION_SHOW_CONFIG_PANEL } from './constants';
 
-export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
+export type ShowConfigPanelActionApi = CanAccessViewMode & HasReadOnlyCapabilities;
 
-const isApiCompatible = (api: unknown | null): api is EditPanelActionApi => {
-  return hasEditCapabilities(api) && apiCanAccessViewMode(api);
+const isApiCompatible = (api: unknown | null): api is ShowConfigPanelActionApi => {
+  return hasReadOnlyCapabilities(api) && apiCanAccessViewMode(api);
 };
 
-export class EditPanelAction
+export class ShowConfigPanelAction
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
 {
-  public readonly type = ACTION_EDIT_PANEL;
-  public readonly id = ACTION_EDIT_PANEL;
+  public readonly type = ACTION_SHOW_CONFIG_PANEL;
+  public readonly id = ACTION_SHOW_CONFIG_PANEL;
   public order = 50;
 
   constructor() {}
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return i18n.translate('presentationPanel.action.editPanel.displayName', {
-      defaultMessage: 'Edit {value} configuration',
+    return i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
+      defaultMessage: 'Show {value} configuration',
       values: {
         value: embeddable.getTypeDisplayName(),
       },
@@ -52,7 +52,7 @@ export class EditPanelAction
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatible(embeddable)
+    return apiCanAccessViewMode(embeddable)
       ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
       : undefined;
   }
@@ -61,22 +61,28 @@ export class EditPanelAction
     return isApiCompatible(embeddable);
   }
 
-  public getIconType() {
-    return 'pencil';
-  }
-
-  public async getHref({ embeddable }: EmbeddableApiContext): Promise<string | undefined> {
+  public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return await embeddable?.getEditHref?.();
+    return 'glasses';
   }
 
+  /**
+   * The compatible check is scoped to the read only capabilities
+   * Note: it does not take into account write permissions
+   */
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    if (!isApiCompatible(embeddable) || !embeddable.isEditingEnabled()) return false;
-    return getInheritedViewMode(embeddable) === 'edit';
+    if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'view') {
+      return false;
+    }
+    const { read: canRead, write: canWrite } = embeddable.isReadOnlyEnabled();
+    return Boolean(
+      // No option to view or edit the configuration is offered for users with write permission.
+      canRead && !canWrite
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    await embeddable.onEdit();
+    await embeddable.onShowConfig();
   }
 }

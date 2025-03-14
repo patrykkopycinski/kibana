@@ -41512,7 +41512,6 @@
     "xpack.securitySolution.uncommonProcessTable.rows": "{numRows} {numRows, plural, =0 {ligne} =1 {ligne} other {lignes}}",
     "xpack.securitySolution.uncommonProcessTable.unit": "{totalCount, plural, other {processus}}",
     "xpack.securitySolution.useAlertResponseActionsSupport.missingAgentIdField": "Alerte, les données d'événement ne comportent pas le champ d'identificateur d'agent {agentTypeName} ({missingField}",
-    "xpack.securitySolution.useAlertResponseActionsSupport.notAnAlert": "Les actions de réponse ne sont prises en charge que pour les alertes (et non pour les événements)",
     "xpack.securitySolution.useConsoleActionSubmitter.actionRequestFailure": "Échec de la création d'une requête d'action.",
     "xpack.securitySolution.useInputHints.exampleInstructions": "Ex : [ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "Appuyez sur Entrée pour exécuter",

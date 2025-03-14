@@ -41550,7 +41550,6 @@
     "xpack.securitySolution.uncommonProcessTable.rows": "{numRows} {numRows, plural, other {行}}",
     "xpack.securitySolution.uncommonProcessTable.unit": "{totalCount, plural, other {个进程}}",
     "xpack.securitySolution.useAlertResponseActionsSupport.missingAgentIdField": "告警事件数据缺少 {agentTypeName} 代理标识符字段 ({missingField})",
-    "xpack.securitySolution.useAlertResponseActionsSupport.notAnAlert": "仅告警（而不是事件）支持响应操作",
     "xpack.securitySolution.useConsoleActionSubmitter.actionRequestFailure": "无法创建操作请求。",
     "xpack.securitySolution.useInputHints.exampleInstructions": "例如：[ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "按 Enter 键以执行",

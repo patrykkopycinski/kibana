@@ -41487,7 +41487,6 @@
     "xpack.securitySolution.uncommonProcessTable.rows": "{numRows} {numRows, plural, other  {行}}",
     "xpack.securitySolution.uncommonProcessTable.unit": "{totalCount, plural, other  {プロセス}}",
     "xpack.securitySolution.useAlertResponseActionsSupport.missingAgentIdField": "{agentTypeName}エージェントIDフィールド（{missingField}）が見つからないイベントデータを警告",
-    "xpack.securitySolution.useAlertResponseActionsSupport.notAnAlert": "対応アクションはアラートでのみサポートされています（イベントはサポートされていません）",
     "xpack.securitySolution.useConsoleActionSubmitter.actionRequestFailure": "アクションリクエストを作成できませんでした。",
     "xpack.securitySolution.useInputHints.exampleInstructions": "例：[ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "Enterを押すと実行します",

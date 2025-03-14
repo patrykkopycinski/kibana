@@ -41110,7 +41110,6 @@
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.title": "Traduction",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translatedRuleCalloutTitle": "Cette règle a été pleinement traduite. Installez la règle pour finir la migration. Une fois la règle installée, vous pourrez la paramétrer.",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.queryPlaceholder": "Cette règle n'a pas été traduite. Cliquez sur modifier pour commencer à écrire.",
-    "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.title": "Requête {queryLanguage}",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel": "Traduction",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.unknownMigrationRuleTitle": "Règle de migration inconnue",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.updatedByLabel": "{updated} : {by} le {date}",

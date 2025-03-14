@@ -41148,7 +41148,6 @@
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.title": "转换",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translatedRuleCalloutTitle": "此规则已完全转换。安装规则以完成迁移。安装后，您即可微调该规则。",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.queryPlaceholder": "尚未转换此规则。单击“编辑”以开始写入。",
-    "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.title": "{queryLanguage} 查询",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel": "转换",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.unknownMigrationRuleTitle": "未知迁移规则",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.updatedByLabel": "{updated}：{by} 于 {date}",

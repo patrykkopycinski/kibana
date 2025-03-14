@@ -41085,7 +41085,6 @@
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.title": "変換",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translatedRuleCalloutTitle": "このルールは完全に変換されました。ルールをインストールして移行を完了します。インストールが完了すると、ルールを微調整できます。",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.queryPlaceholder": "このルールは変換されていません。編集をクリックすると、書き込みを開始します。",
-    "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.title": "{queryLanguage}クエリ",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.translationTabLabel": "変換",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.unknownMigrationRuleTitle": "不明な移行ルール",
     "xpack.securitySolution.siemMigrations.rules.translationDetails.updatedByLabel": "{updated}：{by} 日付：{date}",

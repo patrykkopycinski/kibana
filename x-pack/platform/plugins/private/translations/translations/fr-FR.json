@@ -15984,7 +15984,6 @@
     "xpack.dataVisualizer.file.importSummary.ingestPipelineTitle": "Pipeline d'ingestion",
     "xpack.dataVisualizer.file.importView.backButtonLabel": "Retour",
     "xpack.dataVisualizer.file.importView.cancelButtonLabel": "Sélectionner un autre fichier",
-    "xpack.dataVisualizer.file.importView.createIndexTitle": "Créer un nouvel index",
     "xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage": "Le nom de la vue de données existe déjà",
     "xpack.dataVisualizer.file.importView.deployModelError": "Erreur survenue lors du déploiement du modèle entraîné :",
     "xpack.dataVisualizer.file.importView.importButtonLabel": "Importer",

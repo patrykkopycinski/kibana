@@ -15965,7 +15965,6 @@
     "xpack.dataVisualizer.file.importSummary.ingestPipelineTitle": "パイプラインを投入",
     "xpack.dataVisualizer.file.importView.backButtonLabel": "戻る",
     "xpack.dataVisualizer.file.importView.cancelButtonLabel": "別のファイルを選択",
-    "xpack.dataVisualizer.file.importView.createIndexTitle": "新しいインデックスを作成",
     "xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage": "データビュー名はすでに存在します",
     "xpack.dataVisualizer.file.importView.deployModelError": "学習済みモデルのデプロイエラー：",
     "xpack.dataVisualizer.file.importView.importButtonLabel": "インポート",

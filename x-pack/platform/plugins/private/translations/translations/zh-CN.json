@@ -16001,7 +16001,6 @@
     "xpack.dataVisualizer.file.importSummary.ingestPipelineTitle": "采集管道",
     "xpack.dataVisualizer.file.importView.backButtonLabel": "返回",
     "xpack.dataVisualizer.file.importView.cancelButtonLabel": "选择其他文件",
-    "xpack.dataVisualizer.file.importView.createIndexTitle": "创建新索引",
     "xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage": "数据视图名称已存在",
     "xpack.dataVisualizer.file.importView.deployModelError": "部署已训练模型时出错：",
     "xpack.dataVisualizer.file.importView.importButtonLabel": "导入",

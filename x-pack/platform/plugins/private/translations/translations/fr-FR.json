@@ -32125,7 +32125,6 @@
     "xpack.observability.customThreshold.rule.charts.noData.title": "Aucune donnée du graphique n'est disponible, vérifiez la règle {errorSourceField}",
     "xpack.observability.customThreshold.rule.cloudActionVariableDescription": "Objet cloud défini par ECS s'il est disponible dans la source.",
     "xpack.observability.customThreshold.rule.containerActionVariableDescription": "Objet conteneur défini par ECS s'il est disponible dans la source.",
-    "xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription": "Objet contenant les groupes qui fournissent les données",
     "xpack.observability.customThreshold.rule.hostActionVariableDescription": "Objet hôte défini par ECS s'il est disponible dans la source.",
     "xpack.observability.customThreshold.rule.labelsActionVariableDescription": "Liste d'étiquettes associées avec l'entité sur laquelle l'alerte s'est déclenchée.",
     "xpack.observability.customThreshold.rule.noDataValue": "Aucune donnée",

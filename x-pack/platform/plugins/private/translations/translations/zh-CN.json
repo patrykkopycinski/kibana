@@ -32158,7 +32158,6 @@
     "xpack.observability.customThreshold.rule.charts.noData.title": "没有可用图表数据，请检查规则 {errorSourceField}",
     "xpack.observability.customThreshold.rule.cloudActionVariableDescription": "ECS 定义的云对象（如果在源中可用）。",
     "xpack.observability.customThreshold.rule.containerActionVariableDescription": "ECS 定义的容器对象（如果在源中可用）。",
-    "xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription": "包含正报告数据的组的对象",
     "xpack.observability.customThreshold.rule.hostActionVariableDescription": "ECS 定义的主机对象（如果在源中可用）。",
     "xpack.observability.customThreshold.rule.labelsActionVariableDescription": "与在其上触发此告警的实体关联的标签列表。",
     "xpack.observability.customThreshold.rule.noDataValue": "无数据",

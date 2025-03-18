@@ -32102,7 +32102,6 @@
     "xpack.observability.customThreshold.rule.charts.noData.title": "グラフデータはありません。ルール{errorSourceField}を確認してください",
     "xpack.observability.customThreshold.rule.cloudActionVariableDescription": "ソースで使用可能な場合に、ECSで定義されたクラウドオブジェクト。",
     "xpack.observability.customThreshold.rule.containerActionVariableDescription": "ソースで使用可能な場合に、ECSで定義されたコンテナーオブジェクト。",
-    "xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription": "データを報告しているグループを含むオブジェクト",
     "xpack.observability.customThreshold.rule.hostActionVariableDescription": "ソースで使用可能な場合に、ECSで定義されたホストオブジェクト。",
     "xpack.observability.customThreshold.rule.labelsActionVariableDescription": "このアラートがトリガーされたエンティティに関連付けられたラベルのリスト。",
     "xpack.observability.customThreshold.rule.noDataValue": "データなし",

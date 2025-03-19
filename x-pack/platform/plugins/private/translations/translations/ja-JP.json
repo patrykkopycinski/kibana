@@ -12705,7 +12705,7 @@
     "xpack.apm.welcome.image.alt": "ログから検出されたサービスとAPMで測定されたサービスを表示する、サービスインベントリの新しいエクスペリエンスの図",
     "xpack.apm.welcome.linkLabel": "詳細",
     "xpack.apm.welcome.title": "新しいエクスペリエンスへようこそ！",
-    "xpack.apmDataAccess.apmSettings.index": "APM 設定 - インデックス",
+    "xpack.apmSourcesAccess.apmSettings.index": "APM 設定 - インデックス",
     "xpack.banners.settings.backgroundColor.description": "バナーの背景色。{subscriptionLink}",
     "xpack.banners.settings.backgroundColor.title": "バナー背景色",
     "xpack.banners.settings.placement.description": "Elasticヘッダーの上に、上部のバナーを表示します。{subscriptionLink}",

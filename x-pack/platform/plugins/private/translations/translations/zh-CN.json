@@ -12732,7 +12732,7 @@
     "xpack.apm.welcome.image.alt": "服务库存新体验的图像，显示从日志中检测到的服务和 APM-instrumented 服务",
     "xpack.apm.welcome.linkLabel": "了解详情",
     "xpack.apm.welcome.title": "欢迎参与我们的新体验！",
-    "xpack.apmDataAccess.apmSettings.index": "APM 设置 - 索引",
+    "xpack.apmSourcesAccess.apmSettings.index": "APM 设置 - 索引",
     "xpack.banners.settings.backgroundColor.description": "设置横幅广告的背景色。{subscriptionLink}",
     "xpack.banners.settings.backgroundColor.title": "横幅广告背景色",
     "xpack.banners.settings.placement.description": "在 Elastic 页眉上显示顶部横幅广告。{subscriptionLink}",

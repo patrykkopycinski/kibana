@@ -12719,7 +12719,7 @@
     "xpack.apm.welcome.image.alt": "Image de la nouvelle expérience de l'inventaire des services, montrant les services détectés à partir des logs ainsi que les services instrumentés par APM",
     "xpack.apm.welcome.linkLabel": "En savoir plus",
     "xpack.apm.welcome.title": "Bienvenue dans notre nouvelle expérience !",
-    "xpack.apmDataAccess.apmSettings.index": "Paramètres APM - Index",
+    "xpack.apmSourcesAccess.apmSettings.index": "Paramètres APM - Index",
     "xpack.banners.settings.backgroundColor.description": "Définissez la couleur d'arrière-plan de la bannière. {subscriptionLink}",
     "xpack.banners.settings.backgroundColor.title": "Couleur d'arrière-plan de la bannière",
     "xpack.banners.settings.placement.description": "Affichez une bannière haute au-dessus de l'en-tête Elastic. {subscriptionLink}",

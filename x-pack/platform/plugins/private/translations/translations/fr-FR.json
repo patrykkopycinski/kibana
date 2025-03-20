@@ -44811,7 +44811,6 @@
     "xpack.streams.dashboardTable.dashboardNameColumnTitle": "Nom du tableau de bord",
     "xpack.streams.dashboardTable.tagsColumnTitle": "Balises",
     "xpack.streams.entityDetailOverview.createChildStream": "Créer un flux enfant",
-    "xpack.streams.entityDetailOverview.docCount": "{docCount} documents",
     "xpack.streams.entityDetailOverview.noChildStreams": "Créer des sous-flux pour diviser les données ayant des différences de politiques de conservation, de schémas, etc.",
     "xpack.streams.entityDetailOverview.searchBarPlaceholder": "Filtrer les données avec KQL",
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "Liens rapides",

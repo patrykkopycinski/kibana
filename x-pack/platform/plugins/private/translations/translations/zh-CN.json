@@ -44848,7 +44848,6 @@
     "xpack.streams.dashboardTable.dashboardNameColumnTitle": "仪表板名称",
     "xpack.streams.dashboardTable.tagsColumnTitle": "标签",
     "xpack.streams.entityDetailOverview.createChildStream": "创建子数据流",
-    "xpack.streams.entityDetailOverview.docCount": "{docCount} 个文档",
     "xpack.streams.entityDetailOverview.noChildStreams": "创建子流以分割具有不同保留策略、方案等的数据。",
     "xpack.streams.entityDetailOverview.searchBarPlaceholder": "通过使用 KQL 来筛选数据",
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "快速链接",

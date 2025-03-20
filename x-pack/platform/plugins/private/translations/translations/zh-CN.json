@@ -22882,7 +22882,6 @@
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription": "将不再维护日志流面板。尝试将 {savedSearchDocsLink} 用于类似可视化。",
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.discoverSessionsLinkLabel": "Discover 会话",
     "xpack.infra.metadata.pinAriaLabel": "已固定字段",
-    "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "添加筛选",
     "xpack.infra.metadataEmbeddable.errorAction": "重新提取元数据",
     "xpack.infra.metadataEmbeddable.errorMessage": "加载数据时出错。尝试{refetch}并再次打开主机详情。",
     "xpack.infra.metadataEmbeddable.errorTitle": "抱歉，有错误",

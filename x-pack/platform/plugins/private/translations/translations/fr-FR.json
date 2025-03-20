@@ -22856,7 +22856,6 @@
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription": "La maintenance des panneaux de flux de logs n'est plus assurée. Essayez d'utiliser {savedSearchDocsLink} pour une visualisation similaire.",
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.discoverSessionsLinkLabel": "Sessions Discover",
     "xpack.infra.metadata.pinAriaLabel": "Champ épinglé",
-    "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "Ajouter un filtre",
     "xpack.infra.metadataEmbeddable.errorAction": "récupérer de nouveau les métadonnées",
     "xpack.infra.metadataEmbeddable.errorMessage": "Une erreur s'est produite lors du chargement des données. Essayez de {refetch} et d'ouvrir à nouveau les détails de l'hôte.",
     "xpack.infra.metadataEmbeddable.errorTitle": "Désolé, une erreur est survenue.",

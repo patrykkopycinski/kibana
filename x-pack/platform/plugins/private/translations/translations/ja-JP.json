@@ -46739,7 +46739,6 @@
     "xpack.transform.wizard.previousStepButton": "前へ",
     "xpack.triggersActionsUI.alerts.breadcrumbTitle": "アラート",
     "xpack.triggersActionsUI.alertsSearchBar.placeholder": "検索アラート（例：kibana.alert.evaluation.threshold > 75）",
-    "xpack.triggersActionsUI.alertsTable.moreActionsTextLabel": "さらにアクションを表示",
     "xpack.triggersActionsUI.appName": "ルール",
     "xpack.triggersActionsUI.cases.label": "ケース",
     "xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage": "このルールタイプには{minimumLicenseRequired}ライセンスが必要です。",

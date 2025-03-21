@@ -46773,7 +46773,6 @@
     "xpack.transform.wizard.previousStepButton": "Précédent",
     "xpack.triggersActionsUI.alerts.breadcrumbTitle": "Alertes",
     "xpack.triggersActionsUI.alertsSearchBar.placeholder": "Alertes de recherche (par exemple, kibana.alert.evaluation.threshold > 75)",
-    "xpack.triggersActionsUI.alertsTable.moreActionsTextLabel": "Plus d'actions",
     "xpack.triggersActionsUI.appName": "Règles",
     "xpack.triggersActionsUI.cases.label": "Cas",
     "xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage": "Ce type de règle requiert une licence {minimumLicenseRequired}.",

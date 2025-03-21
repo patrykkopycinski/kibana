@@ -46812,7 +46812,6 @@
     "xpack.transform.wizard.previousStepButton": "上一步",
     "xpack.triggersActionsUI.alerts.breadcrumbTitle": "告警",
     "xpack.triggersActionsUI.alertsSearchBar.placeholder": "搜索告警（例如 kibana.alert.evaluation.threshold > 75）",
-    "xpack.triggersActionsUI.alertsTable.moreActionsTextLabel": "更多操作",
     "xpack.triggersActionsUI.appName": "规则",
     "xpack.triggersActionsUI.cases.label": "案例",
     "xpack.triggersActionsUI.checkRuleTypeEnabled.ruleTypeDisabledByLicenseMessage": "此规则类型需要{minimumLicenseRequired}许可证。",

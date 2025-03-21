@@ -2845,7 +2845,6 @@
     "discover.showingSavedDataViewWarningDescription": "Affichage de la vue de données enregistrée : \"{ownDataViewTitle}\" ({ownDataViewId})",
     "discover.singleDocRoute.errorMessage": "Aucune donnée correspondante pour l'ID {dataViewId}",
     "discover.singleDocRoute.errorTitle": "Une erreur s'est produite",
-    "discover.skipToBottomButtonLabel": "Atteindre la fin du tableau",
     "discover.topNav.managedContentLabel": "Cette session Discover est gérée par Elastic. Les modifications effectuées ici doivent être enregistrées dans une nouvelle session Discover.",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "Gérer les sessions Discover",
     "discover.topNav.openSearchPanel.noSearchesFoundDescription": "Aucune session Discover correspondante n'a été trouvée.",

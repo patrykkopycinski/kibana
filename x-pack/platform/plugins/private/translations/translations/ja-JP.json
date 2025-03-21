@@ -2844,7 +2844,6 @@
     "discover.showingSavedDataViewWarningDescription": "保存されたデータビューを表示しています：\"{ownDataViewTitle}\" ({ownDataViewId})",
     "discover.singleDocRoute.errorMessage": "ID {dataViewId}の一致するデータビューが見つかりません",
     "discover.singleDocRoute.errorTitle": "エラーが発生しました",
-    "discover.skipToBottomButtonLabel": "テーブルの最後に移動",
     "discover.topNav.managedContentLabel": "このDiscoverセッションはElasticが管理しています。この変更は、新しいDiscoverセッションに保存する必要があります。",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "Discoverセッションを管理",
     "discover.topNav.openSearchPanel.noSearchesFoundDescription": "一致するDiscoverセッションが見つかりませんでした。",

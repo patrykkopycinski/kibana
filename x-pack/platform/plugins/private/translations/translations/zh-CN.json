@@ -2845,7 +2845,6 @@
     "discover.showingSavedDataViewWarningDescription": "正在显示已保存数据视图：“{ownDataViewTitle}”({ownDataViewId})",
     "discover.singleDocRoute.errorMessage": "没有与 ID {dataViewId} 相匹配的数据视图",
     "discover.singleDocRoute.errorTitle": "发生错误",
-    "discover.skipToBottomButtonLabel": "转到表尾",
     "discover.topNav.managedContentLabel": "此 Discover 会话由 Elastic 进行管理。此处的更改必须保存到新 Discover 会话。",
     "discover.topNav.openSearchPanel.manageSearchesButtonLabel": "管理 Discover 会话",
     "discover.topNav.openSearchPanel.noSearchesFoundDescription": "找不到匹配的 Discover 会话。",

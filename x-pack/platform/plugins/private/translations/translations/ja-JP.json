@@ -35080,7 +35080,6 @@
     "xpack.security.management.users.usersTitle": "ユーザー",
     "xpack.security.management.usersTitle": "ユーザー",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "アカウントメニュー",
-    "xpack.security.navControlComponent.closeProjectLinkText": "プロジェクトを閉じる",
     "xpack.security.navControlComponent.editProfileLinkText": "プロフィールを編集",
     "xpack.security.navControlComponent.loginLinkText": "ログイン",
     "xpack.security.navControlComponent.logoutLinkText": "ログアウト",

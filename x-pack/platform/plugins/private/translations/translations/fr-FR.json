@@ -35105,7 +35105,6 @@
     "xpack.security.management.users.usersTitle": "Utilisateurs",
     "xpack.security.management.usersTitle": "Utilisateurs",
     "xpack.security.navControlComponent.accountMenuAriaLabel": "Menu Compte",
-    "xpack.security.navControlComponent.closeProjectLinkText": "Fermer le projet",
     "xpack.security.navControlComponent.editProfileLinkText": "Modifier le profil",
     "xpack.security.navControlComponent.loginLinkText": "Connexion",
     "xpack.security.navControlComponent.logoutLinkText": "Déconnexion",

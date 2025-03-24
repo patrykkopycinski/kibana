@@ -5776,7 +5776,6 @@
     "kbn-esql-validation-autocomplete.esql.validation.unknownIndex": "未知索引 [{name}]",
     "kbn-esql-validation-autocomplete.esql.validation.unknownInterval": "意外的时间间隔修饰词：“{value}”",
     "kbn-esql-validation-autocomplete.esql.validation.unknownPolicy": "未知策略 [{name}]",
-    "kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand": "{command} 只支持 {type} 种{typeCount, plural, other {类型}}的值，找到了 [{givenType}] 类型的 [{column}]",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFieldType": "无法检索字段 [{field}]，它不受支持或未进行索引；正返回 null",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionForCommand": "{command} 不支持函数 {name}",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionforCommandOption": "{command} {option} 不支持函数 {name}",

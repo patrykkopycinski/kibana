@@ -5768,7 +5768,6 @@
     "kbn-esql-validation-autocomplete.esql.validation.unknownIndex": "不明なインデックス[{name}]",
     "kbn-esql-validation-autocomplete.esql.validation.unknownInterval": "想定されていない時間間隔修飾子：''{value}''",
     "kbn-esql-validation-autocomplete.esql.validation.unknownPolicy": "不明なポリシー[{name}]",
-    "kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand": "{command}は{type} {typeCount, plural, other {型}}の値のみをサポートしていますが、[{givenType}]型の[{column}]が見つかりました",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFieldType": "フィールド[{field}]を取得できません。サポートされていないか、インデックス化されていません。NULLが返されます",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedLiteralOption": "{name}の無効なオプション [{value}]です。サポートされているオプション：[{supportedOptions}]。",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedSettingValue": "{command}の認識されていない値[{value}]です。モードは[{expected}]のいずれかでなければなりません",

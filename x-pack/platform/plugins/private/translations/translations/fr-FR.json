@@ -5771,7 +5771,6 @@
     "kbn-esql-validation-autocomplete.esql.validation.unknownIndex": "Index inconnu [{name}]",
     "kbn-esql-validation-autocomplete.esql.validation.unknownInterval": "Qualificatif d'intervalle de temps inattendu : \"{value}\"",
     "kbn-esql-validation-autocomplete.esql.validation.unknownPolicy": "Politique [{name}] inconnue",
-    "kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand": "{command} ne prend en charge que les valeurs {type} {typeCount, plural, one {type} other {types}}, [{column}] de type [{givenType}] trouvé",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFieldType": "Le champ [{field}] ne peut pas être récupéré, il n'est pas pris en charge ou n'est pas indexé ; renvoi de valeur null",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionForCommand": "{command} n'est pas compatible avec la fonction {name}",
     "kbn-esql-validation-autocomplete.esql.validation.unsupportedFunctionforCommandOption": "{command} {option} n'est pas compatible avec la fonction {name}",

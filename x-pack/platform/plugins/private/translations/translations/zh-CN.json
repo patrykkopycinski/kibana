@@ -36699,7 +36699,6 @@
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchQueryBar.requiredError": "指标索引查询必填。",
     "xpack.securitySolution.detectionEngine.createRule.stepDefineRule.thresholdField.thresholdFieldPlaceholderText": "所有结果",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.docsLinkText": "了解详情",
-    "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage": "{key} 不是有效的 Mustache 模板",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.noReadActionsPrivileges": "无法创建规则操作。您对“操作”插件没有“读”权限。",
     "xpack.securitySolution.detectionEngine.createRule.stepRuleActions.snoozeDescription": "选择执行操作的时间，或暂停这些操作。没有为已暂停操作创建通知。{docs}。",
     "xpack.securitySolution.detectionEngine.createRule.stepScheduleRule.completeWithEnablingTitle": "创建并启用规则",

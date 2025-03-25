@@ -37171,7 +37171,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.alertSuppressionFieldLabel": "Suppression d'alerte",
     "xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel": "Seuil de score d'anomalie",
     "xpack.securitySolution.detectionEngine.ruleDetails.authorFieldLabel": "Auteur",
-    "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "Règles",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockDisabledFieldDescription": "Ne marquera pas les alertes comme \"fondamentales\"",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldDescription": "Toutes les alertes générées sont marquées comme \"fondamentales\"",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldLabel": "Fondamental",

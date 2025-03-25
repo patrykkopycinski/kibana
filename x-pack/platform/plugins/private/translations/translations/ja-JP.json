@@ -37144,7 +37144,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.alertSuppressionFieldLabel": "アラート抑制",
     "xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel": "異常スコアしきい値",
     "xpack.securitySolution.detectionEngine.ruleDetails.authorFieldLabel": "作成者",
-    "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "ルール",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockDisabledFieldDescription": "アラートを「基本」アラートに設定しません",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldDescription": "すべての生成されたアラートが「基本」アラートに設定されます",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldLabel": "基本",

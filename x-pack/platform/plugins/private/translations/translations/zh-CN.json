@@ -37206,7 +37206,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.alertSuppressionFieldLabel": "告警阻止",
     "xpack.securitySolution.detectionEngine.ruleDetails.anomalyThresholdFieldLabel": "异常分数阈值",
     "xpack.securitySolution.detectionEngine.ruleDetails.authorFieldLabel": "作者",
-    "xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton": "规则",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockDisabledFieldDescription": "不会将告警标记为“构建块”告警",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldDescription": "所有生成的告警将标记为“构建块”告警",
     "xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldLabel": "构建块",

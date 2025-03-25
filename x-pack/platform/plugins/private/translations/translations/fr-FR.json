@@ -7993,7 +7993,6 @@
     "sharedUXPackages.card.noData.noPermission.description": "Cette intégration n'est pas encore activée. Votre administrateur possède les autorisations requises pour l'activer.",
     "sharedUXPackages.card.noData.noPermission.title": "Contactez votre administrateur",
     "sharedUXPackages.card.noData.title": "Ajouter Elastic Agent",
-    "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "Bêta",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "Faites-nous en part",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "Comment fonctionne la navigation de votre côté ? Il manque quelque chose ?",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "Récent",

@@ -7986,7 +7986,6 @@
     "sharedUXPackages.card.noData.noPermission.description": "この統合はまだ有効ではありません。管理者にはオンにするために必要なアクセス権があります。",
     "sharedUXPackages.card.noData.noPermission.title": "管理者にお問い合わせください",
     "sharedUXPackages.card.noData.title": "Elasticエージェントの追加",
-    "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "ベータ",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "お知らせください",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "ナビゲーションはどのように機能していますか？ここまでで何か、忘れていることはありませんか？",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",

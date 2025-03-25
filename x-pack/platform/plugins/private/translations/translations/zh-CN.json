@@ -7999,7 +7999,6 @@
     "sharedUXPackages.card.noData.noPermission.description": "尚未启用此集成。您的管理员具有打开它所需的权限。",
     "sharedUXPackages.card.noData.noPermission.title": "请联系您的管理员",
     "sharedUXPackages.card.noData.title": "添加 Elastic 代理",
-    "sharedUXPackages.chrome.sideNavigation.betaBadge.label": "公测版",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "请告诉我们",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "导航如何为您提供帮助？缺少什么内容？",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",

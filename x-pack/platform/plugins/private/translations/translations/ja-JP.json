@@ -47803,8 +47803,6 @@
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "コネクタータイプを読み込めません",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "ルールを読み込めません",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "ルールステータス情報を読み込めません",
-    "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags": "ルールタグを読み込めません",
-    "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTypesMessage": "ルールタイプを読み込めません",
     "xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon": "ルールの実行をスケジュールできません",
     "xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel": "エラーがある{totalStatusesError, plural, other {個のルール}}を表示",
     "xpack.triggersActionsUI.sections.rulesList.weeksLabel": "週",

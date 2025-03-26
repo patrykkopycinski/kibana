@@ -47879,8 +47879,6 @@
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "无法加载连接器类型",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "无法加载规则",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "无法加载规则状态信息",
-    "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags": "无法加载规则标签",
-    "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTypesMessage": "无法加载规则类型",
     "xpack.triggersActionsUI.sections.rulesList.unableToRunRuleSoon": "无法计划您的要运行的规则",
     "xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel": "显示包含错误的{totalStatusesError, plural, other {规则}}",
     "xpack.triggersActionsUI.sections.rulesList.weeksLabel": "周",

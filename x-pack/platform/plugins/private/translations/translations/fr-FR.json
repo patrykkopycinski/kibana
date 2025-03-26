@@ -41874,8 +41874,6 @@
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn": "Avertir",
     "xpack.securitySolution.uiSettings.ipReputationLinks": "Liens de réputation d'IP",
     "xpack.securitySolution.uiSettings.ipReputationLinksDescription": "Tableau de modèles d'URL pour créer la liste des URL de réputation à afficher sur la page des détails d'IP.",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription": "Définit la quantité maximale de notes non associées (notes n'étant pas attribuées à une chronologie) qui peuvent être créées.",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel": "Nombre maximal de notes non associées",
     "xpack.securitySolution.uiSettings.newsFeedUrl": "URL du fil d'actualités",
     "xpack.securitySolution.uiSettings.newsFeedUrlDescription": "<p>Le contenu du fil d'actualités sera récupéré à partir de cette URL</p>",
     "xpack.securitySolution.uiSettings.rulesTableRefresh": "Actualisation automatique des règles",

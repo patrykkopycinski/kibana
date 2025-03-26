@@ -41912,8 +41912,6 @@
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn": "警告",
     "xpack.securitySolution.uiSettings.ipReputationLinks": "IP 信誉链接",
     "xpack.securitySolution.uiSettings.ipReputationLinksDescription": "用于构建要在“IP 详细信息”页面上显示的信誉 URL 列表的 URL 模板数组。",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription": "定义可创建的未关联备注（未分配给时间线的备注）的最大数量。",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel": "未关联备注的最大数量",
     "xpack.securitySolution.uiSettings.newsFeedUrl": "新闻源 URL",
     "xpack.securitySolution.uiSettings.newsFeedUrlDescription": "<p>将从此 URL 检索新闻源内容</p>",
     "xpack.securitySolution.uiSettings.rulesTableRefresh": "规则自动刷新",

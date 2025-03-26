@@ -41847,8 +41847,6 @@
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn": "警告",
     "xpack.securitySolution.uiSettings.ipReputationLinks": "IP 評判リンク",
     "xpack.securitySolution.uiSettings.ipReputationLinksDescription": "IP 詳細ページに表示される評判 URL のリストを作成するための URL テンプレートの配列。",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription": "作成できる関連付けられていないメモ（タイムラインに割り当てられていないメモ）の最大数を定義します。",
-    "xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel": "関連付けられていないメモの最大数",
     "xpack.securitySolution.uiSettings.newsFeedUrl": "ニュースフィードURL",
     "xpack.securitySolution.uiSettings.newsFeedUrlDescription": "<p>ニュースフィードコンテンツはこの URL から取得されます</p>",
     "xpack.securitySolution.uiSettings.rulesTableRefresh": "ルール自動更新",

@@ -45345,7 +45345,6 @@
     "xpack.streams.streamDetailSchemaEditorUnmapErrorToast": "Une erreur est apparue lors du démapping du champ {field}",
     "xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel": "Non mappés",
     "xpack.streams.streamDetailSchemaEditorUnmapSuccessToast": "Le champ {field} a bien été démappé",
-    "xpack.streams.streamDetailView.componentTemplate": "Modèle de composant",
     "xpack.streams.streamDetailView.dashboardsTab": "Tableaux de bord",
     "xpack.streams.streamDetailView.dataStream": "Flux de données",
     "xpack.streams.streamDetailView.enrichmentTab": "Extraire le champ",

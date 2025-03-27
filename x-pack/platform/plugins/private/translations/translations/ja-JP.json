@@ -45310,7 +45310,6 @@
     "xpack.streams.streamDetailSchemaEditorUnmapErrorToast": "{field}フィールドのマッピング解除中に問題が発生しました",
     "xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel": "マッピングなし",
     "xpack.streams.streamDetailSchemaEditorUnmapSuccessToast": "{field}は正常にマッピング解除されました",
-    "xpack.streams.streamDetailView.componentTemplate": "コンポーネントテンプレート",
     "xpack.streams.streamDetailView.dashboardsTab": "ダッシュボード",
     "xpack.streams.streamDetailView.dataStream": "データストリーム",
     "xpack.streams.streamDetailView.enrichmentTab": "フィールドを抽出",

@@ -45382,7 +45382,6 @@
     "xpack.streams.streamDetailSchemaEditorUnmapErrorToast": "对 {field} 字段取消映射时出现错误",
     "xpack.streams.streamDetailSchemaEditorUnmappedStatusLabel": "未映射",
     "xpack.streams.streamDetailSchemaEditorUnmapSuccessToast": "已成功对 {field} 取消映射",
-    "xpack.streams.streamDetailView.componentTemplate": "组件模板",
     "xpack.streams.streamDetailView.dashboardsTab": "仪表板",
     "xpack.streams.streamDetailView.dataStream": "数据流",
     "xpack.streams.streamDetailView.enrichmentTab": "提取字段",

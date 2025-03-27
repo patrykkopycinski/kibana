@@ -21834,7 +21834,6 @@
     "xpack.idxMgmt.mappingsEditor.parameters.validations.pathIsRequiredErrorMessage": "Sélectionnez un champ vers lequel pointer l'alias.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.positionIncrementGapIsRequiredErrorMessage": "Définir une valeur d'écart d'incrément de position",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.priorityIsRequiredErrorMessage": "Spécifiez une priorité.",
-    "xpack.idxMgmt.mappingsEditor.parameters.validations.referenceFieldIsRequiredErrorMessage": "Le champ de référence est obligatoire.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.scalingFactorIsRequiredErrorMessage": "Facteur de montée en charge obligatoire.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.smallerZeroErrorMessage": "La valeur doit être supérieure ou égale à 0.",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.spacesNotAllowedErrorMessage": "Les espaces ne sont pas autorisés.",

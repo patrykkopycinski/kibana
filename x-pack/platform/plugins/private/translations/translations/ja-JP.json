@@ -21813,7 +21813,6 @@
     "xpack.idxMgmt.mappingsEditor.parameters.validations.pathIsRequiredErrorMessage": "エイリアスが指し示すフィールドを選択します。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.positionIncrementGapIsRequiredErrorMessage": "位置のインクリメントギャップ値の設定",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.priorityIsRequiredErrorMessage": "優先度を指定します。",
-    "xpack.idxMgmt.mappingsEditor.parameters.validations.referenceFieldIsRequiredErrorMessage": "参照フィールドは必須です。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.scalingFactorIsRequiredErrorMessage": "スケーリングファクターが必要です。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.smallerZeroErrorMessage": "値は0と同じかそれ以上でなければなりません。",
     "xpack.idxMgmt.mappingsEditor.parameters.validations.spacesNotAllowedErrorMessage": "スペースは使用できません。",

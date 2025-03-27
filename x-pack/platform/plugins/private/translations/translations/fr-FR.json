@@ -45378,7 +45378,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "Image de bienvenue pour l'application de flux",
     "xpack.streams.streamsAppDeepLinkTitle": "Flux",
     "xpack.streams.streamsAppLinkTitle": "Flux",
-    "xpack.streams.streamsListViewPageHeaderTitle": "Flux",
     "xpack.streams.streamsTable.collapseAll": "Tout réduire",
     "xpack.streams.streamsTable.expandAll": "Tout développer",
     "xpack.streams.streamsTable.management": "Gestion",

@@ -45343,7 +45343,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "ストリームアプリのウェルカム画像",
     "xpack.streams.streamsAppDeepLinkTitle": "ストリーム",
     "xpack.streams.streamsAppLinkTitle": "ストリーム",
-    "xpack.streams.streamsListViewPageHeaderTitle": "ストリーム",
     "xpack.streams.streamsTable.collapseAll": "すべて縮小",
     "xpack.streams.streamsTable.expandAll": "すべて拡張",
     "xpack.streams.streamsTable.management": "管理",

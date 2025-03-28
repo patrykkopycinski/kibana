@@ -3009,7 +3009,6 @@
     "esql.flyout.valuesQueryEditor.label": "値クエリ",
     "esql.flyout.variableName.disabledTooltip": "作成した後にコントロール名を編集することはできません。",
     "esql.flyout.variableName.error": "変数名は必須です",
-    "esql.flyout.variableName.helpText": "エディターでは、この名前の前に?が付けられます",
     "esql.flyout.variableName.label": "名前",
     "esql.flyout.variableName.placeholder": "変数名を設定",
     "esql.flyout.variableNameExists.error": "変数名はすでに存在します",

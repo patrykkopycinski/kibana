@@ -3014,7 +3014,6 @@
     "esql.flyout.valuesQueryEditor.label": "Recherche de valeurs",
     "esql.flyout.variableName.disabledTooltip": "Vous ne pouvez pas modifier un nom de contrôle après sa création.",
     "esql.flyout.variableName.error": "Le nom de variable est requis",
-    "esql.flyout.variableName.helpText": "Ce nom sera précédé d'un \"?\" dans l'éditeur.",
     "esql.flyout.variableName.label": "Nom",
     "esql.flyout.variableName.placeholder": "Définir un nom de variable",
     "esql.flyout.variableNameExists.error": "Ce nom de variable existe déjà",

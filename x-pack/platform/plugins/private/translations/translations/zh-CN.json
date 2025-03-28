@@ -3014,7 +3014,6 @@
     "esql.flyout.valuesQueryEditor.label": "值查询",
     "esql.flyout.variableName.disabledTooltip": "创建控件后即无法编辑控件名称。",
     "esql.flyout.variableName.error": "变量名称必填",
-    "esql.flyout.variableName.helpText": "在编辑器中，此名称将以“?”开头",
     "esql.flyout.variableName.label": "名称",
     "esql.flyout.variableName.placeholder": "设置变量名称",
     "esql.flyout.variableNameExists.error": "变量名称已存在",

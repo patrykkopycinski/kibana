@@ -19150,7 +19150,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "加载代理策略时出错",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "加载软件包信息时出错",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingSelectedAgentPolicyTitle": "加载选定代理策略时出错",
-    "xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout": "此软件包具有 {count, plural, one {一个转换资产} other {# 个转换资产}}，它们将使用与安装软件包的用户相同的角色创建并启动。",
     "xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration": "添加其他集成",
     "xpack.fleet.createPackagePolicyBottomBar.backButton": "返回",
     "xpack.fleet.createPackagePolicyBottomBar.loading": "正在加载……",

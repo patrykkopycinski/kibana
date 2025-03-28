@@ -19132,7 +19132,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "Erreur lors du chargement des stratégies d'agent",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "Erreur lors du chargement des informations de pack",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingSelectedAgentPolicyTitle": "Erreur lors du chargement de la stratégie d'agent sélectionnée",
-    "xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout": "Ce package a {count, plural, one {une ressource de transformation qui sera créée et démarrée} other {# ressources de transformation qui seront créées et démarrées}} avec les mêmes rôles que l'utilisateur responsable de l'installation du package.",
     "xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration": "Ajouter une autre intégration",
     "xpack.fleet.createPackagePolicyBottomBar.backButton": "Retour",
     "xpack.fleet.createPackagePolicyBottomBar.loading": "Chargement...",

@@ -19109,7 +19109,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "エージェントポリシーの読み込みエラー",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "パッケージ情報の読み込みエラー",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingSelectedAgentPolicyTitle": "選択したエージェントポリシーの読み込みエラー",
-    "xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout": "このパッケージには、パッケージをインストールするユーザーと同じロールで作成、開始される{count, plural, one {1個のトランスフォームアセット} other {# トランスフォームアセット}}があります。",
     "xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration": "別の統合を追加",
     "xpack.fleet.createPackagePolicyBottomBar.backButton": "戻る",
     "xpack.fleet.createPackagePolicyBottomBar.loading": "読み込み中...",

@@ -34559,7 +34559,6 @@
     "xpack.searchPlayground.otherOpenAIModel": "{name} (OpenAI Compatible Service)",
     "xpack.searchPlayground.pageTitle": "Playground",
     "xpack.searchPlayground.pageTitle.header.docLink": "Playgroundドキュメント",
-    "xpack.searchPlayground.pageTitle.techPreview": "テクニカルプレビュー",
     "xpack.searchPlayground.plugin.name": "Playground",
     "xpack.searchPlayground.searchMode.readyToSearch": "検索できます",
     "xpack.searchPlayground.searchMode.searchBar.placeholder": "ドキュメントを検索",

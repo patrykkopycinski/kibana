@@ -15362,7 +15362,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "规则标签",
     "xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle": "向量",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "概览",
-    "xpack.csp.findings.findingsFlyout.paginationLabel": "正在查找导航",
     "xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip": "管理规则",
     "xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle": "告警",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "审计",

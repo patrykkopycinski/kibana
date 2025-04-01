@@ -15346,7 +15346,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "Balises de règle",
     "xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle": "Fournisseur",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "Aperçu",
-    "xpack.csp.findings.findingsFlyout.paginationLabel": "Navigation de recherche",
     "xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip": "Gérer la règle",
     "xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle": "Alertes",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "Audit",

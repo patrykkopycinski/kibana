@@ -15328,7 +15328,6 @@
     "xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle": "ルールタグ",
     "xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle": "ベンダー",
     "xpack.csp.findings.findingsFlyout.overviewTabTitle": "概要",
-    "xpack.csp.findings.findingsFlyout.paginationLabel": "ナビゲーションを検索中",
     "xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip": "ルールの管理",
     "xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle": "アラート",
     "xpack.csp.findings.findingsFlyout.ruleTab.auditTitle": "監査",

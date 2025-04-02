@@ -5550,8 +5550,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "大于",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "大于或等于",
     "kbn-esql-validation-autocomplete.esql.definition.infoDoc": "显示有关当前 ES 节点的信息",
-    "kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc": "用于 NULL 比较的谓词：如果值不为 NULL，则返回 true",
-    "kbn-esql-validation-autocomplete.esql.definition.isNullDoc": "用于 NULL 比较的谓词：如果值为 NULL，则返回 true",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanDoc": "小于",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanOrEqualToDoc": "小于或等于",
     "kbn-esql-validation-autocomplete.esql.definition.notDoc": "非",

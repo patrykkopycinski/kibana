@@ -5542,8 +5542,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "より大きい",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "よりも大きいまたは等しい",
     "kbn-esql-validation-autocomplete.esql.definition.infoDoc": "現在のESノードに関する情報を表示",
-    "kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc": "NULL比較の述部：値がNULLではない場合にTrueを返します",
-    "kbn-esql-validation-autocomplete.esql.definition.isNullDoc": "NULL比較の述部：値がNULLである場合にTrueを返します",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanDoc": "より小さい",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanOrEqualToDoc": "以下",
     "kbn-esql-validation-autocomplete.esql.definition.notDoc": "NOT",

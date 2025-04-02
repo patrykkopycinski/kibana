@@ -5546,8 +5546,6 @@
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanDoc": "Supérieur à",
     "kbn-esql-validation-autocomplete.esql.definition.greaterThanOrEqualToDoc": "Supérieur ou égal à",
     "kbn-esql-validation-autocomplete.esql.definition.infoDoc": "Afficher des informations sur le nœud ES actuel",
-    "kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc": "Prédicat pour la comparaison NULL : renvoie \"true\" si la valeur n'est pas NULL",
-    "kbn-esql-validation-autocomplete.esql.definition.isNullDoc": "Prédicat pour la comparaison NULL : renvoie \"true\" si la valeur est NULL",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanDoc": "Inférieur à",
     "kbn-esql-validation-autocomplete.esql.definition.lessThanOrEqualToDoc": "Inférieur ou égal à",
     "kbn-esql-validation-autocomplete.esql.definition.notDoc": "Non",

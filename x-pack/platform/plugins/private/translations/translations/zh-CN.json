@@ -45368,7 +45368,6 @@
     "xpack.streams.streamDetailView.schemaEditorTab": "架构编辑器",
     "xpack.streams.streamDetailView.unmanagedStreamOverview": "此流未托管。访问 Stack Management 链接以更改相关 Elasticsearch 对象。",
     "xpack.streams.streamDetailView.welcomeImage": "流应用的欢迎图像",
-    "xpack.streams.streamsAppDeepLinkTitle": "流计数",
     "xpack.streams.streamsAppLinkTitle": "流计数",
     "xpack.streams.streamsTable.collapseAll": "折叠全部",
     "xpack.streams.streamsTable.expandAll": "展开全部",

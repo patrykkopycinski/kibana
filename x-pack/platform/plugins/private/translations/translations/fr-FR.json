@@ -45331,7 +45331,6 @@
     "xpack.streams.streamDetailView.schemaEditorTab": "Éditeur de schémas",
     "xpack.streams.streamDetailView.unmanagedStreamOverview": "Ce flux n'est pas géré. Suivez les liens vers la gestion de la suite pour modifier les objets Elasticsearch liés.",
     "xpack.streams.streamDetailView.welcomeImage": "Image de bienvenue pour l'application de flux",
-    "xpack.streams.streamsAppDeepLinkTitle": "Flux",
     "xpack.streams.streamsAppLinkTitle": "Flux",
     "xpack.streams.streamsTable.collapseAll": "Tout réduire",
     "xpack.streams.streamsTable.expandAll": "Tout développer",

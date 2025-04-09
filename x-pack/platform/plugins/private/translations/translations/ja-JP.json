@@ -7985,7 +7985,6 @@
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "お知らせください",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "ナビゲーションはどのように機能していますか？ここまでで何か、忘れていることはありませんか？",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "\"{title}\"パネルナビゲーションを切り替える",
     "sharedUXPackages.codeEditor.ariaLabel": "コードエディター",
     "sharedUXPackages.codeEditor.codeEditorEditButton": "{codeEditorAriaLabel}、編集モードを有効化",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Enter",

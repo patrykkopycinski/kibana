@@ -7998,7 +7998,6 @@
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "请告诉我们",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "导航如何为您提供帮助？缺少什么内容？",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "最近",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "切换“{title}”面板导航",
     "sharedUXPackages.codeEditor.ariaLabel": "代码编辑器",
     "sharedUXPackages.codeEditor.codeEditorEditButton": "{codeEditorAriaLabel}，激活编辑模式",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Enter",

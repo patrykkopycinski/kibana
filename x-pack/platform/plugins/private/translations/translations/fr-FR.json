@@ -7992,7 +7992,6 @@
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.btn": "Faites-nous en part",
     "sharedUXPackages.chrome.sideNavigation.feedbackCallout.title": "Comment fonctionne la navigation de votre côté ? Il manque quelque chose ?",
     "sharedUXPackages.chrome.sideNavigation.recentlyAccessed.title": "Récent",
-    "sharedUXPackages.chrome.sideNavigation.togglePanel": "Afficher/Masquer le panneau de navigation \"{title}\"",
     "sharedUXPackages.codeEditor.ariaLabel": "Éditeur de code",
     "sharedUXPackages.codeEditor.codeEditorEditButton": "{codeEditorAriaLabel}, activer le mode d’édition",
     "sharedUXPackages.codeEditor.enterKeyLabel": "Entrée",

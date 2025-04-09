@@ -23069,7 +23069,6 @@
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "再試行",
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription": "ログストリームパネルは管理されていません。{savedSearchDocsLink}を同様の視覚化に活用してください。",
     "xpack.infra.logsStreamEmbeddable.deprecationWarningDescription.discoverSessionsLinkLabel": "Discoverセッション",
-    "xpack.infra.metadata.pinAriaLabel": "固定されたフィールド",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "フィルターを追加",
     "xpack.infra.metadataEmbeddable.errorAction": "メタデータを再取得",
     "xpack.infra.metadataEmbeddable.errorMessage": "データの読み込みエラーが発生しました。{refetch}し、ホスト詳細をもう一度開いてください。",

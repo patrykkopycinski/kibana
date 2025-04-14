@@ -32470,8 +32470,6 @@
     "xpack.observability.pages.alertDetails.pageTitle.ruleName": "规则",
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {已检测到} Inventory {超出阈值} other {已超出}}",
     "xpack.observability.pages.alertDetails.pageTitle.triggered": "已触发",
-    "xpack.observability.pages.alertDetails.relatedAlerts.empty.description": "由于出现意外错误，找不到相关告警。",
-    "xpack.observability.pages.alertDetails.relatedAlerts.empty.title": "加载相关告警时出现问题",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingDescription": "如果已加入 AWS 企业折扣计划 (EDP)，请输入您的折扣率以更新分析成本计算。",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingName": "AWS EDP 折扣率 (%)",
     "xpack.observability.profilingAzureCostDiscountRateUiSettingDescription": "如果与 Microsoft 签署了 Azure 企业协议，请输入您的折扣率以更新分析成本计算。",

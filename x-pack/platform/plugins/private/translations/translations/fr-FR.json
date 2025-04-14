@@ -32435,8 +32435,6 @@
     "xpack.observability.pages.alertDetails.pageTitle.ruleName": "Règle",
     "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {détectée} Inventory {seuil dépassé} other {dépassés}}",
     "xpack.observability.pages.alertDetails.pageTitle.triggered": "Déclenché",
-    "xpack.observability.pages.alertDetails.relatedAlerts.empty.description": "En raison d'une erreur inattendue, aucune alerte associée ne peut être trouvée.",
-    "xpack.observability.pages.alertDetails.relatedAlerts.empty.title": "Problème de chargement des alertes associées",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingDescription": "Si vous êtes inscrits au programme de réduction AWS Enterprise Discount Program (EDP), entrez votre taux de réduction pour mettre à jour le calcul des coûts de profilage.",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingName": "Taux de réduction AWS EDP (%)",
     "xpack.observability.profilingAzureCostDiscountRateUiSettingDescription": "Si vous avez un accord Azure Enterprise avec Microsoft, saisissez votre taux de réduction pour mettre à jour le calcul du coût de profilage.",

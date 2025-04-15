@@ -46193,8 +46193,6 @@
     "xpack.synthetics.settings.noSpace.error": "Les noms d'index ne doivent pas contenir d'espace",
     "xpack.synthetics.settings.saveSuccess": "Paramètres enregistrés !",
     "xpack.synthetics.settings.statusRule.inspect": "Impossible d'inspecter le type de règle de statut du moniteur.",
-    "xpack.synthetics.settings.syncGlobalParams": "Paramètres globaux appliqués correctement à tous les moniteurs",
-    "xpack.synthetics.settings.syncGlobalParams.fail": "Impossible d'appliquer les paramètres globaux à tous les moniteurs",
     "xpack.synthetics.settings.title": "Paramètres",
     "xpack.synthetics.settingsBreadcrumbText": "Paramètres",
     "xpack.synthetics.settingsRoute.allChecks": "Toutes les vérifications",

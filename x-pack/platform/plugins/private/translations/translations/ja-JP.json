@@ -46160,8 +46160,6 @@
     "xpack.synthetics.settings.noSpace.error": "インデックス名にはスペースを使用できません",
     "xpack.synthetics.settings.saveSuccess": "設定が保存されました。",
     "xpack.synthetics.settings.statusRule.inspect": "監視ステータスルールタイプを検査できませんでした。",
-    "xpack.synthetics.settings.syncGlobalParams": "グローバルパラメーターをすべてのモニターに正常に適用しました",
-    "xpack.synthetics.settings.syncGlobalParams.fail": "グローバルパラメーターをすべてのモニターに適用できませんでした",
     "xpack.synthetics.settings.title": "設定",
     "xpack.synthetics.settingsBreadcrumbText": "設定",
     "xpack.synthetics.settingsRoute.allChecks": "すべてのチェック",

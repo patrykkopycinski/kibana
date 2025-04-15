@@ -46232,8 +46232,6 @@
     "xpack.synthetics.settings.noSpace.error": "索引名称不得包含空格",
     "xpack.synthetics.settings.saveSuccess": "设置已保存！",
     "xpack.synthetics.settings.statusRule.inspect": "无法检查监测状态规则类型。",
-    "xpack.synthetics.settings.syncGlobalParams": "已成功将全局参数应用到所有监测",
-    "xpack.synthetics.settings.syncGlobalParams.fail": "未能将全局参数应用到所有监测",
     "xpack.synthetics.settings.title": "设置",
     "xpack.synthetics.settingsBreadcrumbText": "设置",
     "xpack.synthetics.settingsRoute.allChecks": "所有检查",

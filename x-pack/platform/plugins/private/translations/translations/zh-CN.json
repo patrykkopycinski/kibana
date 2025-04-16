@@ -10049,7 +10049,6 @@
     "visualizations.newVisWizard.chooseSourceTitle": "选择源",
     "visualizations.newVisWizard.filterVisTypeAriaLabel": "筛留可视化类型",
     "visualizations.newVisWizard.goBackLink": "选择不同的可视化",
-    "visualizations.newVisWizard.helpTextAriaLabel": "通过为该可视化选择类型，开始创建您的可视化。按 Esc 键关闭此模式。按 Tab 键继续。",
     "visualizations.newVisWizard.learnMoreText": "希望了解详情？",
     "visualizations.newVisWizard.legacyTab": "旧版",
     "visualizations.newVisWizard.legacyTabDescription": "计划在未来弃用旧版可视化。",

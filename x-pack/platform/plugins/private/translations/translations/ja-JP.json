@@ -10033,7 +10033,6 @@
     "visualizations.newVisWizard.chooseSourceTitle": "ソースの選択",
     "visualizations.newVisWizard.filterVisTypeAriaLabel": "ビジュアライゼーションのタイプでフィルタリング",
     "visualizations.newVisWizard.goBackLink": "別のビジュアライゼーションを選択",
-    "visualizations.newVisWizard.helpTextAriaLabel": "タイプを選択してビジュアライゼーションの作成を始めましょう。ESC を押してこのモーダルを閉じます。Tab キーを押して次に進みます。",
     "visualizations.newVisWizard.learnMoreText": "詳細について",
     "visualizations.newVisWizard.legacyTab": "レガシー",
     "visualizations.newVisWizard.legacyTabDescription": "廃止予定には、今後、レガシービジュアライゼーションが予定されています。",

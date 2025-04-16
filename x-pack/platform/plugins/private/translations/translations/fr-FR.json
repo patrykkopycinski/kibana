@@ -10042,7 +10042,6 @@
     "visualizations.newVisWizard.chooseSourceTitle": "Choisir une source",
     "visualizations.newVisWizard.filterVisTypeAriaLabel": "Filtrer un type de visualisation",
     "visualizations.newVisWizard.goBackLink": "Sélectionner une visualisation différente",
-    "visualizations.newVisWizard.helpTextAriaLabel": "Commencez à créer votre visualisation en sélectionnant un type pour cette visualisation. Appuyez sur Échap pour fermer ce mode. Appuyez sur Tab pour aller plus loin.",
     "visualizations.newVisWizard.learnMoreText": "Envie d'en savoir plus ?",
     "visualizations.newVisWizard.legacyTab": "Hérité",
     "visualizations.newVisWizard.legacyTabDescription": "Les visualisations héritées devraient être obsolètes à l’avenir.",

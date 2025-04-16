@@ -19578,7 +19578,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.integrationLink": "Elasticエージェント統合として提供",
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "注",
     "xpack.fleet.initializationErrorMessageTitle": "Fleet を初期化できません",
-    "xpack.fleet.integration.settings.versionInfo.updatesAvailableBody": "バージョン{latestVersion}にアップグレードして最新の機能を入手してください。{changelogLink}",
     "xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink": "変更ログを表示します。",
     "xpack.fleet.integrations.confirmUpdateModal.body.agentCount": "{agentCount, plural, other  {# 個のエージェント}}",
     "xpack.fleet.integrations.confirmUpdateModal.body.policyCount": "{packagePolicyCount, plural, other  {# 個の統合ポリシー}}",

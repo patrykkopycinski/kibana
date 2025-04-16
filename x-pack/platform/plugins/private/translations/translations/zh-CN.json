@@ -19620,7 +19620,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.integrationLink": "将作为 Elastic 代理集成来提供",
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "备注",
     "xpack.fleet.initializationErrorMessageTitle": "无法初始化 Fleet",
-    "xpack.fleet.integration.settings.versionInfo.updatesAvailableBody": "升级到版本 {latestVersion} 可获取最新功能。{changelogLink}",
     "xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink": "查看更改日志。",
     "xpack.fleet.integrations.confirmUpdateModal.body.agentCount": "{agentCount, plural, other {# 个代理}}",
     "xpack.fleet.integrations.confirmUpdateModal.body.policyCount": "{packagePolicyCount, plural, other {# 个集成策略}}",

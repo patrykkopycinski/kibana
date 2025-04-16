@@ -19601,7 +19601,6 @@
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.integrationLink": "disponible en tant qu'intégration Elastic Agent",
     "xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix": "Note",
     "xpack.fleet.initializationErrorMessageTitle": "Initialisation de Fleet impossible",
-    "xpack.fleet.integration.settings.versionInfo.updatesAvailableBody": "Passez à la version {latestVersion} pour bénéficier des fonctionnalités les plus récentes. {changelogLink}",
     "xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink": "Afficher le log des modifications.",
     "xpack.fleet.integrations.confirmUpdateModal.body.agentCount": "{agentCount, plural, one {# agent} other {# agents}}",
     "xpack.fleet.integrations.confirmUpdateModal.body.policyCount": "{packagePolicyCount, plural, one {# politique d’intégration} other {# politiques d’intégration}}",

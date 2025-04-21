@@ -16484,7 +16484,6 @@
     "xpack.elasticAssistant.components.upgrade.upgradeTitle": "Gérer la licence",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.buttonTitle": "Gérer les connecteurs",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.description": "Pour utiliser Elastic AI Assistant, vous devez configurer un connecteur sur un modèle de langage externe de plus grande envergure.",
-    "xpack.elasticAssistant.connectors.connectorSettingsManagement.title": "Paramètres",
     "xpack.elasticAssistant.connectors.models.modelSelector.customOptionText": "Créer un nouveau modèle appelé",
     "xpack.elasticAssistant.connectors.models.modelSelector.helpLabel": "Modèle utilisé pour ce connecteur",
     "xpack.elasticAssistant.connectors.models.modelSelector.modelTitle": "Modèle",

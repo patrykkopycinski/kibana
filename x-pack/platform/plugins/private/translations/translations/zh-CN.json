@@ -16500,7 +16500,6 @@
     "xpack.elasticAssistant.components.upgrade.upgradeTitle": "管理许可证",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.buttonTitle": "管理连接器",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.description": "要使用 Elastic AI Assistant，必须设置连接外部大语言模型的连接器。",
-    "xpack.elasticAssistant.connectors.connectorSettingsManagement.title": "设置",
     "xpack.elasticAssistant.connectors.models.modelSelector.customOptionText": "创建新的已命名模型",
     "xpack.elasticAssistant.connectors.models.modelSelector.helpLabel": "要用于此连接器的模型",
     "xpack.elasticAssistant.connectors.models.modelSelector.modelTitle": "模型",

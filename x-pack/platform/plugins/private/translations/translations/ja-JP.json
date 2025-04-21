@@ -16463,7 +16463,6 @@
     "xpack.elasticAssistant.components.upgrade.upgradeTitle": "ライセンスの管理",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.buttonTitle": "コネクターを管理",
     "xpack.elasticAssistant.connectors.connectorSettingsManagement.description": "Elastic AI Assistantを使用するには、コネクターを既存の大規模言語モデルに設定する必要があります。",
-    "xpack.elasticAssistant.connectors.connectorSettingsManagement.title": "設定",
     "xpack.elasticAssistant.connectors.models.modelSelector.customOptionText": "新しい名前付きモデルを作成",
     "xpack.elasticAssistant.connectors.models.modelSelector.helpLabel": "このコネクターで使用するモデル",
     "xpack.elasticAssistant.connectors.models.modelSelector.modelTitle": "モデル",

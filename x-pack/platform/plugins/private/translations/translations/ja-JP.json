@@ -18575,7 +18575,6 @@
     "xpack.fleet.agentList.monitorMetricsEnabledText": "有効",
     "xpack.fleet.agentList.noAgentsPrompt": "エージェントが登録されていません",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "エージェントが見つかりません。{clearFiltersLink}",
-    "xpack.fleet.agentList.outOfDateLabel": "古いポリシー",
     "xpack.fleet.agentList.policyColumnTitle": "エージェントポリシー",
     "xpack.fleet.agentList.policyFilterText": "エージェントポリシー",
     "xpack.fleet.agentList.reassignActionText": "新しいポリシーに割り当てる",

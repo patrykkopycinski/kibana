@@ -18599,7 +18599,6 @@
     "xpack.fleet.agentList.monitorMetricsEnabledText": "Activé",
     "xpack.fleet.agentList.noAgentsPrompt": "Aucun agent enregistré",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "Agent introuvable. {clearFiltersLink}",
-    "xpack.fleet.agentList.outOfDateLabel": "Politique obsolète",
     "xpack.fleet.agentList.policyColumnTitle": "Politique d'agent",
     "xpack.fleet.agentList.policyFilterText": "Politique d'agent",
     "xpack.fleet.agentList.reassignActionText": "Attribuer à une nouvelle stratégie",

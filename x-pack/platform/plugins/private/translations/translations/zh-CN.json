@@ -18616,7 +18616,6 @@
     "xpack.fleet.agentList.monitorMetricsEnabledText": "已启用",
     "xpack.fleet.agentList.noAgentsPrompt": "未注册任何代理",
     "xpack.fleet.agentList.noFilteredAgentsPrompt": "未找到任何代理。{clearFiltersLink}",
-    "xpack.fleet.agentList.outOfDateLabel": "策略已过时",
     "xpack.fleet.agentList.policyColumnTitle": "代理策略",
     "xpack.fleet.agentList.policyFilterText": "代理策略",
     "xpack.fleet.agentList.reassignActionText": "分配到新策略",

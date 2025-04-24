@@ -2657,7 +2657,6 @@
     "discover.badge.readOnly.text": "Lecture seule",
     "discover.badge.readOnly.tooltip": "Impossible d'enregistrer les sessions Discover",
     "discover.context.breadcrumb": "Documents relatifs",
-    "discover.context.contextOfTitle": "Les documents relatifs à #{anchorId}",
     "discover.context.failedToLoadAnchorDocumentDescription": "Échec de chargement du document ancré",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "Le document ancré n’a pas pu être chargé.",
     "discover.context.invalidTieBreakerFiledSetting": "Paramètre de champ de départage non valide",

@@ -2657,7 +2657,6 @@
     "discover.badge.readOnly.text": "只读",
     "discover.badge.readOnly.tooltip": "无法保存 Discover 会话",
     "discover.context.breadcrumb": "周围文档",
-    "discover.context.contextOfTitle": "#{anchorId} 周围的文档",
     "discover.context.failedToLoadAnchorDocumentDescription": "无法加载定位点文档",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "无法加载定位点文档。",
     "discover.context.invalidTieBreakerFiledSetting": "无效的平分决胜字段设置",

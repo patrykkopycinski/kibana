@@ -38768,7 +38768,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.noEntity.riskLevelTitle": "リスクレベル",
     "xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle": "{riskEntity}リスクレベル",
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "すべて表示",
-    "xpack.securitySolution.entityAnalytics.riskEngine.missingClusterPrivilege": "クラスター権限が不足しています：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "インデックス\"{indexName}\"のインデックス権限が不足しています：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "ユーザーにはリスクエンジン権限がありません。",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合計",

@@ -38796,7 +38796,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.noEntity.riskLevelTitle": "Niveau de risque",
     "xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle": "Score de risque de {riskEntity}",
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "Afficher tout",
-    "xpack.securitySolution.entityAnalytics.riskEngine.missingClusterPrivilege": "Privilèges de cluster manquants : {privileges}.",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "Privilèges d'index manquants pour l'index \"{indexName}\" : {privileges}.",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "L'utilisateur ne dispose pas des privilèges requis pour modifier le moteur de risque.",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "Total",

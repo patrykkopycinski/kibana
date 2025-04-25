@@ -38831,7 +38831,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.noEntity.riskLevelTitle": "风险级别",
     "xpack.securitySolution.entityAnalytics.riskDashboard.riskLevelTitle": "{riskEntity} 风险级别",
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "查看全部",
-    "xpack.securitySolution.entityAnalytics.riskEngine.missingClusterPrivilege": "缺少集群权限：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "缺少索引“{indexName}”的索引权限：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "用户缺少风险引擎权限。",
     "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合计",

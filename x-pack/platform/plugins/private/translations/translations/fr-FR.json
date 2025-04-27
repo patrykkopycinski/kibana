@@ -23328,7 +23328,6 @@
     "xpack.infra.ml.steps.setupProcess.when.description": "Par défaut, les tâches de Machine Learning analysent les 4 dernières semaines de données et continuent à s'exécuter indéfiniment.",
     "xpack.infra.ml.steps.setupProcess.when.timePicker.label": "Date de début",
     "xpack.infra.ml.steps.setupProcess.when.title": "Quand votre modèle commence-t-il ?",
-    "xpack.infra.node.ariaLabel": "{nodeName}, cliquer pour ouvrir le menu",
     "xpack.infra.nodeContextMenu.createRuleLink": "Créer une règle d'inventaire",
     "xpack.infra.nodeContextMenu.description": "Afficher les détails pour {label} {value}",
     "xpack.infra.nodeContextMenu.title": "Détails de {inventoryName}",

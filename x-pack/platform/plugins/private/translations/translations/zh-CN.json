@@ -23353,7 +23353,6 @@
     "xpack.infra.ml.steps.setupProcess.when.description": "默认情况下，Machine Learning 作业会分析过去 4 周的数据，并继续无限期地运行。",
     "xpack.infra.ml.steps.setupProcess.when.timePicker.label": "开始日期",
     "xpack.infra.ml.steps.setupProcess.when.title": "您的模型何时开始？",
-    "xpack.infra.node.ariaLabel": "{nodeName}，单击打开菜单",
     "xpack.infra.nodeContextMenu.createRuleLink": "创建库存规则",
     "xpack.infra.nodeContextMenu.description": "查看 {label} {value} 的详情",
     "xpack.infra.nodeContextMenu.title": "{inventoryName} 详情",

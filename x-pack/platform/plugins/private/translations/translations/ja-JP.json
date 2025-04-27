@@ -23309,7 +23309,6 @@
     "xpack.infra.ml.steps.setupProcess.when.description": "デフォルトでは、機械学習ジョブは直近4週間のデータを分析し、無限に実行し続けます。",
     "xpack.infra.ml.steps.setupProcess.when.timePicker.label": "開始日",
     "xpack.infra.ml.steps.setupProcess.when.title": "いつモデルを開始しますか？",
-    "xpack.infra.node.ariaLabel": "{nodeName}、クリックしてメニューを開きます",
     "xpack.infra.nodeContextMenu.createRuleLink": "インベントリルールの作成",
     "xpack.infra.nodeContextMenu.description": "{label} {value} の詳細を表示",
     "xpack.infra.nodeContextMenu.title": "{inventoryName}の詳細",

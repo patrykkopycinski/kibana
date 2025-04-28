@@ -36672,7 +36672,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processHollowingT1055Description": "Process Hollowing (T1055.012)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procFilesystemT1003Description": "Proc Filesystem (T1003.007)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procMemoryT1055Description": "Proc Memory (T1055.009)",
-    "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolImpersonationT1001Description": "Protocol Impersonation (T1001.003)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ptraceSystemCallsT1055Description": "Ptrace System Calls (T1055.008)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pubPrnT1216Description": "PubPrn (T1216.001)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.purchaseTechnicalDataT1597Description": "Purchase Technical Data (T1597.002)",

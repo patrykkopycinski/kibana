@@ -36611,7 +36611,6 @@
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.processHollowingT1055Description": "プロセスハロウイング（T1055.012）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procFilesystemT1003Description": "プロセスファイルシステム（T1003.007）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.procMemoryT1055Description": "プロセスメモリ（T1055.009）",
-    "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.protocolImpersonationT1001Description": "プロトコルなりすまし（T1001.003）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.ptraceSystemCallsT1055Description": "Ptrace システムコール（T1055.008）",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.pubPrnT1216Description": "PubPrn (T1216.001)",
     "xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.purchaseTechnicalDataT1597Description": "技術データの購入（T1597.002）",

@@ -10,7 +10,6 @@ import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
-import * as i18n from './translations';
 
 /**
  * TODO: This is a workaround to solve the issue with the long standing server tasks while cahtting with the assistant.
@@ -48,11 +47,6 @@ export const useSendMessage = (): UseSendMessage => {
     async ({ apiConfig, http, message, conversationId, replacements }: SendMessageProps) => {
       setIsLoading(true);
 
-      const timeoutId = setTimeout(() => {
-        abortController.current.abort(i18n.FETCH_MESSAGE_TIMEOUT_ERROR);
-        abortController.current = new AbortController();
-      }, EXECUTE_ACTION_TIMEOUT);
-
       try {
         return await fetchConnectorExecuteAction({
           conversationId,
@@ -67,7 +61,6 @@ export const useSendMessage = (): UseSendMessage => {
           traceOptions,
         });
       } finally {
-        clearTimeout(timeoutId);
         setIsLoading(false);
       }
     },

@@ -6369,8 +6369,6 @@
     "management.settings.globalCalloutTitle": "変更はすべてのスペースのすべてのユーザー設定に影響します",
     "management.settings.globalSettingsTabTitle": "グローバル設定",
     "management.settings.helpText": "この設定は Kibana サーバーにより上書きされ、変更することはできません。",
-    "management.settings.offLabel": "オフ",
-    "management.settings.onLabel": "オン",
     "management.settings.resetToDefaultLinkText": "デフォルトにリセット",
     "management.settings.searchBar.unableToParseQueryErrorMessage": "クエリーをパースできません",
     "management.settings.searchBarPlaceholder": "高度な設定を検索",

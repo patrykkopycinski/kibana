@@ -6379,8 +6379,6 @@
     "management.settings.globalCalloutTitle": "更改将影响所有工作区的所有用户设置",
     "management.settings.globalSettingsTabTitle": "常规设置",
     "management.settings.helpText": "此设置已由 Kibana 服务器覆盖，无法更改。",
-    "management.settings.offLabel": "关闭",
-    "management.settings.onLabel": "开启",
     "management.settings.resetToDefaultLinkText": "重置为默认值",
     "management.settings.searchBar.unableToParseQueryErrorMessage": "无法解析查询",
     "management.settings.searchBarPlaceholder": "搜索高级设置",

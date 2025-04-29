@@ -6375,8 +6375,6 @@
     "management.settings.globalCalloutTitle": "Les modifications auront une incidence sur tous les paramètres utilisateur dans l'ensemble des espaces",
     "management.settings.globalSettingsTabTitle": "Paramètres généraux",
     "management.settings.helpText": "Ce paramètre est défini par le serveur Kibana et ne peut pas être modifié.",
-    "management.settings.offLabel": "Désactivé",
-    "management.settings.onLabel": "Activé",
     "management.settings.resetToDefaultLinkText": "Réinitialiser à la valeur par défaut",
     "management.settings.searchBar.unableToParseQueryErrorMessage": "Impossible d'analyser la requête",
     "management.settings.searchBarPlaceholder": "Rechercher dans les paramètres avancés",

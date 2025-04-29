@@ -7840,7 +7840,6 @@
     "share.fileType": "ファイルタイプ",
     "share.link.copied": "リンクがコピーされました",
     "share.link.copyLinkButton": "リンクをコピー",
-    "share.link.helpText": "この{objectType}への直接リンクを共有します。",
     "share.link.warning.title": "保存されていない変更",
     "share.modalContent.copyUrlButtonLabel": "POST URLをコピー",
     "share.postURLWatcherMessage": "POST URLをコピーしてKibana外または旧Watcherから生成を呼び出します。",

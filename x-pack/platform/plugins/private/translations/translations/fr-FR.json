@@ -7847,7 +7847,6 @@
     "share.fileType": "Type de fichier",
     "share.link.copied": "Lien copié",
     "share.link.copyLinkButton": "Copier le lien",
-    "share.link.helpText": "Partager un lien direct vers ce {objectType}.",
     "share.link.warning.title": "Modifications non enregistrées",
     "share.modalContent.copyUrlButtonLabel": "Copier l'URL Post",
     "share.postURLWatcherMessage": "Copiez cette URL POST pour appeler la génération depuis l'extérieur de Kibana ou à partir de Watcher.",

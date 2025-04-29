@@ -7852,7 +7852,6 @@
     "share.fileType": "文件类型",
     "share.link.copied": "已复制链接",
     "share.link.copyLinkButton": "复制链接",
-    "share.link.helpText": "共享指向此 {objectType} 的直接链接。",
     "share.link.warning.title": "未保存的更改",
     "share.modalContent.copyUrlButtonLabel": "复制 Post URL",
     "share.postURLWatcherMessage": "复制此 POST URL 以从 Kibana 外部或从 Watcher 调用生成。",

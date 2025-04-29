@@ -43678,7 +43678,6 @@
     "xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt": "期間を設定",
     "xpack.stackAlerts.esQuery.ui.sizeExpression": "サイズ",
     "xpack.stackAlerts.esQuery.ui.testQuery": "クエリーのテスト",
-    "xpack.stackAlerts.esQuery.ui.testQueryAlerts": "アラートが生成されました",
     "xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse": "グループ化されたクエリーは、直近の{window}件に{groups}グループと一致しました。",
     "xpack.stackAlerts.esQuery.ui.testQueryIsExecuted": "クエリが実行されます。",
     "xpack.stackAlerts.esQuery.ui.testQueryTableAriaLabel": "クエリグリッドをテスト",

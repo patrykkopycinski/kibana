@@ -43748,7 +43748,6 @@
     "xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt": "设置时间窗口",
     "xpack.stackAlerts.esQuery.ui.sizeExpression": "大小",
     "xpack.stackAlerts.esQuery.ui.testQuery": "测试查询",
-    "xpack.stackAlerts.esQuery.ui.testQueryAlerts": "已生成告警",
     "xpack.stackAlerts.esQuery.ui.testQueryGroupedResponse": "过去 {window} 与 {groups} 个组匹配的分组查询。",
     "xpack.stackAlerts.esQuery.ui.testQueryIsExecuted": "已执行查询。",
     "xpack.stackAlerts.esQuery.ui.testQueryTableAriaLabel": "测试查询网格",

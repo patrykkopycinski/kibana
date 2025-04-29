@@ -3751,7 +3751,6 @@
     "fieldFormats.advancedSettings.shortenFieldsTitle": "缩短字段",
     "fieldFormats.boolean.title": "布尔型",
     "fieldFormats.bytes.title": "字节数和位数",
-    "fieldFormats.color.title": "颜色",
     "fieldFormats.currency.title": "货币",
     "fieldFormats.date_nanos.title": "日期纳秒",
     "fieldFormats.date.title": "日期",

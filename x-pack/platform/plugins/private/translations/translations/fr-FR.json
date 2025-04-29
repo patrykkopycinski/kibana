@@ -3751,7 +3751,6 @@
     "fieldFormats.advancedSettings.shortenFieldsTitle": "Raccourcir les champs",
     "fieldFormats.boolean.title": "Booléen",
     "fieldFormats.bytes.title": "Octets et bits",
-    "fieldFormats.color.title": "Couleur",
     "fieldFormats.currency.title": "Devise",
     "fieldFormats.date_nanos.title": "Date nanos",
     "fieldFormats.date.title": "Date",

@@ -3745,7 +3745,6 @@
     "fieldFormats.advancedSettings.shortenFieldsTitle": "フィールドの短縮",
     "fieldFormats.boolean.title": "Boolean",
     "fieldFormats.bytes.title": "バイトとビット",
-    "fieldFormats.color.title": "色",
     "fieldFormats.currency.title": "通貨",
     "fieldFormats.date_nanos.title": "日付ナノ",
     "fieldFormats.date.title": "Date",

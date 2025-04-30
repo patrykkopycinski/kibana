@@ -32252,8 +32252,6 @@
     "xpack.observability.profilingCostPervCPUPerHourUiSettingName": "1時間あたりのvCPU単位のコスト（ドル）",
     "xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription": "AWSまたはAzureではないコンピューターのCPUコアごとのデフォルト時間コスト",
     "xpack.observability.profilingDatacenterPUEUiSettingName": "データセンターPUE",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktraces": "Stacktraces APIからTopN関数を取得するように切り替えます。",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription": "topN関数ページはtopN/関数APIを使用してオンにし、stacktraces apiに切り替えます",
     "xpack.observability.profilingPervCPUWattArm64UiSettingDescription": "arm64アーキテクチャーのコア単位の平均償却消費電力（CPU使用率100%に基づく）。",
     "xpack.observability.profilingPervCPUWattArm64UiSettingName": "vCPUワット単位 - arm64",
     "xpack.observability.profilingPervCPUWattX86UiSettingDescription": "x86アーキテクチャーのコア単位の平均償却消費電力（CPU使用率100%に基づく）。",

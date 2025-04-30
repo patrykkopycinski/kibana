@@ -32271,8 +32271,6 @@
     "xpack.observability.profilingCostPervCPUPerHourUiSettingName": "Coût par vCPU par heure ($)",
     "xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription": "Coût horaire par défaut par cœur de processeur pour les machines hors AWS ou Azure",
     "xpack.observability.profilingDatacenterPUEUiSettingName": "PUE des centres de données",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktraces": "Activez cette option pour récupérer les fonctions TopN de l'API des traces d'appel.",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription": "Les pages de fonctions topN utilisent l'API topN / fonctions, activez-la pour passer à l'API des traces d'appel",
     "xpack.observability.profilingPervCPUWattArm64UiSettingDescription": "Consommation d'énergie moyenne amortie par cœur (avec une utilisation du CPU à 100 %).pour l'architecture arm64.",
     "xpack.observability.profilingPervCPUWattArm64UiSettingName": "Par vCPU Watts - arm64",
     "xpack.observability.profilingPervCPUWattX86UiSettingDescription": "Consommation d'énergie moyenne amortie par cœur (avec une utilisation du CPU à 100 %) pour l'architecture x86.",

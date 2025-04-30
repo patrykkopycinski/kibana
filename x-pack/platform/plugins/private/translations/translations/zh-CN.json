@@ -32307,8 +32307,6 @@
     "xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription": "不在 AWS 或 Azure 上的计算机的每 CPU 核心默认小时成本",
     "xpack.observability.profilingDatacenterPUEUiSettingDescription": "数据中心电源使用效率 (PUE) 衡量数据中心的能源利用效率。根据<a>正常运行时间协会</a>调查，本地数据中心的平均 PUE 默认为 1.7 您还可以使用与您的云服务提供商对应的 PUE：'<ul style=\"list-style-type: none;margin-left: 4px;\"> <li><strong>AWS：</strong>1.135</li> <li><strong>GCP：</strong>1.1</li> <li><strong>Azure：</strong>1.185</li> </ul>'",
     "xpack.observability.profilingDatacenterPUEUiSettingName": "数据中心 PUE",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktraces": "切换以从堆栈跟踪 API 中提取 TopN 函数。",
-    "xpack.observability.profilingFetchTopNFunctionsFromStacktracesDescription": "TopN 函数页面使用 TopN/函数 API，将其打开可切换到堆栈跟踪 API",
     "xpack.observability.profilingPervCPUWattArm64UiSettingDescription": "arm64 架构的平均分摊每核功耗（基于 100% 的 CPU 利用率）。",
     "xpack.observability.profilingPervCPUWattArm64UiSettingName": "每 vCPU 功耗（瓦）- arm64",
     "xpack.observability.profilingPervCPUWattX86UiSettingDescription": "x86 架构的平均分摊每核功耗（基于 100% 的 CPU 利用率）。",

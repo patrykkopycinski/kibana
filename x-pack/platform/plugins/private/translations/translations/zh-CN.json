@@ -35317,7 +35317,6 @@
     "xpack.securitySolution.assetInventory.allAssets.lastSeen": "最后看到时间",
     "xpack.securitySolution.assetInventory.allAssets.name": "名称",
     "xpack.securitySolution.assetInventory.allAssets.search.queryErrorToastMessage": "查询错误",
-    "xpack.securitySolution.assetInventory.allAssets.source": "源",
     "xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel": "资产",
     "xpack.securitySolution.assetInventory.dataTable.fieldsButton": "字段",
     "xpack.securitySolution.assetInventory.dataTable.fieldsModalClose": "关闭",

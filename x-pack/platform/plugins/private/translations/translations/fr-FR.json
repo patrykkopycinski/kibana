@@ -35283,7 +35283,6 @@
     "xpack.securitySolution.assetInventory.allAssets.lastSeen": "Vu en dernier",
     "xpack.securitySolution.assetInventory.allAssets.name": "Nom",
     "xpack.securitySolution.assetInventory.allAssets.search.queryErrorToastMessage": "Erreur de requête",
-    "xpack.securitySolution.assetInventory.allAssets.source": "Source",
     "xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel": "ressources",
     "xpack.securitySolution.assetInventory.dataTable.fieldsButton": "Champs",
     "xpack.securitySolution.assetInventory.dataTable.fieldsModalClose": "Fermer",

@@ -35259,7 +35259,6 @@
     "xpack.securitySolution.assetInventory.allAssets.lastSeen": "前回の認識",
     "xpack.securitySolution.assetInventory.allAssets.name": "名前",
     "xpack.securitySolution.assetInventory.allAssets.search.queryErrorToastMessage": "クエリーエラー",
-    "xpack.securitySolution.assetInventory.allAssets.source": "送信元",
     "xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel": "アセット",
     "xpack.securitySolution.assetInventory.dataTable.fieldsButton": "フィールド",
     "xpack.securitySolution.assetInventory.dataTable.fieldsModalClose": "閉じる",

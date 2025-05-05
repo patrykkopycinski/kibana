@@ -31880,8 +31880,6 @@
     "xpack.observability.apmEnableProfilingIntegration": "Activer l'intégration Universal Profiling dans APM",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "Recherche instantanée dans le tableau de l'inventaire des services",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel} permet une recherche plus rapide dans le tableau d'inventaire des services APM grâce à l'ajout d'une barre de recherche avec filtrage en temps réel.",
-    "xpack.observability.apmEnableServiceMetrics": "Indicateurs de transaction de service",
-    "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} Permet l'utilisation d'indicateurs de transaction de service. Il s'agit d'indicateurs à faible cardinalité qui peuvent être utilisés par certaines vues, comme l'inventaire de service, pour accélérer le chargement.",
     "xpack.observability.apmEnableTableSearchBar": "Recherche de tableau instantanée",
     "xpack.observability.apmEnableTableSearchBarDescription": "{betaLabel} Permet une recherche plus rapide dans les tableaux APM en ajoutant une barre de recherche pratique avec filtrage en temps réel. Disponible pour les tableaux suivants : Transactions et erreurs",
     "xpack.observability.apmEnableTransactionProfiling": "Activer Universal Profiling sur la vue Transactions",

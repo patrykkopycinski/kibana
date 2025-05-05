@@ -31858,8 +31858,6 @@
     "xpack.observability.apmEnableProfilingIntegration": "APMでユニバーサルプロファイリング統合を有効化",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "サービスインベントリインスタントテーブル検索",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel}簡単な検索バーとライブフィルタリングを追加して、APMサービスインベントリテーブルでの検索を高速化できます。",
-    "xpack.observability.apmEnableServiceMetrics": "サービストランザクションメトリック",
-    "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel}サービストランザクションメトリックの使用を有効にします。これは、サービスインベントリなどの特定のビューで使用できる低カーディナリティのメトリックで、読み込み時間を短縮します。",
     "xpack.observability.apmEnableTableSearchBar": "インスタントテーブル検索",
     "xpack.observability.apmEnableTableSearchBarDescription": "{betaLabel}簡単な検索バーとライブフィルタリングを追加して、APMテーブルでの検索を高速化できます。次のテーブルで使用可能です：トランザクションとエラー",
     "xpack.observability.apmEnableTransactionProfiling": "トランザクションビューでユニバーサルプロファイリングを有効化",

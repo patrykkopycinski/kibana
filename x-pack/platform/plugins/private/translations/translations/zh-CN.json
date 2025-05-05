@@ -31912,8 +31912,6 @@
     "xpack.observability.apmEnableProfilingIntegration": "在 APM 中启用 Universal Profiling 集成",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "服务库存即时表搜索",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel} 通过添加一个具有实时筛选功能的便捷搜索栏，在 APM 服务库存表中实现更快的搜索。",
-    "xpack.observability.apmEnableServiceMetrics": "服务事务指标",
-    "xpack.observability.apmEnableServiceMetricsDescription": "{betaLabel} 启用服务事务指标，这种是低基数指标，可供某些视图（如服务库存）使用来加快加载速度。",
     "xpack.observability.apmEnableTableSearchBar": "即时表搜索",
     "xpack.observability.apmEnableTableSearchBarDescription": "{betaLabel} 通过添加一个具有实时筛选功能的便捷搜索栏，在 APM 表中实现更快的搜索。适用于以下表：事务和错误",
     "xpack.observability.apmEnableTransactionProfiling": "在事务视图上启用 Universal Profiling",

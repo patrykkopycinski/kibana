@@ -32062,8 +32062,6 @@
     "xpack.observability.emptySection.apps.ux.description": "Collectez, mesurez et analysez les données de performances reflétant les expériences des utilisateurs réels.",
     "xpack.observability.emptySection.apps.ux.link": "Installer RUM Agent",
     "xpack.observability.emptySection.apps.ux.title": "Expérience utilisateur",
-    "xpack.observability.enableAgentExplorer": "Explorateur d'agent",
-    "xpack.observability.enableAgentExplorerDescription": "{betaLabel} Active la vue d'explorateur d'agent.",
     "xpack.observability.enableAwsLambdaMetrics": "Indicateurs AWS Lambda",
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} Affiche les indicateurs Amazon Lambda dans l'onglet d'indicateurs de service.",
     "xpack.observability.enableComparisonByDefault": "Fonctionnalité de comparaison",

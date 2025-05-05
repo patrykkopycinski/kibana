@@ -32095,8 +32095,6 @@
     "xpack.observability.emptySection.apps.ux.description": "收集、衡量和分析反映真实用户体验的性能数据。",
     "xpack.observability.emptySection.apps.ux.link": "安装 RUM 代理",
     "xpack.observability.emptySection.apps.ux.title": "用户体验",
-    "xpack.observability.enableAgentExplorer": "Agent Explorer",
-    "xpack.observability.enableAgentExplorerDescription": "{betaLabel} 启用代理浏览器视图。",
     "xpack.observability.enableAwsLambdaMetrics": "AWS Lambda 指标",
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} 在服务指标选项卡中显示 Amazon Lambda 指标。",
     "xpack.observability.enableComparisonByDefault": "对比功能",

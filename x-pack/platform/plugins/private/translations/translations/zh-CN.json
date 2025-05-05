@@ -32103,8 +32103,6 @@
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} 在服务指标选项卡中显示 Amazon Lambda 指标。",
     "xpack.observability.enableComparisonByDefault": "对比功能",
     "xpack.observability.enableComparisonByDefaultDescription": "确定是在 APM 应用中默认启用还是禁用比较功能。",
-    "xpack.observability.enableCriticalPath": "关键路径",
-    "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel}（可选）显示跟踪的关键路径。",
     "xpack.observability.enableInfrastructureAssetCustomDashboards": "Infrastructure 中资产详情的定制仪表板",
     "xpack.observability.enableInfrastructureAssetCustomDashboardsDescription": "{technicalPreviewLabel} 启用选项以在资产详情视图中链接定制仪表板。",
     "xpack.observability.enableInfrastructureProfilingIntegration": "Infrastructure 中的 Universal Profiling 集成",

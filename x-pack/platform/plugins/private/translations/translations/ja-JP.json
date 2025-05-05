@@ -32049,8 +32049,6 @@
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} ［サービスメトリック］タブにAmazon Lambdaメトリックを表示します。",
     "xpack.observability.enableComparisonByDefault": "比較機能",
     "xpack.observability.enableComparisonByDefaultDescription": "APMアプリで比較機能がデフォルトで有効か無効かを決定します。",
-    "xpack.observability.enableCriticalPath": "クリティカルパス",
-    "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel} 任意で、トレースのクリティカルパスを表示します。",
     "xpack.observability.enableInfrastructureAssetCustomDashboards": "インフラのアセット詳細のカスタムダッシュボード",
     "xpack.observability.enableInfrastructureAssetCustomDashboardsDescription": "{technicalPreviewLabel}アセット詳細ビューでカスタムダッシュボードをリンクするオプションを有効化します。",
     "xpack.observability.enableInfrastructureProfilingIntegration": "インフラのユニバーサルプロファイリング統合",

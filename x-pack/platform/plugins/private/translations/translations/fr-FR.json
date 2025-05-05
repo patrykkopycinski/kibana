@@ -32070,8 +32070,6 @@
     "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} Affiche les indicateurs Amazon Lambda dans l'onglet d'indicateurs de service.",
     "xpack.observability.enableComparisonByDefault": "Fonctionnalité de comparaison",
     "xpack.observability.enableComparisonByDefaultDescription": "Déterminer si la fonctionnalité de comparaison est activée ou désactivée par défaut dans l'application APM.",
-    "xpack.observability.enableCriticalPath": "Chemin critique",
-    "xpack.observability.enableCriticalPathDescription": "{technicalPreviewLabel} Affiche de façon optionnelle le chemin critique d'une trace.",
     "xpack.observability.enableInfrastructureAssetCustomDashboards": "Tableaux de bord personnalisés pour les détails de ressource dans Infrastructure",
     "xpack.observability.enableInfrastructureAssetCustomDashboardsDescription": "{technicalPreviewLabel} Activez l'option pour lier des tableaux de bord personnalisés dans l'affichage des détails de ressource.",
     "xpack.observability.enableInfrastructureProfilingIntegration": "Intégration Universal Profiling dans Infrastructure",

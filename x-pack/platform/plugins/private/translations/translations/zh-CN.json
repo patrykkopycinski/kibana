@@ -31925,8 +31925,6 @@
     "xpack.observability.apmProgressiveLoadingQualityLow": "低采样速率（最快，最不准确）",
     "xpack.observability.apmProgressiveLoadingQualityMedium": "中等采样速率",
     "xpack.observability.apmProgressiveLoadingQualityOff": "关闭",
-    "xpack.observability.apmServiceInventoryOptimizedSorting": "优化 APM 中的服务列表加载性能",
-    "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel} 默认 APM 服务库存和 Storage Explorer 页面排序（对于未应用 Machine Learning 的服务）将按服务名称排序。",
     "xpack.observability.apmTraceExplorerTab": "APM Trace Explorer",
     "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} 启用 APM Trace Explorer 功能，它允许您通过 KQL 或 EQL 搜索和检查跟踪。{link}",
     "xpack.observability.app.starterPrompts.explainRules.prompt": "是否可以解释可用的规则类型？",

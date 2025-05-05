@@ -31871,8 +31871,6 @@
     "xpack.observability.apmProgressiveLoadingQualityLow": "低サンプリングレート（最速、最も精度が低い）",
     "xpack.observability.apmProgressiveLoadingQualityMedium": "中サンプリングレート",
     "xpack.observability.apmProgressiveLoadingQualityOff": "オフ",
-    "xpack.observability.apmServiceInventoryOptimizedSorting": "APMでサービスリストの読み込みパフォーマンスを最適化",
-    "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel} サービス名によるデフォルトAPMサービスインベントリおよびストレージエクスプローラーページの並べ替え（機械学習が適用されていないサービス）。",
     "xpack.observability.apmTraceExplorerTab": "APMトレースエクスプローラー",
     "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} APMトレースエクスプローラー機能を有効にし、KQLまたはEQLでトレースを検索、検査できます。{link}",
     "xpack.observability.app.starterPrompts.explainRules.prompt": "使用可能なルールタイプを説明できますか？",

@@ -31893,8 +31893,6 @@
     "xpack.observability.apmProgressiveLoadingQualityLow": "Taux d'échantillonnage bas (plus rapide, moins précis)",
     "xpack.observability.apmProgressiveLoadingQualityMedium": "Taux d'échantillonnage moyen",
     "xpack.observability.apmProgressiveLoadingQualityOff": "Désactivé",
-    "xpack.observability.apmServiceInventoryOptimizedSorting": "Optimiser les performances de chargement des listes de services dans APM",
-    "xpack.observability.apmServiceInventoryOptimizedSortingDescription": "{technicalPreviewLabel} Tri par défaut des pages d'inventaire et de stockage des services APM (pour les services hors Machine Learning), en fonction du nom de service.",
     "xpack.observability.apmTraceExplorerTab": "Explorateur de traces APM",
     "xpack.observability.apmTraceExplorerTabDescription": "{technicalPreviewLabel} Activer la fonctionnalité Explorateur de traces APM, qui vous permet de rechercher et d'inspecter les traces avec KQL ou EQL. {link}",
     "xpack.observability.app.starterPrompts.explainRules.prompt": "Pouvez-vous expliquer les types de règles disponibles ?",

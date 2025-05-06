@@ -1617,7 +1617,6 @@
     "dashboard.renderer.404Action": "使用可能なダッシュボードを表示",
     "dashboard.renderer.404Body": "申し訳ございません。お探しのダッシュボードは見つかりませんでした。削除または名前変更されたか、そもそも存在していなかった可能性があります。",
     "dashboard.renderer.404Title": "ダッシュボードが見つかりません",
-    "dashboard.reset.panelError": "パネルの変更をリセットできません",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "ダッシュボードをリセット",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "このダッシュボードは最後に保存された状態に戻ります。フィルターとクエリーの変更が失われる場合があります。",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "ダッシュボードをリセットしますか？",

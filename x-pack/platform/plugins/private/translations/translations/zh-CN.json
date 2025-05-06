@@ -1618,7 +1618,6 @@
     "dashboard.renderer.404Action": "查看可用仪表板",
     "dashboard.renderer.404Body": "抱歉，找不到您要查找的仪表板。该页面可能已移除、重命名，或可能根本不存在。",
     "dashboard.renderer.404Title": "找不到仪表板",
-    "dashboard.reset.panelError": "无法重置面板更改",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "重置仪表板",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "此仪表板将返回到其最后保存的状态。您可能会丢失对筛选和查询的更改。",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "重置仪表板？",

@@ -1618,7 +1618,6 @@
     "dashboard.renderer.404Action": "Voir les tableaux de bord disponibles",
     "dashboard.renderer.404Body": "Désolé, le tableau de bord que vous recherchez est introuvable. Elle a peut-être été retirée ou renommée, ou peut-être qu'elle n'a jamais existé.",
     "dashboard.renderer.404Title": "Tableau de bord introuvable",
-    "dashboard.reset.panelError": "Impossible de réinitialiser les modifications du panneau",
     "dashboard.resetChangesConfirmModal.confirmButtonLabel": "Réinitialiser le tableau de bord",
     "dashboard.resetChangesConfirmModal.resetChangesDescription": "Ce tableau de bord va revenir à son dernier état d'enregistrement. Vous risquez de perdre les modifications apportées aux filtres et aux requêtes.",
     "dashboard.resetChangesConfirmModal.resetChangesTitle": "Réinitialiser le tableau de bord ?",

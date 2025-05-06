@@ -32057,8 +32057,6 @@
     "xpack.observability.emptySection.apps.ux.description": "Collectez, mesurez et analysez les données de performances reflétant les expériences des utilisateurs réels.",
     "xpack.observability.emptySection.apps.ux.link": "Installer RUM Agent",
     "xpack.observability.emptySection.apps.ux.title": "Expérience utilisateur",
-    "xpack.observability.enableAwsLambdaMetrics": "Indicateurs AWS Lambda",
-    "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} Affiche les indicateurs Amazon Lambda dans l'onglet d'indicateurs de service.",
     "xpack.observability.enableComparisonByDefault": "Fonctionnalité de comparaison",
     "xpack.observability.enableComparisonByDefaultDescription": "Déterminer si la fonctionnalité de comparaison est activée ou désactivée par défaut dans l'application APM.",
     "xpack.observability.enableInfrastructureAssetCustomDashboards": "Tableaux de bord personnalisés pour les détails de ressource dans Infrastructure",

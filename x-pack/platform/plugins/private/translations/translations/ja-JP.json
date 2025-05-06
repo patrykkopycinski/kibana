@@ -32036,8 +32036,6 @@
     "xpack.observability.emptySection.apps.ux.description": "現実世界のエンドユーザーエクスペリエンスを反映するパフォーマンスデータを収集、計測、分析しましょう。",
     "xpack.observability.emptySection.apps.ux.link": "Rum エージェントをインストール",
     "xpack.observability.emptySection.apps.ux.title": "ユーザーエクスペリエンス",
-    "xpack.observability.enableAwsLambdaMetrics": "AWS Lambdaメトリック",
-    "xpack.observability.enableAwsLambdaMetricsDescription": "{technicalPreviewLabel} ［サービスメトリック］タブにAmazon Lambdaメトリックを表示します。",
     "xpack.observability.enableComparisonByDefault": "比較機能",
     "xpack.observability.enableComparisonByDefaultDescription": "APMアプリで比較機能がデフォルトで有効か無効かを決定します。",
     "xpack.observability.enableInfrastructureAssetCustomDashboards": "インフラのアセット詳細のカスタムダッシュボード",

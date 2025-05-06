@@ -31881,7 +31881,7 @@
     "xpack.observability.apmLabs": "Activer le bouton Ateliers dans APM",
     "xpack.observability.apmLabsDescription": "Cet indicateur détermine si l'utilisateur a accès au bouton Ateliers, moyen rapide d'activer et de désactiver les fonctionnalités de la version d'évaluation technique dans APM.",
     "xpack.observability.apmProgressiveLoading": "Utiliser le chargement progressif des vues APM sélectionnées",
-    "xpack.observability.apmProgressiveLoadingDescription": "S'il faut charger les données de façon progressive pour les vues APM. Les données peuvent être demandées d'abord avec un taux d'échantillonnage inférieur, avec une précision plus faible mais des temps de réponse plus rapides, pendant que les données non échantillonnées se chargent en arrière-plan",
+    "xpack.observability.apmProgressiveLoadingDescription": "{technicalPreviewLabel} S'il faut charger les données de façon progressive pour les vues APM. Les données peuvent être demandées d'abord avec un taux d'échantillonnage inférieur, avec une précision plus faible mais des temps de réponse plus rapides, pendant que les données non échantillonnées se chargent en arrière-plan",
     "xpack.observability.apmProgressiveLoadingQualityHigh": "Taux d'échantillonnage élevé (plus lent, plus précis)",
     "xpack.observability.apmProgressiveLoadingQualityLow": "Taux d'échantillonnage bas (plus rapide, moins précis)",
     "xpack.observability.apmProgressiveLoadingQualityMedium": "Taux d'échantillonnage moyen",

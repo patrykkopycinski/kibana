@@ -31904,8 +31904,6 @@
     "xpack.observability.apmAWSLambdaPricePerGbSeconds": "AWS lambda 价格因素",
     "xpack.observability.apmAWSLambdaPricePerGbSecondsDescription": "每 Gb-秒的价格。",
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "AWS lambda 每 1M 请求的价格",
-    "xpack.observability.apmEnableContinuousRollups": "连续汇总/打包",
-    "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel} 启用连续汇总/打包时，UI 将以适当分辨率选择指标。在更大时间范围内，将使用分辨率较低的指标，这会缩短加载时间。",
     "xpack.observability.apmEnableProfilingIntegration": "在 APM 中启用 Universal Profiling 集成",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "服务库存即时表搜索",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel} 通过添加一个具有实时筛选功能的便捷搜索栏，在 APM 服务库存表中实现更快的搜索。",

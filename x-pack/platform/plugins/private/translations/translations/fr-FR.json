@@ -31872,8 +31872,6 @@
     "xpack.observability.apmAWSLambdaPricePerGbSeconds": "Facteur de prix AWS Lambda",
     "xpack.observability.apmAWSLambdaPricePerGbSecondsDescription": "Prix par Go-seconde.",
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "Prix AWS Lambda pour 1M de requêtes",
-    "xpack.observability.apmEnableContinuousRollups": "Cumuls continus",
-    "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel} Lorsque les cumuls continus sont activés, l'interface utilisateur sélectionne des indicateurs ayant la résolution appropriée. Sur des plages temporelles plus larges, des indicateurs de résolution inférieure sont utilisés, ce qui améliore les temps de chargement.",
     "xpack.observability.apmEnableProfilingIntegration": "Activer l'intégration Universal Profiling dans APM",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "Recherche instantanée dans le tableau de l'inventaire des services",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel} permet une recherche plus rapide dans le tableau d'inventaire des services APM grâce à l'ajout d'une barre de recherche avec filtrage en temps réel.",

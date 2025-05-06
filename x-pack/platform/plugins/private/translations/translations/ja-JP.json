@@ -31850,8 +31850,6 @@
     "xpack.observability.apmAWSLambdaPricePerGbSeconds": "AWS Lambda価格要因",
     "xpack.observability.apmAWSLambdaPricePerGbSecondsDescription": "Gb秒ごとの料金。",
     "xpack.observability.apmAWSLambdaRequestCostPerMillion": "1MリクエストごとのAWS Lambdaの料金",
-    "xpack.observability.apmEnableContinuousRollups": "連続ロールアップ",
-    "xpack.observability.apmEnableContinuousRollupsDescription": "{betaLabel}連続ロールアップが有効な場合、UIは適切な解像度でメトリックを選択します。より大きな時間範囲では、より低い解像度の測定基準が使用され、読み込み時間が改善されます。",
     "xpack.observability.apmEnableProfilingIntegration": "APMでユニバーサルプロファイリング統合を有効化",
     "xpack.observability.apmEnableServiceInventoryTableSearchBar": "サービスインベントリインスタントテーブル検索",
     "xpack.observability.apmEnableServiceInventoryTableSearchBarDescription": "{technicalPreviewLabel}簡単な検索バーとライブフィルタリングを追加して、APMサービスインベントリテーブルでの検索を高速化できます。",

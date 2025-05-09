@@ -43648,7 +43648,6 @@
     "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "在运行最新查询期间找到匹配项时告警。",
     "xpack.stackAlerts.esQuery.ui.conditionsPrompt": "设置组、阈值和时间窗口",
     "xpack.stackAlerts.esQuery.ui.copyQuery": "复制查询",
-    "xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt": "使用 ES|QL 定义查询",
     "xpack.stackAlerts.esQuery.ui.defineQueryPrompt": "使用查询 DSL 定义查询",
     "xpack.stackAlerts.esQuery.ui.defineTextQueryPrompt": "定义您的查询",
     "xpack.stackAlerts.esQuery.ui.excludePreviousHitsExpression": "排除上次运行中的匹配项",

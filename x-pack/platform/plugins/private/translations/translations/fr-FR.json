@@ -43612,7 +43612,6 @@
     "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "Alerte lorsque des correspondances sont trouvées au cours de la dernière exécution de la requête.",
     "xpack.stackAlerts.esQuery.ui.conditionsPrompt": "Définir le groupe, le seuil et la fenêtre de temps",
     "xpack.stackAlerts.esQuery.ui.copyQuery": "Copier la requête",
-    "xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt": "Définir votre requête à l'aide d'ES|QL",
     "xpack.stackAlerts.esQuery.ui.defineQueryPrompt": "Définir votre requête à l'aide de Query DSL",
     "xpack.stackAlerts.esQuery.ui.defineTextQueryPrompt": "Définir votre requête",
     "xpack.stackAlerts.esQuery.ui.excludePreviousHitsExpression": "Exclure les correspondances des précédentes exécutions",

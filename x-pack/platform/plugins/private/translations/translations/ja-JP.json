@@ -43578,7 +43578,6 @@
     "xpack.stackAlerts.esQuery.ui.alertType.descriptionText": "前回のクエリ実行中に一致が見つかったときにアラートを発行します。",
     "xpack.stackAlerts.esQuery.ui.conditionsPrompt": "グループ、しきい値、時間枠を設定",
     "xpack.stackAlerts.esQuery.ui.copyQuery": "クエリをコピー",
-    "xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt": "ES|QLクエリを使用してクエリを定義",
     "xpack.stackAlerts.esQuery.ui.defineQueryPrompt": "クエリDSLを使用してクエリを定義",
     "xpack.stackAlerts.esQuery.ui.defineTextQueryPrompt": "クエリを定義",
     "xpack.stackAlerts.esQuery.ui.excludePreviousHitsExpression": "前回の実行から一致を除外",

@@ -14967,7 +14967,6 @@
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge": "我确认，AWS CloudFormation 可以创建 IAM 资源。",
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.capabilties": "功能",
     "xpack.csp.agentlessForm.cloudFormation.steps.create": "单击 {createStack}。",
-    "xpack.csp.agentlessForm.cloudFormation.steps.credentials": "复制 {accessKeyId} 和 {secretAccessKey}，然后粘贴以下凭据",
     "xpack.csp.agentlessForm.cloudFormation.steps.region": "（可选）将右上角的 {amazonRegion} 更改为要将您的堆栈部署到的区域",
     "xpack.csp.agentlessForm.cloudFormation.steps.stackStatus": "一旦堆栈状态为 {createComplete}，则单击“输出”选项卡",
     "xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.button": "启动 Google Cloud Shell",

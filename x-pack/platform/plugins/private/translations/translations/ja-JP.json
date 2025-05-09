@@ -14937,7 +14937,6 @@
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge": "AWS CloudFormationがIAMリソースを作成する可能性があることを承諾します。",
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.capabilties": "機能",
     "xpack.csp.agentlessForm.cloudFormation.steps.create": "{createStack}をクリックします。",
-    "xpack.csp.agentlessForm.cloudFormation.steps.credentials": "{accessKeyId}と{secretAccessKey}をコピーして、以下に資格情報を貼り付けます",
     "xpack.csp.agentlessForm.cloudFormation.steps.stackStatus": "スタックステータスが{createComplete}になったら、［出力］タブをクリックします",
     "xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.button": "Google Cloud Shellを起動",
     "xpack.csp.awsIntegration.accessKeyIdLabel": "アクセスキーID",

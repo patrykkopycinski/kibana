@@ -14952,7 +14952,6 @@
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge": "Je reconnais qu'AWS CloudFormation peut créer des ressources IAM.",
     "xpack.csp.agentlessForm.cloudFormation.steps.accept.capabilties": "fonctionnalités",
     "xpack.csp.agentlessForm.cloudFormation.steps.create": "Cliquez sur {createStack}.",
-    "xpack.csp.agentlessForm.cloudFormation.steps.credentials": "Copiez les {accessKeyId} et les {secretAccessKey}, puis collez les informations d'identification ci-dessous",
     "xpack.csp.agentlessForm.cloudFormation.steps.region": "(Facultatif) Modifiez la {amazonRegion} dans le coin supérieur droit pour qu'elle corresponde à la région où vous voulez déployer la suite",
     "xpack.csp.agentlessForm.cloudFormation.steps.stackStatus": "Une fois que l'état de la suite est {createComplete}, cliquez sur l'onglet Sorties",
     "xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.button": "Lancer Google Cloud Shell",

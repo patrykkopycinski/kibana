@@ -11,7 +11,7 @@ import type { SuggestionRawDefinition } from '../../types';
 import {
   getOverlapRange,
   removeQuoteForSuggestedSources,
-  getSourceSuggestions,
+  specialIndicesToSuggestions,
   additionalSourcesSuggestions,
 } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -22,12 +22,12 @@ import { metadataSuggestion, getMetadataSuggestions } from '../metadata';
 export async function suggest({
   innerText,
   command,
+  callbacks,
   getSources,
-  getRecommendedQueriesSuggestions,
   getSourcesFromQuery,
-}: CommandSuggestParams<'from'>): Promise<SuggestionRawDefinition[]> {
+}: CommandSuggestParams<'ts'>): Promise<SuggestionRawDefinition[]> {
   if (/\".*$/.test(innerText)) {
-    // FROM "<suggest>"
+    // TS "<suggest>"
     return [];
   }
 
@@ -49,33 +49,30 @@ export async function suggest({
 
   const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
-  // FROM /
+  // TS /
   if (indexes.length === 0) {
-    addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
+    const timeseriesIndices = await callbacks?.getTimeseriesIndices?.();
+    if (!timeseriesIndices) {
+      return [];
+    }
+    return specialIndicesToSuggestions(timeseriesIndices.indices);
   }
-  // FROM something /
+  // TS something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
     suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
-    suggestions.push(...(await getRecommendedQueriesSuggestions()));
   }
-  // FROM something MET/
-  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
+  // TS something MET/
+  else if (indexes.length > 0 && /^TS\s+\S+\s+/i.test(innerText) && metadataOverlap) {
     suggestions.push(metadataSuggestion);
   }
-  // FROM someth/
-  // FROM something/
-  // FROM something, /
+  // TS someth/
+  // TS something/
+  // TS something, /
   else if (indexes.length) {
     const sources = await getSources();
-
-    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions();
-    const additionalSuggestions = await additionalSourcesSuggestions(
-      innerText,
-      sources,
-      recommendedQuerySuggestions
-    );
+    const additionalSuggestions = await additionalSourcesSuggestions(innerText, sources, []);
     addSuggestionsBasedOnQuote(additionalSuggestions);
   }
 

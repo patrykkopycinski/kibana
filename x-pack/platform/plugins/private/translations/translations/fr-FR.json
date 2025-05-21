@@ -19678,7 +19678,6 @@
     "xpack.fleet.packageCard.collectionButton.copy": "Afficher la collection",
     "xpack.fleet.packageCard.contentPackageLabel": "Contenu uniquement",
     "xpack.fleet.packageCard.faileAttemptDescription": "Échec le {attemptDate}.",
-    "xpack.fleet.packageCard.installedLabel": "Installé",
     "xpack.fleet.packageCard.installFailed": "Échec de l'installation",
     "xpack.fleet.packageCard.installFailedTooltipTitle": "Échec de l'installation",
     "xpack.fleet.packageCard.quickstartBadge.label": "Démarrage rapide",

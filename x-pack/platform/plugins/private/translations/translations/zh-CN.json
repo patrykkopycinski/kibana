@@ -19698,7 +19698,6 @@
     "xpack.fleet.packageCard.collectionButton.copy": "查看集合",
     "xpack.fleet.packageCard.contentPackageLabel": "仅内容",
     "xpack.fleet.packageCard.faileAttemptDescription": "失败于 {attemptDate}。",
-    "xpack.fleet.packageCard.installedLabel": "已安装",
     "xpack.fleet.packageCard.installFailed": "安装失败",
     "xpack.fleet.packageCard.installFailedTooltipTitle": "安装失败",
     "xpack.fleet.packageCard.quickstartBadge.label": "快速入门",

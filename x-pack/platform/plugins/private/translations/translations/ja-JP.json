@@ -19657,7 +19657,6 @@
     "xpack.fleet.packageCard.collectionButton.copy": "コレクションを表示",
     "xpack.fleet.packageCard.contentPackageLabel": "コンテンツのみ",
     "xpack.fleet.packageCard.faileAttemptDescription": "{attemptDate}に失敗しました。",
-    "xpack.fleet.packageCard.installedLabel": "インストール済み",
     "xpack.fleet.packageCard.installFailed": "インストールが失敗しました",
     "xpack.fleet.packageCard.installFailedTooltipTitle": "インストールが失敗しました",
     "xpack.fleet.packageCard.quickstartBadge.label": "クイックスタート",

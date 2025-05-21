@@ -12,6 +12,10 @@ import { css } from '@emotion/react';
 
 import { useMemo } from 'react';
 
+/**
+ * This file was copy pasted from `src/platform/plugins/shared/dashboard/public/dashboard_renderer/grid/use_layout_styles.tsx`
+ * so that the styles in the example app could match those used in Dashboard
+ */
 export const useLayoutStyles = () => {
   const { euiTheme } = useEuiTheme();
 

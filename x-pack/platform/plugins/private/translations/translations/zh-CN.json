@@ -5742,7 +5742,7 @@
     "kbnConfig.deprecations.unusedSettingMessage": "您不再需要配置“{fullPath}”。",
     "kbnGridLayout.dragHandle.ariaLabel": "拖动以移动",
     "kbnGridLayout.resizeHandle.ariaLabel": "调整面板大小",
-    "kbnGridLayout.row.toggleCollapse": "切换折叠",
+    "kbnGridLayout.section.toggleCollapse": "切换折叠",
     "kibana_utils.history.savedObjectIsMissingNotificationMessage": "已保存对象缺失",
     "kibana_utils.stateManagement.stateHash.unableToRestoreUrlErrorMessage": "无法完全还原 URL，请确保使用共享功能。",
     "kibana_utils.stateManagement.stateHash.unableToStoreHistoryInSessionErrorMessage": "Kibana 无法将历史记录项存储在您的会话中，因为其已满，另外，似乎没有任何可安全删除的项目。通常，这可以通过移到全新的选项卡来解决，但这种情况可能是由更大的问题造成。如果您定期看到这个消息，请在 {gitHubIssuesUrl} 报告问题。",

@@ -10,34 +10,31 @@
 import React, { useEffect, useRef } from 'react';
 import { skip } from 'rxjs';
 
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = React.memo(() => {
+export const GridSectionDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = gridLayoutStateManager.activePanelEvent$
+      const styleSubscription = gridLayoutStateManager.activeSectionEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe((activePanel) => {
+        .subscribe((activeRow) => {
           if (!dragPreviewRef.current) return;
-          const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const sectionId = activePanel?.targetSection;
-          if (!activePanel || !sectionId || !gridLayout[sectionId]?.panels[activePanel.id]) {
+          const sectionId = activeRow?.id;
+          if (!activeRow || !sectionId) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = gridLayout[sectionId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
-            dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
-            dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${`gridRow-${sectionId}`} ${
-              panel.row + 1
-            }`;
-            dragPreviewRef.current.style.gridRowEnd = `span ${panel.height}`;
+            dragPreviewRef.current.style.gridColumnStart = `1`;
+            dragPreviewRef.current.style.gridColumnEnd = `-1`;
+            dragPreviewRef.current.style.gridRowEnd = `start-${sectionId}`;
+            dragPreviewRef.current.style.gridRowStart = `span 1`;
           }
         });
 
@@ -49,9 +46,14 @@ export const GridPanelDragPreview = React.memo(() => {
     []
   );
 
-  return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
+  return <div ref={dragPreviewRef} className={'kbnGridSection--dragPreview'} css={styles} />;
 });
 
-const styles = css({ display: 'none', pointerEvents: 'none' });
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    display: 'none',
+    minHeight: euiTheme.size.xl,
+    position: 'relative',
+  });
 
-GridPanelDragPreview.displayName = 'KbnGridLayoutPanelDragPreview';
+GridSectionDragPreview.displayName = 'KbnGridLayoutSectionDragPreview';

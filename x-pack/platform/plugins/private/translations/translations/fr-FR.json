@@ -5738,7 +5738,7 @@
     "kbnConfig.deprecations.unusedSettingMessage": "Vous n’avez plus besoin de configurer \"{fullPath}\".",
     "kbnGridLayout.dragHandle.ariaLabel": "Faire glisser pour déplacer",
     "kbnGridLayout.resizeHandle.ariaLabel": "Redimensionner le panneau",
-    "kbnGridLayout.row.toggleCollapse": "Basculer vers la réduction",
+    "kbnGridLayout.section.toggleCollapse": "Basculer vers la réduction",
     "kibana_utils.history.savedObjectIsMissingNotificationMessage": "L'objet enregistré est manquant.",
     "kibana_utils.stateManagement.stateHash.unableToRestoreUrlErrorMessage": "Impossible de restaurer complètement l'URL. Assurez-vous d'utiliser la fonctionnalité de partage.",
     "kibana_utils.stateManagement.stateHash.unableToStoreHistoryInSessionErrorMessage": "Kibana n'est pas en mesure de stocker des éléments d'historique dans votre session, car le stockage est arrivé à saturation et il ne semble pas y avoir d'éléments pouvant être supprimés sans risque. Ce problème peut généralement être corrigé en passant à un nouvel onglet, mais il peut être causé par un problème plus important. Si ce message s'affiche régulièrement, veuillez nous en faire part sur {gitHubIssuesUrl}.",

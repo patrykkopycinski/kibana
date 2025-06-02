@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { linkTab } from './link';
-export { embedTab } from './embed';
+export { ExportMenu } from './export_popover';

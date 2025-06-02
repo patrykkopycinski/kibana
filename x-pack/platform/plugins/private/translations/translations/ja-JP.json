@@ -10208,7 +10208,6 @@
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "最大系列",
     "xpack.aiops.changePointDetection.noChangePointsFoundMessage": "メトリックの急降下、急上昇、分布の変化などの統計的に有意な変化点を検出します。メトリックを選択し、時間範囲を選択して、データの変化点の検出を開始します。",
     "xpack.aiops.changePointDetection.noChangePointsFoundTitle": "変化点が見つかりません",
-    "xpack.aiops.changePointDetection.notResultsWarning": "変化点の集約結果警告",
     "xpack.aiops.changePointDetection.notSelectedSplitFieldLabel": "--- 未選択 ---",
     "xpack.aiops.changePointDetection.objectTypeLabel": "変化点チャート",
     "xpack.aiops.changePointDetection.partitionsDescription": "指定しない場合、すべての分割されたフィールド値で最も大きい変化点が表示されます。",

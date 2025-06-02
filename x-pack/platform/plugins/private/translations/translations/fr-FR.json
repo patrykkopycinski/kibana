@@ -10216,7 +10216,6 @@
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "Série max.",
     "xpack.aiops.changePointDetection.noChangePointsFoundMessage": "Détectez les points de modification statistiquement significatifs tels que les baisses, les pics et les modifications de distribution dans un indicateur. Sélectionnez un indicateur et définissez une plage temporelle pour commencer à détecter les points de modification dans vos données.",
     "xpack.aiops.changePointDetection.noChangePointsFoundTitle": "Aucun point de modification trouvé",
-    "xpack.aiops.changePointDetection.notResultsWarning": "Avertissement de résultats agrégés d'absence de point de modification",
     "xpack.aiops.changePointDetection.notSelectedSplitFieldLabel": "--- Non sélectionné ---",
     "xpack.aiops.changePointDetection.objectTypeLabel": "Graphique de points de modification",
     "xpack.aiops.changePointDetection.partitionsDescription": "Si aucune valeur n'est spécifiée, les principaux points de modifications parmi toutes les valeurs des champs divisés seront affichés.",

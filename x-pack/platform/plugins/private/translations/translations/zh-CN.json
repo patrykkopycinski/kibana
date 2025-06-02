@@ -10223,7 +10223,6 @@
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "最大序列",
     "xpack.aiops.changePointDetection.noChangePointsFoundMessage": "检测具有统计意义的更改点，如低谷、高峰，以及指标中的分布变化。选择指标并设置时间范围，以开始在您的数据中检测更改点。",
     "xpack.aiops.changePointDetection.noChangePointsFoundTitle": "找不到更改点",
-    "xpack.aiops.changePointDetection.notResultsWarning": "无更改点聚合结果警告",
     "xpack.aiops.changePointDetection.notSelectedSplitFieldLabel": "--- 未选择 ---",
     "xpack.aiops.changePointDetection.objectTypeLabel": "更改点图表",
     "xpack.aiops.changePointDetection.partitionsDescription": "如果未提供，将显示所有分割字段值中的最大更改点。",

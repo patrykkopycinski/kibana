@@ -40872,7 +40872,7 @@
     "xpack.securitySolution.siemMigrations.rules.panel.progress.description": "Traitement de la migration de {totalRules} règles.",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.preparing": "Préparation de l'environnement pour la traduction alimentée par l'IA.",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.translating": "Traduction des règles",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "La migration de {totalRules} règles est créée, mais la traduction n'a pas encore commencé. {missingResourcesText}",
+    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "La migration de {totalRules} règles est créée, mais la traduction n'a pas encore commencé.",
     "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "Chargez les macros et les consultations et débutez le processus de traduction",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "Traduction terminée",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "L'exportation a été téléchargée à {createdAt} et la traduction s'est terminée à {finishedAt}.",

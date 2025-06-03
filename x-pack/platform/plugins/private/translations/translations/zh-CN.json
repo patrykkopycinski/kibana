@@ -40914,7 +40914,7 @@
     "xpack.securitySolution.siemMigrations.rules.panel.progress.description": "正在处理 {totalRules} 个规则的迁移。",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.preparing": "正在准备环境以进行 AI 驱动式转换。",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.translating": "正在转换规则",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "已创建 {totalRules} 个规则的迁移，但转换尚未开始。{missingResourcesText}",
+    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "已创建 {totalRules} 个规则的迁移，但转换尚未开始。",
     "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "上传宏和查找，然后开始转换过程",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "转换完成",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "导出已于 {createdAt} 上传，且转换已于 {finishedAt} 完成。",

@@ -40836,7 +40836,7 @@
     "xpack.securitySolution.siemMigrations.rules.panel.progress.description": "{totalRules}ルールの移行を処理しています。",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.preparing": "AIを活用した変換の環境を準備しています。",
     "xpack.securitySolution.siemMigrations.rules.panel.progress.translating": "ルールを変換中",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "{totalRules}のルールの移行は作成されていますが、変換はまだ開始されていません。{missingResourcesText}",
+    "xpack.securitySolution.siemMigrations.rules.panel.ready.description": "{totalRules}のルールの移行は作成されていますが、変換はまだ開始されていません。",
     "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "マクロとルックアップをアップロードし、変換プロセスを開始",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "変換完了",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "{createdAt}にアップロードされたエクスポートと変換が{finishedAt}に完了しました。",

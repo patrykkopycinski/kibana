@@ -42090,7 +42090,6 @@
     "xpack.slo.slo.item.actions.clone": "クローンを作成",
     "xpack.slo.slo.item.actions.delete": "削除",
     "xpack.slo.slo.item.actions.reset": "リセット",
-    "xpack.slo.slo.reset.errorMessage": "{name} (id: {id})をリセットできませんでした。問題が発生しました：{error}",
     "xpack.slo.slo.reset.errorNotification": "{name} (id: {id})をリセットできませんでした",
     "xpack.slo.slo.reset.successNotification": "{name}は正常にリセットされました",
     "xpack.slo.slo.rules.addWIndowLabel": "時間枠を追加",

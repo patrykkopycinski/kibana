@@ -31649,8 +31649,6 @@
     "xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle": "OpenTelemetry：ログとメトリック",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsDescription": "エンドポイント、ページ、ユーザージャーニーを監視",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsTitle": "シンセティックモニター",
-    "xpack.observability_onboarding.windows.installStep.description": "現在、このオンボーディングはLinuxとMacOSシステムでのみ利用可能です。WindowsシステムからElasticにログファイルをストリーミングする方法については、当社のドキュメントをご覧ください。",
-    "xpack.observability_onboarding.windows.installStep.link.label": "ドキュメントを読む",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.last_value": "最終値",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.rate": "レート",
     "xpack.observability.advancedSettings.searchExcludedDataTiersDesc": "{technicalPreviewLabel} data_coldやdata_frozenなどの検索から除外するデータティアを指定します。構成されている場合、選択されたティアに割り当てられたインデックスは検索リクエストから無視されます。影響を受けるアプリ：APM、インフラ",

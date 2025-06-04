@@ -31703,8 +31703,6 @@
     "xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle": "OpenTelemetry：日志和指标",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsDescription": "监测终端、页面和用户旅程",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsTitle": "组合监测",
-    "xpack.observability_onboarding.windows.installStep.description": "此载入当前仅可用于 Linux 和 MacOS 系统。请参阅我们的文档了解有关将日志文件从 Windows 系统流式传输到 Elastic 的信息。",
-    "xpack.observability_onboarding.windows.installStep.link.label": "阅读文档",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.last_value": "最后值",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.rate": "比率",
     "xpack.observability.advancedSettings.searchExcludedDataTiersDesc": "{technicalPreviewLabel} 指定要从搜索中排除的数据层，如 data_cold 和/或 data_frozen。进行配置后，搜索请求将忽略在选定层中分配的索引。受影响的应用：APM，基础设施",

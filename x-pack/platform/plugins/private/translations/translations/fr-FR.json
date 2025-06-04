@@ -31672,8 +31672,6 @@
     "xpack.observability_onboarding.useCustomCardsForCategory.logsOtelTitle": "OpenTelemetry : Logs et Metrics",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsDescription": "Monitorez les points de terminaison, les pages et les parcours des utilisateurs",
     "xpack.observability_onboarding.useCustomCardsForCategory.syntheticsTitle": "Monitoring synthétique",
-    "xpack.observability_onboarding.windows.installStep.description": "Cette intégration n'est actuellement disponible que sur les systèmes Linux et MacOS. Consultez notre documentation pour en savoir plus sur la diffusion de fichiers de log vers Elastic depuis un système Windows.",
-    "xpack.observability_onboarding.windows.installStep.link.label": "Lire la documentation",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.last_value": "Dernière valeur",
     "xpack.observability..customThreshold.rule.alertFlyout.aggregationText.rate": "Taux",
     "xpack.observability.advancedSettings.searchExcludedDataTiersDesc": "{technicalPreviewLabel} Spécifiez les niveaux de données à exclure de la recherche, tels que data_cold et/ou data_frozen. Lorsque configurés, les index alloués dans les niveaux sélectionnés seront ignorés dans les requêtes de recherche. Applications affectées : APM, Infrastructure",

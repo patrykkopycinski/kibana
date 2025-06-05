@@ -32147,7 +32147,6 @@
     "xpack.observability.pages.alertDetails.pageTitle.duration": "Durée",
     "xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate": "Dernière mise à jour du statut",
     "xpack.observability.pages.alertDetails.pageTitle.ruleName": "Règle",
-    "xpack.observability.pages.alertDetails.pageTitle.title": "{ruleCategory} {ruleCategory, select, Anomaly {détectée} Inventory {seuil dépassé} other {dépassés}}",
     "xpack.observability.pages.alertDetails.pageTitle.triggered": "Déclenché",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingDescription": "Si vous êtes inscrits au programme de réduction AWS Enterprise Discount Program (EDP), entrez votre taux de réduction pour mettre à jour le calcul des coûts de profilage.",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingName": "Taux de réduction AWS EDP (%)",

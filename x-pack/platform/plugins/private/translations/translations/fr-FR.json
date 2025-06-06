@@ -42010,7 +42010,6 @@
     "xpack.slo.groupList.errorTitle": "Impossible de charger les groupes de SLO",
     "xpack.slo.groupPopover.group.title": "Regrouper par",
     "xpack.slo.groups.list.errorNotification": "Un problème est survenu lors de la récupération des groupes de SLO",
-    "xpack.slo.headerMenu.addData": "Ajouter des données",
     "xpack.slo.headerMenu.documentation": "Documentation SLO",
     "xpack.slo.headerMenu.settings": "Paramètres",
     "xpack.slo.headerTitle.linkButtonButtonLabel": "Voir les détails du SLO à distance",

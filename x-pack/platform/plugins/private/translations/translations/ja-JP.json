@@ -41971,7 +41971,6 @@
     "xpack.slo.groupList.errorTitle": "SLOグループを読み込めません",
     "xpack.slo.groupPopover.group.title": "グループ分けの条件",
     "xpack.slo.groups.list.errorNotification": "SLOグループの取得中に問題が発生しました",
-    "xpack.slo.headerMenu.addData": "データの追加",
     "xpack.slo.headerMenu.documentation": "SLOドキュメント",
     "xpack.slo.headerMenu.settings": "設定",
     "xpack.slo.headerTitle.linkButtonButtonLabel": "リモートSLO詳細を表示",

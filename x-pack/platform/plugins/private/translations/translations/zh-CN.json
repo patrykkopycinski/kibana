@@ -42051,7 +42051,6 @@
     "xpack.slo.groupList.errorTitle": "无法加载 SLO 组",
     "xpack.slo.groupPopover.group.title": "分组依据",
     "xpack.slo.groups.list.errorNotification": "提取 SLO 组时出现问题",
-    "xpack.slo.headerMenu.addData": "添加数据",
     "xpack.slo.headerMenu.documentation": "SLO 文档",
     "xpack.slo.headerMenu.settings": "设置",
     "xpack.slo.headerTitle.linkButtonButtonLabel": "查看远程 SLO 详情",

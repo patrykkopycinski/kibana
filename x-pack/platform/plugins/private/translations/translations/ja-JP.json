@@ -25122,7 +25122,6 @@
     "xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel": "CSVダウンロード",
     "xpack.lens.resetLayerAriaLabel": "レイヤーをクリア",
     "xpack.lens.saveDuplicateRejectedDescription": "重複ファイルの保存確認が拒否されました",
-    "xpack.lens.searchTitle": "Lens：ビジュアライゼーションを作成",
     "xpack.lens.section.bannerMessagesLabel": "廃止予定メッセージ",
     "xpack.lens.section.configPanelLabel": "構成パネル",
     "xpack.lens.section.dataPanelLabel": "データパネル",

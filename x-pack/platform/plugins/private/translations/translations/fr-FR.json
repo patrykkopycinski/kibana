@@ -25144,7 +25144,6 @@
     "xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel": "Téléchargement CSV",
     "xpack.lens.resetLayerAriaLabel": "Effacer le calque",
     "xpack.lens.saveDuplicateRejectedDescription": "La confirmation d'enregistrement avec un doublon de titre a été rejetée.",
-    "xpack.lens.searchTitle": "Lens : créer des visualisations",
     "xpack.lens.section.bannerMessagesLabel": "Messages de déclassement",
     "xpack.lens.section.configPanelLabel": "Panneau de configuration",
     "xpack.lens.section.dataPanelLabel": "Panneau de données",

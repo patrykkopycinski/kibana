@@ -15193,7 +15193,6 @@
     "xpack.csp.findingsFlyout.alerts.creatingRule": "Créer une règle de détection",
     "xpack.csp.findingsFlyout.alerts.detectedBy": "détectée par",
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, one {# règle de détection} other {# règles de détection}}",
-    "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription": "Connectez Elastic à chaque compte AWS (actuel et futur) de votre environnement en fournissant à Elastic un accès en lecture seule (configuration) à votre organisation AWS.",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip": "Compatibilité à partir de la version 1.5.0 et suivante de l'intégration",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel": "AWS Organizations",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage": "AWS Organizations n'est pas compatible avec la version actuelle de l'intégration. Veuillez passer à la version la plus récente pour permettre l'intégration d'AWS Organizations.",

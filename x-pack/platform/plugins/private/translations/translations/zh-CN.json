@@ -15208,7 +15208,6 @@
     "xpack.csp.findingsFlyout.alerts.creatingRule": "正在创建检测规则",
     "xpack.csp.findingsFlyout.alerts.detectedBy": "检测者",
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, other {# 个检测规则}}",
-    "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription": "通过为 Elastic 提供您的 AWS 组织的只读（配置）访问权限，将 Elastic 连接到您环境中的每个 AWS 帐户（当前和未来）。",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip": "受集成版本 1.5.0 及更高版本支持",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel": "AWS 组织",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage": "当前版本的集成不支持 AWS 组织。请升级到最新版本以启用 AWS 组织集成。",

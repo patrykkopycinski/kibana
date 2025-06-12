@@ -15174,7 +15174,6 @@
     "xpack.csp.findingsFlyout.alerts.creatingRule": "検出ルールを作成中",
     "xpack.csp.findingsFlyout.alerts.detectedBy": "で検知",
     "xpack.csp.findingsFlyout.alerts.detectionRuleCount": "{ruleCount, plural, other {# 検出ルール}}",
-    "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription": "お客様のAWS組織への読み取り専用（設定）アクセスをElasticに提供することで、お客様の環境にあるすべてのAWSアカウント（現在および将来）にElasticを接続します。",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip": "統合バージョン1.5.0以降に対応",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel": "AWS組織",
     "xpack.csp.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage": "AWS組織は、現在の統合バージョンではサポートされていません。AWS組織統合を有効にするには、最新バージョンにアップグレードしてください。",

@@ -32005,7 +32005,6 @@
     "xpack.observability.metric.iconSelect.tagIconLabel": "Balise",
     "xpack.observability.metric.iconSelect.temperatureLabel": "Température",
     "xpack.observability.metricWithSparkline.nATextColorLabel": "S. O.",
-    "xpack.observability.nameFeatureTitle": "Observabilité",
     "xpack.observability.news.readFullStory": "Lire toute l'histoire",
     "xpack.observability.news.title": "Nouveautés",
     "xpack.observability.noDataConfig.beatsCard.description": "Utilisez des agents Beats et APM pour envoyer des données d'observabilité à Elasticsearch. Nous facilitons les choses en proposant un support technique pour un grand nombre de langues, d'applications et de systèmes courants.",

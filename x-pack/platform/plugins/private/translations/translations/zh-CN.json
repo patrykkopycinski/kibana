@@ -10616,7 +10616,6 @@
     "xpack.alerting.rulesClient.validateActions.misconfiguredConnector": "无效的连接器：{groups}",
     "xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams": "在规则级别定义了 notify_when 或限制时，无法指定每个操作的频率参数：{groups}",
     "xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq": "操作缺少频率参数：{groups}",
-    "xpack.alerting.rulesClient.validateLegacyActions.errorSummary": "无法迁移 SIEM 规则 {ruleId} 的旧版操作：{errorMessage}",
     "xpack.alerting.ruleTypeRegistry.get.missingRuleTypeError": "未注册规则类型“{id}”。",
     "xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError": "无法注册规则类型 [id=\"{id}\"]。操作组 [{actionGroup}] 无法同时用作恢复和活动操作组。",
     "xpack.alerting.ruleTypeRegistry.register.duplicateActionGroupSeverityError": "无法注册规则类型 [id=\"{id}\"]。操作组定义不能包含重复的严重性级别。",

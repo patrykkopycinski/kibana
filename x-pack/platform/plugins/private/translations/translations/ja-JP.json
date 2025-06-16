@@ -10599,7 +10599,6 @@
     "xpack.alerting.rulesClient.validateActions.misconfiguredConnector": "無効なコネクター：{groups}",
     "xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams": "notify_whenとスロットルがルールレベルで定義されているときには、アクション単位の頻度パラメーターを指定できません：{groups}",
     "xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq": "アクションの頻度パラメーターがありません：{groups}",
-    "xpack.alerting.rulesClient.validateLegacyActions.errorSummary": "SIEMルール{ruleId}のレガシーアクションの移行に失敗しました：{errorMessage}",
     "xpack.alerting.ruleTypeRegistry.get.missingRuleTypeError": "ルールタイプ「{id}」は登録されていません。",
     "xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError": "ルールタイプ[id=\"{id}\"]を登録できません。アクショングループ [{actionGroup}] は、復元とアクティブなアクショングループの両方として使用できません。",
     "xpack.alerting.ruleTypeRegistry.register.duplicateActionGroupSeverityError": "ルールタイプ[id=\"{id}\"]を登録できません。アクショングループ定義には、重複する重要度レベルを含めることはできません。",

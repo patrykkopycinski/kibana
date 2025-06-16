@@ -10609,7 +10609,6 @@
     "xpack.alerting.rulesClient.validateActions.misconfiguredConnector": "Connecteurs non valides : {groups}",
     "xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams": "Impossible de spécifier des paramètres de fréquence par action lorsque notify_when et throttle sont définis au niveau de la règle : {groups}",
     "xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq": "Paramètres de fréquence manquants pour les actions : {groups}",
-    "xpack.alerting.rulesClient.validateLegacyActions.errorSummary": "Échec de la migration des actions existantes pour la règle SIEM {ruleId} : {errorMessage}",
     "xpack.alerting.ruleTypeRegistry.get.missingRuleTypeError": "Le type de règle \"{id}\" n'est pas enregistré.",
     "xpack.alerting.ruleTypeRegistry.register.customRecoveryActionGroupUsageError": "Le type de règle [id=\"{id}\"] ne peut pas être enregistré. Le groupe d'actions [{actionGroup}] ne peut pas être utilisé à la fois comme groupe de récupération et comme groupe d'actions actif.",
     "xpack.alerting.ruleTypeRegistry.register.duplicateActionGroupSeverityError": "Le type de règle [id=\"{id}\"] ne peut pas être enregistré. Les définitions de groupe d'action ne peuvent pas contenir des niveaux de sévérité en doublon.",

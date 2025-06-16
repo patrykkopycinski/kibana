@@ -48653,6 +48653,7 @@
     "xpack.watcher.sections.watchList.watchTable.commentHeader": "Commentaire",
     "xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText": "Si des actions ont été reconnues ou contraintes, ou si leur exécution a échoué.",
     "xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText": "Cette alerte est en lecture seule",
+    "xpack.watcher.sections.watchList.watchTable.errorOnSearch": "Recherche non valide : {queryError}",
     "xpack.watcher.sections.watchList.watchTable.idHeader": "ID",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader": "Dernière correspondance de la condition",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText": "Dernière fois où la condition a été remplie et qu'une action a été entreprise.",

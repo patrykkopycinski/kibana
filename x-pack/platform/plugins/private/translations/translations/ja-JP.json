@@ -48606,6 +48606,7 @@
     "xpack.watcher.sections.watchList.watchTable.commentHeader": "コメント",
     "xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText": "アクションが確認または調整されたか、あるいは実行が失敗したかどうか。",
     "xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText": "このウォッチは読み取り専用です",
+    "xpack.watcher.sections.watchList.watchTable.errorOnSearch": "無効な検索：{queryError}",
     "xpack.watcher.sections.watchList.watchTable.idHeader": "ID",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader": "前回条件が満たされた日時",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText": "最後に条件が満たされ、アクションが実行された日付。",

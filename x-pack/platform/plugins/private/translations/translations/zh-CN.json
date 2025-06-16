@@ -48696,6 +48696,7 @@
     "xpack.watcher.sections.watchList.watchTable.commentHeader": "注释",
     "xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText": "是已确认、已限制还是无法执行任何操作。",
     "xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText": "此监视为只读",
+    "xpack.watcher.sections.watchList.watchTable.errorOnSearch": "搜索无效：{queryError}",
     "xpack.watcher.sections.watchList.watchTable.idHeader": "ID",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader": "上次符合条件",
     "xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText": "上次符合条件并采取了操作的时间。",

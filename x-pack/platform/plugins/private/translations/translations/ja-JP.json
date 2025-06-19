@@ -44723,7 +44723,6 @@
     "xpack.streams.streamDetailSchemaEditorUnmapSuccessToast": "{field}は正常にマッピング解除されました",
     "xpack.streams.streamDetailView.dashboardsTab": "ダッシュボード",
     "xpack.streams.streamDetailView.dataStream": "データストリーム",
-    "xpack.streams.streamDetailView.enrichmentTab": "フィールドを抽出",
     "xpack.streams.streamDetailView.indexTemplate": "インデックステンプレート",
     "xpack.streams.streamDetailView.ingestPipeline": "パイプラインを投入",
     "xpack.streams.streamDetailView.managementTab.bottomBar.cancel": "変更をキャンセル",

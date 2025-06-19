@@ -44767,7 +44767,6 @@
     "xpack.streams.streamDetailSchemaEditorUnmapSuccessToast": "Le champ {field} a bien été démappé",
     "xpack.streams.streamDetailView.dashboardsTab": "Tableaux de bord",
     "xpack.streams.streamDetailView.dataStream": "Flux de données",
-    "xpack.streams.streamDetailView.enrichmentTab": "Extraire le champ",
     "xpack.streams.streamDetailView.indexTemplate": "Modèle d'index",
     "xpack.streams.streamDetailView.ingestPipeline": "Pipeline d'ingestion",
     "xpack.streams.streamDetailView.managementTab.bottomBar.cancel": "Annuler les modifications",

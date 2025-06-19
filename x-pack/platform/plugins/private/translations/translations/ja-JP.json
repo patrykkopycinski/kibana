@@ -3991,7 +3991,6 @@
     "guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title": "シンセティック監視を作成",
     "guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title": "ユニバーサルプロファイリングでワークロードを最適化",
     "guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title": "ベクトル検索を設定",
-    "guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title": "検索をWebサイトに追加",
     "guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel": "すべて",
     "guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel": "Observability",
     "guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel": "Elasticsearch",

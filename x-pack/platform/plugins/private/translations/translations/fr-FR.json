@@ -3997,7 +3997,6 @@
     "guidedOnboardingPackage.gettingStarted.cards.syntheticsObservability.title": "Créer un moniteur synthétique",
     "guidedOnboardingPackage.gettingStarted.cards.universalProfilingObservability.title": "Optimiser mes charges de travail avec Universal Profiling",
     "guidedOnboardingPackage.gettingStarted.cards.vectorSearch.title": "Configurer une recherche vectorielle",
-    "guidedOnboardingPackage.gettingStarted.cards.websiteSearch.title": "Ajouter la recherche à mon site web",
     "guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel": "Tous",
     "guidedOnboardingPackage.gettingStarted.guideFilter.observability.buttonLabel": "Observabilité",
     "guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel": "Elasticsearch",

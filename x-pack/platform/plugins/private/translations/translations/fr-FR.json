@@ -40790,7 +40790,6 @@
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.rules": "Règles",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.status": "Statut",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.title": "Résumé de la traduction",
-    "xpack.securitySolution.siemMigrations.rules.panel.translate.button": "Lancer la traduction",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button": "Charger",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources": "Importez les listes de macros et de consultations.",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription": "Cliquez sur Charger pour continuer à traduire {partialRulesCount} règles",

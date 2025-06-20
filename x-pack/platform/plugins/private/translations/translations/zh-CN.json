@@ -40832,7 +40832,6 @@
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.rules": "规则",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.status": "状态",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.title": "转换摘要",
-    "xpack.securitySolution.siemMigrations.rules.panel.translate.button": "开始转换",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button": "上传",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources": "上传缺失的宏和查找列表。",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription": "单击“上传”以继续转换 {partialRulesCount} 个规则",

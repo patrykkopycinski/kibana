@@ -40754,7 +40754,6 @@
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.rules": "ルール",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.tableColumn.status": "ステータス",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.title": "変換概要",
-    "xpack.securitySolution.siemMigrations.rules.panel.translate.button": "変換を開始",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button": "アップロード",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources": "欠落しているマクロとルックアップリストをアップロードします。",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription": "［アップロード］をクリックして、{partialRulesCount}ルールの変換を続行",

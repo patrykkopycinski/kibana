@@ -7731,7 +7731,7 @@
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle": "ケース",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleDeprecated": "ケース（廃止予定）",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionNotesTitle": "メモ",
-    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "{currentId}権限は廃止予定です。{idV2}を参照してください。",
+    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "{currentId}権限は廃止予定です。{latestId}を参照してください。",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSiemMigrationsTitle": "SIEM移行",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTimelineTitle": "Timeline",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle": "セキュリティ",

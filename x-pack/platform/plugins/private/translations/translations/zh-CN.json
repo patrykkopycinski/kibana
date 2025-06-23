@@ -7742,7 +7742,7 @@
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle": "案例",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleDeprecated": "案例（已过时）",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionNotesTitle": "备注",
-    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "{currentId} 权限已过时，请参阅 {idV2}。",
+    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "{currentId} 权限已过时，请参阅 {latestId}。",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSiemMigrationsTitle": "SIEM 迁移",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTimelineTitle": "时间线",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle": "安全",

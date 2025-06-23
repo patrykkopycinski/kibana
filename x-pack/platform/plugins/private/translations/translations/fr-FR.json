@@ -7737,7 +7737,7 @@
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitle": "Cas",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionCaseTitleDeprecated": "Cas (Déclassé)",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionNotesTitle": "Notes",
-    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "Les permissions {currentId} sont déclassées, veuillez consulter {idV2}.",
+    "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage": "Les permissions {currentId} sont déclassées, veuillez consulter {latestId}.",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSiemMigrationsTitle": "Migrations SIEM",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTimelineTitle": "Chronologie",
     "securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle": "Sécurité",

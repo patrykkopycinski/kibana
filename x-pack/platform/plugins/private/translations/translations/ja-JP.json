@@ -33743,8 +33743,6 @@
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "AI Assistantを初期化できませんでした",
     "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "AI Assistantを開く",
     "xpack.searchHomepage.appTitle": "ホーム",
-    "xpack.searchHomepage.consoleLink.buttonText": "コンソールをすばやく開始",
-    "xpack.searchHomepage.header.endpointsButtonLabel": "エンドポイントとAPIキー",
     "xpack.searchHomepage.pageTitle": "Searchへようこそ",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "インデックス",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "インデックス管理",

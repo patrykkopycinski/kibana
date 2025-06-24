@@ -33704,8 +33704,6 @@
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "Impossible d’initialiser l'assistant d’AI",
     "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "Ouvrir l'assistant d'IA",
     "xpack.searchHomepage.appTitle": "Accueil",
-    "xpack.searchHomepage.consoleLink.buttonText": "Démarrez rapidement dans la Console",
-    "xpack.searchHomepage.header.endpointsButtonLabel": "Points de terminaison et clés d'API",
     "xpack.searchHomepage.pageTitle": "Bienvenue dans Search",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "Index",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "Gestion des index",

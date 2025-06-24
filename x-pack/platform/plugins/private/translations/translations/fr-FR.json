@@ -16043,7 +16043,7 @@
     "xpack.elasticAssistant.anonymizedValuesAndCitations.tour.content.citedKnowledgeBaseEntries": "L'assistant d'intelligence artificielle peut désormais citer des sources dans ses réponses. Activez ou désactivez la fonctionnalité de citation à l'aide de ce menu ou de <bold>{keyboardShortcut}</bold>",
     "xpack.elasticAssistant.anonymizedValuesAndCitations.tour.subtitle": "Nouvelles améliorations !",
     "xpack.elasticAssistant.anonymizedValuesAndCitations.tour.title": "Citations et valeurs anonymisées",
-    "xpack.elasticAssistant.assistant.apiErrorTitle": "Une erreur s'est produite lors de l'envoi de votre message.",
+    "xpack.elasticAssistant.assistant.apiErrorTitle": "Une erreur s’est produite lors de l’envoi de votre message.",
     "xpack.elasticAssistant.assistant.assistantHeader.closeButtonLabel": "Fermer",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.description": "Configurez un connecteur pour continuer la conversation",
     "xpack.elasticAssistant.assistant.connectors.addConnectorButton.missingPrivilegesDescription": "Veuillez contacter votre administrateur pour activer le connecteur d'intelligence artificielle générative.",
@@ -16362,7 +16362,9 @@
     "xpack.elasticAssistant.prompts.bulkActionspromptsError": "Erreur de la mise à jour des invites {error}",
     "xpack.elasticAssistant.prompts.getPromptsError": "Erreur lors de la récupération des invites",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "L'assistant d'IA d'Elastic n'est accessible qu'aux entreprises. Veuillez mettre votre licence à niveau pour bénéficier de cette fonctionnalité.",
+    "xpack.elasticAssistantPlugin.assistant.apiErrorTitle": "Une erreur s’est produite lors de l’envoi de votre message.",
     "xpack.elasticAssistantPlugin.assistant.quickPrompts.esqlQueryGenerationTitle": "Génération de requête ES|QL",
+    "xpack.elasticAssistantPlugin.assistant.title": "Assistant d'IA d'Elastic",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "Nombre maximum de tentatives de génération ({generationAttempts}) atteint. Essayez d'envoyer un nombre d'alertes moins élevé à ce modèle.",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "Nombre maximum d'échecs d'hallucinations ({hallucinationFailures}) atteint. Essayez d'envoyer un nombre d'alertes moins élevé à ce modèle.",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfInvalidAnonymization.idFieldRequiredErrorMessage": "Vos paramètres d'anonymisation de Security AI sont configurés pour ne pas autoriser le champ _id. Le champ _id doit être autorisé à générer des découvertes d’attaque.",
@@ -34839,9 +34841,9 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count} {count, plural, one {action} other {actions}} en attente",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "Actions en attente :",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "Intégration",
-    "xpack.securitySolution.aiAssistant.failedLoadingResponseText": "Échec de chargement de la réponse",
-    "xpack.securitySolution.aiAssistant.regenerateResponseButtonLabel": "Régénérer",
-    "xpack.securitySolution.aiAssistant.stopGeneratingButtonLabel": "Arrêter la génération",
+
+    
+    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "Alertes par règle",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "compte",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "Aucune alerte à afficher",
@@ -35049,7 +35051,6 @@
     "xpack.securitySolution.assignees.noAssigneesLabel": "Aucun utilisateur affecté",
     "xpack.securitySolution.assignees.selectableSearchPlaceholder": "Rechercher des utilisateurs",
     "xpack.securitySolution.assignees.totalUsersAssigned": "{total, plural, one {# utilisateur affecté sélectionné} other {# utilisateurs affectés sélectionnés}}",
-    "xpack.securitySolution.assistant.apiErrorTitle": "Une erreur s’est produite lors de l’envoi de votre message.",
     "xpack.securitySolution.assistant.commentActions.addedNoteToTimelineToast": "Note ajoutée à la chronologie",
     "xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel": "Ajouter un contenu de message comme note de chronologie",
     "xpack.securitySolution.assistant.commentActions.addNoteToTimelineTooltip": "Ajouter une note à la chronologie",
@@ -35061,14 +35062,14 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "vue",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "Ajoutez votre description, les actions que vous recommandez ainsi que les étapes de triage à puces. Utilisez les données \"MITRE ATT&CK\" fournies pour ajouter du contexte et des recommandations de MITRE ainsi que des liens hypertexte vers les pages pertinentes sur le site web de MITRE. Assurez-vous d'inclure les scores de risque de l'utilisateur et de l'hôte du contexte. Votre réponse doit inclure des étapes qui pointent vers les fonctionnalités spécifiques d'Elastic Security, y compris les actions de réponse du terminal, l'intégration OSQuery Manager d'Elastic Agent (avec des exemples de requêtes OSQuery), des analyses de timeline et d'entités, ainsi qu'un lien pour toute la documentation Elastic Security pertinente.",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "Évaluer l’événement depuis le contexte ci-dessus et formater soigneusement la sortie en syntaxe Markdown pour mon cas Elastic Security.",
-    "xpack.securitySolution.assistant.contentReferences.knowledgeBaseEntryReference.label": "Entrée de la base de connaissances",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertReference.label": "Afficher l'alerte",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertsPageReference.label": "Afficher les alertes",
-    "xpack.securitySolution.assistant.conversationMigrationStatus.title": "Les conversations de stockage local ont été persistées avec succès.",
-    "xpack.securitySolution.assistant.getComments.assistant": "Assistant",
-    "xpack.securitySolution.assistant.getComments.at": "à : {timestamp}",
-    "xpack.securitySolution.assistant.getComments.system": "Système",
-    "xpack.securitySolution.assistant.getComments.you": "Vous",
+    
+    
+    
+    
+    
+    
+    
+    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "En tant qu’expert en opérations de sécurité et en réponses aux incidents, décomposer l’alerte jointe et résumer ce qu’elle peut impliquer pour mon organisation.",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "Synthèse de l’alerte",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "Quelle intégration d’Elastic Agent activée par Fleet dois-je utiliser pour collecter des logs et des évènements de :",
@@ -35085,7 +35086,6 @@
     "xpack.securitySolution.assistant.settings.breadcrumb.security": "Sécurité",
     "xpack.securitySolution.assistant.settings.breadcrumb.serverless.security": "Paramètres de l'assistant d'IA pour Security",
     "xpack.securitySolution.assistant.settings.breadcrumb.stackManagement": "Gestion de la Suite",
-    "xpack.securitySolution.assistant.title": "Assistant d'IA d'Elastic",
     "xpack.securitySolution.assistant.updateQueryInFormTooltip": "Mettre à jour la recherche dans le formulaire",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "Envoyez moins d'alertes si la fenêtre contextuelle du modèle est petite, ou plus si elle est grande.",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel": "Ajouter à un cas existant",

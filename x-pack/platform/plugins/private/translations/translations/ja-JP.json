@@ -16380,6 +16380,7 @@
     "xpack.elasticAssistant.prompts.bulkActionspromptsError": "プロンプトの更新エラー{error}",
     "xpack.elasticAssistant.prompts.getPromptsError": "プロンプト取得エラー",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "Elastic AI Assistantはエンタープライズユーザーのみご利用いただけます。 この機能を使用するには、ライセンスをアップグレードしてください。",
+    "xpack.elasticAssistantPlugin.assistant.apiErrorTitle": "メッセージの送信中にエラーが発生しました。",
     "xpack.elasticAssistantPlugin.assistant.quickPrompts.esqlQueryGenerationTitle": "ES|QLクエリ生成",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "最大生成試行回数（{generationAttempts}）に達しました。このモデルに送信するアラートの数を減らしてください。",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "最大ハルシネーション失敗回数（{hallucinationFailures}）に達しました。このモデルに送信するアラートの数を減らしてください。",
@@ -34874,9 +34875,9 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count}{count, plural, one {action} other {件のアクション}}が保留中です。",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "保留中のアクション：",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "統合",
-    "xpack.securitySolution.aiAssistant.failedLoadingResponseText": "応答の読み込みに失敗しました",
-    "xpack.securitySolution.aiAssistant.regenerateResponseButtonLabel": "再生成",
-    "xpack.securitySolution.aiAssistant.stopGeneratingButtonLabel": "生成を停止",
+
+    
+    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "ルール別アラート",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "カウント",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "表示するアラートがありません",
@@ -35083,8 +35084,7 @@
     "xpack.securitySolution.assignees.clearFilters": "フィルターを消去",
     "xpack.securitySolution.assignees.noAssigneesLabel": "担当者なし",
     "xpack.securitySolution.assignees.selectableSearchPlaceholder": "ユーザーの検索",
-    "xpack.securitySolution.assignees.totalUsersAssigned": "{total, plural, one {# assignee} other {# 人の担当者}}が選択されました",
-    "xpack.securitySolution.assistant.apiErrorTitle": "メッセージの送信中にエラーが発生しました。",
+    "xpack.securitySolution.assignees.totalUsersAssigned": "{total, plural, other {# 担当者}}が選択されました",
     "xpack.securitySolution.assistant.commentActions.addedNoteToTimelineToast": "メモをタイムラインに追加しました",
     "xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel": "メッセージコンテンツをタイムラインメモとして追加",
     "xpack.securitySolution.assistant.commentActions.addNoteToTimelineTooltip": "メモをタイムラインに追加",
@@ -35096,14 +35096,14 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "表示",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "説明、推奨されるアクション、箇条書きのトリアージステップを追加します。提供されたMITRE ATT&CKデータを使用して、MITREからのコンテキストや推奨事項を追加し、MITREのWebサイトの関連ページにハイパーリンクを貼ります。コンテキストのユーザーとホストのリスクスコアデータを必ず含めてください。回答には、エンドポイント対応アクション、ElasticエージェントOSQueryマネージャー統合（osqueryクエリーの例を付けて）、タイムライン、エンティティ分析など、Elasticセキュリティ固有の機能を指す手順を含め、関連するElasticセキュリティのドキュメントすべてにリンクしてください。",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "上記のコンテキストからイベントを評価し、Elasticセキュリティのケース用に、出力をマークダウン構文で正しく書式設定してください。",
-    "xpack.securitySolution.assistant.contentReferences.knowledgeBaseEntryReference.label": "ナレッジベースエントリ",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertReference.label": "アラートを表示",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertsPageReference.label": "アラートを表示",
-    "xpack.securitySolution.assistant.conversationMigrationStatus.title": "ローカルストレージ会話は正常に永続しました。",
-    "xpack.securitySolution.assistant.getComments.assistant": "アシスタント",
-    "xpack.securitySolution.assistant.getComments.at": "at: {timestamp}",
-    "xpack.securitySolution.assistant.getComments.system": "システム",
-    "xpack.securitySolution.assistant.getComments.you": "あなた",
+    
+    
+    
+    
+    
+    
+    
+    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "セキュリティ運用とインシデント対応のエキスパートとして、添付されたアラートの内訳を説明し、それが私の組織にとって何を意味するのかを要約してください。",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "アラート要約",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "ログやイベントの収集には、どのFleet対応Elasticエージェント統合を使用すべきですか。",
@@ -35120,7 +35120,7 @@
     "xpack.securitySolution.assistant.settings.breadcrumb.security": "セキュリティ",
     "xpack.securitySolution.assistant.settings.breadcrumb.serverless.security": "AI Assistant for Security設定",
     "xpack.securitySolution.assistant.settings.breadcrumb.stackManagement": "スタック管理",
-    "xpack.securitySolution.assistant.title": "Elastic AI Assistant",
+    
     "xpack.securitySolution.assistant.updateQueryInFormTooltip": "フォームでクエリーを更新",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "モデルのコンテキストウィンドウが小さい場合は送信されるアラート数が少なくなり、大きい場合は送信されるアラート数が多くなります。",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel": "既存のケースに追加",

@@ -16376,6 +16376,7 @@
     "xpack.elasticAssistant.prompts.bulkActionspromptsError": "更新提示时出错 {error}",
     "xpack.elasticAssistant.prompts.getPromptsError": "提取提示时出错",
     "xpack.elasticAssistant.securityAssistant.content.prompts.welcome.enterprisePrompt": "Elastic AI 助手仅对企业用户可用。请升级许可证以使用此功能。",
+    "xpack.elasticAssistantPlugin.assistant.apiErrorTitle": "发送消息时出错。",
     "xpack.elasticAssistantPlugin.assistant.quickPrompts.esqlQueryGenerationTitle": "ES|QL 查询生成",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "已达到最大生成尝试次数 ({generationAttempts})。尝试向此模型发送更少的告警。",
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "已达到最大幻觉失败次数 ({hallucinationFailures})。尝试向此模型发送更少的告警。",
@@ -34863,9 +34864,9 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count} 个{count, plural, one {操作} other {操作}}待处理",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "未决操作：",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "集成",
-    "xpack.securitySolution.aiAssistant.failedLoadingResponseText": "无法加载响应",
-    "xpack.securitySolution.aiAssistant.regenerateResponseButtonLabel": "重新生成",
-    "xpack.securitySolution.aiAssistant.stopGeneratingButtonLabel": "停止生成",
+
+    
+    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "按规则排列的告警",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "计数",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "没有可显示的告警",
@@ -35073,7 +35074,6 @@
     "xpack.securitySolution.assignees.noAssigneesLabel": "无被分配人",
     "xpack.securitySolution.assignees.selectableSearchPlaceholder": "搜索用户",
     "xpack.securitySolution.assignees.totalUsersAssigned": "已选择 {total, plural, one {# 个被分配人} other {# 个被分配人}}",
-    "xpack.securitySolution.assistant.apiErrorTitle": "发送消息时出错。",
     "xpack.securitySolution.assistant.commentActions.addedNoteToTimelineToast": "已将备注添加到时间线",
     "xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel": "将消息内容添加为时间线备注",
     "xpack.securitySolution.assistant.commentActions.addNoteToTimelineTooltip": "将备注添加到时间线",
@@ -35085,14 +35085,14 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "视图",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "添加描述、建议操作和带项目符号的分类步骤。使用提供的 MITRE ATT&CK 数据以从 MITRE 添加更多上下文和建议，以及指向 MITRE 网站上的相关页面的超链接。确保包括上下文中的用户和主机风险分数数据。您的响应应包含指向 Elastic Security 特定功能的步骤，包括终端响应操作、Elastic 代理 OSQuery 管理器集成（带示例 osquery 查询）、时间线和实体分析，以及所有相关 Elastic Security 文档的链接。",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "评估来自上述上下文的事件，并以用于我的 Elastic Security 案例的 Markdown 语法对您的输出进行全面格式化。",
-    "xpack.securitySolution.assistant.contentReferences.knowledgeBaseEntryReference.label": "知识库条目",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertReference.label": "查看告警",
-    "xpack.securitySolution.assistant.contentReferences.securityAlertsPageReference.label": "查看告警",
-    "xpack.securitySolution.assistant.conversationMigrationStatus.title": "已成功保持本地存储对话。",
-    "xpack.securitySolution.assistant.getComments.assistant": "助手",
-    "xpack.securitySolution.assistant.getComments.at": "时间：{timestamp}",
-    "xpack.securitySolution.assistant.getComments.system": "系统",
-    "xpack.securitySolution.assistant.getComments.you": "您",
+    
+    
+    
+    
+    
+    
+    
+    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "作为安全运营和事件响应领域的专家，提供附加告警的细目并简要说明它对我所在组织可能的影响。",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "告警汇总",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "我应使用哪个启用 Fleet 的 Elastic 代理集成从以下项中收集日志和事件：",
@@ -35109,7 +35109,7 @@
     "xpack.securitySolution.assistant.settings.breadcrumb.security": "安全",
     "xpack.securitySolution.assistant.settings.breadcrumb.serverless.security": "适用于 Security 的 AI 助手设置",
     "xpack.securitySolution.assistant.settings.breadcrumb.stackManagement": "Stack Management",
-    "xpack.securitySolution.assistant.title": "Elastic AI 助手",
+    
     "xpack.securitySolution.assistant.updateQueryInFormTooltip": "在表单中更新查询",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "如果此模型的上下文窗口较小，则发送更少告警；或者如果窗口更大，则发送更多告警。",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel": "添加到现有案例",

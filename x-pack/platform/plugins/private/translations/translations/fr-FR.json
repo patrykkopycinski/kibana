@@ -26960,7 +26960,6 @@
     "xpack.ml.controls.selectSeverity.criticalLabel": "critique",
     "xpack.ml.controls.selectSeverity.majorLabel": "majeur",
     "xpack.ml.controls.selectSeverity.minorLabel": "mineure",
-    "xpack.ml.controls.selectSeverity.scoreDetailsDescription": "score {value} et supérieur",
     "xpack.ml.controls.selectSeverity.warningLabel": "avertissement",
     "xpack.ml.creationWizardUtils.destinationIndexInputAriaLabel": "Choisissez un nom d'index de destination unique.",
     "xpack.ml.creationWizardUtils.destinationIndexInvalidError": "Nom d'index de destination non valide.",

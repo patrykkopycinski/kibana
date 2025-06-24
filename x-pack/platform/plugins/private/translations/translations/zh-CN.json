@@ -26983,7 +26983,6 @@
     "xpack.ml.controls.selectSeverity.criticalLabel": "紧急",
     "xpack.ml.controls.selectSeverity.majorLabel": "重大",
     "xpack.ml.controls.selectSeverity.minorLabel": "轻微",
-    "xpack.ml.controls.selectSeverity.scoreDetailsDescription": "{value} 及以上分数",
     "xpack.ml.controls.selectSeverity.warningLabel": "警告",
     "xpack.ml.creationWizardUtils.destinationIndexInputAriaLabel": "选择唯一目标索引名称。",
     "xpack.ml.creationWizardUtils.destinationIndexInvalidError": "目标索引名称无效。",

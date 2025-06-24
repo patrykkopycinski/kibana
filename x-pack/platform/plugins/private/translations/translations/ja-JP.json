@@ -26990,7 +26990,6 @@
     "xpack.ml.controls.selectSeverity.criticalLabel": "致命的",
     "xpack.ml.controls.selectSeverity.majorLabel": "メジャー",
     "xpack.ml.controls.selectSeverity.minorLabel": "マイナー",
-    "xpack.ml.controls.selectSeverity.scoreDetailsDescription": "スコア{value}以上",
     "xpack.ml.controls.selectSeverity.warningLabel": "警告",
     "xpack.ml.creationWizardUtils.destinationIndexInputAriaLabel": "固有の宛先インデックス名を選択してください。",
     "xpack.ml.creationWizardUtils.destinationIndexInvalidError": "無効なデスティネーションインデックス名。",

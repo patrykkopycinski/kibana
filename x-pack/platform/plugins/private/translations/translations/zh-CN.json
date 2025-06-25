@@ -45875,7 +45875,6 @@
     "xpack.synthetics.syntheticsEmbeddable.monitors.ariaLabel": "监测概览",
     "xpack.synthetics.syntheticsEmbeddable.stats.ariaLabel": "监测统计信息",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors.label": "Synthetics - 监测",
     "xpack.synthetics.tableTitle.showing": "正在显示 {count} 个（共 {total} 个）{label}",
     "xpack.synthetics.tagsSelectPlaceholder": "选择标签",
     "xpack.synthetics.testDetails.after": "之后",

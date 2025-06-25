@@ -45848,7 +45848,6 @@
     "xpack.synthetics.syntheticsEmbeddable.monitors.ariaLabel": "Aperçu des moniteurs",
     "xpack.synthetics.syntheticsEmbeddable.stats.ariaLabel": "Statistiques des moniteurs",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors.label": "Synthetics - Moniteur",
     "xpack.synthetics.tableTitle.showing": "Affichage de {count} sur {total} {label}",
     "xpack.synthetics.tagsSelectPlaceholder": "Sélectionner des balises",
     "xpack.synthetics.testDetails.after": "Après",

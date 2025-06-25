@@ -45899,7 +45899,6 @@
     "xpack.synthetics.syntheticsEmbeddable.monitors.ariaLabel": "モニター概要",
     "xpack.synthetics.syntheticsEmbeddable.stats.ariaLabel": "モニター統計",
     "xpack.synthetics.syntheticsFeatureCatalogueTitle": "Synthetics",
-    "xpack.synthetics.syntheticsMonitors.label": "Synthetics - 監視",
     "xpack.synthetics.tableTitle.showing": "{count}/{total} {label}を表示中",
     "xpack.synthetics.tagsSelectPlaceholder": "タグを選択",
     "xpack.synthetics.testDetails.after": "後",

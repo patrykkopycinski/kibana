@@ -17320,7 +17320,7 @@
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel": "この手動のオプションでは、既存のインデックスまたはAPIキーを使用できます。自動化された{generateConfig}プロセスに代わる方法です。",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel": "構成を保存",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel": "コンソールで実行",
-    "xpack.enterpriseSearch.createConnector.iInCircle": "詳細",
+    "xpack.enterpriseSearch.createConnector.info": "詳細",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLabel": "コマンドラインインターフェース",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLinkText": "コネクターCLI",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName": "コネクター",

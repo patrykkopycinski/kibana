@@ -17303,7 +17303,7 @@
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel": "Cette option manuelle vous permet d'utiliser un index et/ou une clé API existants. C'est une alternative au processus {generateConfig} automatisé.",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel": "Enregistrer la configuration",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel": "Exécuter dans la console",
-    "xpack.enterpriseSearch.createConnector.iInCircle": "En savoir plus",
+    "xpack.enterpriseSearch.createConnector.info": "En savoir plus",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLabel": "Interface de ligne de commande",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLinkText": "CLI de connecteurs",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName": "Connecteur",

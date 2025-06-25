@@ -17316,7 +17316,7 @@
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel": "此手动选项允许您使用现有索引和/或 API 密钥。它是自动 {generateConfig} 流程的替代方案。",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel": "保存配置",
     "xpack.enterpriseSearch.createConnector.flyoutManualConfigContent.TryInConsoleLabel": "在 Console 中运行",
-    "xpack.enterpriseSearch.createConnector.iInCircle": "更多信息",
+    "xpack.enterpriseSearch.createConnector.info": "更多信息",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLabel": "命令行界面",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.cliLinkText": "连接器 CLI",
     "xpack.enterpriseSearch.createConnector.manualConfiguration.connectorName": "连接器",

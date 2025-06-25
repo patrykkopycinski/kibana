@@ -17765,7 +17765,6 @@
     "xpack.enterpriseSearch.searchNav.management": "管理",
     "xpack.enterpriseSearch.searchNav.management.trainedModels": "学習済みモデル",
     "xpack.enterpriseSearch.searchNav.mngt": "スタック管理",
-    "xpack.enterpriseSearch.searchNav.otherTools": "その他のツール",
     "xpack.enterpriseSearch.searchNav.relevance": "関連性",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "検索AI",
     "xpack.enterpriseSearch.SemanticSearch.description": "推論エンドポイントとsemantic_textフィールド型を使用して、簡単にElasticsearchにセマンティック検索を追加し、検索の関連性を強化できます。",
@@ -34875,9 +34874,6 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count}{count, plural, one {action} other {件のアクション}}が保留中です。",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "保留中のアクション：",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "統合",
-
-    
-    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "ルール別アラート",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "カウント",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "表示するアラートがありません",
@@ -35096,14 +35092,6 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "表示",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "説明、推奨されるアクション、箇条書きのトリアージステップを追加します。提供されたMITRE ATT&CKデータを使用して、MITREからのコンテキストや推奨事項を追加し、MITREのWebサイトの関連ページにハイパーリンクを貼ります。コンテキストのユーザーとホストのリスクスコアデータを必ず含めてください。回答には、エンドポイント対応アクション、ElasticエージェントOSQueryマネージャー統合（osqueryクエリーの例を付けて）、タイムライン、エンティティ分析など、Elasticセキュリティ固有の機能を指す手順を含め、関連するElasticセキュリティのドキュメントすべてにリンクしてください。",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "上記のコンテキストからイベントを評価し、Elasticセキュリティのケース用に、出力をマークダウン構文で正しく書式設定してください。",
-    
-    
-    
-    
-    
-    
-    
-    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "セキュリティ運用とインシデント対応のエキスパートとして、添付されたアラートの内訳を説明し、それが私の組織にとって何を意味するのかを要約してください。",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "アラート要約",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "ログやイベントの収集には、どのFleet対応Elasticエージェント統合を使用すべきですか。",
@@ -35120,7 +35108,6 @@
     "xpack.securitySolution.assistant.settings.breadcrumb.security": "セキュリティ",
     "xpack.securitySolution.assistant.settings.breadcrumb.serverless.security": "AI Assistant for Security設定",
     "xpack.securitySolution.assistant.settings.breadcrumb.stackManagement": "スタック管理",
-    
     "xpack.securitySolution.assistant.updateQueryInFormTooltip": "フォームでクエリーを更新",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "モデルのコンテキストウィンドウが小さい場合は送信されるアラート数が少なくなり、大きい場合は送信されるアラート数が多くなります。",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel": "既存のケースに追加",

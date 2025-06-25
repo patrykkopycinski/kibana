@@ -17761,7 +17761,6 @@
     "xpack.enterpriseSearch.searchNav.management": "管理",
     "xpack.enterpriseSearch.searchNav.management.trainedModels": "已训练模型",
     "xpack.enterpriseSearch.searchNav.mngt": "堆栈管理",
-    "xpack.enterpriseSearch.searchNav.otherTools": "其他工具",
     "xpack.enterpriseSearch.searchNav.relevance": "相关性",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "搜索 AI",
     "xpack.enterpriseSearch.SemanticSearch.description": "使用推理终端和 semantic_text 字段类型将语义搜索轻松添加到 Elasticsearch，以提高搜索相关性。",
@@ -34864,9 +34863,6 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count} 个{count, plural, one {操作} other {操作}}待处理",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "未决操作：",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "集成",
-
-    
-    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "按规则排列的告警",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "计数",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "没有可显示的告警",
@@ -35085,14 +35081,6 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "视图",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "添加描述、建议操作和带项目符号的分类步骤。使用提供的 MITRE ATT&CK 数据以从 MITRE 添加更多上下文和建议，以及指向 MITRE 网站上的相关页面的超链接。确保包括上下文中的用户和主机风险分数数据。您的响应应包含指向 Elastic Security 特定功能的步骤，包括终端响应操作、Elastic 代理 OSQuery 管理器集成（带示例 osquery 查询）、时间线和实体分析，以及所有相关 Elastic Security 文档的链接。",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "评估来自上述上下文的事件，并以用于我的 Elastic Security 案例的 Markdown 语法对您的输出进行全面格式化。",
-    
-    
-    
-    
-    
-    
-    
-    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "作为安全运营和事件响应领域的专家，提供附加告警的细目并简要说明它对我所在组织可能的影响。",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "告警汇总",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "我应使用哪个启用 Fleet 的 Elastic 代理集成从以下项中收集日志和事件：",
@@ -35109,7 +35097,6 @@
     "xpack.securitySolution.assistant.settings.breadcrumb.security": "安全",
     "xpack.securitySolution.assistant.settings.breadcrumb.serverless.security": "适用于 Security 的 AI 助手设置",
     "xpack.securitySolution.assistant.settings.breadcrumb.stackManagement": "Stack Management",
-    
     "xpack.securitySolution.assistant.updateQueryInFormTooltip": "在表单中更新查询",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "如果此模型的上下文窗口较小，则发送更少告警；或者如果窗口更大，则发送更多告警。",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToExistingCaseButtonLabel": "添加到现有案例",

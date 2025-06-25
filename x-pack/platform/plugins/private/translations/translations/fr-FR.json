@@ -17747,7 +17747,6 @@
     "xpack.enterpriseSearch.searchNav.management": "Gestion",
     "xpack.enterpriseSearch.searchNav.management.trainedModels": "Modèles entraînés",
     "xpack.enterpriseSearch.searchNav.mngt": "Gestion de la Suite",
-    "xpack.enterpriseSearch.searchNav.otherTools": "Autres outils",
     "xpack.enterpriseSearch.searchNav.relevance": "Pertinence",
     "xpack.enterpriseSearch.searchProvider.aiSearch.name": "Intelligence artificielle de recherche",
     "xpack.enterpriseSearch.SemanticSearch.description": "Ajoutez facilement une recherche sémantique à Elasticsearch avec des points de terminaison d'inférence et le type de champ semantic_text, cela permettra d'améliorer la pertinence de la recherche.",
@@ -34841,9 +34840,6 @@
     "xpack.securitySolution.agentStatus.actionStatus.multiplePendingActions": "{count} {count, plural, one {action} other {actions}} en attente",
     "xpack.securitySolution.agentStatus.actionStatus.tooltipPendingActions": "Actions en attente :",
     "xpack.securitySolution.agentTypeIntegration.integrationSectionLabel": "Intégration",
-
-    
-    
     "xpack.securitySolution.alertCountByRuleByStatus.alertsByRule": "Alertes par règle",
     "xpack.securitySolution.alertCountByRuleByStatus.count": "compte",
     "xpack.securitySolution.alertCountByRuleByStatus.noRuleAlerts": "Aucune alerte à afficher",
@@ -35062,14 +35058,6 @@
     "xpack.securitySolution.assistant.content.promptContexts.viewTitle": "vue",
     "xpack.securitySolution.assistant.content.prompts.user.finallySuggestInvestigationGuideAndFormatAsMarkdown": "Ajoutez votre description, les actions que vous recommandez ainsi que les étapes de triage à puces. Utilisez les données \"MITRE ATT&CK\" fournies pour ajouter du contexte et des recommandations de MITRE ainsi que des liens hypertexte vers les pages pertinentes sur le site web de MITRE. Assurez-vous d'inclure les scores de risque de l'utilisateur et de l'hôte du contexte. Votre réponse doit inclure des étapes qui pointent vers les fonctionnalités spécifiques d'Elastic Security, y compris les actions de réponse du terminal, l'intégration OSQuery Manager d'Elastic Agent (avec des exemples de requêtes OSQuery), des analyses de timeline et d'entités, ainsi qu'un lien pour toute la documentation Elastic Security pertinente.",
     "xpack.securitySolution.assistant.content.prompts.user.thenSummarizeSuggestedKqlAndEqlQueries": "Évaluer l’événement depuis le contexte ci-dessus et formater soigneusement la sortie en syntaxe Markdown pour mon cas Elastic Security.",
-    
-    
-    
-    
-    
-    
-    
-    
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationPrompt": "En tant qu’expert en opérations de sécurité et en réponses aux incidents, décomposer l’alerte jointe et résumer ce qu’elle peut impliquer pour mon organisation.",
     "xpack.securitySolution.assistant.quickPrompts.alertSummarizationTitle": "Synthèse de l’alerte",
     "xpack.securitySolution.assistant.quickPrompts.AutomationPrompt": "Quelle intégration d’Elastic Agent activée par Fleet dois-je utiliser pour collecter des logs et des évènements de :",

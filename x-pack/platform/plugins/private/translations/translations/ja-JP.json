@@ -37140,8 +37140,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle": "ルールを更新しています",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle": "{rulesCount, plural, =1 {# rule} other {# 個のルール}}をエクスポートできません",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle": "{rulesCount, plural, =1 {# rule} other {# 個のルール}}をスケジュールできません",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton": "閉じる",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage": "このアクションのみ適用できます",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorTitle": "{rulesCount, plural, =1 {# rule} other {#個のルール}}を超える手動ルール実行はスケジュールできません",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle": "オプション",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultRulesEditFailureDescription": "{rulesCount, plural, =1 {# rule} other {# 個のルール}}を編集できません（{message}）",

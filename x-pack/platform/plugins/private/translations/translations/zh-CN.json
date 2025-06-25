@@ -37128,8 +37128,6 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditWarningToastTitle": "正在进行规则更新",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkExportConfirmationDeniedTitle": "无法导出{rulesCount, plural, =1 {# 个规则} other {# 个规则}}",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle": "{rulesCount, plural, =1 {# 个规则} other {# 个规则}}无法计划",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton": "关闭",
-    "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage": "只能应用此操作",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorTitle": "无法为超过 {rulesCount, plural, =1 {# 个规则} other {# 个规则}}计划手动规则运行",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle": "选项",
     "xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.defaultRulesEditFailureDescription": "无法编辑 {rulesCount, plural, =1 {# 个规则} other {# 个规则}} ({message})",

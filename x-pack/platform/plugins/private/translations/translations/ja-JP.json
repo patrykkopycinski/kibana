@@ -33991,7 +33991,6 @@
     "xpack.searchPlayground.header.view.chat": "チャット",
     "xpack.searchPlayground.header.view.preview": "プレビュー",
     "xpack.searchPlayground.header.view.query": "クエリー",
-    "xpack.searchPlayground.inferenceModel": "{name}",
     "xpack.searchPlayground.loadConnectorsError": "コネクターの読み込みエラーです。構成を確認して、再試行してください。",
     "xpack.searchPlayground.openAIAzureConnectorTitle": "OpenAI Azure",
     "xpack.searchPlayground.openAIAzureModel": "{name} (Azure OpenAI)",

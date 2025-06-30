@@ -33954,7 +33954,6 @@
     "xpack.searchPlayground.header.view.chat": "Chat",
     "xpack.searchPlayground.header.view.preview": "Aperçu",
     "xpack.searchPlayground.header.view.query": "Requête",
-    "xpack.searchPlayground.inferenceModel": "{name}",
     "xpack.searchPlayground.loadConnectorsError": "Erreur lors du chargement des connecteurs. Veuillez vérifier votre configuration et réessayer.",
     "xpack.searchPlayground.openAIAzureConnectorTitle": "OpenAI Azure",
     "xpack.searchPlayground.openAIAzureModel": "{name} (Azure OpenAI)",

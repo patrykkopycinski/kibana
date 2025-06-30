@@ -33978,7 +33978,6 @@
     "xpack.searchPlayground.header.view.chat": "聊天",
     "xpack.searchPlayground.header.view.preview": "预览",
     "xpack.searchPlayground.header.view.query": "查询",
-    "xpack.searchPlayground.inferenceModel": "{name}",
     "xpack.searchPlayground.loadConnectorsError": "加载连接器进出错。请检查您的配置，然后重试。",
     "xpack.searchPlayground.openAIAzureConnectorTitle": "OpenAI Azure",
     "xpack.searchPlayground.openAIAzureModel": "{name} (Azure OpenAI)",

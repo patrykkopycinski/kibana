@@ -26778,7 +26778,6 @@
     "xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel": "Annuler",
     "xpack.ml.anomalyChartsEmbeddable.setupModal.title": "Configuration des graphiques Anomaly Explorer",
     "xpack.ml.anomalyChartsEmbeddable.title": "Graphiques d'anomalies de ML pour {jobIds}",
-    "xpack.ml.anomalyDescription.anomalyInLabel": "Anomalie {anomalySeverity} dans {anomalyDetector}",
     "xpack.ml.anomalyDescription.detectedInLabel": "détecté dans {sourcePartitionFieldName} {sourcePartitionFieldValue}",
     "xpack.ml.anomalyDescription.foundForLabel": "trouvé pour {anomalyEntityName} {anomalyEntityValue}",
     "xpack.ml.anomalyDescription.multivariateDescription": "corrélations multi-variable trouvées dans {sourceByFieldName} ; {sourceByFieldValue} est considéré comme anormal en fonction de {sourceCorrelatedByFieldValue}",

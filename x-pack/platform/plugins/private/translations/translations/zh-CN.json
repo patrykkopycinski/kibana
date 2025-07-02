@@ -26801,7 +26801,6 @@
     "xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel": "取消",
     "xpack.ml.anomalyChartsEmbeddable.setupModal.title": "异常浏览器图表配置",
     "xpack.ml.anomalyChartsEmbeddable.title": "{jobIds} 的 ML 异常图表",
-    "xpack.ml.anomalyDescription.anomalyInLabel": "{anomalyDetector} 中的 {anomalySeverity} 异常",
     "xpack.ml.anomalyDescription.detectedInLabel": "在 {sourcePartitionFieldName} {sourcePartitionFieldValue} 检测到",
     "xpack.ml.anomalyDescription.foundForLabel": "已为 {anomalyEntityName} {anomalyEntityValue} 找到",
     "xpack.ml.anomalyDescription.multivariateDescription": "{sourceByFieldName} 中找到多变量关联；如果{sourceCorrelatedByFieldValue}，{sourceByFieldValue} 将被视为有异常",

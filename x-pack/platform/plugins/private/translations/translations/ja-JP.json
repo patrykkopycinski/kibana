@@ -26809,7 +26809,6 @@
     "xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel": "キャンセル",
     "xpack.ml.anomalyChartsEmbeddable.setupModal.title": "異常エクスプローラーグラフ構成",
     "xpack.ml.anomalyChartsEmbeddable.title": "{jobIds}のML異常グラフ",
-    "xpack.ml.anomalyDescription.anomalyInLabel": "{anomalyDetector} の {anomalySeverity} の異常",
     "xpack.ml.anomalyDescription.detectedInLabel": "{sourcePartitionFieldName} {sourcePartitionFieldValue} で検知",
     "xpack.ml.anomalyDescription.foundForLabel": "{anomalyEntityName} {anomalyEntityValue} で発見",
     "xpack.ml.anomalyDescription.multivariateDescription": "{sourceByFieldName} で多変量相関が見つかりました; {sourceByFieldValue} は {sourceCorrelatedByFieldValue} のため異例とみなされます",

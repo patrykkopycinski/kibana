@@ -16102,7 +16102,6 @@
     "xpack.elasticAssistant.assistant.deleteConversationModal.deleteButtonText": "删除",
     "xpack.elasticAssistant.assistant.deleteConversationModal.deleteConversationTitle": "删除此对话",
     "xpack.elasticAssistant.assistant.disclaimer": "来自 AI 系统的响应可能看起来很有说服力，但并不总是完全准确。有关辅助功能及其用法的详细信息，请参阅文档。",
-    "xpack.elasticAssistant.assistant.emptyScreen.description": "使用以下系统提示向我提出任何要求，从“汇总此告警”到“帮助我构建查询”：",
     "xpack.elasticAssistant.assistant.emptyScreen.title": "我如何帮助您？",
     "xpack.elasticAssistant.assistant.firstPromptEditor.addNewSystemPrompt": "添加新系统提示……",
     "xpack.elasticAssistant.assistant.firstPromptEditor.clearSystemPrompt": "清除系统提示",

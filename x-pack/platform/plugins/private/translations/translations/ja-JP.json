@@ -16106,7 +16106,6 @@
     "xpack.elasticAssistant.assistant.deleteConversationModal.deleteButtonText": "削除",
     "xpack.elasticAssistant.assistant.deleteConversationModal.deleteConversationTitle": "この会話を削除",
     "xpack.elasticAssistant.assistant.disclaimer": "AIシステムからの応答は、納得できるように思われる場合であっても、必ずしも完全に正確であるとは限りません。アシスタント機能とその使用方法の詳細については、ドキュメントを参照してください。",
-    "xpack.elasticAssistant.assistant.emptyScreen.description": "次のシステムプロンプトを使用して、「このアラートを要約してください」から「クエリの作成を手伝ってください」まで、何でも依頼してください。",
     "xpack.elasticAssistant.assistant.emptyScreen.title": "お手伝いできることはありますか？",
     "xpack.elasticAssistant.assistant.firstPromptEditor.addNewSystemPrompt": "新しいシステムプロンプトを追加...",
     "xpack.elasticAssistant.assistant.firstPromptEditor.clearSystemPrompt": "システムプロンプトを消去",

@@ -19421,7 +19421,6 @@
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "称作 {providedKeyName} 的注册密钥对于代理策略 {agentPolicyId} 已存在",
     "xpack.fleet.serverError.returnedIncorrectKey": "Find enrollmentKeyById 返回错误的密钥",
     "xpack.fleet.serverError.unableToCreateEnrollmentKey": "无法创建注册 api 密钥",
-    "xpack.fleet.serverPlugin.privilegesTooltip": "访问 Fleet 需要所有工作区。",
     "xpack.fleet.settings.advancedSection.link": "文档",
     "xpack.fleet.settings.advancedSection.preconfiguredTitle": "这是预配置的设置，无法进行更新。",
     "xpack.fleet.settings.advancedSection.switchLabel": "打开此设置会启用自动删除已取消注册的代理。有关更多信息，请参阅 {docLink}。",

@@ -19427,7 +19427,6 @@
     "xpack.fleet.serverError.enrollmentKeyDuplicate": "エージェントポリシーの{agentPolicyId}登録キー{providedKeyName}はすでに存在します",
     "xpack.fleet.serverError.returnedIncorrectKey": "Find enrollmentKeyByIdで正しくないキーが返されました",
     "xpack.fleet.serverError.unableToCreateEnrollmentKey": "登録APIキーを作成できません",
-    "xpack.fleet.serverPlugin.privilegesTooltip": "Fleetアクセスには、すべてのSpacesが必要です。",
     "xpack.fleet.settings.advancedSection.link": "ドキュメント",
     "xpack.fleet.settings.advancedSection.preconfiguredTitle": "この設定はあらかじめ構成されているため、更新できません。",
     "xpack.fleet.settings.advancedSection.switchLabel": "この設定をオンにすると、登録されていないエージェントが自動的に削除されます。詳細については、{docLink}を参照してください。",

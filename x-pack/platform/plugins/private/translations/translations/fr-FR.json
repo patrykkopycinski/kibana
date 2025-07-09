@@ -41120,8 +41120,6 @@
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.error.description": "Une erreur s'est produite lors du chargement de l'index.",
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.error.title": "Impossible de charger l'index",
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.loading.title": "Chargement de l'index",
-    "xpack.serverlessSearch.indexManagementTab.documents": "Documents",
-    "xpack.serverlessSearch.indexManagementTab.documents.noMappings": "Aucun document trouvé pour l'index",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.description": "Vous souhaitez ajouter des champs personnalisés ou utiliser des modèles de ML entraînés pour analyser et enrichir vos documents indexés ? Utilisez des pipelines d'ingestion spécifiques de l'index pour personnaliser les documents selon vos besoins.",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.linkLabel": "En savoir plus sur les pipelines d'ingestion",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.title": "Transformer votre contenu interrogeable",

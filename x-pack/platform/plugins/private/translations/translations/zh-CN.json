@@ -41148,8 +41148,6 @@
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.error.description": "加载索引时出错。",
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.error.title": "无法加载索引",
     "xpack.serverlessSearch.indexManagement.indexDetails.overview.loading.title": "正在加载索引",
-    "xpack.serverlessSearch.indexManagementTab.documents": "文档",
-    "xpack.serverlessSearch.indexManagementTab.documents.noMappings": "找不到索引的文档",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.description": "想要添加自定义字段，或使用已训练 ML 模型分析并扩充您的已索引文档？ 使用特定于索引的采集管道根据您的需求来自定义文档。",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.linkLabel": "详细了解采集管道",
     "xpack.serverlessSearch.indexMappings.ingestPipelinesDocs.title": "转换可搜索内容",

@@ -39442,8 +39442,6 @@
     "xpack.securitySolution.onboarding.alertsCards.timeline.title": "タイムラインで調査",
     "xpack.securitySolution.onboarding.alertsGroup.title": "ルールとアラートを構成",
     "xpack.securitySolution.onboarding.assistantCard.badge.completeText": "{count}個のAI {count, plural, one {connector} other {コネクター}}が追加されました",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton": "統合ステップの追加",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsText": "Elasticルールを追加するには、最初に統合を追加してください。",
     "xpack.securitySolution.onboarding.assistantCard.createNewConnectorPopover": "AIサービスプロバイダー",
     "xpack.securitySolution.onboarding.assistantCard.description": "Elastic AI Assistantで使用できるAIプロバイダーを選択し、構成します。",
     "xpack.securitySolution.onboarding.assistantCard.missingPrivileges.contactAdministrator": "サポートについては、管理者にお問い合わせください。",

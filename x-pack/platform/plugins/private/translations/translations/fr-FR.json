@@ -39396,8 +39396,6 @@
     "xpack.securitySolution.onboarding.alertsCards.timeline.title": "Investiguer dans la chronologie",
     "xpack.securitySolution.onboarding.alertsGroup.title": "Configurer les règles et les alertes",
     "xpack.securitySolution.onboarding.assistantCard.badge.completeText": "{count} {count, plural, one {connector} other {connecteurs IA ajoutés}}",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton": "Ajouter des étapes d'intégration",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsText": "Pour ajouter des règles Elastic, ajoutez d'abord des intégrations.",
     "xpack.securitySolution.onboarding.assistantCard.createNewConnectorPopover": "Fournisseur de service d'IA",
     "xpack.securitySolution.onboarding.assistantCard.description": "Choisissez et configurez n'importe quel fournisseur d'IA disponible pour l'utiliser avec Elastic AI Assistant.",
     "xpack.securitySolution.onboarding.assistantCard.missingPrivileges.contactAdministrator": "Contactez votre administrateur si vous avez besoin d'aide.",

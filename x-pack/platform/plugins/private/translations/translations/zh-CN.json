@@ -39421,8 +39421,6 @@
     "xpack.securitySolution.onboarding.alertsCards.timeline.title": "在时间线中调查",
     "xpack.securitySolution.onboarding.alertsGroup.title": "配置规则和告警",
     "xpack.securitySolution.onboarding.assistantCard.badge.completeText": "{count} 个 AI {count, plural, one {连接器} other {连接器}}已添加",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsButton": "添加集成步骤",
-    "xpack.securitySolution.onboarding.assistantCard.calloutIntegrationsText": "要添加 Elastic 规则，请先添加集成。",
     "xpack.securitySolution.onboarding.assistantCard.createNewConnectorPopover": "AI 服务提供商",
     "xpack.securitySolution.onboarding.assistantCard.description": "选择并配置可与 Elastic AI 助手搭配使用的任何 AI 提供商。",
     "xpack.securitySolution.onboarding.assistantCard.missingPrivileges.contactAdministrator": "请联系管理员寻求帮助。",

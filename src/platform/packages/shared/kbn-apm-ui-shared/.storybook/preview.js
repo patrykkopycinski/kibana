@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './duration';
-export * from './duration_distribution_chart';
-export * from './http_status_code';
-export * from './span_icon';
-export * from './timestamp';
+import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
+import * as jest from 'jest-mock';
 
-export { getSpanIcon } from './span_icon/get_span_icon';
+window.jest = jest;
+export const decorators = [EuiThemeProviderDecorator];

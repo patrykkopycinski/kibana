@@ -21980,7 +21980,6 @@
     "xpack.infra.errorPage.tryAgainDescription ": "Cliquez sur le bouton Retour et réessayez.",
     "xpack.infra.errorPage.unexpectedErrorTitle": "Oups !",
     "xpack.infra.featureRegistry.linkInfrastructureTitle": "Infrastructure",
-    "xpack.infra.featureRegistry.linkLogsTitle": "Logs",
     "xpack.infra.fetcher.error.status": "Erreur",
     "xpack.infra.flamegraph.profilingAppFlamegraphLink": "Accéder au flame-graph d'Universal Profiling",
     "xpack.infra.flamegraph.profilingAppThreadsLink": "Accéder aux threads d'Universal Profiling",

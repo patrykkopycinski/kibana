@@ -22006,7 +22006,6 @@
     "xpack.infra.errorPage.tryAgainDescription ": "戻るボタンをクリックして再試行してください。",
     "xpack.infra.errorPage.unexpectedErrorTitle": "おっと！",
     "xpack.infra.featureRegistry.linkInfrastructureTitle": "インフラストラクチャー",
-    "xpack.infra.featureRegistry.linkLogsTitle": "ログ",
     "xpack.infra.fetcher.error.status": "エラー",
     "xpack.infra.flamegraph.profilingAppFlamegraphLink": "ユニバーサルプロファイリングFlamegraphに移動",
     "xpack.infra.flamegraph.profilingAppThreadsLink": "ユニバーサルプロファイリングスレッドに移動",

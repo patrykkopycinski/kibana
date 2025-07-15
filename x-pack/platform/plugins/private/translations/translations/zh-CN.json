@@ -22000,7 +22000,6 @@
     "xpack.infra.errorPage.tryAgainDescription ": "请点击后退按钮，然后重试。",
     "xpack.infra.errorPage.unexpectedErrorTitle": "糟糕！",
     "xpack.infra.featureRegistry.linkInfrastructureTitle": "基础设施",
-    "xpack.infra.featureRegistry.linkLogsTitle": "日志",
     "xpack.infra.fetcher.error.status": "错误",
     "xpack.infra.flamegraph.profilingAppFlamegraphLink": "前往 Universal Profiling 火焰图",
     "xpack.infra.flamegraph.profilingAppThreadsLink": "前往 Universal Profiling 线程",

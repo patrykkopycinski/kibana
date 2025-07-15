@@ -7,33 +7,29 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
+  AlertConsumers,
   DEPRECATED_ALERTING_CONSUMERS,
+  LOG_THRESHOLD_ALERT_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import {
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../common/alerting/metrics';
-import { METRICS_FEATURE_ID } from '../common/constants';
+import { infraSourceConfigurationSavedObjectName } from '../saved_objects/infra_saved_objects';
 
-const metricRuleTypes = [
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+const logsRuleTypes = [
+  LOG_THRESHOLD_ALERT_TYPE_ID,
   ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
-
-export const getMetricsFeature = (): KibanaFeatureConfig => {
-  const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => {
-    const consumers = [METRICS_FEATURE_ID, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
+export const getLogsFeature = (): KibanaFeatureConfig => {
+  const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => {
+    const consumers = [AlertConsumers.LOGS, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS];
 
     return {
       ruleTypeId,
@@ -41,35 +37,35 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
     };
   });
 
-  const METRICS_FEATURE = {
-    id: METRICS_FEATURE_ID,
-    name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-      defaultMessage: 'Infrastructure',
+  const LOGS_FEATURE = {
+    id: AlertConsumers.LOGS,
+    name: i18n.translate('xpack.observability.featureRegistry.linkLogsTitle', {
+      defaultMessage: 'Logs',
     }),
-    order: 800,
+    order: 700,
     category: DEFAULT_APP_CATEGORIES.observability,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-    app: ['infra', 'metrics', 'kibana'],
-    catalogue: ['infraops', 'metrics'],
+    app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
+    catalogue: ['infralogging', 'logs'],
     management: {
       insightsAndAlerting: ['triggersActions'],
     },
-    alerting: metricAlertingFeatures,
+    alerting: logsAlertingFeatures,
     privileges: {
       all: {
-        app: ['infra', 'metrics', 'kibana'],
-        catalogue: ['infraops', 'metrics'],
+        app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
+        catalogue: ['infralogging', 'logs'],
         api: ['infra', 'rac'],
         savedObject: {
-          all: ['infrastructure-ui-source', metricsDataSourceSavedObjectName],
-          read: ['index-pattern'],
+          all: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
+          read: [],
         },
         alerting: {
           rule: {
-            all: metricAlertingFeatures,
+            all: logsAlertingFeatures,
           },
           alert: {
-            all: metricAlertingFeatures,
+            all: logsAlertingFeatures,
           },
         },
         management: {
@@ -78,27 +74,27 @@ export const getMetricsFeature = (): KibanaFeatureConfig => {
         ui: ['show', 'configureSource', 'save'],
       },
       read: {
-        app: ['infra', 'metrics', 'kibana'],
-        catalogue: ['infraops', 'metrics'],
+        app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
+        catalogue: ['infralogging', 'logs'],
         api: ['infra', 'rac'],
-        savedObject: {
-          all: [],
-          read: ['infrastructure-ui-source', 'index-pattern', metricsDataSourceSavedObjectName],
-        },
         alerting: {
           rule: {
-            read: metricAlertingFeatures,
+            read: logsAlertingFeatures,
           },
           alert: {
-            read: metricAlertingFeatures,
+            read: logsAlertingFeatures,
           },
         },
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
+        savedObject: {
+          all: [],
+          read: [infraSourceConfigurationSavedObjectName, logViewSavedObjectName],
+        },
         ui: ['show'],
       },
     },
   };
-  return METRICS_FEATURE;
+  return LOGS_FEATURE;
 };

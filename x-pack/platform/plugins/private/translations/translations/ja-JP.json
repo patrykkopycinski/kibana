@@ -33469,7 +33469,6 @@
     "xpack.searchPlayground.sources.indices.table.label": "選択したインデックス",
     "xpack.searchPlayground.sources.indices.table.remove.description": "インデックスの削除",
     "xpack.searchPlayground.sources.indices.table.remove.label": "削除",
-    "xpack.searchPlayground.viewCode.actionButtonLabel": "コードを表示",
     "xpack.searchPlayground.viewCode.apiForm.createButton": "APIキーを作成",
     "xpack.searchPlayground.viewCode.apiForm.createdButton": "作成済み",
     "xpack.searchPlayground.viewCode.apiForm.expire.days": "日",

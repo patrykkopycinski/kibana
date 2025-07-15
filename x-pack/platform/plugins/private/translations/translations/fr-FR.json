@@ -33432,7 +33432,6 @@
     "xpack.searchPlayground.sources.indices.table.label": "Index sélectionnés",
     "xpack.searchPlayground.sources.indices.table.remove.description": "Retirer l'index",
     "xpack.searchPlayground.sources.indices.table.remove.label": "Retirer",
-    "xpack.searchPlayground.viewCode.actionButtonLabel": "Afficher le code",
     "xpack.searchPlayground.viewCode.apiForm.createButton": "Créer une clé d'API",
     "xpack.searchPlayground.viewCode.apiForm.createdButton": "Créé",
     "xpack.searchPlayground.viewCode.apiForm.expire.days": "Jours",

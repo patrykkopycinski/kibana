@@ -33456,7 +33456,6 @@
     "xpack.searchPlayground.sources.indices.table.label": "选定索引",
     "xpack.searchPlayground.sources.indices.table.remove.description": "移除索引",
     "xpack.searchPlayground.sources.indices.table.remove.label": "移除",
-    "xpack.searchPlayground.viewCode.actionButtonLabel": "查看代码",
     "xpack.searchPlayground.viewCode.apiForm.createButton": "创建 API 密钥",
     "xpack.searchPlayground.viewCode.apiForm.createdButton": "创建时间",
     "xpack.searchPlayground.viewCode.apiForm.expire.days": "天",

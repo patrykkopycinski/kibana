@@ -5393,7 +5393,7 @@
     "interactiveSetup.verificationCodeForm.submitButton": "{isSubmitting, select, true{Verifying…} other{検証}}",
     "interactiveSetup.verificationCodeForm.submitErrorTitle": "コードを検証できませんでした",
     "interactiveSetup.verificationCodeForm.title": "検証が必要です",
-    "kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition": "リテラル値",
+    "kbn-esql-ast.esql.autocomplete.valueDefinition": "リテラル値",
     "kbnConfig.deprecations.conflictSetting.manualStepOneMessage": "\"{fullNewPath}\"には、構成ファイル、CLIフラグ、または環境変数（Dockerのみ）の正しい値が指定されていることを確認してください。",
     "kbnConfig.deprecations.conflictSetting.manualStepTwoMessage": "構成から\"{fullOldPath}\"を削除します。",
     "kbnConfig.deprecations.conflictSettingMessage": "\"{fullOldPath}\"設定は\"{fullNewPath}\"で置換されました。ただし、いずれのキーも存在します。\"{fullOldPath}\"を無視しています",

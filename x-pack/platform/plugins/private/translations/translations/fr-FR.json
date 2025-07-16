@@ -5391,7 +5391,7 @@
     "interactiveSetup.verificationCodeForm.submitButton": "{isSubmitting, select, true{Verifying…} other{Vérifier}}",
     "interactiveSetup.verificationCodeForm.submitErrorTitle": "Vérification du code impossible",
     "interactiveSetup.verificationCodeForm.title": "Vérification requise",
-    "kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition": "Valeur littérale",
+    "kbn-esql-ast.esql.autocomplete.valueDefinition": "Valeur littérale",
     "kbnConfig.deprecations.conflictSetting.manualStepOneMessage": "Assurez-vous que \"{fullNewPath}\" contient la valeur correcte dans le fichier de configuration, l'indicateur CLI ou la variable d'environnement (dans Docker uniquement).",
     "kbnConfig.deprecations.conflictSetting.manualStepTwoMessage": "Supprimez \"{fullOldPath}\" de la configuration.",
     "kbnConfig.deprecations.conflictSettingMessage": "Le paramètre \"{fullOldPath}\" a été remplacé par \"{fullNewPath}\". Cependant, les deux clés sont présentes. Ignorer \"{fullOldPath}\"",

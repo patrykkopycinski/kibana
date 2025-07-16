@@ -5387,7 +5387,7 @@
     "interactiveSetup.verificationCodeForm.submitButton": "{isSubmitting, select, true{Verifying…} other{验证}}",
     "interactiveSetup.verificationCodeForm.submitErrorTitle": "无法验证代码",
     "interactiveSetup.verificationCodeForm.title": "需要验证",
-    "kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition": "文本值",
+    "kbn-esql-ast.esql.autocomplete.valueDefinition": "文本值",
     "kbnConfig.deprecations.conflictSetting.manualStepOneMessage": "确保“{fullNewPath}”包含配置文件、CLI 标志或环境变量中的正确值（仅适用于 Docker）。",
     "kbnConfig.deprecations.conflictSetting.manualStepTwoMessage": "从配置中移除“{fullOldPath}”。",
     "kbnConfig.deprecations.conflictSettingMessage": "设置“{fullOldPath}”已替换为“{fullNewPath}”。但是，这两个键都存在。忽略“{fullOldPath}”",

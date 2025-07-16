@@ -33235,7 +33235,6 @@
     "xpack.searchIndices.shared.createIndex.defaultTitle": "Créez un index",
     "xpack.searchIndices.shared.createIndex.description": "Un index stocke vos données et définit le schéma, ou les mappings de champs, pour vos recherches",
     "xpack.searchIndices.shared.createIndex.fileUpload.link": "Charger un fichier",
-    "xpack.searchIndices.shared.createIndex.fileUpload.text": "Vous disposez déjà de données ? {link}",
     "xpack.searchIndices.shared.createIndex.name.helpText": "Les noms d'index doivent être en minuscules et ne peuvent contenir que des tirets et des chiffres",
     "xpack.searchIndices.shared.createIndex.name.label": "Nommer votre index",
     "xpack.searchIndices.shared.createIndex.name.placeholder": "Définir un nom pour votre index",

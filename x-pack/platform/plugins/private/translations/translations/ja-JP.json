@@ -33274,7 +33274,6 @@
     "xpack.searchIndices.shared.createIndex.defaultTitle": "インデックスを作成",
     "xpack.searchIndices.shared.createIndex.description": "インデックスはデータを格納し、検索のためのスキーマ、つまりフィールドマッピングを定義します。",
     "xpack.searchIndices.shared.createIndex.fileUpload.link": "ファイルをアップロード",
-    "xpack.searchIndices.shared.createIndex.fileUpload.text": "すでに一部のデータがありますか？{link}",
     "xpack.searchIndices.shared.createIndex.name.helpText": "インデックス名は小文字で、ハイフンと数字のみを使用する必要があります。",
     "xpack.searchIndices.shared.createIndex.name.label": "インデックスの名前を指定",
     "xpack.searchIndices.shared.createIndex.name.placeholder": "インデックスの名前を入力",

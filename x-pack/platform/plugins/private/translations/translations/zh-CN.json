@@ -33259,7 +33259,6 @@
     "xpack.searchIndices.shared.createIndex.defaultTitle": "创建索引",
     "xpack.searchIndices.shared.createIndex.description": "索引存储您的数据并为您的搜索定义架构或字段映射",
     "xpack.searchIndices.shared.createIndex.fileUpload.link": "上传文件",
-    "xpack.searchIndices.shared.createIndex.fileUpload.text": "已具有某些数据？{link}",
     "xpack.searchIndices.shared.createIndex.name.helpText": "索引名称必须为小写，并且只能包含连字符和数字",
     "xpack.searchIndices.shared.createIndex.name.label": "命名您的索引",
     "xpack.searchIndices.shared.createIndex.name.placeholder": "输入索引的名称",

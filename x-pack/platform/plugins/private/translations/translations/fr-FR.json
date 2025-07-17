@@ -700,8 +700,6 @@
     "controls.controlGroup.manageControl.displaySettings.titleInputTitle": "Étiquette",
     "controls.controlGroup.manageControl.displaySettings.widthInputTitle": "Largeur minimale",
     "controls.controlGroup.manageControl.editFlyoutTitle": "Modifier le contrôle",
-    "controls.controlGroup.manageControl.esql.ariaLabel": "Contrôle de variable ES|QL",
-    "controls.controlGroup.manageControl.esql.placeholder": "Sélectionner une seule valeur",
     "controls.controlGroup.manageControl.saveChangesTitle": "Enregistrer",
     "controls.controlGroup.management.applyButtonTooltip.disabled": "Aucune nouvelle sélection à appliquer",
     "controls.controlGroup.management.applyButtonTooltip.enabled": "Appliquer les sélections",

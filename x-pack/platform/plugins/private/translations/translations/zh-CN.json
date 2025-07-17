@@ -702,8 +702,6 @@
     "controls.controlGroup.manageControl.displaySettings.titleInputTitle": "标签",
     "controls.controlGroup.manageControl.displaySettings.widthInputTitle": "最小宽度",
     "controls.controlGroup.manageControl.editFlyoutTitle": "编辑控件",
-    "controls.controlGroup.manageControl.esql.ariaLabel": "ES|QL 可变控件",
-    "controls.controlGroup.manageControl.esql.placeholder": "选择单个值",
     "controls.controlGroup.manageControl.saveChangesTitle": "保存",
     "controls.controlGroup.management.applyButtonTooltip.disabled": "没有可应用的新选择",
     "controls.controlGroup.management.applyButtonTooltip.enabled": "应用选择",

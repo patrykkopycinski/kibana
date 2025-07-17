@@ -702,8 +702,6 @@
     "controls.controlGroup.manageControl.displaySettings.titleInputTitle": "ラベル",
     "controls.controlGroup.manageControl.displaySettings.widthInputTitle": "最小幅",
     "controls.controlGroup.manageControl.editFlyoutTitle": "コントロールを編集",
-    "controls.controlGroup.manageControl.esql.ariaLabel": "ES|QL変数コントロール",
-    "controls.controlGroup.manageControl.esql.placeholder": "1つの値を選択",
     "controls.controlGroup.manageControl.saveChangesTitle": "保存",
     "controls.controlGroup.management.applyButtonTooltip.disabled": "適用する新しい選択項目がありません",
     "controls.controlGroup.management.applyButtonTooltip.enabled": "選択項目を適用",

@@ -45774,7 +45774,6 @@
     "xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel": "选择字段",
     "xpack.triggersActionsUI.common.expressionItems.of.buttonLabel": "/",
     "xpack.triggersActionsUI.common.expressionItems.of.popoverTitle": "/",
-    "xpack.triggersActionsUI.common.expressionItems.of.selectTimeFieldOptionLabel": "选择字段",
     "xpack.triggersActionsUI.common.expressionItems.threshold.andLabel": "AND",
     "xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel": "当",
     "xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle": "当",

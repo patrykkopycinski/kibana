@@ -45793,7 +45793,6 @@
     "xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel": "フィールドを選択",
     "xpack.triggersActionsUI.common.expressionItems.of.buttonLabel": "/",
     "xpack.triggersActionsUI.common.expressionItems.of.popoverTitle": "/",
-    "xpack.triggersActionsUI.common.expressionItems.of.selectTimeFieldOptionLabel": "フィールドの選択",
     "xpack.triggersActionsUI.common.expressionItems.threshold.andLabel": "AND",
     "xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel": "タイミング",
     "xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle": "タイミング",

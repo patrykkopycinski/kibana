@@ -45743,7 +45743,6 @@
     "xpack.triggersActionsUI.common.expressionItems.groupByType.timeFieldOptionLabel": "Choisir un champ",
     "xpack.triggersActionsUI.common.expressionItems.of.buttonLabel": "de",
     "xpack.triggersActionsUI.common.expressionItems.of.popoverTitle": "de",
-    "xpack.triggersActionsUI.common.expressionItems.of.selectTimeFieldOptionLabel": "Choisir un champ",
     "xpack.triggersActionsUI.common.expressionItems.threshold.andLabel": "AND",
     "xpack.triggersActionsUI.common.expressionItems.threshold.descriptionLabel": "quand",
     "xpack.triggersActionsUI.common.expressionItems.threshold.popoverTitle": "quand",

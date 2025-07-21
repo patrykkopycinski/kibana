@@ -429,8 +429,6 @@
     "console.helpPopover.aboutQueryDSLButtonAriaLabel": "À propos du lien QueryDSL",
     "console.helpPopover.aboutQueryDSLLabel": "À propos de Query DSL",
     "console.helpPopover.description": "La console est une interface utilisateur interactive qui vous permet d'appeler les API Elasticsearch et Kibana et d'afficher leurs réponses. Avec la syntaxe Query DSL et REST API, recherchez vos données, gérez les paramètres et bien plus encore.",
-    "console.helpPopover.rerunTourButtonAriaLabel": "Bouton de réexécution de la présentation des fonctionnalités",
-    "console.helpPopover.rerunTourLabel": "Réexécution de la présentation des fonctionnalités",
     "console.helpPopover.title": "Console Elastic",
     "console.historyPage.addAndRunButtonLabel": "Ajouter et exécuter",
     "console.historyPage.applyHistoryButtonLabel": "Ajouter",

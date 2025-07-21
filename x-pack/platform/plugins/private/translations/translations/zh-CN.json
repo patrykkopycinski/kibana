@@ -431,8 +431,6 @@
     "console.helpPopover.aboutQueryDSLButtonAriaLabel": "“关于查询 DSL”链接",
     "console.helpPopover.aboutQueryDSLLabel": "关于查询 DSL",
     "console.helpPopover.description": "Console 是一个用于调用 Elasticsearch 和 Kibana API 并查看其响应的交互式 UI。使用查询 DSL 和 REST API 语法搜索您的数据、管理设置等。",
-    "console.helpPopover.rerunTourButtonAriaLabel": "重新运行功能教程按钮",
-    "console.helpPopover.rerunTourLabel": "重新运行功能教程",
     "console.helpPopover.title": "Elastic Console",
     "console.historyPage.addAndRunButtonLabel": "添加并运行",
     "console.historyPage.applyHistoryButtonLabel": "添加",

@@ -431,8 +431,6 @@
     "console.helpPopover.aboutQueryDSLButtonAriaLabel": "QueryDSLリンクについて",
     "console.helpPopover.aboutQueryDSLLabel": "Query DSLについて",
     "console.helpPopover.description": "Consoleは、ElasticsearchとKibanaのAPIを呼び出し、その応答を表示するためのインタラクティブなUIです。Query DSLとREST API構文を使用して、データの検索、設定の管理などを行います。",
-    "console.helpPopover.rerunTourButtonAriaLabel": "機能ガイドを再実行ボタン",
-    "console.helpPopover.rerunTourLabel": "機能ガイドを再実行",
     "console.helpPopover.title": "Elastic Console",
     "console.historyPage.addAndRunButtonLabel": "追加して実行",
     "console.historyPage.applyHistoryButtonLabel": "追加",

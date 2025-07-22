@@ -11086,7 +11086,6 @@
     "xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser": "获取已监测服务列表、其运行状况和告警。",
     "xpack.apm.onboarding.agent.column.configSettings": "配置设置",
     "xpack.apm.onboarding.agent.column.configValue": "配置值",
-    "xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel": "复制 {variantId} 代理配置代码",
     "xpack.apm.onboarding.agentStatus.check": "检查代理状态",
     "xpack.apm.onboarding.agentStatus.success.calloutMessage": "已从一个或多个代理成功接收数据",
     "xpack.apm.onboarding.agentStatus.warning.calloutMessage": "尚未从代理收到任何数据",

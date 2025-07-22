@@ -11093,7 +11093,6 @@
     "xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser": "監視対象サービスのリスト、正常性ステータス、アラートを取得します。",
     "xpack.apm.onboarding.agent.column.configSettings": "構成設定",
     "xpack.apm.onboarding.agent.column.configValue": "構成名",
-    "xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel": "{variantId} エージェント設定コードをコピー",
     "xpack.apm.onboarding.agentStatus.check": "エージェントステータスを確認",
     "xpack.apm.onboarding.agentStatus.success.calloutMessage": "1 つまたは複数のエージェントからデータを受け取りました",
     "xpack.apm.onboarding.agentStatus.warning.calloutMessage": "エージェントからまだデータを受け取っていません",

@@ -11083,7 +11083,6 @@
     "xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser": "Obtenez la liste des services surveillés, leur statut d'intégrité et les alertes.",
     "xpack.apm.onboarding.agent.column.configSettings": "Paramètre de configuration",
     "xpack.apm.onboarding.agent.column.configValue": "Valeur de configuration",
-    "xpack.apm.onboarding.agentConfigInstructions.euiCodeBlock.copyAriaLabel": "Copier le code de configuration de l'agent {variantId}",
     "xpack.apm.onboarding.agentStatus.check": "Vérifier le statut de l'agent",
     "xpack.apm.onboarding.agentStatus.success.calloutMessage": "Les données ont été correctement reçues d'un ou de plusieurs agents",
     "xpack.apm.onboarding.agentStatus.warning.calloutMessage": "Aucune donnée n'a encore été reçue des agents",

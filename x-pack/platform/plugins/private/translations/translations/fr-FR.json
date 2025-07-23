@@ -991,8 +991,6 @@
     "core.euiFilePicker.removeSelectedAriaLabel": "Supprimer les fichiers sélectionnés",
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count} filtres actifs",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count} filtres disponibles",
-    "core.euiFlyout.screenReaderFixedHeaders": "Vous pouvez quand même continuer à parcourir les en-têtes de page à l'aide de la touche Tabulation en plus de la boîte de dialogue.",
-    "core.euiFlyout.screenReaderModalDialog": "Vous êtes dans une boîte de dialogue modale. Pour fermer, appuyez sur Échap ou appuyez/cliquez en dehors de la boîte de dialogue sur la superposition masquée.",
     "core.euiFlyout.screenReaderNonModalDialog": "Vous êtes dans une boîte de dialogue non modale. Pour fermer la boîte de dialogue, appuyez sur Échap.",
     "core.euiFlyoutCloseButton.ariaLabel": "Fermer cette boîte de dialogue",
     "core.euiForm.addressFormErrors": "Veuillez remédier aux erreurs signalées en surbrillance.",

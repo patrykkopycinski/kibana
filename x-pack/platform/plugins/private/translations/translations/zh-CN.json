@@ -990,8 +990,6 @@
     "core.euiFilePicker.removeSelectedAriaLabel": "移除选定文件",
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count} 个活动筛选",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count} 个可用筛选",
-    "core.euiFlyout.screenReaderFixedHeaders": "除对话框以外，您还可以继续浏览页面标题。",
-    "core.euiFlyout.screenReaderModalDialog": "您位于模式对话框中。按 Esc 键或点击/单击阴影涂层上的对话框外部可关闭。",
     "core.euiFlyout.screenReaderNonModalDialog": "您位于非模式对话框中。要关闭对话框，请按 Esc 键。",
     "core.euiFlyoutCloseButton.ariaLabel": "关闭此对话框",
     "core.euiForm.addressFormErrors": "请解决突出显示的错误。",

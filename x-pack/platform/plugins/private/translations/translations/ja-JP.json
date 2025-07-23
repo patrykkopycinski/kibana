@@ -993,7 +993,6 @@
     "core.euiFilePicker.removeSelectedAriaLabel": "選択したファイルを削除",
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count}個のアクティブなフィルター",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count}個の使用可能なフィルター",
-    "core.euiFlyout.screenReaderFixedHeaders": "ダイアログに加え、引き続きページヘッダーをTabで移動できます。",
     "core.euiFlyout.screenReaderModalDialog": "モーダルダイアログで操作しています。Escapeを押すか、影付きのオーバーレイでダイアログの外をタップ/クリックすると、ダイアログが閉じます。",
     "core.euiFlyout.screenReaderNonModalDialog": "非モーダルダイアログで操作しています。ダイアログを閉じるには、Escapeを押します。",
     "core.euiFlyoutCloseButton.ariaLabel": "このダイアログを閉じる",

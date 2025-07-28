@@ -41227,9 +41227,7 @@
     "xpack.slo.slo.delete.errorNotification": "无法删除 {name}",
     "xpack.slo.slo.delete.successNotification": "已删除 {name}",
     "xpack.slo.slo.deleteInstance.successNotification": "已删除 {name} [实例：{instanceId}]",
-    "xpack.slo.slo.item.actions.clone": "克隆",
-    "xpack.slo.slo.item.actions.delete": "删除",
-    "xpack.slo.slo.item.actions.reset": "重置",
+
     "xpack.slo.slo.reset.errorNotification": "无法重置 {name}（ID：{id}）",
     "xpack.slo.slo.reset.successNotification": "已成功重置 {name}",
     "xpack.slo.slo.rules.addWIndowLabel": "添加窗口",

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export * from './processor_state_machine';
-export * from './types';
-export * from './utils';
+export const moveArrayItem = <T>(array: T[], from: number, to: number): T[] => {
+  const result = array.slice();
+  const [removed] = result.splice(from, 1);
+  result.splice(to, 0, removed);
+
+  return result;
+};

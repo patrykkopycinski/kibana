@@ -43922,7 +43922,6 @@
     "xpack.streams.streamDetailView.ingestPipeline": "采集管道",
     "xpack.streams.streamDetailView.managementTab.bottomBar.cancel": "取消更改",
     "xpack.streams.streamDetailView.managementTab.bottomBar.confirm": "保存更改",
-    "xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction": "编辑 {type} 处理器",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle": "使用处理器可在索引前转换数据。拖放现有处理器以更新其执行顺序。",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingTitle": "用于提取字段的处理器",
     "xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError": "保存处理器的更改时出现问题。",

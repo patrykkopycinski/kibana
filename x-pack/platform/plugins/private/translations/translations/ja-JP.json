@@ -43940,7 +43940,6 @@
     "xpack.streams.streamDetailView.ingestPipeline": "パイプラインを投入",
     "xpack.streams.streamDetailView.managementTab.bottomBar.cancel": "変更をキャンセル",
     "xpack.streams.streamDetailView.managementTab.bottomBar.confirm": "変更を保存",
-    "xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction": "{type}プロセッサーを編集",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle": "インデックスの前に、プロセッサーを使用してデータを変換します。実行順を更新するには、既存のプロセッサーをドラッグしてドロップします。",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingTitle": "フィールド抽出のプロセッサー",
     "xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError": "プロセッサーの変更の保存中に問題が発生しました。",

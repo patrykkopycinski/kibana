@@ -43890,7 +43890,6 @@
     "xpack.streams.streamDetailView.ingestPipeline": "Pipeline d'ingestion",
     "xpack.streams.streamDetailView.managementTab.bottomBar.cancel": "Annuler les modifications",
     "xpack.streams.streamDetailView.managementTab.bottomBar.confirm": "Enregistrer les modifications",
-    "xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction": "Modifier le processeur {type}",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle": "Utilisez les processeurs pour transformer les données avant l'indexation. Faites un cliquer-glisser sur les processeurs existants pour mettre à jour leur ordre d'exécution.",
     "xpack.streams.streamDetailView.managementTab.enrichment.headingTitle": "Processeurs pour l'extraction de champs.",
     "xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError": "Un problème a eu lieu lors de l'enregistrement des modifications des processeurs.",

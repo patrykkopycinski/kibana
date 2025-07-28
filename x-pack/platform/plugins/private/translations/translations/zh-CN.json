@@ -33331,7 +33331,6 @@
     "xpack.searchPlayground.openAIConnectorTitle": "OpenAI",
     "xpack.searchPlayground.openAIOtherConnectorTitle": "OpenAI 其他",
     "xpack.searchPlayground.otherOpenAIModel": "{name}（OpenAI 兼容服务）",
-    "xpack.searchPlayground.pageTitle": "Playground",
     "xpack.searchPlayground.pageTitle.header.docLink": "Playground 文档",
     "xpack.searchPlayground.plugin.name": "Playground",
     "xpack.searchPlayground.searchMode.readyToSearch": "可供搜索",

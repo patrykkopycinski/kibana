@@ -31235,7 +31235,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText": "启用此选项可在之前检测的组开始不报告任何结果时触发无数据告警。 不建议将此选项用于可能会快速自动启动和停止节点的动态扩展基础架构。",
     "xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText": "如果条件在预期时间段中未报告任何数据时或告警无法查询 Elasticsearch，启用此选项可触发无数据告警",
     "xpack.observability.customThreshold.rule.alertFlyout.removeCondition": "删除条件",
-    "xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder": "搜索 Observability 数据……（例如 host.name:host-1）",
     "xpack.observability.customThreshold.rule.alertFlyout.searchConfiguration.queryWarning": "定制阈值不支持除 KQL 类型以外的查询，查询已更改为默认查询。",
     "xpack.observability.customThreshold.rule.alertFlyout.selectDataViewPrompt": "选择数据视图",
     "xpack.observability.customThreshold.rule.alertFlyout.setConditions": "设置规则条件",

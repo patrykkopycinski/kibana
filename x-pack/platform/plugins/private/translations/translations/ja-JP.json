@@ -31253,7 +31253,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText": "以前に検出されたグループが結果を報告しなくなった場合は、これを有効にすると、データアラートがトリガーされます。自動的に急速にノードを開始および停止することがある動的に拡張するインフラストラクチャーでは、これは推奨されません。",
     "xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText": "有効にすると、条件が想定された期間内にデータを報告しない場合、またはアラートがElasticsearchをクエリーできない場合に、データアラートをトリガーします",
     "xpack.observability.customThreshold.rule.alertFlyout.removeCondition": "条件を削除",
-    "xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder": "オブザーバビリティデータを検索…（例：host.name:host-1）",
     "xpack.observability.customThreshold.rule.alertFlyout.searchConfiguration.queryWarning": "カスタムしきい値は、クエリタイプ以外のクエリをサポートしません。クエリはデフォルトのクエリに変更されました。",
     "xpack.observability.customThreshold.rule.alertFlyout.selectDataViewPrompt": "データビューを選択",
     "xpack.observability.customThreshold.rule.alertFlyout.setConditions": "ルール条件を設定",

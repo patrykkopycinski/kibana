@@ -31216,7 +31216,6 @@
     "xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText": "Activez cette option pour déclencher l'action si une alerte d'absence de données précédemment détectée cesse de signaler des résultats. Ce n’est pas recommandé pour les infrastructures à montée en charge dynamique qui peuvent rapidement lancer ou stopper des nœuds automatiquement.",
     "xpack.observability.customThreshold.rule.alertFlyout.noDataHelpText": "Activez cette option pour déclencher une alerte d'absence de données lorsque la ou les conditions ne signale(nt) aucune donnée sur la période attendue, ou si l'alerte ne parvient pas à interroger Elasticsearch",
     "xpack.observability.customThreshold.rule.alertFlyout.removeCondition": "Retirer la condition",
-    "xpack.observability.customThreshold.rule.alertFlyout.searchBar.placeholder": "Rechercher des données d'observabilité… (par exemple host.name:host-1)",
     "xpack.observability.customThreshold.rule.alertFlyout.searchConfiguration.queryWarning": "Le seuil personnalisé ne prend pas en charge les requêtes autres que le type de requête, la requête a été remplacée par la requête par défaut.",
     "xpack.observability.customThreshold.rule.alertFlyout.selectDataViewPrompt": "Sélectionner une vue de données",
     "xpack.observability.customThreshold.rule.alertFlyout.setConditions": "Définir les conditions de règles",

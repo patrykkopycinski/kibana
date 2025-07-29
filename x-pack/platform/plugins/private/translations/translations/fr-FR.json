@@ -25897,7 +25897,6 @@
     "xpack.metricsData.assetDetails.metrics.label.diskReadIOPS": "Entrées et sorties par seconde en lecture sur le disque",
     "xpack.metricsData.assetDetails.metrics.label.diskReadThroughput": "Rendement de lecture du disque",
     "xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailable": "Espace disque disponible",
-    "xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailablity": "Disponibilité de l'espace disque",
     "xpack.metricsData.assetDetails.metrics.label.diskThroughput": "Rendement du disque",
     "xpack.metricsData.assetDetails.metrics.label.diskUsage": "Utilisation du disque",
     "xpack.metricsData.assetDetails.metrics.label.diskUsageAverage": "Utilisation moyenne du disque",

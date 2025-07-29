@@ -25918,7 +25918,6 @@
     "xpack.metricsData.assetDetails.metrics.label.diskReadIOPS": "磁盘读取 IOPS",
     "xpack.metricsData.assetDetails.metrics.label.diskReadThroughput": "磁盘读取吞吐量",
     "xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailable": "可用磁盘空间",
-    "xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailablity": "磁盘空间可用性",
     "xpack.metricsData.assetDetails.metrics.label.diskThroughput": "磁盘吞吐量",
     "xpack.metricsData.assetDetails.metrics.label.diskUsage": "磁盘使用率",
     "xpack.metricsData.assetDetails.metrics.label.diskUsageAverage": "磁盘使用率平均值",

@@ -40626,7 +40626,6 @@
     "xpack.serverlessSearch.app.connectors.title": "连接器",
     "xpack.serverlessSearch.app.elasticsearch.title": "Elasticsearch",
     "xpack.serverlessSearch.app.home.title": "主页",
-    "xpack.serverlessSearch.app.webCrawlers.title": "网络爬虫",
     "xpack.serverlessSearch.back": "返回",
     "xpack.serverlessSearch.beta": "公测版",
     "xpack.serverlessSearch.cancel": "取消",
@@ -40831,7 +40830,6 @@
     "xpack.serverlessSearch.testConnection.title": "测试您的连接",
     "xpack.serverlessSearch.update": "更新",
     "xpack.serverlessSearch.webcrawlers.headerContent": "发现、提取和索引网站和知识库中的可搜索内容 {learnMoreLink}",
-    "xpack.serverlessSearch.webcrawlers.title": "网络爬虫",
     "xpack.serverlessSearch.webCrawlersEmpty.description": "要设置并部署网络爬虫，您需要在数据源、终端与 Kibana UI 之间开展工作。高级流程类似于这样：",
     "xpack.serverlessSearch.webCrawlersEmpty.dockerLabel": "Docker",
     "xpack.serverlessSearch.webCrawlersEmpty.guideOneDescription": "设置一个或多个您要爬网的域 URL",
@@ -41221,7 +41219,6 @@
     "xpack.slo.slo.delete.errorNotification": "无法删除 {name}",
     "xpack.slo.slo.delete.successNotification": "已删除 {name}",
     "xpack.slo.slo.deleteInstance.successNotification": "已删除 {name} [实例：{instanceId}]",
-
     "xpack.slo.slo.reset.errorNotification": "无法重置 {name}（ID：{id}）",
     "xpack.slo.slo.reset.successNotification": "已成功重置 {name}",
     "xpack.slo.slo.rules.addWIndowLabel": "添加窗口",

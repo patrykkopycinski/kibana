@@ -28368,7 +28368,6 @@
     "xpack.ml.overview.nodesPanel.ariaLabel": "Überblick-Panel",
     "xpack.ml.overview.nodesPanel.header": "Knoten",
     "xpack.ml.overview.nodesPanel.totalNodesLabel": "Insgesamt",
-    "xpack.ml.overview.nodesPanel.viewNodeLink": "Knoten anzeigen",
     "xpack.ml.overview.overviewLabel": "Überblick",
     "xpack.ml.overview.statsBar.failedAnalyticsLabel": "Fehlgeschlagen",
     "xpack.ml.overview.statsBar.runningAnalyticsLabel": "Wird ausgeführt",

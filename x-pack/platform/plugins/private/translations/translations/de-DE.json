@@ -22895,7 +22895,6 @@
     "xpack.ingestPipelines.list.missingCustomPipeline.button": "Pipeline erstellen",
     "xpack.ingestPipelines.list.missingCustomPipeline.text": "Die Pipeline {pipelineName} ist nicht vorhanden.",
     "xpack.ingestPipelines.list.missingCustomPipeline.title": "Benutzerdefinierte Pipeline existiert nicht",
-    "xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel": "Schließen",
     "xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel": "Löschen",
     "xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle": "Fehlerprozessoren",
     "xpack.ingestPipelines.list.pipelineDetails.loading": "Pipeline wird geladen…",

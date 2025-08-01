@@ -22980,7 +22980,6 @@
     "xpack.ingestPipelines.list.missingCustomPipeline.button": "创建管道",
     "xpack.ingestPipelines.list.missingCustomPipeline.text": "管道 {pipelineName} 不存在。",
     "xpack.ingestPipelines.list.missingCustomPipeline.title": "定制管道不存在",
-    "xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel": "关闭",
     "xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel": "删除",
     "xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle": "失败处理器",
     "xpack.ingestPipelines.list.pipelineDetails.loading": "正在加载管道……",

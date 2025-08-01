@@ -22987,7 +22987,6 @@
     "xpack.ingestPipelines.list.missingCustomPipeline.button": "パイプラインの作成",
     "xpack.ingestPipelines.list.missingCustomPipeline.text": "パイプライン{pipelineName}が存在しません。",
     "xpack.ingestPipelines.list.missingCustomPipeline.title": "カスタムパイプラインは存在しません",
-    "xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel": "閉じる",
     "xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel": "削除",
     "xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle": "障害プロセッサー",
     "xpack.ingestPipelines.list.pipelineDetails.loading": "パイプラインを読み込んでいます…",

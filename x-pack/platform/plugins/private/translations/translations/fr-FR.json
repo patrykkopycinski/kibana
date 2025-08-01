@@ -22957,7 +22957,6 @@
     "xpack.ingestPipelines.list.missingCustomPipeline.button": "Créer un pipeline",
     "xpack.ingestPipelines.list.missingCustomPipeline.text": "Le pipeline {pipelineName} n'existe pas.",
     "xpack.ingestPipelines.list.missingCustomPipeline.title": "Le pipeline personnalisé n'existe pas",
-    "xpack.ingestPipelines.list.pipelineDetails.closeButtonLabel": "Fermer",
     "xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel": "Supprimer",
     "xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle": "Processeurs d'échec",
     "xpack.ingestPipelines.list.pipelineDetails.loading": "Chargement du pipeline…",

@@ -15127,7 +15127,6 @@
     "xpack.datasetQuality.details.updateFieldLimitFailed": "Nous n'avons pas pu mettre à jour la limite du champ.",
     "xpack.datasetQuality.details.viewDashboardsActionText": "Afficher les tableaux de bord",
     "xpack.datasetQuality.editPipeline.strong.Label": "2.",
-    "xpack.datasetQuality.emptyState.noPrivileges.message": "Vous ne disposez pas des autorisations requises pour voir les données de logs. Assurez-vous d'avoir les autorisations requises pour voir {datasetPattern}.",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "Impossible de charger les ensembles de données",
     "xpack.datasetQuality.failedDocsColumnName": "Documents échoués (%)",
     "xpack.datasetQuality.failedDocsColumnTooltip": "Le pourcentage de documents envoyés au stockage d'échec à cause d'un problème durant l'ingestion.",

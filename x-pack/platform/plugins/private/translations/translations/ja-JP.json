@@ -15147,7 +15147,6 @@
     "xpack.datasetQuality.details.updateFieldLimitFailed": "フィールド上限を更新できませんでした。",
     "xpack.datasetQuality.details.viewDashboardsActionText": "ダッシュボードを表示",
     "xpack.datasetQuality.editPipeline.strong.Label": "2.",
-    "xpack.datasetQuality.emptyState.noPrivileges.message": "ログデータを表示するために必要な権限がありません。{datasetPattern}を表示するための十分な権限があることを確認してください。",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "データセットを読み込めませんでした",
     "xpack.datasetQuality.failedDocsColumnName": "失敗したドキュメント（%）",
     "xpack.datasetQuality.failedDocsColumnTooltip": "インジェスト時の問題により失敗ストアに送信されたドキュメントの割合。",

@@ -15087,7 +15087,6 @@
     "xpack.datasetQuality.details.updateFieldLimitFailed": "Wir konnten das Feldlimit nicht aktualisieren.",
     "xpack.datasetQuality.details.viewDashboardsActionText": "Dashboards anzeigen",
     "xpack.datasetQuality.editPipeline.strong.Label": "2.",
-    "xpack.datasetQuality.emptyState.noPrivileges.message": "Sie haben nicht die erforderlichen Berechtigungen, um die Protokolldaten anzuzeigen. Stellen Sie sicher, dass Sie über ausreichende Berechtigungen verfügen, um {datasetPattern} anzuzeigen.",
     "xpack.datasetQuality.emptyState.noPrivileges.title": "Datensätze konnten nicht geladen werden",
     "xpack.datasetQuality.failedDocsColumnName": "Fehlgeschlagene Dokumente (%)",
     "xpack.datasetQuality.failedDocsColumnTooltip": "Der Prozentsatz der Dokumente, die aufgrund eines Problems während der Ingestion an den Fehlerspeicher gesendet wurden.",

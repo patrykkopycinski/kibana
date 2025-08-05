@@ -5,32 +5,30 @@
  * 2.0.
  */
 
+import React from 'react';
+import { cloneDeep } from 'lodash';
+import userEvent from '@testing-library/user-event';
 import { useLicense as _useLicense } from '../../../../../../common/hooks/use_license';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import React from 'react';
 import { createLicenseServiceMock } from '../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
-import type { NotifyUserOptionProps } from './notify_user_option';
-import { NotifyUserOption } from './notify_user_option';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
-import { cloneDeep } from 'lodash';
-import { set } from '@kbn/safer-lodash-set';
-import { ProtectionModes } from '../../../../../../../common/endpoint/types';
-import userEvent from '@testing-library/user-event';
 import {
   NOTIFY_USER_SECTION_TITLE,
   NOTIFY_USER_CHECKBOX_LABEL,
   CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
 } from './shared_translations';
+import type { DeviceControlNotifyUserOptionProps } from './device_control_notify_user_option';
+import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
 const useLicenseMock = _useLicense as jest.Mock;
 
-describe('Policy form Notify User option component', () => {
-  let formProps: NotifyUserOptionProps;
+describe('Policy form DeviceControlNotifyUserOption component', () => {
+  let formProps: DeviceControlNotifyUserOptionProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
 
@@ -40,31 +38,32 @@ describe('Policy form Notify User option component', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
+      .config.policy.value;
+
+    // Enable device control and notifications by default
+    policy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+    policy.mac.device_control = { enabled: true, usb_storage: 'deny_all' };
+    policy.windows.popup.device_control = { enabled: true, message: 'hello world' };
+    policy.mac.popup.device_control = { enabled: true, message: 'hello world' };
 
     formProps = {
-      policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
-        .config.policy.value,
+      policy,
       onChange: jest.fn(),
       mode: 'edit',
       'data-test-subj': 'test',
-      protection: 'malware',
-      osList: ['windows', 'mac', 'linux'],
     };
 
     render = () => {
-      renderResult = mockedContext.render(<NotifyUserOption {...formProps} />);
+      renderResult = mockedContext.render(<DeviceControlNotifyUserOption {...formProps} />);
       return renderResult;
     };
   });
 
   it('should render with expected content', () => {
-    set(formProps.policy, 'windows.popup.malware.message', 'hello world');
     const { getByTestId } = render();
 
-    expect(getByTestId('test-title')).toHaveTextContent(exactMatchText(NOTIFY_USER_SECTION_TITLE));
-    expect(getByTestId('test-supportedVersion')).toHaveTextContent(
-      exactMatchText('Agent version 7.11+')
-    );
+    expect(getByTestId('test')).toHaveTextContent(NOTIFY_USER_SECTION_TITLE);
     expect(isChecked('test-checkbox')).toBe(true);
     expect(renderResult.getByLabelText(NOTIFY_USER_CHECKBOX_LABEL));
     expect(getByTestId('test-customMessageTitle')).toHaveTextContent(
@@ -74,16 +73,16 @@ describe('Policy form Notify User option component', () => {
   });
 
   it('should render with options un-checked', () => {
-    set(formProps.policy, 'windows.popup.malware.enabled', false);
+    formProps.policy.windows.popup.device_control!.enabled = false;
     render();
 
     expect(isChecked('test-checkbox')).toBe(false);
     expect(renderResult.queryByTestId('test-customMessage')).toBeNull();
   });
 
-  it('should render checked disabled if protection mode is OFF', () => {
-    set(formProps.policy, 'windows.popup.malware.enabled', false);
-    set(formProps.policy, 'windows.malware.mode', ProtectionModes.off);
+  it('should render checkbox disabled if device control is OFF', () => {
+    formProps.policy.windows.device_control!.enabled = false;
+    formProps.policy.mac.device_control!.enabled = false;
     render();
 
     expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
@@ -91,9 +90,9 @@ describe('Policy form Notify User option component', () => {
 
   it('should be able to un-check the option', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', false);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', false);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', false);
+    expectedUpdatedPolicy.windows.popup.device_control!.enabled = false;
+    expectedUpdatedPolicy.mac.popup.device_control!.enabled = false;
+
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
@@ -104,11 +103,11 @@ describe('Policy form Notify User option component', () => {
   });
 
   it('should be able to check the option', async () => {
-    set(formProps.policy, 'windows.popup.malware.enabled', false);
+    formProps.policy.windows.popup.device_control!.enabled = false;
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', true);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', true);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', true);
+    expectedUpdatedPolicy.windows.popup.device_control!.enabled = true;
+    expectedUpdatedPolicy.mac.popup.device_control!.enabled = true;
+
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
@@ -120,24 +119,30 @@ describe('Policy form Notify User option component', () => {
 
   it('should be able to change the notification message', async () => {
     const msg = 'a';
+    // Set initial value to empty to avoid concatenation
+    formProps.policy.windows.popup.device_control!.message = '';
+    formProps.policy.mac.popup.device_control!.message = '';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    set(expectedUpdatedPolicy, 'windows.popup.malware.message', msg);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.message', msg);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.message', msg);
-    render();
-    await userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
 
-    expect(formProps.onChange).toHaveBeenCalledWith({
+    render();
+    const customMessageInput = renderResult.getByTestId('test-customMessage');
+    await userEvent.clear(customMessageInput);
+    await userEvent.type(customMessageInput, msg);
+
+    expectedUpdatedPolicy.windows.popup.device_control!.message = msg;
+    expectedUpdatedPolicy.mac.popup.device_control!.message = msg;
+
+    expect(formProps.onChange).toHaveBeenCalledTimes(1);
+    expect(formProps.onChange).toHaveBeenLastCalledWith({
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
   });
 
-  describe('and license is lower than platinum', () => {
+  describe('and license is lower than enterprise', () => {
     beforeEach(() => {
       const licenseServiceMock = createLicenseServiceMock();
-      licenseServiceMock.isPlatinumPlus.mockReturnValue(false);
-
+      licenseServiceMock.isEnterprise.mockReturnValue(false);
       useLicenseMock.mockReturnValue(licenseServiceMock);
     });
 
@@ -147,7 +152,6 @@ describe('Policy form Notify User option component', () => {
 
     it('should NOT render the component', () => {
       render();
-
       expect(renderResult.queryByTestId('test')).toBeNull();
     });
   });
@@ -155,45 +159,32 @@ describe('Policy form Notify User option component', () => {
   describe('and rendered in View mode', () => {
     beforeEach(() => {
       formProps.mode = 'view';
-      set(formProps.policy, 'windows.popup.malware.message', 'you got owned');
     });
 
     it('should render with no form elements', () => {
       render();
-
       expectIsViewOnly(renderResult.getByTestId('test'));
     });
 
     it('should render with expected output when checked', () => {
       render();
-
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText(
-          'User notification' +
-            'Agent version 7.11+' +
-            'Notify user' +
-            'Notification message' +
-            'you got owned'
-        )
+        'User notificationNotify userNotification messagehello world'
       );
     });
 
     it('should render with expected output when checked with empty message', () => {
-      set(formProps.policy, 'windows.popup.malware.message', '');
+      formProps.policy.windows.popup.device_control!.message = '';
       render();
-
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('User notificationAgent version 7.11+Notify userNotification message—')
+        'User notificationNotify userNotification message—'
       );
     });
 
     it('should render with expected output when un-checked', () => {
-      set(formProps.policy, 'windows.popup.malware.enabled', false);
+      formProps.policy.windows.popup.device_control!.enabled = false;
       render();
-
-      expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('User notificationAgent version 7.11+Notify user')
-      );
+      expect(renderResult.getByTestId('test')).toHaveTextContent('User notificationNotify user');
     });
   });
 });

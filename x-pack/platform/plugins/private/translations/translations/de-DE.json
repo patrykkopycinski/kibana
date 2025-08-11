@@ -2885,8 +2885,6 @@
     "embeddableApi.valueClickTrigger.title": "Einfacher Klick",
     "embeddableExamples.dataTable.ariaLabel": "Datentabellen",
     "embeddableExamples.dataTable.noDataViewError": "Um das Datentabellenbeispiel zu verwenden, ist mindestens eine Datenansicht erforderlich.",
-    "embeddableExamples.euiMarkdownEditor.displayNameAriaLabel": "EUI Markdown",
-    "embeddableExamples.euiMarkdownEditor.embeddableAriaLabel": "Dashboard-Markdown-Editor",
     "embeddableExamples.savedbook.addBookAction.displayName": "Buch",
     "embeddableExamples.savedbook.editBook.displayName": "Buch",
     "embeddableExamples.savedBook.editor.addToLibrary": "In der Bibliothek speichern",

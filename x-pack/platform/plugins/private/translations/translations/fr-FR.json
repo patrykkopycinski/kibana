@@ -2902,8 +2902,6 @@
     "embeddableApi.valueClickTrigger.title": "Clic unique",
     "embeddableExamples.dataTable.ariaLabel": "Tableau de données",
     "embeddableExamples.dataTable.noDataViewError": "Au moins une vue de données est requise pour utiliser l'exemple de table de données.",
-    "embeddableExamples.euiMarkdownEditor.displayNameAriaLabel": "Markdown EUI",
-    "embeddableExamples.euiMarkdownEditor.embeddableAriaLabel": "Éditeur de markdown du tableau de bord",
     "embeddableExamples.savedbook.addBookAction.displayName": "Livre",
     "embeddableExamples.savedbook.editBook.displayName": "livre",
     "embeddableExamples.savedBook.editor.addToLibrary": "Enregistrer dans la bibliothèque",

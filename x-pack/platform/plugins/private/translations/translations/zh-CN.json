@@ -2897,8 +2897,6 @@
     "embeddableApi.valueClickTrigger.title": "单击",
     "embeddableExamples.dataTable.ariaLabel": "数据表",
     "embeddableExamples.dataTable.noDataViewError": "至少需要一个数据视图才能使用数据表示例。",
-    "embeddableExamples.euiMarkdownEditor.displayNameAriaLabel": "EUI Markdown",
-    "embeddableExamples.euiMarkdownEditor.embeddableAriaLabel": "仪表板 Markdown 编辑器",
     "embeddableExamples.savedbook.addBookAction.displayName": "书籍",
     "embeddableExamples.savedbook.editBook.displayName": "书籍",
     "embeddableExamples.savedBook.editor.addToLibrary": "保存到库",

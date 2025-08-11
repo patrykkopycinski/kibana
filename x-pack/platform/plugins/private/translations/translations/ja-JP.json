@@ -2904,8 +2904,6 @@
     "embeddableApi.valueClickTrigger.title": "シングルクリック",
     "embeddableExamples.dataTable.ariaLabel": "データテーブル",
     "embeddableExamples.dataTable.noDataViewError": "データテーブル例を使用するには、1つ以上のデータビューが必要です。",
-    "embeddableExamples.euiMarkdownEditor.displayNameAriaLabel": "EUI Markdown",
-    "embeddableExamples.euiMarkdownEditor.embeddableAriaLabel": "ダッシュボードMarkdownエディター",
     "embeddableExamples.savedbook.addBookAction.displayName": "ブック",
     "embeddableExamples.savedbook.editBook.displayName": "ブック",
     "embeddableExamples.savedBook.editor.addToLibrary": "ライブラリに保存",

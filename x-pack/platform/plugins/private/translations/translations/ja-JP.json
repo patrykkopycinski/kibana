@@ -31690,7 +31690,6 @@
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "検索コネクターインデックスパターン",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "行を展開",
     "xpack.observabilityLogsExplorer.appTitle": "ログエクスプローラー",
-    "xpack.observabilityLogsOverview.categorizedLogsFilterLabel": "分類されたログエントリ",
     "xpack.observabilityLogsOverview.controlColumnHeader": "列の制御",
     "xpack.observabilityLogsOverview.discoverLinkTitle": "Discoverで開く",
     "xpack.observabilityLogsOverview.errorTitle": "エラー",

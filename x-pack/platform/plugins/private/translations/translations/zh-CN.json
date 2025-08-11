@@ -31673,7 +31673,6 @@
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "搜索连接器索引模式",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "展开行",
     "xpack.observabilityLogsExplorer.appTitle": "日志浏览器",
-    "xpack.observabilityLogsOverview.categorizedLogsFilterLabel": "已归类日志条目",
     "xpack.observabilityLogsOverview.controlColumnHeader": "控制列",
     "xpack.observabilityLogsOverview.discoverLinkTitle": "在 Discover 中打开",
     "xpack.observabilityLogsOverview.errorTitle": "错误",

@@ -31586,7 +31586,6 @@
     "xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel": "Indexmuster für Search-Connectors",
     "xpack.observabilityAiAssistantManagement.span.expandRowLabel": "Zeile erweitern",
     "xpack.observabilityLogsExplorer.appTitle": "Logs Explorer",
-    "xpack.observabilityLogsOverview.categorizedLogsFilterLabel": "Kategorisierte Log-Einträge",
     "xpack.observabilityLogsOverview.controlColumnHeader": "Steuerspalte",
     "xpack.observabilityLogsOverview.discoverLinkTitle": "In Discover öffnen",
     "xpack.observabilityLogsOverview.errorTitle": "Fehler",

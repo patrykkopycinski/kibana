@@ -8080,7 +8080,6 @@
     "unifiedDocViewer.fieldChooser.discoverField.value": "Wert",
     "unifiedDocViewer.fieldsTable.ariaLabel": "Feldwerte",
     "unifiedDocViewer.fieldsTable.pinControlColumnHeader": "Spalte „Pin-Feld“ fixieren",
-    "unifiedDocViewer.flyout.closeButtonLabel": "Schließen",
     "unifiedDocViewer.flyout.documentNavigation": "Dokumentnavigation",
     "unifiedDocViewer.flyout.docViewerDetailHeading": "Dokument",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "Ergebnis",

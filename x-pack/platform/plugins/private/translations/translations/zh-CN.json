@@ -8106,7 +8106,6 @@
     "unifiedDocViewer.fieldChooser.discoverField.value": "值",
     "unifiedDocViewer.fieldsTable.ariaLabel": "字段值",
     "unifiedDocViewer.fieldsTable.pinControlColumnHeader": "固定字段列",
-    "unifiedDocViewer.flyout.closeButtonLabel": "关闭",
     "unifiedDocViewer.flyout.documentNavigation": "文档导航",
     "unifiedDocViewer.flyout.docViewerDetailHeading": "文档",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "结果",

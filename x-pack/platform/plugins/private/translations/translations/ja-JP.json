@@ -8114,7 +8114,6 @@
     "unifiedDocViewer.fieldChooser.discoverField.value": "値",
     "unifiedDocViewer.fieldsTable.ariaLabel": "フィールド値",
     "unifiedDocViewer.fieldsTable.pinControlColumnHeader": "フィールド列を固定",
-    "unifiedDocViewer.flyout.closeButtonLabel": "閉じる",
     "unifiedDocViewer.flyout.documentNavigation": "ドキュメントナビゲーション",
     "unifiedDocViewer.flyout.docViewerDetailHeading": "ドキュメント",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "結果",

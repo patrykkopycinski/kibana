@@ -8107,7 +8107,6 @@
     "unifiedDocViewer.fieldChooser.discoverField.value": "Valeur",
     "unifiedDocViewer.fieldsTable.ariaLabel": "Valeurs des champs",
     "unifiedDocViewer.fieldsTable.pinControlColumnHeader": "Épingler la colonne Champ",
-    "unifiedDocViewer.flyout.closeButtonLabel": "Fermer",
     "unifiedDocViewer.flyout.documentNavigation": "Navigation dans le document",
     "unifiedDocViewer.flyout.docViewerDetailHeading": "Document",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "Résultat",

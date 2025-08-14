@@ -4,19 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import { CLOUDBEAT_GCP, CLOUDBEAT_AZURE, CLOUDBEAT_AWS } from './constants';
-import type { PostureInput } from './types';
+import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
+import { CloudProviders, CloudSetupConfig } from '../types';
+
+const CLOUDBEAT_AWS = 'cloudbeat/cis_aws';
+const CLOUDBEAT_GCP = 'cloudbeat/cis_gcp';
+const CLOUDBEAT_AZURE = 'cloudbeat/cis_azure';
+
+export const TEMPLATE_NAME = 'cspm';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
+  getPolicyMock(CLOUDBEAT_AWS, TEMPLATE_NAME, AWS_PROVIDER, vars);
 export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
+  getPolicyMock(CLOUDBEAT_GCP, TEMPLATE_NAME, GCP_PROVIDER, vars);
 export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
+  getPolicyMock(CLOUDBEAT_AZURE, TEMPLATE_NAME, AZURE_PROVIDER, vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
@@ -49,12 +56,12 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
 export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   return {
     version: packageVersion,
-    name: 'cspm',
+    name: TEMPLATE_NAME,
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: TEMPLATE_NAME,
         inputs: [
           {
             type: CLOUDBEAT_AWS,
@@ -78,12 +85,12 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
 export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   return {
     version: packageVersion,
-    name: 'cspm',
+    name: TEMPLATE_NAME,
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: TEMPLATE_NAME,
         inputs: [
           {
             type: CLOUDBEAT_GCP,
@@ -100,12 +107,12 @@ export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
 export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
   return {
     version: packageVersion,
-    name: 'cspm',
+    name: TEMPLATE_NAME,
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: TEMPLATE_NAME,
         inputs: [
           {
             type: CLOUDBEAT_AZURE,
@@ -120,9 +127,9 @@ export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
 };
 
 const getPolicyMock = (
-  type: PostureInput,
+  type: string,
   posture: string,
-  deployment: string,
+  deployment: CloudProviders,
   vars: object = {}
 ): NewPackagePolicy => {
   const mockPackagePolicy = createNewPackagePolicyMock();
@@ -178,7 +185,7 @@ const getPolicyMock = (
     inputs: [
       {
         type: CLOUDBEAT_AWS,
-        policy_template: 'cspm',
+        policy_template: TEMPLATE_NAME,
         enabled: type === CLOUDBEAT_AWS,
         streams: [
           {
@@ -190,7 +197,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_GCP,
-        policy_template: 'cspm',
+        policy_template: TEMPLATE_NAME,
         enabled: type === CLOUDBEAT_GCP,
         streams: [
           {
@@ -202,7 +209,7 @@ const getPolicyMock = (
       },
       {
         type: CLOUDBEAT_AZURE,
-        policy_template: 'cspm',
+        policy_template: TEMPLATE_NAME,
         enabled: type === CLOUDBEAT_AZURE,
         streams: [
           {
@@ -313,7 +320,7 @@ export const getAwsPackageInfoMock = () => {
     ...getPackageInfoMock(),
     policy_templates: [
       {
-        name: 'cspm',
+        name: TEMPLATE_NAME,
         title: 'Cloud Security Posture Management (CSPM)',
         description: 'Identify & remediate configuration risks in the Cloud services you leverage',
         multiple: true,
@@ -384,4 +391,34 @@ export const getAwsPackageInfoMock = () => {
       },
     ],
   };
+};
+
+export const mockConfig: CloudSetupConfig = {
+  policyTemplate: 'test-template',
+  defaultProvider: 'aws',
+  namespaceSupportEnabled: true,
+  name: 'Test Integration',
+  shortName: 'Test',
+  overviewPath: '/overview',
+  getStartedPath: '/get-started',
+  cloudConnectorEnabledVersion: '3.0.0',
+  showCloudTemplates: true,
+  providers: {
+    aws: {
+      type: 'aws-input-type',
+      enableOrganization: true,
+      getStartedPath: '/aws/start',
+    },
+    gcp: {
+      type: 'gcp-input-type',
+      enabled: true,
+      enableOrganization: true,
+      getStartedPath: '/gcp/start',
+    },
+    azure: {
+      type: 'azure-input-type',
+      enableOrganization: true,
+      getStartedPath: '/azure/start',
+    },
+  },
 };

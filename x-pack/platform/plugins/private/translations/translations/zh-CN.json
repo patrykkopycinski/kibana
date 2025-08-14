@@ -22408,7 +22408,6 @@
     "xpack.infra.metrics.noDataConfig.promptTitle": "添加指标数据",
     "xpack.infra.metrics.noDataConfig.solutionName": "Observability",
     "xpack.infra.metrics.nodeDetails.noProcesses": "未发现任何进程",
-    "xpack.infra.metrics.nodeDetails.noProcessesBody": "请尝试修改您的筛选条件。此处仅显示配置的“{metricbeatDocsLink}”内的进程。",
     "xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText": "按 CPU 或内存排名前 N",
     "xpack.infra.metrics.nodeDetails.noProcessesClearFilters": "清除筛选",
     "xpack.infra.metrics.nodeDetails.processes.charts.noDataLabel": "找不到结果",

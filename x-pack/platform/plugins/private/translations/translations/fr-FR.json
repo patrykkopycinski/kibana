@@ -22384,7 +22384,6 @@
     "xpack.infra.metrics.noDataConfig.promptTitle": "Ajouter des données d'indicateurs",
     "xpack.infra.metrics.noDataConfig.solutionName": "Observabilité",
     "xpack.infra.metrics.nodeDetails.noProcesses": "Aucun processus trouvé",
-    "xpack.infra.metrics.nodeDetails.noProcessesBody": "Essayez de modifier votre filtre. Seuls les processus figurant dans les {metricbeatDocsLink} configurés seront affichés ici.",
     "xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText": "N premiers par CPU ou mémoire",
     "xpack.infra.metrics.nodeDetails.noProcessesClearFilters": "Effacer les filtres",
     "xpack.infra.metrics.nodeDetails.processes.charts.noDataLabel": "Résultat introuvable",

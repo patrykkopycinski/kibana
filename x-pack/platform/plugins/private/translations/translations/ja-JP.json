@@ -22415,7 +22415,6 @@
     "xpack.infra.metrics.noDataConfig.promptTitle": "メトリックデータを追加",
     "xpack.infra.metrics.noDataConfig.solutionName": "オブザーバビリティ",
     "xpack.infra.metrics.nodeDetails.noProcesses": "プロセスが見つかりません",
-    "xpack.infra.metrics.nodeDetails.noProcessesBody": "フィルターを変更してください。構成された{metricbeatDocsLink}内のプロセスのみがここに表示されます。",
     "xpack.infra.metrics.nodeDetails.noProcessesBody.metricbeatDocsLinkText": "CPU またはメモリ別上位 N",
     "xpack.infra.metrics.nodeDetails.noProcessesClearFilters": "フィルターを消去",
     "xpack.infra.metrics.nodeDetails.processes.charts.noDataLabel": "結果が見つかりませんでした",

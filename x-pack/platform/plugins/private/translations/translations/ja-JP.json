@@ -43685,7 +43685,6 @@
     "xpack.streams.filter.lessThan": "より小さい",
     "xpack.streams.filter.lessThanOrEquals": "以下",
     "xpack.streams.filter.notEquals": "等しくない",
-    "xpack.streams.filter.notExists": "存在しない",
     "xpack.streams.filter.operator": "演算子",
     "xpack.streams.filter.startsWith": "で始まる",
     "xpack.streams.filter.value": "値",

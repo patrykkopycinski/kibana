@@ -43635,7 +43635,6 @@
     "xpack.streams.filter.lessThan": "inférieur à",
     "xpack.streams.filter.lessThanOrEquals": "inférieur ou égal",
     "xpack.streams.filter.notEquals": "différent de",
-    "xpack.streams.filter.notExists": "n'existe pas",
     "xpack.streams.filter.operator": "Opérateur",
     "xpack.streams.filter.startsWith": "commence par",
     "xpack.streams.filter.value": "Valeur",

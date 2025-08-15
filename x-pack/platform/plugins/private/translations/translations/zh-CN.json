@@ -43668,7 +43668,6 @@
     "xpack.streams.filter.lessThan": "小于",
     "xpack.streams.filter.lessThanOrEquals": "小于或等于",
     "xpack.streams.filter.notEquals": "不等于",
-    "xpack.streams.filter.notExists": "不存在",
     "xpack.streams.filter.operator": "运算符",
     "xpack.streams.filter.startsWith": "开头为",
     "xpack.streams.filter.value": "值",

@@ -43520,7 +43520,6 @@
     "xpack.streams.filter.lessThan": "weniger als",
     "xpack.streams.filter.lessThanOrEquals": "kleiner oder gleich",
     "xpack.streams.filter.notEquals": "ist nicht gleich",
-    "xpack.streams.filter.notExists": "existiert nicht",
     "xpack.streams.filter.operator": "Operator",
     "xpack.streams.filter.startsWith": "beginnt mit",
     "xpack.streams.filter.value": "Wert",

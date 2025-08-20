@@ -18658,7 +18658,6 @@
     "xpack.fleet.epm.screenshotsTitle": "スクリーンショット",
     "xpack.fleet.epm.subscriptionLabel": "サブスクリプション",
     "xpack.fleet.epm.updateAvailableTooltip": "更新が利用可能です",
-    "xpack.fleet.epm.usedByLabel": "エージェントポリシー",
     "xpack.fleet.epm.verificationWarningCalloutIntroText": "この統合には、真正が不明な未署名のパッケージが含まれています。{learnMoreLink}の詳細をご覧ください。",
     "xpack.fleet.epm.verificationWarningCalloutLearnMoreLink": "パッケージ署名",
     "xpack.fleet.epm.verificationWarningCalloutTitle": "統合は検証されていません",

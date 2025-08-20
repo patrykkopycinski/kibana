@@ -18589,7 +18589,6 @@
     "xpack.fleet.epm.screenshotsTitle": "Screenshots",
     "xpack.fleet.epm.subscriptionLabel": "Abonnement",
     "xpack.fleet.epm.updateAvailableTooltip": "Update verfügbar",
-    "xpack.fleet.epm.usedByLabel": "Agentenrichtlinien",
     "xpack.fleet.epm.verificationWarningCalloutIntroText": "Diese Integration enthält ein unsigniertes Paket unbekannter Authentizität. Erfahren Sie mehr über {learnMoreLink}.",
     "xpack.fleet.epm.verificationWarningCalloutLearnMoreLink": "Paket-Signaturen",
     "xpack.fleet.epm.verificationWarningCalloutTitle": "Integration nicht verifiziert",

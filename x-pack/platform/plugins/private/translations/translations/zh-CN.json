@@ -18651,7 +18651,6 @@
     "xpack.fleet.epm.screenshotsTitle": "屏幕截图",
     "xpack.fleet.epm.subscriptionLabel": "订阅",
     "xpack.fleet.epm.updateAvailableTooltip": "有可用更新",
-    "xpack.fleet.epm.usedByLabel": "代理策略",
     "xpack.fleet.epm.verificationWarningCalloutIntroText": "此集成包含真实性未知的未签名软件包。详细了解 {learnMoreLink}。",
     "xpack.fleet.epm.verificationWarningCalloutLearnMoreLink": "软件包签名",
     "xpack.fleet.epm.verificationWarningCalloutTitle": "未验证集成",

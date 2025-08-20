@@ -18634,7 +18634,6 @@
     "xpack.fleet.epm.screenshotsTitle": "Captures d'écran",
     "xpack.fleet.epm.subscriptionLabel": "Abonnement",
     "xpack.fleet.epm.updateAvailableTooltip": "Mise à jour disponible",
-    "xpack.fleet.epm.usedByLabel": "Politiques d'agent",
     "xpack.fleet.epm.verificationWarningCalloutIntroText": "Cette intégration contient un package non signé à l'authenticité inconnue. En savoir plus sur {learnMoreLink}.",
     "xpack.fleet.epm.verificationWarningCalloutLearnMoreLink": "signatures des packages",
     "xpack.fleet.epm.verificationWarningCalloutTitle": "Intégration non vérifiée",

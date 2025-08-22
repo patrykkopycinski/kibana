@@ -30862,8 +30862,6 @@
     "xpack.observability_onboarding.otelLogsPanel.steps.platform": "选择平台",
     "xpack.observability_onboarding.otelLogsPanel.steps.start": "启动收集器",
     "xpack.observability_onboarding.otelLogsPanel.steps.visualize": "可视化数据",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label": "技术预览",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.observability_onboarding.otelLogsPanel.troubleshooting": "在我们的文档中查找更多详情和故障排除解决方案。{link}",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel": "查看并分析您的指标",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel": "查看并分析您的日志",

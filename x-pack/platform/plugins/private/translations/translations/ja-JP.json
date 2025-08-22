@@ -30879,8 +30879,6 @@
     "xpack.observability_onboarding.otelLogsPanel.steps.platform": "プラットフォームを選択",
     "xpack.observability_onboarding.otelLogsPanel.steps.start": "コレクターを開始",
     "xpack.observability_onboarding.otelLogsPanel.steps.visualize": "データを可視化する",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label": "テクニカルプレビュー",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.observability_onboarding.otelLogsPanel.troubleshooting": "詳細とトラブルシューティングの解決策については、ドキュメントをご覧ください。{link}",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel": "メトリックを表示して分析",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel": "ログを表示して分析",

@@ -30766,8 +30766,6 @@
     "xpack.observability_onboarding.otelLogsPanel.steps.platform": "Wählen Sie Ihre Platform",
     "xpack.observability_onboarding.otelLogsPanel.steps.start": "Starten Sie den Collector",
     "xpack.observability_onboarding.otelLogsPanel.steps.visualize": "Daten visualisieren",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label": "Technische Vorschau",
-    "xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
     "xpack.observability_onboarding.otelLogsPanel.troubleshooting": "Weitere Einzelheiten und Lösungen zur Fehlerbehebung finden Sie in unserer Dokumentation. {link}",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourMetricsTextLabel": "Ihre Metriken anzeigen und analysieren",
     "xpack.observability_onboarding.otelLogsPanel.viewAndAnalyzeYourTextLabel": "Ihre Logs ansehen und analysieren",

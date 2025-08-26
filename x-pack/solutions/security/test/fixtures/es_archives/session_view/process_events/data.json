@@ -207951,3 +207951,466 @@
             }
         }
     }
+
+    {
+        "type": "doc",
+        "value": {
+            "index": "logs-endpoint.events.process",
+            "id": "DlWxr4ABxtjWu-ucyjOp",
+            "source": {
+                "agent": {
+                    "id": "01010101-0101-0101-0101-010101010101",
+                    "type": "endpoint",
+                    "version": "8.3.0-SNAPSHOT"
+                },
+                "process": {
+                    "Ext": {
+                        "ancestry": [
+                            "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+                            "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU2LTEzMjk2NDkxMDQwLjYwMDAwMDAw",
+                            "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUxOTgyLTEzMjk2NDkxMDM2LjI3MDAwMDAwMA==",
+                            "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUxMzExLTEzMjk2NDkwNzYxLjkwMDAwMDAwMA==",
+                            "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTEtMTMyOTYyNDg3MjEuMA=="
+                        ]
+                    },
+                    "parent": {
+                        "real_user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "interactive": true,
+                        "start": "2022-05-08T00:00:00.13Z",
+                        "pid": 52057,
+                        "working_directory": "/home/kg",
+                        "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+                        "executable": "/bin/bash",
+                        "args": "single-arg",
+                        "name": "bash",
+                        "tty": {
+                            "char_device": {
+                                "major": 4,
+                                "minor": 1
+                            },
+                            "type": "char_device"
+                        },
+                        "real_group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "args_count": 1,
+                        "user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "command_line": "-bash",
+                        "group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "supplemental_groups": [
+                            {
+                                "name": "adm",
+                                "id": 4
+                            },
+                            {
+                                "name": "cdrom",
+                                "id": 24
+                            },
+                            {
+                                "name": "sudo",
+                                "id": 27
+                            },
+                            {
+                                "name": "dip",
+                                "id": 30
+                            },
+                            {
+                                "name": "plugdev",
+                                "id": 46
+                            },
+                            {
+                                "name": "lxd",
+                                "id": 110
+                            },
+                            {
+                                "name": "docker",
+                                "id": 118
+                            }
+                        ]
+                    },
+                    "group_leader": {
+                        "real_user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "interactive": true,
+                        "start": "2022-05-08T00:00:00.13Z",
+                        "pid": 52057,
+                        "working_directory": "/home/kg",
+                        "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+                        "executable": "/bin/bash",
+                        "args": "single-arg",
+                        "name": "bash",
+                        "tty": {
+                            "char_device": {
+                                "major": 4,
+                                "minor": 1
+                            },
+                            "type": "char_device"
+                        },
+                        "real_group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "args_count": 1,
+                        "same_as_process": false,
+                        "user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "supplemental_groups": [
+                            {
+                                "name": "adm",
+                                "id": 4
+                            },
+                            {
+                                "name": "cdrom",
+                                "id": 24
+                            },
+                            {
+                                "name": "sudo",
+                                "id": 27
+                            },
+                            {
+                                "name": "dip",
+                                "id": 30
+                            },
+                            {
+                                "name": "plugdev",
+                                "id": 46
+                            },
+                            {
+                                "name": "lxd",
+                                "id": 110
+                            },
+                            {
+                                "name": "docker",
+                                "id": 118
+                            }
+                        ]
+                    },
+                    "previous": [
+                        {
+                            "args": [
+                                "-bash"
+                            ],
+                            "args_count": 0,
+                            "executable": "/bin/bash"
+                        }
+                    ],
+                    "real_user": {
+                        "name": "kg",
+                        "id": 1000
+                    },
+                    "interactive": true,
+                    "start": "2022-05-08T00:00:00.13Z",
+                    "pid": 52065,
+                    "working_directory": "/home/kg",
+                    "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDY1LTEzMjk2NDkxMDQwLjI0MDAwMDAwMA==",
+                    "executable": "/usr/bin/dircolors",
+                    "args": [
+                        "dircolors",
+                        "-b"
+                    ],
+                    "session_leader": {
+                        "real_user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "interactive": true,
+                        "start": "2022-05-08T00:00:00.13Z",
+                        "pid": 52057,
+                        "working_directory": "/home/kg",
+                        "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+                        "executable": "/bin/bash",
+                        "args": "single-arg",
+                        "name": "bash",
+                        "tty": {
+                            "char_device": {
+                                "major": 4,
+                                "minor": 1
+                            },
+                            "type": "char_device"
+                        },
+                        "real_group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "args_count": 1,
+                        "same_as_process": false,
+                        "user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "supplemental_groups": [
+                            {
+                                "name": "adm",
+                                "id": 4
+                            },
+                            {
+                                "name": "cdrom",
+                                "id": 24
+                            },
+                            {
+                                "name": "sudo",
+                                "id": 27
+                            },
+                            {
+                                "name": "dip",
+                                "id": 30
+                            },
+                            {
+                                "name": "plugdev",
+                                "id": 46
+                            },
+                            {
+                                "name": "lxd",
+                                "id": 110
+                            },
+                            {
+                                "name": "docker",
+                                "id": 118
+                            }
+                        ]
+                    },
+                    "entry_leader": {
+                        "parent": {
+                            "start": "2022-05-08T00:00:00.13Z",
+                            "pid": 52056,
+                            "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU2LTEzMjk2NDkxMDQwLjYwMDAwMDAw"
+                        },
+                        "real_user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "interactive": true,
+                        "start": "2022-05-08T00:00:00.13Z",
+                        "entry_meta": {
+                            "source": {
+                                "ip": "10.0.2.2"
+                            },
+                            "type": "sshd"
+                        },
+                        "pid": 52057,
+                        "working_directory": "/home/kg",
+                        "entity_id": "MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==",
+                        "executable": "/bin/bash",
+                        "args": "single-arg",
+                        "name": "bash",
+                        "tty": {
+                            "char_device": {
+                                "major": 4,
+                                "minor": 1
+                            },
+                            "type": "char_device"
+                        },
+                        "real_group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "args_count": 1,
+                        "same_as_process": false,
+                        "user": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "group": {
+                            "name": "kg",
+                            "id": 1000
+                        },
+                        "supplemental_groups": [
+                            {
+                                "name": "adm",
+                                "id": 4
+                            },
+                            {
+                                "name": "cdrom",
+                                "id": 24
+                            },
+                            {
+                                "name": "sudo",
+                                "id": 27
+                            },
+                            {
+                                "name": "dip",
+                                "id": 30
+                            },
+                            {
+                                "name": "plugdev",
+                                "id": 46
+                            },
+                            {
+                                "name": "lxd",
+                                "id": 110
+                            },
+                            {
+                                "name": "docker",
+                                "id": 118
+                            }
+                        ]
+                    },
+                    "exit_code": 0,
+                    "name": "dircolors",
+                    "tty": {
+                        "char_device": {
+                            "major": 4,
+                            "minor": 1
+                        }
+                    },
+                    "real_group": {
+                        "name": "kg",
+                        "id": 1000
+                    },
+                    "args": "single-arg",
+                    "args_count": 1,
+                    "user": {
+                        "name": "kg",
+                        "id": 1000
+                    },
+                    "command_line": "dircolors -b",
+                    "hash": {
+                        "sha1": "04cf29f2e04fa4cae48134732e2ed92468a8fc0d",
+                        "sha256": "fa88babbb82377cd09f0bb371f752121e645245d5247ebfc39393a8798abe5c5",
+                        "md5": "c60577bd54ca4b90624de46bd6f3be1a"
+                    },
+                    "group": {
+                        "name": "kg",
+                        "id": 1000
+                    },
+                    "supplemental_groups": [
+                        {
+                            "name": "adm",
+                            "id": 4
+                        },
+                        {
+                            "name": "cdrom",
+                            "id": 24
+                        },
+                        {
+                            "name": "sudo",
+                            "id": 27
+                        },
+                        {
+                            "name": "dip",
+                            "id": 30
+                        },
+                        {
+                            "name": "plugdev",
+                            "id": 46
+                        },
+                        {
+                            "name": "lxd",
+                            "id": 110
+                        },
+                        {
+                            "name": "docker",
+                            "id": 118
+                        }
+                    ]
+                },
+                "message": "Endpoint process event",
+                "@timestamp": "2022-05-08T00:00:00.00Z",
+                "ecs": {
+                    "version": "1.11.0"
+                },
+                "data_stream": {
+                    "namespace": "default",
+                    "type": "logs",
+                    "dataset": "endpoint.events.process"
+                },
+                "elastic": {
+                    "agent": {
+                        "id": "01010101-0101-0101-0101-010101010101"
+                    }
+                },
+                "host": {
+                    "hostname": "codecvlt",
+                    "boot": {
+                        "id": "1234"
+                    },
+                    "os": {
+                        "Ext": {
+                            "variant": "Ubuntu"
+                        },
+                        "kernel": "5.13.0-40-generic #45-Ubuntu SMP Tue Mar 29 14:48:14 UTC 2022",
+                        "name": "Linux",
+                        "family": "ubuntu",
+                        "type": "linux",
+                        "version": "21.10",
+                        "platform": "ubuntu",
+                        "full": "Ubuntu 21.10"
+                    },
+                    "ip": [
+                        "172.17.0.1",
+                        "127.0.0.1",
+                        "::1",
+                        "10.0.2.15",
+                        "fe80::a00:27ff:fed8:d0c7"
+                    ],
+                    "name": "codecvlt",
+                    "id": "00000000-0000-0000-0000-000000000000",
+                    "mac": [
+                        "02:42:7e:91:e2:fc",
+                        "08:00:27:d8:d0:c7"
+                    ],
+                    "architecture": "x86_64"
+                },
+                "event": {
+                    "agent_id_status": "auth_metadata_missing",
+                    "sequence": 304523,
+                    "ingested": "2022-05-10T20:38:26Z",
+                    "created": "2022-05-10T20:38:22.5614244Z",
+                    "kind": "event",
+                    "module": "endpoint",
+                    "action": "end",
+                    "id": "MbEL/BDTBn1bDrQw++++2Py8",
+                    "category": [
+                        "process"
+                    ],
+                    "type": [
+                        "end"
+                    ],
+                    "dataset": "endpoint.events.process"
+                },
+                "user": {
+                    "Ext": {
+                        "real": {
+                            "name": "kg",
+                            "id": 1000
+                        }
+                    },
+                    "name": "kg",
+                    "id": 1000
+                },
+                "group": {
+                    "Ext": {
+                        "real": {
+                            "name": "kg",
+                            "id": 1000
+                        }
+                    },
+                    "name": "kg",
+                    "id": 1000
+                }
+            }
+        }
+    }
+

@@ -36111,8 +36111,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel": "Regel aktualisieren",
     "xpack.securitySolution.detectionEngine.ruleDetails.updateCalloutTitle": "Elastic-Regel-Update verfügbar",
     "xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel": "Überblick über Elastic-Updates",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription": "Klicken Sie auf den Namen einer Regel, um die neuesten Änderungen anzuzeigen.",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle": "Neue Feldansicht der Aktualisierungen",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton": "Aktualisierung prüfen",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage": "Bevor Sie diese Regel bearbeiten, empfehlen wir Ihnen dringend, sie zu aktualisieren, um sicherzustellen, dass Sie die neuesten Verbesserungen erhalten.",
     "xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton": "Zurück zu den Details",

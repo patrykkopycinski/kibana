@@ -36191,8 +36191,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel": "Mettre à jour une règle",
     "xpack.securitySolution.detectionEngine.ruleDetails.updateCalloutTitle": "Mise à jour de la règle Elastic disponible",
     "xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel": "Aperçu de la mise à jour Elastic",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription": "Cliquez sur le nom d'une règle pour voir les dernières modifications.",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle": "Nouvelle vue des mises à jour par champ",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton": "Passer en revue la mise à jour",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage": "Avant de modifier cette règle, nous vous recommandons vivement de la mettre à jour afin de bénéficier des dernières améliorations.",
     "xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton": "Revenir aux détails",

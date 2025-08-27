@@ -36216,8 +36216,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel": "更新规则",
     "xpack.securitySolution.detectionEngine.ruleDetails.updateCalloutTitle": "有 Elastic 规则更新可用",
     "xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel": "Elastic 更新概览",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription": "单击规则名称可查看最新更改。",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle": "更新的新字段视图",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton": "复查更新",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage": "在编辑此规则之前，强烈建议您对其进行更新以确保获取最新改进。",
     "xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton": "返回到详情",

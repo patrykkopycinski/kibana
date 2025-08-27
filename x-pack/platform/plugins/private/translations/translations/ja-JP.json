@@ -36230,8 +36230,6 @@
     "xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel": "ルールを更新",
     "xpack.securitySolution.detectionEngine.ruleDetails.updateCalloutTitle": "Elasticルールの更新が利用可能です",
     "xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel": "Elastic更新の概要",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription": "ルールの名前をクリックすると、最新の変更が表示されます。",
-    "xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle": "更新の新しいフィールドビュー",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpdate.calloutButton": "更新をレビュー",
     "xpack.securitySolution.detectionEngine.ruleDetailsUpgrade.calloutMessage": "このルールを編集する前に、ルールを更新し、最新の改善点を確実に導入することを強くお勧めします。",
     "xpack.securitySolution.detectionEngine.ruleEditingUpdate.calloutButton": "詳細に戻る",

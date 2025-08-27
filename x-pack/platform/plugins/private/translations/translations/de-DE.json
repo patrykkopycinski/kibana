@@ -14645,7 +14645,6 @@
     "xpack.csp.dataTable.fieldsModalReset": "Felder zurücksetzen",
     "xpack.csp.dataTable.fieldsModalSearch": "Suchfeldname",
     "xpack.csp.dataTable.fieldsModalTitle": "Felder",
-    "xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle": "Demnächst verfügbar",
     "xpack.csp.disableBenchmarkRuleButton": "Regel deaktivieren",
     "xpack.csp.eksIntegration.accessKeyIdLabel": "Zugriffsschlüssel-ID",
     "xpack.csp.eksIntegration.assumeRoleDescription": "Eine IAM-Rolle Amazon Resource Name (ARN) ist eine IAM-Identität, die Sie in Ihrem AWS-Konto erstellen können. Beim Erstellen einer IAM-Rolle können Nutzer die Berechtigungen der Rolle definieren. Rollen verfügen nicht über standardmäßige langfristige Anmeldeinformationen wie Passwörter oder Zugangsschlüssel.",

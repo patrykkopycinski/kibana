@@ -14702,7 +14702,6 @@
     "xpack.csp.dataTable.fieldsModalReset": "重置字段",
     "xpack.csp.dataTable.fieldsModalSearch": "搜索字段名称",
     "xpack.csp.dataTable.fieldsModalTitle": "字段",
-    "xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle": "即将推出",
     "xpack.csp.disableBenchmarkRuleButton": "禁用规则",
     "xpack.csp.eksIntegration.accessKeyIdLabel": "访问密钥 ID",
     "xpack.csp.eksIntegration.assumeRoleDescription": "IAM 角色 Amazon 资源名称 (ARN) 是您可在 AWS 账户中创建的 IAM 身份。创建 IAM 角色时，用户可以定义该角色的权限。角色没有标准的长期凭据，如密码或访问密钥。",

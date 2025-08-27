@@ -14708,7 +14708,6 @@
     "xpack.csp.dataTable.fieldsModalReset": "フィールドをリセット",
     "xpack.csp.dataTable.fieldsModalSearch": "検索フィールド名",
     "xpack.csp.dataTable.fieldsModalTitle": "フィールド",
-    "xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle": "まもなくリリース",
     "xpack.csp.disableBenchmarkRuleButton": "ルールを無効にする",
     "xpack.csp.eksIntegration.accessKeyIdLabel": "アクセスキーID",
     "xpack.csp.eksIntegration.assumeRoleDescription": "IAMロールAmazon Resource Name（ARN）は、AWSアカウントで作成できるIAM IDです。IAMロールを作成するときには、ユーザーはロールの権限を定義できます。ロールには、パスワードやアクセスキーなどの標準の長期的な資格情報がありません。",

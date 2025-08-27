@@ -14689,7 +14689,6 @@
     "xpack.csp.dataTable.fieldsModalReset": "Réinitialiser les champs",
     "xpack.csp.dataTable.fieldsModalSearch": "Rechercher le nom du champ",
     "xpack.csp.dataTable.fieldsModalTitle": "Champs",
-    "xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle": "Bientôt disponible",
     "xpack.csp.disableBenchmarkRuleButton": "Désactiver la règle",
     "xpack.csp.eksIntegration.accessKeyIdLabel": "ID de clé d'accès",
     "xpack.csp.eksIntegration.assumeRoleDescription": "Un nom ARN (Amazon Resource Name) de rôle IAM est une identité IAM que vous pouvez créer dans votre compte AWS. Lors de la création d'un rôle IAM, les utilisateurs peuvent définir les autorisations accordées au rôle. Les rôles n'ont pas d'informations d'identification à long terme standard telles que des mots de passe ou des clés d'accès.",

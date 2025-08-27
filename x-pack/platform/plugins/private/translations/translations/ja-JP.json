@@ -2974,7 +2974,6 @@
     "esqlEditor.discardStarredQueryModal.discardQueryLabel": "クエリを破棄",
     "esqlEditor.discardStarredQueryModal.dismissButtonLabel": "次回以降確認しない",
     "esqlEditor.discardStarredQueryModal.title": "スター付きのクエリを破棄",
-    "esqlEditor.history.historyItemslimit": "最後の{historyItemsLimit}件のクエリを表示中",
     "esqlEditor.history.starredItemslimit": "{starredItemsCount}件のクエリを表示中（最大{starredItemsLimit}）",
     "esqlEditor.query.aborted": "リクエストが中断されました",
     "esqlEditor.query.cancel": "キャンセル",

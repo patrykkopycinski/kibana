@@ -2955,7 +2955,6 @@
     "esqlEditor.discardStarredQueryModal.discardQueryLabel": "Abfrage verwerfen",
     "esqlEditor.discardStarredQueryModal.dismissButtonLabel": "Fragen Sie mich nicht erneut",
     "esqlEditor.discardStarredQueryModal.title": "Markierte Abfrage löschen",
-    "esqlEditor.history.historyItemslimit": "Die letzten {historyItemsLimit} Abfragen werden angezeigt",
     "esqlEditor.history.starredItemslimit": "Es werden {starredItemsCount} Abfragen angezeigt (maximal {starredItemsLimit})",
     "esqlEditor.query.aborted": "Anfrage wurde abgebrochen",
     "esqlEditor.query.cancel": "Abbrechen",

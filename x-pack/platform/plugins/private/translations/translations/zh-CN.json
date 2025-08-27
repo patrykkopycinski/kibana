@@ -2967,7 +2967,6 @@
     "esqlEditor.discardStarredQueryModal.discardQueryLabel": "丢弃查询",
     "esqlEditor.discardStarredQueryModal.dismissButtonLabel": "不再询问我",
     "esqlEditor.discardStarredQueryModal.title": "丢弃带星标查询",
-    "esqlEditor.history.historyItemslimit": "正在显示最后 {historyItemsLimit} 个查询",
     "esqlEditor.history.starredItemslimit": "正在显示 {starredItemsCount} 个查询（最多 {starredItemsLimit} 个）",
     "esqlEditor.query.aborted": "请求已中止",
     "esqlEditor.query.cancel": "取消",

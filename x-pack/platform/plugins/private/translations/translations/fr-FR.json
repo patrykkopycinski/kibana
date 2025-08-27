@@ -2971,7 +2971,6 @@
     "esqlEditor.discardStarredQueryModal.discardQueryLabel": "Abandonner la requête",
     "esqlEditor.discardStarredQueryModal.dismissButtonLabel": "Ne plus me demander",
     "esqlEditor.discardStarredQueryModal.title": "Abandonner la requête avec étoile",
-    "esqlEditor.history.historyItemslimit": "Affichage des dernières {historyItemsLimit} requêtes",
     "esqlEditor.history.starredItemslimit": "Affichage de {starredItemsCount} requêtes (max {starredItemsLimit})",
     "esqlEditor.query.aborted": "La demande a été annulée",
     "esqlEditor.query.cancel": "Annuler",

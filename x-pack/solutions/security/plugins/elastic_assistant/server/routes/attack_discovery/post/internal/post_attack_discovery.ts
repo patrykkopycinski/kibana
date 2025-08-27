@@ -11,7 +11,6 @@ import {
   AttackDiscoveryPostResponse,
   API_VERSIONS,
   ATTACK_DISCOVERY,
-  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
   getAttackDiscoveryLoadingMessage,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -22,19 +21,20 @@ import {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
-} from '../../../../common/constants';
-import { getDurationNanoseconds } from './get_duration_nanoseconds';
-import { performChecks } from '../../helpers';
-import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
-import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
-import { buildResponse } from '../../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { requestIsValid } from './helpers/request_is_valid';
-import { generateAndUpdateAttackDiscoveries } from '../helpers/generate_and_update_discoveries';
-import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+} from '../../../../../common/constants';
+import { generateDepreciatedInternalApiResponse } from '../helpers/generate_depreciated_internal_api_response';
+import { getDurationNanoseconds } from '../get_duration_nanoseconds';
+import { performChecks } from '../../../helpers';
+import { writeAttackDiscoveryEvent } from '../helpers/write_attack_discovery_event';
+import { buildResponse } from '../../../../lib/build_response';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
+import { requestIsValid } from '../helpers/request_is_valid';
+import { generateAndUpdateAttackDiscoveries } from '../../helpers/generate_and_update_discoveries';
+import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
+/** depreciated internal API route, to be removed in a future release */
 export const postAttackDiscoveryRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
@@ -75,7 +75,6 @@ export const postAttackDiscoveryRoute = (
         ]);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
-        const { featureFlags } = await context.core;
         const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
 
         const logger: Logger = assistantContext.logger;
@@ -135,30 +134,16 @@ export const postAttackDiscoveryRoute = (
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
-            ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-            true
-          );
-
-          if (attackDiscoveryAlertsEnabled) {
-            // Perform alerts access check
-            const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
-              context: performChecksContext,
-              response,
-            });
-            if (!privilegesCheckResponse.isSuccess) {
-              return privilegesCheckResponse.response;
-            }
+          // Perform alerts access check
+          const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
+            context: performChecksContext,
+            response,
+          });
+          if (!privilegesCheckResponse.isSuccess) {
+            return privilegesCheckResponse.response;
           }
 
-          const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
-            dataClient,
-            authenticatedUser,
-            apiConfig,
-            size
-          );
-
-          const executionUuid = attackDiscoveryAlertsEnabled ? uuidv4() : attackDiscoveryId;
+          const executionUuid = uuidv4();
 
           // event log details:
           const connectorId = apiConfig.connectorId;
@@ -172,7 +157,6 @@ export const postAttackDiscoveryRoute = (
 
           await writeAttackDiscoveryEvent({
             action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED,
-            attackDiscoveryAlertsEnabled,
             authenticatedUser,
             connectorId,
             dataClient,
@@ -188,7 +172,6 @@ export const postAttackDiscoveryRoute = (
           // Don't await the results of invoking the graph; (just the metadata will be returned from the route handler):
           generateAndUpdateAttackDiscoveries({
             actionsClient,
-            attackDiscoveryAlertsEnabled,
             executionUuid,
             authenticatedUser,
             config: request.body,
@@ -210,7 +193,6 @@ export const postAttackDiscoveryRoute = (
                 await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED,
                   alertsContextCount: result.anonymizedAlerts?.length,
-                  attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
                   dataClient,
@@ -228,7 +210,6 @@ export const postAttackDiscoveryRoute = (
                 await writeAttackDiscoveryEvent({
                   action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
                   alertsContextCount: result.anonymizedAlerts?.length,
-                  attackDiscoveryAlertsEnabled,
                   authenticatedUser,
                   connectorId,
                   dataClient,
@@ -254,7 +235,6 @@ export const postAttackDiscoveryRoute = (
 
               await writeAttackDiscoveryEvent({
                 action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED,
-                attackDiscoveryAlertsEnabled,
                 authenticatedUser,
                 connectorId,
                 dataClient,
@@ -271,7 +251,7 @@ export const postAttackDiscoveryRoute = (
             });
 
           return response.ok({
-            body: currentAd,
+            body: generateDepreciatedInternalApiResponse(),
           });
         } catch (err) {
           logger.error(err);

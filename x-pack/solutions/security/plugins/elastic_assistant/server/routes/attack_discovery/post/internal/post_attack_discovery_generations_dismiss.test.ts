@@ -7,12 +7,12 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
-import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../../lib/attack_discovery/persistence';
 import { postAttackDiscoveryGenerationsDismissRoute } from './post_attack_discovery_generations_dismiss';
-import { attackDiscoveryDataClientMock } from '../../../__mocks__/data_clients.mock';
-import { requestMock } from '../../../__mocks__/request';
-import { requestContextMock } from '../../../__mocks__/request_context';
-import { serverMock } from '../../../__mocks__/server';
+import { attackDiscoveryDataClientMock } from '../../../../__mocks__/data_clients.mock';
+import { requestMock } from '../../../../__mocks__/request';
+import { requestContextMock } from '../../../../__mocks__/request_context';
+import { serverMock } from '../../../../__mocks__/server';
 
 const { context } = requestContextMock.createTools();
 const server = serverMock.create();

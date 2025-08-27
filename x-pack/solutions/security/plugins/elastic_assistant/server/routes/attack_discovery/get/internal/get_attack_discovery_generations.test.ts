@@ -10,9 +10,9 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { getAttackDiscoveryGenerationsRoute } from './get_attack_discovery_generations';
-import * as helpers from '../../helpers';
-import { getMockAttackDiscoveryGenerationsResponse } from '../../../__mocks__/attack_discovery_generations_response';
-import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_user';
+import * as helpers from '../../../helpers';
+import { getMockAttackDiscoveryGenerationsResponse } from '../../../../__mocks__/attack_discovery_generations_response';
+import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 
 const mockAttackDiscoveryGenerationsResponse = getMockAttackDiscoveryGenerationsResponse();
 

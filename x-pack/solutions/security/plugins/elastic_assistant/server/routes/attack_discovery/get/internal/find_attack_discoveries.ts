@@ -9,25 +9,25 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-  ATTACK_DISCOVERY_BULK,
-  PostAttackDiscoveryBulkRequestBody,
-  PostAttackDiscoveryBulkResponse,
+  ATTACK_DISCOVERY_FIND,
+  AttackDiscoveryFindRequestQuery,
+  AttackDiscoveryFindResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { performChecks } from '../../helpers';
-import { buildResponse } from '../../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+import { performChecks } from '../../../helpers';
+import { buildResponse } from '../../../../lib/build_response';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
+import { hasReadAttackDiscoveryAlertsPrivileges } from '../../helpers/index_privileges';
 
-export const postAttackDiscoveryBulkRoute = (
+/** depreciated internal API route, to be removed in a future release */
+export const findAttackDiscoveriesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
-    .post({
+    .get({
       access: 'internal',
-      path: ATTACK_DISCOVERY_BULK,
+      path: ATTACK_DISCOVERY_FIND,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -39,26 +39,21 @@ export const postAttackDiscoveryBulkRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(PostAttackDiscoveryBulkRequestBody),
+            query: buildRouteValidationWithZod(AttackDiscoveryFindRequestQuery),
           },
           response: {
             200: {
               body: {
-                custom: buildRouteValidationWithZod(PostAttackDiscoveryBulkResponse),
+                custom: buildRouteValidationWithZod(AttackDiscoveryFindResponse),
               },
             },
           },
         },
       },
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<PostAttackDiscoveryBulkResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryFindResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
-        const { featureFlags } = await context.core;
         const logger: Logger = assistantContext.logger;
 
         // Perform license and authenticated user checks:
@@ -72,20 +67,8 @@ export const postAttackDiscoveryBulkRoute = (
           return checkResponse.response;
         }
 
-        const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
-          ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-          true
-        );
-
-        if (!attackDiscoveryAlertsEnabled) {
-          return resp.error({
-            body: `Attack discovery alerts feature is disabled`,
-            statusCode: 403,
-          });
-        }
-
         // Perform alerts access check
-        const privilegesCheckResponse = await hasReadWriteAttackDiscoveryAlertsPrivileges({
+        const privilegesCheckResponse = await hasReadAttackDiscoveryAlertsPrivileges({
           context: ctx,
           response,
         });
@@ -94,7 +77,7 @@ export const postAttackDiscoveryBulkRoute = (
         }
 
         try {
-          const currentUser = await checkResponse.currentUser;
+          const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -104,37 +87,43 @@ export const postAttackDiscoveryBulkRoute = (
             });
           }
 
-          const kibanaAlertWorkflowStatus = request.body.update?.kibana_alert_workflow_status;
-          const visibility = request.body.update?.visibility;
-          const ids = request.body.update?.ids;
-
-          if (ids == null || ids.length === 0) {
-            return response.ok({
-              body: { data: [] },
-            });
-          }
+          const currentUser = await checkResponse.currentUser;
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          const data = await dataClient.bulkUpdateAttackDiscoveryAlerts({
+          const result = await dataClient.findAttackDiscoveryAlerts({
             authenticatedUser: currentUser,
             esClient,
-            ids,
-            kibanaAlertWorkflowStatus,
+            findAttackDiscoveryAlertsParams: {
+              alertIds: query.alert_ids,
+              includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
+              ids: query.ids,
+              search: query.search,
+              shared: query.shared,
+              status: query.status,
+              connectorNames: query.connector_names,
+              start: query.start,
+              end: query.end,
+              page: query.page,
+              perPage: query.per_page,
+              sortField: query.sort_field,
+              sortOrder: query.sort_order,
+            },
             logger,
-            visibility,
           });
 
           return response.ok({
-            body: { data },
+            body: {
+              ...result,
+            },
           });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);
 
           return resp.error({
-            body: { success: false, error: error.message },
+            body: error.message,
             statusCode: error.statusCode,
           });
         }

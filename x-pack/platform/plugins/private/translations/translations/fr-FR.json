@@ -34336,7 +34336,6 @@
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.learnMoreLink": "En savoir plus sur Attack discovery",
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.noAlertsToAnalyzeTitle": "Aucune alerte à analyser",
     "xpack.securitySolution.attackDiscovery.pages.pageTitle.pageTitle": "Attack discovery",
-    "xpack.securitySolution.attackDiscovery.pages.pageTitle.statusConnectors": "Vous avez {newDiscoveriesCount} {newDiscoveriesCount, plural, =1 {nouvelle découverte} other {nouvelles découvertes}} à travers {newConnectorResultsCount} {newConnectorResultsCount, plural, =1 {connecteur} other {connecteurs}} à examiner.",
     "xpack.securitySolution.attackDiscovery.pages.welcome.firstSetUpLabel": "Tout d’abord, configurez un connecteur d’IA générative.",
     "xpack.securitySolution.attackDiscovery.pages.welcome.welcomeToAttackDiscoveryLabel": "Bienvenue sur Attack discovery !",
     "xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsPreviewTabLabel": "Aperçu des alertes",

@@ -9,24 +9,24 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ATTACK_DISCOVERY_FIND,
-  AttackDiscoveryFindRequestQuery,
-  AttackDiscoveryFindResponse,
+  ATTACK_DISCOVERY_GENERATIONS,
+  GetAttackDiscoveryGenerationsRequestQuery,
+  GetAttackDiscoveryGenerationsResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { performChecks } from '../../helpers';
-import { buildResponse } from '../../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
+import { performChecks } from '../../../helpers';
+import { buildResponse } from '../../../../lib/build_response';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
-export const findAttackDiscoveriesRoute = (
+/** depreciated internal API route, to be removed in a future release */
+export const getAttackDiscoveryGenerationsRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
     .get({
       access: 'internal',
-      path: ATTACK_DISCOVERY_FIND,
+      path: ATTACK_DISCOVERY_GENERATIONS,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -38,18 +38,22 @@ export const findAttackDiscoveriesRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(AttackDiscoveryFindRequestQuery),
+            query: buildRouteValidationWithZod(GetAttackDiscoveryGenerationsRequestQuery),
           },
           response: {
             200: {
               body: {
-                custom: buildRouteValidationWithZod(AttackDiscoveryFindResponse),
+                custom: buildRouteValidationWithZod(GetAttackDiscoveryGenerationsResponse),
               },
             },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryFindResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<GetAttackDiscoveryGenerationsResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
@@ -66,16 +70,9 @@ export const findAttackDiscoveriesRoute = (
           return checkResponse.response;
         }
 
-        // Perform alerts access check
-        const privilegesCheckResponse = await hasReadAttackDiscoveryAlertsPrivileges({
-          context: ctx,
-          response,
-        });
-        if (!privilegesCheckResponse.isSuccess) {
-          return privilegesCheckResponse.response;
-        }
-
         try {
+          const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
+          const spaceId = (await context.elasticAssistant).getSpaceId();
           const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
@@ -88,28 +85,16 @@ export const findAttackDiscoveriesRoute = (
 
           const currentUser = await checkResponse.currentUser;
 
-          // get an Elasticsearch client for the authenticated user:
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-
-          const result = await dataClient.findAttackDiscoveryAlerts({
+          const result = await dataClient.getAttackDiscoveryGenerations({
             authenticatedUser: currentUser,
-            esClient,
-            findAttackDiscoveryAlertsParams: {
-              alertIds: query.alert_ids,
-              includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
-              ids: query.ids,
-              search: query.search,
-              shared: query.shared,
-              status: query.status,
-              connectorNames: query.connector_names,
-              start: query.start,
+            eventLogIndex,
+            getAttackDiscoveryGenerationsParams: {
               end: query.end,
-              page: query.page,
-              perPage: query.per_page,
-              sortField: query.sort_field,
-              sortOrder: query.sort_order,
+              size: query.size,
+              start: query.start,
             },
             logger,
+            spaceId,
           });
 
           return response.ok({

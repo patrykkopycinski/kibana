@@ -9,23 +9,26 @@ import type { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ATTACK_DISCOVERY_GENERATIONS,
-  GetAttackDiscoveryGenerationsRequestQuery,
-  GetAttackDiscoveryGenerationsResponse,
+  ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
+  PostAttackDiscoveryGenerationsDismissRequestParams,
+  PostAttackDiscoveryGenerationsDismissResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
-import { performChecks } from '../../helpers';
-import { buildResponse } from '../../../lib/build_response';
-import type { ElasticAssistantRequestHandlerContext } from '../../../types';
+import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../../../../common/constants';
+import { performChecks } from '../../../helpers';
+import { writeAttackDiscoveryEvent } from '../helpers/write_attack_discovery_event';
+import { buildResponse } from '../../../../lib/build_response';
+import type { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
-export const getAttackDiscoveryGenerationsRoute = (
+/** depreciated internal API route, to be removed in a future release */
+export const postAttackDiscoveryGenerationsDismissRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
-      path: ATTACK_DISCOVERY_GENERATIONS,
+      path: ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS,
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
@@ -37,12 +40,12 @@ export const getAttackDiscoveryGenerationsRoute = (
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetAttackDiscoveryGenerationsRequestQuery),
+            params: buildRouteValidationWithZod(PostAttackDiscoveryGenerationsDismissRequestParams),
           },
           response: {
             200: {
               body: {
-                custom: buildRouteValidationWithZod(GetAttackDiscoveryGenerationsResponse),
+                custom: buildRouteValidationWithZod(PostAttackDiscoveryGenerationsDismissResponse),
               },
             },
           },
@@ -52,7 +55,7 @@ export const getAttackDiscoveryGenerationsRoute = (
         context,
         request,
         response
-      ): Promise<IKibanaResponse<GetAttackDiscoveryGenerationsResponse>> => {
+      ): Promise<IKibanaResponse<PostAttackDiscoveryGenerationsDismissResponse>> => {
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
@@ -71,8 +74,8 @@ export const getAttackDiscoveryGenerationsRoute = (
 
         try {
           const eventLogIndex = (await context.elasticAssistant).eventLogIndex;
+          const eventLogger = (await context.elasticAssistant).eventLogger;
           const spaceId = (await context.elasticAssistant).getSpaceId();
-          const { query } = request;
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
           if (!dataClient) {
@@ -83,22 +86,43 @@ export const getAttackDiscoveryGenerationsRoute = (
           }
 
           const currentUser = await checkResponse.currentUser;
+          const executionUuid = request.params.execution_uuid;
 
-          const result = await dataClient.getAttackDiscoveryGenerations({
+          const previousGeneration = await dataClient.getAttackDiscoveryGenerationById({
             authenticatedUser: currentUser,
             eventLogIndex,
-            getAttackDiscoveryGenerationsParams: {
-              end: query.end,
-              size: query.size,
-              start: query.start,
-            },
+            executionUuid,
+            logger,
+            spaceId,
+          });
+
+          // event log details:
+          const connectorId = previousGeneration.connector_id;
+
+          await writeAttackDiscoveryEvent({
+            action: ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED,
+            authenticatedUser: currentUser,
+            connectorId,
+            dataClient,
+            eventLogger,
+            eventLogIndex,
+            executionUuid,
+            loadingMessage: undefined,
+            message: `Attack discovery generation ${executionUuid} for user ${currentUser.username} started`,
+            spaceId,
+          });
+
+          const latestGeneration = await dataClient.getAttackDiscoveryGenerationById({
+            authenticatedUser: currentUser,
+            eventLogIndex,
+            executionUuid,
             logger,
             spaceId,
           });
 
           return response.ok({
             body: {
-              ...result,
+              ...latestGeneration,
             },
           });
         } catch (err) {
@@ -106,7 +130,7 @@ export const getAttackDiscoveryGenerationsRoute = (
           const error = transformError(err);
 
           return resp.error({
-            body: error.message,
+            body: { success: false, error: error.message },
             statusCode: error.statusCode,
           });
         }

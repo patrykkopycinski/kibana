@@ -34265,7 +34265,6 @@
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.learnMoreLink": "Erfahren Sie mehr über die Angriffserkennung",
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.noAlertsToAnalyzeTitle": "Keine Alerts, die analysiert werden können",
     "xpack.securitySolution.attackDiscovery.pages.pageTitle.pageTitle": "Angriffserkennung",
-    "xpack.securitySolution.attackDiscovery.pages.pageTitle.statusConnectors": "Sie haben {newDiscoveriesCount} neue {newDiscoveriesCount, plural, =1 {discovery} other {Entdeckungen}} in {newConnectorResultsCount} {newConnectorResultsCount, plural, =1 {connector} other {Connectors}} zum Anzeigen.",
     "xpack.securitySolution.attackDiscovery.pages.welcome.firstSetUpLabel": "Richten Sie zunächst einen Generative-KI-Connector ein.",
     "xpack.securitySolution.attackDiscovery.pages.welcome.welcomeToAttackDiscoveryLabel": "Willkommen bei Attack Discovery!",
     "xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsPreviewTabLabel": "Alarmvorschau",

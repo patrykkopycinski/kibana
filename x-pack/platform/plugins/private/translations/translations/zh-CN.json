@@ -34359,7 +34359,6 @@
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.learnMoreLink": "详细了解 Attack Discovery",
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.noAlertsToAnalyzeTitle": "没有要分析的告警",
     "xpack.securitySolution.attackDiscovery.pages.pageTitle.pageTitle": "Attack Discovery",
-    "xpack.securitySolution.attackDiscovery.pages.pageTitle.statusConnectors": "您有 {newDiscoveriesCount} 个新{newDiscoveriesCount, plural, =1 {发现} other {发现}}待查看，来自 {newConnectorResultsCount} 个{newConnectorResultsCount, plural, =1 {连接器} other {连接器}}。",
     "xpack.securitySolution.attackDiscovery.pages.welcome.firstSetUpLabel": "首先设置生成式 AI 连接器。",
     "xpack.securitySolution.attackDiscovery.pages.welcome.welcomeToAttackDiscoveryLabel": "欢迎使用 Attack Discovery！",
     "xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsPreviewTabLabel": "告警预览",

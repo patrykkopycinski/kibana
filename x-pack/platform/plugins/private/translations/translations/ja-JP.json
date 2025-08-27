@@ -34372,7 +34372,6 @@
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.learnMoreLink": "Attack discoveryの詳細",
     "xpack.securitySolution.attackDiscovery.pages.noAlerts.noAlertsToAnalyzeTitle": "分析するアラートがありません",
     "xpack.securitySolution.attackDiscovery.pages.pageTitle.pageTitle": "Attack discovery",
-    "xpack.securitySolution.attackDiscovery.pages.pageTitle.statusConnectors": "{newConnectorResultsCount}件の{newConnectorResultsCount, plural, =1 {connector} other {コネクター}}全体で、表示する{newDiscoveriesCount}件の新しい{newDiscoveriesCount, plural, =1 {discovery} other {検出}}があります。",
     "xpack.securitySolution.attackDiscovery.pages.welcome.firstSetUpLabel": "まず、生成AIコネクターを設定します。",
     "xpack.securitySolution.attackDiscovery.pages.welcome.welcomeToAttackDiscoveryLabel": "Attack Discoveryへようこそ！",
     "xpack.securitySolution.attackDiscovery.settingsFlyout.alertSelection.alertsPreviewTabLabel": "アラートプレビュー",

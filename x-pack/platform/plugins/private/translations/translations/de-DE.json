@@ -15798,7 +15798,6 @@
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel": "Referenzen anzeigen",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip": "Dieses Gespräch enthält keine Zitate.",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip": "Tastenkombination: <bold>{keyboardShortcut}</bold>",
-    "xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel": "Konversation löschen",
     "xpack.elasticAssistant.assistant.submitMessage": "Nachricht abschicken",
     "xpack.elasticAssistant.assistant.useConversation.welcomeConversationTitle": "Willkommen",
     "xpack.elasticAssistant.assistant.useSendMessage.fetchMessageTimeoutError": "Der Assistent konnte nicht rechtzeitig antworten. Bitte versuchen Sie es später noch einmal.",

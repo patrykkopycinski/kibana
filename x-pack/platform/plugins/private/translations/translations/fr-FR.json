@@ -15840,7 +15840,6 @@
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel": "Afficher les citations",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip": "Cette conversation ne contient pas de citations.",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip": "Raccourci clavier : <bold>{keyboardShortcut}</bold>",
-    "xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel": "Supprimer la conversation",
     "xpack.elasticAssistant.assistant.submitMessage": "Envoyer un message",
     "xpack.elasticAssistant.assistant.useConversation.welcomeConversationTitle": "Bienvenue",
     "xpack.elasticAssistant.assistant.useSendMessage.fetchMessageTimeoutError": "L'assistant n'a pas pu répondre à temps. Réessayez plus tard.",

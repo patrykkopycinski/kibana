@@ -15860,7 +15860,6 @@
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel": "引用を表示",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip": "この変換には引用が含まれていません。",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip": "キーボードショートカット：<bold>{keyboardShortcut}</bold>",
-    "xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel": "会話を削除",
     "xpack.elasticAssistant.assistant.submitMessage": "メッセージを送信",
     "xpack.elasticAssistant.assistant.useConversation.welcomeConversationTitle": "ようこそ",
     "xpack.elasticAssistant.assistant.useSendMessage.fetchMessageTimeoutError": "アシスタントは時間内に応答できませんでした。しばらくたってから再試行してください。",

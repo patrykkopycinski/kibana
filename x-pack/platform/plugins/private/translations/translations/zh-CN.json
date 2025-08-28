@@ -15854,7 +15854,6 @@
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel": "显示引文",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip": "此对话不包含引文。",
     "xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip": "快捷键：<bold>{keyboardShortcut}</bold>",
-    "xpack.elasticAssistant.assistant.sidePanel.deleteConversationAriaLabel": "删除对话",
     "xpack.elasticAssistant.assistant.submitMessage": "提交消息",
     "xpack.elasticAssistant.assistant.useConversation.welcomeConversationTitle": "欢迎",
     "xpack.elasticAssistant.assistant.useSendMessage.fetchMessageTimeoutError": "助手无法及时响应。请稍后重试。",

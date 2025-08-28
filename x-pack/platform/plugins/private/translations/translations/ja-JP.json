@@ -43684,8 +43684,6 @@
     "xpack.streams.samplePreviewTable.unknownStatus": "このフィールドのインデックス化されたドキュメントが不足しているため、変更をシミュレーションできませんでした",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "キャンセル",
     "xpack.streams.streamDetail.preview.editPreviewMessage": "ストリームの編集中はプレビューできません",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmpty": "プレビューはここに表示されます",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription": "新しい子ストリームを作成し、条件に基づいて子ストリームに何がルーティングされるかを確認",
     "xpack.streams.streamDetail.preview.empty": "プレビューするドキュメントがありません",
     "xpack.streams.streamDetail.preview.error": "プレビューの読み込みエラー",
     "xpack.streams.streamDetail.preview.header": "データプレビュー",

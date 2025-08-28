@@ -43667,8 +43667,6 @@
     "xpack.streams.samplePreviewTable.unknownStatus": "无法模拟更改，因为缺少使用此字段的已索引文档",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "取消",
     "xpack.streams.streamDetail.preview.editPreviewMessage": "编辑流期间预览不可用",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmpty": "您的预览将在此处显示",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription": "创建新的子流以查看要根据条件将哪些内容路由到其中",
     "xpack.streams.streamDetail.preview.empty": "没有可预览的文档",
     "xpack.streams.streamDetail.preview.error": "加载预览时出错",
     "xpack.streams.streamDetail.preview.header": "数据预览",

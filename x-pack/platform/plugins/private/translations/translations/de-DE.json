@@ -43519,8 +43519,6 @@
     "xpack.streams.samplePreviewTable.unknownStatus": "Änderungen konnten nicht simuliert werden, da es an indexierten Dokumenten mit diesem Feld mangelt",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "Abbrechen",
     "xpack.streams.streamDetail.preview.editPreviewMessage": "Die Vorschau ist beim Bearbeiten von Streams nicht verfügbar.",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmpty": "Ihre Vorschau wird hier angezeigt",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription": "Erstellen Sie einen neuen Child-Stream, um zu sehen, was basierend auf den Bedingungen an ihn weitergeleitet wird.",
     "xpack.streams.streamDetail.preview.empty": "Keine Dokumente zur Vorschau verfügbar",
     "xpack.streams.streamDetail.preview.error": "Fehler beim Laden der Vorschau",
     "xpack.streams.streamDetail.preview.header": "Datenvorschau",

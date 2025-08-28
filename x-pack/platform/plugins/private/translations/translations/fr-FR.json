@@ -43634,8 +43634,6 @@
     "xpack.streams.samplePreviewTable.unknownStatus": "Impossible de simuler les modifications à cause d'un manque de documents indexés avec ce champ",
     "xpack.streams.schemaEditorFlyout.closeButtonLabel": "Annuler",
     "xpack.streams.streamDetail.preview.editPreviewMessage": "L'aperçu est indisponible lors de la modification de flux",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmpty": "Votre aperçu apparaîtra ici",
-    "xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription": "Créez un nouveau flux enfant pour voir ce qui y sera routé selon les conditions",
     "xpack.streams.streamDetail.preview.empty": "Aucun document à visionner",
     "xpack.streams.streamDetail.preview.error": "Erreur lors du chargement de l'aperçu",
     "xpack.streams.streamDetail.preview.header": "Aperçu de données",

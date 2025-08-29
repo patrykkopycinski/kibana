@@ -32853,7 +32853,6 @@
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "Der KI-Assistent konnte nicht initialisiert werden",
     "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "Öffnen Sie den KI-Assistenten",
     "xpack.searchHomepage.appTitle": "Startseite",
-    "xpack.searchHomepage.pageTitle": "Willkommen bei Search",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "Indizes",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "Indexverwaltung",
     "xpack.searchIndices.code.createIndexCommand.description": "Verwenden Sie den Elasticsearch-Client, um einen Index mit semantischen Feldern zu erstellen",

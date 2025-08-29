@@ -32939,7 +32939,6 @@
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "无法初始化 AI 助手",
     "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "打开 AI 助手",
     "xpack.searchHomepage.appTitle": "主页",
-    "xpack.searchHomepage.pageTitle": "欢迎使用 Search",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "索引",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "索引管理",
     "xpack.searchIndices.code.createIndexCommand.description": "使用 Elasticsearch 客户端创建包含语义字段的索引",

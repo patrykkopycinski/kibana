@@ -32955,7 +32955,6 @@
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "AI Assistantを初期化できませんでした",
     "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "AI Assistantを開く",
     "xpack.searchHomepage.appTitle": "ホーム",
-    "xpack.searchHomepage.pageTitle": "Searchへようこそ",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "インデックス",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "インデックス管理",
     "xpack.searchIndices.code.createIndexCommand.description": "Elasticsearchクライアントを使用して、セマンティックフィールドがあるインデックスを作成",

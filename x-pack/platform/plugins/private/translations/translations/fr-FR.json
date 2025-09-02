@@ -19084,8 +19084,6 @@
     "xpack.fleet.settings.advancedSectionTitle": "Paramètres avancés",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription": "Le chemin d'accès au disque sur lequel le binaire de l'agent sera téléchargé.",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle": "Répertoire cible du binaire de l'agent",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription": "Activer la rotation du fichier journal sur des intervalles de temps en plus de la rotation basée sur la taille, c'est-à-dire 24h/24, 7/7j.",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle": "Agent journalisant le nombre de fichiers",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription": "Nombre de fichiers de log en rotation à conserver. Les fichiers les plus anciens seront supprimés en premier.",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle": "Agent journalisant le nombre de fichiers",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription": "Configurer la limite de taille du fichier journal en octets. Si la limite est atteinte, le fichier de log sera automatiquement mis en rotation.",

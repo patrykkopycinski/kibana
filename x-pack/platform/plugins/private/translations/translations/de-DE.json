@@ -19037,8 +19037,6 @@
     "xpack.fleet.settings.advancedSectionTitle": "Erweiterte Einstellungen",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription": "Der Festplattenpfad, zu dem die Agent-Binärdatei heruntergeladen wird.",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle": "Zielverzeichnis für Agent-Binärdateien",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription": "Aktivieren Sie zusätzlich zur größenbasierten Rotation die Rotation der Logdateien in Zeitintervallen, z. B. 24 h, 7 d.",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle": "Agent-Logging Anzahl der Dateien",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription": "Anzahl der zu behaltenden rotierten Logdateien. Die ältesten Dateien werden zuerst gelöscht.",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle": "Anzahl der vom Agenten protokollierten Dateien",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription": "Konfigurieren Sie das Größenlimit für Log-Dateien in Bytes. Wenn das Limit erreicht ist, wird die Log-Datei automatisch rotiert.",

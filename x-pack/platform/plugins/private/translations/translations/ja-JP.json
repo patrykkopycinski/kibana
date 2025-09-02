@@ -19108,8 +19108,6 @@
     "xpack.fleet.settings.advancedSectionTitle": "高度な設定",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription": "エージェントバイナリがダウンロードされるディスクパス。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle": "エージェントバイナリ保存先ディレクトリ",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription": "サイズに基づくローテーションのほかに、期間単位でのログファイルのローテーション（24時間、7日など）を有効化します。",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle": "エージェントログファイル数",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription": "保持するローテーションされたログファイルの数。ファイルは古い順に削除されます。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle": "エージェントログファイル数",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription": "ログファイルサイズの上限をバイト単位で設定します。上限に達すると、ログファイルが自動的にローテーションされます。",

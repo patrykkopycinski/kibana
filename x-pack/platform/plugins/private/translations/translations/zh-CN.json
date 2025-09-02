@@ -19101,8 +19101,6 @@
     "xpack.fleet.settings.advancedSectionTitle": "高级设置",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryDescription": "下载代理二进制文件的磁盘路径。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentDownloadTargetDirectoryTitle": "代理二进制文件目标目录",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalescription": "除基于大小的轮换外，启用基于时间间隔（如 24 小时、7 天）的日志文件轮换。",
-    "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileIntervalitle": "代理日志记录文件数",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitDescription": "要保留的已转换日志文件数。首先删除最早的文件。",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileLimitTitle": "代理日志记录文件数",
     "xpack.fleet.settings.agentPolicyAdvanced.agentLoggingFileSizeDescription": "配置日志文件大小限制（字节数）。如果达到限制，将自动轮换日志文件。",

@@ -31054,7 +31054,6 @@
     "xpack.observability.customThreshold.rule.aggregators.p99": "{metric} 的第 99 个百分位",
     "xpack.observability.customThreshold.rule.aggregators.rate": "{metric} 的比率",
     "xpack.observability.customThreshold.rule.aggregators.sum": "{metric} 的总和",
-    "xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel": "在 Discover 中打开",
     "xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle": "超出阈值",
     "xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription": "链接到告警故障排除视图获取进一步的上下文和详情。 如果未配置 server.publicBaseUrl，这将为空字符串。",
     "xpack.observability.customThreshold.rule.alertFlyout.addCondition": "添加条件",

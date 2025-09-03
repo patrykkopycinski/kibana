@@ -31034,7 +31034,6 @@
     "xpack.observability.customThreshold.rule.aggregators.p99": "99e centile de {metric}",
     "xpack.observability.customThreshold.rule.aggregators.rate": "Taux de {metric}",
     "xpack.observability.customThreshold.rule.aggregators.sum": "Somme de {metric}",
-    "xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel": "Ouvrir dans Discover",
     "xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle": "Seuil dépassé",
     "xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription": "Lien vers l’affichage de résolution des problèmes d’alerte pour voir plus de contextes et de détails. La chaîne sera vide si server.publicBaseUrl n'est pas configuré.",
     "xpack.observability.customThreshold.rule.alertFlyout.addCondition": "Ajouter une condition",

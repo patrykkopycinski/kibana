@@ -30957,7 +30957,6 @@
     "xpack.observability.customThreshold.rule.aggregators.p99": "99. Perzentil von {metric}",
     "xpack.observability.customThreshold.rule.aggregators.rate": "Rate von {metric}",
     "xpack.observability.customThreshold.rule.aggregators.sum": "Summe der {metric}",
-    "xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel": "In Discover öffnen",
     "xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle": "Schwellenwert überschritten",
     "xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription": "Link zur Ansicht zur Fehlerbehebung bei Alerts für weiteren Kontext und Details. Dies wird eine leere Zeichenfolge sein, wenn server.publicBaseUrl nicht konfiguriert ist.",
     "xpack.observability.customThreshold.rule.alertFlyout.addCondition": "Bedingung hinzufügen",

@@ -31071,7 +31071,6 @@
     "xpack.observability.customThreshold.rule.aggregators.p99": "{metric}の99パーセンタイル",
     "xpack.observability.customThreshold.rule.aggregators.rate": "{metric}の比率",
     "xpack.observability.customThreshold.rule.aggregators.sum": "{metric}の合計",
-    "xpack.observability.customThreshold.rule.alertDetailsAppSection.openInDiscoverLabel": "Discoverで開く",
     "xpack.observability.customThreshold.rule.alertDetailsAppSection.thresholdTitle": "しきい値を超えました",
     "xpack.observability.customThreshold.rule.alertDetailUrlActionVariableDescription": "アラートトラブルシューティングビューにリンクして、さらに詳しい状況や詳細を確認できます。server.publicBaseUrlが構成されていない場合は、空の文字列になります。",
     "xpack.observability.customThreshold.rule.alertFlyout.addCondition": "条件を追加",

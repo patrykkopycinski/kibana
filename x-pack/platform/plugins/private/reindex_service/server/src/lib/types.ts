@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { SavedObject } from '@kbn/core/types';
+import type { ReindexOperation } from '../../../common';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('upgrade assistant', function () {
-    loadTestFile(require.resolve('./api_deprecations'));
-  });
-}
+export type ReindexSavedObject = SavedObject<ReindexOperation>;

@@ -46409,7 +46409,6 @@
     "xpack.upgradeAssistant.overview.verifyChanges.resetCounterButton": "カウンターのリセット",
     "xpack.upgradeAssistant.overview.verifyChanges.retryButton": "再試行",
     "xpack.upgradeAssistant.overview.viewDiscoverResultsAction": "Discoverでログを分析",
-    "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "「{indexName}」に再インデックスするための権限が不十分です。",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "すべての廃止予定の警告が解決されました。",
     "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "アップグレード前に次の問題を解決する必要があります：{upgradeIssues}。",
     "xpack.upgradeAssistant.status.esTotalCriticalDepsMessage": "{esTotalCriticalDeps} Elasticsearch廃止予定の {esTotalCriticalDeps, plural, one {issue} other {問題}}",

@@ -46131,7 +46131,6 @@
     "xpack.upgradeAssistant.overview.verifyChanges.resetCounterButton": "Zähler zurücksetzen",
     "xpack.upgradeAssistant.overview.verifyChanges.retryButton": "Wiederholen",
     "xpack.upgradeAssistant.overview.viewDiscoverResultsAction": "Analysieren von Logs in Discover",
-    "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "Sie haben nicht die erforderlichen Berechtigungen, um „{indexName}“ neu zu indizieren.",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "Alle Warnungen bezüglich der Veraltung wurden behoben.",
     "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "Die folgenden Probleme müssen vor dem Upgrade behoben werden: {upgradeIssues}.",
     "xpack.upgradeAssistant.status.esTotalCriticalDepsMessage": "{esTotalCriticalDeps} Veraltete Funktionen von Elasticsearch {esTotalCriticalDeps, plural, one {issue} other {Probleme}}",

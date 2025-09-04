@@ -46356,7 +46356,6 @@
     "xpack.upgradeAssistant.overview.verifyChanges.resetCounterButton": "Réinitialiser le compteur",
     "xpack.upgradeAssistant.overview.verifyChanges.retryButton": "Réessayer",
     "xpack.upgradeAssistant.overview.viewDiscoverResultsAction": "Analyser les logs dans Discover",
-    "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "Vous ne disposez pas des privilèges appropriés pour réindexer \"{indexName}\".",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "Tous les avertissements de déclassement ont été résolus.",
     "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "Les problèmes suivants doivent être résolus avant la mise à niveau : {upgradeIssues}.",
     "xpack.upgradeAssistant.status.esTotalCriticalDepsMessage": "{esTotalCriticalDeps} {esTotalCriticalDeps, plural, one {issue} other {problèmes}} de déclassement Elasticsearch",

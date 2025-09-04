@@ -46391,7 +46391,6 @@
     "xpack.upgradeAssistant.overview.verifyChanges.resetCounterButton": "重置计数器",
     "xpack.upgradeAssistant.overview.verifyChanges.retryButton": "重试",
     "xpack.upgradeAssistant.overview.viewDiscoverResultsAction": "在 Discover 中分析日志",
-    "xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch": "您没有足够的权限重新索引“{indexName}”。",
     "xpack.upgradeAssistant.status.allDeprecationsResolvedMessage": "所有弃用警告均已解决。",
     "xpack.upgradeAssistant.status.deprecationsUnresolvedMessage": "在升级之前必须解决以下问题：{upgradeIssues}。",
     "xpack.upgradeAssistant.status.esTotalCriticalDepsMessage": "{esTotalCriticalDeps} 个 Elasticsearch 弃用 {esTotalCriticalDeps, plural, one {问题} other {# 问题}}",

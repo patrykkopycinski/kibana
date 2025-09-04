@@ -5,5 +5,13 @@
  * 2.0.
  */
 
-//
-export const API_BASE_PATH_UPRGRADE_ASSISTANT = '/api/upgrade_assistant';
+export const getMockVersionInfo = () => {
+  const currentMajor = 8;
+
+  return {
+    currentVersion: {},
+    currentMajor,
+    prevMajor: currentMajor - 1,
+    nextMajor: currentMajor + 1,
+  };
+};

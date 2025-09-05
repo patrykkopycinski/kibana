@@ -10196,8 +10196,6 @@
     "xpack.alerting.maintenanceWindows.archive.subtitle": "已取消即将发生的维护窗口事件，且该窗口已进入删除队列。",
     "xpack.alerting.maintenanceWindows.archive.title": "归档维护窗口",
     "xpack.alerting.maintenanceWindows.archiveCallout.subtitle": "您在此处所做的更改将不会保存。是否确定要放弃这些未保存更改并归档此维护窗口？",
-    "xpack.alerting.maintenanceWindows.badge.experimentalDescription": "此功能处于技术预览阶段，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
-    "xpack.alerting.maintenanceWindows.badge.experimentalLabel": "技术预览",
     "xpack.alerting.maintenanceWindows.badge.readOnly.text": "只读",
     "xpack.alerting.maintenanceWindows.badge.readOnly.tooltip": "无法创建或编辑维护窗口",
     "xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle": "规则通知立即恢复。已取消所有正在运行和即将发生的维护窗口事件，且该窗口已进入删除队列。",

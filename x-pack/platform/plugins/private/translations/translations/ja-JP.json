@@ -10205,8 +10205,6 @@
     "xpack.alerting.maintenanceWindows.archive.subtitle": "予定されている保守時間枠イベントはキャンセルされ、時間枠は削除用のキューに追加されます。",
     "xpack.alerting.maintenanceWindows.archive.title": "保守時間枠をアーカイブ",
     "xpack.alerting.maintenanceWindows.archiveCallout.subtitle": "ここで行った変更は保存されません。これらの保存されていない変更を破棄し、この保守時間枠をアーカイブしますか？",
-    "xpack.alerting.maintenanceWindows.badge.experimentalDescription": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.alerting.maintenanceWindows.badge.experimentalLabel": "テクニカルプレビュー",
     "xpack.alerting.maintenanceWindows.badge.readOnly.text": "読み取り専用",
     "xpack.alerting.maintenanceWindows.badge.readOnly.tooltip": "保守時間枠を作成または編集できません",
     "xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle": "ルール通知はただちに再開します。すべての実行中と予定されている保守時間枠イベントはキャンセルされ、時間枠は削除用のキューに追加されます。",

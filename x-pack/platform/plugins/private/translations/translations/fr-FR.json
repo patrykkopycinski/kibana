@@ -10193,8 +10193,6 @@
     "xpack.alerting.maintenanceWindows.archive.subtitle": "Les événements de fenêtre de maintenance à venir sont annulés et la fenêtre est mise en file d'attente pour suppression.",
     "xpack.alerting.maintenanceWindows.archive.title": "Archiver la fenêtre de maintenance",
     "xpack.alerting.maintenanceWindows.archiveCallout.subtitle": "Les modifications que vous avez apportées ici ne seront pas enregistrées. Voulez-vous vraiment abandonner ces modifications non enregistrées et archiver cette fenêtre de maintenance ?",
-    "xpack.alerting.maintenanceWindows.badge.experimentalDescription": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
-    "xpack.alerting.maintenanceWindows.badge.experimentalLabel": "Version d'évaluation technique",
     "xpack.alerting.maintenanceWindows.badge.readOnly.text": "Lecture seule",
     "xpack.alerting.maintenanceWindows.badge.readOnly.tooltip": "Impossible de créer ou de modifier des fenêtres de maintenance",
     "xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle": "Les notifications de règle reprennent immédiatement. L'ensemble des événements de fenêtre de maintenance à venir et en cours d'exécution sont annulés et la fenêtre est mise en file d'attente pour suppression.",

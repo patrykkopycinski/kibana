@@ -10170,8 +10170,6 @@
     "xpack.alerting.maintenanceWindows.archive.subtitle": "Anstehende Wartungsfensterereignisse werden storniert und das Fenster wird zur Löschung in die Warteschlange gestellt.",
     "xpack.alerting.maintenanceWindows.archive.title": "Wartungsfenster archivieren",
     "xpack.alerting.maintenanceWindows.archiveCallout.subtitle": "Die Änderungen, die Sie hier vorgenommen haben, werden nicht gespeichert. Sind Sie sicher, dass Sie diese nicht gespeicherten Änderungen verwerfen und dieses Wartungsfenster archivieren möchten?",
-    "xpack.alerting.maintenanceWindows.badge.experimentalDescription": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
-    "xpack.alerting.maintenanceWindows.badge.experimentalLabel": "Technische Vorschau",
     "xpack.alerting.maintenanceWindows.badge.readOnly.text": "Nur lesen",
     "xpack.alerting.maintenanceWindows.badge.readOnly.tooltip": "Wartungsfenster können nicht erstellt oder bearbeitet werden",
     "xpack.alerting.maintenanceWindows.cancelAndArchiveModal.subtitle": "Regelbenachrichtigungen werden sofort fortgesetzt. Alle laufenden und bevorstehenden Wartungsfensterereignisse werden abgebrochen und das Fenster wird zur Löschung in die Warteschlange gestellt.",

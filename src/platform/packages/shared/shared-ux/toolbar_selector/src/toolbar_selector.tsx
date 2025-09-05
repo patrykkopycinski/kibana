@@ -33,6 +33,7 @@ export interface BaseToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
+  popoverContentBelowSearch?: ReactElement;
   popoverTitle?: string;
   options: SelectableEntry[];
   searchable: boolean;
@@ -58,6 +59,7 @@ export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
+  popoverContentBelowSearch,
   popoverTitle,
   options,
   searchable,
@@ -151,7 +153,7 @@ export const ToolbarSelector = ({
             'data-test-subj': `${dataTestSubj}SelectorSearch`,
             compressed: true,
             placeholder: i18n.translate(
-              'unifiedHistogram.toolbarSelectorPopover.searchPlaceholder',
+              'sharedUXPackages.toolbarSelectorPopover.searchPlaceholder',
               {
                 defaultMessage: 'Search',
               }
@@ -189,12 +191,6 @@ export const ToolbarSelector = ({
         >
           <ToolbarButton
             size="s"
-            css={css`
-              font-weight: ${euiTheme.font.weight.medium};
-              width: 100%;
-              min-width: 0;
-              max-width: ${euiTheme.base * 20}px;
-            `}
             data-test-subj={`${dataTestSubj}Button`}
             data-selected-value={dataSelectedValue}
             aria-label={popoverTitle}
@@ -229,7 +225,7 @@ export const ToolbarSelector = ({
               noMatchesMessage: (
                 <p>
                   <FormattedMessage
-                    id="unifiedHistogram.toolbarSelectorPopover.noResults"
+                    id="sharedUXPackages.toolbarSelectorPopover.noResults"
                     defaultMessage="No results found for {term}"
                     values={{
                       term: <strong>{searchTerm}</strong>,
@@ -250,6 +246,7 @@ export const ToolbarSelector = ({
                 css={{ paddingBottom: 0 }}
               >
                 {search}
+                {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
               </EuiPanel>
             )}
             {list}

@@ -6481,7 +6481,7 @@
     "savedSearch.kibana_context.q.help": "Spécifier une recherche en texte libre Kibana",
     "savedSearch.kibana_context.savedSearchId.help": "Spécifier l'ID de recherche enregistrée à utiliser pour les requêtes et les filtres",
     "savedSearch.kibana_context.timeRange.help": "Spécifier le filtre de plage temporelle Kibana",
-    "savedSearch.legacyURLConflict.errorMessage": "Cette session Discover a la même URL qu'un alias hérité. Désactiver l'alias pour résoudre cette erreur : {json}",
+    "savedSearch.legacyURLConflict.errorMessage": "Cette session Discover a la même URL qu'un alias hérité. Désactiver l'alias pour résoudre cette erreur : {json}",
     "searchApiKeysComponents.apiKeyForm.createButton": "Créer une clé d'API",
     "searchApiKeysComponents.apiKeyForm.noUserPrivileges": "Vous n'avez pas accès à la gestion des clés d'API",
     "searchApiKeysComponents.apiKeyForm.showApiKey": "Afficher la clé d'API",

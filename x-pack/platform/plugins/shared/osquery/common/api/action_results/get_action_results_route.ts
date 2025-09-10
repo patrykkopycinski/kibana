@@ -9,24 +9,24 @@ import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { Direction } from '../../search_strategy';
 
-export const getLiveQueryResultsRequestQuerySchema = t.type({
-  kuery: t.union([t.string, t.undefined]),
+export const getActionResultsRequestQuerySchema = t.type({
+  startDate: t.union([t.string, t.undefined]),
   page: t.union([toNumberRt, t.undefined]),
   pageSize: t.union([toNumberRt, t.undefined]),
   sort: t.union([t.string, t.undefined]),
   sortOrder: t.union([t.literal(Direction.asc), t.literal(Direction.desc), t.undefined]),
-  startDate: t.union([t.string, t.undefined]),
+  kuery: t.union([t.string, t.undefined]),
+  agentIds: t.union([t.string, t.undefined]),
 });
 
-export type GetLiveQueryResultsRequestQuerySchema = t.OutputOf<
-  typeof getLiveQueryResultsRequestQuerySchema
+export type GetActionResultsRequestQuerySchema = t.OutputOf<
+  typeof getActionResultsRequestQuerySchema
 >;
 
-export const getLiveQueryResultsRequestParamsSchema = t.type({
-  id: t.string,
+export const getActionResultsRequestParamsSchema = t.type({
   actionId: t.string,
 });
 
-export type GetLiveQueryResultsRequestParamsSchema = t.OutputOf<
-  typeof getLiveQueryResultsRequestParamsSchema
+export type GetActionResultsRequestParamsSchema = t.OutputOf<
+  typeof getActionResultsRequestParamsSchema
 >;

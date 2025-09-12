@@ -39689,8 +39689,6 @@
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription": "Échec de l'installation des règles de migration",
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesSuccess": "Réussite de l'installation de {succeeded, plural, one {# rule} other {# règles}}.",
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "Règles traduites",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaBadge": "Version d'évaluation technique",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaTooltip": "Cette fonctionnalité est en version d'évaluation technique, elle est susceptible d'être modifiée. Veuillez utilisez les migrations SIEM avec prudence dans les environnements de production.",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "Réduire la migration de règles",
     "xpack.securitySolution.siemMigrations.rules.panel.error": "La dernière exécution de cette migration a échoué et a généré le message suivant :",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "Développer la migration de règles",

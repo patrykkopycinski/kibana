@@ -39734,8 +39734,6 @@
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription": "移行ルールをインストールできませんでした",
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesSuccess": "{succeeded, plural, one {# rule} other {# 件のルール}}が正常にインストールされました。",
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "変換されたルール",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaBadge": "テクニカルプレビュー",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaTooltip": "この機能はテクニカルプレビュー中で、変更される可能性があります。本番環境ではSIEM移行を注意して使用してください。",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "ルール移行を折りたたむ",
     "xpack.securitySolution.siemMigrations.rules.panel.error": "この移行の最後の実行が次のメッセージで失敗しました：",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "ルール移行を展開",

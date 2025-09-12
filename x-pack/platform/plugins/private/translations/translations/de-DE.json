@@ -39580,8 +39580,6 @@
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription": "Migrationsregeln konnten nicht installiert werden",
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesSuccess": "{succeeded, plural, one {# rule} other {# Regeln}} wurde erfolgreich installiert.",
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "Übersetzte Regeln",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaBadge": "Technische Vorschau",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaTooltip": "Diese Funktionalität befindet sich in der technischen Vorschau und kann sich ändern. Bitte verwenden Sie SIEM-Migrationen in Produktionsumgebungen mit Vorsicht.",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "Zusammenführung der Regelmigration",
     "xpack.securitySolution.siemMigrations.rules.panel.error": "Die letzte Ausführung dieser Migration schlug mit der folgenden Meldung fehl:",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "Regelmigration erweitern",

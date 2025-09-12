@@ -39718,8 +39718,6 @@
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesFailDescription": "无法安装迁移规则",
     "xpack.securitySolution.siemMigrations.rules.installMigrationRulesSuccess": "{succeeded, plural, one {# 个规则} other {# 个规则}}已成功安装。",
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "已转换规则",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaBadge": "技术预览",
-    "xpack.securitySolution.siemMigrations.rules.pageTitle.betaTooltip": "此功能处于技术预览状态，可能会进行更改。在生产环境中请谨慎使用 SIEM 迁移。",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "折叠规则迁移",
     "xpack.securitySolution.siemMigrations.rules.panel.error": "上次执行此迁移失败，并显示以下消息：",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "展开规则迁移",

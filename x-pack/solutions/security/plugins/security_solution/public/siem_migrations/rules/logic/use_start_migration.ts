@@ -7,24 +7,24 @@
 
 import { useCallback, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SiemMigrationRetryFilter } from '../../../../../common/siem_migrations/constants';
-import { useKibana } from '../../../../common/lib/kibana/kibana_react';
-import { reducer, initialState } from '../../../common/service';
-import type { MigrationSettingsBase } from '../../../common/types';
+import type { SiemMigrationRetryFilter } from '../../../../common/siem_migrations/constants';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { reducer, initialState } from '../../common/service';
+import type { RuleMigrationSettings } from '../types';
 
-export const DASHBOARDS_DATA_INPUT_START_MIGRATION_SUCCESS = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboards.service.startMigrationSuccess',
+export const RULES_DATA_INPUT_START_MIGRATION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.service.startMigrationSuccess',
   { defaultMessage: 'Migration started successfully.' }
 );
-export const DASHBOARDS_DATA_INPUT_START_MIGRATION_ERROR = i18n.translate(
-  'xpack.securitySolution.siemMigrations.dashboards.service.startMigrationError',
+export const RULES_DATA_INPUT_START_MIGRATION_ERROR = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.service.startMigrationError',
   { defaultMessage: 'Error starting migration.' }
 );
 
 export type StartMigration = (
   migrationId: string,
   retry?: SiemMigrationRetryFilter,
-  settings?: MigrationSettingsBase
+  settings?: RuleMigrationSettings
 ) => void;
 export type OnSuccess = () => void;
 
@@ -37,27 +37,27 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const { started } = await siemMigrations.dashboards.startDashboardMigration(
+          const { started } = await siemMigrations.rules.startRuleMigration(
             migrationId,
             retry,
             settings
           );
 
           if (started) {
-            notifications.toasts.addSuccess(DASHBOARDS_DATA_INPUT_START_MIGRATION_SUCCESS);
+            notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
           }
           dispatch({ type: 'success' });
           onSuccess?.();
         } catch (err) {
           const apiError = err.body ?? err;
           notifications.toasts.addError(apiError, {
-            title: DASHBOARDS_DATA_INPUT_START_MIGRATION_ERROR,
+            title: RULES_DATA_INPUT_START_MIGRATION_ERROR,
           });
           dispatch({ type: 'error', error: apiError });
         }
       })();
     },
-    [siemMigrations.dashboards, onSuccess, notifications.toasts]
+    [siemMigrations.rules, notifications.toasts, onSuccess]
   );
 
   return { isLoading: state.loading, error: state.error, startMigration };

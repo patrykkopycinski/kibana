@@ -10,9 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
-import { useKibana } from '../../../../common/lib/kibana/use_kibana';
-import type { RuleMigrationStats } from '../../types';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import type { DashboardMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
@@ -22,14 +20,15 @@ import { useStartMigration } from '../../logic/use_start_migration';
 import { StartTranslationButton } from '../../../common/components/start_translation_button';
 
 export interface MigrationReadyPanelProps {
-  migrationStats: RuleMigrationStats;
+  migrationStats: DashboardMigrationStats;
 }
 
 export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migrationStats }) => {
-  const { openFlyout } = useRuleMigrationDataInputContext();
-  const { telemetry } = useKibana().services.siemMigrations.rules;
   const [missingResources, setMissingResources] = React.useState<SiemMigrationResourceBase[]>([]);
-  const { getMissingResources, isLoading } = useGetMissingResources('rule', setMissingResources);
+  const { getMissingResources, isLoading } = useGetMissingResources(
+    'dashboard',
+    setMissingResources
+  );
   const { startMigration, isLoading: isStarting } = useStartMigration();
 
   useEffect(() => {
@@ -37,12 +36,8 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
   }, [getMissingResources, migrationStats.id]);
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
-    openFlyout(migrationStats);
-    telemetry.reportSetupMigrationOpenResources({
-      migrationId: migrationStats.id,
-      missingResourcesCount: missingResources.length,
-    });
-  }, [openFlyout, migrationStats, telemetry, missingResources.length]);
+    // @TODO: openFlyout  here
+  }, []);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,
@@ -51,13 +46,13 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const migrationPanelDescription = useMemo(() => {
     if (migrationStats.last_execution?.error) {
-      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.items.total);
+      return i18n.DASHBOARD_MIGRATION_ERROR_DESCRIPTION(migrationStats.items.total);
     }
 
     if (isStopped) {
-      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.items.total);
+      return i18n.DASHBOARD_MIGRATION_STOPPED_DESCRIPTION(migrationStats.items.total);
     }
-    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
+    return i18n.DASHBOARD_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
   }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
   return (
@@ -66,13 +61,13 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} migrationType="rule" />
+              <MigrationPanelTitle migrationStats={migrationStats} migrationType="dashboard" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <PanelText data-test-subj="ruleMigrationDescription" size="s" subdued>
+              <PanelText data-test-subj="dashboardMigrationDescription" size="s" subdued>
                 <span>{migrationPanelDescription}</span>
                 {!isLoading && missingResources.length > 0 && (
-                  <span> {i18n.RULE_MIGRATION_READY_MISSING_RESOURCES}</span>
+                  <span> {i18n.DASHBOARD_MIGRATION_READY_MISSING_RESOURCES}</span>
                 )}
               </PanelText>
             </EuiFlexItem>
@@ -85,14 +80,14 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
             {missingResources.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ruleMigrationMissingResourcesButton"
-                  aria-label={i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                  aria-label={i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                  data-test-subj="dashboardMigrationMissingResourcesButton"
                   iconType="download"
                   iconSide="right"
                   onClick={onOpenFlyout}
                   size="s"
                 >
-                  {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+                  {i18n.DASHBOARD_MIGRATION_UPLOAD_BUTTON}
                 </EuiButtonEmpty>
               </EuiFlexItem>
             )}
@@ -110,7 +105,10 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
       {migrationStats.last_execution?.error && (
         <>
           <EuiSpacer size="m" />
-          <MigrationsLastError message={migrationStats.last_execution.error} migrationType="rule" />
+          <MigrationsLastError
+            message={migrationStats.last_execution.error}
+            migrationType="dashboard"
+          />
         </>
       )}
     </EuiPanel>

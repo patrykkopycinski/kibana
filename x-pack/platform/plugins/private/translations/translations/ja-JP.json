@@ -27180,7 +27180,7 @@
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "一致する項目が見つかりません。",
     "xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText": "データフィード数を表示",
     "xpack.ml.jobDetailsFlyout.errorFetchingJobDetails": "ジョブ詳細の取得エラー",
-    "xpack.ml.jobDetailsFlyout.openJobsListButton": "ジョブリストを開く",
+    "xpack.ml.jobDetailsFlyout.manageJobButton": "ジョブの管理",
     "xpack.ml.jobMessages.actionsLabel": "アクション",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "通知の消去はサポートされていません。",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "ジョブメッセージ警告とエラーの消去エラー",

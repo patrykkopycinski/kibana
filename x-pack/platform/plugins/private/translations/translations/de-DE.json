@@ -27075,7 +27075,7 @@
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "Keine übereinstimmenden Elemente",
     "xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText": "Anzahl der Datenfeeds anzeigen",
     "xpack.ml.jobDetailsFlyout.errorFetchingJobDetails": "Fehler beim Abrufen von Jobdetails",
-    "xpack.ml.jobDetailsFlyout.openJobsListButton": "Liste der offenen Jobs",
+    "xpack.ml.jobDetailsFlyout.manageJobButton": "Job verwalten",
     "xpack.ml.jobMessages.actionsLabel": "Aktionen",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "Das Löschen von Benachrichtigungen wird nicht unterstützt.",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "Fehler beim Löschen von Warnungen und Fehlern in Jobmeldungen",

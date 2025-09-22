@@ -27144,7 +27144,7 @@
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "Aucun élément correspondant",
     "xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText": "Afficher les nombres de fils de données",
     "xpack.ml.jobDetailsFlyout.errorFetchingJobDetails": "Erreur lors de la récupération des détails de la tâche",
-    "xpack.ml.jobDetailsFlyout.openJobsListButton": "Ouvrir la liste des tâches",
+    "xpack.ml.jobDetailsFlyout.manageJobButton": "Gérer la tâche",
     "xpack.ml.jobMessages.actionsLabel": "Actions",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "Effacement des notifications non pris en charge.",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "Erreur lors de l'effacement des avertissements et erreurs du message lié à la tâche",

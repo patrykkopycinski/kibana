@@ -27169,7 +27169,7 @@
     "xpack.ml.itemsGrid.noMatchingItemsTitle": "没有匹配的项",
     "xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText": "查看数据馈送计数",
     "xpack.ml.jobDetailsFlyout.errorFetchingJobDetails": "提取作业详情时出错",
-    "xpack.ml.jobDetailsFlyout.openJobsListButton": "打开作业列表",
+    "xpack.ml.jobDetailsFlyout.manageJobButton": "管理作业",
     "xpack.ml.jobMessages.actionsLabel": "操作",
     "xpack.ml.jobMessages.clearJobAuditMessagesDisabledTooltip": "不支持清除通知。",
     "xpack.ml.jobMessages.clearJobAuditMessagesErrorTitle": "清除作业消息警告和错误时出错",

@@ -38244,8 +38244,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "调查指南在告警预览中不可用。",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle": "调查指南",
     "xpack.securitySolution.flyout.right.investigation.sectionTitle": "调查",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel": "复制到剪贴板",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel": "复制到剪贴板",
     "xpack.securitySolution.flyout.right.network.networkPreviewTitle": "预览网络详情",
     "xpack.securitySolution.flyout.right.notes.addNoteButtonLabel": "添加备注",
     "xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel": "提取备注时出错",

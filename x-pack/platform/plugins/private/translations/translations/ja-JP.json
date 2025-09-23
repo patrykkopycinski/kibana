@@ -38260,8 +38260,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "調査ガイドはアラートプレビューでは使用できません。",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle": "調査ガイド",
     "xpack.securitySolution.flyout.right.investigation.sectionTitle": "調査",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel": "クリップボードにコピー",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel": "クリップボードにコピー",
     "xpack.securitySolution.flyout.right.network.networkPreviewTitle": "ネットワーク詳細をプレビュー",
     "xpack.securitySolution.flyout.right.notes.addNoteButtonLabel": "メモを追加",
     "xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel": "メモの取得エラー",

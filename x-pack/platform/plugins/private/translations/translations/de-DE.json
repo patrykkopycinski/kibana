@@ -38113,8 +38113,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "Der Untersuchungsleitfaden ist in der Warnungsvorschau nicht verfügbar.",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle": "Untersuchungsleitfaden",
     "xpack.securitySolution.flyout.right.investigation.sectionTitle": "Untersuchung",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel": "In die Zwischenablage kopieren",
-    "xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel": "In die Zwischenablage kopieren",
     "xpack.securitySolution.flyout.right.network.networkPreviewTitle": "Netzwerkdetails anzeigen",
     "xpack.securitySolution.flyout.right.notes.addNoteButtonLabel": "Notiz hinzufügen",
     "xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel": "Fehler beim Abrufen von Anmerkungen",

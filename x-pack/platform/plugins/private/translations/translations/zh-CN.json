@@ -43495,7 +43495,6 @@
     "xpack.streams.streamDetailRouting.addRule": "创建新的子流",
     "xpack.streams.streamDetailRouting.cancel": "取消",
     "xpack.streams.streamDetailRouting.change": "更改路由",
-    "xpack.streams.streamDetailRouting.currentStream": "当前流",
     "xpack.streams.streamDetailRouting.deleted": "流已删除",
     "xpack.streams.streamDetailRouting.edit": "编辑",
     "xpack.streams.streamDetailRouting.name": "流名称",

@@ -43513,7 +43513,6 @@
     "xpack.streams.streamDetailRouting.addRule": "新しい子ストリームを作成",
     "xpack.streams.streamDetailRouting.cancel": "キャンセル",
     "xpack.streams.streamDetailRouting.change": "ルーティングを変更",
-    "xpack.streams.streamDetailRouting.currentStream": "現在のストリーム",
     "xpack.streams.streamDetailRouting.deleted": "ストリームが削除されました",
     "xpack.streams.streamDetailRouting.edit": "編集",
     "xpack.streams.streamDetailRouting.name": "ストリーム名",

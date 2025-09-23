@@ -43347,7 +43347,6 @@
     "xpack.streams.streamDetailRouting.addRule": "Einen neuen untergeordneten Stream erstellen",
     "xpack.streams.streamDetailRouting.cancel": "Abbrechen",
     "xpack.streams.streamDetailRouting.change": "Routing ändern",
-    "xpack.streams.streamDetailRouting.currentStream": "Aktueller Stream",
     "xpack.streams.streamDetailRouting.deleted": "Stream wurde gelöscht",
     "xpack.streams.streamDetailRouting.edit": "Bearbeiten",
     "xpack.streams.streamDetailRouting.name": "Stream-Name",

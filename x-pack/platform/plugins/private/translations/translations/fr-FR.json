@@ -43463,7 +43463,6 @@
     "xpack.streams.streamDetailRouting.addRule": "Créer un nouveau flux enfant",
     "xpack.streams.streamDetailRouting.cancel": "Annuler",
     "xpack.streams.streamDetailRouting.change": "Changer le routage",
-    "xpack.streams.streamDetailRouting.currentStream": "Flux actuel",
     "xpack.streams.streamDetailRouting.deleted": "Flux supprimé",
     "xpack.streams.streamDetailRouting.edit": "Modifier",
     "xpack.streams.streamDetailRouting.name": "Nom du flux",

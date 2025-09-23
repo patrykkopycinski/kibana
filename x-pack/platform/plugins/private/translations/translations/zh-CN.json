@@ -43498,7 +43498,6 @@
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "快速链接",
     "xpack.streams.entityDetailOverview.tabs.streams": "流计数",
     "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "保留：已禁用",
-    "xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel": "保留：{retention}",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "错误：{message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILM 策略：{name}",
     "xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel": "经典",

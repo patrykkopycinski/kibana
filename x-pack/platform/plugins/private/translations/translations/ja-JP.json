@@ -43515,7 +43515,6 @@
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "クイックリンク",
     "xpack.streams.entityDetailOverview.tabs.streams": "ストリーム",
     "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "保持：無効",
-    "xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel": "保持：{retention}",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "エラー: {message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILMポリシー：{name}",
     "xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel": "クラシック",

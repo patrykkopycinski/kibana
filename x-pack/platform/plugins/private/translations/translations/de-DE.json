@@ -43350,7 +43350,6 @@
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "Schnellzugriffe",
     "xpack.streams.entityDetailOverview.tabs.streams": "Streams",
     "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "Retention: Deaktiviert",
-    "xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel": "Retention: {retention}",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "Fehler: {message}",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "ILM-Richtlinie: {name}",
     "xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel": "Classic",

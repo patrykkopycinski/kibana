@@ -43465,7 +43465,6 @@
     "xpack.streams.entityDetailOverview.tabs.quicklinks": "Liens rapides",
     "xpack.streams.entityDetailOverview.tabs.streams": "Flux",
     "xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel": "Conservation : Désactivé",
-    "xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel": "Conservation : {retention}",
     "xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel": "Erreur : {message}.",
     "xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel": "Stratégie ILM : {name}",
     "xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel": "Classique",

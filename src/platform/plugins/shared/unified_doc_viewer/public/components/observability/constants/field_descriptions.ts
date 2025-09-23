@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentFrameworkSection } from './section';
+import { i18n } from '@kbn/i18n';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default ContentFrameworkSection;
+export const SPAN_DESTINATION_SERVICE_RESOURCE_DESCRIPTION = i18n.translate(
+  'unifiedDocViewer.observability.traces.spanDestinationServiceResource.description',
+  { defaultMessage: 'Identifier for the destination service resource being operated on.' }
+);

@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentFrameworkSection } from './section';
-
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default ContentFrameworkSection;
+export * as fieldLabels from './field_labels';
+export * as fieldDescriptions from './field_descriptions';

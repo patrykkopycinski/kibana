@@ -7,22 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText } from '@elastic/eui';
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import type { ContentFrameworkSectionProps } from './section/section';
 
-interface FormattedValueProps {
-  value: string;
-  truncate?: boolean;
-}
-
-export function FormattedValue({ value, truncate }: FormattedValueProps) {
-  return (
-    <EuiText
-      className={truncate ? 'eui-textTruncate' : 'eui-textBreakWord'}
-      data-test-subj="ContentFrameworkTableFormattedValue"
-      size="xs"
-      // Value returned from formatFieldValue is always sanitized
-      dangerouslySetInnerHTML={{ __html: value }}
-    />
-  );
-}
+const LazyContentFrameworkSection = React.lazy(() => import('./section'));
+export const ContentFrameworkSection = withSuspense<ContentFrameworkSectionProps>(
+  LazyContentFrameworkSection,
+  <></>
+);

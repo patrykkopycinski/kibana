@@ -27102,8 +27102,6 @@
     "xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage": "{successesJobsCount, plural, one{{successJob}} other{# Jobs}} {actionTextPT} erfolgreich abgeschlossen",
     "xpack.ml.jobsList.actionFailedNotificationMessage": "{failureId} konnte nicht {actionText}",
     "xpack.ml.jobsList.actionsLabel": "Aktionen",
-    "xpack.ml.jobsList.alertingRules.screenReaderDescription": "In dieser Spalte werden Symbole angezeigt, wenn einem Job Alarmregeln zugeordnet sind.",
-    "xpack.ml.jobsList.auditMessageColumn.screenReaderDescription": "In dieser Spalte werden Symbole angezeigt, wenn in den letzten 24 Stunden Fehler oder Warnungen für den Job aufgetreten sind.",
     "xpack.ml.jobsList.cannotSelectRowForJobMessage": "Job-ID {jobId} kann nicht ausgewählt werden",
     "xpack.ml.jobsList.cloneJobErrorMessage": "{jobId} konnte nicht geklont werden. Job konnte nicht gefunden werden",
     "xpack.ml.jobsList.closeActionStatusText": "schließen",

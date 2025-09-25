@@ -14939,7 +14939,6 @@
     "xpack.datasetQuality.datasetQualityColumnName": "データセット品質",
     "xpack.datasetQuality.datasetQualityColumnTooltip": "品質は、データセットの劣化したドキュメントの割合に基づきます。{visualQueue}",
     "xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle": "ドキュメントのインデックスが失敗しました",
-    "xpack.datasetQuality.datasetQualityIdicator": "{quality}",
     "xpack.datasetQuality.degradedDocsColumnName": "劣化したドキュメント（%）",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "データセットにおける{ignoredProperty}プロパティのドキュメントの割合。",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",

@@ -14933,7 +14933,6 @@
     "xpack.datasetQuality.datasetQualityColumnName": "数据集质量",
     "xpack.datasetQuality.datasetQualityColumnTooltip": "质量基于数据集中的已降级和失败文档的百分比。{visualQueue}",
     "xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle": "文档索引失败",
-    "xpack.datasetQuality.datasetQualityIdicator": "{quality}",
     "xpack.datasetQuality.degradedDocsColumnName": "已降级文档 (%)",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "您的数据集中包含 {ignoredProperty} 属性的文档的百分比。",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",

@@ -14877,7 +14877,6 @@
     "xpack.datasetQuality.datasetQualityColumnName": "Qualität des Datensatzes",
     "xpack.datasetQuality.datasetQualityColumnTooltip": "Die Qualität basiert auf dem Prozentsatz der beschädigten und fehlgeschlagenen Dokumente in einem Datensatz. {visualQueue}",
     "xpack.datasetQuality.datasetQualityDetails.qualityIssueFlyout.failedDocsTitle": "Das Indexieren der Dokumente ist fehlgeschlagen",
-    "xpack.datasetQuality.datasetQualityIdicator": "{quality}",
     "xpack.datasetQuality.degradedDocsColumnName": "Degradierte Dokumente (%)",
     "xpack.datasetQuality.degradedDocsColumnTooltip": "Der Prozentsatz der Dokumente mit der Eigenschaft {ignoredProperty} in Ihrem Datensatz.",
     "xpack.datasetQuality.degradedDocsQualityDescription": "{quality} -{comparator} {minimimPercentage}%",

@@ -26713,6 +26713,7 @@ paths:
                                       enum:
                                         - input
                                         - output
+                                        - ''
                                       type: string
                                   required:
                                     - id
@@ -27216,6 +27217,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id
@@ -27581,6 +27583,7 @@ paths:
                                     enum:
                                       - input
                                       - output
+                                      - ''
                                     type: string
                                 required:
                                   - id

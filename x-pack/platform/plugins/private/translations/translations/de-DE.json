@@ -22446,7 +22446,6 @@
     "xpack.infra.registerFeatures.infraOpsTitle": "Metriken",
     "xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel": "Als Standard markieren",
     "xpack.infra.renderName.button.ariaLabel": "Zu {name} wechseln",
-    "xpack.infra.sampleDataLinkLabel": "Logs",
     "xpack.infra.savedView.defaultViewNameHosts": "Standardansicht",
     "xpack.infra.savedView.errorOnCreate.title": "Beim Speichern der Ansicht ist ein Fehler aufgetreten.",
     "xpack.infra.savedView.errorOnDelete.title": "Beim Löschen der Ansicht ist ein Fehler aufgetreten.",

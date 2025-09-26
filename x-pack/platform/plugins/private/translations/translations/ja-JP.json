@@ -22541,7 +22541,6 @@
     "xpack.infra.registerFeatures.infraOpsTitle": "メトリック",
     "xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel": "デフォルトに設定",
     "xpack.infra.renderName.button.ariaLabel": "{name}に切り替える",
-    "xpack.infra.sampleDataLinkLabel": "ログ",
     "xpack.infra.savedView.defaultViewNameHosts": "デフォルトビュー",
     "xpack.infra.savedView.errorOnCreate.title": "ビューの保存中にエラーが発生しました。",
     "xpack.infra.savedView.errorOnDelete.title": "ビューの削除中にエラーが発生しました。",

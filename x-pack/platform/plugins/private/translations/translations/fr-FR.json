@@ -22510,7 +22510,6 @@
     "xpack.infra.registerFeatures.infraOpsTitle": "Indicateurs",
     "xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel": "Marquer comme par défaut",
     "xpack.infra.renderName.button.ariaLabel": "Basculer vers {name}",
-    "xpack.infra.sampleDataLinkLabel": "Logs",
     "xpack.infra.savedView.defaultViewNameHosts": "Vue par défaut",
     "xpack.infra.savedView.errorOnCreate.title": "Une erreur s'est produite lors de l'enregistrement de l'affichage.",
     "xpack.infra.savedView.errorOnDelete.title": "Une erreur s'est produite lors de la suppression de l'affichage.",

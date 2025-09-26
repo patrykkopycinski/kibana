@@ -22534,7 +22534,6 @@
     "xpack.infra.registerFeatures.infraOpsTitle": "指标",
     "xpack.infra.renderMakeDefaultAction.defaultButton.ariaLabel": "标记为默认",
     "xpack.infra.renderName.button.ariaLabel": "切换到 {name}",
-    "xpack.infra.sampleDataLinkLabel": "日志",
     "xpack.infra.savedView.defaultViewNameHosts": "默认视图",
     "xpack.infra.savedView.errorOnCreate.title": "保存视图时出错。",
     "xpack.infra.savedView.errorOnDelete.title": "删除视图时发生错误。",

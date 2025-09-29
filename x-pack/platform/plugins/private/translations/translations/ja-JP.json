@@ -43500,7 +43500,6 @@
     "xpack.streams.streamDetailView.routingTab": "ストリームパーティショニング",
     "xpack.streams.streamDetailView.schemaEditorTab": "スキーマエディター",
     "xpack.streams.streamDetailView.welcomeImage": "ストリームアプリのウェルカム画像",
-    "xpack.streams.streamsAppLinkTitle": "ストリーム",
     "xpack.streams.streamsTable.collapseAll": "すべて縮小",
     "xpack.streams.streamsTable.expandAll": "すべて拡張",
     "xpack.streams.streamsTable.management": "管理",

@@ -43451,7 +43451,6 @@
     "xpack.streams.streamDetailView.routingTab": "Partition de flux",
     "xpack.streams.streamDetailView.schemaEditorTab": "Éditeur de schémas",
     "xpack.streams.streamDetailView.welcomeImage": "Image de bienvenue pour l'application de flux",
-    "xpack.streams.streamsAppLinkTitle": "Flux",
     "xpack.streams.streamsTable.collapseAll": "Tout réduire",
     "xpack.streams.streamsTable.expandAll": "Tout développer",
     "xpack.streams.streamsTable.management": "Gestion",

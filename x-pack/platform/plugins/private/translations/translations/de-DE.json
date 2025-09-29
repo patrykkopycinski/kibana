@@ -43334,7 +43334,6 @@
     "xpack.streams.streamDetailView.routingTab": "Stream-Partitionierung",
     "xpack.streams.streamDetailView.schemaEditorTab": "Schema-Editor",
     "xpack.streams.streamDetailView.welcomeImage": "Willkommensbild für die Streams-App",
-    "xpack.streams.streamsAppLinkTitle": "Streams",
     "xpack.streams.streamsTable.collapseAll": "Alles einklappen",
     "xpack.streams.streamsTable.expandAll": "Alle erweitern",
     "xpack.streams.streamsTable.management": "Management",

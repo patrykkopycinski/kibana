@@ -33770,7 +33770,6 @@
     "xpack.security.roleMappings.createBreadcrumb": "Créer",
     "xpack.security.roles.createBreadcrumb": "Créer",
     "xpack.security.sessionExpirationToast.body": "Vous serez déconnecté {timeout}.",
-    "xpack.security.sessionExpirationToast.extendButton": "Rester connecté",
     "xpack.security.sessionExpirationToast.title": "Délai d'expiration de session",
     "xpack.security.uiApi.errorBoundaryToastMessage": "Rechargez la page pour continuer.",
     "xpack.security.uiApi.errorBoundaryToastTitle": "Impossible de charger la ressource Kibana",

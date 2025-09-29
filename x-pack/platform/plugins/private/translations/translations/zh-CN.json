@@ -33793,7 +33793,6 @@
     "xpack.security.roleMappings.createBreadcrumb": "创建",
     "xpack.security.roles.createBreadcrumb": "创建",
     "xpack.security.sessionExpirationToast.body": "您会在 {timeout} 后自动注销。",
-    "xpack.security.sessionExpirationToast.extendButton": "保持登录",
     "xpack.security.sessionExpirationToast.title": "会话超时",
     "xpack.security.uiApi.errorBoundaryToastMessage": "重新加载页面以继续。",
     "xpack.security.uiApi.errorBoundaryToastTitle": "无法加载 Kibana 资产",

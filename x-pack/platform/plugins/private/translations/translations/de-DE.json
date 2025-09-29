@@ -33701,7 +33701,6 @@
     "xpack.security.roleMappings.createBreadcrumb": "Erstellen",
     "xpack.security.roles.createBreadcrumb": "Erstellen",
     "xpack.security.sessionExpirationToast.body": "Sie werden in {timeout} abgemeldet.",
-    "xpack.security.sessionExpirationToast.extendButton": "Angemeldet bleiben",
     "xpack.security.sessionExpirationToast.title": "Zeitüberschreitung der Sitzung",
     "xpack.security.uiApi.errorBoundaryToastMessage": "Laden Sie die Seite neu, um fortzufahren.",
     "xpack.security.uiApi.errorBoundaryToastTitle": "Kibana-Asset konnte nicht geladen werden",

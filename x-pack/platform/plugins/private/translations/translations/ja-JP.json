@@ -33806,7 +33806,6 @@
     "xpack.security.roleMappings.createBreadcrumb": "作成",
     "xpack.security.roles.createBreadcrumb": "作成",
     "xpack.security.sessionExpirationToast.body": "ログアウト{timeout}します。",
-    "xpack.security.sessionExpirationToast.extendButton": "ログイン状態を維持",
     "xpack.security.sessionExpirationToast.title": "セッションタイムアウト",
     "xpack.security.uiApi.errorBoundaryToastMessage": "続行するにはページを再読み込みしてください。",
     "xpack.security.uiApi.errorBoundaryToastTitle": "Kibanaアセットを読み込めませんでした",

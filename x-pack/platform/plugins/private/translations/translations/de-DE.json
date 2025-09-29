@@ -9757,7 +9757,6 @@
     "xpack.aiAssistant.newChatButton": "Neue Konversation",
     "xpack.aiAssistant.prompt.placeholder": "Senden Sie eine Nachricht an den Assistenten",
     "xpack.aiAssistant.promptEditorNaturalLanguage.euiSelectable.selectAnOptionLabel": "Wählen Sie eine Option aus",
-    "xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel": "Connectors verwalten",
     "xpack.aiAssistant.simulatedFunctionCallingCalloutLabel": "Simulierter Funktionsaufruf ist aktiviert. Möglicherweise stellen Sie eine Leistungsminderung fest.",
     "xpack.aiAssistant.suggestedFunctionEvent": "hat die Funktion {functionName} angefordert",
     "xpack.aiAssistant.technicalPreviewBadgeDescription": "GPT4 ist für ein konsistenteres Erlebnis bei der Nutzung von Funktionsaufrufen erforderlich (z. B. bei der Durchführung von Ursachenanalysen, der Visualisierung von Daten und mehr). GPT3.5 kann für einige der einfacheren Workflows eingesetzt werden, wie zum Beispiel zum Erklären von Fehlern oder für eine ChatGPT-ähnliche Erfahrung innerhalb von Kibana, die keine häufigen Funktionsaufrufe erfordert.",

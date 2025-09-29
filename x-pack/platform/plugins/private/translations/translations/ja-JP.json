@@ -9792,7 +9792,6 @@
     "xpack.aiAssistant.newChatButton": "新しい会話",
     "xpack.aiAssistant.prompt.placeholder": "アシスタントにメッセージを送信",
     "xpack.aiAssistant.promptEditorNaturalLanguage.euiSelectable.selectAnOptionLabel": "オプションを選択",
-    "xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel": "コネクターを管理",
     "xpack.aiAssistant.simulatedFunctionCallingCalloutLabel": "シミュレートされた関数呼び出しが有効です。パフォーマンスが劣化する場合があります。",
     "xpack.aiAssistant.suggestedFunctionEvent": "関数{functionName}を要求しました",
     "xpack.aiAssistant.technicalPreviewBadgeDescription": "関数呼び出し（根本原因分析やデータの視覚化など）を使用する際に、より一貫性のあるエクスペリエンスを実現するために、GPT4が必要です。GPT3.5は、エラーの説明などのシンプルなワークフローの一部や、頻繁な関数呼び出しの使用が必要とされないKibana内のエクスペリエンスなどのChatGPTで機能します。",

@@ -9783,7 +9783,6 @@
     "xpack.aiAssistant.newChatButton": "新对话",
     "xpack.aiAssistant.prompt.placeholder": "向助手发送消息",
     "xpack.aiAssistant.promptEditorNaturalLanguage.euiSelectable.selectAnOptionLabel": "选择选项",
-    "xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel": "管理连接器",
     "xpack.aiAssistant.simulatedFunctionCallingCalloutLabel": "模拟函数调用已启用。您可能会面临性能降级。",
     "xpack.aiAssistant.suggestedFunctionEvent": "已请求函数 {functionName}",
     "xpack.aiAssistant.technicalPreviewBadgeDescription": "需要 GPT4 以在使用函数调用时（例如，执行根本原因分析、数据可视化等时候）获得更加一致的体验。GPT3.5 适用于某些更简单的工作流（如解释错误），或在 Kibana 中获得不需要频繁使用函数调用的与 ChatGPT 类似的体验。",

@@ -55998,9 +55998,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -57873,9 +57871,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -59546,9 +59542,7 @@ paths:
                                                               to:
                                                                 minLength: 1
                                                                 type: string
-                                                              value:
-                                                                minLength: 1
-                                                                type: string
+                                                              value: {}
                                                               where:
                                                                 anyOf:
                                                                   - anyOf:
@@ -61271,9 +61265,7 @@ paths:
                                                           to:
                                                             minLength: 1
                                                             type: string
-                                                          value:
-                                                            minLength: 1
-                                                            type: string
+                                                          value: {}
                                                           where:
                                                             anyOf:
                                                               - anyOf:
@@ -63317,9 +63309,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:
@@ -64965,9 +64955,7 @@ paths:
                                               to:
                                                 minLength: 1
                                                 type: string
-                                              value:
-                                                minLength: 1
-                                                type: string
+                                              value: {}
                                               where:
                                                 anyOf:
                                                   - anyOf:

@@ -13813,7 +13813,6 @@
     "xpack.cases.caseView.observables.type": "オブザーバブルタイプ",
     "xpack.cases.caseView.observables.updated": "オブザーバブルが更新されました",
     "xpack.cases.caseView.observables.value": "オブザーバブル値",
-    "xpack.cases.caseView.observables.valuePlaceholder": "オブザーバブル値",
     "xpack.cases.caseView.openCase": "ケースを開く",
     "xpack.cases.caseView.optional": "オプション",
     "xpack.cases.caseView.otherEndpoints": "および{endpoints} {endpoints, plural, =1 {other} other {件のエンドポイント}}",

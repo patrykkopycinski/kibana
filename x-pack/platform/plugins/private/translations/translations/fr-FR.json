@@ -13795,7 +13795,6 @@
     "xpack.cases.caseView.observables.type": "Type d'observable",
     "xpack.cases.caseView.observables.updated": "Observable mis à jour",
     "xpack.cases.caseView.observables.value": "Valeur d'observable",
-    "xpack.cases.caseView.observables.valuePlaceholder": "Valeur d'observable",
     "xpack.cases.caseView.openCase": "Ouvrir le cas",
     "xpack.cases.caseView.optional": "Facultatif",
     "xpack.cases.caseView.otherEndpoints": "et {endpoints} {endpoints, plural, =1 {other} other {autres}}",

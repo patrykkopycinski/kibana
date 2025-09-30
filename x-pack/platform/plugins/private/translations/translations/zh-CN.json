@@ -13807,7 +13807,6 @@
     "xpack.cases.caseView.observables.type": "可观察对象类型",
     "xpack.cases.caseView.observables.updated": "可观察对象已更新",
     "xpack.cases.caseView.observables.value": "可观察对象值",
-    "xpack.cases.caseView.observables.valuePlaceholder": "可观察对象值",
     "xpack.cases.caseView.openCase": "创建案例",
     "xpack.cases.caseView.optional": "可选",
     "xpack.cases.caseView.otherEndpoints": "以及其他 {endpoints} 个",

@@ -13757,7 +13757,6 @@
     "xpack.cases.caseView.observables.type": "Beobachtbarer Typ",
     "xpack.cases.caseView.observables.updated": "Observable wurde aktualisiert",
     "xpack.cases.caseView.observables.value": "Beobachtbarer Wert",
-    "xpack.cases.caseView.observables.valuePlaceholder": "Beobachtbarer Wert",
     "xpack.cases.caseView.openCase": "Fall öffnen",
     "xpack.cases.caseView.optional": "Optional",
     "xpack.cases.caseView.otherEndpoints": "und {endpoints} {endpoints, plural, =1 {other} other {andere}}",

@@ -8,21 +8,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EMPTY_LABEL } from '@kbn/field-formats-common';
 
-// TODO: move in some data/table related package
-export const SPECIAL_TOKENS_STRING_CONVERSION = new Map([
-  [
-    '__other__',
-    i18n.translate('coloring.colorMapping.terms.otherBucketLabel', {
-      defaultMessage: 'Other',
-    }),
-  ],
-  ['', EMPTY_LABEL],
-]);
+export const EMPTY_LABEL = i18n.translate('fieldFormats.blankLabel', {
+  defaultMessage: '(blank)',
+  description: 'Represents the label used to replace an empty string value in tables and charts',
+});
 
-/**
- * Returns special string for sake of color mapping/syncing
- */
-export const getSpecialString = (value: string) =>
-  SPECIAL_TOKENS_STRING_CONVERSION.get(value) ?? value;
+export const NULL_LABEL = i18n.translate('fieldFormats.nullLabel', {
+  defaultMessage: '(null)',
+  description: 'Represents the label used to replace an null value in tables and charts',
+});
+
+export const NAN_LABEL = 'NaN';
+
+export const MISSING_TOKEN = '__missing__';

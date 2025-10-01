@@ -16695,8 +16695,6 @@
     "xpack.enterpriseSearch.inferencePipelineCard.modelState.stopping.tooltip": "Ce modèle entraîné est en cours de fermeture, il n'est donc pas disponible actuellement",
     "xpack.enterpriseSearch.ingestionCard.betaBadgeLabel": "Bêta",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "Nouvelle ligne",
-    "xpack.enterpriseSearch.integrations.apiDescription": "Ajouter la recherche à votre application avec les API robustes d'Elasticsearch.",
-    "xpack.enterpriseSearch.integrations.apiName": "API",
     "xpack.enterpriseSearch.integrations.webCrawlerDescription": "Ajoutez la recherche à votre site web avec le robot d'indexation.",
     "xpack.enterpriseSearch.integrations.webCrawlerName": "Robot d'indexation",
     "xpack.enterpriseSearch.invalidJsonError": "JSON non valide",

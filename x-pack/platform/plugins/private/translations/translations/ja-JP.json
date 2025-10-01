@@ -16714,8 +16714,6 @@
     "xpack.enterpriseSearch.inferencePipelineCard.modelState.stopping.tooltip": "この学習済みモデルは停止中で、現在利用できません",
     "xpack.enterpriseSearch.ingestionCard.betaBadgeLabel": "ベータ",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "新しい行",
-    "xpack.enterpriseSearch.integrations.apiDescription": "Elasticsearchの堅牢なAPIを使用して、検索をアプリケーションに追加します。",
-    "xpack.enterpriseSearch.integrations.apiName": "API",
     "xpack.enterpriseSearch.integrations.webCrawlerDescription": "Webクローラーを使用して、検索をWebサイトに追加します。",
     "xpack.enterpriseSearch.integrations.webCrawlerName": "Webクローラー",
     "xpack.enterpriseSearch.invalidJsonError": "無効なJSON",

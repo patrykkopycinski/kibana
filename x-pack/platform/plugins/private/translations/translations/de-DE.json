@@ -16649,8 +16649,6 @@
     "xpack.enterpriseSearch.inferencePipelineCard.modelState.stopping.tooltip": "Dieses trainierte Modell wird gerade abgeschaltet und ist derzeit nicht verfügbar",
     "xpack.enterpriseSearch.ingestionCard.betaBadgeLabel": "Beta",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "Neue Zeile",
-    "xpack.enterpriseSearch.integrations.apiDescription": "Fügen Sie Ihrer Anwendung mit den robusten APIs von Elasticsearch eine Suchfunktion hinzu.",
-    "xpack.enterpriseSearch.integrations.apiName": "API",
     "xpack.enterpriseSearch.integrations.webCrawlerDescription": "Fügen Sie Ihrer Website mit dem Web-Crawler eine Suche hinzu.",
     "xpack.enterpriseSearch.integrations.webCrawlerName": "Web-Crawler",
     "xpack.enterpriseSearch.invalidJsonError": "Ungültiges JSON",

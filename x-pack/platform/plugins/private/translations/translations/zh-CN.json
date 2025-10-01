@@ -16708,8 +16708,6 @@
     "xpack.enterpriseSearch.inferencePipelineCard.modelState.stopping.tooltip": "此已训练模型正在关闭过程中，当前不可用",
     "xpack.enterpriseSearch.ingestionCard.betaBadgeLabel": "公测版",
     "xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel": "新行",
-    "xpack.enterpriseSearch.integrations.apiDescription": "通过 Elasticsearch 稳健的 API 将搜索功能添加到您的应用程序。",
-    "xpack.enterpriseSearch.integrations.apiName": "API",
     "xpack.enterpriseSearch.integrations.webCrawlerDescription": "通过网络爬虫将搜索功能添加到您的网站。",
     "xpack.enterpriseSearch.integrations.webCrawlerName": "网络爬虫",
     "xpack.enterpriseSearch.invalidJsonError": "JSON 无效",

@@ -40370,7 +40370,6 @@
     "xpack.slo.sloGroupConfiguration.statusLabel": "状态",
     "xpack.slo.sloGroupConfiguration.tagsLabel": "标签",
     "xpack.slo.sLOGroupingValueSelector.copyButton.label": "将值复制到剪贴板",
-    "xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel": "选择之前的值",
     "xpack.slo.sLOGroupingValueSelector.placeholder": "选择分组值",
     "xpack.slo.sloIndicatorTypeBadge.clickToFilter": "单击以按 {indicatorType} SLO 筛选",
     "xpack.slo.sloIndicatorTypeBadge.exploreInApm": "查看 {service} 详情",

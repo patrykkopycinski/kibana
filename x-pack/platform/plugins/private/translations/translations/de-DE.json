@@ -40073,7 +40073,6 @@
     "xpack.slo.sloGroupConfiguration.statusLabel": "Status",
     "xpack.slo.sloGroupConfiguration.tagsLabel": "Tags",
     "xpack.slo.sLOGroupingValueSelector.copyButton.label": "Wert in die Zwischenablage kopieren",
-    "xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel": "Wählen Sie einen Wert aus, bevor",
     "xpack.slo.sLOGroupingValueSelector.placeholder": "Wählen Sie einen Gruppenwert aus",
     "xpack.slo.sloIndicatorTypeBadge.clickToFilter": "Klicken Sie, um nach {indicatorType} SLOs zu filtern",
     "xpack.slo.sloIndicatorTypeBadge.exploreInApm": "{service}-Details anzeigen",

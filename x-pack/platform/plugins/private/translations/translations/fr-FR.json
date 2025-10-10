@@ -40338,7 +40338,6 @@
     "xpack.slo.sloGroupConfiguration.statusLabel": "Statut",
     "xpack.slo.sloGroupConfiguration.tagsLabel": "Balises",
     "xpack.slo.sLOGroupingValueSelector.copyButton.label": "Copier la valeur sur le presse-papiers",
-    "xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel": "Sélectionner une valeur avant",
     "xpack.slo.sLOGroupingValueSelector.placeholder": "Sélectionner une valeur de groupe",
     "xpack.slo.sloIndicatorTypeBadge.clickToFilter": "Cliquer pour filtrer par SLO {indicatorType}",
     "xpack.slo.sloIndicatorTypeBadge.exploreInApm": "Voir les détails de {service}",

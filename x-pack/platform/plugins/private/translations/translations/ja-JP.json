@@ -40383,7 +40383,6 @@
     "xpack.slo.sloGroupConfiguration.statusLabel": "ステータス",
     "xpack.slo.sloGroupConfiguration.tagsLabel": "タグ",
     "xpack.slo.sLOGroupingValueSelector.copyButton.label": "値をクリップボードにコピー",
-    "xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel": "前の値を選択",
     "xpack.slo.sLOGroupingValueSelector.placeholder": "グループ値を選択",
     "xpack.slo.sloIndicatorTypeBadge.clickToFilter": "クリックすると、{indicatorType} SLOでフィルタリングします",
     "xpack.slo.sloIndicatorTypeBadge.exploreInApm": "{service}詳細を表示",

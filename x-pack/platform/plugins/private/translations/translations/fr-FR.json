@@ -9819,7 +9819,6 @@
     "xpack.aiops.fieldContextPopover.descriptionTooltipContent": "Afficher les principales valeurs de champ",
     "xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern": "La valeur du champ pour ce champ montre un exemple du modèle de champ de texte important identifié.",
     "xpack.aiops.fieldContextPopover.notTopTenValueMessage": "Le terme sélectionné n'est pas dans le top 10",
-    "xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel": "Afficher les principales valeurs de champ",
     "xpack.aiops.index.dataLoader.internalServerErrorMessage": "Erreur lors du chargement des données dans l'index {index}. {message}. La requête a peut-être expiré. Essayez d'utiliser un échantillon d'une taille inférieure ou de réduire la plage temporelle.",
     "xpack.aiops.index.dataViewWithoutMetricNotificationDescription": "La détection des points de modification peut être exécutée uniquement sur des vues de données possédant un champ d'indicateur.",
     "xpack.aiops.index.dataViewWithoutMetricNotificationTitle": "La vue de données \"{dataViewTitle}\" ne contient aucun champ d'indicateurs.",

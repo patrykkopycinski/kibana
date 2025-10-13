@@ -9822,7 +9822,6 @@
     "xpack.aiops.fieldContextPopover.descriptionTooltipContent": "显示排名靠前字段值",
     "xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern": "此字段的字段值显示了识别的重要文本字段模式的示例。",
     "xpack.aiops.fieldContextPopover.notTopTenValueMessage": "选定的词项未排名前 10",
-    "xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel": "显示排名靠前字段值",
     "xpack.aiops.index.dataLoader.internalServerErrorMessage": "加载索引 {index} 中的数据时出错。{message}。请求可能已超时。请尝试使用较小的样例大小或缩小时间范围。",
     "xpack.aiops.index.dataViewWithoutMetricNotificationDescription": "只能在包含指标字段的数据视图上运行更改点检测。",
     "xpack.aiops.index.dataViewWithoutMetricNotificationTitle": "数据视图“{dataViewTitle}”不包含任何指标字段。",

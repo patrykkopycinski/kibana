@@ -9668,7 +9668,6 @@
     "xpack.aiops.fieldContextPopover.descriptionTooltipContent": "Zeigen Sie die obersten Feldwerte an.",
     "xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern": "Der Feldwert für dieses Feld zeigt ein Beispiel für das identifizierte signifikante Textfeldmuster.",
     "xpack.aiops.fieldContextPopover.notTopTenValueMessage": "Der ausgewählte Begriff ist nicht unter den Top 10",
-    "xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel": "Zeige die obersten Feldwerte an",
     "xpack.aiops.index.dataLoader.internalServerErrorMessage": "Fehler beim Laden der Daten im Index {index}. {message}. Die Anfrage ist möglicherweise abgelaufen. Versuchen Sie, eine kleinere Stichprobengröße zu verwenden oder den Zeitraum einzugrenzen.",
     "xpack.aiops.index.dataViewWithoutMetricNotificationDescription": "Die Erkennung von Änderungspunkten kann nur auf Datenansichten mit einem Metrikfeld ausgeführt werden.",
     "xpack.aiops.index.dataViewWithoutMetricNotificationTitle": "Die Datenansicht \"{dataViewTitle}\" enthält keine Metrikfelder.",

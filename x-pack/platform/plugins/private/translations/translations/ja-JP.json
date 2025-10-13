@@ -9832,7 +9832,6 @@
     "xpack.aiops.fieldContextPopover.descriptionTooltipContent": "上位のフィールド値を表示",
     "xpack.aiops.fieldContextPopover.descriptionTooltipLogPattern": "このフィールドのフィールド値は、特定された重要なテキストフィールドパターンの例を示しています。",
     "xpack.aiops.fieldContextPopover.notTopTenValueMessage": "選択した用語は上位10件にありません",
-    "xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel": "上位のフィールド値を表示",
     "xpack.aiops.index.dataLoader.internalServerErrorMessage": "インデックス {index} のデータの読み込み中にエラーが発生。{message}。リクエストがタイムアウトした可能性があります。小さなサンプルサイズを使うか、時間範囲を狭めてみてください。",
     "xpack.aiops.index.dataViewWithoutMetricNotificationDescription": "変化点の検出は、メトリックフィールドがあるデータビューでのみ実行できます。",
     "xpack.aiops.index.dataViewWithoutMetricNotificationTitle": "データビュー\"{dataViewTitle}\"にはメトリックフィールドが含まれていません。",

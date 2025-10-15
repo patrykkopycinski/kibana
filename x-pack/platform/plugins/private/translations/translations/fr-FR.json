@@ -26456,7 +26456,6 @@
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "La liste Principaux influenceurs est masquée, car aucun influenceur n'a été configuré pour les tâches sélectionnées.",
     "xpack.ml.explorer.noInfluencersFoundTitle": "Aucun influenceur {viewBySwimlaneFieldName} n'a été trouvé",
     "xpack.ml.explorer.noInfluencersFoundTitleFilterMessage": "Aucun influenceur {viewBySwimlaneFieldName} n'a été trouvé pour le filtre spécifié",
-    "xpack.ml.explorer.noJobSelectedLabel": "Aucune tâche sélectionnée",
     "xpack.ml.explorer.noMatchingAnomaliesFoundTitle": "Aucune anomalie correspondante trouvée",
     "xpack.ml.explorer.noResultForSelectedJobsMessage": "Aucun résultat trouvé pour {jobsCount, plural, one {la tâche sélectionnée} other {les tâches sélectionnées}}",
     "xpack.ml.explorer.noResultsFoundLabel": "Résultat introuvable",

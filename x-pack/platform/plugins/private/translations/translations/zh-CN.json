@@ -26479,7 +26479,6 @@
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "“排名最前影响因素”列表被隐藏，因为没有为所选作业配置影响因素。",
     "xpack.ml.explorer.noInfluencersFoundTitle": "未找到任何 {viewBySwimlaneFieldName} 影响因素",
     "xpack.ml.explorer.noInfluencersFoundTitleFilterMessage": "对于指定筛选找不到任何 {viewBySwimlaneFieldName} 影响因素",
-    "xpack.ml.explorer.noJobSelectedLabel": "未选择任何作业",
     "xpack.ml.explorer.noMatchingAnomaliesFoundTitle": "未找到任何匹配的异常",
     "xpack.ml.explorer.noResultsFoundLabel": "找不到结果",
     "xpack.ml.explorer.overallLabel": "总体",

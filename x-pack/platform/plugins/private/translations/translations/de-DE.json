@@ -26270,7 +26270,6 @@
     "xpack.ml.explorer.noConfiguredInfluencersTooltip": "Die Liste der Top-Influencer ist verborgen, da für die ausgewählten Jobs keine Influencer konfiguriert wurden.",
     "xpack.ml.explorer.noInfluencersFoundTitle": "Keine {viewBySwimlaneFieldName} Influencer gefunden",
     "xpack.ml.explorer.noInfluencersFoundTitleFilterMessage": "Für den angegebenen Filter wurden keine {viewBySwimlaneFieldName} Influencer gefunden",
-    "xpack.ml.explorer.noJobSelectedLabel": "Keine Jobs ausgewählt",
     "xpack.ml.explorer.noMatchingAnomaliesFoundTitle": "Keine passenden Anomalien gefunden",
     "xpack.ml.explorer.noResultForSelectedJobsMessage": "Keine Ergebnisse für die ausgewählten {jobsCount, plural, one {job} other {jobs}} gefunden",
     "xpack.ml.explorer.noResultsFoundLabel": "Keine Ergebnisse gefunden",

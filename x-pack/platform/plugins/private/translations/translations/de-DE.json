@@ -41057,7 +41057,6 @@
     "xpack.spaces.management.manageSpacePage.userImpactWarningTitle": "Warnung",
     "xpack.spaces.management.navigation.solutionViewDefaultValue": "Lösungsansicht auswählen",
     "xpack.spaces.management.navigation.solutionViewLabel": "Lösungsansicht",
-    "xpack.spaces.management.reversedSpaceBadge.reversedSpacesCanBePartiallyModifiedTooltip": "Reservierte Bereiche sind integriert und können nur teilweise modifiziert werden.",
     "xpack.spaces.management.selectAllFeaturesLink": "Alle anzeigen",
     "xpack.spaces.management.showAllFeaturesText": "Alle anzeigen",
     "xpack.spaces.management.spaceDetails.contentTabs.content.heading": "Inhalt",

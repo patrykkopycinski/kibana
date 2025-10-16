@@ -41368,7 +41368,6 @@
     "xpack.spaces.management.manageSpacePage.userImpactWarningTitle": "警告",
     "xpack.spaces.management.navigation.solutionViewDefaultValue": "ソリューションビューを選択",
     "xpack.spaces.management.navigation.solutionViewLabel": "ソリューションビュー",
-    "xpack.spaces.management.reversedSpaceBadge.reversedSpacesCanBePartiallyModifiedTooltip": "リザーブされたスペースはビルトインのため、部分的な変更しかできません。",
     "xpack.spaces.management.selectAllFeaturesLink": "すべて表示",
     "xpack.spaces.management.showAllFeaturesText": "すべて表示",
     "xpack.spaces.management.spaceDetails.contentTabs.content.heading": "コンテンツ",

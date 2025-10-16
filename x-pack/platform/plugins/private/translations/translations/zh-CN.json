@@ -41353,7 +41353,6 @@
     "xpack.spaces.management.manageSpacePage.userImpactWarningTitle": "警告",
     "xpack.spaces.management.navigation.solutionViewDefaultValue": "选择解决方案视图",
     "xpack.spaces.management.navigation.solutionViewLabel": "解决方案视图",
-    "xpack.spaces.management.reversedSpaceBadge.reversedSpacesCanBePartiallyModifiedTooltip": "保留的工作区是内置的，只能进行部分修改。",
     "xpack.spaces.management.selectAllFeaturesLink": "全部显示",
     "xpack.spaces.management.showAllFeaturesText": "全部显示",
     "xpack.spaces.management.spaceDetails.contentTabs.content.heading": "内容",

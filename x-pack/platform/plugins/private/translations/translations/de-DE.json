@@ -40081,7 +40081,6 @@
     "xpack.slo.sLOInspect.codeBlockAccordion.temporaryDocumentLabel": "Temporäres Dokument",
     "xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel": "Rollup-Transformationsabfrage-Composite",
     "xpack.slo.sLOInspect.sLOInspectButtonLabel": "Inspect",
-    "xpack.slo.sloList.healthCallout.buttonDimissLabel": "Verwerfen",
     "xpack.slo.sloList.pageHeader.create": "SLO erstellen",
     "xpack.slo.sloList.welcomePrompt.buttonLabel": "SLO erstellen",
     "xpack.slo.sloList.welcomePrompt.getStartedMessage": "Erstellen Sie zunächst Ihr erstes SLO.",

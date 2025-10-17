@@ -40378,7 +40378,6 @@
     "xpack.slo.sLOInspect.codeBlockAccordion.temporaryDocumentLabel": "临时文档",
     "xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel": "汇总/打包转换查询组合",
     "xpack.slo.sLOInspect.sLOInspectButtonLabel": "SLO 检查",
-    "xpack.slo.sloList.healthCallout.buttonDimissLabel": "关闭",
     "xpack.slo.sloList.pageHeader.create": "创建 SLO",
     "xpack.slo.sloList.welcomePrompt.buttonLabel": "创建 SLO",
     "xpack.slo.sloList.welcomePrompt.getStartedMessage": "要开始使用，请创建您的首个 SLO。",

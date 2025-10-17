@@ -40346,7 +40346,6 @@
     "xpack.slo.sLOInspect.codeBlockAccordion.temporaryDocumentLabel": "Document provisoire",
     "xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel": "Cumul des composites de recherche de transformation",
     "xpack.slo.sLOInspect.sLOInspectButtonLabel": "Inspection des SLO",
-    "xpack.slo.sloList.healthCallout.buttonDimissLabel": "Rejeter",
     "xpack.slo.sloList.pageHeader.create": "Créer un SLO",
     "xpack.slo.sloList.welcomePrompt.buttonLabel": "Créer un SLO",
     "xpack.slo.sloList.welcomePrompt.getStartedMessage": "Pour commencer, créez votre premier SLO.",

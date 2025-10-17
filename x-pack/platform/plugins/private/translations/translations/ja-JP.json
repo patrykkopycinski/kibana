@@ -40391,7 +40391,6 @@
     "xpack.slo.sLOInspect.codeBlockAccordion.temporaryDocumentLabel": "一時ドキュメント",
     "xpack.slo.sLOInspect.codeBlockAccordion.transformQueryLabel": "ロールアップ変換クエリ複合",
     "xpack.slo.sLOInspect.sLOInspectButtonLabel": "SLO検査",
-    "xpack.slo.sloList.healthCallout.buttonDimissLabel": "閉じる",
     "xpack.slo.sloList.pageHeader.create": "SLOの作成",
     "xpack.slo.sloList.welcomePrompt.buttonLabel": "SLOの作成",
     "xpack.slo.sloList.welcomePrompt.getStartedMessage": "開始するには、まずSLOを作成します。",

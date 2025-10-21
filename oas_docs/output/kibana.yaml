@@ -59534,6 +59534,8 @@ paths:
                                                                     nullable: true
                                                                   - not: {}
                                                               type: array
+                                                            - items: {}
+                                                              type: array
                                                             - {}
                                                         type: object
                                                       - anyOf:
@@ -63077,6 +63079,8 @@ paths:
                                                                       - 'null'
                                                                     nullable: true
                                                                   - not: {}
+                                                              type: array
+                                                            - items: {}
                                                               type: array
                                                             - {}
                                                         type: object
@@ -66839,6 +66843,8 @@ paths:
                                                     nullable: true
                                                   - not: {}
                                               type: array
+                                            - items: {}
+                                              type: array
                                             - {}
                                         type: object
                                       - anyOf:
@@ -68484,6 +68490,8 @@ paths:
                                                       - 'null'
                                                     nullable: true
                                                   - not: {}
+                                              type: array
+                                            - items: {}
                                               type: array
                                             - {}
                                         type: object

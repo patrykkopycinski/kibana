@@ -33791,6 +33791,8 @@ paths:
                               type: array
                             installed_kibana_space_id:
                               type: string
+                            is_rollback_ttl_expired:
+                              type: boolean
                             latest_executed_state:
                               additionalProperties: true
                               type: object
@@ -35073,6 +35075,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object
@@ -35755,6 +35759,8 @@ paths:
                             type: array
                           installed_kibana_space_id:
                             type: string
+                          is_rollback_ttl_expired:
+                            type: boolean
                           latest_executed_state:
                             additionalProperties: true
                             type: object

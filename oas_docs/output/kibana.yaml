@@ -27795,7 +27795,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - in: path
@@ -37850,7 +37850,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.
+        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -37915,7 +37915,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-setup.
+        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query

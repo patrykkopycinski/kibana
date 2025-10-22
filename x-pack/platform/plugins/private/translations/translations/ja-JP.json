@@ -32667,7 +32667,6 @@
     "xpack.searchProfiler.scoreTimeDescription": "クエリーに対してドキュメントを実際にスコアリングするためにかかった時間。",
     "xpack.searchProfiler.sendRequestButtonTooltipContent": "クリックしてリクエストを送信",
     "xpack.searchProfiler.trialLicenseTitle": "トライアル",
-    "xpack.searchSharedUI.formInfoField.copyMessage": "クリップボードにコピー",
     "xpack.security.accessAgreement.acknowledgeButtonText": "確認して続行",
     "xpack.security.accessAgreement.acknowledgeErrorMessage": "アクセスの同意を確認できませんでした。",
     "xpack.security.accessAgreement.title": "アクセスの同意",

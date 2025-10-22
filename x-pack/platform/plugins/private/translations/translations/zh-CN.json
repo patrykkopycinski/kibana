@@ -32653,7 +32653,6 @@
     "xpack.searchProfiler.scoreTimeDescription": "基于查询实际评分文档所用的时间。",
     "xpack.searchProfiler.sendRequestButtonTooltipContent": "单击以发送请求",
     "xpack.searchProfiler.trialLicenseTitle": "试用",
-    "xpack.searchSharedUI.formInfoField.copyMessage": "复制到剪贴板",
     "xpack.security.accessAgreement.acknowledgeButtonText": "确认并继续",
     "xpack.security.accessAgreement.acknowledgeErrorMessage": "无法确认访问协议。",
     "xpack.security.accessAgreement.title": "访问协议",

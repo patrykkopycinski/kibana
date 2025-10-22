@@ -32444,7 +32444,6 @@
     "xpack.searchProfiler.scoreTimeDescription": "Die Zeit, die tatsächlich benötigt wird, um das Dokument anhand der Abfrage zu bewerten.",
     "xpack.searchProfiler.sendRequestButtonTooltipContent": "Klicken, um Anfrage zu senden",
     "xpack.searchProfiler.trialLicenseTitle": "Testversion",
-    "xpack.searchSharedUI.formInfoField.copyMessage": "In die Zwischenablage kopieren",
     "xpack.security.accessAgreement.acknowledgeButtonText": "Bestätigen Sie und fahren Sie fort",
     "xpack.security.accessAgreement.acknowledgeErrorMessage": "Zugriffsvereinbarung konnte nicht bestätigt werden.",
     "xpack.security.accessAgreement.title": "Zugangsvereinbarung",

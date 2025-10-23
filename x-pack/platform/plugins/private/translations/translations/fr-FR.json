@@ -17967,8 +17967,6 @@
     "xpack.fleet.epm.install.packageUpdateError": "Erreur lors de la mise à jour de {pkgName} vers la version {pkgVersion}",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "Beats uniquement",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "Elastic Agent uniquement",
-    "xpack.fleet.epm.integrationPreference.recommendedLabel": "Recommandé",
-    "xpack.fleet.epm.integrationPreference.recommendedTooltip": "Nous recommandons les intégrations Elastic Agent lorsqu’elles sont disponibles.",
     "xpack.fleet.epm.integrationPreference.title": "Si une intégration est disponible pour {link}, montrer :",
     "xpack.fleet.epm.integrationPreference.titleLink": "Elastic Agent et Beats",
     "xpack.fleet.epm.licenseLabel": "Licence",

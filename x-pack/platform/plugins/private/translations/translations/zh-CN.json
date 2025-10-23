@@ -17983,8 +17983,6 @@
     "xpack.fleet.epm.install.packageUpdateError": "将 {pkgName} 更新到 {pkgVersion} 时出错",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "仅限 Beats",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "仅限 Elastic 代理",
-    "xpack.fleet.epm.integrationPreference.recommendedLabel": "推荐",
-    "xpack.fleet.epm.integrationPreference.recommendedTooltip": "如果 Elastic Agent 集成正式发布，我们建议使用这些集成。",
     "xpack.fleet.epm.integrationPreference.title": "如果集成可用于 {link}，显示：",
     "xpack.fleet.epm.integrationPreference.titleLink": "Elastic 代理和 Beats",
     "xpack.fleet.epm.licenseLabel": "许可证",

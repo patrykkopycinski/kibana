@@ -17990,8 +17990,6 @@
     "xpack.fleet.epm.install.packageUpdateError": "{pkgName} {pkgVersion}の更新エラー",
     "xpack.fleet.epm.integrationPreference.beatsLabel": "Beatsのみ",
     "xpack.fleet.epm.integrationPreference.elasticAgentLabel": "Elasticエージェントのみ",
-    "xpack.fleet.epm.integrationPreference.recommendedLabel": "推奨",
-    "xpack.fleet.epm.integrationPreference.recommendedTooltip": "公開されたときには、Elasticエージェント統合をお勧めします。",
     "xpack.fleet.epm.integrationPreference.title": "{link}の統合が利用可能な場合は、以下が表示されます。",
     "xpack.fleet.epm.integrationPreference.titleLink": "ElasticエージェントとBeats",
     "xpack.fleet.epm.licenseLabel": "ライセンス",

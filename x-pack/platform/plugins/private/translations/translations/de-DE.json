@@ -94,7 +94,6 @@
     "aiAssistantManagementSelection.app.title": "KI-Assistenten",
     "aiAssistantManagementSelection.app.titleBar": "KI-Assistenten",
     "aiAssistantManagementSelection.breadcrumb.index": "KI-Assistent",
-    "aiAssistantManagementSelection.featureRegistry.featureName": "AI Assistant",
     "aiAssistantManagementSelection.managementSectionLabel": "KI-Assistenten",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingName": "Sichtbarkeit AI Assistant für Observability und Search",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault": "Nur Observability und Search (Standard)",

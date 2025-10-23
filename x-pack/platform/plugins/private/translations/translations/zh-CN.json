@@ -94,7 +94,6 @@
     "aiAssistantManagementSelection.app.title": "AI 助手",
     "aiAssistantManagementSelection.app.titleBar": "AI 助手",
     "aiAssistantManagementSelection.breadcrumb.index": "AI 助手",
-    "aiAssistantManagementSelection.featureRegistry.featureName": "AI 助手",
     "aiAssistantManagementSelection.managementSectionLabel": "AI 助手",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingName": "适用于 Observability 和 Search 的 AI 助手可见性",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault": "仅限 Observability 和 Search（默认）",

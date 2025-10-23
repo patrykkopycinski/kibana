@@ -94,7 +94,6 @@
     "aiAssistantManagementSelection.app.title": "Assistants d'IA",
     "aiAssistantManagementSelection.app.titleBar": "Assistants d'IA",
     "aiAssistantManagementSelection.breadcrumb.index": "Assistant d'IA",
-    "aiAssistantManagementSelection.featureRegistry.featureName": "Assistant d'IA",
     "aiAssistantManagementSelection.managementSectionLabel": "Assistants d'IA",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingName": "Assistant d’IA de visibilité pour Observability et Search",
     "aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault": "Observability et Search uniquement (par défaut)",

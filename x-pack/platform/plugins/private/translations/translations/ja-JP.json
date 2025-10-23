@@ -35962,7 +35962,6 @@
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription": "すべてのポリシーでグローバルに割り当てるか、特定のポリシーに割り当てます。",
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle": "割り当て",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "ポリシーを表示",
-    "xpack.securitySolution.effectScope.policyDetailsNotAccessible": "ポリシーにアクセスできなくなりました",
     "xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace": "現在のスペースからはポリシーにアクセスできません",
     "xpack.securitySolution.emptyString.emptyStringDescription": "空の文字列",
     "xpack.securitySolution.enableRiskScore.enableRiskScore": "{riskEntity}リスクスコアを有効化",

@@ -35922,7 +35922,6 @@
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription": "Effectuez une affectation globale à toutes les politiques, ou une affectation spécifique à certaines politiques.",
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle": "Affectation",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "Afficher la politique",
-    "xpack.securitySolution.effectScope.policyDetailsNotAccessible": "La politique n'est plus accessible",
     "xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace": "La politique n'est pas accessible depuis l'espace actuel",
     "xpack.securitySolution.emptyString.emptyStringDescription": "Chaîne vide",
     "xpack.securitySolution.enableRiskScore.enableRiskScore": "Activer le score de risque de {riskEntity}",

@@ -35948,7 +35948,6 @@
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription": "跨所有策略进行全局分配，或将其分配给特定策略。",
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle": "分配",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "查看策略",
-    "xpack.securitySolution.effectScope.policyDetailsNotAccessible": "策略不再可访问",
     "xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace": "当前空间无法访问该策略",
     "xpack.securitySolution.emptyString.emptyStringDescription": "空字符串",
     "xpack.securitySolution.enableRiskScore.enableRiskScore": "启用{riskEntity}风险分数",

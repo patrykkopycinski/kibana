@@ -35712,7 +35712,6 @@
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionDescription": "Weisen Sie global für alle Richtlinien zu oder weisen Sie es bestimmten Richtlinien zu.",
     "xpack.securitySolution.effectedPolicySelect.assignmentSectionTitle": "Zuordnung",
     "xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel": "Richtlinie anzeigen",
-    "xpack.securitySolution.effectScope.policyDetailsNotAccessible": "Die Richtlinie ist nicht mehr zugänglich",
     "xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace": "Die Richtlinie ist vom aktuellen Bereich aus nicht zugänglich",
     "xpack.securitySolution.emptyString.emptyStringDescription": "Leere Zeichenfolge",
     "xpack.securitySolution.enableRiskScore.enableRiskScore": "Aktivieren Sie die Risikobewertung für {riskEntity}",

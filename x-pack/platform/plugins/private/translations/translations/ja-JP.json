@@ -5283,7 +5283,6 @@
     "interactiveSetup.verificationCodeForm.title": "検証が必要です",
     "kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd": "日付ピッカーの終了日時",
     "kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart": "日付ピッカーの開始日時",
-    "kbn-esql-validation-autocomplete.esql.hover.acceptableTypes": "使用可能なタイプ",
     "kbn-esql-validation-autocomplete.esql.hover.policyEnrichedFields": "**フィールド**",
     "kbn-esql-validation-autocomplete.esql.hover.policyIndexes": "**インデックス**",
     "kbn-esql-validation-autocomplete.esql.hover.policyMatchingField": "**一致するフィールド**",

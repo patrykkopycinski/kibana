@@ -5280,7 +5280,6 @@
     "interactiveSetup.verificationCodeForm.title": "Vérification requise",
     "kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd": "L'heure de fin à partir du sélecteur de date",
     "kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart": "L'heure de début à partir du sélecteur de date",
-    "kbn-esql-validation-autocomplete.esql.hover.acceptableTypes": "Types acceptables",
     "kbn-esql-validation-autocomplete.esql.hover.policyEnrichedFields": "**Champs**",
     "kbn-esql-validation-autocomplete.esql.hover.policyIndexes": "**Indexes**",
     "kbn-esql-validation-autocomplete.esql.hover.policyMatchingField": "**Champ correspondant**",

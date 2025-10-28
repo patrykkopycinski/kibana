@@ -71463,6 +71463,7 @@ paths:
                       description: The unique identifier of the deleted monitor.
                       type: string
                 type: array
+          description: A successful response.
       summary: Delete monitors
       tags:
         - synthetics
@@ -71568,6 +71569,7 @@ paths:
                     }
               schema:
                 type: object
+          description: A successful response.
         '404':
           description: If the monitor is not found, the API returns a 404 error.
       summary: Get a monitor

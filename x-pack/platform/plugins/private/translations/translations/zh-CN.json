@@ -32308,7 +32308,6 @@
     "xpack.screenshotting.exportTypes.printablePdf.logoDescription": "由 Elastic 提供支持",
     "xpack.screenshotting.exportTypes.printablePdf.pagingDescription": "第 {currentPage} 页，共 {pageCount} 页",
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "无法初始化 AI 助手",
-    "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "打开 AI 助手",
     "xpack.searchHomepage.appTitle": "主页",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "索引",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "索引管理",

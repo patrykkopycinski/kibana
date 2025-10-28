@@ -32105,7 +32105,6 @@
     "xpack.screenshotting.exportTypes.printablePdf.logoDescription": "Powered by Elastic",
     "xpack.screenshotting.exportTypes.printablePdf.pagingDescription": "Seite {currentPage} von {pageCount}",
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "Der KI-Assistent konnte nicht initialisiert werden",
-    "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "Öffnen Sie den KI-Assistenten",
     "xpack.searchHomepage.appTitle": "Startseite",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "Indizes",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "Indexverwaltung",

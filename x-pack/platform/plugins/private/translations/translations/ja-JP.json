@@ -32324,7 +32324,6 @@
     "xpack.screenshotting.exportTypes.printablePdf.logoDescription": "Elastic 提供",
     "xpack.screenshotting.exportTypes.printablePdf.pagingDescription": "{pageCount} ページ中 {currentPage} ページ目",
     "xpack.searchAssistant.navControl.initFailureErrorTitle": "AI Assistantを初期化できませんでした",
-    "xpack.searchAssistant.navControl.openTheAIAssistantPopoverLabel": "AI Assistantを開く",
     "xpack.searchHomepage.appTitle": "ホーム",
     "xpack.searchIndices.breadcrumbs.indexManagement.indices.label": "インデックス",
     "xpack.searchIndices.breadcrumbs.indexManagement.label": "インデックス管理",

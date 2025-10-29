@@ -22494,6 +22494,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -22514,6 +22515,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
@@ -22654,6 +22656,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -22674,6 +22677,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -22716,6 +22720,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -22736,6 +22741,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -22820,6 +22826,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -22840,6 +22847,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -22985,6 +22993,7 @@ paths:
                       - host
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -23005,6 +23014,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -23747,6 +23757,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -23767,6 +23778,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent policies
       tags:
         - Elastic Agent policies
@@ -24667,6 +24679,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -24687,6 +24700,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent policy
       tags:
         - Elastic Agent policies
@@ -25394,6 +25408,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -25414,6 +25429,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
@@ -26098,6 +26114,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -26118,6 +26135,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent policy
       tags:
         - Elastic Agent policies
@@ -27028,6 +27046,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27048,6 +27067,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
@@ -27104,6 +27124,7 @@ paths:
                 required:
                   - currentVersions
                   - totalAgents
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27124,6 +27145,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get auto upgrade agent status
       tags:
         - Elastic Agent policies
@@ -27829,6 +27851,7 @@ paths:
                       - revision
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27849,6 +27872,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Copy an agent policy
       tags:
         - Elastic Agent policies
@@ -27893,6 +27917,7 @@ paths:
             application/json:
               schema:
                 type: string
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -27913,6 +27938,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -27933,6 +27959,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Download an agent policy
       tags:
         - Elastic Agent policies
@@ -28379,6 +28406,7 @@ paths:
                           - inputs
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28399,6 +28427,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a full agent policy
       tags:
         - Elastic Agent policies
@@ -28489,6 +28518,7 @@ paths:
                       - data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28509,6 +28539,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
@@ -28563,6 +28594,7 @@ paths:
                 required:
                   - id
                   - name
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28583,6 +28615,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent policy
       tags:
         - Elastic Agent policies
@@ -28691,6 +28724,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28711,6 +28745,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
@@ -28789,6 +28824,7 @@ paths:
                       - active
                 required:
                   - results
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28809,6 +28845,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent status summary
       tags:
         - Elastic Agent status
@@ -28884,6 +28921,7 @@ paths:
                 required:
                   - items
                   - dataPreview
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -28904,6 +28942,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get incoming agent data
       tags:
         - Elastic Agents
@@ -29323,6 +29362,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29343,6 +29383,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agents
       tags:
         - Elastic Agents
@@ -29394,6 +29435,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29414,6 +29456,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agents by action ids
       tags:
         - Elastic Agents
@@ -29458,6 +29501,7 @@ paths:
                     type: string
                 required:
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29478,6 +29522,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an agent
       tags:
         - Elastic Agents
@@ -29809,6 +29854,7 @@ paths:
                       - local_metadata
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -29829,6 +29875,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent
       tags:
         - Elastic Agents
@@ -30175,6 +30222,7 @@ paths:
                       - local_metadata
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30195,6 +30243,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update an agent by ID
       tags:
         - Elastic Agents
@@ -30325,6 +30374,7 @@ paths:
                       - ack_data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30345,6 +30395,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an agent action
       tags:
         - Elastic Agent actions
@@ -30438,7 +30489,7 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30459,7 +30510,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Migrate a single agent
       tags:
         - Elastic Agents
@@ -30509,6 +30560,7 @@ paths:
                 additionalProperties: false
                 type: object
                 properties: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30529,6 +30581,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Reassign an agent
       tags:
         - Elastic Agent actions
@@ -30585,6 +30638,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30605,6 +30659,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
@@ -30703,6 +30758,7 @@ paths:
                 additionalProperties: false
                 type: object
                 properties: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30723,6 +30779,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Upgrade an agent
       tags:
         - Elastic Agent actions
@@ -30790,6 +30847,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30810,6 +30868,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent uploads
       tags:
         - Elastic Agents
@@ -30966,6 +31025,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -30986,6 +31046,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an agent action status
       tags:
         - Elastic Agent actions
@@ -31066,6 +31127,7 @@ paths:
                       - ack_data
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31086,6 +31148,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Cancel an agent action
       tags:
         - Elastic Agent actions
@@ -31118,6 +31181,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31138,6 +31202,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get available agent versions
       tags:
         - Elastic Agents
@@ -31233,7 +31298,7 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31254,7 +31319,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Migrate multiple agents
       tags:
         - Elastic Agents
@@ -31315,6 +31380,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31335,6 +31401,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
@@ -31395,6 +31462,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31415,6 +31483,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
@@ -31480,6 +31549,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31500,6 +31570,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
@@ -31565,6 +31636,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31585,6 +31657,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
@@ -31656,6 +31729,7 @@ paths:
                     type: string
                 required:
                   - actionId
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31676,6 +31750,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
@@ -31721,6 +31796,7 @@ paths:
                 required:
                   - id
                   - deleted
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31741,6 +31817,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete an uploaded file
       tags:
         - Elastic Agents
@@ -31775,6 +31852,7 @@ paths:
             application/json:
               schema:
                 type: object
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31795,6 +31873,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an uploaded file
       tags:
         - Elastic Agents
@@ -31852,6 +31931,7 @@ paths:
                   - isReady
                   - missing_requirements
                   - missing_optional_features
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31872,6 +31952,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent setup info
       tags:
         - Elastic Agents
@@ -31923,6 +32004,7 @@ paths:
                 required:
                   - isInitialized
                   - nonFatalErrors
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -31943,6 +32025,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Initiate agent setup
       tags:
         - Elastic Agents
@@ -31986,6 +32069,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32006,6 +32090,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get agent tags
       tags:
         - Elastic Agents
@@ -32039,6 +32124,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32059,6 +32145,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Check permissions
       tags:
         - Fleet internals
@@ -32134,7 +32221,7 @@ paths:
                     type: array
                 required:
                   - items
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32155,7 +32242,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -32275,7 +32362,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32296,7 +32383,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
@@ -32345,7 +32432,7 @@ paths:
                     type: string
                 required:
                   - id
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32366,7 +32453,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
@@ -32429,7 +32516,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32450,7 +32537,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
@@ -32565,7 +32652,7 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: Indicates a successful call.
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32586,7 +32673,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Indicates a bad request call.
+          description: A bad request.
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
@@ -32679,6 +32766,7 @@ paths:
                     type: array
                 required:
                   - data_streams
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32699,6 +32787,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get data streams
       tags:
         - Data streams
@@ -32821,6 +32910,7 @@ paths:
                   - page
                   - perPage
                   - list
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32841,6 +32931,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
@@ -32926,6 +33017,7 @@ paths:
                 required:
                   - item
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -32946,6 +33038,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -32990,6 +33083,7 @@ paths:
                     type: string
                 required:
                   - action
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33010,6 +33104,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -33073,6 +33168,7 @@ paths:
                       - created_at
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33093,6 +33189,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -33178,6 +33275,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33198,6 +33296,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
@@ -33256,6 +33355,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33276,6 +33376,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
@@ -33413,6 +33514,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33433,6 +33535,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -33479,7 +33582,8 @@ paths:
               required:
                 - readMeData
       responses:
-        '200': {}
+        '200':
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33500,6 +33604,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -33569,6 +33674,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -33589,6 +33695,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get data streams
       tags:
         - Data streams
@@ -34010,6 +34117,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34030,6 +34138,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
@@ -34151,6 +34260,7 @@ paths:
                 required:
                   - items
                   - _meta
+          description: 'OK: A successful request.'
         '400':
           content:
             application/gzip; application/zip:
@@ -34171,6 +34281,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
@@ -34345,7 +34456,7 @@ paths:
                     type: array
                 required:
                   - items
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34366,7 +34477,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -34430,7 +34541,7 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34451,7 +34562,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -34516,7 +34627,7 @@ paths:
                     type: string
                 required:
                   - status
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34537,7 +34648,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -34605,7 +34716,7 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34626,7 +34737,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -34691,7 +34802,7 @@ paths:
                     type: string
                 required:
                   - status
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34712,7 +34823,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -34820,6 +34931,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -34840,6 +34952,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
@@ -35327,6 +35440,7 @@ paths:
                       - has_policies
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -35347,6 +35461,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
@@ -35497,7 +35612,7 @@ paths:
                 required:
                   - items
                   - _meta
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -35518,7 +35633,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -36003,6 +36118,7 @@ paths:
                       - assets
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36023,6 +36139,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
@@ -36061,6 +36178,7 @@ paths:
           content:
             application/json:
               schema: {}
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36081,6 +36199,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
@@ -36133,6 +36252,7 @@ paths:
                     type: boolean
                 required:
                   - success
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36153,6 +36273,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete assets for an input package
       tags:
         - Elastic Package Manager (EPM)
@@ -36200,7 +36321,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36221,7 +36342,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -36284,7 +36405,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36305,7 +36426,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -36363,7 +36484,7 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: OK
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36384,7 +36505,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Bad Request
+          description: A bad request.
       summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -36456,6 +36577,7 @@ paths:
                     - success
                     - error
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36476,6 +36598,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
@@ -36526,6 +36649,7 @@ paths:
                       - package_policy_count
                 required:
                   - response
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36546,6 +36670,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
@@ -36686,6 +36811,7 @@ paths:
                 required:
                   - items
                   - total
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36706,6 +36832,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
@@ -36738,6 +36865,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36758,6 +36886,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
@@ -36852,6 +36981,7 @@ paths:
                         type: array
                     required:
                       - inputs
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36872,6 +37002,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
@@ -36903,6 +37034,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -36923,6 +37055,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)
@@ -37063,6 +37196,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37083,6 +37217,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
@@ -37321,6 +37456,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37341,6 +37477,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -37383,6 +37520,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37403,6 +37541,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -37536,6 +37675,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37556,6 +37696,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -37792,6 +37933,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37812,6 +37954,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -37864,6 +38007,7 @@ paths:
                     type: string
                 required:
                   - status
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37884,6 +38028,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -37904,6 +38049,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Check Fleet Server health
       tags:
         - Fleet internals
@@ -37949,6 +38095,7 @@ paths:
                     type: string
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -37969,6 +38116,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
@@ -38008,6 +38156,7 @@ paths:
             application/json:
               schema:
                 type: string
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38028,6 +38177,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -38048,6 +38198,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Download an agent manifest
       tags:
         - Elastic Agent policies
@@ -38085,6 +38236,7 @@ paths:
                     type: string
                 required:
                   - api_key
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38105,6 +38257,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
@@ -38148,6 +38301,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38168,6 +38322,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '500':
           content:
             application/json:
@@ -38188,6 +38343,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: An internal server error.
       summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
@@ -38968,6 +39124,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -38988,6 +39145,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get outputs
       tags:
         - Fleet outputs
@@ -40507,6 +40665,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -40527,6 +40686,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create output
       tags:
         - Fleet outputs
@@ -40569,6 +40729,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -40589,6 +40750,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -40609,6 +40771,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Not found.
       summary: Delete output
       tags:
         - Fleet outputs
@@ -41382,6 +41545,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -41402,6 +41566,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get output
       tags:
         - Fleet outputs
@@ -42905,6 +43070,7 @@ paths:
                           - password
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -42925,6 +43091,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update output
       tags:
         - Fleet outputs
@@ -42969,6 +43136,7 @@ paths:
                   - state
                   - message
                   - timestamp
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -42989,6 +43157,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get the latest output health
       tags:
         - Fleet outputs
@@ -43458,6 +43627,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -43478,6 +43648,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get package policies
       tags:
         - Fleet package policies
@@ -44342,6 +44513,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -44362,6 +44534,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '409':
           content:
             application/json:
@@ -44382,6 +44555,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A conflict occurred.
       summary: Create a package policy
       tags:
         - Fleet package policies
@@ -44833,6 +45007,7 @@ paths:
                     type: array
                 required:
                   - items
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -44853,6 +45028,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -44864,6 +45040,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Bulk get package policies
       tags:
         - Fleet package policies
@@ -44917,6 +45094,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -44937,6 +45115,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a package policy
       tags:
         - Fleet package policies
@@ -45369,6 +45548,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -45389,6 +45569,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -45400,6 +45581,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Get a package policy
       tags:
         - Fleet package policies
@@ -46264,6 +46446,7 @@ paths:
                       - created_by
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -46284,6 +46467,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '403':
           content:
             application/json:
@@ -46304,6 +46488,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: Forbidden.
       summary: Update a package policy
       tags:
         - Fleet package policies
@@ -46429,6 +46614,7 @@ paths:
                     - policy_ids
                     - package
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -46449,6 +46635,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Bulk delete package policies
       tags:
         - Fleet package policies
@@ -46516,6 +46703,7 @@ paths:
                     - id
                     - success
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -46536,6 +46724,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Upgrade a package policy
       tags:
         - Fleet package policies
@@ -47392,6 +47581,7 @@ paths:
                   required:
                     - hasErrors
                 type: array
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47412,6 +47602,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies
@@ -47485,6 +47676,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47505,6 +47697,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get proxies
       tags:
         - Fleet proxies
@@ -47609,6 +47802,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47629,6 +47823,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a proxy
       tags:
         - Fleet proxies
@@ -47671,6 +47866,7 @@ paths:
                     type: string
                 required:
                   - id
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47691,6 +47887,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Delete a proxy
       tags:
         - Fleet proxies
@@ -47757,6 +47954,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47777,6 +47975,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a proxy
       tags:
         - Fleet proxies
@@ -47883,6 +48082,7 @@ paths:
                       - name
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -47903,6 +48103,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Update a proxy
       tags:
         - Fleet proxies
@@ -48025,6 +48226,7 @@ paths:
                       - title
                 required:
                   - integrations
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48045,6 +48247,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get remote synced integrations status by outputId
       tags:
         - Fleet remote synced integrations
@@ -48163,6 +48366,7 @@ paths:
                       - title
                 required:
                   - integrations
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48183,6 +48387,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get remote synced integrations status
       tags:
         - Fleet remote synced integrations
@@ -48235,6 +48440,7 @@ paths:
                 required:
                   - name
                   - value
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48255,6 +48461,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Create a service token
       tags:
         - Fleet service tokens
@@ -48329,6 +48536,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48349,6 +48557,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -48360,6 +48569,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Get settings
       tags:
         - Fleet internals
@@ -48475,6 +48685,7 @@ paths:
                       - id
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48495,6 +48706,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '404':
           content:
             application/json:
@@ -48506,6 +48718,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: Not found.
       summary: Update settings
       tags:
         - Fleet internals
@@ -48558,6 +48771,7 @@ paths:
                 required:
                   - isInitialized
                   - nonFatalErrors
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48578,6 +48792,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
         '500':
           content:
             application/json:
@@ -48590,6 +48805,7 @@ paths:
                     type: string
                 required:
                   - message
+          description: An internal server error occurred.
       summary: Initiate Fleet setup
       tags:
         - Fleet internals
@@ -48622,6 +48838,7 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
+          description: 'OK: A successful request.'
       summary: Get space settings
       tags: []
       x-state: Generally available; added in 9.1.0
@@ -48685,6 +48902,7 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
+          description: 'OK: A successful request.'
       summary: Create space settings
       tags: []
       x-state: Generally available; added in 9.1.0
@@ -48771,6 +48989,7 @@ paths:
                   - total
                   - page
                   - perPage
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48791,6 +49010,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get metadata for latest uninstall tokens
       tags:
         - Fleet uninstall tokens
@@ -48848,6 +49068,7 @@ paths:
                       - token
                 required:
                   - item
+          description: 'OK: A successful request.'
         '400':
           content:
             application/json:
@@ -48868,6 +49089,7 @@ paths:
                 required:
                   - message
                   - attributes
+          description: A bad request.
       summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens

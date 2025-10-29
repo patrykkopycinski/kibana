@@ -5795,7 +5795,6 @@
     "management.landing.header": "Willkommen beim Stack-Management {version}",
     "management.landing.solution.header": "Stack-Management {version}",
     "management.landing.solution.subhead": "Verwalten Sie Ihre {indicesLink}, {dataViewsLink}, {ingestPipelinesLink}, {usersLink} und vieles mehr.",
-    "management.landing.solution.viewAllPagesButton": "Alle Seiten anzeigen",
     "management.landing.subhead": "Verwalten Sie Ihre Indizes, Datenquellen, gespeicherten Objekte, Kibana-Einstellungen und mehr.",
     "management.landing.subhead.dataViewsLink": "Datenquellen",
     "management.landing.subhead.indicesLink": "Index",

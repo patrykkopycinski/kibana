@@ -5827,7 +5827,6 @@
     "management.landing.header": "Stack Management {version}へようこそ",
     "management.landing.solution.header": "スタック管理{version}",
     "management.landing.solution.subhead": "{indicesLink}、{dataViewsLink}、{ingestPipelinesLink}、{usersLink}などを管理します。",
-    "management.landing.solution.viewAllPagesButton": "すべてのページを表示",
     "management.landing.subhead": "インデックス、データビュー、保存されたオブジェクト、Kibanaの設定、その他を管理します。",
     "management.landing.subhead.dataViewsLink": "データビュー",
     "management.landing.subhead.indicesLink": "インデックス",

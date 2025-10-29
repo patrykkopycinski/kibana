@@ -5820,7 +5820,6 @@
     "management.landing.header": "欢迎使用 Stack Management {version}",
     "management.landing.solution.header": "Stack Management {version}",
     "management.landing.solution.subhead": "管理您的 {indicesLink}、{dataViewsLink}、{ingestPipelinesLink}、{usersLink} 等。",
-    "management.landing.solution.viewAllPagesButton": "查看所有页面",
     "management.landing.subhead": "管理您的索引、数据视图、已保存对象、Kibana 设置等等。",
     "management.landing.subhead.dataViewsLink": "数据视图",
     "management.landing.subhead.indicesLink": "索引",

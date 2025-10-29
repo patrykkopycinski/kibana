@@ -34483,6 +34483,194 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/epm/packages/_bulk_rollback:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_rollback</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-bulk-rollback
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkRollbackRequest:
+                value:
+                  packages:
+                    - name: system
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                packages:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      name:
+                        description: Package name to rollback
+                        type: string
+                    required:
+                      - name
+                  minItems: 1
+                  type: array
+              required:
+                - packages
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    taskId: taskId
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                required:
+                  - taskId
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Bulk rollback packages
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/epm/packages/_bulk_rollback/{taskId}:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_rollback/{taskId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: get-fleet-epm-packages-bulk-rollback-taskid
+      parameters:
+        - description: Task ID of the bulk operation
+          in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    status: success
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  error:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                  results:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            message:
+                              type: string
+                          required:
+                            - message
+                        name:
+                          type: string
+                        success:
+                          type: boolean
+                      required:
+                        - name
+                        - success
+                    type: array
+                  status:
+                    type: string
+                required:
+                  - status
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get Bulk rollback packages details
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/_bulk_uninstall:
     post:
       description: |-
@@ -34580,7 +34768,8 @@ paths:
         [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: get-fleet-epm-packages-bulk-uninstall-taskid
       parameters:
-        - in: path
+        - description: Task ID of the bulk operation
+          in: path
           name: taskId
           required: true
           schema:
@@ -34755,7 +34944,8 @@ paths:
         [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: get-fleet-epm-packages-bulk-upgrade-taskid
       parameters:
-        - in: path
+        - description: Task ID of the bulk operation
+          in: path
           name: taskId
           required: true
           schema:
@@ -36610,6 +36800,84 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/fleet/epm/packages/{pkgName}/rollback:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/rollback</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-pkgname-rollback
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Package name to roll back
+          in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
+                    version: 1.0.0
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  version:
+                    type: string
+                required:
+                  - version
+                  - success
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Rollback a package to previous version
+      tags:
+        - Elastic Package Manager (EPM)
+      x-state: Technical Preview; added in 9.1.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
       description: |-

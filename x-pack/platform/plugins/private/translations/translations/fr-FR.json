@@ -1306,7 +1306,6 @@
     "core.ui_settings.params.storeUrlText": "L'URL peut parfois devenir trop longue pour être gérée par certains navigateurs. Pour pallier ce problème, nous testons actuellement le stockage de certaines parties de l'URL dans le stockage de session. N'hésitez pas à nous faire part de vos commentaires.",
     "core.ui_settings.params.storeUrlTitle": "Stocker les URL dans le stockage de session",
     "core.ui_settings.params.themeName": "Thème",
-    "core.ui_settings.params.themeName.options.amsterdam": "Amsterdam",
     "core.ui_settings.params.themeName.options.borealis": "Borealis",
     "core.ui_settings.params.themeVersionTitle": "Version du thème",
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "Actualiser la page",

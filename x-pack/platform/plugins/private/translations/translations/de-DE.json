@@ -1290,7 +1290,6 @@
     "core.ui_settings.params.storeUrlText": "Die URL kann manchmal so groß werden, dass einige Browser sie nicht mehr verarbeiten können. Um dies zu verhindern, prüfen wir, ob das Speichern von Teilen der URL im Sitzungsspeicher helfen könnte. Bitte lassen Sie uns wissen, wie Sie zurechtkommen!",
     "core.ui_settings.params.storeUrlTitle": "URLs im Sitzungsspeicher speichern",
     "core.ui_settings.params.themeName": "Thema",
-    "core.ui_settings.params.themeName.options.amsterdam": "Amsterdam",
     "core.ui_settings.params.themeName.options.borealis": "Borealis",
     "core.ui_settings.params.themeVersionTitle": "Theme-Version",
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "Seite neu laden",

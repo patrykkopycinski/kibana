@@ -1303,7 +1303,6 @@
     "core.ui_settings.params.storeUrlText": "有时，URL 可能会变得过长，使某些浏览器无法进行处理。为此，我们正在测试将 URL 的组成部分存储在会话存储中是否能有所帮助。请向我们反馈您的体验！",
     "core.ui_settings.params.storeUrlTitle": "将 URL 存储在会话存储中",
     "core.ui_settings.params.themeName": "主题",
-    "core.ui_settings.params.themeName.options.amsterdam": "阿姆斯特丹",
     "core.ui_settings.params.themeName.options.borealis": "Borealis",
     "core.ui_settings.params.themeVersionTitle": "主题版本",
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "重新加载页面",

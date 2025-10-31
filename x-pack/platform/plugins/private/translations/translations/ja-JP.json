@@ -1309,7 +1309,6 @@
     "core.ui_settings.params.storeUrlText": "URLが長くなりすぎるためブラウザーが対応できない場合があります。セッションストレージにURLの一部を保存することでこの問題に対処できるかどうかをテストしています。結果を教えてください！",
     "core.ui_settings.params.storeUrlTitle": "セッションストレージにURLを格納",
     "core.ui_settings.params.themeName": "テーマ",
-    "core.ui_settings.params.themeName.options.amsterdam": "アムステルダム",
     "core.ui_settings.params.themeName.options.borealis": "Borealis",
     "core.ui_settings.params.themeVersionTitle": "テーマバージョン",
     "core.ui.chrome.appearanceChange.requiresPageReloadButtonLabel": "ページを再読み込み",

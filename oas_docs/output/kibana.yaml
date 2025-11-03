@@ -103193,8 +103193,9 @@ x-topics:
       To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
       For example:
 
-      ```
-      curl -X GET "http://localhost:5601/s/marketing/api/data_views"
+      ```bash
+      curl -X GET "http://${KIBANA_URL}/s/marketing/api/data_views" \
+        -H "Authorization: ApiKey ${API_KEY}"
       ```
 
       If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.

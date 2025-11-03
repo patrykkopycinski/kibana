@@ -1491,7 +1491,6 @@
     "dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel": "パネル全体でカラーパレットを同期",
     "dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel": "パネル全体でカーソルを同期",
     "dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel": "パネル間でツールチップを同期",
-    "dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel": "タグ",
     "dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel": "パネルの間に余白を使用",
     "dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel": "パネル全体で同期",
     "dashboard.embeddableApi.showSettings.flyout.title": "ダッシュボード設定",

@@ -1485,7 +1485,6 @@
     "dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel": "在面板之间同步调色板",
     "dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel": "在面板之间同步光标",
     "dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel": "在面板之间同步工具提示",
-    "dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel": "标签",
     "dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel": "在面板间使用边距",
     "dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel": "跨面板同步",
     "dashboard.embeddableApi.showSettings.flyout.title": "仪表板设置",

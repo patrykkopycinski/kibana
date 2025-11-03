@@ -1488,7 +1488,6 @@
     "dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel": "Synchroniser les palettes de couleur de tous les panneaux",
     "dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel": "Synchroniser le curseur de tous les panneaux",
     "dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel": "Synchroniser les infobulles de tous les panneaux",
-    "dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel": "Balises",
     "dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel": "Utiliser des marges entre les panneaux",
     "dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel": "Synchroniser sur tous les panneaux",
     "dashboard.embeddableApi.showSettings.flyout.title": "Paramètres du tableau de bord",

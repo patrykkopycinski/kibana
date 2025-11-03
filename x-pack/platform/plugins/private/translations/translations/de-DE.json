@@ -1471,7 +1471,6 @@
     "dashboard.embeddableApi.showSettings.flyout.form.syncColorsBetweenPanelsSwitchLabel": "Farbpaletten zwischen den Bedienfeldern synchronisieren",
     "dashboard.embeddableApi.showSettings.flyout.form.syncCursorBetweenPanelsSwitchLabel": "Cursor über alle Felder hinweg synchronisieren",
     "dashboard.embeddableApi.showSettings.flyout.form.syncTooltipsBetweenPanelsSwitchLabel": "Synchrone Tooltips für alle Bedienfelder",
-    "dashboard.embeddableApi.showSettings.flyout.form.tagsFormRowLabel": "Tags",
     "dashboard.embeddableApi.showSettings.flyout.form.useMarginsBetweenPanelsSwitchLabel": "Verwenden Sie Abstände zwischen den Panels",
     "dashboard.embeddableApi.showSettings.flyout.formRow.syncAcrossPanelsLabel": "Über alle Felder hinweg synchronisieren",
     "dashboard.embeddableApi.showSettings.flyout.title": "Dashboard-Einstellungen",

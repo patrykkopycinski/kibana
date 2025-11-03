@@ -73438,13 +73438,13 @@ paths:
                     "ids": ["param1-id", "param2-id"]
                   }
             schema:
-              property:
+              type: object
+              properties:
                 ids:
                   description: An array of parameter IDs to delete.
                   items:
                     type: string
                   type: array
-              type: object
         required: true
       responses:
         '200':
@@ -99886,7 +99886,6 @@ components:
           description: |
             The value associated with the parameter. It will be included in the response if the user has write permissions.  
           type: string
-      required: null
     Synthetics_getPrivateLocation:
       additionalProperties: true
       properties:

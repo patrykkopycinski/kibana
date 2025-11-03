@@ -57658,6 +57658,7 @@ paths:
                 $ref: '#/components/examples/copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -57846,6 +57847,7 @@ paths:
                 $ref: '#/components/examples/resolve_copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -57911,6 +57913,7 @@ paths:
                 $ref: '#/components/examples/update_saved_objects_spaces_request1'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:

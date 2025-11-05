@@ -36911,7 +36911,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "查看全部",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "缺少索引“{indexName}”的索引权限：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "用户缺少风险引擎权限。",
-    "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合计",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "合计",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "{entityType} 风险分数",
     "xpack.securitySolution.entityDetails.userPanel.error": "计算 {entity} 风险分数时出现问题",

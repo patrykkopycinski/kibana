@@ -36927,7 +36927,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "すべて表示",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "インデックス\"{indexName}\"のインデックス権限が不足しています：{privileges}。",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "ユーザーにはリスクエンジン権限がありません。",
-    "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "合計",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "合計",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "{entityType}リスクスコア",
     "xpack.securitySolution.entityDetails.userPanel.error": "{entity}リスクスコアの計算中に問題が発生しました",

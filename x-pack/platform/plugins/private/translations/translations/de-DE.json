@@ -36668,7 +36668,6 @@
     "xpack.securitySolution.entityAnalytics.riskDashboard.viewAllLabel": "Alle anzeigen",
     "xpack.securitySolution.entityAnalytics.riskEngine.missingIndexPrivilege": "Fehlende Indexberechtigungen für den Index \"{indexName}\": {privileges}.",
     "xpack.securitySolution.entityAnalytics.riskEngine.unauthorized": "Dem Nutzer fehlen die Berechtigungen für die Risiko-Engine.",
-    "xpack.securitySolution.entityAnalytics.riskScore.chart.totalLabel": "Gesamt",
     "xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel": "Gesamt",
     "xpack.securitySolution.entityAnalytics.usersRiskDashboard.title": "{entityType} Risiko-Scores",
     "xpack.securitySolution.entityDetails.userPanel.error": "Bei der Berechnung des Risiko-Score für {entity} ist ein Problem aufgetreten",

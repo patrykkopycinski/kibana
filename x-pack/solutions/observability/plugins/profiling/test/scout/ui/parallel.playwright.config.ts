@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export { sloDataFixture } from './slo_data';
-export type { SloDataFixture } from './slo_data';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
-export { profilingSetupFixture } from './profiling';
-export type { ProfilingSetupFixture } from './profiling';
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './parallel_tests',
+  workers: 2,
+});

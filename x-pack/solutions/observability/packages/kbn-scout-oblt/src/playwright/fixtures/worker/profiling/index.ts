@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export { sloDataFixture } from './slo_data';
-export type { SloDataFixture } from './slo_data';
-
-export { profilingSetupFixture } from './profiling';
-export type { ProfilingSetupFixture } from './profiling';
+export { profilingSetupFixture } from './profiling_setup_fixture';
+export type { ProfilingSetupFixture } from './profiling_setup_fixture';

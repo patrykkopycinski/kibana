@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export { sloDataFixture } from './slo_data';
-export type { SloDataFixture } from './slo_data';
+// Test data time range constants
+export const PROFILING_TEST_DATES = {
+  rangeFrom: '2023-04-18T00:00:00.000Z',
+  rangeTo: '2023-04-18T00:00:30.000Z',
+} as const;
 
-export { profilingSetupFixture } from './profiling';
-export type { ProfilingSetupFixture } from './profiling';
+export const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';

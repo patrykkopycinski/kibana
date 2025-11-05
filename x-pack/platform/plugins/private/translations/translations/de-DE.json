@@ -30842,7 +30842,6 @@
     "xpack.osquery.agent.attachedQuery": "angehängte Abfrage",
     "xpack.osquery.agentDetails.fetchError": "Fehler beim Abrufen von Agentendetails",
     "xpack.osquery.agentPolicy.confirmModalCalloutDescription": "Fleet hat festgestellt, dass die ausgewählte {agentPolicyCount, plural, one {agent policy} other {Agent Policies}} bereits von einigen Ihrer Agenten verwendet wird. Als Ergebnis dieser Aktion wird Fleet Updates an alle Agenten bereitstellen, die diese {agentPolicyCount, plural, one {agent policy} other {Agent Policies}} verwenden.",
-    "xpack.osquery.agentPolicy.confirmModalCalloutTitle": "Diese Aktion wird {agentCount, plural, one {# agent} other {# Agenten}} aktualisieren",
     "xpack.osquery.agentPolicy.confirmModalCancelButtonLabel": "Abbrechen",
     "xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel": "Änderungen speichern und bereitstellen",
     "xpack.osquery.agentPolicy.confirmModalDescription": "Möchten Sie wirklich fortfahren?",

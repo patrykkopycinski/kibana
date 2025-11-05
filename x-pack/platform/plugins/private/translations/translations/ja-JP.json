@@ -31061,7 +31061,6 @@
     "xpack.osquery.agent.attachedQuery": "関連付けられたクエリー",
     "xpack.osquery.agentDetails.fetchError": "エージェント詳細の取得中にエラーが発生しました",
     "xpack.osquery.agentPolicy.confirmModalCalloutDescription": "選択した{agentPolicyCount, plural, one {agent policy} other {エージェントポリシー}}が一部のエージェントですでに使用されていることをFleetが検出しました。このアクションの結果、Fleetはこの{agentPolicyCount, plural, one {agent policy} other {エージェントポリシー}}を使用するすべてのエージェントにアップデートをデプロイします。",
-    "xpack.osquery.agentPolicy.confirmModalCalloutTitle": "このアクションは {agentCount, plural, one {# agent} other {# 個のエージェント}} を更新します。",
     "xpack.osquery.agentPolicy.confirmModalCancelButtonLabel": "キャンセル",
     "xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel": "変更を保存してデプロイ",
     "xpack.osquery.agentPolicy.confirmModalDescription": "続行していいですか？",

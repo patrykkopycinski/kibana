@@ -31022,7 +31022,6 @@
     "xpack.osquery.agent.attachedQuery": "requête attachée",
     "xpack.osquery.agentDetails.fetchError": "Erreur lors de la récupération des détails des agents",
     "xpack.osquery.agentPolicy.confirmModalCalloutDescription": "Fleet a détecté que {agentPolicyCount, plural, one {la politique d'agent sélectionnée est} other {les politiques d'agent sélectionnées sont}} déjà en cours d'utilisation par certains de vos agents. Par conséquent, Fleet déploiera des mises à jour pour tous les agents utilisant {agentPolicyCount, plural, one {cette politique d'agent} other {ces politiques d'agent}}.",
-    "xpack.osquery.agentPolicy.confirmModalCalloutTitle": "Cette action mettra à jour {agentCount, plural, one {# agent} other {# agents}}",
     "xpack.osquery.agentPolicy.confirmModalCancelButtonLabel": "Annuler",
     "xpack.osquery.agentPolicy.confirmModalConfirmButtonLabel": "Enregistrer et déployer les modifications",
     "xpack.osquery.agentPolicy.confirmModalDescription": "Voulez-vous vraiment continuer ?",

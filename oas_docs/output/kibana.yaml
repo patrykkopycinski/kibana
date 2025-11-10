@@ -126,6 +126,7 @@ tags:
     description: |
       Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
     x-displayName: Elastic Package Manager (EPM)
+  - name: Fleet agentless policies
   - name: Fleet cloud connectors
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
@@ -23590,6 +23591,7 @@ paths:
                                   enabled:
                                     type: boolean
                                   id:
+                                    description: Package policy unique identifier.
                                     type: string
                                   inputs:
                                     anyOf:
@@ -23725,7 +23727,7 @@ paths:
                                           type: object
                                           properties:
                                             enabled:
-                                              description: enable or disable that input, (default to true)
+                                              description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
                                             streams:
                                               additionalProperties:
@@ -23733,7 +23735,7 @@ paths:
                                                 type: object
                                                 properties:
                                                   enabled:
-                                                    description: enable or disable that stream, (default to true)
+                                                    description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
                                                   vars:
                                                     additionalProperties:
@@ -23758,9 +23760,9 @@ paths:
                                                             - id
                                                             - isSecretRef
                                                       nullable: true
-                                                    description: Input/stream level variable (see integration documentation for more information)
+                                                    description: Input/stream level variable. Refer to the integration documentation for more information.
                                                     type: object
-                                              description: Input streams (see integration documentation to know what streams are available)
+                                              description: Input streams. Refer to the integration documentation to know which streams are available.
                                               type: object
                                             vars:
                                               additionalProperties:
@@ -23785,15 +23787,16 @@ paths:
                                                       - id
                                                       - isSecretRef
                                                 nullable: true
-                                              description: Input/stream level variable (see integration documentation for more information)
+                                              description: Input/stream level variable. Refer to the integration documentation for more information.
                                               type: object
-                                        description: Package policy inputs (see integration documentation to know what inputs are available)
+                                        description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                         type: object
                                         x-oas-optional: true
+                                    description: Package policy inputs.
                                   is_managed:
                                     type: boolean
                                   name:
-                                    description: Package policy name (should be unique)
+                                    description: Unique name for the package policy.
                                     type: string
                                   namespace:
                                     description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -23854,15 +23857,16 @@ paths:
                                       - version
                                   policy_id:
                                     deprecated: true
-                                    description: Agent policy ID where that package policy will be added
+                                    description: ID of the agent policy which the package policy will be added to.
                                     nullable: true
                                     type: string
                                   policy_ids:
                                     items:
-                                      description: Agent policy IDs where that package policy will be added
+                                      description: IDs of the agent policies which that package policy will be added to.
                                       type: string
                                     type: array
                                   revision:
+                                    description: Package policy revision.
                                     type: number
                                   secret_references:
                                     items:
@@ -23929,10 +23933,12 @@ paths:
                                                 - id
                                                 - isSecretRef
                                           nullable: true
-                                        description: Input/stream level variable (see integration documentation for more information)
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                         x-oas-optional: true
+                                    description: Package level variable.
                                   version:
+                                    description: Package policy ES version.
                                     type: string
                                 required:
                                   - name
@@ -24522,6 +24528,7 @@ paths:
                                 enabled:
                                   type: boolean
                                 id:
+                                  description: Package policy unique identifier.
                                   type: string
                                 inputs:
                                   anyOf:
@@ -24657,7 +24664,7 @@ paths:
                                         type: object
                                         properties:
                                           enabled:
-                                            description: enable or disable that input, (default to true)
+                                            description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
                                           streams:
                                             additionalProperties:
@@ -24665,7 +24672,7 @@ paths:
                                               type: object
                                               properties:
                                                 enabled:
-                                                  description: enable or disable that stream, (default to true)
+                                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
                                                 vars:
                                                   additionalProperties:
@@ -24690,9 +24697,9 @@ paths:
                                                           - id
                                                           - isSecretRef
                                                     nullable: true
-                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
-                                            description: Input streams (see integration documentation to know what streams are available)
+                                            description: Input streams. Refer to the integration documentation to know which streams are available.
                                             type: object
                                           vars:
                                             additionalProperties:
@@ -24717,15 +24724,16 @@ paths:
                                                     - id
                                                     - isSecretRef
                                               nullable: true
-                                            description: Input/stream level variable (see integration documentation for more information)
+                                            description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
-                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package policy inputs.
                                 is_managed:
                                   type: boolean
                                 name:
-                                  description: Package policy name (should be unique)
+                                  description: Unique name for the package policy.
                                   type: string
                                 namespace:
                                   description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -24786,15 +24794,16 @@ paths:
                                     - version
                                 policy_id:
                                   deprecated: true
-                                  description: Agent policy ID where that package policy will be added
+                                  description: ID of the agent policy which the package policy will be added to.
                                   nullable: true
                                   type: string
                                 policy_ids:
                                   items:
-                                    description: Agent policy IDs where that package policy will be added
+                                    description: IDs of the agent policies which that package policy will be added to.
                                     type: string
                                   type: array
                                 revision:
+                                  description: Package policy revision.
                                   type: number
                                 secret_references:
                                   items:
@@ -24861,10 +24870,12 @@ paths:
                                               - id
                                               - isSecretRef
                                         nullable: true
-                                      description: Input/stream level variable (see integration documentation for more information)
+                                      description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package level variable.
                                 version:
+                                  description: Package policy ES version.
                                   type: string
                               required:
                                 - name
@@ -25250,6 +25261,7 @@ paths:
                                   enabled:
                                     type: boolean
                                   id:
+                                    description: Package policy unique identifier.
                                     type: string
                                   inputs:
                                     anyOf:
@@ -25385,7 +25397,7 @@ paths:
                                           type: object
                                           properties:
                                             enabled:
-                                              description: enable or disable that input, (default to true)
+                                              description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
                                             streams:
                                               additionalProperties:
@@ -25393,7 +25405,7 @@ paths:
                                                 type: object
                                                 properties:
                                                   enabled:
-                                                    description: enable or disable that stream, (default to true)
+                                                    description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
                                                   vars:
                                                     additionalProperties:
@@ -25418,9 +25430,9 @@ paths:
                                                             - id
                                                             - isSecretRef
                                                       nullable: true
-                                                    description: Input/stream level variable (see integration documentation for more information)
+                                                    description: Input/stream level variable. Refer to the integration documentation for more information.
                                                     type: object
-                                              description: Input streams (see integration documentation to know what streams are available)
+                                              description: Input streams. Refer to the integration documentation to know which streams are available.
                                               type: object
                                             vars:
                                               additionalProperties:
@@ -25445,15 +25457,16 @@ paths:
                                                       - id
                                                       - isSecretRef
                                                 nullable: true
-                                              description: Input/stream level variable (see integration documentation for more information)
+                                              description: Input/stream level variable. Refer to the integration documentation for more information.
                                               type: object
-                                        description: Package policy inputs (see integration documentation to know what inputs are available)
+                                        description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                         type: object
                                         x-oas-optional: true
+                                    description: Package policy inputs.
                                   is_managed:
                                     type: boolean
                                   name:
-                                    description: Package policy name (should be unique)
+                                    description: Unique name for the package policy.
                                     type: string
                                   namespace:
                                     description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -25514,15 +25527,16 @@ paths:
                                       - version
                                   policy_id:
                                     deprecated: true
-                                    description: Agent policy ID where that package policy will be added
+                                    description: ID of the agent policy which the package policy will be added to.
                                     nullable: true
                                     type: string
                                   policy_ids:
                                     items:
-                                      description: Agent policy IDs where that package policy will be added
+                                      description: IDs of the agent policies which that package policy will be added to.
                                       type: string
                                     type: array
                                   revision:
+                                    description: Package policy revision.
                                     type: number
                                   secret_references:
                                     items:
@@ -25589,10 +25603,12 @@ paths:
                                                 - id
                                                 - isSecretRef
                                           nullable: true
-                                        description: Input/stream level variable (see integration documentation for more information)
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
                                         x-oas-optional: true
+                                    description: Package level variable.
                                   version:
+                                    description: Package policy ES version.
                                     type: string
                                 required:
                                   - name
@@ -25957,6 +25973,7 @@ paths:
                                 enabled:
                                   type: boolean
                                 id:
+                                  description: Package policy unique identifier.
                                   type: string
                                 inputs:
                                   anyOf:
@@ -26092,7 +26109,7 @@ paths:
                                         type: object
                                         properties:
                                           enabled:
-                                            description: enable or disable that input, (default to true)
+                                            description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
                                           streams:
                                             additionalProperties:
@@ -26100,7 +26117,7 @@ paths:
                                               type: object
                                               properties:
                                                 enabled:
-                                                  description: enable or disable that stream, (default to true)
+                                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
                                                 vars:
                                                   additionalProperties:
@@ -26125,9 +26142,9 @@ paths:
                                                           - id
                                                           - isSecretRef
                                                     nullable: true
-                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
-                                            description: Input streams (see integration documentation to know what streams are available)
+                                            description: Input streams. Refer to the integration documentation to know which streams are available.
                                             type: object
                                           vars:
                                             additionalProperties:
@@ -26152,15 +26169,16 @@ paths:
                                                     - id
                                                     - isSecretRef
                                               nullable: true
-                                            description: Input/stream level variable (see integration documentation for more information)
+                                            description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
-                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package policy inputs.
                                 is_managed:
                                   type: boolean
                                 name:
-                                  description: Package policy name (should be unique)
+                                  description: Unique name for the package policy.
                                   type: string
                                 namespace:
                                   description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -26221,15 +26239,16 @@ paths:
                                     - version
                                 policy_id:
                                   deprecated: true
-                                  description: Agent policy ID where that package policy will be added
+                                  description: ID of the agent policy which the package policy will be added to.
                                   nullable: true
                                   type: string
                                 policy_ids:
                                   items:
-                                    description: Agent policy IDs where that package policy will be added
+                                    description: IDs of the agent policies which that package policy will be added to.
                                     type: string
                                   type: array
                                 revision:
+                                  description: Package policy revision.
                                   type: number
                                 secret_references:
                                   items:
@@ -26296,10 +26315,12 @@ paths:
                                               - id
                                               - isSecretRef
                                         nullable: true
-                                      description: Input/stream level variable (see integration documentation for more information)
+                                      description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package level variable.
                                 version:
+                                  description: Package policy ES version.
                                   type: string
                               required:
                                 - name
@@ -26889,6 +26910,7 @@ paths:
                                 enabled:
                                   type: boolean
                                 id:
+                                  description: Package policy unique identifier.
                                   type: string
                                 inputs:
                                   anyOf:
@@ -27024,7 +27046,7 @@ paths:
                                         type: object
                                         properties:
                                           enabled:
-                                            description: enable or disable that input, (default to true)
+                                            description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
                                           streams:
                                             additionalProperties:
@@ -27032,7 +27054,7 @@ paths:
                                               type: object
                                               properties:
                                                 enabled:
-                                                  description: enable or disable that stream, (default to true)
+                                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
                                                 vars:
                                                   additionalProperties:
@@ -27057,9 +27079,9 @@ paths:
                                                           - id
                                                           - isSecretRef
                                                     nullable: true
-                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
-                                            description: Input streams (see integration documentation to know what streams are available)
+                                            description: Input streams. Refer to the integration documentation to know which streams are available.
                                             type: object
                                           vars:
                                             additionalProperties:
@@ -27084,15 +27106,16 @@ paths:
                                                     - id
                                                     - isSecretRef
                                               nullable: true
-                                            description: Input/stream level variable (see integration documentation for more information)
+                                            description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
-                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package policy inputs.
                                 is_managed:
                                   type: boolean
                                 name:
-                                  description: Package policy name (should be unique)
+                                  description: Unique name for the package policy.
                                   type: string
                                 namespace:
                                   description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -27153,15 +27176,16 @@ paths:
                                     - version
                                 policy_id:
                                   deprecated: true
-                                  description: Agent policy ID where that package policy will be added
+                                  description: ID of the agent policy which the package policy will be added to.
                                   nullable: true
                                   type: string
                                 policy_ids:
                                   items:
-                                    description: Agent policy IDs where that package policy will be added
+                                    description: IDs of the agent policies which that package policy will be added to.
                                     type: string
                                   type: array
                                 revision:
+                                  description: Package policy revision.
                                   type: number
                                 secret_references:
                                   items:
@@ -27228,10 +27252,12 @@ paths:
                                               - id
                                               - isSecretRef
                                         nullable: true
-                                      description: Input/stream level variable (see integration documentation for more information)
+                                      description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package level variable.
                                 version:
+                                  description: Package policy ES version.
                                   type: string
                               required:
                                 - name
@@ -27694,6 +27720,7 @@ paths:
                                 enabled:
                                   type: boolean
                                 id:
+                                  description: Package policy unique identifier.
                                   type: string
                                 inputs:
                                   anyOf:
@@ -27829,7 +27856,7 @@ paths:
                                         type: object
                                         properties:
                                           enabled:
-                                            description: enable or disable that input, (default to true)
+                                            description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
                                           streams:
                                             additionalProperties:
@@ -27837,7 +27864,7 @@ paths:
                                               type: object
                                               properties:
                                                 enabled:
-                                                  description: enable or disable that stream, (default to true)
+                                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
                                                 vars:
                                                   additionalProperties:
@@ -27862,9 +27889,9 @@ paths:
                                                           - id
                                                           - isSecretRef
                                                     nullable: true
-                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                                   type: object
-                                            description: Input streams (see integration documentation to know what streams are available)
+                                            description: Input streams. Refer to the integration documentation to know which streams are available.
                                             type: object
                                           vars:
                                             additionalProperties:
@@ -27889,15 +27916,16 @@ paths:
                                                     - id
                                                     - isSecretRef
                                               nullable: true
-                                            description: Input/stream level variable (see integration documentation for more information)
+                                            description: Input/stream level variable. Refer to the integration documentation for more information.
                                             type: object
-                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package policy inputs.
                                 is_managed:
                                   type: boolean
                                 name:
-                                  description: Package policy name (should be unique)
+                                  description: Unique name for the package policy.
                                   type: string
                                 namespace:
                                   description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -27958,15 +27986,16 @@ paths:
                                     - version
                                 policy_id:
                                   deprecated: true
-                                  description: Agent policy ID where that package policy will be added
+                                  description: ID of the agent policy which the package policy will be added to.
                                   nullable: true
                                   type: string
                                 policy_ids:
                                   items:
-                                    description: Agent policy IDs where that package policy will be added
+                                    description: IDs of the agent policies which that package policy will be added to.
                                     type: string
                                   type: array
                                 revision:
+                                  description: Package policy revision.
                                   type: number
                                 secret_references:
                                   items:
@@ -28033,10 +28062,12 @@ paths:
                                               - id
                                               - isSecretRef
                                         nullable: true
-                                      description: Input/stream level variable (see integration documentation for more information)
+                                      description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
                                       x-oas-optional: true
+                                  description: Package level variable.
                                 version:
+                                  description: Package policy ES version.
                                   type: string
                               required:
                                 - name
@@ -29225,6 +29256,862 @@ paths:
       summary: Get incoming agent data
       tags:
         - Elastic Agents
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agentless_policies:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create an agentless policy
+      operationId: post-fleet-agentless-policies
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The format of the response package policy.
+          in: query
+          name: format
+          required: false
+          schema:
+            default: simplified
+            enum:
+              - legacy
+              - simplified
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createAgentlessPoliciesRequestExample:
+                description: Example request to create agentless policies
+                value:
+                  description: test
+                  inputs:
+                    ESS Billing-cel:
+                      enabled: true
+                      streams:
+                        ess_billing.billing:
+                          enabled: true
+                          vars:
+                            hide_sensitive: true
+                            http_client_timeout: 30s
+                            lookbehind: 365
+                            tags:
+                              - forwarded
+                              - billing
+                        ess_billing.credits:
+                          enabled: false
+                      vars:
+                        api_key: <REPLACE_WITH_YOUR_API_KEY>
+                        organization_id: '1234'
+                  name: ess_billing-1
+                  namespace: default
+                  package:
+                    name: ess_billing
+                    version: 1.6.0
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                additional_datastreams_permissions:
+                  description: Additional datastream permissions, that will be added to the agent policy.
+                  items:
+                    type: string
+                  nullable: true
+                  type: array
+                description:
+                  description: Policy description.
+                  type: string
+                force:
+                  description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
+                  type: boolean
+                id:
+                  description: Policy unique identifier.
+                  type: string
+                inputs:
+                  additionalProperties:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      enabled:
+                        description: Enable or disable that input. Defaults to `true` (enabled).
+                        type: boolean
+                      streams:
+                        additionalProperties:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            enabled:
+                              description: Enable or disable that stream. Defaults to `true` (enabled).
+                              type: boolean
+                            vars:
+                              additionalProperties:
+                                anyOf:
+                                  - type: boolean
+                                  - type: string
+                                  - type: number
+                                  - items:
+                                      type: string
+                                    type: array
+                                  - items:
+                                      type: number
+                                    type: array
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                      isSecretRef:
+                                        type: boolean
+                                    required:
+                                      - id
+                                      - isSecretRef
+                                nullable: true
+                              description: Input/stream level variable. Refer to the integration documentation for more information.
+                              type: object
+                        description: Input streams. Refer to the integration documentation to know which streams are available.
+                        type: object
+                      vars:
+                        additionalProperties:
+                          anyOf:
+                            - type: boolean
+                            - type: string
+                            - type: number
+                            - items:
+                                type: string
+                              type: array
+                            - items:
+                                type: number
+                              type: array
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                isSecretRef:
+                                  type: boolean
+                              required:
+                                - id
+                                - isSecretRef
+                          nullable: true
+                        description: Input/stream level variable. Refer to the integration documentation for more information.
+                        type: object
+                  description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
+                  type: object
+                name:
+                  description: Unique name for the policy.
+                  type: string
+                namespace:
+                  description: Policy namespace. When not specified, it inherits the agent policy namespace.
+                  type: string
+                package:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    experimental_data_stream_features:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          data_stream:
+                            type: string
+                          features:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              doc_value_only_numeric:
+                                type: boolean
+                              doc_value_only_other:
+                                type: boolean
+                              synthetic_source:
+                                type: boolean
+                              tsdb:
+                                type: boolean
+                        required:
+                          - data_stream
+                          - features
+                      type: array
+                    fips_compatible:
+                      type: boolean
+                    name:
+                      description: Package name
+                      type: string
+                    requires_root:
+                      type: boolean
+                    title:
+                      type: string
+                    version:
+                      description: Package version
+                      type: string
+                  required:
+                    - name
+                    - version
+                vars:
+                  additionalProperties:
+                    anyOf:
+                      - type: boolean
+                      - type: string
+                      - type: number
+                      - items:
+                          type: string
+                        type: array
+                      - items:
+                          type: number
+                        type: array
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          isSecretRef:
+                            type: boolean
+                        required:
+                          - id
+                          - isSecretRef
+                    nullable: true
+                  description: Input/stream level variable. Refer to the integration documentation for more information.
+                  type: object
+              required:
+                - name
+                - package
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createAgentlessPoliciesResponseExample:
+                  description: Example response showing the successful result of communication initialisation over MCP protocol
+                  value:
+                    item:
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: test
+                      enabled: true
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+                      inputs:
+                        ESS Billing-cel:
+                          enabled: true
+                          streams:
+                            ess_billing.billing:
+                              enabled: true
+                              vars:
+                                hide_sensitive: true
+                                http_client_timeout: 30s
+                                lookbehind: 365
+                                tags:
+                                  - forwarded
+                                  - billing
+                            ess_billing.credits:
+                              enabled: false
+                          vars:
+                            api_key:
+                              id: QY1sWpoBbWcMW-edr0Ee
+                              isSecretRef: true
+                            organization_id: '1234'
+                            url: https://billing.elastic-cloud.com
+                      name: ess_billing-1
+                      namespace: default
+                      package:
+                        name: ess_billing
+                        title: Elasticsearch Service Billing
+                        version: 1.6.0
+                      revision: 1
+                      secret_references:
+                        - id: QY1sWpoBbWcMW-edr0Ee
+                      supports_agentless: true
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                      version: WzE0OTgsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  item:
+                    additionalProperties: false
+                    description: The created agentless package policy.
+                    type: object
+                    properties:
+                      additional_datastreams_permissions:
+                        description: Additional datastream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
+                      agents:
+                        type: number
+                      cloud_connector_id:
+                        description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
+                      created_at:
+                        type: string
+                      created_by:
+                        type: string
+                      description:
+                        description: Package policy description
+                        type: string
+                      elasticsearch:
+                        additionalProperties: true
+                        type: object
+                        properties:
+                          privileges:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              cluster:
+                                items:
+                                  type: string
+                                type: array
+                      enabled:
+                        type: boolean
+                      id:
+                        description: Package policy unique identifier.
+                        type: string
+                      inputs:
+                        anyOf:
+                          - items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                compiled_input: {}
+                                config:
+                                  additionalProperties:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      frozen:
+                                        type: boolean
+                                      type:
+                                        type: string
+                                      value: {}
+                                    required:
+                                      - value
+                                  description: Package variable (see integration documentation for more information)
+                                  type: object
+                                enabled:
+                                  type: boolean
+                                id:
+                                  type: string
+                                keep_enabled:
+                                  type: boolean
+                                policy_template:
+                                  type: string
+                                streams:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      compiled_stream: {}
+                                      config:
+                                        additionalProperties:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            frozen:
+                                              type: boolean
+                                            type:
+                                              type: string
+                                            value: {}
+                                          required:
+                                            - value
+                                        description: Package variable (see integration documentation for more information)
+                                        type: object
+                                      data_stream:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          dataset:
+                                            type: string
+                                          elasticsearch:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              dynamic_dataset:
+                                                type: boolean
+                                              dynamic_namespace:
+                                                type: boolean
+                                              privileges:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  indices:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                          type:
+                                            type: string
+                                        required:
+                                          - dataset
+                                          - type
+                                      enabled:
+                                        type: boolean
+                                      id:
+                                        type: string
+                                      keep_enabled:
+                                        type: boolean
+                                      release:
+                                        enum:
+                                          - ga
+                                          - beta
+                                          - experimental
+                                        type: string
+                                      vars:
+                                        additionalProperties:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            frozen:
+                                              type: boolean
+                                            type:
+                                              type: string
+                                            value: {}
+                                          required:
+                                            - value
+                                        description: Package variable (see integration documentation for more information)
+                                        type: object
+                                    required:
+                                      - enabled
+                                      - data_stream
+                                      - compiled_stream
+                                  type: array
+                                type:
+                                  type: string
+                                vars:
+                                  additionalProperties:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      frozen:
+                                        type: boolean
+                                      type:
+                                        type: string
+                                      value: {}
+                                    required:
+                                      - value
+                                  description: Package variable (see integration documentation for more information)
+                                  type: object
+                              required:
+                                - type
+                                - enabled
+                                - streams
+                                - compiled_input
+                            type: array
+                          - additionalProperties:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  description: Enable or disable that input. Defaults to `true` (enabled).
+                                  type: boolean
+                                streams:
+                                  additionalProperties:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      enabled:
+                                        description: Enable or disable that stream. Defaults to `true` (enabled).
+                                        type: boolean
+                                      vars:
+                                        additionalProperties:
+                                          anyOf:
+                                            - type: boolean
+                                            - type: string
+                                            - type: number
+                                            - items:
+                                                type: string
+                                              type: array
+                                            - items:
+                                                type: number
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
+                                        type: object
+                                  description: Input streams. Refer to the integration documentation to know which streams are available.
+                                  type: object
+                                vars:
+                                  additionalProperties:
+                                    anyOf:
+                                      - type: boolean
+                                      - type: string
+                                      - type: number
+                                      - items:
+                                          type: string
+                                        type: array
+                                      - items:
+                                          type: number
+                                        type: array
+                                      - additionalProperties: false
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                          isSecretRef:
+                                            type: boolean
+                                        required:
+                                          - id
+                                          - isSecretRef
+                                    nullable: true
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
+                                  type: object
+                            description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
+                            type: object
+                            x-oas-optional: true
+                        description: Package policy inputs.
+                      is_managed:
+                        type: boolean
+                      name:
+                        description: Unique name for the package policy.
+                        type: string
+                      namespace:
+                        description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
+                        type: string
+                      output_id:
+                        nullable: true
+                        type: string
+                      overrides:
+                        additionalProperties: false
+                        description: Override settings that are defined in the package policy. The override option should be used only in unusual circumstances and not as a routine procedure.
+                        nullable: true
+                        type: object
+                        properties:
+                          inputs:
+                            additionalProperties: {}
+                            type: object
+                      package:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          experimental_data_stream_features:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                data_stream:
+                                  type: string
+                                features:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    doc_value_only_numeric:
+                                      type: boolean
+                                    doc_value_only_other:
+                                      type: boolean
+                                    synthetic_source:
+                                      type: boolean
+                                    tsdb:
+                                      type: boolean
+                              required:
+                                - data_stream
+                                - features
+                            type: array
+                          fips_compatible:
+                            type: boolean
+                          name:
+                            description: Package name
+                            type: string
+                          requires_root:
+                            type: boolean
+                          title:
+                            type: string
+                          version:
+                            description: Package version
+                            type: string
+                        required:
+                          - name
+                          - version
+                      policy_id:
+                        deprecated: true
+                        description: ID of the agent policy which the package policy will be added to.
+                        nullable: true
+                        type: string
+                      policy_ids:
+                        items:
+                          description: IDs of the agent policies which that package policy will be added to.
+                          type: string
+                        type: array
+                      revision:
+                        description: Package policy revision.
+                        type: number
+                      secret_references:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
+                      spaceIds:
+                        items:
+                          type: string
+                        type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
+                      supports_cloud_connector:
+                        default: false
+                        description: Indicates whether the package policy supports cloud connectors.
+                        nullable: true
+                        type: boolean
+                      updated_at:
+                        type: string
+                      updated_by:
+                        type: string
+                      vars:
+                        anyOf:
+                          - additionalProperties:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                frozen:
+                                  type: boolean
+                                type:
+                                  type: string
+                                value: {}
+                              required:
+                                - value
+                            description: Package variable (see integration documentation for more information)
+                            type: object
+                          - additionalProperties:
+                              anyOf:
+                                - type: boolean
+                                - type: string
+                                - type: number
+                                - items:
+                                    type: string
+                                  type: array
+                                - items:
+                                    type: number
+                                  type: array
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    isSecretRef:
+                                      type: boolean
+                                  required:
+                                    - id
+                                    - isSecretRef
+                              nullable: true
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
+                            type: object
+                            x-oas-optional: true
+                        description: Package level variable.
+                      version:
+                        description: Package policy ES version.
+                        type: string
+                    required:
+                      - name
+                      - enabled
+                      - inputs
+                      - id
+                      - revision
+                      - updated_at
+                      - updated_by
+                      - created_at
+                      - created_by
+                required:
+                  - item
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a conflict error response
+                  value:
+                    error: Conflict
+                    message: An error message describing what went wrong
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+      summary: Create an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Technical Preview; added in 9.3.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agentless_policies/{policyId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an agentless policy
+      operationId: delete-fleet-agentless-policies-policyid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the policy to delete.
+          in: path
+          name: policyId
+          required: true
+          schema:
+            type: string
+        - description: Force delete the policy even if the policy is managed.
+          in: query
+          name: force
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createAgentlessPoliciesResponseExample:
+                  description: Example response showing the successful result of communication initialisation over MCP protocol
+                  value:
+                    item:
+                      id: d52a7812-5736-4fdc-aed8-72152afa1ffa
+              schema:
+                additionalProperties: false
+                description: Response for deleting an agentless package policy.
+                type: object
+                properties:
+                  id:
+                    description: The ID of the deleted agentless package policy.
+                    type: string
+                required:
+                  - id
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictErrorResponseExample:
+                  description: Example of a conflict error response
+                  value:
+                    error: Conflict
+                    message: An error message describing what went wrong
+                    statusCode: 409
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Conflict
+      summary: Delete an agentless policy
+      tags:
+        - Fleet agentless policies
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -43808,6 +44695,7 @@ paths:
                         enabled:
                           type: boolean
                         id:
+                          description: Package policy unique identifier.
                           type: string
                         inputs:
                           anyOf:
@@ -43943,7 +44831,7 @@ paths:
                                 type: object
                                 properties:
                                   enabled:
-                                    description: enable or disable that input, (default to true)
+                                    description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
                                   streams:
                                     additionalProperties:
@@ -43951,7 +44839,7 @@ paths:
                                       type: object
                                       properties:
                                         enabled:
-                                          description: enable or disable that stream, (default to true)
+                                          description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
                                         vars:
                                           additionalProperties:
@@ -43976,9 +44864,9 @@ paths:
                                                   - id
                                                   - isSecretRef
                                             nullable: true
-                                          description: Input/stream level variable (see integration documentation for more information)
+                                          description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
-                                    description: Input streams (see integration documentation to know what streams are available)
+                                    description: Input streams. Refer to the integration documentation to know which streams are available.
                                     type: object
                                   vars:
                                     additionalProperties:
@@ -44003,15 +44891,16 @@ paths:
                                             - id
                                             - isSecretRef
                                       nullable: true
-                                    description: Input/stream level variable (see integration documentation for more information)
+                                    description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
-                              description: Package policy inputs (see integration documentation to know what inputs are available)
+                              description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                               type: object
                               x-oas-optional: true
+                          description: Package policy inputs.
                         is_managed:
                           type: boolean
                         name:
-                          description: Package policy name (should be unique)
+                          description: Unique name for the package policy.
                           type: string
                         namespace:
                           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -44072,15 +44961,16 @@ paths:
                             - version
                         policy_id:
                           deprecated: true
-                          description: Agent policy ID where that package policy will be added
+                          description: ID of the agent policy which the package policy will be added to.
                           nullable: true
                           type: string
                         policy_ids:
                           items:
-                            description: Agent policy IDs where that package policy will be added
+                            description: IDs of the agent policies which that package policy will be added to.
                             type: string
                           type: array
                         revision:
+                          description: Package policy revision.
                           type: number
                         secret_references:
                           items:
@@ -44147,10 +45037,12 @@ paths:
                                       - id
                                       - isSecretRef
                                 nullable: true
-                              description: Input/stream level variable (see integration documentation for more information)
+                              description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
                               x-oas-optional: true
+                          description: Package level variable.
                         version:
+                          description: Package policy ES version.
                           type: string
                       required:
                         - name
@@ -44250,7 +45142,7 @@ paths:
                     enabled:
                       type: boolean
                     force:
-                      description: Force package policy creation even if package is not verified, or if the agent policy is managed.
+                      description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
                       type: boolean
                     id:
                       description: Package policy unique identifier
@@ -44383,7 +45275,7 @@ paths:
                     is_managed:
                       type: boolean
                     name:
-                      description: Package policy name (should be unique)
+                      description: Unique name for the package policy.
                       type: string
                     namespace:
                       description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -44444,12 +45336,12 @@ paths:
                         - version
                     policy_id:
                       deprecated: true
-                      description: Agent policy ID where that package policy will be added
+                      description: ID of the agent policy which the package policy will be added to.
                       nullable: true
                       type: string
                     policy_ids:
                       items:
-                        description: Agent policy IDs where that package policy will be added
+                        description: IDs of the agent policies which that package policy will be added to.
                         type: string
                       type: array
                     spaceIds:
@@ -44493,10 +45385,13 @@ paths:
                       nullable: true
                       type: array
                     description:
+                      description: Policy description.
                       type: string
                     force:
+                      description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
                       type: boolean
                     id:
+                      description: Policy unique identifier.
                       type: string
                     inputs:
                       additionalProperties:
@@ -44504,7 +45399,7 @@ paths:
                         type: object
                         properties:
                           enabled:
-                            description: enable or disable that input, (default to true)
+                            description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
                           streams:
                             additionalProperties:
@@ -44512,7 +45407,7 @@ paths:
                               type: object
                               properties:
                                 enabled:
-                                  description: enable or disable that stream, (default to true)
+                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
                                 vars:
                                   additionalProperties:
@@ -44537,9 +45432,9 @@ paths:
                                           - id
                                           - isSecretRef
                                     nullable: true
-                                  description: Input/stream level variable (see integration documentation for more information)
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
-                            description: Input streams (see integration documentation to know what streams are available)
+                            description: Input streams. Refer to the integration documentation to know which streams are available.
                             type: object
                           vars:
                             additionalProperties:
@@ -44564,13 +45459,15 @@ paths:
                                     - id
                                     - isSecretRef
                               nullable: true
-                            description: Input/stream level variable (see integration documentation for more information)
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                       type: object
                     name:
+                      description: Unique name for the policy.
                       type: string
                     namespace:
+                      description: Policy namespace. When not specified, it inherits the agent policy namespace.
                       type: string
                     output_id:
                       nullable: true
@@ -44618,9 +45515,12 @@ paths:
                         - name
                         - version
                     policy_id:
+                      deprecated: true
+                      description: Deprecated. Use policy_ids instead.
                       nullable: true
                       type: string
                     policy_ids:
+                      description: IDs of the agent policies which that package policy will be added to.
                       items:
                         type: string
                       type: array
@@ -44652,7 +45552,7 @@ paths:
                               - id
                               - isSecretRef
                         nullable: true
-                      description: Input/stream level variable (see integration documentation for more information)
+                      description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
                   required:
                     - name
@@ -44704,6 +45604,7 @@ paths:
                       enabled:
                         type: boolean
                       id:
+                        description: Package policy unique identifier.
                         type: string
                       inputs:
                         anyOf:
@@ -44839,7 +45740,7 @@ paths:
                               type: object
                               properties:
                                 enabled:
-                                  description: enable or disable that input, (default to true)
+                                  description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
                                 streams:
                                   additionalProperties:
@@ -44847,7 +45748,7 @@ paths:
                                     type: object
                                     properties:
                                       enabled:
-                                        description: enable or disable that stream, (default to true)
+                                        description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
                                       vars:
                                         additionalProperties:
@@ -44872,9 +45773,9 @@ paths:
                                                 - id
                                                 - isSecretRef
                                           nullable: true
-                                        description: Input/stream level variable (see integration documentation for more information)
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
-                                  description: Input streams (see integration documentation to know what streams are available)
+                                  description: Input streams. Refer to the integration documentation to know which streams are available.
                                   type: object
                                 vars:
                                   additionalProperties:
@@ -44899,15 +45800,16 @@ paths:
                                           - id
                                           - isSecretRef
                                     nullable: true
-                                  description: Input/stream level variable (see integration documentation for more information)
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
-                            description: Package policy inputs (see integration documentation to know what inputs are available)
+                            description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
                             x-oas-optional: true
+                        description: Package policy inputs.
                       is_managed:
                         type: boolean
                       name:
-                        description: Package policy name (should be unique)
+                        description: Unique name for the package policy.
                         type: string
                       namespace:
                         description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -44968,15 +45870,16 @@ paths:
                           - version
                       policy_id:
                         deprecated: true
-                        description: Agent policy ID where that package policy will be added
+                        description: ID of the agent policy which the package policy will be added to.
                         nullable: true
                         type: string
                       policy_ids:
                         items:
-                          description: Agent policy IDs where that package policy will be added
+                          description: IDs of the agent policies which that package policy will be added to.
                           type: string
                         type: array
                       revision:
+                        description: Package policy revision.
                         type: number
                       secret_references:
                         items:
@@ -45043,10 +45946,12 @@ paths:
                                     - id
                                     - isSecretRef
                               nullable: true
-                            description: Input/stream level variable (see integration documentation for more information)
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
+                        description: Package level variable.
                       version:
+                        description: Package policy ES version.
                         type: string
                     required:
                       - name
@@ -45197,6 +46102,7 @@ paths:
                         enabled:
                           type: boolean
                         id:
+                          description: Package policy unique identifier.
                           type: string
                         inputs:
                           anyOf:
@@ -45332,7 +46238,7 @@ paths:
                                 type: object
                                 properties:
                                   enabled:
-                                    description: enable or disable that input, (default to true)
+                                    description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
                                   streams:
                                     additionalProperties:
@@ -45340,7 +46246,7 @@ paths:
                                       type: object
                                       properties:
                                         enabled:
-                                          description: enable or disable that stream, (default to true)
+                                          description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
                                         vars:
                                           additionalProperties:
@@ -45365,9 +46271,9 @@ paths:
                                                   - id
                                                   - isSecretRef
                                             nullable: true
-                                          description: Input/stream level variable (see integration documentation for more information)
+                                          description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
-                                    description: Input streams (see integration documentation to know what streams are available)
+                                    description: Input streams. Refer to the integration documentation to know which streams are available.
                                     type: object
                                   vars:
                                     additionalProperties:
@@ -45392,15 +46298,16 @@ paths:
                                             - id
                                             - isSecretRef
                                       nullable: true
-                                    description: Input/stream level variable (see integration documentation for more information)
+                                    description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
-                              description: Package policy inputs (see integration documentation to know what inputs are available)
+                              description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                               type: object
                               x-oas-optional: true
+                          description: Package policy inputs.
                         is_managed:
                           type: boolean
                         name:
-                          description: Package policy name (should be unique)
+                          description: Unique name for the package policy.
                           type: string
                         namespace:
                           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -45461,15 +46368,16 @@ paths:
                             - version
                         policy_id:
                           deprecated: true
-                          description: Agent policy ID where that package policy will be added
+                          description: ID of the agent policy which the package policy will be added to.
                           nullable: true
                           type: string
                         policy_ids:
                           items:
-                            description: Agent policy IDs where that package policy will be added
+                            description: IDs of the agent policies which that package policy will be added to.
                             type: string
                           type: array
                         revision:
+                          description: Package policy revision.
                           type: number
                         secret_references:
                           items:
@@ -45536,10 +46444,12 @@ paths:
                                       - id
                                       - isSecretRef
                                 nullable: true
-                              description: Input/stream level variable (see integration documentation for more information)
+                              description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
                               x-oas-optional: true
+                          description: Package level variable.
                         version:
+                          description: Package policy ES version.
                           type: string
                       required:
                         - name
@@ -45739,6 +46649,7 @@ paths:
                       enabled:
                         type: boolean
                       id:
+                        description: Package policy unique identifier.
                         type: string
                       inputs:
                         anyOf:
@@ -45874,7 +46785,7 @@ paths:
                               type: object
                               properties:
                                 enabled:
-                                  description: enable or disable that input, (default to true)
+                                  description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
                                 streams:
                                   additionalProperties:
@@ -45882,7 +46793,7 @@ paths:
                                     type: object
                                     properties:
                                       enabled:
-                                        description: enable or disable that stream, (default to true)
+                                        description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
                                       vars:
                                         additionalProperties:
@@ -45907,9 +46818,9 @@ paths:
                                                 - id
                                                 - isSecretRef
                                           nullable: true
-                                        description: Input/stream level variable (see integration documentation for more information)
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
-                                  description: Input streams (see integration documentation to know what streams are available)
+                                  description: Input streams. Refer to the integration documentation to know which streams are available.
                                   type: object
                                 vars:
                                   additionalProperties:
@@ -45934,15 +46845,16 @@ paths:
                                           - id
                                           - isSecretRef
                                     nullable: true
-                                  description: Input/stream level variable (see integration documentation for more information)
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
-                            description: Package policy inputs (see integration documentation to know what inputs are available)
+                            description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
                             x-oas-optional: true
+                        description: Package policy inputs.
                       is_managed:
                         type: boolean
                       name:
-                        description: Package policy name (should be unique)
+                        description: Unique name for the package policy.
                         type: string
                       namespace:
                         description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -46003,15 +46915,16 @@ paths:
                           - version
                       policy_id:
                         deprecated: true
-                        description: Agent policy ID where that package policy will be added
+                        description: ID of the agent policy which the package policy will be added to.
                         nullable: true
                         type: string
                       policy_ids:
                         items:
-                          description: Agent policy IDs where that package policy will be added
+                          description: IDs of the agent policies which that package policy will be added to.
                           type: string
                         type: array
                       revision:
+                        description: Package policy revision.
                         type: number
                       secret_references:
                         items:
@@ -46078,10 +46991,12 @@ paths:
                                     - id
                                     - isSecretRef
                               nullable: true
-                            description: Input/stream level variable (see integration documentation for more information)
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
+                        description: Package level variable.
                       version:
+                        description: Package policy ES version.
                         type: string
                     required:
                       - name
@@ -46379,12 +47294,12 @@ paths:
                         - version
                     policy_id:
                       deprecated: true
-                      description: Agent policy ID where that package policy will be added
+                      description: ID of the agent policy which the package policy will be added to.
                       nullable: true
                       type: string
                     policy_ids:
                       items:
-                        description: Agent policy IDs where that package policy will be added
+                        description: IDs of the agent policies which that package policy will be added to.
                         type: string
                       type: array
                     spaceIds:
@@ -46427,10 +47342,13 @@ paths:
                       nullable: true
                       type: array
                     description:
+                      description: Policy description.
                       type: string
                     force:
+                      description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
                       type: boolean
                     id:
+                      description: Policy unique identifier.
                       type: string
                     inputs:
                       additionalProperties:
@@ -46438,7 +47356,7 @@ paths:
                         type: object
                         properties:
                           enabled:
-                            description: enable or disable that input, (default to true)
+                            description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
                           streams:
                             additionalProperties:
@@ -46446,7 +47364,7 @@ paths:
                               type: object
                               properties:
                                 enabled:
-                                  description: enable or disable that stream, (default to true)
+                                  description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
                                 vars:
                                   additionalProperties:
@@ -46471,9 +47389,9 @@ paths:
                                           - id
                                           - isSecretRef
                                     nullable: true
-                                  description: Input/stream level variable (see integration documentation for more information)
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
-                            description: Input streams (see integration documentation to know what streams are available)
+                            description: Input streams. Refer to the integration documentation to know which streams are available.
                             type: object
                           vars:
                             additionalProperties:
@@ -46498,13 +47416,15 @@ paths:
                                     - id
                                     - isSecretRef
                               nullable: true
-                            description: Input/stream level variable (see integration documentation for more information)
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                      description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                       type: object
                     name:
+                      description: Unique name for the policy.
                       type: string
                     namespace:
+                      description: Policy namespace. When not specified, it inherits the agent policy namespace.
                       type: string
                     output_id:
                       nullable: true
@@ -46552,9 +47472,12 @@ paths:
                         - name
                         - version
                     policy_id:
+                      deprecated: true
+                      description: Deprecated. Use policy_ids instead.
                       nullable: true
                       type: string
                     policy_ids:
+                      description: IDs of the agent policies which that package policy will be added to.
                       items:
                         type: string
                       type: array
@@ -46586,7 +47509,7 @@ paths:
                               - id
                               - isSecretRef
                         nullable: true
-                      description: Input/stream level variable (see integration documentation for more information)
+                      description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
                   required:
                     - name
@@ -46637,6 +47560,7 @@ paths:
                       enabled:
                         type: boolean
                       id:
+                        description: Package policy unique identifier.
                         type: string
                       inputs:
                         anyOf:
@@ -46772,7 +47696,7 @@ paths:
                               type: object
                               properties:
                                 enabled:
-                                  description: enable or disable that input, (default to true)
+                                  description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
                                 streams:
                                   additionalProperties:
@@ -46780,7 +47704,7 @@ paths:
                                     type: object
                                     properties:
                                       enabled:
-                                        description: enable or disable that stream, (default to true)
+                                        description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
                                       vars:
                                         additionalProperties:
@@ -46805,9 +47729,9 @@ paths:
                                                 - id
                                                 - isSecretRef
                                           nullable: true
-                                        description: Input/stream level variable (see integration documentation for more information)
+                                        description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
-                                  description: Input streams (see integration documentation to know what streams are available)
+                                  description: Input streams. Refer to the integration documentation to know which streams are available.
                                   type: object
                                 vars:
                                   additionalProperties:
@@ -46832,15 +47756,16 @@ paths:
                                           - id
                                           - isSecretRef
                                     nullable: true
-                                  description: Input/stream level variable (see integration documentation for more information)
+                                  description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
-                            description: Package policy inputs (see integration documentation to know what inputs are available)
+                            description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
                             x-oas-optional: true
+                        description: Package policy inputs.
                       is_managed:
                         type: boolean
                       name:
-                        description: Package policy name (should be unique)
+                        description: Unique name for the package policy.
                         type: string
                       namespace:
                         description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -46901,15 +47826,16 @@ paths:
                           - version
                       policy_id:
                         deprecated: true
-                        description: Agent policy ID where that package policy will be added
+                        description: ID of the agent policy which the package policy will be added to.
                         nullable: true
                         type: string
                       policy_ids:
                         items:
-                          description: Agent policy IDs where that package policy will be added
+                          description: IDs of the agent policies which that package policy will be added to.
                           type: string
                         type: array
                       revision:
+                        description: Package policy revision.
                         type: number
                       secret_references:
                         items:
@@ -46976,10 +47902,12 @@ paths:
                                     - id
                                     - isSecretRef
                               nullable: true
-                            description: Input/stream level variable (see integration documentation for more information)
+                            description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
                             x-oas-optional: true
+                        description: Package level variable.
                       version:
+                        description: Package policy ES version.
                         type: string
                     required:
                       - name
@@ -47600,7 +48528,7 @@ paths:
                                       type: object
                                       properties:
                                         enabled:
-                                          description: enable or disable that input, (default to true)
+                                          description: Enable or disable that input. Defaults to `true` (enabled).
                                           type: boolean
                                         streams:
                                           additionalProperties:
@@ -47608,7 +48536,7 @@ paths:
                                             type: object
                                             properties:
                                               enabled:
-                                                description: enable or disable that stream, (default to true)
+                                                description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
                                               vars:
                                                 additionalProperties:
@@ -47633,9 +48561,9 @@ paths:
                                                         - id
                                                         - isSecretRef
                                                   nullable: true
-                                                description: Input/stream level variable (see integration documentation for more information)
+                                                description: Input/stream level variable. Refer to the integration documentation for more information.
                                                 type: object
-                                          description: Input streams (see integration documentation to know what streams are available)
+                                          description: Input streams. Refer to the integration documentation to know which streams are available.
                                           type: object
                                         vars:
                                           additionalProperties:
@@ -47660,15 +48588,16 @@ paths:
                                                   - id
                                                   - isSecretRef
                                             nullable: true
-                                          description: Input/stream level variable (see integration documentation for more information)
+                                          description: Input/stream level variable. Refer to the integration documentation for more information.
                                           type: object
-                                    description: Package policy inputs (see integration documentation to know what inputs are available)
+                                    description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                     type: object
                                     x-oas-optional: true
+                                description: Package policy inputs.
                               is_managed:
                                 type: boolean
                               name:
-                                description: Package policy name (should be unique)
+                                description: Unique name for the package policy.
                                 type: string
                               namespace:
                                 description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -47729,15 +48658,16 @@ paths:
                                   - version
                               policy_id:
                                 deprecated: true
-                                description: Agent policy ID where that package policy will be added
+                                description: ID of the agent policy which the package policy will be added to.
                                 nullable: true
                                 type: string
                               policy_ids:
                                 items:
-                                  description: Agent policy IDs where that package policy will be added
+                                  description: IDs of the agent policies which that package policy will be added to.
                                   type: string
                                 type: array
                               revision:
+                                description: Package policy revision.
                                 type: number
                               secret_references:
                                 items:
@@ -47804,10 +48734,12 @@ paths:
                                             - id
                                             - isSecretRef
                                       nullable: true
-                                    description: Input/stream level variable (see integration documentation for more information)
+                                    description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
                                     x-oas-optional: true
+                                description: Package level variable.
                               version:
+                                description: Package policy ES version.
                                 type: string
                             required:
                               - name
@@ -48003,7 +48935,7 @@ paths:
                                   type: string
                                 type: array
                               name:
-                                description: Package policy name (should be unique)
+                                description: Unique name for the package policy.
                                 type: string
                               namespace:
                                 description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
@@ -48064,12 +48996,12 @@ paths:
                                   - version
                               policy_id:
                                 deprecated: true
-                                description: Agent policy ID where that package policy will be added
+                                description: ID of the agent policy which the package policy will be added to.
                                 nullable: true
                                 type: string
                               policy_ids:
                                 items:
-                                  description: Agent policy IDs where that package policy will be added
+                                  description: IDs of the agent policies which that package policy will be added to.
                                   type: string
                                 type: array
                               revision:
@@ -48113,6 +49045,7 @@ paths:
                                 description: Package variable (see integration documentation for more information)
                                 type: object
                               version:
+                                description: Package policy ES version.
                                 type: string
                             required:
                               - name

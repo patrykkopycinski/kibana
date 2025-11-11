@@ -30783,13 +30783,21 @@ paths:
         [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-connectors
       parameters:
-        - in: query
+        - description: The page number for pagination.
+          in: query
           name: page
           required: false
           schema:
             type: string
-        - in: query
+        - description: The number of items per page.
+          in: query
           name: perPage
+          required: false
+          schema:
+            type: string
+        - description: KQL query to filter cloud connectors.
+          in: query
+          name: kuery
           required: false
           schema:
             type: string
@@ -30889,12 +30897,14 @@ paths:
               type: object
               properties:
                 cloudProvider:
+                  description: 'The cloud provider type: aws, azure, or gcp.'
                   enum:
                     - aws
                     - azure
                     - gcp
                   type: string
                 name:
+                  description: The name of the cloud connector.
                   maxLength: 255
                   minLength: 1
                   type: string
@@ -31023,12 +31033,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The unique identifier of the cloud connector to delete.
+          in: path
           name: cloudConnectorId
           required: true
           schema:
             type: string
-        - in: query
+        - description: If true, forces deletion even if the cloud connector is in use.
+          in: query
           name: force
           required: false
           schema:
@@ -31085,7 +31097,8 @@ paths:
         [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-connectors-cloudconnectorid
       parameters:
-        - in: path
+        - description: The unique identifier of the cloud connector.
+          in: path
           name: cloudConnectorId
           required: true
           schema:
@@ -31176,7 +31189,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The unique identifier of the cloud connector to update.
+          in: path
           name: cloudConnectorId
           required: true
           schema:
@@ -31189,6 +31203,7 @@ paths:
               type: object
               properties:
                 name:
+                  description: The name of the cloud connector.
                   maxLength: 255
                   minLength: 1
                   type: string

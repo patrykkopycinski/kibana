@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { HeatmapStyleSettings } from './style_settings';
-export { HeatmapLegendSettings } from './legend_settings';
+export { XyAppearanceSettings, getValueLabelDisableReason } from './appearance_settings';

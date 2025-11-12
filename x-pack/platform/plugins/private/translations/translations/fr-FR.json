@@ -43437,7 +43437,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "Projet",
     "xpack.synthetics.overview.groupPopover.tag.label": "Balise",
     "xpack.synthetics.overview.heading": "Moniteurs",
-    "xpack.synthetics.overview.metricItem.loadingMessage": "Chargement des indicateurs",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.content": "Aucune donnée d'indicateur disponible pour ce moniteur",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.title": "Les données d'indicateur ne sont pas disponibles",
     "xpack.synthetics.overview.monitors.headingText": "Monitore le statut",

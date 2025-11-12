@@ -43177,7 +43177,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "Projekt",
     "xpack.synthetics.overview.groupPopover.tag.label": "Tag",
     "xpack.synthetics.overview.heading": "Monitore",
-    "xpack.synthetics.overview.metricItem.loadingMessage": "Metriken werden geladen",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.content": "Für diesen Monitor sind keine Daten verfügbar",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.title": "Metrikdaten sind nicht verfügbar",
     "xpack.synthetics.overview.monitors.headingText": "Überwacht den Status",

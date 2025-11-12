@@ -43467,7 +43467,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "项目",
     "xpack.synthetics.overview.groupPopover.tag.label": "标签",
     "xpack.synthetics.overview.heading": "监测",
-    "xpack.synthetics.overview.metricItem.loadingMessage": "正在加载指标",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.content": "没有可用于此监测的指标数据",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.title": "指标数据不可用",
     "xpack.synthetics.overview.monitors.headingText": "监测状态",

@@ -43484,7 +43484,6 @@
     "xpack.synthetics.overview.groupPopover.project.label": "プロジェクト",
     "xpack.synthetics.overview.groupPopover.tag.label": "タグ",
     "xpack.synthetics.overview.heading": "監視",
-    "xpack.synthetics.overview.metricItem.loadingMessage": "メトリックを読み込んでいます",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.content": "このモニターで使用できるメトリックデータはありません",
     "xpack.synthetics.overview.metricsTooltip.noMetrics.title": "メトリックデータがありません",
     "xpack.synthetics.overview.monitors.headingText": "ステータスを監視",

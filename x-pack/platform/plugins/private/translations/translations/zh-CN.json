@@ -33336,7 +33336,6 @@
     "xpack.securitySolution.actionForm.platinumOnly": "此功能仅在白金级和更高版本中可用。",
     "xpack.securitySolution.actionForm.responseActionSectionsDescription": "响应操作",
     "xpack.securitySolution.actionForm.responseActionSectionsTitle": "响应操作在每次执行规则时运行。",
-    "xpack.securitySolution.actionLogExpandedTray.missingErrors": "操作未指定任何错误",
     "xpack.securitySolution.actions.addToTimeline.addedFieldMessage": "已将 {fieldOrValue} 添加到时间线",
     "xpack.securitySolution.actions.addToTimeline.alertsCountMessage": "{entity} 告警",
     "xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage": "来自 {entity} 的 {description} 告警",

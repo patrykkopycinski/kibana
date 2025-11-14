@@ -33313,7 +33313,6 @@
     "xpack.securitySolution.actionForm.platinumOnly": "Cette fonctionnalité est disponible uniquement dans les licences Platinum et supérieures.",
     "xpack.securitySolution.actionForm.responseActionSectionsDescription": "Actions de réponse",
     "xpack.securitySolution.actionForm.responseActionSectionsTitle": "Les actions de réponse sont lancées à chaque exécution de règle.",
-    "xpack.securitySolution.actionLogExpandedTray.missingErrors": "L'action n'a spécifié aucune erreur",
     "xpack.securitySolution.actions.addToTimeline.addedFieldMessage": "{fieldOrValue} ajouté à la chronologie",
     "xpack.securitySolution.actions.addToTimeline.alertsCountMessage": "Alertes {entity}",
     "xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage": "Alertes {description} de {entity}",

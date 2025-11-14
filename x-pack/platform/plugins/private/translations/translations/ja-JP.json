@@ -33349,7 +33349,6 @@
     "xpack.securitySolution.actionForm.platinumOnly": "この機能はプラチナ以上でのみ利用できます。",
     "xpack.securitySolution.actionForm.responseActionSectionsDescription": "対応アクション",
     "xpack.securitySolution.actionForm.responseActionSectionsTitle": "対応アクションは各ルールの実行時に実行されます。",
-    "xpack.securitySolution.actionLogExpandedTray.missingErrors": "アクションはどのエラーも指定しませんでした",
     "xpack.securitySolution.actions.addToTimeline.addedFieldMessage": "{fieldOrValue}をタイムラインに追加しました",
     "xpack.securitySolution.actions.addToTimeline.alertsCountMessage": "{entity}アラート",
     "xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage": "{entity}からの{description}アラート",

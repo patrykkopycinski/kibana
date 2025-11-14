@@ -33127,7 +33127,6 @@
     "xpack.securitySolution.actionForm.platinumOnly": "Diese Funktionalität ist nur in Platinum und höher verfügbar.",
     "xpack.securitySolution.actionForm.responseActionSectionsDescription": "Reaktionsmaßnahmen",
     "xpack.securitySolution.actionForm.responseActionSectionsTitle": "Reaktionsmaßnahmen werden bei jeder Regel-Ausführung ausgeführt.",
-    "xpack.securitySolution.actionLogExpandedTray.missingErrors": "Die Aktion hat keine Fehler angegeben.",
     "xpack.securitySolution.actions.addToTimeline.addedFieldMessage": "{fieldOrValue} zur Zeitleiste hinzugefügt",
     "xpack.securitySolution.actions.addToTimeline.alertsCountMessage": "{entity} Warnungen",
     "xpack.securitySolution.actions.addToTimeline.descriptiveAlertsCountMessage": "{description} Alerts von {entity}",

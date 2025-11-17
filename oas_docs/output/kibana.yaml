@@ -24002,7 +24002,6 @@ paths:
                         - id
                         - name
                         - namespace
-                        - is_managed
                         - is_protected
                         - status
                         - updated_at
@@ -24939,7 +24938,6 @@ paths:
                       - id
                       - name
                       - namespace
-                      - is_managed
                       - is_protected
                       - status
                       - updated_at
@@ -25672,7 +25670,6 @@ paths:
                         - id
                         - name
                         - namespace
-                        - is_managed
                         - is_protected
                         - status
                         - updated_at
@@ -26384,7 +26381,6 @@ paths:
                       - id
                       - name
                       - namespace
-                      - is_managed
                       - is_protected
                       - status
                       - updated_at
@@ -27321,7 +27317,6 @@ paths:
                       - id
                       - name
                       - namespace
-                      - is_managed
                       - is_protected
                       - status
                       - updated_at
@@ -28131,7 +28126,6 @@ paths:
                       - id
                       - name
                       - namespace
-                      - is_managed
                       - is_protected
                       - status
                       - updated_at
@@ -28405,14 +28399,54 @@ paths:
                                   _runtime_experimental:
                                     type: string
                                   apm: {}
+                                  diagnostics:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      limit:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          burst:
+                                            type: number
+                                          interval:
+                                            type: string
+                                      uploader:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          init_dur:
+                                            type: string
+                                          max_dur:
+                                            type: string
+                                          max_retries:
+                                            type: number
                                   enabled:
                                     type: boolean
+                                  http:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      enabled:
+                                        type: boolean
+                                      host:
+                                        type: string
+                                      port:
+                                        type: number
                                   logs:
                                     type: boolean
                                   metrics:
                                     type: boolean
                                   namespace:
                                     type: string
+                                  pprof:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      enabled:
+                                        type: boolean
+                                    required:
+                                      - enabled
                                   traces:
                                     type: boolean
                                   use_output:
@@ -50023,6 +50057,25 @@ paths:
                         type: boolean
                       id:
                         type: string
+                      ilm_migration_status:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          logs:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
+                          metrics:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
+                          synthetics:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:
@@ -50046,8 +50099,6 @@ paths:
                         type: string
                       version:
                         type: string
-                    required:
-                      - id
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -50172,6 +50223,25 @@ paths:
                         type: boolean
                       id:
                         type: string
+                      ilm_migration_status:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          logs:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
+                          metrics:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
+                          synthetics:
+                            enum:
+                              - success
+                            nullable: true
+                            type: string
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:
@@ -50195,8 +50265,6 @@ paths:
                         type: string
                       version:
                         type: string
-                    required:
-                      - id
                 required:
                   - item
           description: 'OK: A successful request.'

@@ -9931,7 +9931,6 @@
     "xpack.alerting.ruleCircuitBreaker.error.updateSummary": "Regel „{name}“ kann nicht aktualisiert werden. Die maximale Anzahl von Ausführungen pro Minute würde überschritten werden.",
     "xpack.alerting.rulesClient.invalidDate": "Ungültiges Datum für den Parameter {field}: \"{dateValue}\"",
     "xpack.alerting.rulesClient.runSoon.disabledRuleError": "Fehler beim Ausführen der Regel: Die Regel ist deaktiviert",
-    "xpack.alerting.rulesClient.runSoon.getTaskError": "Fehler beim Ausführen der Regel: {errMessage}",
     "xpack.alerting.rulesClient.runSoon.ruleIsRunning": "Die Regel ist bereits im Einsatz",
     "xpack.alerting.rulesClient.runSoon.runSoonError": "Fehler beim Ausführen der Regel: {errMessage}",
     "xpack.alerting.rulesClient.snoozeSchedule.limitReached": "Eine Regel darf nicht mehr als 5 Schlummerzeitpläne haben",

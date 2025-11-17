@@ -10096,7 +10096,6 @@
     "xpack.alerting.ruleCircuitBreaker.error.updateSummary": "ルール''{name}''を更新できません。1分間あたりの最大実行回数を超えました。",
     "xpack.alerting.rulesClient.invalidDate": "パラメーター{field}の無効な日付：「{dateValue}」",
     "xpack.alerting.rulesClient.runSoon.disabledRuleError": "ルールの実行エラー：ルールが無効です",
-    "xpack.alerting.rulesClient.runSoon.getTaskError": "ルールの実行エラー：{errMessage}",
     "xpack.alerting.rulesClient.runSoon.ruleIsRunning": "ルールはすでに実行中です",
     "xpack.alerting.rulesClient.runSoon.runSoonError": "ルールの実行エラー：{errMessage}",
     "xpack.alerting.rulesClient.snoozeSchedule.limitReached": "ルールに含めることができるスヌーズスケジュールは5つまでです",

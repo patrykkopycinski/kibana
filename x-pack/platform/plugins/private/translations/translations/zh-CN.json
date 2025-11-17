@@ -10086,7 +10086,6 @@
     "xpack.alerting.ruleCircuitBreaker.error.updateSummary": "无法更新规则“{name}”。将超出每分钟的最大运行次数。",
     "xpack.alerting.rulesClient.invalidDate": "参数 {field} 的日期无效：“{dateValue}”",
     "xpack.alerting.rulesClient.runSoon.disabledRuleError": "运行规则时出错：规则已禁用",
-    "xpack.alerting.rulesClient.runSoon.getTaskError": "运行规则时出错：{errMessage}",
     "xpack.alerting.rulesClient.runSoon.ruleIsRunning": "规则已在运行",
     "xpack.alerting.rulesClient.runSoon.runSoonError": "运行规则时出错：{errMessage}",
     "xpack.alerting.rulesClient.snoozeSchedule.limitReached": "规则不能具有 5 个以上的暂停计划",

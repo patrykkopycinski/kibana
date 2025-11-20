@@ -37766,7 +37766,6 @@
     "xpack.securitySolution.hoverActions.investigateInResolverForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントを分析",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "イベントを分析します",
     "xpack.securitySolution.hoverActions.moreActionsForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントのその他のアクションを選択",
-    "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "行{ariaRowindex}のイベントをタイムラインの列{columnValues}に{isEventPinned, select, true {Unpin} other {Pin} }",
     "xpack.securitySolution.hoverActions.sendAlertToTimelineForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のイベントのアラートを送信",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "詳細を表示",
     "xpack.securitySolution.hoverActions.viewDetailsForRowAriaLabel": "行 {ariaRowindex}、列 {columnValues} のアラートまたはイベントの詳細を表示",

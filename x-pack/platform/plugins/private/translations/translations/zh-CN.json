@@ -37746,7 +37746,6 @@
     "xpack.securitySolution.hoverActions.investigateInResolverForRowAriaLabel": "分析第 {ariaRowindex} 行的告警或事件，其中列为 {columnValues}",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "分析事件",
     "xpack.securitySolution.hoverActions.moreActionsForRowAriaLabel": "为第 {ariaRowindex} 行中的告警或事件选择更多操作，其中列为 {columnValues}",
-    "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "将第 {ariaRowindex} 行的事件{isEventPinned, select, true {取消固定} other {固定} }到时间线，其中列为 {columnValues}",
     "xpack.securitySolution.hoverActions.sendAlertToTimelineForRowAriaLabel": "将第 {ariaRowindex} 行的告警发送到时间线，其中列为 {columnValues}",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "查看详情",
     "xpack.securitySolution.hoverActions.viewDetailsForRowAriaLabel": "查看第 {ariaRowindex} 行的告警或事件的详细信息，其中列为 {columnValues}",

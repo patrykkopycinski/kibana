@@ -37723,7 +37723,6 @@
     "xpack.securitySolution.hoverActions.investigateInResolverForRowAriaLabel": "Analyser l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",
     "xpack.securitySolution.hoverActions.investigateInResolverTooltip": "Analyser l'événement",
     "xpack.securitySolution.hoverActions.moreActionsForRowAriaLabel": "Sélectionner davantage d'actions pour l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",
-    "xpack.securitySolution.hoverActions.pinEventForRowAriaLabel": "{isEventPinned, select, true {Unpin} other {Pin} } l’événement de la ligne {ariaRowindex} à la chronologie, avec les colonnes {columnValues}",
     "xpack.securitySolution.hoverActions.sendAlertToTimelineForRowAriaLabel": "Envoyer l'alerte de la ligne {ariaRowindex} à la chronologie, avec les colonnes {columnValues}",
     "xpack.securitySolution.hoverActions.viewDetailsAriaLabel": "Afficher les détails",
     "xpack.securitySolution.hoverActions.viewDetailsForRowAriaLabel": "Afficher les détails pour l'alerte ou l'événement de la ligne {ariaRowindex}, avec les colonnes {columnValues}",

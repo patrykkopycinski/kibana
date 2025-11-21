@@ -53482,6 +53482,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -53539,7 +53540,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: The status of the maintenance window. One of "running", "upcoming", "finished" or "archived".
+        - description: The status of the maintenance window. One of "running", "upcoming", "finished", "archived", or "disabled".
           in: query
           name: status
           required: false
@@ -53550,6 +53551,7 @@ paths:
                   - finished
                   - upcoming
                   - archived
+                  - disabled
                 type: string
               - items:
                   enum:
@@ -53557,6 +53559,7 @@ paths:
                     - finished
                     - upcoming
                     - archived
+                    - disabled
                   type: string
                 type: array
         - description: The page number to return.
@@ -53681,6 +53684,7 @@ paths:
                             - upcoming
                             - finished
                             - archived
+                            - disabled
                           type: string
                         title:
                           description: The name of the maintenance window.
@@ -53883,6 +53887,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -54132,6 +54137,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -54293,6 +54299,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.
@@ -54452,6 +54459,7 @@ paths:
                       - upcoming
                       - finished
                       - archived
+                      - disabled
                     type: string
                   title:
                     description: The name of the maintenance window.

@@ -60123,6 +60123,60 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            failure_store:
+                                              anyOf:
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    inherit:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties: {}
+                                                  required:
+                                                    - inherit
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    disabled:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties: {}
+                                                  required:
+                                                    - disabled
+                                                - anyOf:
+                                                    - additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        lifecycle:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            enabled:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties:
+                                                                data_retention:
+                                                                  minLength: 1
+                                                                  type: string
+                                                          required:
+                                                            - enabled
+                                                      required:
+                                                        - lifecycle
+                                                    - additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        lifecycle:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            disabled:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties: {}
+                                                          required:
+                                                            - disabled
+                                                      required:
+                                                        - lifecycle
                                             lifecycle:
                                               anyOf:
                                                 - additionalProperties: false
@@ -62208,6 +62262,7 @@ paths:
                                             - lifecycle
                                             - processing
                                             - settings
+                                            - failure_store
                                       required:
                                         - ingest
                                     - type: object
@@ -62652,6 +62707,60 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        failure_store:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                disabled:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - disabled
+                                            - anyOf:
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    lifecycle:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        enabled:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            data_retention:
+                                                              minLength: 1
+                                                              type: string
+                                                      required:
+                                                        - enabled
+                                                  required:
+                                                    - lifecycle
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    lifecycle:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        disabled:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties: {}
+                                                      required:
+                                                        - disabled
+                                                  required:
+                                                    - lifecycle
                                         lifecycle:
                                           anyOf:
                                             - additionalProperties: false
@@ -64737,6 +64846,7 @@ paths:
                                         - lifecycle
                                         - processing
                                         - settings
+                                        - failure_store
                                   required:
                                     - ingest
                           required:
@@ -64977,6 +65087,60 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            failure_store:
+                                              anyOf:
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    inherit:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties: {}
+                                                  required:
+                                                    - inherit
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    disabled:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties: {}
+                                                  required:
+                                                    - disabled
+                                                - anyOf:
+                                                    - additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        lifecycle:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            enabled:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties:
+                                                                data_retention:
+                                                                  minLength: 1
+                                                                  type: string
+                                                          required:
+                                                            - enabled
+                                                      required:
+                                                        - lifecycle
+                                                    - additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        lifecycle:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            disabled:
+                                                              additionalProperties: false
+                                                              type: object
+                                                              properties: {}
+                                                          required:
+                                                            - disabled
+                                                      required:
+                                                        - lifecycle
                                             lifecycle:
                                               anyOf:
                                                 - additionalProperties: false
@@ -67062,6 +67226,7 @@ paths:
                                             - lifecycle
                                             - processing
                                             - settings
+                                            - failure_store
                                       required:
                                         - ingest
                                     - type: object
@@ -67356,6 +67521,60 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        failure_store:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                disabled:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - disabled
+                                            - anyOf:
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    lifecycle:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        enabled:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            data_retention:
+                                                              minLength: 1
+                                                              type: string
+                                                      required:
+                                                        - enabled
+                                                  required:
+                                                    - lifecycle
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    lifecycle:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        disabled:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties: {}
+                                                      required:
+                                                        - disabled
+                                                  required:
+                                                    - lifecycle
                                         lifecycle:
                                           anyOf:
                                             - additionalProperties: false
@@ -69441,6 +69660,7 @@ paths:
                                         - lifecycle
                                         - processing
                                         - settings
+                                        - failure_store
                                   required:
                                     - ingest
                           required:
@@ -70054,6 +70274,60 @@ paths:
                     - allOf:
                         - type: object
                           properties:
+                            failure_store:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    disabled:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - disabled
+                                - anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        lifecycle:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            enabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                data_retention:
+                                                  minLength: 1
+                                                  type: string
+                                          required:
+                                            - enabled
+                                      required:
+                                        - lifecycle
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        lifecycle:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            disabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties: {}
+                                          required:
+                                            - disabled
+                                      required:
+                                        - lifecycle
                             lifecycle:
                               anyOf:
                                 - additionalProperties: false
@@ -72139,6 +72413,7 @@ paths:
                             - lifecycle
                             - processing
                             - settings
+                            - failure_store
                         - type: object
                           properties:
                             wired:
@@ -72356,6 +72631,60 @@ paths:
                     - allOf:
                         - type: object
                           properties:
+                            failure_store:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    disabled:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - disabled
+                                - anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        lifecycle:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            enabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                data_retention:
+                                                  minLength: 1
+                                                  type: string
+                                          required:
+                                            - enabled
+                                      required:
+                                        - lifecycle
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        lifecycle:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            disabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties: {}
+                                          required:
+                                            - disabled
+                                      required:
+                                        - lifecycle
                             lifecycle:
                               anyOf:
                                 - additionalProperties: false
@@ -74441,6 +74770,7 @@ paths:
                             - lifecycle
                             - processing
                             - settings
+                            - failure_store
                         - type: object
                           properties:
                             classic:

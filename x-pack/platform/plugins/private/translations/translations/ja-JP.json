@@ -26482,7 +26482,6 @@
     "xpack.ml.importExport.importFlyout.cannotImportJobCallout.jobListAria": "ジョブを表示",
     "xpack.ml.importExport.importFlyout.cannotImportJobCallout.jobListButton": "ジョブを表示",
     "xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters": "フィルター{num, plural, one {list} other {リスト}}がありません：{filters}",
-    "xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex": "インデックス{num, plural, one {pattern} other {パターン}}がありません: {indices}",
     "xpack.ml.importExport.importFlyout.cannotImportJobCallout.title": "{num, plural, one {# job} other {# 件のジョブ}}をインポートできません",
     "xpack.ml.importExport.importFlyout.cannotReadFileCallout.body": "ジョブのエクスポートオプションを使用してKibanaからエクスポートされた機械学習ジョブを含むファイルを選択してください。",
     "xpack.ml.importExport.importFlyout.cannotReadFileCallout.title": "ファイルを読み取れません",

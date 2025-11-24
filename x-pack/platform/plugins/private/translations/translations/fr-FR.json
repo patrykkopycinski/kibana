@@ -38834,7 +38834,6 @@
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.title": "Résumé de la traduction",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button": "Charger",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources": "Importez les listes de macros et de consultations.",
-    "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription": "Cliquez sur Charger pour continuer à traduire {partialRulesCount} règles",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleError": "Échec du chargement du fichier de règles",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.description": "{rules} règles téléchargées",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title": "Migration de règle créée avec succès",

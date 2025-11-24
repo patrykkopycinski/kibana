@@ -38494,7 +38494,6 @@
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.title": "Zusammenfassung der Übersetzung",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMacros.button": "Hochladen",
     "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResources": "Laden Sie fehlende Makros und Lookup-Listen hoch.",
-    "xpack.securitySolution.siemMigrations.rules.panel.uploadMissingResourcesDescription": "Klicken Sie auf Hochladen, um mit der Übersetzung der {partialRulesCount} Regeln fortzufahren",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleError": "Fehler beim Hochladen der Regeldatei",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.description": "{rules} Regeln wurden hochgeladen",
     "xpack.securitySolution.siemMigrations.rules.service.createRuleSuccess.title": "Regelmigration erfolgreich erstellt",

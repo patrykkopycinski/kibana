@@ -39421,7 +39421,6 @@
     "xpack.securitySolutionServerless.upselling.siemMigrations.rulesPageUpgradeLicenseMessage": "この機能を使用するには、Elastic Cloud Serverless機能ティアにアップグレードする必要があります。サブスクリプションを更新するか、サポートについては管理者に問い合わせてください。以前に移行を作成したことがある場合は、アップグレード後にアクセスできます。",
     "xpack.securitySolutionServerless.upselling.siemMigrations.title": "Security {requiredTier}ティアが必要です",
     "xpack.securitySolutionServerless.upselling.siemMigrations.upgradeTierMessage": "この機能を使用するには、Elastic Cloud Serverless機能ティアにアップグレードする必要があります。サブスクリプションを更新するか、サポートについては管理者に問い合わせてください。",
-    "xpack.serverless.header.giveFeedbackBtn.label": "フィードバックを作成する",
     "xpack.serverless.nav.manageOrgMembersDescription": "チームメンバーを招待して、このプロジェ宇土にアクセスするためのロールを付与してください。",
     "xpack.serverless.nav.manageOrgMembersTitle": "組織メンバーを管理",
     "xpack.serverlessObservability.aiAssistantManagementDescription": "対応言語をはじめ、ナレッジベースを管理し、アシスタント動作を制御します。",

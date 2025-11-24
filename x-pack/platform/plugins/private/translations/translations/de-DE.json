@@ -39037,7 +39037,6 @@
     "xpack.securitySolutionServerless.upselling.siemMigrations.rulesPageUpgradeLicenseMessage": "Um diese Elastic Cloud Serverless Feature zu nutzen, müssen Sie Ihre Elastic Cloud Serverless-Funktionsstufe aktualisieren. Aktualisieren Sie Ihr Abonnement oder wenden Sie sich an Ihren Administrator, um Unterstützung zu erhalten. Wenn Sie zuvor eine Migration erstellt haben, können Sie nach dem Upgrade darauf zugreifen.",
     "xpack.securitySolutionServerless.upselling.siemMigrations.title": "Sicherheitsstufe {requiredTier} erforderlich",
     "xpack.securitySolutionServerless.upselling.siemMigrations.upgradeTierMessage": "Um diese Elastic Cloud Serverless Feature zu nutzen, müssen Sie Ihre Elastic Cloud Serverless-Funktionsstufe aktualisieren. Aktualisieren Sie Ihr Abonnement oder wenden Sie sich an Ihren Administrator, um Unterstützung zu erhalten.",
-    "xpack.serverless.header.giveFeedbackBtn.label": "Feedback geben",
     "xpack.serverless.nav.manageOrgMembersDescription": "Laden Sie Teammitglieder ein und weisen Sie ihnen Rollen zu, um auf dieses Projekt zuzugreifen.",
     "xpack.serverless.nav.manageOrgMembersTitle": "Organisationsmitglieder verwalten",
     "xpack.serverlessObservability.aiAssistantManagementDescription": "Verwalten Sie die Wissensdatenbank und steuern Sie das Verhalten des Assistenten, einschließlich der Reaktionssprache.",

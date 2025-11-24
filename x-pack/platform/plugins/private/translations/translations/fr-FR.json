@@ -39377,7 +39377,6 @@
     "xpack.securitySolutionServerless.upselling.siemMigrations.rulesPageUpgradeLicenseMessage": "Pour utiliser cette fonctionnalité, vous devez mettre à niveau votre niveau de fonctionnalités Elastic Cloud Serverless. Mettez à jour votre abonnement ou contactez votre administrateur pour obtenir de l'aide. Si vous avez déjà créé une migration, vous pourrez y accéder après la mise à niveau.",
     "xpack.securitySolutionServerless.upselling.siemMigrations.title": "Niveau de sécurité {requiredTier} exigé",
     "xpack.securitySolutionServerless.upselling.siemMigrations.upgradeTierMessage": "Pour utiliser cette fonctionnalité, vous devez mettre à niveau votre niveau de fonctionnalités Elastic Cloud Serverless. Mettez à jour votre abonnement ou contactez votre administrateur pour obtenir de l'aide.",
-    "xpack.serverless.header.giveFeedbackBtn.label": "Donner un retour",
     "xpack.serverless.nav.manageOrgMembersDescription": "Invitez les membres de l'équipe et attribuez-leur des rôles pour accéder à ce projet.",
     "xpack.serverless.nav.manageOrgMembersTitle": "Gérer les membres de l'organisation",
     "xpack.serverlessObservability.aiAssistantManagementDescription": "Gérez la base de connaissances et contrôlez le comportement de l'assistant, y compris le langage de réponse.",

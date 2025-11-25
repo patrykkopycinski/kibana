@@ -3856,8 +3856,6 @@
     "home.sampleData.logsTsdbSpecTitle": "Beispiel-Web-Logs (TSDB)",
     "home.solutionsSection.sectionTitle": "Wählen Sie Ihre Lösung",
     "home.tryButtonLabel": "Integrationen hinzufügen",
-    "home.tutorial.addDataToKibanaDescription": "Zusätzlich zum Hinzufügen von {integrationsLink} können Sie unsere Beispieldaten ausprobieren oder Ihre eigenen Daten hochladen.",
-    "home.tutorial.addDataToKibanaDescription.integrations": "Integrationen",
     "home.tutorial.addDataToKibanaTitle": "Mehr Möglichkeiten, Ihre Daten hinzuzufügen",
     "home.tutorial.backToDirectory": "Zurück zum Verzeichnis",
     "home.tutorial.card.sampleDataDescription": "Beginnen Sie mit der Erkundung von Kibana mit diesen „Ein-Klick“-Datensätzen.",

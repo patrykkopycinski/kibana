@@ -3869,8 +3869,6 @@
     "home.sampleData.logsTsdbSpecTitle": "样例 Web 日志 (TSDB)",
     "home.solutionsSection.sectionTitle": "选取您的解决方案",
     "home.tryButtonLabel": "添加集成",
-    "home.tutorial.addDataToKibanaDescription": "除了添加 {integrationsLink} 以外，您还可以试用样例数据或上传自己的数据。",
-    "home.tutorial.addDataToKibanaDescription.integrations": "集成",
     "home.tutorial.addDataToKibanaTitle": "更多添加数据的方式",
     "home.tutorial.backToDirectory": "返回到目录",
     "home.tutorial.card.sampleDataDescription": "开始使用这些“一键式”数据集浏览 Kibana。",

@@ -3876,8 +3876,6 @@
     "home.sampleData.logsTsdbSpecTitle": "サンプルWebログ（TSDB）",
     "home.solutionsSection.sectionTitle": "ソリューションを選択",
     "home.tryButtonLabel": "統合の追加",
-    "home.tutorial.addDataToKibanaDescription": "{integrationsLink}を追加するほかに、サンプルデータを試したり、独自のデータをアップロードしたりできます。",
-    "home.tutorial.addDataToKibanaDescription.integrations": "統合",
     "home.tutorial.addDataToKibanaTitle": "データを追加するその他の方法",
     "home.tutorial.backToDirectory": "ディレクトリに戻る",
     "home.tutorial.card.sampleDataDescription": "これらの「ワンクリック」データセットで Kibana の探索を始めましょう。",

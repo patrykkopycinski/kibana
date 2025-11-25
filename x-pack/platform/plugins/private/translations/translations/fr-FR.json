@@ -3873,8 +3873,6 @@
     "home.sampleData.logsTsdbSpecTitle": "Exemple de logs Internet (TSDB)",
     "home.solutionsSection.sectionTitle": "Choisir votre solution",
     "home.tryButtonLabel": "Ajouter des intégrations",
-    "home.tutorial.addDataToKibanaDescription": "En plus d'ajouter {integrationsLink}, vous pouvez essayer l'exemple de données ou charger vos propres données.",
-    "home.tutorial.addDataToKibanaDescription.integrations": "intégrations",
     "home.tutorial.addDataToKibanaTitle": "Autres façons d'ajouter des données",
     "home.tutorial.backToDirectory": "Retour au répertoire",
     "home.tutorial.card.sampleDataDescription": "Commencez votre exploration de Kibana avec ces ensembles de données \"en un clic\".",

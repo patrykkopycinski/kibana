@@ -23459,6 +23459,10 @@ paths:
                                 enabled:
                                   type: boolean
                                 target_csp:
+                                  enum:
+                                    - aws
+                                    - azure
+                                    - gcp
                                   type: string
                               required:
                                 - enabled
@@ -24172,6 +24176,10 @@ paths:
                         enabled:
                           type: boolean
                         target_csp:
+                          enum:
+                            - aws
+                            - azure
+                            - gcp
                           type: string
                       required:
                         - enabled
@@ -24395,6 +24403,10 @@ paths:
                               enabled:
                                 type: boolean
                               target_csp:
+                                enum:
+                                  - aws
+                                  - azure
+                                  - gcp
                                 type: string
                             required:
                               - enabled
@@ -25127,6 +25139,10 @@ paths:
                                 enabled:
                                   type: boolean
                                 target_csp:
+                                  enum:
+                                    - aws
+                                    - azure
+                                    - gcp
                                   type: string
                               required:
                                 - enabled
@@ -25838,6 +25854,10 @@ paths:
                               enabled:
                                 type: boolean
                               target_csp:
+                                enum:
+                                  - aws
+                                  - azure
+                                  - gcp
                                 type: string
                             required:
                               - enabled
@@ -26549,6 +26569,10 @@ paths:
                         enabled:
                           type: boolean
                         target_csp:
+                          enum:
+                            - aws
+                            - azure
+                            - gcp
                           type: string
                       required:
                         - enabled
@@ -26774,6 +26798,10 @@ paths:
                               enabled:
                                 type: boolean
                               target_csp:
+                                enum:
+                                  - aws
+                                  - azure
+                                  - gcp
                                 type: string
                             required:
                               - enabled
@@ -27596,6 +27624,10 @@ paths:
                               enabled:
                                 type: boolean
                               target_csp:
+                                enum:
+                                  - aws
+                                  - azure
+                                  - gcp
                                 type: string
                             required:
                               - enabled
@@ -29413,6 +29445,110 @@ paths:
                   package:
                     name: ess_billing
                     version: 1.6.0
+              createAgentlessPoliciesReuseAWSCloudConnectorExample:
+                description: Example request to create agentless policy reusing an existing AWS cloud connector
+                value:
+                  cloud_connector:
+                    cloud_connector_id: existing-aws-connector-id
+                    target_csp: aws
+                  description: CSPM integration for AWS reusing existing cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-reuse-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              createAgentlessPoliciesWithAWSCloudConnectorExample:
+                description: Example request to create agentless policy with AWS cloud connector
+                value:
+                  cloud_connector:
+                    target_csp: aws
+                  description: CSPM integration for AWS with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            aws.account_type: organization-account
+                            aws.credentials.type: cloud_connector
+                            aws.supports_cloud_connectors: true
+                            external_id:
+                              id: ABCDEFGHIJKLMNOPQRST
+                              isSecretRef: true
+                            role_arn: arn:aws:iam::123456789012:role/TestRole
+                      vars:
+                        cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                    cspm-cloudbeat/cis_azure:
+                      enabled: false
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-aws-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: aws
+                    posture: cspm
+              createAgentlessPoliciesWithAzureCloudConnectorExample:
+                description: Example request to create agentless policy with Azure cloud connector
+                value:
+                  cloud_connector:
+                    target_csp: azure
+                  description: CSPM integration for Azure with cloud connector
+                  inputs:
+                    cspm-cloudbeat/cis_aws:
+                      enabled: false
+                    cspm-cloudbeat/cis_azure:
+                      enabled: true
+                      streams:
+                        cloud_security_posture.findings:
+                          enabled: true
+                          vars:
+                            azure_credentials_cloud_connector_id:
+                              type: text
+                              value: existing-azure-credentials-connector-id
+                            azure.account_type: organization-account
+                            client_id:
+                              id: client-secret-id
+                              isSecretRef: true
+                            tenant_id:
+                              id: tenant-secret-id
+                              isSecretRef: true
+                    cspm-cloudbeat/cis_gcp:
+                      enabled: false
+                  name: cspm-azure-policy
+                  namespace: default
+                  package:
+                    name: cloud_security_posture
+                    version: 3.1.1
+                  vars:
+                    deployment: azure
+                    posture: cspm
             schema:
               additionalProperties: false
               type: object
@@ -29423,6 +29559,20 @@ paths:
                     type: string
                   nullable: true
                   type: array
+                cloud_connector:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    cloud_connector_id:
+                      description: ID of an existing cloud connector to reuse. If not provided, a new connector will be created.
+                      type: string
+                    enabled:
+                      default: false
+                      description: Whether cloud connectors are enabled for this policy.
+                      type: boolean
+                    name:
+                      description: Optional name for the cloud connector. If not provided, will be auto-generated from credentials.
+                      type: string
                 description:
                   description: Policy description.
                   type: string
@@ -29625,6 +29775,101 @@ paths:
                       supports_agentless: true
                       updated_at: '2025-11-06T18:27:43.541Z'
                       updated_by: test_user
+                      version: WzE0OTgsMV0=
+                createAgentlessPoliciesWithAWSCloudConnectorResponseExample:
+                  description: Example response for AWS cloud connector integration
+                  value:
+                    item:
+                      cloud_connector_id: aws-connector-67890
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for AWS with cloud connector
+                      enabled: true
+                      id: aws-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                aws.account_type: organization-account
+                                aws.credentials.type: cloud_connector
+                                external_id:
+                                  id: secret-external-id-123
+                                  isSecretRef: true
+                                role_arn: arn:aws:iam::123456789012:role/TestRole
+                          vars:
+                            cloud_formation_template: https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cspm-ACCOUNT_TYPE-9.2.0.yml
+                        cspm-cloudbeat/cis_azure:
+                          enabled: false
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-aws-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      revision: 1
+                      secret_references:
+                        - id: secret-external-id-123
+                      supports_agentless: true
+                      supports_cloud_connector: true
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: aws
+                        posture: cspm
+                      version: WzE0OTgsMV0=
+                createAgentlessPoliciesWithAzureCloudConnectorResponseExample:
+                  description: Example response for Azure cloud connector integration
+                  value:
+                    item:
+                      cloud_connector_id: azure-connector-67890
+                      created_at: '2025-11-06T18:27:43.541Z'
+                      created_by: test_user
+                      description: CSPM integration for Azure with cloud connector
+                      enabled: true
+                      id: azure-policy-12345
+                      inputs:
+                        cspm-cloudbeat/cis_aws:
+                          enabled: false
+                        cspm-cloudbeat/cis_azure:
+                          enabled: true
+                          streams:
+                            cloud_security_posture.findings:
+                              enabled: true
+                              vars:
+                                azure_credentials_cloud_connector_id:
+                                  type: text
+                                  value: existing-azure-credentials-connector-id
+                                azure.account_type: organization-account
+                                client_id:
+                                  id: client-secret-id-456
+                                  isSecretRef: true
+                                tenant_id:
+                                  id: tenant-secret-id-123
+                                  isSecretRef: true
+                        cspm-cloudbeat/cis_gcp:
+                          enabled: false
+                      name: cspm-azure-policy
+                      namespace: default
+                      package:
+                        name: cloud_security_posture
+                        title: Cloud Security Posture Management
+                        version: 3.1.1
+                      revision: 1
+                      secret_references:
+                        - id: tenant-secret-id-123
+                        - id: client-secret-id-456
+                      supports_agentless: true
+                      supports_cloud_connector: true
+                      updated_at: '2025-11-06T18:27:43.541Z'
+                      updated_by: test_user
+                      vars:
+                        deployment: azure
+                        posture: cspm
                       version: WzE0OTgsMV0=
               schema:
                 additionalProperties: false

@@ -38481,7 +38481,7 @@
     "xpack.securitySolution.riskInformation.howOftenTitle": "À quelle fréquence le risque est-il calculé ?",
     "xpack.securitySolution.riskInformation.introText": "L'analyse de risque des entités détecte les hôtes et les utilisateurs risqués à l'intérieur de votre environnement.",
     "xpack.securitySolution.riskInformation.levelHeader": "Niveau de risque",
-    "xpack.securitySolution.riskInformation.riskCalculationStep1": "Uniquement les utilisateurs et les hôtes (entités) de scores associés aux alertes de détection non fermées.",
+    "xpack.securitySolution.riskInformation.riskCalculationStep1": "Seules les entités associées aux alertes de détection non fermées sont notées. Ce comportement peut être configuré dans {managementLink}.",
     "xpack.securitySolution.riskInformation.riskCalculationStep2": "Génère un score de catégorie \"Alerte\" en regroupant les alertes par identificateur d'entité, afin que les alertes ayant des scores de risque plus élevés contribuent davantage que les alertes dont les scores de risque sont moins élevés.",
     "xpack.securitySolution.riskInformation.riskCalculationStep3": "Si la fonctionnalité \"Criticité des ressources\" est activée dans votre espace, le score de risque des entités vérifie le niveau de classification de la criticité de l'entité et génère un modificateur de score dans la catégorie \"Criticité des ressources\".",
     "xpack.securitySolution.riskInformation.riskCalculationStep4": "Génère le niveau de risque des entités en tant que score numérique normalisé.",

@@ -38522,7 +38522,7 @@
     "xpack.securitySolution.riskInformation.howOftenTitle": "リスクを計算する頻度",
     "xpack.securitySolution.riskInformation.introText": "Entity Risk Analyticsは、環境内のリスクのあるホストとユーザーを明らかにします。",
     "xpack.securitySolution.riskInformation.levelHeader": "リスクレベル",
-    "xpack.securitySolution.riskInformation.riskCalculationStep1": "クローズされていない検出アラートに関連付けられたユーザーとホスト（エンティティ）のみスコア付けします。",
+    "xpack.securitySolution.riskInformation.riskCalculationStep1": "クローズされていない検出アラートに関連付けられたエンティティのみスコア付けします。この動作は {managementLink} で設定できます。",
     "xpack.securitySolution.riskInformation.riskCalculationStep2": "エンティティID別にアラートを集約することで、「アラート」カテゴリスコアを生成します。リスクスコアが高いアラートがリスクスコアが低いアラートよりも大きく寄与するように設定されます。",
     "xpack.securitySolution.riskInformation.riskCalculationStep3": "スペースで「アセット重要度」機能が有効な場合は、エンティティリスクスコアによって、エンティティのアセット重要度分類ティアが検証され、「アセット重要度」カテゴリの下でスコア修飾子が生成されます。",
     "xpack.securitySolution.riskInformation.riskCalculationStep4": "正規化された数値スコアとしてエンティティリスクを生成します。",

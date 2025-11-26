@@ -38502,7 +38502,7 @@
     "xpack.securitySolution.riskInformation.howOftenTitle": "多久计算一次风险？",
     "xpack.securitySolution.riskInformation.introText": "实体风险分析将显示您的环境中存在的有风险主机和用户。",
     "xpack.securitySolution.riskInformation.levelHeader": "风险级别",
-    "xpack.securitySolution.riskInformation.riskCalculationStep1": "仅对与尚未关闭的检测告警关联的用户和主机（实体）评分。",
+    "xpack.securitySolution.riskInformation.riskCalculationStep1": "仅对与尚未关闭的检测告警关联的实体评分。可在 {managementLink} 中配置此行为。",
     "xpack.securitySolution.riskInformation.riskCalculationStep2": "通过按实体标识符聚合告警来生成“告警”类别分数，从而使风险分数高的告警贡献高于风险分数低的告警。",
     "xpack.securitySolution.riskInformation.riskCalculationStep3": "如果在工作区中启用了“资产关键度”功能，实体风险评分会验证实体的资产关键度分类层，并在“资产关键度”类别下生成分数修饰符。",
     "xpack.securitySolution.riskInformation.riskCalculationStep4": "以标准化数字分数的形式生成实体风险。",

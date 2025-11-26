@@ -38116,7 +38116,7 @@
     "xpack.securitySolution.riskInformation.howOftenTitle": "Wie oft wird das Risiko berechnet?",
     "xpack.securitySolution.riskInformation.introText": "Entity Risk Analytics identifiziert riskante Hosts und Nutzer in Ihrer Umgebung.",
     "xpack.securitySolution.riskInformation.levelHeader": "Risikostufe",
-    "xpack.securitySolution.riskInformation.riskCalculationStep1": "Bewertet nur Nutzer und Hosts (Entitäten), die mit Erkennungs-Alerts verknüpft sind, die nicht geschlossen wurden.",
+    "xpack.securitySolution.riskInformation.riskCalculationStep1": "Bewertet nur Entitäten, die mit Erkennungs-Alerts verknüpft sind, die nicht geschlossen wurden. Dieses Verhalten kann in {managementLink} konfiguriert werden.",
     "xpack.securitySolution.riskInformation.riskCalculationStep2": "Erzeugt einen 'Alert'-Kategorie-Score, indem Alerts nach Entitäts-Identifikator aggregiert werden, sodass Alerts mit höheren Risikowerten mehr beitragen als solche mit niedrigeren Risikowerten.",
     "xpack.securitySolution.riskInformation.riskCalculationStep3": "Wenn die Feature „Asset-Kritikalität“ in Ihrem Bereich aktiviert ist, überprüft die Risikobewertung für Entitäten die Klassifizierungsstufe der Asset-Kritikalität der Entität und generiert einen Score-Modifikator in der Kategorie „Asset-Kritikalität“.",
     "xpack.securitySolution.riskInformation.riskCalculationStep4": "Erzeugt das Entitätsrisiko als normalisierte numerische Risiko-Score.",

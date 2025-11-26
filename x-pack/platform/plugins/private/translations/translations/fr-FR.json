@@ -9970,7 +9970,6 @@
     "xpack.alerting.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage": "L'adaptateur de connecteur \"{connectorTypeId}\" n'est pas enregistré.",
     "xpack.alerting.feature.executionLogAggs.limitationQueryMsg": "Les résultats sont limités à 10 000 documents. Affinez votre recherche pour en voir d'autres.",
     "xpack.alerting.feature.flappingSettingsSubFeatureName": "Détection de bagotement",
-    "xpack.alerting.feature.maintenanceWindowFeatureName": "Fenêtres de maintenance",
     "xpack.alerting.feature.queryDelaySettingsSubFeatureName": "Retard de requête",
     "xpack.alerting.feature.rulesSettingsFeatureName": "Paramètres des règles",
     "xpack.alerting.getMaintenanceWindowFailure": "Impossible d'obtenir la fenêtre de maintenance.",

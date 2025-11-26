@@ -49166,7 +49166,7 @@
             }
           },
           {
-            "description": "The status of the maintenance window. One of \"running\", \"upcoming\", \"finished\", \"archived\", or \"disabled\".",
+            "description": "The status of the maintenance window. It can be \"running\", \"upcoming\", \"finished\", \"archived\", or \"disabled\".",
             "in": "query",
             "name": "status",
             "required": false,

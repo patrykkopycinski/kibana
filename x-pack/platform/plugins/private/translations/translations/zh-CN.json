@@ -9973,7 +9973,6 @@
     "xpack.alerting.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage": "连接器适配器“{connectorTypeId}”未注册。",
     "xpack.alerting.feature.executionLogAggs.limitationQueryMsg": "结果限制显示 10,000 个文档，请优化您的搜索以查看其他文档。",
     "xpack.alerting.feature.flappingSettingsSubFeatureName": "摆动检测",
-    "xpack.alerting.feature.maintenanceWindowFeatureName": "维护窗口",
     "xpack.alerting.feature.queryDelaySettingsSubFeatureName": "查询延迟",
     "xpack.alerting.feature.rulesSettingsFeatureName": "规则设置",
     "xpack.alerting.getMaintenanceWindowFailure": "无法获取维护窗口。",

@@ -9819,7 +9819,6 @@
     "xpack.alerting.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage": "Der Connector-Adapter \"{connectorTypeId}\" ist nicht registriert.",
     "xpack.alerting.feature.executionLogAggs.limitationQueryMsg": "Die Ergebnisse sind auf 10.000 Dokumente beschränkt, verfeinern Sie Ihre Suche, um weitere anzuzeigen.",
     "xpack.alerting.feature.flappingSettingsSubFeatureName": "Flapping-Erkennung",
-    "xpack.alerting.feature.maintenanceWindowFeatureName": "Wartungsfenster",
     "xpack.alerting.feature.queryDelaySettingsSubFeatureName": "Abfrageverzögerung",
     "xpack.alerting.feature.rulesSettingsFeatureName": "Regel-Einstellungen",
     "xpack.alerting.getMaintenanceWindowFailure": "Das Wartungsfenster konnte nicht abgerufen werden.",

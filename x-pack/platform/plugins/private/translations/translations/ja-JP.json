@@ -9983,7 +9983,6 @@
     "xpack.alerting.connectorAdapterRegistry.get.missingConnectorAdapterErrorMessage": "コネクターアダプター\"{connectorTypeId}\"は登録されていません。",
     "xpack.alerting.feature.executionLogAggs.limitationQueryMsg": "結果は10,000ドキュメントに制限されています。他のドキュメントを表示するには、検索を絞り込んでください。",
     "xpack.alerting.feature.flappingSettingsSubFeatureName": "フラップ検出",
-    "xpack.alerting.feature.maintenanceWindowFeatureName": "保守時間枠",
     "xpack.alerting.feature.queryDelaySettingsSubFeatureName": "クエリの遅延",
     "xpack.alerting.feature.rulesSettingsFeatureName": "ルール設定",
     "xpack.alerting.getMaintenanceWindowFailure": "保守時間枠を取得できません。",

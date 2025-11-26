@@ -7,20 +7,21 @@
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 
-import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
+import { SearchUnifiedAlertsRequestBody } from '../../../../../common/api/detection_engine/unified_alerts';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL } from '../../../../../common/constants';
 import { searchAlertsHandler } from '../common/search_alerts_handler';
 
-export const querySignalsRoute = (
+export const searchUnifiedAlertsRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null
 ) => {
   router.versioned
     .post({
-      path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-      access: 'public',
+      path: DETECTION_ENGINE_SEARCH_UNIFIED_ALERTS_URL,
+      access: 'internal',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -29,17 +30,21 @@ export const querySignalsRoute = (
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
+            body: buildRouteValidationWithZod(SearchUnifiedAlertsRequestBody),
           },
         },
       },
       async (context, request, response) => {
         const getIndexPattern = async () => {
           const spaceId = (await context.securitySolution).getSpaceId();
-          const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const indexPattern = [
+            ...(alertsIndex ? [alertsIndex] : []), // Detection alerts
+            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Attack alerts
+          ];
           return indexPattern;
         };
 

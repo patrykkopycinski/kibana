@@ -21781,7 +21781,8 @@ paths:
                   type: array
                 supports_agentless:
                   default: false
-                  description: Indicates whether the agent policy supports agentless integrations.
+                  deprecated: true
+                  description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.
                   nullable: true
                   type: boolean
                 unenroll_timeout:
@@ -24176,7 +24177,8 @@ paths:
                   type: array
                 supports_agentless:
                   default: false
-                  description: Indicates whether the agent policy supports agentless integrations.
+                  deprecated: true
+                  description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.
                   nullable: true
                   type: boolean
                 unenroll_timeout:
@@ -43151,7 +43153,8 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      deprecated: true
+                      description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
                     supports_cloud_connector:
@@ -43327,7 +43330,8 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      deprecated: true
+                      description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
                     vars:
@@ -45284,7 +45288,8 @@ paths:
                       type: array
                     supports_agentless:
                       default: false
-                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      deprecated: true
+                      description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
                     vars:

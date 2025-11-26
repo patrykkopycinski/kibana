@@ -11243,7 +11243,6 @@
     "xpack.apm.serviceMap.noServicesPromptDescription": "Nous ne parvenons pas à trouver des services à mapper dans la plage temporelle et l'environnement actuellement sélectionnés. Veuillez essayer une autre plage ou vérifier l'environnement sélectionné. Si vous ne disposez d'aucun service, utilisez nos instructions de configuration pour vous aider à vous lancer.",
     "xpack.apm.serviceMap.noServicesPromptTitle": "Aucun service disponible",
     "xpack.apm.serviceMap.popover.noDataText": "Aucune donnée pour l'environnement sélectionné. Essayez de passer à un autre environnement.",
-    "xpack.apm.serviceMap.resourceCountLabel": "{count} ressources",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "Détails du service",
     "xpack.apm.serviceMap.subtypePopoverStat": "Sous-type",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "En savoir plus sur les paramètres APM dans la documentation",

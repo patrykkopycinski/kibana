@@ -11084,7 +11084,6 @@
     "xpack.apm.serviceMap.noServicesPromptDescription": "Wir können innerhalb des aktuell ausgewählten Zeitraums und der Umgebung keine Services zum Zuordnen finden. Bitte versuchen Sie einen anderen Bereich oder überprüfen Sie die ausgewählte Umgebung. Falls Sie noch keine Services haben, verwenden Sie bitte unsere Einrichtungsanweisungen, um zu beginnen.",
     "xpack.apm.serviceMap.noServicesPromptTitle": "Keine Services sind verfügbar",
     "xpack.apm.serviceMap.popover.noDataText": "Keine Daten für die ausgewählte Umgebung vorhanden. Versuchen Sie, in eine andere Umgebung zu wechseln.",
-    "xpack.apm.serviceMap.resourceCountLabel": "{count} Ressourcen",
     "xpack.apm.serviceMap.serviceDetailsButtonText": "Servicedetails",
     "xpack.apm.serviceMap.subtypePopoverStat": "Subtype",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "Erfahren Sie mehr über APM-Einstellungen in der Dokumentation",

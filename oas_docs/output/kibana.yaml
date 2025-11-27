@@ -54745,10 +54745,113 @@ paths:
         '401':
           content:
             application/json:
+              examples:
+                syncExample:
+                  $ref: '#/components/examples/Machine_learning_APIs_mlSync401Example'
               schema:
                 $ref: '#/components/schemas/Machine_learning_APIs_mlSync4xxResponse'
           description: Authorization information is missing or invalid.
       summary: Sync saved objects in the default space
+      tags:
+        - ml
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/ml/saved_objects/update_jobs_spaces:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/ml/saved_objects/update_jobs_spaces</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update a list of jobs to add and/or remove them from given spaces.
+      operationId: mlUpdateJobsSpaces
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateADJobSpacesRequest:
+                value:
+                  jobIds:
+                    - test-job
+                  jobType: anomaly-detector
+                  spacesToAdd:
+                    - default
+                  spacesToRemove:
+                    - '*'
+              updateDFAJobSpacesRequest:
+                value:
+                  jobIds:
+                    - test-job
+                  jobType: data-frame-analytics
+                  spacesToAdd:
+                    - default
+                  spacesToRemove:
+                    - '*'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successADResponse:
+                  value:
+                    test-job:
+                      success: true
+                      type: anomaly-detector
+                successDFAResponse:
+                  value:
+                    test-job:
+                      success: true
+                      type: data-frame-analytics
+          description: Indicates a successful call
+      summary: Update jobs spaces
+      tags:
+        - ml
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/ml/saved_objects/update_trained_models_spaces:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/ml/saved_objects/update_trained_models_spaces</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update a list of trained models to add and/or remove them from given spaces.
+      operationId: mlUpdateTrainedModelsSpaces
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateTrainedModelsSpacesRequest:
+                value:
+                  modelIds:
+                    - test-model
+                  spacesToAdd:
+                    - default
+                  spacesToRemove:
+                    - '*'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successADResponse:
+                  value:
+                    test-model:
+                      success: true
+                      type: anomaly-detector
+                successDFAResponse:
+                  value:
+                    test-model:
+                      success: true
+                      type: trained-model"
+          description: Indicates a successful call
+      summary: Update trained models spaces
       tags:
         - ml
       x-metaTags:
@@ -82627,6 +82730,12 @@ components:
         runtimeField:
           script:
             source: emit(doc["bar"].value)
+    Machine_learning_APIs_mlSync401Example:
+      summary: Two anomaly detection jobs required synchronization in this example.
+      value:
+        error: Unauthorized
+        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:

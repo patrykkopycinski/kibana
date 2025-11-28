@@ -23624,8 +23624,6 @@
     "xpack.lens.messagesButton.label.warnings": "{warningCount} 个{warningCount, plural, one {警告} other {警告}}",
     "xpack.lens.metric.addLayer": "可视化",
     "xpack.lens.metric.breakdownBy": "细分方式",
-    "xpack.lens.metric.color": "颜色",
-    "xpack.lens.metric.colorByValue.label": "按值上色",
     "xpack.lens.metric.colorMode.dynamic": "动态",
     "xpack.lens.metric.colorMode.static": "静态",
     "xpack.lens.metric.headingLabel": "值",

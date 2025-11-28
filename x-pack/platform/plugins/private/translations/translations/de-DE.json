@@ -23295,8 +23295,6 @@
     "xpack.lens.messagesButton.label.warnings": "{warningCount} {warningCount, plural, one {warning} other {warnings}}",
     "xpack.lens.metric.addLayer": "Visualisierung",
     "xpack.lens.metric.breakdownBy": "Aufschlüsselung nach",
-    "xpack.lens.metric.color": "Farbe",
-    "xpack.lens.metric.colorByValue.label": "Farbe nach Nutzen",
     "xpack.lens.metric.colorMode.dynamic": "Dynamisch",
     "xpack.lens.metric.colorMode.static": "Statisch",
     "xpack.lens.metric.headingLabel": "Wert",

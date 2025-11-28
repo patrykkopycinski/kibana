@@ -23607,8 +23607,6 @@
     "xpack.lens.messagesButton.label.warnings": "{warningCount} {warningCount, plural, one {warning} other {avertissements}}",
     "xpack.lens.metric.addLayer": "Visualisation",
     "xpack.lens.metric.breakdownBy": "Répartir par",
-    "xpack.lens.metric.color": "Couleur",
-    "xpack.lens.metric.colorByValue.label": "Couleur par valeur",
     "xpack.lens.metric.colorMode.dynamic": "Dynamique",
     "xpack.lens.metric.colorMode.static": "Statique",
     "xpack.lens.metric.headingLabel": "Valeur",

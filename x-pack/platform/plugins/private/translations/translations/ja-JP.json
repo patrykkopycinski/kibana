@@ -23636,8 +23636,6 @@
     "xpack.lens.messagesButton.label.warnings": "{warningCount}{warningCount, plural, one {warning} other {件の警告}}",
     "xpack.lens.metric.addLayer": "ビジュアライゼーション",
     "xpack.lens.metric.breakdownBy": "分類する",
-    "xpack.lens.metric.color": "色",
-    "xpack.lens.metric.colorByValue.label": "値別の色",
     "xpack.lens.metric.colorMode.dynamic": "動的",
     "xpack.lens.metric.colorMode.static": "静的",
     "xpack.lens.metric.headingLabel": "値",

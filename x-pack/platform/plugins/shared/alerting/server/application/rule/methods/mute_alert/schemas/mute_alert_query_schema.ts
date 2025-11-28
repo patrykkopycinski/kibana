@@ -4,4 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { muteAlertParamsSchema, muteAlertQuerySchema } from './v1';
+import { schema } from '@kbn/config-schema';
+
+export const muteAlertQuerySchema = schema.object({
+  validateAlertsExistence: schema.maybe(schema.boolean({ defaultValue: true })),
+});

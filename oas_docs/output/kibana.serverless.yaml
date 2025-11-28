@@ -6499,6 +6499,12 @@ paths:
           required: true
           schema:
             type: string
+        - description: Whether to validate the existence of the alert.
+          in: query
+          name: validate_alerts_existence
+          required: false
+          schema:
+            type: boolean
       responses:
         '204':
           description: Indicates a successful call.

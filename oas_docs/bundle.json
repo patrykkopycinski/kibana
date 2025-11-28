@@ -82584,274 +82584,6 @@
         ]
       }
     },
-    "/api/streams/{name}/dashboards": {
-      "get": {
-        "description": "Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
-        "operationId": "get-streams-name-dashboards",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Get stream dashboards",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
-    "/api/streams/{name}/dashboards/_bulk": {
-      "post": {
-        "description": "Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "post-streams-name-dashboards-bulk",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "operations": {
-                    "items": {
-                      "anyOf": [
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "index": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "index"
-                          ],
-                          "type": "object"
-                        },
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "delete": {
-                              "additionalProperties": false,
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                }
-                              },
-                              "required": [
-                                "id"
-                              ],
-                              "type": "object"
-                            }
-                          },
-                          "required": [
-                            "delete"
-                          ],
-                          "type": "object"
-                        }
-                      ]
-                    },
-                    "type": "array"
-                  }
-                },
-                "required": [
-                  "operations"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Bulk update dashboards",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
-    "/api/streams/{name}/dashboards/{dashboardId}": {
-      "delete": {
-        "description": "Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "delete-streams-name-dashboards-dashboardid",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "dashboardId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Unlink a dashboard from a stream",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      },
-      "put": {
-        "description": "Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "put-streams-name-dashboards-dashboardid",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "dashboardId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Link a dashboard to a stream",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
     "/api/streams/{name}/queries": {
       "get": {
         "description": "Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
@@ -83737,178 +83469,6 @@
         "x-state": "Technical Preview"
       }
     },
-    "/api/streams/{name}/rules": {
-      "get": {
-        "description": "Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.",
-        "operationId": "get-streams-name-rules",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Get stream rules",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
-    "/api/streams/{name}/rules/{ruleId}": {
-      "delete": {
-        "description": "Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "delete-streams-name-rules-ruleid",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "ruleId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Unlink a rule from a stream",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      },
-      "put": {
-        "description": "Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.",
-        "operationId": "put-streams-name-rules-ruleid",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "ruleId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
-                  },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
-                  },
-                  {
-                    "not": {}
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Link a rule to a stream",
-        "tags": [
-          "streams"
-        ],
-        "x-state": "Technical Preview"
-      }
-    },
     "/api/streams/{name}/significant_events": {
       "get": {
         "description": "Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.",
@@ -84783,7 +84343,8 @@
             "schema": {
               "enum": [
                 "dashboard",
-                "rule"
+                "rule",
+                "slo"
               ],
               "type": "string"
             }
@@ -84917,7 +84478,8 @@
                                 "type": {
                                   "enum": [
                                     "dashboard",
-                                    "rule"
+                                    "rule",
+                                    "slo"
                                   ],
                                   "type": "string"
                                 }
@@ -84946,7 +84508,8 @@
                                 "type": {
                                   "enum": [
                                     "dashboard",
-                                    "rule"
+                                    "rule",
+                                    "slo"
                                   ],
                                   "type": "string"
                                 }
@@ -85031,7 +84594,8 @@
             "schema": {
               "enum": [
                 "dashboard",
-                "rule"
+                "rule",
+                "slo"
               ],
               "type": "string"
             }
@@ -85128,7 +84692,8 @@
             "schema": {
               "enum": [
                 "dashboard",
-                "rule"
+                "rule",
+                "slo"
               ],
               "type": "string"
             }

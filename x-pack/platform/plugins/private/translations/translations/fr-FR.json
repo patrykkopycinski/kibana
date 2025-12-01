@@ -42439,7 +42439,6 @@
     "xpack.streams.streamDetailRouting.deleted": "Flux supprimé",
     "xpack.streams.streamDetailRouting.edit": "Modifier",
     "xpack.streams.streamDetailRouting.name": "Nom du flux",
-    "xpack.streams.streamDetailRouting.remove": "Retirer",
     "xpack.streams.streamDetailRouting.saved": "Flux enregistré",
     "xpack.streams.streamDetailRouting.view": "Ouvrir le flux dans un nouvel onglet",
     "xpack.streams.streamDetailSchemaEditor.ecsRecommendationLoadingText": "Chargement...",

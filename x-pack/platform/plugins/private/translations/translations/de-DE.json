@@ -42041,7 +42041,6 @@
     "xpack.streams.streamDetailRouting.deleted": "Stream wurde gelöscht",
     "xpack.streams.streamDetailRouting.edit": "Bearbeiten",
     "xpack.streams.streamDetailRouting.name": "Stream-Name",
-    "xpack.streams.streamDetailRouting.remove": "Entfernen",
     "xpack.streams.streamDetailRouting.saved": "Stream gespeichert",
     "xpack.streams.streamDetailRouting.view": "Stream in einem neuen Tab öffnen",
     "xpack.streams.streamDetailSchemaEditor.ecsRecommendationLoadingText": "Wird geladen...",

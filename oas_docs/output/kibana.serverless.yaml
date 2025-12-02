@@ -3222,6 +3222,9 @@ paths:
                     nullable: true
                     type: object
                     properties:
+                      enabled:
+                        description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                        type: boolean
                       look_back_window:
                         description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
@@ -4005,6 +4008,9 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    enabled:
+                      description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                      type: boolean
                     look_back_window:
                       description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
@@ -4627,6 +4633,9 @@ paths:
                     nullable: true
                     type: object
                     properties:
+                      enabled:
+                        description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                        type: boolean
                       look_back_window:
                         description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
@@ -5279,6 +5288,9 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    enabled:
+                      description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                      type: boolean
                     look_back_window:
                       description: The minimum number of runs in which the threshold must be met.
                       maximum: 20
@@ -5669,6 +5681,9 @@ paths:
                     nullable: true
                     type: object
                     properties:
+                      enabled:
+                        description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                        type: boolean
                       look_back_window:
                         description: The minimum number of runs in which the threshold must be met.
                         maximum: 20
@@ -7182,6 +7197,9 @@ paths:
                     nullable: true
                     type: object
                     properties:
+                      enabled:
+                        description: Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.
+                        type: boolean
                       look_back_window:
                         description: The minimum number of runs in which the threshold must be met.
                         maximum: 20

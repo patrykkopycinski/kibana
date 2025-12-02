@@ -3622,6 +3622,10 @@
                       "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
+                        "enabled": {
+                          "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                          "type": "boolean"
+                        },
                         "look_back_window": {
                           "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
@@ -4646,6 +4650,10 @@
                     "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
+                      "enabled": {
+                        "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                        "type": "boolean"
+                      },
                       "look_back_window": {
                         "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
@@ -5417,6 +5425,10 @@
                       "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
+                        "enabled": {
+                          "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                          "type": "boolean"
+                        },
                         "look_back_window": {
                           "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
@@ -6275,6 +6287,10 @@
                     "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
+                      "enabled": {
+                        "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                        "type": "boolean"
+                      },
                       "look_back_window": {
                         "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
@@ -6786,6 +6802,10 @@
                       "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
+                        "enabled": {
+                          "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                          "type": "boolean"
+                        },
                         "look_back_window": {
                           "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
@@ -8754,6 +8774,10 @@
                       "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
+                        "enabled": {
+                          "description": "Determines whether the rule can enter the flapping state. By default, rules can enter the flapping state.",
+                          "type": "boolean"
+                        },
                         "look_back_window": {
                           "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,

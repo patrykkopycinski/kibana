@@ -35037,6 +35037,7 @@ paths:
                                 - transform
                                 - ml_model
                                 - knowledge_base
+                                - esql_view
                               type: string
                             version:
                               type: string
@@ -35459,6 +35460,7 @@ paths:
                                       - transform
                                       - ml_model
                                       - knowledge_base
+                                      - esql_view
                                     type: string
                                   version:
                                     type: string
@@ -35783,6 +35785,7 @@ paths:
                                 - transform
                                 - ml_model
                                 - knowledge_base
+                                - esql_view
                               type: string
                             version:
                               type: string
@@ -35945,6 +35948,7 @@ paths:
                                               - transform
                                               - ml_model
                                               - knowledge_base
+                                              - esql_view
                                             type: string
                                           version:
                                             type: string
@@ -36645,6 +36649,7 @@ paths:
                                 - transform
                                 - ml_model
                                 - knowledge_base
+                                - esql_view
                               type: string
                             version:
                               type: string
@@ -36939,6 +36944,7 @@ paths:
                                     - transform
                                     - ml_model
                                     - knowledge_base
+                                    - esql_view
                                   type: string
                                 version:
                                   type: string
@@ -37325,6 +37331,7 @@ paths:
                                 - transform
                                 - ml_model
                                 - knowledge_base
+                                - esql_view
                               type: string
                             version:
                               type: string
@@ -37625,6 +37632,7 @@ paths:
                                     - transform
                                     - ml_model
                                     - knowledge_base
+                                    - esql_view
                                   type: string
                                 version:
                                   type: string

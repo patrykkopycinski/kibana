@@ -26650,7 +26650,8 @@
                                   "data_stream_ilm_policy",
                                   "transform",
                                   "ml_model",
-                                  "knowledge_base"
+                                  "knowledge_base",
+                                  "esql_view"
                                 ],
                                 "type": "string"
                               },
@@ -27227,7 +27228,8 @@
                                         "data_stream_ilm_policy",
                                         "transform",
                                         "ml_model",
-                                        "knowledge_base"
+                                        "knowledge_base",
+                                        "esql_view"
                                       ],
                                       "type": "string"
                                     },
@@ -27694,7 +27696,8 @@
                                   "data_stream_ilm_policy",
                                   "transform",
                                   "ml_model",
-                                  "knowledge_base"
+                                  "knowledge_base",
+                                  "esql_view"
                                 ],
                                 "type": "string"
                               },
@@ -27918,7 +27921,8 @@
                                                 "data_stream_ilm_policy",
                                                 "transform",
                                                 "ml_model",
-                                                "knowledge_base"
+                                                "knowledge_base",
+                                                "esql_view"
                                               ],
                                               "type": "string"
                                             },
@@ -29372,7 +29376,8 @@
                                   "data_stream_ilm_policy",
                                   "transform",
                                   "ml_model",
-                                  "knowledge_base"
+                                  "knowledge_base",
+                                  "esql_view"
                                 ],
                                 "type": "string"
                               },
@@ -29797,7 +29802,8 @@
                                       "data_stream_ilm_policy",
                                       "transform",
                                       "ml_model",
-                                      "knowledge_base"
+                                      "knowledge_base",
+                                      "esql_view"
                                     ],
                                     "type": "string"
                                   },
@@ -30348,7 +30354,8 @@
                                   "data_stream_ilm_policy",
                                   "transform",
                                   "ml_model",
-                                  "knowledge_base"
+                                  "knowledge_base",
+                                  "esql_view"
                                 ],
                                 "type": "string"
                               },
@@ -30770,7 +30777,8 @@
                                       "data_stream_ilm_policy",
                                       "transform",
                                       "ml_model",
-                                      "knowledge_base"
+                                      "knowledge_base",
+                                      "esql_view"
                                     ],
                                     "type": "string"
                                   },

@@ -53918,6 +53918,9 @@
                                             "query"
                                           ],
                                           "type": "object"
+                                        },
+                                        "severity_score": {
+                                          "type": "number"
                                         }
                                       },
                                       "required": [
@@ -58955,6 +58958,9 @@
                                             "query"
                                           ],
                                           "type": "object"
+                                        },
+                                        "severity_score": {
+                                          "type": "number"
                                         }
                                       },
                                       "required": [
@@ -63545,6 +63551,9 @@
                                             "query"
                                           ],
                                           "type": "object"
+                                        },
+                                        "severity_score": {
+                                          "type": "number"
                                         }
                                       },
                                       "required": [
@@ -68278,6 +68287,9 @@
                                             "query"
                                           ],
                                           "type": "object"
+                                        },
+                                        "severity_score": {
+                                          "type": "number"
                                         }
                                       },
                                       "required": [
@@ -72870,6 +72882,9 @@
                                         "query"
                                       ],
                                       "type": "object"
+                                    },
+                                    "severity_score": {
+                                      "type": "number"
                                     }
                                   },
                                   "required": [
@@ -82988,6 +83003,9 @@
                                         "query"
                                       ],
                                       "type": "object"
+                                    },
+                                    "severity_score": {
+                                      "type": "number"
                                     }
                                   },
                                   "required": [
@@ -83446,6 +83464,9 @@
                       "query"
                     ],
                     "type": "object"
+                  },
+                  "severity_score": {
+                    "type": "number"
                   },
                   "title": {
                     "minLength": 1,

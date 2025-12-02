@@ -60423,6 +60423,8 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      severity_score:
+                                        type: number
                                     required:
                                       - kql
                               type: array
@@ -63018,6 +63020,8 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      severity_score:
+                                        type: number
                                     required:
                                       - kql
                               type: array
@@ -65387,6 +65391,8 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      severity_score:
+                                        type: number
                                     required:
                                       - kql
                               type: array
@@ -67832,6 +67838,8 @@ paths:
                                             type: string
                                         required:
                                           - query
+                                      severity_score:
+                                        type: number
                                     required:
                                       - kql
                               type: array
@@ -70201,6 +70209,8 @@ paths:
                                         type: string
                                     required:
                                       - query
+                                  severity_score:
+                                    type: number
                                 required:
                                   - kql
                           type: array
@@ -75566,6 +75576,8 @@ paths:
                                         type: string
                                     required:
                                       - query
+                                  severity_score:
+                                    type: number
                                 required:
                                   - kql
                         required:
@@ -75826,6 +75838,8 @@ paths:
                       type: string
                   required:
                     - query
+                severity_score:
+                  type: number
                 title:
                   minLength: 1
                   type: string

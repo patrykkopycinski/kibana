@@ -11792,8 +11792,6 @@
     "xpack.apm.waterfall.showCriticalPath": "Kritischen Pfad anzeigen",
     "xpack.apm.waterfall.spanLinks.badge": "{total} {total, plural, one {Span link} other {Span-Links}}",
     "xpack.apm.waterfall.spanLinks.badgeAriaLabel": "Details zu offenen Span-Links anzeigen",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedChildren": "{linkedChildren} eingehend",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedParents": "{linkedParents} ausgehend",
     "xpack.apm.waterfall.spanLinks.tooltip.title": "{total} {total, plural, one {Span link} other {Span-Links}} gefunden",
     "xpack.apm.waterfallItem.euiToolTip.orphanDescriotion": "Dieser {type} war ursprünglich aufgrund eines fehlenden Trace-Kontexts verwaist, wurde aber der Root-Transaktion neu zugeordnet, um den Ausführungsfluss wiederherzustellen",
     "xpack.apm.waterfallItem.euiToolTip.orphanLabel": "Orphan",

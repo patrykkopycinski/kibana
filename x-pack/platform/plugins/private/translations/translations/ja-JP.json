@@ -11966,8 +11966,6 @@
     "xpack.apm.waterfall.showCriticalPath": "クリティカルパスを表示",
     "xpack.apm.waterfall.spanLinks.badge": "{total} {total, plural, one {Span link} other {個のスパンリンク}}",
     "xpack.apm.waterfall.spanLinks.badgeAriaLabel": "スパンリンク詳細を開く",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedChildren": "{linkedChildren}受信",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedParents": "{linkedParents}送信",
     "xpack.apm.waterfall.spanLinks.tooltip.title": "{total} {total, plural, one {Span link} other {個のスパンリンク}}が見つかりました",
     "xpack.apm.waterfallItem.euiToolTip.orphanDescriotion": "この{type}は、当初はトレースコンテキストが欠落していたためオーファンになっていましたが、ルートトランザクションに再関連付けされ、実行フローが復元されました",
     "xpack.apm.waterfallItem.euiToolTip.orphanLabel": "オーファン",

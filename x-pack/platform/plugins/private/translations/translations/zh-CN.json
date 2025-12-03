@@ -11959,8 +11959,6 @@
     "xpack.apm.waterfall.showCriticalPath": "显示关键路径",
     "xpack.apm.waterfall.spanLinks.badge": "{total} 个{total, plural, one {跨度链接} other {跨度链接}}",
     "xpack.apm.waterfall.spanLinks.badgeAriaLabel": "打开跨度链接详情",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedChildren": "{linkedChildren} 传入",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedParents": "{linkedParents} 传出",
     "xpack.apm.waterfall.spanLinks.tooltip.title": "找到 {total} 个{total, plural, one {跨度链接} other {跨度链接}}",
     "xpack.apm.waterfallItem.euiToolTip.orphanDescriotion": "由于缺少跟踪上下文，此 {type} 最初处于孤立状态，但它已重定父级到根事务以还原执行流",
     "xpack.apm.waterfallItem.euiToolTip.orphanLabel": "孤立",

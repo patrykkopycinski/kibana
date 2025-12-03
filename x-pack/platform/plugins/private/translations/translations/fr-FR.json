@@ -11951,8 +11951,6 @@
     "xpack.apm.waterfall.showCriticalPath": "Afficher le chemin critique",
     "xpack.apm.waterfall.spanLinks.badge": "{total} {total, plural, one {Span link} other {liens de portée}}",
     "xpack.apm.waterfall.spanLinks.badgeAriaLabel": "Ouvrir les détails des liens d'intervalle",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedChildren": "{linkedChildren} entrants",
-    "xpack.apm.waterfall.spanLinks.tooltip.linkedParents": "{linkedParents} sortants",
     "xpack.apm.waterfallItem.euiToolTip.orphanDescriotion": "Ce {type} est orphelin à cause d'un contexte de trace manquant, mais a été associé à la transaction racine parente pour restaurer le flux d'exécution",
     "xpack.apm.waterfallItem.euiToolTip.orphanLabel": "Orphelin",
     "xpack.automaticImport.bottomBar.addToElastic": "Ajouter à Elastic",

@@ -23782,6 +23782,12 @@ paths:
                                     description: ID of the cloud connector associated with this package policy.
                                     nullable: true
                                     type: string
+                                  cloud_connector_name:
+                                    description: Transient field for cloud connector name during creation.
+                                    maxLength: 255
+                                    minLength: 1
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -24727,6 +24733,12 @@ paths:
                                   description: ID of the cloud connector associated with this package policy.
                                   nullable: true
                                   type: string
+                                cloud_connector_name:
+                                  description: Transient field for cloud connector name during creation.
+                                  maxLength: 255
+                                  minLength: 1
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -25463,6 +25475,12 @@ paths:
                                     description: ID of the cloud connector associated with this package policy.
                                     nullable: true
                                     type: string
+                                  cloud_connector_name:
+                                    description: Transient field for cloud connector name during creation.
+                                    maxLength: 255
+                                    minLength: 1
+                                    nullable: true
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -26176,6 +26194,12 @@ paths:
                                   type: number
                                 cloud_connector_id:
                                   description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
+                                cloud_connector_name:
+                                  description: Transient field for cloud connector name during creation.
+                                  maxLength: 255
+                                  minLength: 1
                                   nullable: true
                                   type: string
                                 created_at:
@@ -27123,6 +27147,12 @@ paths:
                                   description: ID of the cloud connector associated with this package policy.
                                   nullable: true
                                   type: string
+                                cloud_connector_name:
+                                  description: Transient field for cloud connector name during creation.
+                                  maxLength: 255
+                                  minLength: 1
+                                  nullable: true
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -27947,6 +27977,12 @@ paths:
                                   type: number
                                 cloud_connector_id:
                                   description: ID of the cloud connector associated with this package policy.
+                                  nullable: true
+                                  type: string
+                                cloud_connector_name:
+                                  description: Transient field for cloud connector name during creation.
+                                  maxLength: 255
+                                  minLength: 1
                                   nullable: true
                                   type: string
                                 created_at:
@@ -29736,6 +29772,8 @@ paths:
                       type: boolean
                     name:
                       description: Optional name for the cloud connector. If not provided, will be auto-generated from credentials.
+                      maxLength: 255
+                      minLength: 1
                       type: string
                 description:
                   description: Policy description.
@@ -30054,6 +30092,12 @@ paths:
                         type: number
                       cloud_connector_id:
                         description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
+                      cloud_connector_name:
+                        description: Transient field for cloud connector name during creation.
+                        maxLength: 255
+                        minLength: 1
                         nullable: true
                         type: string
                       created_at:
@@ -45199,6 +45243,12 @@ paths:
                           description: ID of the cloud connector associated with this package policy.
                           nullable: true
                           type: string
+                        cloud_connector_name:
+                          description: Transient field for cloud connector name during creation.
+                          maxLength: 255
+                          minLength: 1
+                          nullable: true
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -45662,6 +45712,12 @@ paths:
                       description: ID of the cloud connector associated with this package policy.
                       nullable: true
                       type: string
+                    cloud_connector_name:
+                      description: Transient field for cloud connector name during creation.
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -46108,6 +46164,12 @@ paths:
                         type: number
                       cloud_connector_id:
                         description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
+                      cloud_connector_name:
+                        description: Transient field for cloud connector name during creation.
+                        maxLength: 255
+                        minLength: 1
                         nullable: true
                         type: string
                       created_at:
@@ -46606,6 +46668,12 @@ paths:
                           type: number
                         cloud_connector_id:
                           description: ID of the cloud connector associated with this package policy.
+                          nullable: true
+                          type: string
+                        cloud_connector_name:
+                          description: Transient field for cloud connector name during creation.
+                          maxLength: 255
+                          minLength: 1
                           nullable: true
                           type: string
                         created_at:
@@ -47155,6 +47223,12 @@ paths:
                         description: ID of the cloud connector associated with this package policy.
                         nullable: true
                         type: string
+                      cloud_connector_name:
+                        description: Transient field for cloud connector name during creation.
+                        maxLength: 255
+                        minLength: 1
+                        nullable: true
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -47627,6 +47701,12 @@ paths:
                       description: ID of the cloud connector associated with this package policy.
                       nullable: true
                       type: string
+                    cloud_connector_name:
+                      description: Transient field for cloud connector name during creation.
+                      maxLength: 255
+                      minLength: 1
+                      nullable: true
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -48065,6 +48145,12 @@ paths:
                         type: number
                       cloud_connector_id:
                         description: ID of the cloud connector associated with this package policy.
+                        nullable: true
+                        type: string
+                      cloud_connector_name:
+                        description: Transient field for cloud connector name during creation.
+                        maxLength: 255
+                        minLength: 1
                         nullable: true
                         type: string
                       created_at:
@@ -48900,6 +48986,12 @@ paths:
                                 description: ID of the cloud connector associated with this package policy.
                                 nullable: true
                                 type: string
+                              cloud_connector_name:
+                                description: Transient field for cloud connector name during creation.
+                                maxLength: 255
+                                minLength: 1
+                                nullable: true
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -49290,6 +49382,12 @@ paths:
                                 type: array
                               cloud_connector_id:
                                 description: ID of the cloud connector associated with this package policy.
+                                nullable: true
+                                type: string
+                              cloud_connector_name:
+                                description: Transient field for cloud connector name during creation.
+                                maxLength: 255
+                                minLength: 1
                                 nullable: true
                                 type: string
                               created_at:

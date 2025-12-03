@@ -57527,7 +57527,8 @@
                                                                     "double",
                                                                     "date",
                                                                     "boolean",
-                                                                    "ip"
+                                                                    "ip",
+                                                                    "geo_point"
                                                                   ],
                                                                   "type": "string"
                                                                 }
@@ -67160,7 +67161,8 @@
                                                                     "double",
                                                                     "date",
                                                                     "boolean",
-                                                                    "ip"
+                                                                    "ip",
+                                                                    "geo_point"
                                                                   ],
                                                                   "type": "string"
                                                                 }
@@ -77064,7 +77066,8 @@
                                                     "double",
                                                     "date",
                                                     "boolean",
-                                                    "ip"
+                                                    "ip",
+                                                    "geo_point"
                                                   ],
                                                   "type": "string"
                                                 }
@@ -81646,7 +81649,8 @@
                                                     "double",
                                                     "date",
                                                     "boolean",
-                                                    "ip"
+                                                    "ip",
+                                                    "geo_point"
                                                   ],
                                                   "type": "string"
                                                 }

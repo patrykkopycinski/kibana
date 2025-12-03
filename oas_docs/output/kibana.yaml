@@ -62816,6 +62816,7 @@ paths:
                                                                   - date
                                                                   - boolean
                                                                   - ip
+                                                                  - geo_point
                                                                 type: string
                                                             required:
                                                               - type
@@ -67784,6 +67785,7 @@ paths:
                                                                   - date
                                                                   - boolean
                                                                   - ip
+                                                                  - geo_point
                                                                 type: string
                                                             required:
                                                               - type
@@ -72969,6 +72971,7 @@ paths:
                                                   - date
                                                   - boolean
                                                   - ip
+                                                  - geo_point
                                                 type: string
                                             required:
                                               - type
@@ -75326,6 +75329,7 @@ paths:
                                                   - date
                                                   - boolean
                                                   - ip
+                                                  - geo_point
                                                 type: string
                                             required:
                                               - type

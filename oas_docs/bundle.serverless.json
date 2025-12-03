@@ -410,6 +410,9 @@
         "responses": {
           "204": {
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Delete a connector",
@@ -449,6 +452,10 @@
                       "description": "The identifier for the connector.",
                       "type": "string"
                     },
+                    "is_connector_type_deprecated": {
+                      "description": "Indicates whether the connector type is deprecated.",
+                      "type": "boolean"
+                    },
                     "is_deprecated": {
                       "description": "Indicates whether the connector is deprecated.",
                       "type": "boolean"
@@ -466,7 +473,7 @@
                       "type": "boolean"
                     },
                     "name": {
-                      "description": " The name of the rule.",
+                      "description": " The name of the connector.",
                       "type": "string"
                     }
                   },
@@ -476,13 +483,17 @@
                     "connector_type_id",
                     "is_preconfigured",
                     "is_deprecated",
-                    "is_system_action"
+                    "is_system_action",
+                    "is_connector_type_deprecated"
                   ],
                   "type": "object"
                 }
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Get connector information",
@@ -566,6 +577,10 @@
                       "description": "The identifier for the connector.",
                       "type": "string"
                     },
+                    "is_connector_type_deprecated": {
+                      "description": "Indicates whether the connector type is deprecated.",
+                      "type": "boolean"
+                    },
                     "is_deprecated": {
                       "description": "Indicates whether the connector is deprecated.",
                       "type": "boolean"
@@ -583,7 +598,7 @@
                       "type": "boolean"
                     },
                     "name": {
-                      "description": " The name of the rule.",
+                      "description": " The name of the connector.",
                       "type": "string"
                     }
                   },
@@ -593,13 +608,17 @@
                     "connector_type_id",
                     "is_preconfigured",
                     "is_deprecated",
-                    "is_system_action"
+                    "is_system_action",
+                    "is_connector_type_deprecated"
                   ],
                   "type": "object"
                 }
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Create a connector",
@@ -678,6 +697,10 @@
                       "description": "The identifier for the connector.",
                       "type": "string"
                     },
+                    "is_connector_type_deprecated": {
+                      "description": "Indicates whether the connector type is deprecated.",
+                      "type": "boolean"
+                    },
                     "is_deprecated": {
                       "description": "Indicates whether the connector is deprecated.",
                       "type": "boolean"
@@ -695,7 +718,7 @@
                       "type": "boolean"
                     },
                     "name": {
-                      "description": " The name of the rule.",
+                      "description": " The name of the connector.",
                       "type": "string"
                     }
                   },
@@ -705,13 +728,17 @@
                     "connector_type_id",
                     "is_preconfigured",
                     "is_deprecated",
-                    "is_system_action"
+                    "is_system_action",
+                    "is_connector_type_deprecated"
                   ],
                   "type": "object"
                 }
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Update a connector",
@@ -783,6 +810,10 @@
                       "description": "The identifier for the connector.",
                       "type": "string"
                     },
+                    "is_connector_type_deprecated": {
+                      "description": "Indicates whether the connector type is deprecated.",
+                      "type": "boolean"
+                    },
                     "is_deprecated": {
                       "description": "Indicates whether the connector is deprecated.",
                       "type": "boolean"
@@ -800,7 +831,7 @@
                       "type": "boolean"
                     },
                     "name": {
-                      "description": " The name of the rule.",
+                      "description": " The name of the connector.",
                       "type": "string"
                     }
                   },
@@ -810,13 +841,17 @@
                     "connector_type_id",
                     "is_preconfigured",
                     "is_deprecated",
-                    "is_system_action"
+                    "is_system_action",
+                    "is_connector_type_deprecated"
                   ],
                   "type": "object"
                 }
               }
             },
             "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
           }
         },
         "summary": "Run a connector",
@@ -840,7 +875,92 @@
             }
           }
         ],
-        "responses": {},
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "enabled": {
+                        "description": "Indicates whether the connector is enabled.",
+                        "type": "boolean"
+                      },
+                      "enabled_in_config": {
+                        "description": "Indicates whether the connector is enabled in the Kibana configuration.",
+                        "type": "boolean"
+                      },
+                      "enabled_in_license": {
+                        "description": "Indicates whether the connector is enabled through the license.",
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "description": "The identifier for the connector.",
+                        "type": "string"
+                      },
+                      "is_deprecated": {
+                        "description": "Indicates whether the connector type is deprecated.",
+                        "type": "boolean"
+                      },
+                      "is_system_action_type": {
+                        "description": "Indicates whether the action is a system action.",
+                        "type": "boolean"
+                      },
+                      "minimum_license_required": {
+                        "description": "The minimum license required to enable the connector.",
+                        "enum": [
+                          "basic",
+                          "standard",
+                          "gold",
+                          "platinum",
+                          "enterprise",
+                          "trial"
+                        ],
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name of the connector type.",
+                        "type": "string"
+                      },
+                      "sub_feature": {
+                        "description": "Indicates the sub-feature type the connector is grouped under.",
+                        "enum": [
+                          "endpointSecurity"
+                        ],
+                        "type": "string"
+                      },
+                      "supported_feature_ids": {
+                        "description": "The list of supported features",
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "enabled",
+                      "enabled_in_config",
+                      "enabled_in_license",
+                      "minimum_license_required",
+                      "supported_feature_ids",
+                      "is_system_action_type",
+                      "is_deprecated"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          }
+        },
         "summary": "Get connector types",
         "tags": [
           "connectors"
@@ -851,7 +971,77 @@
       "get": {
         "operationId": "get-actions-connectors",
         "parameters": [],
-        "responses": {},
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "config": {
+                        "additionalProperties": {},
+                        "type": "object"
+                      },
+                      "connector_type_id": {
+                        "description": "The connector type identifier.",
+                        "type": "string"
+                      },
+                      "id": {
+                        "description": "The identifier for the connector.",
+                        "type": "string"
+                      },
+                      "is_connector_type_deprecated": {
+                        "description": "Indicates whether the connector type is deprecated.",
+                        "type": "boolean"
+                      },
+                      "is_deprecated": {
+                        "description": "Indicates whether the connector is deprecated.",
+                        "type": "boolean"
+                      },
+                      "is_missing_secrets": {
+                        "description": "Indicates whether the connector is missing secrets.",
+                        "type": "boolean"
+                      },
+                      "is_preconfigured": {
+                        "description": "Indicates whether the connector is preconfigured. If true, the `config` and `is_missing_secrets` properties are omitted from the response. ",
+                        "type": "boolean"
+                      },
+                      "is_system_action": {
+                        "description": "Indicates whether the connector is used for system actions.",
+                        "type": "boolean"
+                      },
+                      "name": {
+                        "description": " The name of the connector.",
+                        "type": "string"
+                      },
+                      "referenced_by_count": {
+                        "description": "The number of saved objects that reference the connector. If is_preconfigured is true, this value is not calculated.",
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "connector_type_id",
+                      "is_preconfigured",
+                      "is_deprecated",
+                      "is_system_action",
+                      "is_connector_type_deprecated",
+                      "referenced_by_count"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          }
+        },
         "summary": "Get all connectors",
         "tags": [
           "connectors"

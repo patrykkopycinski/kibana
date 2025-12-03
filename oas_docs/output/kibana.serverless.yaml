@@ -56023,7 +56023,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -56032,9 +56046,13 @@ paths:
                                       type: string
                                     name:
                                       type: string
+                                    updated_at:
+                                      format: date-time
+                                      type: string
                                   required:
                                     - name
                                     - description
+                                    - updated_at
                           required:
                             - stream
                         - type: object
@@ -56261,25 +56279,28 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
                                       not: {}
-                                - allOf:
-                                    - type: object
-                                      properties: {}
-                                    - type: object
-                                      properties:
-                                        description:
-                                          type: string
-                                        name:
-                                          type: string
-                                      required:
-                                        - name
-                                        - description
-                                    - type: object
-                                      properties:
-                                        ingest:
-                                          additionalProperties: false
-                                          type: object
+                                    updated_at:
+                                      not: {}
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ingest:
+                                      allOf:
+                                        - type: object
                                           properties:
                                             failure_store:
                                               anyOf:
@@ -58845,8 +58866,12 @@ paths:
                                                         required:
                                                           - where
                                                   type: array
+                                                updated_at:
+                                                  format: date-time
+                                                  type: string
                                               required:
                                                 - steps
+                                                - updated_at
                                             settings:
                                               additionalProperties: false
                                               type: object
@@ -58884,13 +58909,7 @@ paths:
                                             - processing
                                             - settings
                                             - failure_store
-                                      required:
-                                        - ingest
-                                    - type: object
-                                      properties:
-                                        ingest:
-                                          additionalProperties: false
-                                          type: object
+                                        - type: object
                                           properties:
                                             wired:
                                               additionalProperties: false
@@ -59138,8 +59157,8 @@ paths:
                                                 - routing
                                           required:
                                             - wired
-                                      required:
-                                        - ingest
+                                  required:
+                                    - ingest
                           required:
                             - stream
                         - type: object
@@ -59151,7 +59170,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -59160,9 +59193,13 @@ paths:
                                       type: string
                                     name:
                                       type: string
+                                    updated_at:
+                                      format: date-time
+                                      type: string
                                   required:
                                     - name
                                     - description
+                                    - updated_at
                           required:
                             - stream
                         - type: object
@@ -59389,7 +59426,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -61962,8 +62013,12 @@ paths:
                                                     required:
                                                       - where
                                               type: array
+                                            updated_at:
+                                              format: date-time
+                                              type: string
                                           required:
                                             - steps
+                                            - updated_at
                                         settings:
                                           additionalProperties: false
                                           type: object
@@ -62019,7 +62074,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -62028,9 +62097,13 @@ paths:
                                       type: string
                                     name:
                                       type: string
+                                    updated_at:
+                                      format: date-time
+                                      type: string
                                   required:
                                     - name
                                     - description
+                                    - updated_at
                           required:
                             - stream
                         - type: object
@@ -62257,25 +62330,28 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
                                       not: {}
-                                - allOf:
-                                    - type: object
-                                      properties: {}
-                                    - type: object
-                                      properties:
-                                        description:
-                                          type: string
-                                        name:
-                                          type: string
-                                      required:
-                                        - name
-                                        - description
-                                    - type: object
-                                      properties:
-                                        ingest:
-                                          additionalProperties: false
-                                          type: object
+                                    updated_at:
+                                      not: {}
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ingest:
+                                      allOf:
+                                        - type: object
                                           properties:
                                             failure_store:
                                               anyOf:
@@ -64841,8 +64917,12 @@ paths:
                                                         required:
                                                           - where
                                                   type: array
+                                                updated_at:
+                                                  format: date-time
+                                                  type: string
                                               required:
                                                 - steps
+                                                - updated_at
                                             settings:
                                               additionalProperties: false
                                               type: object
@@ -64880,13 +64960,7 @@ paths:
                                             - processing
                                             - settings
                                             - failure_store
-                                      required:
-                                        - ingest
-                                    - type: object
-                                      properties:
-                                        ingest:
-                                          additionalProperties: false
-                                          type: object
+                                        - type: object
                                           properties:
                                             classic:
                                               additionalProperties: false
@@ -64952,8 +65026,8 @@ paths:
                                                   type: object
                                           required:
                                             - classic
-                                      required:
-                                        - ingest
+                                  required:
+                                    - ingest
                           required:
                             - stream
                         - type: object
@@ -64965,7 +65039,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -64974,9 +65062,13 @@ paths:
                                       type: string
                                     name:
                                       type: string
+                                    updated_at:
+                                      format: date-time
+                                      type: string
                                   required:
                                     - name
                                     - description
+                                    - updated_at
                           required:
                             - stream
                         - type: object
@@ -65203,7 +65295,21 @@ paths:
                                 - additionalProperties: true
                                   type: object
                                   properties:
+                                    ingest:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        processing:
+                                          additionalProperties: true
+                                          type: object
+                                          properties:
+                                            updated_at:
+                                              not: {}
+                                      required:
+                                        - processing
                                     name:
+                                      not: {}
+                                    updated_at:
                                       not: {}
                                 - additionalProperties: false
                                   type: object
@@ -67776,8 +67882,12 @@ paths:
                                                     required:
                                                       - where
                                               type: array
+                                            updated_at:
+                                              format: date-time
+                                              type: string
                                           required:
                                             - steps
+                                            - updated_at
                                         settings:
                                           additionalProperties: false
                                           type: object
@@ -67833,7 +67943,21 @@ paths:
                             - additionalProperties: true
                               type: object
                               properties:
+                                ingest:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        updated_at:
+                                          not: {}
+                                  required:
+                                    - processing
                                 name:
+                                  not: {}
+                                updated_at:
                                   not: {}
                             - additionalProperties: false
                               type: object
@@ -67842,9 +67966,13 @@ paths:
                                   type: string
                                 name:
                                   type: string
+                                updated_at:
+                                  format: date-time
+                                  type: string
                               required:
                                 - name
                                 - description
+                                - updated_at
                       required:
                         - stream
                     - type: object
@@ -68071,7 +68199,21 @@ paths:
                             - additionalProperties: true
                               type: object
                               properties:
+                                ingest:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: true
+                                      type: object
+                                      properties:
+                                        updated_at:
+                                          not: {}
+                                  required:
+                                    - processing
                                 name:
+                                  not: {}
+                                updated_at:
                                   not: {}
                             - additionalProperties: false
                               type: object
@@ -71059,6 +71201,8 @@ paths:
                                         required:
                                           - where
                                   type: array
+                                updated_at:
+                                  not: {}
                               required:
                                 - steps
                             settings:
@@ -73913,6 +74057,8 @@ paths:
                                         required:
                                           - where
                                   type: array
+                                updated_at:
+                                  not: {}
                               required:
                                 - steps
                             settings:

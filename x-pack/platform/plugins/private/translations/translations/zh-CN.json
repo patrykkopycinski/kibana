@@ -13712,8 +13712,6 @@
     "xpack.cases.connectors.resilient.incidentTypesLabel": "事件类型",
     "xpack.cases.connectors.resilient.incidentTypesPlaceholder": "选择类型",
     "xpack.cases.connectors.resilient.severityLabel": "严重性",
-    "xpack.cases.connectors.resilient.unableToGetIncidentTypesMessage": "无法获取事件类型",
-    "xpack.cases.connectors.resilient.unableToGetSeverityMessage": "无法获取严重性",
     "xpack.cases.connectors.serviceNow.additionalFieldsFormatErrorMessage": "JSON 无效。",
     "xpack.cases.connectors.serviceNow.additionalFieldsLabel": "其他字段",
     "xpack.cases.connectors.serviceNow.additionalFieldsLengthError": "一次最多可以定义 {length} 个附加字段。",

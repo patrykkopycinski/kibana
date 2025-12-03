@@ -13702,8 +13702,6 @@
     "xpack.cases.connectors.resilient.incidentTypesLabel": "Types d'incidents",
     "xpack.cases.connectors.resilient.incidentTypesPlaceholder": "Choisir les types",
     "xpack.cases.connectors.resilient.severityLabel": "Sévérité",
-    "xpack.cases.connectors.resilient.unableToGetIncidentTypesMessage": "Impossible d'obtenir les types d'incidents",
-    "xpack.cases.connectors.resilient.unableToGetSeverityMessage": "Impossible d'obtenir la sévérité",
     "xpack.cases.connectors.serviceNow.additionalFieldsFormatErrorMessage": "Syntaxe JSON non valide.",
     "xpack.cases.connectors.serviceNow.additionalFieldsLabel": "Champs supplémentaires",
     "xpack.cases.connectors.serviceNow.additionalFieldsLengthError": "Un maximum de {length} champs supplémentaires peut être défini à la fois.",

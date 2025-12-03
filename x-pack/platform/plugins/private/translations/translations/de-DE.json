@@ -13536,8 +13536,6 @@
     "xpack.cases.connectors.resilient.incidentTypesLabel": "Incident-Arten",
     "xpack.cases.connectors.resilient.incidentTypesPlaceholder": "Typen auswählen",
     "xpack.cases.connectors.resilient.severityLabel": "Priorität",
-    "xpack.cases.connectors.resilient.unableToGetIncidentTypesMessage": "Die Ereignistypen können nicht abgerufen werden",
-    "xpack.cases.connectors.resilient.unableToGetSeverityMessage": "Der Schweregrad konnte nicht ermittelt werden.",
     "xpack.cases.connectors.serviceNow.additionalFieldsFormatErrorMessage": "Ungültiges JSON.",
     "xpack.cases.connectors.serviceNow.additionalFieldsLabel": "Zusätzliche Felder",
     "xpack.cases.connectors.serviceNow.additionalFieldsLengthError": "Es können maximal {length} zusätzliche Felder gleichzeitig definiert werden.",

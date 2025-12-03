@@ -13719,8 +13719,6 @@
     "xpack.cases.connectors.resilient.incidentTypesLabel": "インシデントタイプ",
     "xpack.cases.connectors.resilient.incidentTypesPlaceholder": "タイプを選択",
     "xpack.cases.connectors.resilient.severityLabel": "深刻度",
-    "xpack.cases.connectors.resilient.unableToGetIncidentTypesMessage": "インシデントタイプを取得できません",
-    "xpack.cases.connectors.resilient.unableToGetSeverityMessage": "深刻度を取得できません",
     "xpack.cases.connectors.serviceNow.additionalFieldsFormatErrorMessage": "無効なJSONです。",
     "xpack.cases.connectors.serviceNow.additionalFieldsLabel": "追加フィールド",
     "xpack.cases.connectors.serviceNow.additionalFieldsLengthError": "最大{length}の追加フィールドを同時に定義できます。",

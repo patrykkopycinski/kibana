@@ -25836,6 +25836,200 @@
         "x-state": "Technical Preview; added in 9.2.0"
       }
     },
+    "/api/fleet/cloud_connectors/{cloudConnectorId}/usage": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.",
+        "operationId": "get-fleet-cloud-connectors-cloudconnectorid-usage",
+        "parameters": [
+          {
+            "description": "The unique identifier of the cloud connector.",
+            "in": "path",
+            "name": "cloudConnectorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The page number for pagination.",
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "description": "The number of items per page.",
+            "in": "query",
+            "name": "perPage",
+            "required": false,
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "getCloudConnectorUsageResponseExample": {
+                    "description": "Example response showing package policies using the cloud connector",
+                    "value": {
+                      "items": [
+                        {
+                          "created_at": "2025-01-16T09:00:00.000Z",
+                          "id": "package-policy-1",
+                          "name": "CSPM AWS Policy",
+                          "package": {
+                            "name": "cloud_security_posture",
+                            "title": "Cloud Security Posture Management",
+                            "version": "3.1.1"
+                          },
+                          "policy_ids": [
+                            "policy-id-123",
+                            "policy-id-456"
+                          ],
+                          "updated_at": "2025-01-16T09:00:00.000Z"
+                        }
+                      ],
+                      "page": 1,
+                      "perPage": 20,
+                      "total": 2
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "package": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "title",
+                              "version"
+                            ],
+                            "type": "object"
+                          },
+                          "policy_ids": {
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "name",
+                          "policy_ids",
+                          "created_at",
+                          "updated_at"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "page": {
+                      "type": "number"
+                    },
+                    "perPage": {
+                      "type": "number"
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "page",
+                    "perPage"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "OK: A successful request."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "genericErrorResponseExample": {
+                    "description": "Example of a generic error response",
+                    "value": {
+                      "error": "Bad Request",
+                      "message": "Cloud connector not found",
+                      "statusCode": 400
+                    }
+                  }
+                },
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A bad request."
+          }
+        },
+        "summary": "Get cloud connector usage (package policies using the connector)",
+        "tags": [
+          "Fleet cloud connectors"
+        ],
+        "x-state": "Technical Preview; added in 9.2.0"
+      }
+    },
     "/api/fleet/data_streams": {
       "get": {
         "description": "[Required authorization] Route required privileges: fleet-agents-all AND fleet-agent-policies-all AND fleet-settings-all.",

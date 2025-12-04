@@ -88220,13 +88220,20 @@
                     "value": {
                       "attachments": [
                         {
+                          "createdAt": "2023-02-23T16:15:47.275Z",
+                          "description": "Dashboard for monitoring production services",
                           "id": "dashboard-123",
+                          "streamNames": [
+                            "logs.awsfirehose",
+                            "logs.nginx"
+                          ],
                           "tags": [
                             "monitoring",
                             "production"
                           ],
                           "title": "My Dashboard",
-                          "type": "dashboard"
+                          "type": "dashboard",
+                          "updatedAt": "2023-03-24T14:39:17.636Z"
                         }
                       ]
                     }

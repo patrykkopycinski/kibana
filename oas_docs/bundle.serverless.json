@@ -883,6 +883,10 @@
                   "items": {
                     "additionalProperties": false,
                     "properties": {
+                      "allow_multiple_system_actions": {
+                        "description": "Indicates whether multiple instances of the same system action connector can be used in a single rule.",
+                        "type": "boolean"
+                      },
                       "enabled": {
                         "description": "Indicates whether the connector is enabled.",
                         "type": "boolean"

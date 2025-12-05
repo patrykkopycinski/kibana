@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './create_script';
-export * from './list_scripts';
+export * from './scripts_library_utils';

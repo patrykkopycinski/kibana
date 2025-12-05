@@ -39345,8 +39345,6 @@
     "xpack.securitySolutionServerless.dashboardsLandingCallout.maps": "Cartes",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.title": "Élaborer un tableau de bord ou une visualisation ? Créez et ajoutez des {maps} ou sélectionnez depuis {visualizationLibrary}",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.visualizeLibrary": "Bibliothèque Visualize",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.body": "Passez votre licence au niveau {productTypeRequired} pour utiliser la liste d'exceptions Endpoint Security.",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.title": "Toujours plus avec Security !",
     "xpack.securitySolutionServerless.endpointCustomNotification.badgeText": "Endpoint Complete",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardMessage": "Pour personnaliser la notification utilisateur, vous devez ajouter Endpoint Protection Complete à votre projet.",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardTitle": "Notification personnalisée",

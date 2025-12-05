@@ -39384,8 +39384,6 @@
     "xpack.securitySolutionServerless.dashboardsLandingCallout.maps": "マップ",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.title": "ダッシュボードやビジュアライゼーションを構築していますか？{maps}を作成して追加するか、{visualizationLibrary}から選択します。",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.visualizeLibrary": "Visualizeライブラリ",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.body": "エンドポイントセキュリティ例外リストを使用するには、ライセンスを{productTypeRequired}にアップグレードしてください。",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.title": "Securityではさまざまなことが可能です！",
     "xpack.securitySolutionServerless.endpointCustomNotification.badgeText": "エンドポイント完了",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardMessage": "ユーザー通知をカスタマイズするには、Endpoint Protection Completeをプロジェクトに追加する必要があります。",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardTitle": "カスタム通知",

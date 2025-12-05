@@ -38952,8 +38952,6 @@
     "xpack.securitySolutionServerless.dashboardsLandingCallout.maps": "Maps",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.title": "Sie erstellen ein Dashboard oder eine Visualisierung? Erstellen Sie {maps} und fügen Sie es hinzu oder wählen Sie aus der {visualizationLibrary}",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.visualizeLibrary": "Bibliothek visualisieren",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.body": "Aktualisieren Sie Ihre Lizenz auf {productTypeRequired}, um die Endpoint Security-Ausnahmeliste zu verwenden.",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.title": "Machen Sie mehr mit Security!",
     "xpack.securitySolutionServerless.endpointCustomNotification.badgeText": "Endpoint abgeschlossen",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardMessage": "Um die Nutzerbenachrichtigung anzupassen, müssen Sie Endpoint Protection Complete zu Ihrem Projekt hinzufügen.",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardTitle": "Benutzerdefinierte Benachrichtigung",

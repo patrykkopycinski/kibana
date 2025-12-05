@@ -39366,8 +39366,6 @@
     "xpack.securitySolutionServerless.dashboardsLandingCallout.maps": "Maps",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.title": "正在构建仪表板或可视化？ 创建并添加{maps}或从{visualizationLibrary}中选择",
     "xpack.securitySolutionServerless.dashboardsLandingCallout.visualizeLibrary": "Visualize 库",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.body": "将您的许可证升级到{productTypeRequired}以使用 Endpoint Security 例外列表。",
-    "xpack.securitySolutionServerless.endpoint.exceptions.details.paywall.title": "Security 让您事半功倍！",
     "xpack.securitySolutionServerless.endpointCustomNotification.badgeText": "Endpoint Complete",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardMessage": "要定制用户通知，必须将 Endpoint Protection Complete 添加到您的项目。",
     "xpack.securitySolutionServerless.endpointCustomNotification.cardTitle": "定制通知",

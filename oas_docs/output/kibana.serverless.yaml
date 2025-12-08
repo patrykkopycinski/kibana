@@ -56583,9 +56583,14 @@ paths:
                                             description: A non-empty string.
                                             minLength: 1
                                             type: string
+                                          type:
+                                            enum:
+                                              - system
+                                            type: string
                                         required:
                                           - name
                                           - filter
+                                          - type
                                       kql:
                                         additionalProperties: false
                                         type: object
@@ -59730,9 +59735,14 @@ paths:
                                             description: A non-empty string.
                                             minLength: 1
                                             type: string
+                                          type:
+                                            enum:
+                                              - system
+                                            type: string
                                         required:
                                           - name
                                           - filter
+                                          - type
                                       kql:
                                         additionalProperties: false
                                         type: object
@@ -62634,9 +62644,14 @@ paths:
                                             description: A non-empty string.
                                             minLength: 1
                                             type: string
+                                          type:
+                                            enum:
+                                              - system
+                                            type: string
                                         required:
                                           - name
                                           - filter
+                                          - type
                                       kql:
                                         additionalProperties: false
                                         type: object
@@ -65599,9 +65614,14 @@ paths:
                                             description: A non-empty string.
                                             minLength: 1
                                             type: string
+                                          type:
+                                            enum:
+                                              - system
+                                            type: string
                                         required:
                                           - name
                                           - filter
+                                          - type
                                       kql:
                                         additionalProperties: false
                                         type: object
@@ -68503,9 +68523,14 @@ paths:
                                         description: A non-empty string.
                                         minLength: 1
                                         type: string
+                                      type:
+                                        enum:
+                                          - system
+                                        type: string
                                     required:
                                       - name
                                       - filter
+                                      - type
                                   kql:
                                     additionalProperties: false
                                     type: object
@@ -74915,9 +74940,14 @@ paths:
                                         description: A non-empty string.
                                         minLength: 1
                                         type: string
+                                      type:
+                                        enum:
+                                          - system
+                                        type: string
                                     required:
                                       - name
                                       - filter
+                                      - type
                                   kql:
                                     additionalProperties: false
                                     type: object
@@ -75209,9 +75239,14 @@ paths:
                       description: A non-empty string.
                       minLength: 1
                       type: string
+                    type:
+                      enum:
+                        - system
+                      type: string
                   required:
                     - name
                     - filter
+                    - type
                 kql:
                   additionalProperties: false
                   type: object
@@ -75755,9 +75790,14 @@ paths:
                           description: The root condition object. It can be a simple filter or a combination of other conditions.
                         name:
                           type: string
+                        type:
+                          enum:
+                            - system
+                          type: string
                       required:
                         - name
                         - filter
+                        - type
                     kql:
                       additionalProperties: false
                       type: object

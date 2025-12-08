@@ -54503,11 +54503,18 @@
                                               "description": "A non-empty string.",
                                               "minLength": 1,
                                               "type": "string"
+                                            },
+                                            "type": {
+                                              "enum": [
+                                                "system"
+                                              ],
+                                              "type": "string"
                                             }
                                           },
                                           "required": [
                                             "name",
-                                            "filter"
+                                            "filter",
+                                            "type"
                                           ],
                                           "type": "object"
                                         },
@@ -60113,11 +60120,18 @@
                                               "description": "A non-empty string.",
                                               "minLength": 1,
                                               "type": "string"
+                                            },
+                                            "type": {
+                                              "enum": [
+                                                "system"
+                                              ],
+                                              "type": "string"
                                             }
                                           },
                                           "required": [
                                             "name",
-                                            "filter"
+                                            "filter",
+                                            "type"
                                           ],
                                           "type": "object"
                                         },
@@ -65269,11 +65283,18 @@
                                               "description": "A non-empty string.",
                                               "minLength": 1,
                                               "type": "string"
+                                            },
+                                            "type": {
+                                              "enum": [
+                                                "system"
+                                              ],
+                                              "type": "string"
                                             }
                                           },
                                           "required": [
                                             "name",
-                                            "filter"
+                                            "filter",
+                                            "type"
                                           ],
                                           "type": "object"
                                         },
@@ -70542,11 +70563,18 @@
                                               "description": "A non-empty string.",
                                               "minLength": 1,
                                               "type": "string"
+                                            },
+                                            "type": {
+                                              "enum": [
+                                                "system"
+                                              ],
+                                              "type": "string"
                                             }
                                           },
                                           "required": [
                                             "name",
-                                            "filter"
+                                            "filter",
+                                            "type"
                                           ],
                                           "type": "object"
                                         },
@@ -75700,11 +75728,18 @@
                                           "description": "A non-empty string.",
                                           "minLength": 1,
                                           "type": "string"
+                                        },
+                                        "type": {
+                                          "enum": [
+                                            "system"
+                                          ],
+                                          "type": "string"
                                         }
                                       },
                                       "required": [
                                         "name",
-                                        "filter"
+                                        "filter",
+                                        "type"
                                       ],
                                       "type": "object"
                                     },
@@ -86904,11 +86939,18 @@
                                           "description": "A non-empty string.",
                                           "minLength": 1,
                                           "type": "string"
+                                        },
+                                        "type": {
+                                          "enum": [
+                                            "system"
+                                          ],
+                                          "type": "string"
                                         }
                                       },
                                       "required": [
                                         "name",
-                                        "filter"
+                                        "filter",
+                                        "type"
                                       ],
                                       "type": "object"
                                     },
@@ -87398,11 +87440,18 @@
                         "description": "A non-empty string.",
                         "minLength": 1,
                         "type": "string"
+                      },
+                      "type": {
+                        "enum": [
+                          "system"
+                        ],
+                        "type": "string"
                       }
                     },
                     "required": [
                       "name",
-                      "filter"
+                      "filter",
+                      "type"
                     ],
                     "type": "object"
                   },
@@ -88317,11 +88366,18 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "type": {
+                            "enum": [
+                              "system"
+                            ],
+                            "type": "string"
                           }
                         },
                         "required": [
                           "name",
-                          "filter"
+                          "filter",
+                          "type"
                         ],
                         "type": "object"
                       },

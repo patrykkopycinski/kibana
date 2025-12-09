@@ -60797,6 +60797,10 @@ paths:
                                       - title
                                   - type: object
                                     properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
                                       feature:
                                         additionalProperties: false
                                         type: object
@@ -63949,6 +63953,10 @@ paths:
                                       - title
                                   - type: object
                                     properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
                                       feature:
                                         additionalProperties: false
                                         type: object
@@ -66858,6 +66866,10 @@ paths:
                                       - title
                                   - type: object
                                     properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
                                       feature:
                                         additionalProperties: false
                                         type: object
@@ -69828,6 +69840,10 @@ paths:
                                       - title
                                   - type: object
                                     properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
                                       feature:
                                         additionalProperties: false
                                         type: object
@@ -72737,6 +72753,10 @@ paths:
                                   - title
                               - type: object
                                 properties:
+                                  evidence:
+                                    items:
+                                      type: string
+                                    type: array
                                   feature:
                                     additionalProperties: false
                                     type: object
@@ -79154,6 +79174,10 @@ paths:
                                   - title
                               - type: object
                                 properties:
+                                  evidence:
+                                    items:
+                                      type: string
+                                    type: array
                                   feature:
                                     additionalProperties: false
                                     type: object
@@ -79453,6 +79477,10 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                evidence:
+                  items:
+                    type: string
+                  type: array
                 feature:
                   additionalProperties: false
                   type: object

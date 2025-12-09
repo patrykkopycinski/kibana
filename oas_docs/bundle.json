@@ -54188,6 +54188,12 @@
                                     },
                                     {
                                       "properties": {
+                                        "evidence": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
                                         "feature": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -59805,6 +59811,12 @@
                                     },
                                     {
                                       "properties": {
+                                        "evidence": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
                                         "feature": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -64968,6 +64980,12 @@
                                     },
                                     {
                                       "properties": {
+                                        "evidence": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
                                         "feature": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -70248,6 +70266,12 @@
                                     },
                                     {
                                       "properties": {
+                                        "evidence": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        },
                                         "feature": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -75413,6 +75437,12 @@
                                 },
                                 {
                                   "properties": {
+                                    "evidence": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
                                     "feature": {
                                       "additionalProperties": false,
                                       "properties": {
@@ -86624,6 +86654,12 @@
                                 },
                                 {
                                   "properties": {
+                                    "evidence": {
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "type": "array"
+                                    },
                                     "feature": {
                                       "additionalProperties": false,
                                       "properties": {
@@ -87125,6 +87161,12 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "evidence": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
                   "feature": {
                     "additionalProperties": false,
                     "properties": {

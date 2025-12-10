@@ -80238,7 +80238,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.<br/><br/>[Required authorization] Route required privileges: read_stream.
+        Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment types, search query, and tags.<br/><br/>[Required authorization] Route required privileges: read_stream.
       operationId: get-streams-streamname-attachments
       parameters:
         - description: The name of the stream
@@ -80247,16 +80247,40 @@ paths:
           required: true
           schema:
             type: string
-        - description: Filter by attachment type
+        - description: Search query to filter attachments by title
           in: query
-          name: attachmentType
+          name: query
           required: false
           schema:
-            enum:
-              - dashboard
-              - rule
-              - slo
             type: string
+        - description: Filter by attachment types (single value or array)
+          in: query
+          name: attachmentTypes
+          required: false
+          schema:
+            anyOf:
+              - enum:
+                  - dashboard
+                  - rule
+                  - slo
+                type: string
+              - items:
+                  enum:
+                    - dashboard
+                    - rule
+                    - slo
+                  type: string
+                type: array
+        - description: Filter by tags (single value or array)
+          in: query
+          name: tags
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - items:
+                  type: string
+                type: array
       requestBody:
         content:
           application/json:

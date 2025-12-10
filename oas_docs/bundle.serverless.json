@@ -87539,7 +87539,7 @@
     },
     "/api/streams/{streamName}/attachments": {
       "get": {
-        "description": "Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment type.<br/><br/>[Required authorization] Route required privileges: read_stream.",
+        "description": "Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment types, search query, and tags.<br/><br/>[Required authorization] Route required privileges: read_stream.",
         "operationId": "get-streams-streamname-attachments",
         "parameters": [
           {
@@ -87552,17 +87552,60 @@
             }
           },
           {
-            "description": "Filter by attachment type",
+            "description": "Search query to filter attachments by title",
             "in": "query",
-            "name": "attachmentType",
+            "name": "query",
             "required": false,
             "schema": {
-              "enum": [
-                "dashboard",
-                "rule",
-                "slo"
-              ],
               "type": "string"
+            }
+          },
+          {
+            "description": "Filter by attachment types (single value or array)",
+            "in": "query",
+            "name": "attachmentTypes",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "dashboard",
+                    "rule",
+                    "slo"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "enum": [
+                      "dashboard",
+                      "rule",
+                      "slo"
+                    ],
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
+            }
+          },
+          {
+            "description": "Filter by tags (single value or array)",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              ]
             }
           }
         ],

@@ -31844,7 +31844,6 @@
     "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "无法为“{reportObjectTitle}”创建 {reportType} 报告。",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "堆栈管理 &gt; Kibana &gt; Reporting",
     "xpack.reporting.publicNotifier.error.tryRefresh": "请尝试刷新页面。",
-    "xpack.reporting.publicNotifier.httpErrorMessage": "无法检查 Reporting 作业状态！",
     "xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription": "报告已达到最大大小，仅包含部分数据。",
     "xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle": "已为“{reportObjectTitle}”创建部分 {reportType}",
     "xpack.reporting.publicNotifier.pollingErrorMessage": "报告通知器错误！",

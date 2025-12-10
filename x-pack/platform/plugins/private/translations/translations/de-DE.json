@@ -31518,7 +31518,6 @@
     "xpack.reporting.publicNotifier.error.couldNotCreateReportTitle": "Der Bericht {reportType} für „{reportObjectTitle}“ kann nicht erstellt werden.",
     "xpack.reporting.publicNotifier.error.reportingSectionUrlLinkLabel": "Stack-Management &gt; Kibana &gt; Berichterstattung",
     "xpack.reporting.publicNotifier.error.tryRefresh": "Versuchen Sie, die Seite neu zu laden.",
-    "xpack.reporting.publicNotifier.httpErrorMessage": "Der Status des Berichterstattungs-Jobs konnte nicht überprüft werden.",
     "xpack.reporting.publicNotifier.maxSizeReached.partialReportDescription": "Der Bericht hat die maximale Größe erreicht und enthält unvollständige Daten.",
     "xpack.reporting.publicNotifier.maxSizeReached.partialReportTitle": "Teilweise {reportType} für ''{reportObjectTitle}'' erstellt",
     "xpack.reporting.publicNotifier.pollingErrorMessage": "Fehler beim Melden des Notifiers!",

@@ -31452,6 +31452,8 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        accountType:
+                          type: string
                         cloudProvider:
                           type: string
                         created_at:
@@ -31534,6 +31536,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                accountType:
+                  description: 'The account type: single-account (single account/subscription) or organization-account (organization-wide).'
+                  enum:
+                    - single-account
+                    - organization-account
+                  type: string
                 cloudProvider:
                   description: 'The cloud provider type: aws, azure, or gcp.'
                   enum:
@@ -31596,6 +31604,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      accountType:
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:
@@ -31753,6 +31763,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      accountType:
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:
@@ -31840,6 +31852,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                accountType:
+                  description: 'The account type: single-account (single account/subscription) or organization-account (organization-wide).'
+                  enum:
+                    - single-account
+                    - organization-account
+                  type: string
                 name:
                   description: The name of the cloud connector.
                   maxLength: 255
@@ -31891,6 +31909,8 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      accountType:
+                        type: string
                       cloudProvider:
                         type: string
                       created_at:

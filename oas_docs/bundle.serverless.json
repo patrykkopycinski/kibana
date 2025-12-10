@@ -25152,6 +25152,9 @@
                       "items": {
                         "additionalProperties": false,
                         "properties": {
+                          "accountType": {
+                            "type": "string"
+                          },
                           "cloudProvider": {
                             "type": "string"
                           },
@@ -25260,6 +25263,14 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "accountType": {
+                    "description": "The account type: single-account (single account/subscription) or organization-account (organization-wide).",
+                    "enum": [
+                      "single-account",
+                      "organization-account"
+                    ],
+                    "type": "string"
+                  },
                   "cloudProvider": {
                     "description": "The cloud provider type: aws, azure, or gcp.",
                     "enum": [
@@ -25355,6 +25366,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "accountType": {
+                          "type": "string"
+                        },
                         "cloudProvider": {
                           "type": "string"
                         },
@@ -25557,6 +25571,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "accountType": {
+                          "type": "string"
+                        },
                         "cloudProvider": {
                           "type": "string"
                         },
@@ -25672,6 +25689,14 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "accountType": {
+                    "description": "The account type: single-account (single account/subscription) or organization-account (organization-wide).",
+                    "enum": [
+                      "single-account",
+                      "organization-account"
+                    ],
+                    "type": "string"
+                  },
                   "name": {
                     "description": "The name of the cloud connector.",
                     "maxLength": 255,
@@ -25753,6 +25778,9 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "accountType": {
+                          "type": "string"
+                        },
                         "cloudProvider": {
                           "type": "string"
                         },

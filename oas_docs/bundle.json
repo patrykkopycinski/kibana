@@ -927,6 +927,15 @@
                         "description": "The name of the connector type.",
                         "type": "string"
                       },
+                      "source": {
+                        "description": "The source of the connector type definition.",
+                        "enum": [
+                          "yml",
+                          "spec",
+                          "stack"
+                        ],
+                        "type": "string"
+                      },
                       "sub_feature": {
                         "description": "Indicates the sub-feature type the connector is grouped under.",
                         "enum": [
@@ -951,7 +960,8 @@
                       "minimum_license_required",
                       "supported_feature_ids",
                       "is_system_action_type",
-                      "is_deprecated"
+                      "is_deprecated",
+                      "source"
                     ],
                     "type": "object"
                   },

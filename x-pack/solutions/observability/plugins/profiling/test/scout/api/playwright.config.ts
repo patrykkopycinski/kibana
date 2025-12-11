@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { test, apiTest } from './single_thread_fixtures';
-export { spaceTest } from './parallel_run_fixtures';
-export type * from './types';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

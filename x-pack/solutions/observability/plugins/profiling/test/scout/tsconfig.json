@@ -4,11 +4,12 @@
     "outDir": "target/types"
   },
   "include": [
-    "**/*"
+    "**/*",
   ],
   "kbn_references": [
     "@kbn/scout-oblt",
-    "@kbn/observability-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/observability-plugin"
   ],
   "exclude": [
     "target/**/*"

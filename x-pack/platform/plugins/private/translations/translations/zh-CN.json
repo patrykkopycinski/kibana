@@ -38800,7 +38800,6 @@
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description": "登录到您的 Splunk 管理员帐户，前往 {section} 应用，然后运行以下查询。以 {format} 格式导出结果。",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section": "搜索和报告",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title": "导出 Splunk 规则",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.prompt": "选择或拖放导出的 JSON 文件",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.title": "更新导出的规则",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.title": "上传规则",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title": "上传 Splunk SIEM 规则",

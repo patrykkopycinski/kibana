@@ -38382,7 +38382,6 @@
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description": "Loggen Sie sich in Ihr Splunk-Administratorkonto ein, gehen Sie zur {section} App und führen Sie die folgende Abfrage aus. Exportieren Sie Ihre Ergebnisse als {format}.",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section": "Search und Berichterstattung",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title": "Splunk-Regeln exportieren",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.prompt": "Wählen Sie die exportierte JSON-Datei aus oder ziehen Sie sie per Drag-and-Drop.",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.title": "Exportierte Regeln aktualisieren",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.title": "Regeln hochladen",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title": "Splunk SIEM-Regeln hochladen",

@@ -38818,7 +38818,6 @@
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description": "Splunk管理者アカウントにログインし、{section}アプリを開き、次のクエリを実行します。結果を{format}でエクスポートします。",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.description.section": "検索とレポート",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.copyExportQuery.title": "Splunkをエクスポート",
-    "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.prompt": "エクスポートされたJSONファイルを選択するか、ドラッグしてドロップします",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.title": "エクスポートしたルールを更新",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.title": "ルールのアップロード",
     "xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title": "Splunk SIEMルールをアップロード",

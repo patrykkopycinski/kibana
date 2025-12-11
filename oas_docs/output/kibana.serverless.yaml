@@ -59090,9 +59090,7 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
-                                                          customIdentifier:
-                                                            type: string
-                                                          where:
+                                                          condition:
                                                             allOf:
                                                               - anyOf:
                                                                   - anyOf:
@@ -59261,8 +59259,10 @@ paths:
                                                                     type: array
                                                                 required:
                                                                   - steps
+                                                          customIdentifier:
+                                                            type: string
                                                         required:
-                                                          - where
+                                                          - condition
                                                   type: array
                                                 updated_at:
                                                   format: date-time
@@ -62246,9 +62246,7 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      customIdentifier:
-                                                        type: string
-                                                      where:
+                                                      condition:
                                                         allOf:
                                                           - anyOf:
                                                               - anyOf:
@@ -62417,8 +62415,10 @@ paths:
                                                                 type: array
                                                             required:
                                                               - steps
+                                                      customIdentifier:
+                                                        type: string
                                                     required:
-                                                      - where
+                                                      - condition
                                               type: array
                                             updated_at:
                                               format: date-time
@@ -65159,9 +65159,7 @@ paths:
                                                       - additionalProperties: false
                                                         type: object
                                                         properties:
-                                                          customIdentifier:
-                                                            type: string
-                                                          where:
+                                                          condition:
                                                             allOf:
                                                               - anyOf:
                                                                   - anyOf:
@@ -65330,8 +65328,10 @@ paths:
                                                                     type: array
                                                                 required:
                                                                   - steps
+                                                          customIdentifier:
+                                                            type: string
                                                         required:
-                                                          - where
+                                                          - condition
                                                   type: array
                                                 updated_at:
                                                   format: date-time
@@ -68133,9 +68133,7 @@ paths:
                                                   - additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      customIdentifier:
-                                                        type: string
-                                                      where:
+                                                      condition:
                                                         allOf:
                                                           - anyOf:
                                                               - anyOf:
@@ -68304,8 +68302,10 @@ paths:
                                                                 type: array
                                                             required:
                                                               - steps
+                                                      customIdentifier:
+                                                        type: string
                                                     required:
-                                                      - where
+                                                      - condition
                                               type: array
                                             updated_at:
                                               format: date-time
@@ -71461,9 +71461,7 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
-                                          customIdentifier:
-                                            type: string
-                                          where:
+                                          condition:
                                             allOf:
                                               - anyOf:
                                                   - anyOf:
@@ -71632,8 +71630,10 @@ paths:
                                                     type: array
                                                 required:
                                                   - steps
+                                          customIdentifier:
+                                            type: string
                                         required:
-                                          - where
+                                          - condition
                                   type: array
                                 updated_at:
                                   not: {}
@@ -74317,9 +74317,7 @@ paths:
                                       - additionalProperties: false
                                         type: object
                                         properties:
-                                          customIdentifier:
-                                            type: string
-                                          where:
+                                          condition:
                                             allOf:
                                               - anyOf:
                                                   - anyOf:
@@ -74488,8 +74486,10 @@ paths:
                                                     type: array
                                                 required:
                                                   - steps
+                                          customIdentifier:
+                                            type: string
                                         required:
-                                          - where
+                                          - condition
                                   type: array
                                 updated_at:
                                   not: {}

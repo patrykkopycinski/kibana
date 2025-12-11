@@ -21125,6 +21125,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_internal:
+                              nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
                             agent_logging_files_interval:
@@ -21848,6 +21850,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_internal:
+                      nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
                     agent_logging_files_interval:
@@ -22075,6 +22079,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
@@ -22818,6 +22824,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_internal:
+                              nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
                             agent_logging_files_interval:
@@ -23538,6 +23546,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
@@ -24260,6 +24270,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_internal:
+                      nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
                     agent_logging_files_interval:
@@ -24489,6 +24501,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
@@ -25321,6 +25335,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
@@ -26198,6 +26214,7 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              internal: {}
                               limits:
                                 additionalProperties: false
                                 type: object
@@ -26311,6 +26328,7 @@ paths:
                               - monitoring
                               - download
                               - features
+                              - internal
                           connectors:
                             additionalProperties: {}
                             type: object

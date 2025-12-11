@@ -10505,6 +10505,9 @@
                               "agent_download_timeout": {
                                 "nullable": true
                               },
+                              "agent_internal": {
+                                "nullable": true
+                              },
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
@@ -11563,6 +11566,9 @@
                       "agent_download_timeout": {
                         "nullable": true
                       },
+                      "agent_internal": {
+                        "nullable": true
+                      },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
@@ -11887,6 +11893,9 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
+                              "nullable": true
+                            },
+                            "agent_internal": {
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
@@ -12971,6 +12980,9 @@
                                 "nullable": true
                               },
                               "agent_download_timeout": {
+                                "nullable": true
+                              },
+                              "agent_internal": {
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
@@ -14307,6 +14319,9 @@
                             "agent_download_timeout": {
                               "nullable": true
                             },
+                            "agent_internal": {
+                              "nullable": true
+                            },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
@@ -15363,6 +15378,9 @@
                       "agent_download_timeout": {
                         "nullable": true
                       },
+                      "agent_internal": {
+                        "nullable": true
+                      },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
@@ -15690,6 +15708,9 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
+                              "nullable": true
+                            },
+                            "agent_internal": {
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
@@ -16892,6 +16913,9 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
+                              "nullable": true
+                            },
+                            "agent_internal": {
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
@@ -18176,6 +18200,7 @@
                                   },
                                   "type": "object"
                                 },
+                                "internal": {},
                                 "limits": {
                                   "additionalProperties": false,
                                   "properties": {
@@ -18340,7 +18365,8 @@
                               "required": [
                                 "monitoring",
                                 "download",
-                                "features"
+                                "features",
+                                "internal"
                               ],
                               "type": "object"
                             },

@@ -41307,7 +41307,6 @@
     "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "スペース",
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "スペース",
     "xpack.spaces.navControl.tour.closeBtn": "閉じる",
-    "xpack.spaces.navControl.tour.learnMore": "詳しくはこちら",
     "xpack.spaces.redirectLegacyUrlToast.text": "検索している{objectNoun}は新しい場所にあります。今後はこのURLを使用してください。",
     "xpack.spaces.redirectLegacyUrlToast.title": "新しいURLに移動しました",
     "xpack.spaces.shareToSpace.aliasTableCalloutBody": "{aliasesToDisableCount, plural, one {# legacy URL} other {# 個のレガシーURL}}が無効になります。",

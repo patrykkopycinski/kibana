@@ -41288,7 +41288,6 @@
     "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "工作区",
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "工作区",
     "xpack.spaces.navControl.tour.closeBtn": "关闭",
-    "xpack.spaces.navControl.tour.learnMore": "了解详情",
     "xpack.spaces.redirectLegacyUrlToast.text": "您正在寻找的{objectNoun}具有新的位置。从现在开始使用此 URL。",
     "xpack.spaces.redirectLegacyUrlToast.title": "我们已将您重定向到新 URL",
     "xpack.spaces.shareToSpace.aliasTableCalloutBody": "将禁用 {aliasesToDisableCount, plural, one {# 个旧版 URL} other {# 个旧版 URL}}。",

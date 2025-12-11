@@ -40856,7 +40856,6 @@
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "Spaces",
     "xpack.spaces.navControl.tour.closeBtn": "Schließen",
     "xpack.spaces.navControl.tour.esSolution": "Elasticsearch",
-    "xpack.spaces.navControl.tour.learnMore": "Weitere Informationen",
     "xpack.spaces.navControl.tour.obltSolution": "Observability",
     "xpack.spaces.navControl.tour.securitySolution": "Security",
     "xpack.spaces.navControl.tour.title": "Sie haben die Lösungsansicht {solution} gewählt",

@@ -41265,7 +41265,6 @@
     "xpack.spaces.navControl.spacesMenu.selectSpacesTitle": "Espaces",
     "xpack.spaces.navControl.spacesMenu.spacesAriaLabel": "Espaces",
     "xpack.spaces.navControl.tour.closeBtn": "Fermer",
-    "xpack.spaces.navControl.tour.learnMore": "En savoir plus",
     "xpack.spaces.redirectLegacyUrlToast.text": "Le {objectNoun} que vous recherchez possède un nouvel emplacement. Utilisez cette URL à partir de maintenant.",
     "xpack.spaces.redirectLegacyUrlToast.title": "Nous vous avons redirigé vers une nouvelle URL",
     "xpack.spaces.shareToSpace.aliasTableCalloutBody": "{aliasesToDisableCount, plural, one {# URL existante sera désactivée} other {# URL existantes seront désactivées}}.",

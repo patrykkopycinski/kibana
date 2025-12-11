@@ -33374,6 +33374,7 @@
     "xpack.securitySolution.appLinks.category.entityAnalytics": "实体分析",
     "xpack.securitySolution.appLinks.category.investigations": "调查",
     "xpack.securitySolution.appLinks.category.management": "管理",
+    "xpack.securitySolution.appLinks.cloudDefendPoliciesDescription": "通过细粒度、灵活的运行时策略保护 Kubernetes 中的容器工作负载，使其免于受到攻击和出现漂移。",
     "xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription": "查看用于云安全态势管理的基准规则。",
     "xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription": "所有 CSP 集成中的结果概述。",
     "xpack.securitySolution.appLinks.coverageOverviewDashboard": "MITRE ATT&CK 支持",

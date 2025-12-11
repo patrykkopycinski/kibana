@@ -33357,6 +33357,7 @@
     "xpack.securitySolution.appLinks.category.entityAnalytics": "Analyse des entités",
     "xpack.securitySolution.appLinks.category.investigations": "Investigations",
     "xpack.securitySolution.appLinks.category.management": "Gestion",
+    "xpack.securitySolution.appLinks.cloudDefendPoliciesDescription": "Sécurisez les charges de travail conteneurisées dans Kubernetes contre les attaques et les dérives grâce à des politiques d'exécution granulaires et flexibles.",
     "xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription": "Voir les règles de benchmark pour la gestion du niveau de sécurité du cloud.",
     "xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription": "Un aperçu des résultats de toutes les intégrations CSP.",
     "xpack.securitySolution.appLinks.coverageOverviewDashboard": "Couverture MITRE ATT&CK",

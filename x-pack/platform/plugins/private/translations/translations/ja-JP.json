@@ -33391,6 +33391,7 @@
     "xpack.securitySolution.appLinks.category.entityAnalytics": "エンティティ分析",
     "xpack.securitySolution.appLinks.category.investigations": "調査",
     "xpack.securitySolution.appLinks.category.management": "管理",
+    "xpack.securitySolution.appLinks.cloudDefendPoliciesDescription": "粒度の高い柔軟なランタイムポリシーによって、Kubernetesのコンテナーワークロードを攻撃とドリフトから保護します。",
     "xpack.securitySolution.appLinks.cloudSecurityPostureBenchmarksDescription": "Cloud Security Posture Managementのベンチマークルールを表示します。",
     "xpack.securitySolution.appLinks.cloudSecurityPostureDashboardDescription": "すべてのCSP統合の結果の概要。",
     "xpack.securitySolution.appLinks.coverageOverviewDashboard": "MITRE ATT&CKの範囲",

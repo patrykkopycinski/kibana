@@ -7791,7 +7791,6 @@
     "unifiedDataTable.grid.copyColumnValuesToClipBoardButton": "列をコピー",
     "unifiedDataTable.grid.documentHeader": "まとめ",
     "unifiedDataTable.grid.editFieldButton": "データビューフィールドを編集",
-    "unifiedDataTable.grid.esqlMultivalueFilteringDisabled": "ES|QLでは、多値フィルタリングはサポートされていません。",
     "unifiedDataTable.grid.filterFor": "フィルター",
     "unifiedDataTable.grid.filterForAria": "この{value}でフィルターを適用",
     "unifiedDataTable.grid.filterOut": "除外",

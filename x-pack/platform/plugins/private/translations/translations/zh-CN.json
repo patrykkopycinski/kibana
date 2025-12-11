@@ -7782,7 +7782,6 @@
     "unifiedDataTable.grid.copyColumnValuesToClipBoardButton": "复制列",
     "unifiedDataTable.grid.documentHeader": "总结",
     "unifiedDataTable.grid.editFieldButton": "编辑数据视图字段",
-    "unifiedDataTable.grid.esqlMultivalueFilteringDisabled": "ES|QL 中不支持多值筛选",
     "unifiedDataTable.grid.filterFor": "筛留",
     "unifiedDataTable.grid.filterForAria": "筛留此 {value}",
     "unifiedDataTable.grid.filterOut": "筛除",

@@ -7785,7 +7785,6 @@
     "unifiedDataTable.grid.copyColumnValuesToClipBoardButton": "Copier la colonne",
     "unifiedDataTable.grid.documentHeader": "Résumé",
     "unifiedDataTable.grid.editFieldButton": "Modifier le champ de la vue de données",
-    "unifiedDataTable.grid.esqlMultivalueFilteringDisabled": "Le filtrage à valeurs multiples n'est pas pris en charge dans ES|QL",
     "unifiedDataTable.grid.filterFor": "Filtrer sur",
     "unifiedDataTable.grid.filterForAria": "Filtrer sur cette {value}",
     "unifiedDataTable.grid.filterOut": "Exclure",

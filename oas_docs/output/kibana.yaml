@@ -79825,6 +79825,12 @@ paths:
           required: true
           schema:
             type: string
+        - description: Number of sample documents to use for generation from the current data of stream
+          in: query
+          name: sampleDocsSize
+          required: false
+          schema:
+            type: number
       requestBody:
         content:
           application/json:

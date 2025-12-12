@@ -48004,6 +48004,8 @@ paths:
                               - success
                             nullable: true
                             type: string
+                      integration_knowledge_enabled:
+                        type: boolean
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:
@@ -48113,6 +48115,8 @@ paths:
                 has_seen_add_data_notice:
                   deprecated: true
                   type: boolean
+                integration_knowledge_enabled:
+                  type: boolean
                 kibana_ca_sha256:
                   deprecated: true
                   type: string
@@ -48172,6 +48176,8 @@ paths:
                               - success
                             nullable: true
                             type: string
+                      integration_knowledge_enabled:
+                        type: boolean
                       output_secret_storage_requirements_met:
                         type: boolean
                       preconfigured_fields:

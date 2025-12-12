@@ -49464,6 +49464,9 @@
                           },
                           "type": "object"
                         },
+                        "integration_knowledge_enabled": {
+                          "type": "boolean"
+                        },
                         "output_secret_storage_requirements_met": {
                           "type": "boolean"
                         },
@@ -49614,6 +49617,9 @@
                     "deprecated": true,
                     "type": "boolean"
                   },
+                  "integration_knowledge_enabled": {
+                    "type": "boolean"
+                  },
                   "kibana_ca_sha256": {
                     "deprecated": true,
                     "type": "string"
@@ -49696,6 +49702,9 @@
                             }
                           },
                           "type": "object"
+                        },
+                        "integration_knowledge_enabled": {
+                          "type": "boolean"
                         },
                         "output_secret_storage_requirements_met": {
                           "type": "boolean"

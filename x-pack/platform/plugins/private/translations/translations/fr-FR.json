@@ -21089,7 +21089,6 @@
     "xpack.infra.assetDetails.title.tooltip.ariaLabel": "Hôte détecté par l'APM",
     "xpack.infra.assetDetails.title.tooltip.learnMoreLink": "En savoir plus",
     "xpack.infra.assetDetails.tooltip.activeAlertsExplanation": "Alertes actives",
-    "xpack.infra.bottomDrawer.kubernetesDashboardsLink": "Tableaux de bord Kubernetes",
     "xpack.infra.chartSection.missingMetricDataBody": "Les données de ce graphique sont manquantes.",
     "xpack.infra.chartSection.missingMetricDataText": "Données manquantes",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderText": "Points de données insuffisants pour afficher le graphique, essayez d'augmenter la plage temporelle.",

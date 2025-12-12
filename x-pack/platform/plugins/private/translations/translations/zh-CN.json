@@ -21103,7 +21103,6 @@
     "xpack.infra.assetDetails.title.tooltip.ariaLabel": "APM 检测到的主机",
     "xpack.infra.assetDetails.title.tooltip.learnMoreLink": "了解详情",
     "xpack.infra.assetDetails.tooltip.activeAlertsExplanation": "活动告警",
-    "xpack.infra.bottomDrawer.kubernetesDashboardsLink": "Kubernetes 仪表板",
     "xpack.infra.chartSection.missingMetricDataBody": "此图表的数据缺失。",
     "xpack.infra.chartSection.missingMetricDataText": "缺失数据",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderText": "没有足够的数据点来呈现图表，请尝试增大时间范围。",

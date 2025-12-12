@@ -21114,7 +21114,6 @@
     "xpack.infra.assetDetails.title.tooltip.ariaLabel": "APMによって検出されたホスト",
     "xpack.infra.assetDetails.title.tooltip.learnMoreLink": "詳細",
     "xpack.infra.assetDetails.tooltip.activeAlertsExplanation": "アクティブアラート",
-    "xpack.infra.bottomDrawer.kubernetesDashboardsLink": "Kubernetesダッシュボード",
     "xpack.infra.chartSection.missingMetricDataBody": "このチャートはデータが欠けています。",
     "xpack.infra.chartSection.missingMetricDataText": "データが欠けています",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderText": "チャートのレンダリングに必要なデータポイントが足りません。時間範囲を広げてみてください。",

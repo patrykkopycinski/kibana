@@ -20813,7 +20813,6 @@
     "xpack.infra.assetDetails.title.tooltip.ariaLabel": "Host von APM erkannt",
     "xpack.infra.assetDetails.title.tooltip.learnMoreLink": "Weitere Informationen",
     "xpack.infra.assetDetails.tooltip.activeAlertsExplanation": "Aktive Alerts",
-    "xpack.infra.bottomDrawer.kubernetesDashboardsLink": "Kubernetes-Dashboards",
     "xpack.infra.chartSection.missingMetricDataBody": "Die Daten für dieses Diagramm fehlen.",
     "xpack.infra.chartSection.missingMetricDataText": "Fehlende Daten",
     "xpack.infra.chartSection.notEnoughDataPointsToRenderText": "Nicht genügend Datenpunkte, um das Diagramm darzustellen. Versuchen Sie, den Zeitbereich zu erweitern.",

@@ -578,7 +578,6 @@
     "contentManagement.contentEditor.activity.lastUpdatedByLabelText": "最終更新者",
     "contentManagement.contentEditor.activity.managedUserLabel": "システム",
     "contentManagement.contentEditor.activity.unkownUserLabel": "不明",
-    "contentManagement.contentEditor.cancelButtonLabel": "キャンセル",
     "contentManagement.contentEditor.flyoutTitle": "{entityName}の詳細",
     "contentManagement.contentEditor.flyoutWarningsTitle": "十分ご注意ください！",
     "contentManagement.contentEditor.metadataForm.descriptionInputLabel": "説明",

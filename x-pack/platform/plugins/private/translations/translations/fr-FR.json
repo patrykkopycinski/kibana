@@ -578,7 +578,6 @@
     "contentManagement.contentEditor.activity.lastUpdatedByLabelText": "Dernière mise à jour par",
     "contentManagement.contentEditor.activity.managedUserLabel": "Système",
     "contentManagement.contentEditor.activity.unkownUserLabel": "Inconnu",
-    "contentManagement.contentEditor.cancelButtonLabel": "Annuler",
     "contentManagement.contentEditor.flyoutTitle": "Détails de {entityName}",
     "contentManagement.contentEditor.flyoutWarningsTitle": "Continuez avec prudence !",
     "contentManagement.contentEditor.metadataForm.descriptionInputLabel": "Description",

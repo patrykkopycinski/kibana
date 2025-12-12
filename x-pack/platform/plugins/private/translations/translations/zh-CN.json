@@ -578,7 +578,6 @@
     "contentManagement.contentEditor.activity.lastUpdatedByLabelText": "最后更新者",
     "contentManagement.contentEditor.activity.managedUserLabel": "系统",
     "contentManagement.contentEditor.activity.unkownUserLabel": "未知",
-    "contentManagement.contentEditor.cancelButtonLabel": "取消",
     "contentManagement.contentEditor.flyoutTitle": "{entityName} 详情",
     "contentManagement.contentEditor.flyoutWarningsTitle": "谨慎操作！",
     "contentManagement.contentEditor.metadataForm.descriptionInputLabel": "描述",

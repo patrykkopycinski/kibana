@@ -38058,7 +38058,6 @@
     "xpack.securitySolution.onboarding.cardBadge.techPreviewTooltip": "この機能はテクニカルプレビュー中であるため、変更される可能性があります。",
     "xpack.securitySolution.onboarding.cardComplete": "完了",
     "xpack.securitySolution.onboarding.common.startMigration.connectorMissingText": "AIコネクターを設定",
-    "xpack.securitySolution.onboarding.common.startMigration.footerNote": "Splunkおよび関連するマークは、米国およびその他の国におけるSplunk LLCの商標または登録商標です。",
     "xpack.securitySolution.onboarding.configure.title": "構成",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton": "統合ステップの追加",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsText": "ダッシュボードを表示するには、最初に統合を追加してください。",

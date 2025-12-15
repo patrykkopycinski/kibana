@@ -38019,7 +38019,6 @@
     "xpack.securitySolution.onboarding.cardBadge.techPreviewTooltip": "Cette fonctionnalité est en version d'évaluation technique. Elle est donc susceptible d'être modifiée.",
     "xpack.securitySolution.onboarding.cardComplete": "Terminé",
     "xpack.securitySolution.onboarding.common.startMigration.connectorMissingText": "Paramétrer le connecteur d'IA",
-    "xpack.securitySolution.onboarding.common.startMigration.footerNote": "Splunk et les marques associées sont des marques commerciales ou des marques déposées de Splunk LLC aux États-Unis et dans d'autres pays.",
     "xpack.securitySolution.onboarding.configure.title": "Configurer",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton": "Ajouter des étapes d'intégration",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsText": "Pour afficher les tableaux de bord, ajoutez d'abord des intégrations.",

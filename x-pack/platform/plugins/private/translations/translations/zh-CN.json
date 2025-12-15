@@ -38038,7 +38038,6 @@
     "xpack.securitySolution.onboarding.cardBadge.techPreviewTooltip": "此功能处于技术预览状态，可能会进行更改。",
     "xpack.securitySolution.onboarding.cardComplete": "已完成",
     "xpack.securitySolution.onboarding.common.startMigration.connectorMissingText": "设置 AI 连接器",
-    "xpack.securitySolution.onboarding.common.startMigration.footerNote": "Splunk 及相关标志为 Splunk LLC 在美国和其他国家/地区的商标或注册商标。",
     "xpack.securitySolution.onboarding.configure.title": "配置",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsButton": "添加集成步骤",
     "xpack.securitySolution.onboarding.dashboardsCard.calloutIntegrationsText": "要查看仪表板，请先添加集成。",

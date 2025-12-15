@@ -19618,7 +19618,6 @@
     "xpack.idxMgmt.indexDetails.loadingDescription": "インデックス詳細を読み込み中...",
     "xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock": "保留中のフィールド",
     "xpack.idxMgmt.indexDetails.mappings.addNewField": "フィールドの追加",
-    "xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip": "インデックスのフィールドを追加する権限がありません",
     "xpack.idxMgmt.indexDetails.mappings.docsCardDescription": "ドキュメントには、複数のフィールドのセットがあります。インデックスマッピングでは、各フィールドに型（キーワード、数値、日付など）と、追加のサブフィールドが指定されます。これらのインデックスマッピングでは、関連性の調整と検索エクスペリエンスで使用可能な機能が決まります。",
     "xpack.idxMgmt.indexDetails.mappings.docsCardLink": "マッピングの詳細",
     "xpack.idxMgmt.indexDetails.mappings.docsCardTitle": "インデックスマッピングについて",

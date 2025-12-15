@@ -19607,7 +19607,6 @@
     "xpack.idxMgmt.indexDetails.loadingDescription": "正在加载索引详情……",
     "xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock": "待处理字段",
     "xpack.idxMgmt.indexDetails.mappings.addNewField": "添加字段",
-    "xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip": "您无权在索引中添加字段",
     "xpack.idxMgmt.indexDetails.mappings.docsCardDescription": "您的文档由一组字段构成。索引映射为每个字段提供类型（例如，关键字、数字或日期）和其他子字段。这些索引映射确定您的相关性调整和搜索体验中可用的功能。",
     "xpack.idxMgmt.indexDetails.mappings.docsCardLink": "详细了解映射",
     "xpack.idxMgmt.indexDetails.mappings.docsCardTitle": "关于索引映射",

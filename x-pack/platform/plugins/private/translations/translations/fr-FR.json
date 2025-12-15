@@ -19595,7 +19595,6 @@
     "xpack.idxMgmt.indexDetails.loadingDescription": "Chargement des détails de l'index…",
     "xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock": "Champs en attente",
     "xpack.idxMgmt.indexDetails.mappings.addNewField": "Ajouter un champ",
-    "xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip": "Vous ne disposez pas d'autorisation pour ajouter des champs dans un index",
     "xpack.idxMgmt.indexDetails.mappings.docsCardDescription": "Vos documents sont constitués d'un ensemble de champs. Les mappings d'index donnent à chaque champ un type (tel que \"keyword\", \"number\" ou \"date\") et des champs secondaires supplémentaires. Ces mappings d'index déterminent les fonctions disponibles dans votre réglage de pertinence et votre expérience de recherche.",
     "xpack.idxMgmt.indexDetails.mappings.docsCardLink": "En savoir plus sur les mappings",
     "xpack.idxMgmt.indexDetails.mappings.docsCardTitle": "À propos des mappings d’index",

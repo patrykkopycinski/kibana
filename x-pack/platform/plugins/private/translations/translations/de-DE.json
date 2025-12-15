@@ -19321,7 +19321,6 @@
     "xpack.idxMgmt.indexDetails.loadingDescription": "Indexdetails werden geladen…",
     "xpack.idxMgmt.indexDetails.mappings.addMappingPendingBlock": "Ausstehende Felder",
     "xpack.idxMgmt.indexDetails.mappings.addNewField": "Feld hinzufügen",
-    "xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip": "Sie verfügen nicht über die Berechtigung zum Hinzufügen von Feldern in einem Index",
     "xpack.idxMgmt.indexDetails.mappings.docsCardDescription": "Ihre Dokumente bestehen aus einer Menge von Feldern. Index-Mappings geben jedem Feld einen Typ (wie Schlüsselwort, Zahl oder Datum) und zusätzliche Unterfelder. Diese Index-Mappings bestimmen die Funktionen, die Ihnen bei der Relevanzoptimierung und im Sucherlebnis zur Verfügung stehen.",
     "xpack.idxMgmt.indexDetails.mappings.docsCardLink": "Weitere Informationen zu Mappings",
     "xpack.idxMgmt.indexDetails.mappings.docsCardTitle": "Informationen zu Index-Mappings",

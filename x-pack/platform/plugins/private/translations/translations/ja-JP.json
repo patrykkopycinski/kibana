@@ -6038,8 +6038,6 @@
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "このルールには{minimumLicenseRequired}ライセンスが必要です。",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorBody": "別の検索を試すか、フィルター設定を変更してください",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorTitle": "ルールタイプが見つかりませんでした",
-    "responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder": "検索",
-    "responseOpsRuleForm.components.ruleTypeModal.title": "ルールタイプを選択",
     "responseOpsRuleForm.disabledActionsWarningTitle": "このアラートには無効なアクションがあります",
     "responseOpsRuleForm.healthCheck.actionText": "詳細情報",
     "responseOpsRuleForm.healthCheck.alertsErrorText": "ルールを作製するには、アラートおよびアクションプラグインを有効にする必要があります。",

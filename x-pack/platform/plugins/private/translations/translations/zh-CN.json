@@ -6031,8 +6031,6 @@
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "此规则需要{minimumLicenseRequired}许可证。",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorBody": "请尝试不同搜索或更改筛选设置",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorTitle": "找不到规则类型",
-    "responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder": "搜索",
-    "responseOpsRuleForm.components.ruleTypeModal.title": "选择规则类型",
     "responseOpsRuleForm.disabledActionsWarningTitle": "此规则具有已禁用的操作",
     "responseOpsRuleForm.healthCheck.actionText": "了解详情。",
     "responseOpsRuleForm.healthCheck.alertsErrorText": "要创建规则，必须启用告警和操作插件。",

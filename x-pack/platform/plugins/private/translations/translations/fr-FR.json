@@ -6037,8 +6037,6 @@
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "Cette règle nécessite une licence {minimumLicenseRequired}.",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorBody": "Essayez une autre recherche ou modifiez vos paramètres de filtrage",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorTitle": "Aucun type de règles trouvé",
-    "responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder": "Recherche",
-    "responseOpsRuleForm.components.ruleTypeModal.title": "Sélectionner le type de règle",
     "responseOpsRuleForm.disabledActionsWarningTitle": "Cette règle possède des actions qui sont désactivées",
     "responseOpsRuleForm.healthCheck.actionText": "En savoir plus.",
     "responseOpsRuleForm.healthCheck.alertsErrorText": "Pour créer une règle, vous devez activer les plug-ins d'alerting et d'actions.",

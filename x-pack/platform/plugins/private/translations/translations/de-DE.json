@@ -6006,8 +6006,6 @@
     "responseOpsRuleForm.components.ruleTypeModal.minimumRequiredLicenseMessage": "Für diese Regel ist eine {minimumLicenseRequired}-Lizenz erforderlich.",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorBody": "Versuchen Sie eine andere Suche oder ändern Sie Ihre Filtereinstellungen",
     "responseOpsRuleForm.components.ruleTypeModal.noRuleTypesErrorTitle": "Keine Regeltypen gefunden",
-    "responseOpsRuleForm.components.ruleTypeModal.searchPlaceholder": "Search",
-    "responseOpsRuleForm.components.ruleTypeModal.title": "Regeltyp auswählen",
     "responseOpsRuleForm.disabledActionsWarningTitle": "Diese Regel hat Aktionen, die deaktiviert sind",
     "responseOpsRuleForm.healthCheck.actionText": "Weitere Informationen",
     "responseOpsRuleForm.healthCheck.alertsErrorText": "Um eine Regel zu erstellen, müssen Sie die Alerting- und Actions-Plugins aktivieren.",

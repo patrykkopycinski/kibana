@@ -88835,6 +88835,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Query string to filter significant events on metadata fields",
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -88896,14 +88905,6 @@
             "in": "query",
             "name": "connectorId",
             "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "currentDate",
-            "required": false,
             "schema": {
               "type": "string"
             }

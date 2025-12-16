@@ -2444,6 +2444,7 @@ paths:
                     - esql
                     - index_search
                     - workflow
+                    - mcp
                   type: string
               required:
                 - id

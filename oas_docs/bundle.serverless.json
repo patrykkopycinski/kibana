@@ -2612,7 +2612,8 @@
                     "enum": [
                       "esql",
                       "index_search",
-                      "workflow"
+                      "workflow",
+                      "mcp"
                     ],
                     "type": "string"
                   }

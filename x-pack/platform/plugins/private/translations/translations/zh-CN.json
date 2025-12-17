@@ -39475,7 +39475,6 @@
     "xpack.serverlessSearch.enabled": "已启用",
     "xpack.serverlessSearch.invalidJsonError": "JSON 无效",
     "xpack.serverlessSearch.learnMore": "了解详情",
-    "xpack.serverlessSearch.nav.build.searchPlayground": "Playground",
     "xpack.serverlessSearch.nav.mngt.access": "访问",
     "xpack.serverlessSearch.nav.mngt.alertsAndInsights": "告警和洞见",
     "xpack.serverlessSearch.nav.mngt.content": "内容",

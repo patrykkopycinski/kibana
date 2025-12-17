@@ -39493,7 +39493,6 @@
     "xpack.serverlessSearch.enabled": "有効",
     "xpack.serverlessSearch.invalidJsonError": "無効なJSON",
     "xpack.serverlessSearch.learnMore": "詳しくはこちら",
-    "xpack.serverlessSearch.nav.build.searchPlayground": "Playground",
     "xpack.serverlessSearch.nav.mngt.access": "アクセス",
     "xpack.serverlessSearch.nav.mngt.alertsAndInsights": "アラートとインサイト",
     "xpack.serverlessSearch.nav.mngt.content": "コンテンツ",

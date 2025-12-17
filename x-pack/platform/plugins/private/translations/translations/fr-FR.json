@@ -39454,7 +39454,6 @@
     "xpack.serverlessSearch.enabled": "Activé",
     "xpack.serverlessSearch.invalidJsonError": "JSON non valide",
     "xpack.serverlessSearch.learnMore": "En savoir plus",
-    "xpack.serverlessSearch.nav.build.searchPlayground": "Playground",
     "xpack.serverlessSearch.nav.mngt.access": "Accès",
     "xpack.serverlessSearch.nav.mngt.alertsAndInsights": "Alertes et informations exploitables",
     "xpack.serverlessSearch.nav.mngt.content": "Contenu",

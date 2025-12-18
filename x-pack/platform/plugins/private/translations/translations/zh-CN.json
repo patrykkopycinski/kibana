@@ -20672,7 +20672,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle": "未找到任何快照存储库",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle": "未找到存储库名称",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody": "输入现有存储库的名称，或使用此名称{link}。",
-    "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription": "设置副本数目。默认情况下与上一阶段相同。",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel": "设置副本",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel": "副本分片数目",
     "xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title": "可搜索快照",

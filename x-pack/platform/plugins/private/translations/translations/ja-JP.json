@@ -20683,7 +20683,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle": "スナップショットリポジドリが見つかりません",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle": "リポジトリ名が見つかりません",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody": "既存のリポジトリの名前を入力するか、この名前で{link}。",
-    "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription": "レプリカの数を設定します。デフォルトでは前のフェーズと同じです。",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel": "レプリカを設定",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel": "レプリカの数",
     "xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title": "検索可能スナップショット",

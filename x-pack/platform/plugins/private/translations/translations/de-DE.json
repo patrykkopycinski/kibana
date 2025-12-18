@@ -20387,7 +20387,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle": "Keine Snapshot-Repositories gefunden",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle": "Repository-Name nicht gefunden",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody": "Geben Sie den Namen eines vorhandenen Repositorys ein oder {link} mit diesem Namen.",
-    "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription": "Legen Sie die Anzahl der Replikate fest. Bleibt standardmäßig gleich wie in der vorherigen Phase.",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel": "Replikate festlegen",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel": "Anzahl der Replikate",
     "xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title": "Durchsuchbarer Snapshot",

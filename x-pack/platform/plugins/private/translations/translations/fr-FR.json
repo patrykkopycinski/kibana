@@ -20660,7 +20660,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesTitle": "Référentiel de snapshot introuvable",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoriesWithNameTitle": "Nom de référentiel introuvable",
     "xpack.indexLifecycleMgmt.editPolicy.noSnapshotRepositoryWithNameBody": "Saisissez le nom d'un référentiel existant ou {link} avec ce nom.",
-    "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.formRowDescription": "Définissez le nombre de répliques. Par défaut, reste identique à la phase précédente.",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicas.switchLabel": "Définir des répliques",
     "xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel": "Nombre de répliques",
     "xpack.indexLifecycleMgmt.editPolicy.partiallyMountedSearchableSnapshotField.title": "Snapshot qu’il est possible de rechercher",

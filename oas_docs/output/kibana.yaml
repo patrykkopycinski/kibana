@@ -1850,6 +1850,9 @@ paths:
                     visualizations:
                       description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
+                confirm:
+                  description: Can be used to respond to a confirmation prompt.
+                  type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string
@@ -1859,8 +1862,6 @@ paths:
                 input:
                   description: The user input message to send to the agent.
                   type: string
-              required:
-                - input
       responses:
         '200':
           content:
@@ -2156,6 +2157,9 @@ paths:
                     visualizations:
                       description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
+                confirm:
+                  description: Can be used to respond to a confirmation prompt.
+                  type: boolean
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string
@@ -2165,8 +2169,6 @@ paths:
                 input:
                   description: The user input message to send to the agent.
                   type: string
-              required:
-                - input
       responses:
         '200':
           content:

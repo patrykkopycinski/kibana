@@ -1543,7 +1543,6 @@
     "dashboard.panel.unlinkFromLibrary": "取消与库的链接",
     "dashboard.panel.unlinkFromLibrary.failureMessage": "从该库中取消链接 {panelTitle} 时出错。",
     "dashboard.panel.unlinkFromLibrary.successMessage": "面板 {panelTitle} 不再与该库连接。",
-    "dashboard.panelPlacement.panelPlacementSettingsExistsError": "可嵌入对象类型 {panelType} 的面板位置设置已存在",
     "dashboard.panelPlacement.unknownStrategyError": "未知面板位置策略：{strategy}",
     "dashboard.panelStorageError.clearError": "清除未保存更改时遇到错误：{message}",
     "dashboard.panelStorageError.getError": "获取未保存更改时遇到错误：{message}",

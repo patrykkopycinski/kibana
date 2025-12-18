@@ -1529,7 +1529,6 @@
     "dashboard.panel.unlinkFromLibrary": "Verknüpfung mit der Bibliothek aufheben",
     "dashboard.panel.unlinkFromLibrary.failureMessage": "Beim Aufheben der Verknüpfung von {panelTitle} aus der Bibliothek ist ein Fehler aufgetreten.",
     "dashboard.panel.unlinkFromLibrary.successMessage": "Panel {panelTitle} ist nicht mehr mit der Bibliothek verbunden.",
-    "dashboard.panelPlacement.panelPlacementSettingsExistsError": "Die Panel-Platzierungseinstellungen für den einbettbaren Typ {panelType} sind bereits vorhanden",
     "dashboard.panelPlacement.unknownStrategyError": "Unbekannte Strategie zur Panelplatzierung: {strategy}",
     "dashboard.panelStorageError.clearError": "Beim Löschen ungespeicherter Änderungen ist ein Fehler aufgetreten: {message}",
     "dashboard.panelStorageError.getError": "Fehler beim Abrufen der ungespeicherten Änderungen: {message}",

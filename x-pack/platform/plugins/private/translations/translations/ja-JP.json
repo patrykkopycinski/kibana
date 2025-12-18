@@ -1549,7 +1549,6 @@
     "dashboard.panel.unlinkFromLibrary": "ライブラリからのリンクを解除",
     "dashboard.panel.unlinkFromLibrary.failureMessage": "\"{panelTitle}\"をライブラリからリンク解除しているときにエラーが発生しました。",
     "dashboard.panel.unlinkFromLibrary.successMessage": "パネル\"{panelTitle}\"はライブラリに接続されていません。",
-    "dashboard.panelPlacement.panelPlacementSettingsExistsError": "埋め込み可能タイプ\"{panelType}\"のパネル配置設定はすでに存在します",
     "dashboard.panelPlacement.unknownStrategyError": "不明なパネル配置ストラテジ：{strategy}",
     "dashboard.panelStorageError.clearError": "保存されていない変更の消去中にエラーが発生しました。{message}",
     "dashboard.panelStorageError.getError": "保存されていない変更の取得中にエラーが発生しました。{message}",

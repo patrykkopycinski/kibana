@@ -14409,6 +14409,10 @@ paths:
                     type: integer
                   total:
                     type: integer
+                  warnings:
+                    items:
+                      $ref: '#/components/schemas/Security_Detections_API_WarningSchema'
+                    type: array
                 required:
                   - page
                   - perPage

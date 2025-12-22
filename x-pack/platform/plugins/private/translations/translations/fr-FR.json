@@ -20923,7 +20923,6 @@
     "xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days": "7 derniers jours",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh": "Les données chargent continuellement ?",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh.troubleshoot": "Essayez d'augmenter l'intervalle d'actualisation, de raccourcir la plage de dates ou de désactiver l'actualisation automatique.",
-    "xpack.infra.assetDetails.flyout.ariaLabel": "Détails de {name}",
     "xpack.infra.assetDetails.header.return": "Renvoyer",
     "xpack.infra.assetDetails.kpi.subtitle.average": "Moyenne",
     "xpack.infra.assetDetails.metadata.seeMore.ariaLabel": "Voir {count} de plus {fieldName}",

@@ -20948,7 +20948,6 @@
     "xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days": "過去7日間",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh": "データの読み込みが継続的に行われていますか？",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh.troubleshoot": "更新間隔を長くするか、日付範囲を短くするか、自動更新をオフにしてみてください。",
-    "xpack.infra.assetDetails.flyout.ariaLabel": "{name}の詳細",
     "xpack.infra.assetDetails.header.return": "戻る",
     "xpack.infra.assetDetails.kpi.subtitle.average": "平均",
     "xpack.infra.assetDetails.metadata.seeMore.ariaLabel": "さらに{count}件の{fieldName}を表示",

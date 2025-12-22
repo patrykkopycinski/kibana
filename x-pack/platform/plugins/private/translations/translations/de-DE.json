@@ -20647,7 +20647,6 @@
     "xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days": "Letzte 7 Tage",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh": "Erleben Sie ständig das Laden von Daten?",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh.troubleshoot": "Versuchen Sie, das Aktualisierungsintervall zu verlängern, den Datumsbereich zu verkürzen oder die automatische Aktualisierung zu deaktivieren.",
-    "xpack.infra.assetDetails.flyout.ariaLabel": "{name} Details",
     "xpack.infra.assetDetails.header.return": "Zurückkehren",
     "xpack.infra.assetDetails.kpi.subtitle.average": "Durchschnitt",
     "xpack.infra.assetDetails.metadata.seeMore.ariaLabel": "Sehen Sie {count} weitere {fieldName}",

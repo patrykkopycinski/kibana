@@ -20937,7 +20937,6 @@
     "xpack.infra.assetDetails.datePicker.commonlyUsedRanges.last7Days": "过去 7 天",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh": "持续出现加载数据问题？",
     "xpack.infra.assetDetails.datePicker.tooltip.autoRefresh.troubleshoot": "请尝试增加刷新时间间隔，缩短日期范围或关闭自动刷新。",
-    "xpack.infra.assetDetails.flyout.ariaLabel": "{name} 详情",
     "xpack.infra.assetDetails.header.return": "返回",
     "xpack.infra.assetDetails.kpi.subtitle.average": "平均值",
     "xpack.infra.assetDetails.metadata.seeMore.ariaLabel": "查看更多 {count} 个{fieldName}",

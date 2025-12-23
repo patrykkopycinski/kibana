@@ -89826,9 +89826,10 @@
             }
           },
           {
+            "description": "Optional connector ID. If not provided, the default AI connector from settings will be used.",
             "in": "query",
             "name": "connectorId",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }

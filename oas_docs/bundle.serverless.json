@@ -1064,7 +1064,7 @@
     },
     "/api/agent_builder/a2a/{agentId}": {
       "post": {
-        "description": "> warn\n> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-a2a-agentid",
         "parameters": [
           {
@@ -1136,7 +1136,7 @@
     },
     "/api/agent_builder/a2a/{agentId}.json": {
       "get": {
-        "description": "Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-a2a-agentid.json",
         "parameters": [
           {
@@ -1222,7 +1222,7 @@
     },
     "/api/agent_builder/agents": {
       "get": {
-        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents",
         "parameters": [],
         "responses": {
@@ -1293,7 +1293,7 @@
         "x-state": "Technical Preview"
       },
       "post": {
-        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-agents",
         "parameters": [
           {
@@ -1465,7 +1465,7 @@
     },
     "/api/agent_builder/agents/{id}": {
       "delete": {
-        "description": "Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-agents-id",
         "parameters": [
           {
@@ -1512,7 +1512,7 @@
         "x-state": "Technical Preview"
       },
       "get": {
-        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents-id",
         "parameters": [
           {
@@ -1571,7 +1571,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-agents-id",
         "parameters": [
           {
@@ -1741,7 +1741,7 @@
     },
     "/api/agent_builder/conversations": {
       "get": {
-        "description": "List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-conversations",
         "parameters": [
           {
@@ -1791,7 +1791,7 @@
     },
     "/api/agent_builder/conversations/{conversation_id}": {
       "delete": {
-        "description": "Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "delete-agent-builder-conversations-conversation-id",
         "parameters": [
           {
@@ -1838,7 +1838,7 @@
         "x-state": "Technical Preview"
       },
       "get": {
-        "description": "Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-conversations-conversation-id",
         "parameters": [
           {
@@ -1896,7 +1896,7 @@
     },
     "/api/agent_builder/converse": {
       "post": {
-        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-converse",
         "parameters": [
           {
@@ -2075,7 +2075,7 @@
     },
     "/api/agent_builder/converse/async": {
       "post": {
-        "description": "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.\n\n## Event types\n\nThe endpoint emits Server-Sent Events (SSE) with the following custom event types:\n\n`conversation_id_set`\n\nSets the conversation ID.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\"\n}\n```\n\n---\n\n`conversation_created`\n\nFires when a new conversation is persisted and assigned an ID.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\",\n  \"title\": \"conversation title\"\n}\n```\n\n---\n\n`conversation_updated`\n\nFires when a conversation is updated.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\",\n  \"title\": \"updated conversation title\"\n}\n```\n\n---\n\n`reasoning`\n\nHandles reasoning-related data.\n\nSchema:\n```json\n{\n  \"reasoning\": \"plain text reasoning content\",\n  \"transient\": false\n}\n```\n\n---\n\n`tool_call`\n\nTriggers when a tool is invoked.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"tool_id\": \"tool_name\",\n  \"params\": {}\n}\n```\n\n---\n\n`tool_progress`\n\nReports progress of a running tool.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"message\": \"progress message\"\n}\n```\n\n---\n\n`tool_result`\n\nReturns results from a completed tool call.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"tool_id\": \"tool_name\",\n  \"results\": []\n}\n```\n\n**Note:** `results` is an array of `ToolResult` objects.\n\n---\n\n`message_chunk`\n\nStreams partial text chunks.\n\nSchema:\n```json\n{\n  \"message_id\": \"uuid\",\n  \"text_chunk\": \"partial text\"\n}\n```\n\n---\n\n`message_complete`\n\nIndicates message stream is finished.\n\nSchema:\n```json\n{\n  \"message_id\": \"uuid\",\n  \"message_content\": \"full text content of the message\"\n}\n```\n\n---\n\n`thinking_complete`\n\nMarks the end of the thinking/reasoning phase.\n\nSchema:\n```json\n{\n  \"time_to_first_token\": 0\n}\n```\n\n**Note:** `time_to_first_token` is in milliseconds.\n\n---\n\n`round_complete`\n\nMarks end of one conversation round.\n\nSchema:\n```json\n{\n  \"round\": {}\n}\n```\n\n**Note:** `round` contains the full round json object.\n\n---\n\n## Event flow\n\nA typical conversation round emits events in this sequence:\n\n1. `reasoning` (potentially multiple, some transient)\n2. `tool_call` (if tools are used)\n3. `tool_progress` (zero or more progress updates)\n4. `tool_result` (when tool completes)\n5. `thinking_complete`\n6. `message_chunk` (multiple, as text streams)\n7. `message_complete`\n8. `round_complete`\n\n<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.\n\n## Event types\n\nThe endpoint emits Server-Sent Events (SSE) with the following custom event types:\n\n`conversation_id_set`\n\nSets the conversation ID.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\"\n}\n```\n\n---\n\n`conversation_created`\n\nFires when a new conversation is persisted and assigned an ID.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\",\n  \"title\": \"conversation title\"\n}\n```\n\n---\n\n`conversation_updated`\n\nFires when a conversation is updated.\n\nSchema:\n```json\n{\n  \"conversation_id\": \"uuid\",\n  \"title\": \"updated conversation title\"\n}\n```\n\n---\n\n`reasoning`\n\nHandles reasoning-related data.\n\nSchema:\n```json\n{\n  \"reasoning\": \"plain text reasoning content\",\n  \"transient\": false\n}\n```\n\n---\n\n`tool_call`\n\nTriggers when a tool is invoked.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"tool_id\": \"tool_name\",\n  \"params\": {}\n}\n```\n\n---\n\n`tool_progress`\n\nReports progress of a running tool.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"message\": \"progress message\"\n}\n```\n\n---\n\n`tool_result`\n\nReturns results from a completed tool call.\n\nSchema:\n```json\n{\n  \"tool_call_id\": \"uuid\",\n  \"tool_id\": \"tool_name\",\n  \"results\": []\n}\n```\n\n**Note:** `results` is an array of `ToolResult` objects.\n\n---\n\n`message_chunk`\n\nStreams partial text chunks.\n\nSchema:\n```json\n{\n  \"message_id\": \"uuid\",\n  \"text_chunk\": \"partial text\"\n}\n```\n\n---\n\n`message_complete`\n\nIndicates message stream is finished.\n\nSchema:\n```json\n{\n  \"message_id\": \"uuid\",\n  \"message_content\": \"full text content of the message\"\n}\n```\n\n---\n\n`thinking_complete`\n\nMarks the end of the thinking/reasoning phase.\n\nSchema:\n```json\n{\n  \"time_to_first_token\": 0\n}\n```\n\n**Note:** `time_to_first_token` is in milliseconds.\n\n---\n\n`round_complete`\n\nMarks end of one conversation round.\n\nSchema:\n```json\n{\n  \"round\": {}\n}\n```\n\n**Note:** `round` contains the full round json object.\n\n---\n\n## Event flow\n\nA typical conversation round emits events in this sequence:\n\n1. `reasoning` (potentially multiple, some transient)\n2. `tool_call` (if tools are used)\n3. `tool_progress` (zero or more progress updates)\n4. `tool_result` (when tool completes)\n5. `thinking_complete`\n6. `message_chunk` (multiple, as text streams)\n7. `message_complete`\n8. `round_complete`\n\n<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-converse-async",
         "parameters": [
           {
@@ -2283,7 +2283,7 @@
     },
     "/api/agent_builder/mcp": {
       "post": {
-        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-mcp",
         "parameters": [],
         "requestBody": {
@@ -2350,7 +2350,7 @@
     },
     "/api/agent_builder/tools": {
       "get": {
-        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools",
         "parameters": [],
         "responses": {
@@ -2524,7 +2524,7 @@
         "x-state": "Technical Preview"
       },
       "post": {
-        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-tools",
         "parameters": [
           {
@@ -2727,7 +2727,7 @@
     },
     "/api/agent_builder/tools/_execute": {
       "post": {
-        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-tools-execute",
         "parameters": [
           {
@@ -3032,7 +3032,7 @@
     },
     "/api/agent_builder/tools/{toolId}": {
       "delete": {
-        "description": "Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3079,7 +3079,7 @@
         "x-state": "Technical Preview"
       },
       "get": {
-        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_onechat.",
+        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3216,7 +3216,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_onechat.",
+        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-tools-toolid",
         "parameters": [
           {

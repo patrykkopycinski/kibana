@@ -4604,7 +4604,6 @@
     "indexPatternEditor.form.nameAriaLabel": "名称字段（可选）",
     "indexPatternEditor.form.titleAriaLabel": "索引模式字段",
     "indexPatternEditor.goToManagementPage": "管理设置并查看字段详细信息",
-    "indexPatternEditor.loadingHeader": "正在寻找匹配的索引......",
     "indexPatternEditor.pagingLabel": "每页行数：{perPage}",
     "indexPatternEditor.previewPanel.viewModeGroup.allSourcesButton": "所有源",
     "indexPatternEditor.previewPanel.viewModeGroup.legend": "可见源",

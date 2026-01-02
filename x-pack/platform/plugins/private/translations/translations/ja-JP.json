@@ -4611,7 +4611,6 @@
     "indexPatternEditor.form.nameAriaLabel": "名前フィールド（任意）",
     "indexPatternEditor.form.titleAriaLabel": "インデックスパターンフィールド",
     "indexPatternEditor.goToManagementPage": "設定を管理して、フィールド詳細を表示",
-    "indexPatternEditor.loadingHeader": "一致するインデックスを検索中…",
     "indexPatternEditor.pagingLabel": "ページあたりの行数: {perPage}",
     "indexPatternEditor.previewPanel.viewModeGroup.allSourcesButton": "すべてのソール",
     "indexPatternEditor.previewPanel.viewModeGroup.legend": "表示されているソース",

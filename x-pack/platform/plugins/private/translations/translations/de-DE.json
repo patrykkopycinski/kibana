@@ -4590,7 +4590,6 @@
     "indexPatternEditor.form.nameAriaLabel": "Namensfeld optional",
     "indexPatternEditor.form.titleAriaLabel": "Indexmusterfeld",
     "indexPatternEditor.goToManagementPage": "Einstellungen verwalten und Felddetails anzeigen",
-    "indexPatternEditor.loadingHeader": "Passende Indizes werden gesucht …",
     "indexPatternEditor.pagingLabel": "Zeilen pro Seite: {perPage}",
     "indexPatternEditor.previewPanel.viewModeGroup.allSourcesButton": "Alle Quellen",
     "indexPatternEditor.previewPanel.viewModeGroup.legend": "Sichtbare Quellen",

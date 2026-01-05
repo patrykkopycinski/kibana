@@ -21606,6 +21606,7 @@ paths:
                                     items:
                                       description: IDs of the agent policies which that package policy will be added to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   revision:
                                     description: Package policy revision.
@@ -22561,6 +22562,7 @@ paths:
                                   items:
                                     description: IDs of the agent policies which that package policy will be added to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                                 revision:
                                   description: Package policy revision.
@@ -23305,6 +23307,7 @@ paths:
                                     items:
                                       description: IDs of the agent policies which that package policy will be added to.
                                       type: string
+                                    maxItems: 1000
                                     type: array
                                   revision:
                                     description: Package policy revision.
@@ -24028,6 +24031,7 @@ paths:
                                   items:
                                     description: IDs of the agent policies which that package policy will be added to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                                 revision:
                                   description: Package policy revision.
@@ -24983,6 +24987,7 @@ paths:
                                   items:
                                     description: IDs of the agent policies which that package policy will be added to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                                 revision:
                                   description: Package policy revision.
@@ -25817,6 +25822,7 @@ paths:
                                   items:
                                     description: IDs of the agent policies which that package policy will be added to.
                                     type: string
+                                  maxItems: 1000
                                   type: array
                                 revision:
                                   description: Package policy revision.
@@ -27934,6 +27940,7 @@ paths:
                         items:
                           description: IDs of the agent policies which that package policy will be added to.
                           type: string
+                        maxItems: 1000
                         type: array
                       revision:
                         description: Package policy revision.
@@ -43249,6 +43256,7 @@ paths:
                           items:
                             description: IDs of the agent policies which that package policy will be added to.
                             type: string
+                          maxItems: 1000
                           type: array
                         revision:
                           description: Package policy revision.
@@ -43630,6 +43638,7 @@ paths:
                       items:
                         description: IDs of the agent policies which that package policy will be added to.
                         type: string
+                      maxItems: 1000
                       type: array
                     spaceIds:
                       items:
@@ -43811,6 +43820,7 @@ paths:
                       description: IDs of the agent policies which that package policy will be added to.
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     supports_agentless:
                       default: false
@@ -44172,6 +44182,7 @@ paths:
                         items:
                           description: IDs of the agent policies which that package policy will be added to.
                           type: string
+                        maxItems: 1000
                         type: array
                       revision:
                         description: Package policy revision.
@@ -44676,6 +44687,7 @@ paths:
                           items:
                             description: IDs of the agent policies which that package policy will be added to.
                             type: string
+                          maxItems: 1000
                           type: array
                         revision:
                           description: Package policy revision.
@@ -45229,6 +45241,7 @@ paths:
                         items:
                           description: IDs of the agent policies which that package policy will be added to.
                           type: string
+                        maxItems: 1000
                         type: array
                       revision:
                         description: Package policy revision.
@@ -45614,6 +45627,7 @@ paths:
                       items:
                         description: IDs of the agent policies which that package policy will be added to.
                         type: string
+                      maxItems: 1000
                       type: array
                     spaceIds:
                       items:
@@ -45793,6 +45807,7 @@ paths:
                       description: IDs of the agent policies which that package policy will be added to.
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     supports_agentless:
                       default: false
@@ -46153,6 +46168,7 @@ paths:
                         items:
                           description: IDs of the agent policies which that package policy will be added to.
                           type: string
+                        maxItems: 1000
                         type: array
                       revision:
                         description: Package policy revision.
@@ -46991,6 +47007,7 @@ paths:
                                 items:
                                   description: IDs of the agent policies which that package policy will be added to.
                                   type: string
+                                maxItems: 1000
                                 type: array
                               revision:
                                 description: Package policy revision.
@@ -47335,6 +47352,7 @@ paths:
                                 items:
                                   description: IDs of the agent policies which that package policy will be added to.
                                   type: string
+                                maxItems: 1000
                                 type: array
                               revision:
                                 type: number

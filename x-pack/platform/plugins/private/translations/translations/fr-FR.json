@@ -38676,7 +38676,6 @@
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "Règles traduites",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "Réduire la migration de règles",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "Développer la migration de règles",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "Chargez les macros et les consultations et débutez le processus de traduction",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "Traduction terminée",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "L'exportation a été téléchargée à {createdAt} et la traduction s'est terminée à {finishedAt}.",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.button": "Afficher les règles",

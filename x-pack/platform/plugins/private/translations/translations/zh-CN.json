@@ -38695,7 +38695,6 @@
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "已转换规则",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "折叠规则迁移",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "展开规则迁移",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "上传宏和查找，然后开始转换过程",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "转换完成",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "导出已于 {createdAt} 上传，且转换已于 {finishedAt} 完成。",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.button": "查看规则",

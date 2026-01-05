@@ -38280,7 +38280,6 @@
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "Übersetzte Regeln",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "Zusammenführung der Regelmigration",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "Regelmigration erweitern",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "Laden Sie Makros und Lookups hoch und starten Sie den Übersetzungsprozess",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "Übersetzung abgeschlossen",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "Der Export wurde am {createdAt} hochgeladen und die Übersetzung am {finishedAt} fertiggestellt.",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.button": "Regeln anzeigen",

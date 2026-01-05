@@ -38713,7 +38713,6 @@
     "xpack.securitySolution.siemMigrations.rules.pageTitle": "変換されたルール",
     "xpack.securitySolution.siemMigrations.rules.panel.collapse": "ルール移行を折りたたむ",
     "xpack.securitySolution.siemMigrations.rules.panel.expand": "ルール移行を展開",
-    "xpack.securitySolution.siemMigrations.rules.panel.ready.missingResources": "マクロとルックアップをアップロードし、変換プロセスを開始",
     "xpack.securitySolution.siemMigrations.rules.panel.result.badge": "変換完了",
     "xpack.securitySolution.siemMigrations.rules.panel.result.description": "{createdAt}にアップロードされたエクスポートと変換が{finishedAt}に完了しました。",
     "xpack.securitySolution.siemMigrations.rules.panel.result.summary.button": "ルールを表示",

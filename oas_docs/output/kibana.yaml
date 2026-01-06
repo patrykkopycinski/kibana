@@ -31744,6 +31744,24 @@ paths:
                           maxItems: 3
                           nullable: true
                           type: array
+                        upgrade:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            rollbacks:
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  valid_until:
+                                    type: string
+                                  version:
+                                    type: string
+                                required:
+                                  - valid_until
+                                  - version
+                              maxItems: 100
+                              type: array
                         upgrade_attempts:
                           items:
                             type: string
@@ -32267,6 +32285,24 @@ paths:
                         maxItems: 3
                         nullable: true
                         type: array
+                      upgrade:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          rollbacks:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                valid_until:
+                                  type: string
+                                version:
+                                  type: string
+                              required:
+                                - valid_until
+                                - version
+                            maxItems: 100
+                            type: array
                       upgrade_attempts:
                         items:
                           type: string
@@ -32646,6 +32682,24 @@ paths:
                         maxItems: 3
                         nullable: true
                         type: array
+                      upgrade:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          rollbacks:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                valid_until:
+                                  type: string
+                                version:
+                                  type: string
+                              required:
+                                - valid_until
+                                - version
+                            maxItems: 100
+                            type: array
                       upgrade_attempts:
                         items:
                           type: string

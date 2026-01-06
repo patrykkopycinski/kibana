@@ -22070,6 +22070,32 @@
                             "nullable": true,
                             "type": "array"
                           },
+                          "upgrade": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "rollbacks": {
+                                "items": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "valid_until": {
+                                      "type": "string"
+                                    },
+                                    "version": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "valid_until",
+                                    "version"
+                                  ],
+                                  "type": "object"
+                                },
+                                "maxItems": 100,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
                           "upgrade_attempts": {
                             "items": {
                               "type": "string"
@@ -24418,6 +24444,32 @@
                           "nullable": true,
                           "type": "array"
                         },
+                        "upgrade": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "rollbacks": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "valid_until": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "valid_until",
+                                  "version"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 100,
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        },
                         "upgrade_attempts": {
                           "items": {
                             "type": "string"
@@ -24924,6 +24976,32 @@
                           "maxItems": 3,
                           "nullable": true,
                           "type": "array"
+                        },
+                        "upgrade": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "rollbacks": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "valid_until": {
+                                    "type": "string"
+                                  },
+                                  "version": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "valid_until",
+                                  "version"
+                                ],
+                                "type": "object"
+                              },
+                              "maxItems": 100,
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
                         },
                         "upgrade_attempts": {
                           "items": {

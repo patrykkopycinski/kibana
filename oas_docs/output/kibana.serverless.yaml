@@ -1694,6 +1694,462 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all attachments for a conversation. Use the optional include_deleted query parameter to include soft-deleted attachments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: get-agent-builder-conversations-conversation-id-attachments
+      parameters:
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: Whether to include deleted attachments in the list.
+          in: query
+          name: include_deleted
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listAttachmentsResponseExample:
+                  description: Example response containing active attachments for a conversation
+                  value:
+                    results:
+                      - active: true
+                        current_version: 2
+                        description: My text file
+                        id: attachment-1
+                        type: text
+                        versions:
+                          - content_hash: abc123
+                            created_at: '2025-01-01T10:00:00.000Z'
+                            data: Initial content
+                            estimated_tokens: 3
+                            version: 1
+                          - content_hash: def456
+                            created_at: '2025-01-01T11:00:00.000Z'
+                            data: Updated content
+                            estimated_tokens: 3
+                            version: 2
+                      - active: true
+                        current_version: 1
+                        description: Configuration data
+                        id: attachment-2
+                        type: json
+                        versions:
+                          - content_hash: ghi789
+                            created_at: '2025-01-01T12:00:00.000Z'
+                            data:
+                              key: value
+                              nested:
+                                field: 123
+                            estimated_tokens: 15
+                            version: 1
+                    total_token_estimate: 21
+          description: Indicates a successful response
+      summary: List conversation attachments
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new attachment for a conversation with version tracking.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: post-agent-builder-conversations-conversation-id-attachments
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createHiddenAttachmentExample:
+                description: Example request for creating a hidden attachment
+                value:
+                  data: Internal system data
+                  description: System context
+                  hidden: true
+                  type: text
+              createJsonAttachmentExample:
+                description: Example request for creating a JSON attachment with custom ID
+                value:
+                  data:
+                    configuration:
+                      enabled: true
+                      threshold: 50
+                    metadata:
+                      source: user_input
+                  description: Application settings
+                  id: custom-attachment-id
+                  type: json
+              createTextAttachmentExample:
+                description: Example request for creating a text attachment
+                value:
+                  data: This is the content of my text attachment
+                  description: Meeting notes
+                  type: text
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                data: {}
+                description:
+                  description: Human-readable description of the attachment.
+                  type: string
+                hidden:
+                  description: Whether the attachment should be hidden from the user.
+                  type: boolean
+                id:
+                  description: Optional custom ID for the attachment.
+                  type: string
+                type:
+                  description: The type of the attachment (e.g., text, json, visualization_ref).
+                  type: string
+              required:
+                - type
+                - data
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createAttachmentResponseExample:
+                  description: Example response returning the created attachment
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: Meeting notes
+                      id: att-abc123
+                      type: text
+                      versions:
+                        - content_hash: sha256-xyz
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data: This is the content of my text attachment
+                          estimated_tokens: 12
+                          version: 1
+          description: Indicates a successful response
+      summary: Create conversation attachment
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an attachment. By default performs a soft delete (can be restored). Use permanent=true to permanently remove unreferenced attachments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: delete-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to delete.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+        - description: If true, permanently removes the attachment (only for unreferenced attachments).
+          in: query
+          name: permanent
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                permanentDeleteAttachmentResponseExample:
+                  description: Example response for permanent delete (cannot be restored)
+                  value:
+                    permanent: true
+                    success: true
+                softDeleteAttachmentResponseExample:
+                  description: Example response for soft delete (can be restored)
+                  value:
+                    permanent: false
+                    success: true
+          description: Indicates a successful response
+      summary: Delete conversation attachment
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    patch:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Rename an attachment without creating a new version.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: patch-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to rename.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              renameAttachmentExample:
+                description: Example request for renaming an attachment
+                value:
+                  description: Updated attachment name
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  description: The new description/name for the attachment.
+                  type: string
+              required:
+                - description
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                renameAttachmentResponseExample:
+                  description: Example response returning the renamed attachment (version unchanged)
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: Updated attachment name
+                      id: att-abc123
+                      type: text
+                      versions:
+                        - content_hash: sha256-xyz
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data: Content remains the same
+                          estimated_tokens: 10
+                          version: 1
+                    success: true
+          description: Indicates a successful response
+      summary: Rename attachment
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update an attachment content. Creates a new version if content changed.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to update.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateAttachmentContentExample:
+                description: Example request for updating attachment content
+                value:
+                  data: This is the updated content
+              updateAttachmentWithDescriptionExample:
+                description: Example request for updating both content and description
+                value:
+                  data: New content version
+                  description: Updated meeting notes - v2
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                data: {}
+                description:
+                  description: Optional new description for the attachment.
+                  type: string
+              required:
+                - data
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateAttachmentResponseExample:
+                  description: Example response returning the updated attachment with new version
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 2
+                      description: Meeting notes
+                      id: att-abc123
+                      type: text
+                      versions:
+                        - content_hash: sha256-abc
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data: Original content
+                          estimated_tokens: 10
+                          version: 1
+                        - content_hash: sha256-def
+                          created_at: '2025-01-06T11:00:00.000Z'
+                          data: This is the updated content
+                          estimated_tokens: 12
+                          version: 2
+                    new_version: 2
+          description: Indicates a successful response
+      summary: Update conversation attachment
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/_restore:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/_restore</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Restore a soft-deleted attachment.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: post-agent-builder-conversations-conversation-id-attachments-attachment-id-restore
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to restore.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                restoreAttachmentResponseExample:
+                  description: Example response returning the restored attachment
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: Restored attachment
+                      id: att-abc123
+                      type: text
+                      versions:
+                        - content_hash: sha256-xyz
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data: Restored content
+                          estimated_tokens: 10
+                          version: 1
+                    success: true
+          description: Indicates a successful response
+      summary: Restore deleted attachment
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/converse:
     post:
       description: |-

@@ -20463,6 +20463,7 @@ paths:
                             certificate_authorities:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             key:
                               type: string
@@ -20470,6 +20471,7 @@ paths:
                         - id
                         - name
                         - host
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -20576,6 +20578,7 @@ paths:
                     certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     key:
                       type: string
@@ -20635,6 +20638,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           key:
                             type: string
@@ -20805,6 +20809,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           key:
                             type: string
@@ -20913,6 +20918,7 @@ paths:
                     certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     key:
                       type: string
@@ -20972,6 +20978,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           key:
                             type: string
@@ -21132,6 +21139,7 @@ paths:
                             required:
                               - name
                               - enabled
+                          maxItems: 100
                           type: array
                         agentless:
                           additionalProperties: false
@@ -21193,6 +21201,7 @@ paths:
                             required:
                               - name
                               - value
+                          maxItems: 10
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -21247,6 +21256,7 @@ paths:
                               - metrics
                               - traces
                             type: string
+                          maxItems: 3
                           type: array
                         monitoring_http:
                           additionalProperties: false
@@ -21287,6 +21297,7 @@ paths:
                           anyOf:
                             - items:
                                 type: string
+                              maxItems: 10000
                               type: array
                             - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                               items:
@@ -21297,6 +21308,7 @@ paths:
                                     description: Additional datastream permissions, that will be added to the agent policy.
                                     items:
                                       type: string
+                                    maxItems: 1000
                                     nullable: true
                                     type: array
                                   agents:
@@ -21329,6 +21341,7 @@ paths:
                                           cluster:
                                             items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                   enabled:
                                     type: boolean
@@ -21405,6 +21418,7 @@ paths:
                                                               indices:
                                                                 items:
                                                                   type: string
+                                                                maxItems: 100
                                                                 type: array
                                                       type:
                                                         type: string
@@ -21441,6 +21455,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
+                                              maxItems: 100
                                               type: array
                                             type:
                                               type: string
@@ -21463,6 +21478,7 @@ paths:
                                             - enabled
                                             - streams
                                             - compiled_input
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties:
                                           additionalProperties: false
@@ -21487,9 +21503,11 @@ paths:
                                                         - type: number
                                                         - items:
                                                             type: string
+                                                          maxItems: 100
                                                           type: array
                                                         - items:
                                                             type: number
+                                                          maxItems: 100
                                                           type: array
                                                         - additionalProperties: false
                                                           type: object
@@ -21514,9 +21532,11 @@ paths:
                                                   - type: number
                                                   - items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                                   - items:
                                                       type: number
+                                                    maxItems: 100
                                                     type: array
                                                   - additionalProperties: false
                                                     type: object
@@ -21581,6 +21601,7 @@ paths:
                                           required:
                                             - data_stream
                                             - features
+                                        maxItems: 100
                                         type: array
                                       fips_compatible:
                                         type: boolean
@@ -21620,10 +21641,12 @@ paths:
                                           type: string
                                       required:
                                         - id
+                                    maxItems: 100
                                     type: array
                                   spaceIds:
                                     items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   supports_agentless:
                                     default: false
@@ -21661,9 +21684,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -21693,6 +21718,7 @@ paths:
                                   - updated_by
                                   - created_at
                                   - created_by
+                              maxItems: 10000
                               type: array
                         required_versions:
                           items:
@@ -21710,6 +21736,7 @@ paths:
                             required:
                               - version
                               - percentage
+                          maxItems: 100
                           nullable: true
                           type: array
                         revision:
@@ -21719,6 +21746,7 @@ paths:
                         space_ids:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         status:
                           enum:
@@ -21750,6 +21778,7 @@ paths:
                         - updated_at
                         - updated_by
                         - revision
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -21858,6 +21887,7 @@ paths:
                     required:
                       - name
                       - enabled
+                  maxItems: 100
                   type: array
                 agentless:
                   additionalProperties: false
@@ -21917,6 +21947,7 @@ paths:
                     required:
                       - name
                       - value
+                  maxItems: 10
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -21968,6 +21999,7 @@ paths:
                       - metrics
                       - traces
                     type: string
+                  maxItems: 3
                   type: array
                 monitoring_http:
                   additionalProperties: false
@@ -22020,11 +22052,13 @@ paths:
                     required:
                       - version
                       - percentage
+                  maxItems: 100
                   nullable: true
                   type: array
                 space_ids:
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 supports_agentless:
                   default: false
@@ -22088,6 +22122,7 @@ paths:
                           required:
                             - name
                             - enabled
+                        maxItems: 100
                         type: array
                       agentless:
                         additionalProperties: false
@@ -22149,6 +22184,7 @@ paths:
                           required:
                             - name
                             - value
+                        maxItems: 10
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -22203,6 +22239,7 @@ paths:
                             - metrics
                             - traces
                           type: string
+                        maxItems: 3
                         type: array
                       monitoring_http:
                         additionalProperties: false
@@ -22243,6 +22280,7 @@ paths:
                         anyOf:
                           - items:
                               type: string
+                            maxItems: 10000
                             type: array
                           - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                             items:
@@ -22253,6 +22291,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  maxItems: 1000
                                   nullable: true
                                   type: array
                                 agents:
@@ -22285,6 +22324,7 @@ paths:
                                         cluster:
                                           items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                 enabled:
                                   type: boolean
@@ -22361,6 +22401,7 @@ paths:
                                                             indices:
                                                               items:
                                                                 type: string
+                                                              maxItems: 100
                                                               type: array
                                                     type:
                                                       type: string
@@ -22397,6 +22438,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
+                                            maxItems: 100
                                             type: array
                                           type:
                                             type: string
@@ -22419,6 +22461,7 @@ paths:
                                           - enabled
                                           - streams
                                           - compiled_input
+                                      maxItems: 100
                                       type: array
                                     - additionalProperties:
                                         additionalProperties: false
@@ -22443,9 +22486,11 @@ paths:
                                                       - type: number
                                                       - items:
                                                           type: string
+                                                        maxItems: 100
                                                         type: array
                                                       - items:
                                                           type: number
+                                                        maxItems: 100
                                                         type: array
                                                       - additionalProperties: false
                                                         type: object
@@ -22470,9 +22515,11 @@ paths:
                                                 - type: number
                                                 - items:
                                                     type: string
+                                                  maxItems: 100
                                                   type: array
                                                 - items:
                                                     type: number
+                                                  maxItems: 100
                                                   type: array
                                                 - additionalProperties: false
                                                   type: object
@@ -22537,6 +22584,7 @@ paths:
                                         required:
                                           - data_stream
                                           - features
+                                      maxItems: 100
                                       type: array
                                     fips_compatible:
                                       type: boolean
@@ -22576,10 +22624,12 @@ paths:
                                         type: string
                                     required:
                                       - id
+                                  maxItems: 100
                                   type: array
                                 spaceIds:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 supports_agentless:
                                   default: false
@@ -22617,9 +22667,11 @@ paths:
                                           - type: number
                                           - items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                           - items:
                                               type: number
+                                            maxItems: 100
                                             type: array
                                           - additionalProperties: false
                                             type: object
@@ -22649,6 +22701,7 @@ paths:
                                 - updated_by
                                 - created_at
                                 - created_by
+                            maxItems: 10000
                             type: array
                       required_versions:
                         items:
@@ -22666,6 +22719,7 @@ paths:
                           required:
                             - version
                             - percentage
+                        maxItems: 100
                         nullable: true
                         type: array
                       revision:
@@ -22675,6 +22729,7 @@ paths:
                       space_ids:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       status:
                         enum:
@@ -22777,6 +22832,7 @@ paths:
                   description: list of package policy ids
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
                 ignoreMissing:
                   type: boolean
@@ -22833,6 +22889,7 @@ paths:
                             required:
                               - name
                               - enabled
+                          maxItems: 100
                           type: array
                         agentless:
                           additionalProperties: false
@@ -22894,6 +22951,7 @@ paths:
                             required:
                               - name
                               - value
+                          maxItems: 10
                           type: array
                         has_fleet_server:
                           type: boolean
@@ -22948,6 +23006,7 @@ paths:
                               - metrics
                               - traces
                             type: string
+                          maxItems: 3
                           type: array
                         monitoring_http:
                           additionalProperties: false
@@ -22988,6 +23047,7 @@ paths:
                           anyOf:
                             - items:
                                 type: string
+                              maxItems: 10000
                               type: array
                             - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                               items:
@@ -22998,6 +23058,7 @@ paths:
                                     description: Additional datastream permissions, that will be added to the agent policy.
                                     items:
                                       type: string
+                                    maxItems: 1000
                                     nullable: true
                                     type: array
                                   agents:
@@ -23030,6 +23091,7 @@ paths:
                                           cluster:
                                             items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                   enabled:
                                     type: boolean
@@ -23106,6 +23168,7 @@ paths:
                                                               indices:
                                                                 items:
                                                                   type: string
+                                                                maxItems: 100
                                                                 type: array
                                                       type:
                                                         type: string
@@ -23142,6 +23205,7 @@ paths:
                                                   - enabled
                                                   - data_stream
                                                   - compiled_stream
+                                              maxItems: 100
                                               type: array
                                             type:
                                               type: string
@@ -23164,6 +23228,7 @@ paths:
                                             - enabled
                                             - streams
                                             - compiled_input
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties:
                                           additionalProperties: false
@@ -23188,9 +23253,11 @@ paths:
                                                         - type: number
                                                         - items:
                                                             type: string
+                                                          maxItems: 100
                                                           type: array
                                                         - items:
                                                             type: number
+                                                          maxItems: 100
                                                           type: array
                                                         - additionalProperties: false
                                                           type: object
@@ -23215,9 +23282,11 @@ paths:
                                                   - type: number
                                                   - items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                                   - items:
                                                       type: number
+                                                    maxItems: 100
                                                     type: array
                                                   - additionalProperties: false
                                                     type: object
@@ -23282,6 +23351,7 @@ paths:
                                           required:
                                             - data_stream
                                             - features
+                                        maxItems: 100
                                         type: array
                                       fips_compatible:
                                         type: boolean
@@ -23321,10 +23391,12 @@ paths:
                                           type: string
                                       required:
                                         - id
+                                    maxItems: 100
                                     type: array
                                   spaceIds:
                                     items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   supports_agentless:
                                     default: false
@@ -23362,9 +23434,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -23394,6 +23468,7 @@ paths:
                                   - updated_by
                                   - created_at
                                   - created_by
+                              maxItems: 10000
                               type: array
                         required_versions:
                           items:
@@ -23411,6 +23486,7 @@ paths:
                             required:
                               - version
                               - percentage
+                          maxItems: 100
                           nullable: true
                           type: array
                         revision:
@@ -23420,6 +23496,7 @@ paths:
                         space_ids:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         status:
                           enum:
@@ -23451,6 +23528,7 @@ paths:
                         - updated_at
                         - updated_by
                         - revision
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -23557,6 +23635,7 @@ paths:
                           required:
                             - name
                             - enabled
+                        maxItems: 100
                         type: array
                       agentless:
                         additionalProperties: false
@@ -23618,6 +23697,7 @@ paths:
                           required:
                             - name
                             - value
+                        maxItems: 10
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -23672,6 +23752,7 @@ paths:
                             - metrics
                             - traces
                           type: string
+                        maxItems: 3
                         type: array
                       monitoring_http:
                         additionalProperties: false
@@ -23712,6 +23793,7 @@ paths:
                         anyOf:
                           - items:
                               type: string
+                            maxItems: 10000
                             type: array
                           - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                             items:
@@ -23722,6 +23804,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  maxItems: 1000
                                   nullable: true
                                   type: array
                                 agents:
@@ -23754,6 +23837,7 @@ paths:
                                         cluster:
                                           items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                 enabled:
                                   type: boolean
@@ -23830,6 +23914,7 @@ paths:
                                                             indices:
                                                               items:
                                                                 type: string
+                                                              maxItems: 100
                                                               type: array
                                                     type:
                                                       type: string
@@ -23866,6 +23951,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
+                                            maxItems: 100
                                             type: array
                                           type:
                                             type: string
@@ -23888,6 +23974,7 @@ paths:
                                           - enabled
                                           - streams
                                           - compiled_input
+                                      maxItems: 100
                                       type: array
                                     - additionalProperties:
                                         additionalProperties: false
@@ -23912,9 +23999,11 @@ paths:
                                                       - type: number
                                                       - items:
                                                           type: string
+                                                        maxItems: 100
                                                         type: array
                                                       - items:
                                                           type: number
+                                                        maxItems: 100
                                                         type: array
                                                       - additionalProperties: false
                                                         type: object
@@ -23939,9 +24028,11 @@ paths:
                                                 - type: number
                                                 - items:
                                                     type: string
+                                                  maxItems: 100
                                                   type: array
                                                 - items:
                                                     type: number
+                                                  maxItems: 100
                                                   type: array
                                                 - additionalProperties: false
                                                   type: object
@@ -24006,6 +24097,7 @@ paths:
                                         required:
                                           - data_stream
                                           - features
+                                      maxItems: 100
                                       type: array
                                     fips_compatible:
                                       type: boolean
@@ -24045,10 +24137,12 @@ paths:
                                         type: string
                                     required:
                                       - id
+                                  maxItems: 100
                                   type: array
                                 spaceIds:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 supports_agentless:
                                   default: false
@@ -24086,9 +24180,11 @@ paths:
                                           - type: number
                                           - items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                           - items:
                                               type: number
+                                            maxItems: 100
                                             type: array
                                           - additionalProperties: false
                                             type: object
@@ -24118,6 +24214,7 @@ paths:
                                 - updated_by
                                 - created_at
                                 - created_by
+                            maxItems: 10000
                             type: array
                       required_versions:
                         items:
@@ -24135,6 +24232,7 @@ paths:
                           required:
                             - version
                             - percentage
+                        maxItems: 100
                         nullable: true
                         type: array
                       revision:
@@ -24144,6 +24242,7 @@ paths:
                       space_ids:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       status:
                         enum:
@@ -24281,6 +24380,7 @@ paths:
                     required:
                       - name
                       - enabled
+                  maxItems: 100
                   type: array
                 agentless:
                   additionalProperties: false
@@ -24342,6 +24442,7 @@ paths:
                     required:
                       - name
                       - value
+                  maxItems: 10
                   type: array
                 has_fleet_server:
                   type: boolean
@@ -24393,6 +24494,7 @@ paths:
                       - metrics
                       - traces
                     type: string
+                  maxItems: 3
                   type: array
                 monitoring_http:
                   additionalProperties: false
@@ -24445,11 +24547,13 @@ paths:
                     required:
                       - version
                       - percentage
+                  maxItems: 100
                   nullable: true
                   type: array
                 space_ids:
                   items:
                     type: string
+                  maxItems: 100
                   type: array
                 supports_agentless:
                   default: false
@@ -24513,6 +24617,7 @@ paths:
                           required:
                             - name
                             - enabled
+                        maxItems: 100
                         type: array
                       agentless:
                         additionalProperties: false
@@ -24574,6 +24679,7 @@ paths:
                           required:
                             - name
                             - value
+                        maxItems: 10
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -24628,6 +24734,7 @@ paths:
                             - metrics
                             - traces
                           type: string
+                        maxItems: 3
                         type: array
                       monitoring_http:
                         additionalProperties: false
@@ -24668,6 +24775,7 @@ paths:
                         anyOf:
                           - items:
                               type: string
+                            maxItems: 10000
                             type: array
                           - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                             items:
@@ -24678,6 +24786,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  maxItems: 1000
                                   nullable: true
                                   type: array
                                 agents:
@@ -24710,6 +24819,7 @@ paths:
                                         cluster:
                                           items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                 enabled:
                                   type: boolean
@@ -24786,6 +24896,7 @@ paths:
                                                             indices:
                                                               items:
                                                                 type: string
+                                                              maxItems: 100
                                                               type: array
                                                     type:
                                                       type: string
@@ -24822,6 +24933,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
+                                            maxItems: 100
                                             type: array
                                           type:
                                             type: string
@@ -24844,6 +24956,7 @@ paths:
                                           - enabled
                                           - streams
                                           - compiled_input
+                                      maxItems: 100
                                       type: array
                                     - additionalProperties:
                                         additionalProperties: false
@@ -24868,9 +24981,11 @@ paths:
                                                       - type: number
                                                       - items:
                                                           type: string
+                                                        maxItems: 100
                                                         type: array
                                                       - items:
                                                           type: number
+                                                        maxItems: 100
                                                         type: array
                                                       - additionalProperties: false
                                                         type: object
@@ -24895,9 +25010,11 @@ paths:
                                                 - type: number
                                                 - items:
                                                     type: string
+                                                  maxItems: 100
                                                   type: array
                                                 - items:
                                                     type: number
+                                                  maxItems: 100
                                                   type: array
                                                 - additionalProperties: false
                                                   type: object
@@ -24962,6 +25079,7 @@ paths:
                                         required:
                                           - data_stream
                                           - features
+                                      maxItems: 100
                                       type: array
                                     fips_compatible:
                                       type: boolean
@@ -25001,10 +25119,12 @@ paths:
                                         type: string
                                     required:
                                       - id
+                                  maxItems: 100
                                   type: array
                                 spaceIds:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 supports_agentless:
                                   default: false
@@ -25042,9 +25162,11 @@ paths:
                                           - type: number
                                           - items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                           - items:
                                               type: number
+                                            maxItems: 100
                                             type: array
                                           - additionalProperties: false
                                             type: object
@@ -25074,6 +25196,7 @@ paths:
                                 - updated_by
                                 - created_at
                                 - created_by
+                            maxItems: 10000
                             type: array
                       required_versions:
                         items:
@@ -25091,6 +25214,7 @@ paths:
                           required:
                             - version
                             - percentage
+                        maxItems: 100
                         nullable: true
                         type: array
                       revision:
@@ -25100,6 +25224,7 @@ paths:
                       space_ids:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       status:
                         enum:
@@ -25198,6 +25323,7 @@ paths:
                           description: List of action IDs related to failed upgrades
                           items:
                             type: string
+                          maxItems: 1000
                           type: array
                         failedUpgradeAgents:
                           description: Number of agents that failed to upgrade to this version
@@ -25206,6 +25332,7 @@ paths:
                           description: List of action IDs related to in-progress upgrades
                           items:
                             type: string
+                          maxItems: 1000
                           type: array
                         inProgressUpgradeAgents:
                           description: Number of agents that are upgrading to this version
@@ -25218,6 +25345,7 @@ paths:
                         - agents
                         - failedUpgradeAgents
                         - inProgressUpgradeAgents
+                    maxItems: 10000
                     type: array
                   totalAgents:
                     type: number
@@ -25348,6 +25476,7 @@ paths:
                           required:
                             - name
                             - enabled
+                        maxItems: 100
                         type: array
                       agentless:
                         additionalProperties: false
@@ -25409,6 +25538,7 @@ paths:
                           required:
                             - name
                             - value
+                        maxItems: 10
                         type: array
                       has_fleet_server:
                         type: boolean
@@ -25463,6 +25593,7 @@ paths:
                             - metrics
                             - traces
                           type: string
+                        maxItems: 3
                         type: array
                       monitoring_http:
                         additionalProperties: false
@@ -25503,6 +25634,7 @@ paths:
                         anyOf:
                           - items:
                               type: string
+                            maxItems: 10000
                             type: array
                           - description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
                             items:
@@ -25513,6 +25645,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  maxItems: 1000
                                   nullable: true
                                   type: array
                                 agents:
@@ -25545,6 +25678,7 @@ paths:
                                         cluster:
                                           items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                 enabled:
                                   type: boolean
@@ -25621,6 +25755,7 @@ paths:
                                                             indices:
                                                               items:
                                                                 type: string
+                                                              maxItems: 100
                                                               type: array
                                                     type:
                                                       type: string
@@ -25657,6 +25792,7 @@ paths:
                                                 - enabled
                                                 - data_stream
                                                 - compiled_stream
+                                            maxItems: 100
                                             type: array
                                           type:
                                             type: string
@@ -25679,6 +25815,7 @@ paths:
                                           - enabled
                                           - streams
                                           - compiled_input
+                                      maxItems: 100
                                       type: array
                                     - additionalProperties:
                                         additionalProperties: false
@@ -25703,9 +25840,11 @@ paths:
                                                       - type: number
                                                       - items:
                                                           type: string
+                                                        maxItems: 100
                                                         type: array
                                                       - items:
                                                           type: number
+                                                        maxItems: 100
                                                         type: array
                                                       - additionalProperties: false
                                                         type: object
@@ -25730,9 +25869,11 @@ paths:
                                                 - type: number
                                                 - items:
                                                     type: string
+                                                  maxItems: 100
                                                   type: array
                                                 - items:
                                                     type: number
+                                                  maxItems: 100
                                                   type: array
                                                 - additionalProperties: false
                                                   type: object
@@ -25797,6 +25938,7 @@ paths:
                                         required:
                                           - data_stream
                                           - features
+                                      maxItems: 100
                                       type: array
                                     fips_compatible:
                                       type: boolean
@@ -25836,10 +25978,12 @@ paths:
                                         type: string
                                     required:
                                       - id
+                                  maxItems: 100
                                   type: array
                                 spaceIds:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 supports_agentless:
                                   default: false
@@ -25877,9 +26021,11 @@ paths:
                                           - type: number
                                           - items:
                                               type: string
+                                            maxItems: 100
                                             type: array
                                           - items:
                                               type: number
+                                            maxItems: 100
                                             type: array
                                           - additionalProperties: false
                                             type: object
@@ -25909,6 +26055,7 @@ paths:
                                 - updated_by
                                 - created_at
                                 - created_by
+                            maxItems: 10000
                             type: array
                       required_versions:
                         items:
@@ -25926,6 +26073,7 @@ paths:
                           required:
                             - version
                             - percentage
+                        maxItems: 100
                         nullable: true
                         type: array
                       revision:
@@ -25935,6 +26083,7 @@ paths:
                       space_ids:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       status:
                         enum:
@@ -26174,6 +26323,7 @@ paths:
                                       certificate_authorities:
                                         items:
                                           type: string
+                                        maxItems: 10
                                         type: array
                                       key:
                                         type: string
@@ -26329,6 +26479,7 @@ paths:
                                   hosts:
                                     items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   proxy_headers:
                                     additionalProperties:
@@ -26365,6 +26516,7 @@ paths:
                                       certificate_authorities:
                                         items:
                                           type: string
+                                        maxItems: 10
                                         type: array
                                       key:
                                         type: string
@@ -26384,6 +26536,7 @@ paths:
                                       hosts:
                                         items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       path:
                                         type: string
@@ -26452,6 +26605,7 @@ paths:
                                           - fields
                                     required:
                                       - add_fields
+                                  maxItems: 10000
                                   type: array
                                 revision:
                                   type: number
@@ -26475,6 +26629,7 @@ paths:
                                     required:
                                       - id
                                       - data_stream
+                                  maxItems: 10000
                                   type: array
                                 type:
                                   type: string
@@ -26488,10 +26643,12 @@ paths:
                                 - data_stream
                                 - use_output
                                 - package_policy_id
+                            maxItems: 10000
                             type: array
                           namespaces:
                             items:
                               type: string
+                            maxItems: 100
                             type: array
                           output_permissions:
                             additionalProperties:
@@ -26509,6 +26666,7 @@ paths:
                                 hosts:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 proxy_headers:
                                   additionalProperties:
@@ -26542,6 +26700,7 @@ paths:
                                   type: string
                               required:
                                 - id
+                            maxItems: 1000
                             type: array
                           service:
                             additionalProperties: false
@@ -26550,6 +26709,7 @@ paths:
                               extensions:
                                 items:
                                   type: string
+                                maxItems: 1000
                                 type: array
                               pipelines:
                                 additionalProperties:
@@ -26559,14 +26719,17 @@ paths:
                                     exporters:
                                       items:
                                         type: string
+                                      maxItems: 1000
                                       type: array
                                     processors:
                                       items:
                                         type: string
+                                      maxItems: 1000
                                       type: array
                                     receivers:
                                       items:
                                         type: string
+                                      maxItems: 1000
                                       type: array
                                   x-oas-optional: true
                                 type: object
@@ -26663,6 +26826,7 @@ paths:
                                   type: string
                                 pkgName:
                                   type: string
+                            maxItems: 1000
                             type: array
                           output:
                             additionalProperties: false
@@ -26833,6 +26997,7 @@ paths:
                   description: list of package policy ids
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - ids
@@ -26868,6 +27033,7 @@ paths:
                                     type: string
                                   pkgName:
                                     type: string
+                              maxItems: 1000
                               type: array
                             output:
                               additionalProperties: false
@@ -26902,6 +27068,7 @@ paths:
                       required:
                         - monitoring
                         - data
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -26949,6 +27116,7 @@ paths:
             anyOf:
               - items:
                   type: string
+                maxItems: 1000
                 type: array
               - type: string
         - in: query
@@ -27058,6 +27226,7 @@ paths:
             anyOf:
               - items:
                   type: string
+                maxItems: 10000
                 type: array
               - type: string
         - in: query
@@ -27086,6 +27255,7 @@ paths:
                 properties:
                   dataPreview:
                     items: {}
+                    maxItems: 1000
                     type: array
                   items:
                     items:
@@ -27098,6 +27268,7 @@ paths:
                         required:
                           - data
                       type: object
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -27302,6 +27473,7 @@ paths:
                   description: Additional datastream permissions, that will be added to the agent policy.
                   items:
                     type: string
+                  maxItems: 100
                   nullable: true
                   type: array
                 cloud_connector:
@@ -27353,9 +27525,11 @@ paths:
                                   - type: number
                                   - items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   - items:
                                       type: number
+                                    maxItems: 100
                                     type: array
                                   - additionalProperties: false
                                     type: object
@@ -27380,9 +27554,11 @@ paths:
                             - type: number
                             - items:
                                 type: string
+                              maxItems: 100
                               type: array
                             - items:
                                 type: number
+                              maxItems: 100
                               type: array
                             - additionalProperties: false
                               type: object
@@ -27431,6 +27607,7 @@ paths:
                         required:
                           - data_stream
                           - features
+                      maxItems: 100
                       type: array
                     fips_compatible:
                       type: boolean
@@ -27455,9 +27632,11 @@ paths:
                       - type: number
                       - items:
                           type: string
+                        maxItems: 100
                         type: array
                       - items:
                           type: number
+                        maxItems: 100
                         type: array
                       - additionalProperties: false
                         type: object
@@ -27631,6 +27810,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       agents:
@@ -27663,6 +27843,7 @@ paths:
                               cluster:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                       enabled:
                         type: boolean
@@ -27739,6 +27920,7 @@ paths:
                                                   indices:
                                                     items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                           type:
                                             type: string
@@ -27775,6 +27957,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
+                                  maxItems: 100
                                   type: array
                                 type:
                                   type: string
@@ -27797,6 +27980,7 @@ paths:
                                 - enabled
                                 - streams
                                 - compiled_input
+                            maxItems: 100
                             type: array
                           - additionalProperties:
                               additionalProperties: false
@@ -27821,9 +28005,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -27848,9 +28034,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -27915,6 +28103,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           fips_compatible:
                             type: boolean
@@ -27954,10 +28143,12 @@ paths:
                               type: string
                           required:
                             - id
+                        maxItems: 100
                         type: array
                       spaceIds:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       supports_agentless:
                         default: false
@@ -27995,9 +28186,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -28385,12 +28578,14 @@ paths:
                                     - type
                                     - status
                                     - message
+                                maxItems: 1000
                                 type: array
                             required:
                               - id
                               - type
                               - status
                               - message
+                          maxItems: 1000
                           type: array
                         default_api_key:
                           type: string
@@ -28407,6 +28602,7 @@ paths:
                             required:
                               - id
                               - retired_at
+                          maxItems: 100
                           type: array
                         default_api_key_id:
                           type: string
@@ -28454,6 +28650,7 @@ paths:
                         namespaces:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         outputs:
                           additionalProperties:
@@ -28474,6 +28671,7 @@ paths:
                                   required:
                                     - id
                                     - retired_at
+                                maxItems: 100
                                 type: array
                               type:
                                 type: string
@@ -28481,6 +28679,7 @@ paths:
                         packages:
                           items:
                             type: string
+                          maxItems: 1000
                           type: array
                         policy_id:
                           type: string
@@ -28489,6 +28688,7 @@ paths:
                           type: number
                         sort:
                           items: {}
+                          maxItems: 10
                           type: array
                         status:
                           enum:
@@ -28507,6 +28707,7 @@ paths:
                         tags:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         type:
                           enum:
@@ -28525,11 +28726,13 @@ paths:
                               - output
                               - other
                             type: string
+                          maxItems: 3
                           nullable: true
                           type: array
                         upgrade_attempts:
                           items:
                             type: string
+                          maxItems: 1000
                           nullable: true
                           type: array
                         upgrade_details:
@@ -28601,6 +28804,7 @@ paths:
                         - active
                         - enrolled_at
                         - local_metadata
+                    maxItems: 10000
                     type: array
                   nextSearchAfter:
                     type: string
@@ -28677,6 +28881,7 @@ paths:
                 actionIds:
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - actionIds
@@ -28691,6 +28896,7 @@ paths:
                   items:
                     items:
                       type: string
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -28895,12 +29101,14 @@ paths:
                                   - type
                                   - status
                                   - message
+                              maxItems: 1000
                               type: array
                           required:
                             - id
                             - type
                             - status
                             - message
+                        maxItems: 1000
                         type: array
                       default_api_key:
                         type: string
@@ -28917,6 +29125,7 @@ paths:
                           required:
                             - id
                             - retired_at
+                        maxItems: 100
                         type: array
                       default_api_key_id:
                         type: string
@@ -28964,6 +29173,7 @@ paths:
                       namespaces:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       outputs:
                         additionalProperties:
@@ -28984,6 +29194,7 @@ paths:
                                 required:
                                   - id
                                   - retired_at
+                              maxItems: 100
                               type: array
                             type:
                               type: string
@@ -28991,6 +29202,7 @@ paths:
                       packages:
                         items:
                           type: string
+                        maxItems: 1000
                         type: array
                       policy_id:
                         type: string
@@ -28999,6 +29211,7 @@ paths:
                         type: number
                       sort:
                         items: {}
+                        maxItems: 10
                         type: array
                       status:
                         enum:
@@ -29017,6 +29230,7 @@ paths:
                       tags:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       type:
                         enum:
@@ -29035,11 +29249,13 @@ paths:
                             - output
                             - other
                           type: string
+                        maxItems: 3
                         nullable: true
                         type: array
                       upgrade_attempts:
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       upgrade_details:
@@ -29174,6 +29390,7 @@ paths:
                 tags:
                   items:
                     type: string
+                  maxItems: 10
                   type: array
                 user_provided_metadata:
                   additionalProperties: {}
@@ -29263,12 +29480,14 @@ paths:
                                   - type
                                   - status
                                   - message
+                              maxItems: 1000
                               type: array
                           required:
                             - id
                             - type
                             - status
                             - message
+                        maxItems: 1000
                         type: array
                       default_api_key:
                         type: string
@@ -29285,6 +29504,7 @@ paths:
                           required:
                             - id
                             - retired_at
+                        maxItems: 100
                         type: array
                       default_api_key_id:
                         type: string
@@ -29332,6 +29552,7 @@ paths:
                       namespaces:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       outputs:
                         additionalProperties:
@@ -29352,6 +29573,7 @@ paths:
                                 required:
                                   - id
                                   - retired_at
+                              maxItems: 100
                               type: array
                             type:
                               type: string
@@ -29359,6 +29581,7 @@ paths:
                       packages:
                         items:
                           type: string
+                        maxItems: 1000
                         type: array
                       policy_id:
                         type: string
@@ -29367,6 +29590,7 @@ paths:
                         type: number
                       sort:
                         items: {}
+                        maxItems: 10
                         type: array
                       status:
                         enum:
@@ -29385,6 +29609,7 @@ paths:
                       tags:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       type:
                         enum:
@@ -29403,11 +29628,13 @@ paths:
                             - output
                             - other
                           type: string
+                        maxItems: 3
                         nullable: true
                         type: array
                       upgrade_attempts:
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       upgrade_details:
@@ -29599,6 +29826,7 @@ paths:
                       agents:
                         items:
                           type: string
+                        maxItems: 10000
                         type: array
                       created_at:
                         type: string
@@ -29612,6 +29840,7 @@ paths:
                       namespaces:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       rollout_duration_seconds:
                         type: number
@@ -29729,6 +29958,7 @@ paths:
                     tags:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                 uri:
                   format: uri
@@ -29884,6 +30114,7 @@ paths:
                     enum:
                       - CPU
                     type: string
+                  maxItems: 1
                   type: array
       responses:
         '200':
@@ -30103,6 +30334,7 @@ paths:
                         - createTime
                         - status
                         - actionId
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -30220,6 +30452,7 @@ paths:
                               - agentId
                               - error
                               - timestamp
+                          maxItems: 10
                           type: array
                         nbAgentsAck:
                           description: number of agents that acknowledged the action
@@ -30281,6 +30514,7 @@ paths:
                         - nbAgentsActioned
                         - status
                         - creationTime
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -30352,6 +30586,7 @@ paths:
                       agents:
                         items:
                           type: string
+                        maxItems: 10000
                         type: array
                       created_at:
                         type: string
@@ -30365,6 +30600,7 @@ paths:
                       namespaces:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       rollout_duration_seconds:
                         type: number
@@ -30437,6 +30673,7 @@ paths:
                   items:
                     items:
                       type: string
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -30498,6 +30735,7 @@ paths:
                   anyOf:
                     - items:
                         type: string
+                      maxItems: 10000
                       type: array
                     - type: string
                 batchSize:
@@ -30537,6 +30775,7 @@ paths:
                     tags:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                 uri:
                   format: uri
@@ -30615,6 +30854,7 @@ paths:
                   anyOf:
                     - items:
                         type: string
+                      maxItems: 10000
                       type: array
                     - type: string
                 batchSize:
@@ -30698,11 +30938,13 @@ paths:
                     enum:
                       - CPU
                     type: string
+                  maxItems: 1
                   type: array
                 agents:
                   anyOf:
                     - items:
                         type: string
+                      maxItems: 10000
                       type: array
                     - type: string
                 batchSize:
@@ -30778,10 +31020,11 @@ paths:
                 agents:
                   anyOf:
                     - items:
-                        description: KQL query string, leave empty to action all agents
+                        description: list of agent IDs
                         type: string
+                      maxItems: 10000
                       type: array
-                    - description: list of agent IDs
+                    - description: KQL query string, leave empty to action all agents
                       type: string
                 batchSize:
                   type: number
@@ -30866,6 +31109,7 @@ paths:
                   anyOf:
                     - items:
                         type: string
+                      maxItems: 10000
                       type: array
                     - type: string
                 batchSize:
@@ -30876,10 +31120,12 @@ paths:
                 tagsToAdd:
                   items:
                     type: string
+                  maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
                     type: string
+                  maxItems: 10
                   type: array
               required:
                 - agents
@@ -30953,6 +31199,7 @@ paths:
                   anyOf:
                     - items:
                         type: string
+                      maxItems: 10000
                       type: array
                     - type: string
                 batchSize:
@@ -31175,6 +31422,7 @@ paths:
                       enum:
                         - encrypted_saved_object_encryption_key_required
                       type: string
+                    maxItems: 1
                     type: array
                   missing_requirements:
                     items:
@@ -31185,6 +31433,7 @@ paths:
                         - fleet_admin_user
                         - fleet_server
                       type: string
+                    maxItems: 5
                     type: array
                   package_verification_key_id:
                     type: string
@@ -31261,6 +31510,7 @@ paths:
                       required:
                         - name
                         - message
+                    maxItems: 10000
                     type: array
                 required:
                   - isInitialized
@@ -31327,6 +31577,7 @@ paths:
                   items:
                     items:
                       type: string
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -31489,6 +31740,7 @@ paths:
                         - packagePolicyCount
                         - created_at
                         - updated_at
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -32064,6 +32316,7 @@ paths:
                         policy_ids:
                           items:
                             type: string
+                          maxItems: 10000
                           type: array
                         updated_at:
                           type: string
@@ -32073,6 +32326,7 @@ paths:
                         - policy_ids
                         - created_at
                         - updated_at
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -32158,6 +32412,7 @@ paths:
                             required:
                               - id
                               - title
+                          maxItems: 10000
                           type: array
                         dataset:
                           type: string
@@ -32203,6 +32458,7 @@ paths:
                         - size_in_bytes_formatted
                         - dashboards
                         - serviceDetails
+                    maxItems: 10000
                     type: array
                 required:
                   - data_streams
@@ -32303,6 +32559,7 @@ paths:
                         - api_key
                         - active
                         - created_at
+                    maxItems: 10000
                     type: array
                   list:
                     deprecated: true
@@ -32337,6 +32594,7 @@ paths:
                         - api_key
                         - active
                         - created_at
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -32674,6 +32932,7 @@ paths:
                     required:
                       - id
                       - type
+                  maxItems: 1000
                   type: array
               required:
                 - assetIds
@@ -32712,6 +32971,7 @@ paths:
                         - id
                         - type
                         - attributes
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -32792,6 +33052,7 @@ paths:
                         - id
                         - title
                         - count
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -32867,6 +33128,7 @@ paths:
                     required:
                       - name
                       - type
+                  maxItems: 10
                   type: array
                 force:
                   type: boolean
@@ -32951,6 +33213,7 @@ paths:
                           required:
                             - id
                             - type
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -33017,6 +33280,7 @@ paths:
                 categories:
                   items:
                     type: string
+                  maxItems: 10
                   type: array
                 readMeData:
                   type: string
@@ -33112,6 +33376,7 @@ paths:
                           type: string
                       required:
                         - name
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -33191,6 +33456,7 @@ paths:
                         categories:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         conditions:
                           additionalProperties: true
@@ -33203,6 +33469,7 @@ paths:
                                 capabilities:
                                   items:
                                     type: string
+                                  maxItems: 10
                                   type: array
                                 subscription:
                                   type: string
@@ -33216,6 +33483,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
+                          maxItems: 1000
                           type: array
                         description:
                           type: string
@@ -33232,6 +33500,7 @@ paths:
                                     type: string
                                 required:
                                   - name
+                              maxItems: 10
                               type: array
                             fields:
                               items:
@@ -33242,6 +33511,7 @@ paths:
                                     type: string
                                 required:
                                   - name
+                              maxItems: 10
                               type: array
                         download:
                           type: string
@@ -33266,6 +33536,7 @@ paths:
                                 type: string
                             required:
                               - src
+                          maxItems: 10
                           type: array
                         id:
                           type: string
@@ -33305,6 +33576,7 @@ paths:
                                   required:
                                     - id
                                     - type
+                                maxItems: 100
                                 type: array
                               type: object
                             created_at:
@@ -33331,6 +33603,7 @@ paths:
                                 required:
                                   - data_stream
                                   - features
+                              maxItems: 100
                               type: array
                             install_format_schema_version:
                               type: string
@@ -33374,6 +33647,7 @@ paths:
                                 required:
                                   - id
                                   - type
+                              maxItems: 1000
                               type: array
                             installed_kibana:
                               items:
@@ -33406,6 +33680,7 @@ paths:
                                 required:
                                   - id
                                   - type
+                              maxItems: 1000
                               type: array
                             installed_kibana_space_id:
                               type: string
@@ -33447,12 +33722,14 @@ paths:
                                   - created_at
                                   - target_version
                                   - error
+                              maxItems: 10
                               type: array
                             name:
                               type: string
                             namespaces:
                               items:
                                 type: string
+                              maxItems: 100
                               type: array
                             previous_version:
                               nullable: true
@@ -33509,6 +33786,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
+                          maxItems: 100
                           type: array
                         readme:
                           type: string
@@ -33548,6 +33826,7 @@ paths:
                           items:
                             additionalProperties: {}
                             type: object
+                          maxItems: 1000
                           type: array
                         version:
                           type: string
@@ -33556,6 +33835,7 @@ paths:
                         - version
                         - title
                         - id
+                    maxItems: 1000
                     type: array
                 required:
                   - items
@@ -33699,6 +33979,7 @@ paths:
                           required:
                             - id
                             - type
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -33781,6 +34062,7 @@ paths:
                         required:
                           - name
                           - version
+                  maxItems: 1000
                   minItems: 1
                   type: array
               required:
@@ -33862,6 +34144,7 @@ paths:
                                         required:
                                           - id
                                           - type
+                                  maxItems: 1000
                                   type: array
                                 error: {}
                                 installSource:
@@ -33897,6 +34180,7 @@ paths:
                             - name
                             - statusCode
                             - error
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -33969,6 +34253,7 @@ paths:
                         type: string
                     required:
                       - name
+                  maxItems: 1000
                   minItems: 1
                   type: array
               required:
@@ -34079,6 +34364,7 @@ paths:
                       required:
                         - name
                         - success
+                    maxItems: 10000
                     type: array
                   status:
                     type: string
@@ -34157,6 +34443,7 @@ paths:
                     required:
                       - name
                       - version
+                  maxItems: 1000
                   minItems: 1
                   type: array
               required:
@@ -34255,6 +34542,7 @@ paths:
                       required:
                         - name
                         - success
+                    maxItems: 10000
                     type: array
                   status:
                     type: string
@@ -34328,6 +34616,7 @@ paths:
                         type: string
                     required:
                       - name
+                  maxItems: 1000
                   minItems: 1
                   type: array
                 prerelease:
@@ -34431,6 +34720,7 @@ paths:
                       required:
                         - name
                         - success
+                    maxItems: 10000
                     type: array
                   status:
                     type: string
@@ -34563,6 +34853,7 @@ paths:
                           required:
                             - id
                             - type
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -34658,15 +34949,18 @@ paths:
                             asset_ids:
                               items:
                                 type: string
+                              maxItems: 100
                               type: array
                             asset_types:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             text:
                               type: string
                           required:
                             - text
+                        maxItems: 1000
                         type: array
                       assets:
                         additionalProperties: {}
@@ -34674,6 +34968,7 @@ paths:
                       categories:
                         items:
                           type: string
+                        maxItems: 10
                         type: array
                       conditions:
                         additionalProperties: true
@@ -34686,6 +34981,7 @@ paths:
                               capabilities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               subscription:
                                 type: string
@@ -34699,6 +34995,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 1000
                         type: array
                       description:
                         type: string
@@ -34715,6 +35012,7 @@ paths:
                                   type: string
                               required:
                                 - name
+                            maxItems: 10
                             type: array
                           fields:
                             items:
@@ -34725,6 +35023,7 @@ paths:
                                   type: string
                               required:
                                 - name
+                            maxItems: 10
                             type: array
                       download:
                         type: string
@@ -34752,6 +35051,7 @@ paths:
                               type: string
                           required:
                             - src
+                        maxItems: 10
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -34789,6 +35089,7 @@ paths:
                                 required:
                                   - id
                                   - type
+                              maxItems: 100
                               type: array
                             type: object
                           created_at:
@@ -34815,6 +35116,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           install_format_schema_version:
                             type: string
@@ -34858,6 +35160,7 @@ paths:
                               required:
                                 - id
                                 - type
+                            maxItems: 1000
                             type: array
                           installed_kibana:
                             items:
@@ -34890,6 +35193,7 @@ paths:
                               required:
                                 - id
                                 - type
+                            maxItems: 1000
                             type: array
                           installed_kibana_space_id:
                             type: string
@@ -34931,12 +35235,14 @@ paths:
                                 - created_at
                                 - target_version
                                 - error
+                            maxItems: 10
                             type: array
                           name:
                             type: string
                           namespaces:
                             items:
                               type: string
+                            maxItems: 100
                             type: array
                           previous_version:
                             nullable: true
@@ -34999,6 +35305,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 100
                         type: array
                       readme:
                         type: string
@@ -35027,6 +35334,7 @@ paths:
                               type: string
                           required:
                             - src
+                        maxItems: 10
                         type: array
                       signature_path:
                         type: string
@@ -35058,6 +35366,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 1000
                         type: array
                       version:
                         type: string
@@ -35245,6 +35554,7 @@ paths:
                           required:
                             - id
                             - type
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -35346,15 +35656,18 @@ paths:
                             asset_ids:
                               items:
                                 type: string
+                              maxItems: 100
                               type: array
                             asset_types:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             text:
                               type: string
                           required:
                             - text
+                        maxItems: 1000
                         type: array
                       assets:
                         additionalProperties: {}
@@ -35362,6 +35675,7 @@ paths:
                       categories:
                         items:
                           type: string
+                        maxItems: 10
                         type: array
                       conditions:
                         additionalProperties: true
@@ -35374,6 +35688,7 @@ paths:
                               capabilities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               subscription:
                                 type: string
@@ -35387,6 +35702,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 1000
                         type: array
                       description:
                         type: string
@@ -35403,6 +35719,7 @@ paths:
                                   type: string
                               required:
                                 - name
+                            maxItems: 10
                             type: array
                           fields:
                             items:
@@ -35413,6 +35730,7 @@ paths:
                                   type: string
                               required:
                                 - name
+                            maxItems: 10
                             type: array
                       download:
                         type: string
@@ -35440,6 +35758,7 @@ paths:
                               type: string
                           required:
                             - src
+                        maxItems: 10
                         type: array
                       installationInfo:
                         additionalProperties: true
@@ -35477,6 +35796,7 @@ paths:
                                 required:
                                   - id
                                   - type
+                              maxItems: 100
                               type: array
                             type: object
                           created_at:
@@ -35503,6 +35823,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           install_format_schema_version:
                             type: string
@@ -35546,6 +35867,7 @@ paths:
                               required:
                                 - id
                                 - type
+                            maxItems: 1000
                             type: array
                           installed_kibana:
                             items:
@@ -35578,6 +35900,7 @@ paths:
                               required:
                                 - id
                                 - type
+                            maxItems: 1000
                             type: array
                           installed_kibana_space_id:
                             type: string
@@ -35619,12 +35942,14 @@ paths:
                                 - created_at
                                 - target_version
                                 - error
+                            maxItems: 10
                             type: array
                           name:
                             type: string
                           namespaces:
                             items:
                               type: string
+                            maxItems: 100
                             type: array
                           previous_version:
                             nullable: true
@@ -35687,6 +36012,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 100
                         type: array
                       readme:
                         type: string
@@ -35715,6 +36041,7 @@ paths:
                               type: string
                           required:
                             - src
+                        maxItems: 10
                         type: array
                       signature_path:
                         type: string
@@ -35746,6 +36073,7 @@ paths:
                         items:
                           additionalProperties: {}
                           type: object
+                        maxItems: 1000
                         type: array
                       version:
                         type: string
@@ -36029,6 +36357,7 @@ paths:
                   description: When provided install assets in the specified spaces instead of the current space.
                   items:
                     type: string
+                  maxItems: 100
                   minItems: 1
                   type: array
       responses:
@@ -36192,6 +36521,7 @@ paths:
                         type: string
                     required:
                       - transformId
+                  maxItems: 1000
                   type: array
               required:
                 - transforms
@@ -36214,6 +36544,7 @@ paths:
                     - transformId
                     - success
                     - error
+                maxItems: 10000
                 type: array
           description: 'OK: A successful request.'
         '400':
@@ -36434,6 +36765,7 @@ paths:
               anyOf:
                 - type: string
                 - type: number
+            maxItems: 10
             type: array
         - in: query
           name: perPage
@@ -36475,6 +36807,7 @@ paths:
                             required:
                               - name
                               - title
+                          maxItems: 1000
                           type: array
                         description:
                           type: string
@@ -36497,6 +36830,7 @@ paths:
                                 type: string
                             required:
                               - src
+                          maxItems: 10
                           type: array
                         name:
                           type: string
@@ -36511,6 +36845,7 @@ paths:
                         - version
                         - status
                         - dataStreams
+                    maxItems: 10000
                     type: array
                   searchAfter:
                     items:
@@ -36521,6 +36856,7 @@ paths:
                         - enum: []
                           nullable: true
                         - {}
+                    maxItems: 2
                     type: array
                   total:
                     type: number
@@ -36578,6 +36914,7 @@ paths:
                   items:
                     items:
                       type: string
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -36688,12 +37025,14 @@ paths:
                                 required:
                                   - id
                                   - data_stream
+                              maxItems: 10000
                               type: array
                             type:
                               type: string
                           required:
                             - id
                             - type
+                        maxItems: 10000
                         type: array
                     required:
                       - inputs
@@ -36806,6 +37145,7 @@ paths:
                         host_urls:
                           items:
                             type: string
+                          maxItems: 10
                           minItems: 1
                           type: array
                         id:
@@ -36871,6 +37211,7 @@ paths:
                             agent_certificate_authorities:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             agent_key:
                               type: string
@@ -36879,6 +37220,7 @@ paths:
                             certificate_authorities:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             client_auth:
                               enum:
@@ -36891,6 +37233,7 @@ paths:
                             es_certificate_authorities:
                               items:
                                 type: string
+                              maxItems: 10
                               type: array
                             es_key:
                               type: string
@@ -36900,6 +37243,7 @@ paths:
                         - name
                         - host_urls
                         - id
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -36968,6 +37312,7 @@ paths:
                 host_urls:
                   items:
                     type: string
+                  maxItems: 10
                   minItems: 1
                   type: array
                 id:
@@ -37033,6 +37378,7 @@ paths:
                     agent_certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     agent_key:
                       type: string
@@ -37041,6 +37387,7 @@ paths:
                     certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     client_auth:
                       enum:
@@ -37053,6 +37400,7 @@ paths:
                     es_certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     es_key:
                       type: string
@@ -37076,6 +37424,7 @@ paths:
                       host_urls:
                         items:
                           type: string
+                        maxItems: 10
                         minItems: 1
                         type: array
                       id:
@@ -37141,6 +37490,7 @@ paths:
                           agent_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           agent_key:
                             type: string
@@ -37149,6 +37499,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           client_auth:
                             enum:
@@ -37161,6 +37512,7 @@ paths:
                           es_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           es_key:
                             type: string
@@ -37295,6 +37647,7 @@ paths:
                       host_urls:
                         items:
                           type: string
+                        maxItems: 10
                         minItems: 1
                         type: array
                       id:
@@ -37360,6 +37713,7 @@ paths:
                           agent_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           agent_key:
                             type: string
@@ -37368,6 +37722,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           client_auth:
                             enum:
@@ -37380,6 +37735,7 @@ paths:
                           es_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           es_key:
                             type: string
@@ -37452,6 +37808,7 @@ paths:
                 host_urls:
                   items:
                     type: string
+                  maxItems: 10
                   minItems: 1
                   type: array
                 is_default:
@@ -37511,6 +37868,7 @@ paths:
                     agent_certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     agent_key:
                       type: string
@@ -37519,6 +37877,7 @@ paths:
                     certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     client_auth:
                       enum:
@@ -37531,6 +37890,7 @@ paths:
                     es_certificate_authorities:
                       items:
                         type: string
+                      maxItems: 10
                       type: array
                     es_key:
                       type: string
@@ -37553,6 +37913,7 @@ paths:
                       host_urls:
                         items:
                           type: string
+                        maxItems: 10
                         minItems: 1
                         type: array
                       id:
@@ -37618,6 +37979,7 @@ paths:
                           agent_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           agent_key:
                             type: string
@@ -37626,6 +37988,7 @@ paths:
                           certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           client_auth:
                             enum:
@@ -37638,6 +38001,7 @@ paths:
                           es_certificate_authorities:
                             items:
                               type: string
+                            maxItems: 10
                             type: array
                           es_key:
                             type: string
@@ -38095,6 +38459,7 @@ paths:
                             allow_edit:
                               items:
                                 type: string
+                              maxItems: 1000
                               type: array
                             ca_sha256:
                               nullable: true
@@ -38109,6 +38474,7 @@ paths:
                               items:
                                 format: uri
                                 type: string
+                              maxItems: 10
                               minItems: 1
                               type: array
                             id:
@@ -38212,6 +38578,7 @@ paths:
                                 certificate_authorities:
                                   items:
                                     type: string
+                                  maxItems: 10
                                   type: array
                                 key:
                                   type: string
@@ -38239,6 +38606,7 @@ paths:
                             allow_edit:
                               items:
                                 type: string
+                              maxItems: 1000
                               type: array
                             ca_sha256:
                               nullable: true
@@ -38253,6 +38621,7 @@ paths:
                               items:
                                 format: uri
                                 type: string
+                              maxItems: 10
                               minItems: 1
                               type: array
                             id:
@@ -38377,6 +38746,7 @@ paths:
                                 certificate_authorities:
                                   items:
                                     type: string
+                                  maxItems: 10
                                   type: array
                                 key:
                                   type: string
@@ -38408,6 +38778,7 @@ paths:
                             allow_edit:
                               items:
                                 type: string
+                              maxItems: 1000
                               type: array
                             ca_sha256:
                               nullable: true
@@ -38421,6 +38792,7 @@ paths:
                             hosts:
                               items:
                                 type: string
+                              maxItems: 10
                               minItems: 1
                               type: array
                             id:
@@ -38516,6 +38888,7 @@ paths:
                                 certificate_authorities:
                                   items:
                                     type: string
+                                  maxItems: 10
                                   type: array
                                 key:
                                   type: string
@@ -38540,6 +38913,7 @@ paths:
                             allow_edit:
                               items:
                                 type: string
+                              maxItems: 1000
                               type: array
                             auth_type:
                               enum:
@@ -38615,10 +38989,12 @@ paths:
                                 required:
                                   - key
                                   - value
+                              maxItems: 100
                               type: array
                             hosts:
                               items:
                                 type: string
+                              maxItems: 10
                               minItems: 1
                               type: array
                             id:
@@ -38787,6 +39163,7 @@ paths:
                                 certificate_authorities:
                                   items:
                                     type: string
+                                  maxItems: 10
                                   type: array
                                 key:
                                   type: string
@@ -38828,6 +39205,7 @@ paths:
                             - connection_type
                             - username
                             - password
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -38897,6 +39275,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -38911,6 +39290,7 @@ paths:
                       items:
                         format: uri
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -39014,6 +39394,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -39041,6 +39422,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -39055,6 +39437,7 @@ paths:
                       items:
                         format: uri
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -39179,6 +39562,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -39210,6 +39594,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -39223,6 +39608,7 @@ paths:
                     hosts:
                       items:
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -39318,6 +39704,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -39342,6 +39729,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     auth_type:
                       enum:
@@ -39417,10 +39805,12 @@ paths:
                         required:
                           - key
                           - value
+                      maxItems: 100
                       type: array
                     hosts:
                       items:
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -39589,6 +39979,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -39646,6 +40037,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -39660,6 +40052,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -39763,6 +40156,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -39790,6 +40184,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -39804,6 +40199,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -39928,6 +40324,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -39959,6 +40356,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -39972,6 +40370,7 @@ paths:
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -40067,6 +40466,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -40091,6 +40491,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           auth_type:
                             enum:
@@ -40166,10 +40567,12 @@ paths:
                               required:
                                 - key
                                 - value
+                            maxItems: 100
                             type: array
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -40338,6 +40741,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -40526,6 +40930,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -40540,6 +40945,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -40643,6 +41049,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -40670,6 +41077,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -40684,6 +41092,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -40808,6 +41217,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -40839,6 +41249,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -40852,6 +41263,7 @@ paths:
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -40947,6 +41359,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -40971,6 +41384,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           auth_type:
                             enum:
@@ -41046,10 +41460,12 @@ paths:
                               required:
                                 - key
                                 - value
+                            maxItems: 100
                             type: array
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -41218,6 +41634,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -41323,6 +41740,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -41337,6 +41755,7 @@ paths:
                       items:
                         format: uri
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -41438,6 +41857,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -41461,6 +41881,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -41475,6 +41896,7 @@ paths:
                       items:
                         format: uri
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -41597,6 +42019,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -41624,6 +42047,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     ca_sha256:
                       nullable: true
@@ -41637,6 +42061,7 @@ paths:
                     hosts:
                       items:
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -41730,6 +42155,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -41750,6 +42176,7 @@ paths:
                     allow_edit:
                       items:
                         type: string
+                      maxItems: 1000
                       type: array
                     auth_type:
                       enum:
@@ -41825,10 +42252,12 @@ paths:
                         required:
                           - key
                           - value
+                      maxItems: 100
                       type: array
                     hosts:
                       items:
                         type: string
+                      maxItems: 10
                       minItems: 1
                       type: array
                     id:
@@ -41997,6 +42426,7 @@ paths:
                         certificate_authorities:
                           items:
                             type: string
+                          maxItems: 10
                           type: array
                         key:
                           type: string
@@ -42051,6 +42481,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -42065,6 +42496,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -42168,6 +42600,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -42195,6 +42628,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -42209,6 +42643,7 @@ paths:
                             items:
                               format: uri
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -42333,6 +42768,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -42364,6 +42800,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           ca_sha256:
                             nullable: true
@@ -42377,6 +42814,7 @@ paths:
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -42472,6 +42910,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -42496,6 +42935,7 @@ paths:
                           allow_edit:
                             items:
                               type: string
+                            maxItems: 1000
                             type: array
                           auth_type:
                             enum:
@@ -42571,10 +43011,12 @@ paths:
                               required:
                                 - key
                                 - value
+                            maxItems: 100
                             type: array
                           hosts:
                             items:
                               type: string
+                            maxItems: 10
                             minItems: 1
                             type: array
                           id:
@@ -42743,6 +43185,7 @@ paths:
                               certificate_authorities:
                                 items:
                                   type: string
+                                maxItems: 10
                                 type: array
                               key:
                                 type: string
@@ -42947,6 +43390,7 @@ paths:
                           description: Additional datastream permissions, that will be added to the agent policy.
                           items:
                             type: string
+                          maxItems: 1000
                           nullable: true
                           type: array
                         agents:
@@ -42979,6 +43423,7 @@ paths:
                                 cluster:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                         enabled:
                           type: boolean
@@ -43055,6 +43500,7 @@ paths:
                                                     indices:
                                                       items:
                                                         type: string
+                                                      maxItems: 100
                                                       type: array
                                             type:
                                               type: string
@@ -43091,6 +43537,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
+                                    maxItems: 100
                                     type: array
                                   type:
                                     type: string
@@ -43113,6 +43560,7 @@ paths:
                                   - enabled
                                   - streams
                                   - compiled_input
+                              maxItems: 100
                               type: array
                             - additionalProperties:
                                 additionalProperties: false
@@ -43137,9 +43585,11 @@ paths:
                                               - type: number
                                               - items:
                                                   type: string
+                                                maxItems: 100
                                                 type: array
                                               - items:
                                                   type: number
+                                                maxItems: 100
                                                 type: array
                                               - additionalProperties: false
                                                 type: object
@@ -43164,9 +43614,11 @@ paths:
                                         - type: number
                                         - items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                         - items:
                                             type: number
+                                          maxItems: 100
                                           type: array
                                         - additionalProperties: false
                                           type: object
@@ -43231,6 +43683,7 @@ paths:
                                 required:
                                   - data_stream
                                   - features
+                              maxItems: 100
                               type: array
                             fips_compatible:
                               type: boolean
@@ -43270,10 +43723,12 @@ paths:
                                 type: string
                             required:
                               - id
+                          maxItems: 100
                           type: array
                         spaceIds:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         supports_agentless:
                           default: false
@@ -43311,9 +43766,11 @@ paths:
                                   - type: number
                                   - items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   - items:
                                       type: number
+                                    maxItems: 100
                                     type: array
                                   - additionalProperties: false
                                     type: object
@@ -43343,6 +43800,7 @@ paths:
                         - updated_by
                         - created_at
                         - created_by
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -43419,6 +43877,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      maxItems: 1000
                       nullable: true
                       type: array
                     cloud_connector_id:
@@ -43510,6 +43969,7 @@ paths:
                                             indices:
                                               items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                     type:
                                       type: string
@@ -43546,6 +44006,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
+                            maxItems: 100
                             type: array
                           type:
                             type: string
@@ -43566,6 +44027,7 @@ paths:
                         required:
                           - type
                           - enabled
+                      maxItems: 1000
                       type: array
                     is_managed:
                       type: boolean
@@ -43613,6 +44075,7 @@ paths:
                             required:
                               - data_stream
                               - features
+                          maxItems: 100
                           type: array
                         fips_compatible:
                           type: boolean
@@ -43643,6 +44106,7 @@ paths:
                     spaceIds:
                       items:
                         type: string
+                      maxItems: 100
                       type: array
                     supports_agentless:
                       default: false
@@ -43679,6 +44143,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      maxItems: 100
                       nullable: true
                       type: array
                     description:
@@ -43714,9 +44179,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -43741,9 +44208,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -43795,6 +44264,7 @@ paths:
                             required:
                               - data_stream
                               - features
+                          maxItems: 100
                           type: array
                         fips_compatible:
                           type: boolean
@@ -43836,9 +44306,11 @@ paths:
                           - type: number
                           - items:
                               type: string
+                            maxItems: 100
                             type: array
                           - items:
                               type: number
+                            maxItems: 100
                             type: array
                           - additionalProperties: false
                             type: object
@@ -43873,6 +44345,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       agents:
@@ -43905,6 +44378,7 @@ paths:
                               cluster:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                       enabled:
                         type: boolean
@@ -43981,6 +44455,7 @@ paths:
                                                   indices:
                                                     items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                           type:
                                             type: string
@@ -44017,6 +44492,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
+                                  maxItems: 100
                                   type: array
                                 type:
                                   type: string
@@ -44039,6 +44515,7 @@ paths:
                                 - enabled
                                 - streams
                                 - compiled_input
+                            maxItems: 100
                             type: array
                           - additionalProperties:
                               additionalProperties: false
@@ -44063,9 +44540,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -44090,9 +44569,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -44157,6 +44638,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           fips_compatible:
                             type: boolean
@@ -44196,10 +44678,12 @@ paths:
                               type: string
                           required:
                             - id
+                        maxItems: 100
                         type: array
                       spaceIds:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       supports_agentless:
                         default: false
@@ -44237,9 +44721,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -44356,6 +44842,7 @@ paths:
                   description: list of package policy ids
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
                 ignoreMissing:
                   type: boolean
@@ -44378,6 +44865,7 @@ paths:
                           description: Additional datastream permissions, that will be added to the agent policy.
                           items:
                             type: string
+                          maxItems: 1000
                           nullable: true
                           type: array
                         agents:
@@ -44410,6 +44898,7 @@ paths:
                                 cluster:
                                   items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                         enabled:
                           type: boolean
@@ -44486,6 +44975,7 @@ paths:
                                                     indices:
                                                       items:
                                                         type: string
+                                                      maxItems: 100
                                                       type: array
                                             type:
                                               type: string
@@ -44522,6 +45012,7 @@ paths:
                                         - enabled
                                         - data_stream
                                         - compiled_stream
+                                    maxItems: 100
                                     type: array
                                   type:
                                     type: string
@@ -44544,6 +45035,7 @@ paths:
                                   - enabled
                                   - streams
                                   - compiled_input
+                              maxItems: 100
                               type: array
                             - additionalProperties:
                                 additionalProperties: false
@@ -44568,9 +45060,11 @@ paths:
                                               - type: number
                                               - items:
                                                   type: string
+                                                maxItems: 100
                                                 type: array
                                               - items:
                                                   type: number
+                                                maxItems: 100
                                                 type: array
                                               - additionalProperties: false
                                                 type: object
@@ -44595,9 +45089,11 @@ paths:
                                         - type: number
                                         - items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                         - items:
                                             type: number
+                                          maxItems: 100
                                           type: array
                                         - additionalProperties: false
                                           type: object
@@ -44662,6 +45158,7 @@ paths:
                                 required:
                                   - data_stream
                                   - features
+                              maxItems: 100
                               type: array
                             fips_compatible:
                               type: boolean
@@ -44701,10 +45198,12 @@ paths:
                                 type: string
                             required:
                               - id
+                          maxItems: 100
                           type: array
                         spaceIds:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         supports_agentless:
                           default: false
@@ -44742,9 +45241,11 @@ paths:
                                   - type: number
                                   - items:
                                       type: string
+                                    maxItems: 100
                                     type: array
                                   - items:
                                       type: number
+                                    maxItems: 100
                                     type: array
                                   - additionalProperties: false
                                     type: object
@@ -44774,6 +45275,7 @@ paths:
                         - updated_by
                         - created_at
                         - created_by
+                    maxItems: 10000
                     type: array
                 required:
                   - items
@@ -44932,6 +45434,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       agents:
@@ -44964,6 +45467,7 @@ paths:
                               cluster:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                       enabled:
                         type: boolean
@@ -45040,6 +45544,7 @@ paths:
                                                   indices:
                                                     items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                           type:
                                             type: string
@@ -45076,6 +45581,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
+                                  maxItems: 100
                                   type: array
                                 type:
                                   type: string
@@ -45098,6 +45604,7 @@ paths:
                                 - enabled
                                 - streams
                                 - compiled_input
+                            maxItems: 100
                             type: array
                           - additionalProperties:
                               additionalProperties: false
@@ -45122,9 +45629,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -45149,9 +45658,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -45216,6 +45727,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           fips_compatible:
                             type: boolean
@@ -45255,10 +45767,12 @@ paths:
                               type: string
                           required:
                             - id
+                        maxItems: 100
                         type: array
                       spaceIds:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       supports_agentless:
                         default: false
@@ -45296,9 +45810,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -45413,6 +45929,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      maxItems: 1000
                       nullable: true
                       type: array
                     cloud_connector_id:
@@ -45500,6 +46017,7 @@ paths:
                                             indices:
                                               items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                     type:
                                       type: string
@@ -45536,6 +46054,7 @@ paths:
                                 - enabled
                                 - data_stream
                                 - compiled_stream
+                            maxItems: 100
                             type: array
                           type:
                             type: string
@@ -45556,6 +46075,7 @@ paths:
                         required:
                           - type
                           - enabled
+                      maxItems: 100
                       type: array
                     is_managed:
                       type: boolean
@@ -45602,6 +46122,7 @@ paths:
                             required:
                               - data_stream
                               - features
+                          maxItems: 100
                           type: array
                         fips_compatible:
                           type: boolean
@@ -45632,6 +46153,7 @@ paths:
                     spaceIds:
                       items:
                         type: string
+                      maxItems: 100
                       type: array
                     supports_agentless:
                       default: false
@@ -45666,6 +46188,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      maxItems: 100
                       nullable: true
                       type: array
                     description:
@@ -45701,9 +46224,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -45728,9 +46253,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -45782,6 +46309,7 @@ paths:
                             required:
                               - data_stream
                               - features
+                          maxItems: 100
                           type: array
                         fips_compatible:
                           type: boolean
@@ -45823,9 +46351,11 @@ paths:
                           - type: number
                           - items:
                               type: string
+                            maxItems: 100
                             type: array
                           - items:
                               type: number
+                            maxItems: 100
                             type: array
                           - additionalProperties: false
                             type: object
@@ -45859,6 +46389,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        maxItems: 1000
                         nullable: true
                         type: array
                       agents:
@@ -45891,6 +46422,7 @@ paths:
                               cluster:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                       enabled:
                         type: boolean
@@ -45967,6 +46499,7 @@ paths:
                                                   indices:
                                                     items:
                                                       type: string
+                                                    maxItems: 100
                                                     type: array
                                           type:
                                             type: string
@@ -46003,6 +46536,7 @@ paths:
                                       - enabled
                                       - data_stream
                                       - compiled_stream
+                                  maxItems: 100
                                   type: array
                                 type:
                                   type: string
@@ -46025,6 +46559,7 @@ paths:
                                 - enabled
                                 - streams
                                 - compiled_input
+                            maxItems: 100
                             type: array
                           - additionalProperties:
                               additionalProperties: false
@@ -46049,9 +46584,11 @@ paths:
                                             - type: number
                                             - items:
                                                 type: string
+                                              maxItems: 100
                                               type: array
                                             - items:
                                                 type: number
+                                              maxItems: 100
                                               type: array
                                             - additionalProperties: false
                                               type: object
@@ -46076,9 +46613,11 @@ paths:
                                       - type: number
                                       - items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                                       - items:
                                           type: number
+                                        maxItems: 100
                                         type: array
                                       - additionalProperties: false
                                         type: object
@@ -46143,6 +46682,7 @@ paths:
                               required:
                                 - data_stream
                                 - features
+                            maxItems: 100
                             type: array
                           fips_compatible:
                             type: boolean
@@ -46182,10 +46722,12 @@ paths:
                               type: string
                           required:
                             - id
+                        maxItems: 100
                         type: array
                       spaceIds:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       supports_agentless:
                         default: false
@@ -46223,9 +46765,11 @@ paths:
                                 - type: number
                                 - items:
                                     type: string
+                                  maxItems: 100
                                   type: array
                                 - items:
                                     type: number
+                                  maxItems: 100
                                   type: array
                                 - additionalProperties: false
                                   type: object
@@ -46337,6 +46881,7 @@ paths:
                 packagePolicyIds:
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - packagePolicyIds
@@ -46390,6 +46935,7 @@ paths:
                             required:
                               - data_stream
                               - features
+                          maxItems: 100
                           type: array
                         fips_compatible:
                           type: boolean
@@ -46414,6 +46960,7 @@ paths:
                     policy_ids:
                       items:
                         type: string
+                      maxItems: 10000
                       type: array
                     statusCode:
                       type: number
@@ -46424,6 +46971,7 @@ paths:
                     - success
                     - policy_ids
                     - package
+                maxItems: 10000
                 type: array
           description: 'OK: A successful request.'
         '400':
@@ -46482,6 +47030,7 @@ paths:
                 packagePolicyIds:
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
               required:
                 - packagePolicyIds
@@ -46513,6 +47062,7 @@ paths:
                   required:
                     - id
                     - success
+                maxItems: 10000
                 type: array
           description: 'OK: A successful request.'
         '400':
@@ -46571,6 +47121,7 @@ paths:
                 packagePolicyIds:
                   items:
                     type: string
+                  maxItems: 1000
                   type: array
                 packageVersion:
                   type: string
@@ -46644,6 +47195,7 @@ paths:
                                       - fields
                                 required:
                                   - add_fields
+                              maxItems: 10000
                               type: array
                             revision:
                               type: number
@@ -46666,6 +47218,7 @@ paths:
                                     type: string
                                 required:
                                   - data_stream
+                              maxItems: 10000
                               type: array
                             type:
                               type: string
@@ -46679,7 +47232,9 @@ paths:
                             - data_stream
                             - use_output
                             - package_policy_id
+                        maxItems: 10000
                         type: array
+                      maxItems: 1
                       type: array
                     body:
                       additionalProperties: false
@@ -46699,6 +47254,7 @@ paths:
                                 description: Additional datastream permissions, that will be added to the agent policy.
                                 items:
                                   type: string
+                                maxItems: 1000
                                 nullable: true
                                 type: array
                               agents:
@@ -46731,6 +47287,7 @@ paths:
                                       cluster:
                                         items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                               enabled:
                                 type: boolean
@@ -46806,6 +47363,7 @@ paths:
                                                           indices:
                                                             items:
                                                               type: string
+                                                            maxItems: 100
                                                             type: array
                                                   type:
                                                     type: string
@@ -46842,6 +47400,7 @@ paths:
                                               - enabled
                                               - data_stream
                                               - compiled_stream
+                                          maxItems: 100
                                           type: array
                                         type:
                                           type: string
@@ -46864,6 +47423,7 @@ paths:
                                         - enabled
                                         - streams
                                         - compiled_input
+                                    maxItems: 100
                                     type: array
                                   - additionalProperties:
                                       additionalProperties: false
@@ -46888,9 +47448,11 @@ paths:
                                                     - type: number
                                                     - items:
                                                         type: string
+                                                      maxItems: 100
                                                       type: array
                                                     - items:
                                                         type: number
+                                                      maxItems: 100
                                                       type: array
                                                     - additionalProperties: false
                                                       type: object
@@ -46915,9 +47477,11 @@ paths:
                                               - type: number
                                               - items:
                                                   type: string
+                                                maxItems: 100
                                                 type: array
                                               - items:
                                                   type: number
+                                                maxItems: 100
                                                 type: array
                                               - additionalProperties: false
                                                 type: object
@@ -46982,6 +47546,7 @@ paths:
                                       required:
                                         - data_stream
                                         - features
+                                    maxItems: 100
                                     type: array
                                   fips_compatible:
                                     type: boolean
@@ -47021,10 +47586,12 @@ paths:
                                       type: string
                                   required:
                                     - id
+                                maxItems: 100
                                 type: array
                               spaceIds:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                               supports_agentless:
                                 default: false
@@ -47062,9 +47629,11 @@ paths:
                                         - type: number
                                         - items:
                                             type: string
+                                          maxItems: 100
                                           type: array
                                         - items:
                                             type: number
+                                          maxItems: 100
                                           type: array
                                         - additionalProperties: false
                                           type: object
@@ -47100,6 +47669,7 @@ paths:
                                 description: Additional datastream permissions, that will be added to the agent policy.
                                 items:
                                   type: string
+                                maxItems: 1000
                                 nullable: true
                                 type: array
                               cloud_connector_id:
@@ -47130,6 +47700,7 @@ paths:
                                       cluster:
                                         items:
                                           type: string
+                                        maxItems: 100
                                         type: array
                               enabled:
                                 type: boolean
@@ -47144,6 +47715,7 @@ paths:
                                       type: string
                                   required:
                                     - message
+                                maxItems: 10
                                 type: array
                               force:
                                 type: boolean
@@ -47218,6 +47790,7 @@ paths:
                                                       indices:
                                                         items:
                                                           type: string
+                                                        maxItems: 100
                                                         type: array
                                               type:
                                                 type: string
@@ -47254,6 +47827,7 @@ paths:
                                           - enabled
                                           - data_stream
                                           - compiled_stream
+                                      maxItems: 100
                                       type: array
                                     type:
                                       type: string
@@ -47276,12 +47850,14 @@ paths:
                                     - enabled
                                     - streams
                                     - compiled_input
+                                maxItems: 100
                                 type: array
                               is_managed:
                                 type: boolean
                               missingVars:
                                 items:
                                   type: string
+                                maxItems: 100
                                 type: array
                               name:
                                 description: Unique name for the package policy.
@@ -47327,6 +47903,7 @@ paths:
                                       required:
                                         - data_stream
                                         - features
+                                    maxItems: 100
                                     type: array
                                   fips_compatible:
                                     type: boolean
@@ -47365,6 +47942,7 @@ paths:
                                       type: string
                                   required:
                                     - id
+                                maxItems: 100
                                 type: array
                               supports_agentless:
                                 default: false
@@ -47401,6 +47979,7 @@ paths:
                               - name
                               - enabled
                               - inputs
+                      maxItems: 2
                       type: array
                     hasErrors:
                       type: boolean
@@ -47410,6 +47989,7 @@ paths:
                       type: number
                   required:
                     - hasErrors
+                maxItems: 10000
                 type: array
           description: 'OK: A successful request.'
         '400':
@@ -47494,6 +48074,7 @@ paths:
                         - id
                         - url
                         - name
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -48008,6 +48589,7 @@ paths:
                           enum:
                             - fleet_server_hosts
                           type: string
+                        maxItems: 1
                         type: array
                       prerelease_integrations_enabled:
                         type: boolean
@@ -48120,6 +48702,7 @@ paths:
                   items:
                     format: uri
                     type: string
+                  maxItems: 10
                   type: array
                 prerelease_integrations_enabled:
                   type: boolean
@@ -48180,6 +48763,7 @@ paths:
                           enum:
                             - fleet_server_hosts
                           type: string
+                        maxItems: 1
                         type: array
                       prerelease_integrations_enabled:
                         type: boolean
@@ -48282,6 +48866,7 @@ paths:
                       required:
                         - name
                         - message
+                    maxItems: 10000
                     type: array
                 required:
                   - isInitialized
@@ -48346,6 +48931,7 @@ paths:
                       allowed_namespace_prefixes:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       managed_by:
                         type: string
@@ -48394,6 +48980,7 @@ paths:
                 allowed_namespace_prefixes:
                   items:
                     type: string
+                  maxItems: 10
                   type: array
       responses:
         '200':
@@ -48410,6 +48997,7 @@ paths:
                       allowed_namespace_prefixes:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       managed_by:
                         type: string
@@ -48482,6 +49070,7 @@ paths:
                         namespaces:
                           items:
                             type: string
+                          maxItems: 100
                           type: array
                         policy_id:
                           type: string
@@ -48492,6 +49081,7 @@ paths:
                         - id
                         - policy_id
                         - created_at
+                    maxItems: 10000
                     type: array
                   page:
                     type: number
@@ -48568,6 +49158,7 @@ paths:
                       namespaces:
                         items:
                           type: string
+                        maxItems: 100
                         type: array
                       policy_id:
                         type: string

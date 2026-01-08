@@ -57519,6 +57519,16 @@ paths:
   /api/saved_objects/_bulk_create:
     post:
       deprecated: true
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_create</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create multiple Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       operationId: bulkCreateSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -57554,12 +57564,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_create</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/saved_objects/_bulk_delete:
     post:
       deprecated: true
@@ -57571,6 +57575,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         WARNING: When you delete a saved object, it cannot be recovered.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. There is currently no alternative API for all use cases supported by this API. Once alternative APIs are provided in a future Elastic version, it will be possible to migrate away from this API.
       operationId: bulkDeleteSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -57611,6 +57617,16 @@ paths:
   /api/saved_objects/_bulk_get:
     post:
       deprecated: true
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_get</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve multiple Kibana saved objects by identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       operationId: bulkGetSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -57641,12 +57657,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_get</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/saved_objects/_bulk_resolve:
     post:
       deprecated: true
@@ -57658,6 +57668,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Retrieve multiple Kibana saved objects by identifier using any legacy URL aliases if they exist. Under certain circumstances when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved by the bulk resolve API using either its new ID or its old ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       operationId: bulkResolveSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -57692,7 +57704,7 @@ paths:
   /api/saved_objects/_bulk_update:
     post:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_update</span></div>
@@ -57700,6 +57712,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Update the attributes for multiple Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       operationId: bulkUpdateSavedObjects
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -57891,7 +57905,7 @@ paths:
   /api/saved_objects/_find:
     get:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_find</span></div>
@@ -57899,6 +57913,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Retrieve a paginated set of Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       operationId: findSavedObjects
       parameters:
         - description: |
@@ -58280,7 +58296,7 @@ paths:
   /api/saved_objects/{type}:
     post:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}</span></div>
@@ -58288,6 +58304,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create a Kibana saved object with a randomly generated identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       operationId: createSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -58334,7 +58352,7 @@ paths:
   /api/saved_objects/{type}/{id}:
     get:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -58342,6 +58360,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Retrieve a single Kibana saved object by identifier.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       operationId: getSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_saved_object_id'
@@ -58367,7 +58387,7 @@ paths:
           name: product_name
     post:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -58375,6 +58395,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       operationId: createSavedObjectId
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -58421,7 +58443,7 @@ paths:
           name: product_name
     put:
       deprecated: true
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -58429,6 +58451,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Update the attributes for Kibana saved objects.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
       operationId: updateSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_kbn_xsrf'
@@ -58476,6 +58500,8 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists. Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features. When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID. In such a scenario, that object can be retrieved using either its new ID or its old ID.
+
+        WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the export API for your use case.
       operationId: resolveSavedObject
       parameters:
         - $ref: '#/components/parameters/Saved_objects_saved_object_id'

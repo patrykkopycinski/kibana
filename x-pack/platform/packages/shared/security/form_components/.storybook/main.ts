@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-export * from './form_changes';
-export * from './form_field';
-export * from './form_label';
-export * from './form_row';
-export * from './theme_keypad_menu';
-export * from './contrast_keypad_menu';
+import { defaultConfig } from '@kbn/storybook';
+
+module.exports = {
+  ...defaultConfig,
+  stories: ['../**/*.stories.+(tsx|mdx)'],
+  reactOptions: {
+    strictMode: true,
+  },
+};

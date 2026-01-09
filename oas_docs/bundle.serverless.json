@@ -2584,10 +2584,6 @@
                     },
                     "type": "object"
                   },
-                  "confirm": {
-                    "description": "Can be used to respond to a confirmation prompt.",
-                    "type": "boolean"
-                  },
                   "connector_id": {
                     "description": "Optional connector ID for the agent to use for external integrations.",
                     "type": "string"
@@ -2599,6 +2595,22 @@
                   "input": {
                     "description": "The user input message to send to the agent.",
                     "type": "string"
+                  },
+                  "prompts": {
+                    "additionalProperties": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allow": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "allow"
+                      ],
+                      "type": "object"
+                    },
+                    "description": "Can be used to respond to a confirmation prompt.",
+                    "type": "object"
                   }
                 },
                 "type": "object"
@@ -2763,10 +2775,6 @@
                     },
                     "type": "object"
                   },
-                  "confirm": {
-                    "description": "Can be used to respond to a confirmation prompt.",
-                    "type": "boolean"
-                  },
                   "connector_id": {
                     "description": "Optional connector ID for the agent to use for external integrations.",
                     "type": "string"
@@ -2778,6 +2786,22 @@
                   "input": {
                     "description": "The user input message to send to the agent.",
                     "type": "string"
+                  },
+                  "prompts": {
+                    "additionalProperties": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "allow": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "allow"
+                      ],
+                      "type": "object"
+                    },
+                    "description": "Can be used to respond to a confirmation prompt.",
+                    "type": "object"
                   }
                 },
                 "type": "object"

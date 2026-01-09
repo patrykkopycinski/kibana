@@ -3765,7 +3765,6 @@
     "home.sampleData.flightsSpec.flightLogTitle": "[航班] 飞行日志",
     "home.sampleData.flightsSpecDescription": "用于监测航班路线的样例数据、可视化和仪表板。",
     "home.sampleData.flightsSpecTitle": "样例航班数据",
-    "home.sampleData.logsSpec.bytesDistributionTitle": "[Logs] 字节分布",
     "home.sampleData.logsSpec.discoverTitle": "[Logs] 访问",
     "home.sampleData.logsSpec.heatmapTitle": "[日志] 唯一目标热图",
     "home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle": "[日志] 机器 OS 和目标 Sankey 图",

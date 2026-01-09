@@ -3771,7 +3771,6 @@
     "home.sampleData.flightsSpec.flightLogTitle": "[Vols] Journal de vol",
     "home.sampleData.flightsSpecDescription": "Exemple de données, de visualisations et de tableaux de bord pour le monitoring des itinéraires de vol.",
     "home.sampleData.flightsSpecTitle": "Exemple de données aéroportuaires",
-    "home.sampleData.logsSpec.bytesDistributionTitle": "[Logs] Distribution des octets",
     "home.sampleData.logsSpec.discoverTitle": "[Logs] Visites",
     "home.sampleData.logsSpec.heatmapTitle": "[Logs] Carte thermique de destination unique",
     "home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle": "[Logs] Diagramme de Sankey de système d'exploitation source et destination",

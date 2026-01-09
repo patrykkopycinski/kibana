@@ -3772,7 +3772,6 @@
     "home.sampleData.flightsSpec.flightLogTitle": "[フライト] 飛行記録",
     "home.sampleData.flightsSpecDescription": "飛行ルートを監視するサンプルデータ、ビジュアライゼーション、ダッシュボードです。",
     "home.sampleData.flightsSpecTitle": "サンプル飛行データ",
-    "home.sampleData.logsSpec.bytesDistributionTitle": "[Logs]バイト分布",
     "home.sampleData.logsSpec.discoverTitle": "[Logs]訪問",
     "home.sampleData.logsSpec.heatmapTitle": "[Logs] 一意の目的地ヒートマップ",
     "home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle": "[Logs] コンピューターOSと目的値サンキーダイアグラム",

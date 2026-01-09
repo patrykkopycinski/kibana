@@ -3752,7 +3752,6 @@
     "home.sampleData.flightsSpec.flightLogTitle": "[Flights] Flugprotokoll",
     "home.sampleData.flightsSpecDescription": "Beispieldaten, Visualisierungen und Dashboards zum Monitoring von Flugrouten.",
     "home.sampleData.flightsSpecTitle": "Beispiel für Flugdaten",
-    "home.sampleData.logsSpec.bytesDistributionTitle": "[Logs] Verteilung der Bytes",
     "home.sampleData.logsSpec.discoverTitle": "[Logs] Logdaten",
     "home.sampleData.logsSpec.heatmapTitle": "[Logs] Einzigartige Ziel-Heatmap",
     "home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle": "[Logs] Maschinenbetriebssystem und Ziel-Sankey-Diagramm",

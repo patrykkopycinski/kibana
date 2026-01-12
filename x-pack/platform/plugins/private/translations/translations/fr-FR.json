@@ -17555,7 +17555,6 @@
     "xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies": "Cette intégration est partagée par plusieurs stratégies d'agent.",
     "xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle": "Erreur lors de la suppression de {count} intégrations",
     "xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle": "Erreur lors de la suppression de l'intégration \"{id}\"",
-    "xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle": "Erreur lors de la suppression du déploiement sans agent",
     "xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle": "Erreur lors de la suppression de l'intégration",
     "xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle": "{count} intégrations ont été supprimées",
     "xpack.fleet.deletePackagePolicy.successSingleNotificationTitle": "L'intégration \"{id}\" a été supprimée",

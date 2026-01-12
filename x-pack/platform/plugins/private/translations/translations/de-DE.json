@@ -17295,7 +17295,6 @@
     "xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies": "Diese Integration wird von mehreren Agent Policies geteilt.",
     "xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle": "Fehler beim Löschen von {count} Integrationen",
     "xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle": "Fehler beim Löschen der Integration „{id}“",
-    "xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle": "Fehler beim Löschen des agentenlosen Deployments",
     "xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle": "Fehler beim Löschen der Integration",
     "xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle": "{count} Integrationen gelöscht",
     "xpack.fleet.deletePackagePolicy.successSingleNotificationTitle": "Integration ''{id}' gelöscht",

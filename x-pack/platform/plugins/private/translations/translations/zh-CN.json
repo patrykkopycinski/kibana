@@ -17565,7 +17565,6 @@
     "xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies": "此集成由多个代理策略共享。",
     "xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle": "删除 {count} 个集成时出错",
     "xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle": "删除集成“{id}”时出错",
-    "xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle": "删除无代理部署时出错",
     "xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle": "删除集成时出错",
     "xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle": "已删除 {count} 个集成",
     "xpack.fleet.deletePackagePolicy.successSingleNotificationTitle": "已删除集成“{id}”",

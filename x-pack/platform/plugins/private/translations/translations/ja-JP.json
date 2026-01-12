@@ -17576,7 +17576,6 @@
     "xpack.fleet.deletePackagePolicy.confirmModal.warningMultipleAgentPolicies": "この統合は、複数のエージェントポリシーによって共有されています。",
     "xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle": "{count}個の統合の削除エラー",
     "xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle": "統合''{id}''の削除エラー",
-    "xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle": "エージェントレスデプロイの削除エラー",
     "xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle": "統合の削除エラー",
     "xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle": "{count}個の統合を削除しました",
     "xpack.fleet.deletePackagePolicy.successSingleNotificationTitle": "統合''{id}''を削除しました",

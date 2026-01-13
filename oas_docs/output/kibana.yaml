@@ -33092,6 +33092,113 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/agents/{agentId}/privilege_level_change:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/privilege_level_change</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Change the privilege level of a single agent to unprivileged.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-agentid-privilege-level-change
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The agent ID to change privilege level for
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              changeAgentPrivilegeLevelRequest:
+                value:
+                  user_info:
+                    groupname: groupname
+                    password: password
+                    username: username
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                user_info:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    groupname:
+                      type: string
+                    password:
+                      type: string
+                    username:
+                      type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: actionId
+              schema:
+                anyOf:
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                    required:
+                      - actionId
+                  - additionalProperties: false
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Change agent privilege level
+      tags:
+        - Elastic Agents
+      x-state: Technical Preview; added in 9.3.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: |-
@@ -33907,6 +34014,110 @@ paths:
       summary: Migrate multiple agents
       tags:
         - Elastic Agents
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agents/bulk_privilege_level_change:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_privilege_level_change</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Change multiple agents' privilege level to unprivileged.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-bulk-privilege-level-change
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkChangeAgentPrivilegeLevelRequest:
+                value:
+                  agents: agent
+                  user_info:
+                    groupname: groupname
+                    password: password
+                    username: username
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        type: string
+                      maxItems: 10000
+                      type: array
+                    - type: string
+                batchSize:
+                  type: number
+                user_info:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    groupname:
+                      type: string
+                    password:
+                      type: string
+                    username:
+                      type: string
+              required:
+                - agents
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    actionId: actionId
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Bulk change agent privilege level
+      tags:
+        - Elastic Agents
+      x-state: Technical Preview; added in 9.3.0
       x-metaTags:
         - content: Kibana
           name: product_name

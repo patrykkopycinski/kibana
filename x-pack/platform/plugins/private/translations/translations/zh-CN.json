@@ -11518,7 +11518,6 @@
     "xpack.apm.transactionDetail.tooltip": "达到最大事务组工具提示",
     "xpack.apm.transactionDetails.agentMissingTransactionLabel": "不完整的轨迹",
     "xpack.apm.transactionDetails.agentMissingTransactionMessage": "此轨迹不完整，{itemsCount} 个项目无法在时间线中显示。这可能是由于采集延迟导致的暂时性问题，也可能是由于某些事件被丢弃而造成的永久性问题。",
-    "xpack.apm.transactionDetails.coldstartBadge": "冷启动",
     "xpack.apm.transactionDetails.distribution.failedTransactionsLatencyDistributionErrorTitle": "提取失败事务延迟分布时出错。",
     "xpack.apm.transactionDetails.distribution.latencyDistributionErrorTitle": "提取总体延迟分布时出错。",
     "xpack.apm.transactionDetails.errorCount": "{errorCount, number} {errorCount, plural, one {Error} other {错误}}",

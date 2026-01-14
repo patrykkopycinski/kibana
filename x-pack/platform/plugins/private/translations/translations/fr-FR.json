@@ -11512,7 +11512,6 @@
     "xpack.apm.transactionDetail.tooltip": "Infobulle de nombre maximal de groupes de transactions atteint",
     "xpack.apm.transactionDetails.agentMissingTransactionLabel": "Trace incomplète",
     "xpack.apm.transactionDetails.agentMissingTransactionMessage": "Cette trace est incomplète et les éléments {itemsCount} n'ont pas pu être affichés dans la chronologie. Il pourrait s'agir d'un problème temporaire provoqué par un retard d'ingestion ou d'un problème permanent provoqué par l'abandon de certains événements.",
-    "xpack.apm.transactionDetails.coldstartBadge": "démarrage à froid",
     "xpack.apm.transactionDetails.distribution.failedTransactionsLatencyDistributionErrorTitle": "Une erreur s'est produite lors de la récupération de la distribution de la latence des transactions ayant échoué.",
     "xpack.apm.transactionDetails.distribution.latencyDistributionErrorTitle": "Une erreur s'est produite lors de la récupération de la distribution de la latence globale.",
     "xpack.apm.transactionDetails.errorCount": "{errorCount, number} {errorCount, plural, one {Error} other {Erreurs}}",

@@ -11355,7 +11355,6 @@
     "xpack.apm.transactionDetail.tooltip": "Maximale Transaktionsgruppen erreicht Tooltip",
     "xpack.apm.transactionDetails.agentMissingTransactionLabel": "Unvollständiges Tracing",
     "xpack.apm.transactionDetails.agentMissingTransactionMessage": "Dieser Trace ist unvollständig und {itemsCount} Elemente konnten nicht in der Zeitleiste angezeigt werden. Dies könnte ein vorübergehendes Problem sein, das durch eine Verzögerung beim Ingest verursacht wird, oder ein dauerhaftes Problem, das durch das Auslassen einiger Ereignisse verursacht wird.",
-    "xpack.apm.transactionDetails.coldstartBadge": "Kaltstart",
     "xpack.apm.transactionDetails.distribution.failedTransactionsLatencyDistributionErrorTitle": "Ein Fehler ist beim Abrufen der Latenzverteilung fehlgeschlagener Transaktionen aufgetreten.",
     "xpack.apm.transactionDetails.distribution.latencyDistributionErrorTitle": "Beim Abrufen der gesamten Latenzverteilung ist ein Fehler aufgetreten.",
     "xpack.apm.transactionDetails.errorCount": "{errorCount, number} {errorCount, plural, one {Error} other {Fehler}}",

@@ -28013,6 +28013,9 @@ paths:
                   required:
                     - name
                     - version
+                policy_template:
+                  description: The policy template to use for the agentless package policy. If not provided, the default policy template will be used.
+                  type: string
                 vars:
                   additionalProperties:
                     anyOf:

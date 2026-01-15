@@ -12101,6 +12101,19 @@ paths:
       summary: Delete cases
       tags:
         - cases
+      x-code-samples:
+        - label: curl
+          lang: curl
+          source: |
+            curl \
+              --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
+              --header "Authorization: $API_KEY" \
+              --header "Content-Type: application/json"
+              --header "kbn-xsrf: true"
+        - label: Console
+          lang: console
+          source: |
+            DELETE kbn:/api/cases?ids=["030e6e34-6470-4001-864f-b229511ad188","e662ff34-0493-4538-b9d1-6706ced02ff2"]
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -89669,9 +89682,10 @@ components:
             id: 57af14a0-03b1-11ed-920c-974bfa104448
             owner: cases
             payload:
-              comment: A new comment
-              owner: cases
-              type: user
+              comment:
+                comment: A new comment
+                owner: cases
+                type: user
             type: comment
             version: WzM1ODg4LDFa
           - action: add
@@ -89686,7 +89700,7 @@ components:
             owner: cases
             payload:
               assignees:
-                uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                - uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             type: assignees
             version: WzM1ODg4LDFb
     Cases_find_case_response:
@@ -94061,7 +94075,7 @@ components:
           - $ref: '#/components/schemas/Cases_string'
           - $ref: '#/components/schemas/Cases_string_array'
     Cases_case_id:
-      description: The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.
+      description: The identifier for the case. To retrieve case IDs, use the search cases (`_find)` API. All non-ASCII characters must be URL encoded.
       in: path
       name: caseId
       required: true
@@ -94078,7 +94092,7 @@ components:
           - $ref: '#/components/schemas/Cases_case_categories'
     Cases_comment_id:
       description: |
-        The identifier for the comment. To retrieve comment IDs, use the get case or find cases APIs.
+        The identifier for the comment. To retrieve comment IDs, use the get case or search cases (`_find`) APIs.
       in: path
       name: commentId
       required: true
@@ -94119,14 +94133,13 @@ components:
         type: string
     Cases_ids:
       description: |
-        The cases that you want to removed. All non-ASCII characters must be URL encoded.
-      example:
-        - d4e7abb0-b462-11ec-9a8d-698504725a43
+        The cases that you want to removed. To get the case identifiers, use the search cases (`_find`) API. In the Dev Console, you can specify the array of cases in the following format: `ids=["e58e77e3-ef8e-4251-926f-efb115f3c4ec"]`. In `curl`, all non-ASCII characters must be URL encoded. For example: `ids=%5B%22e58e77e3-ef8e-4251-926f-efb115f3c4ec%22%5D`
       in: query
       name: ids
       required: true
       schema:
         items:
+          example: d4e7abb0-b462-11ec-9a8d-698504725a43
           maxItems: 100
           minItems: 1
           type: string
@@ -94264,7 +94277,6 @@ components:
         type: string
     Cases_user_action_types:
       description: Determines the types of user actions to return.
-      example: create_case
       in: query
       name: types
       schema:
@@ -94285,6 +94297,7 @@ components:
             - tags
             - title
             - user
+          example: create_case
           type: string
         type: array
     Data_views_field_name:
@@ -96072,9 +96085,9 @@ components:
         status:
           $ref: '#/components/schemas/Cases_case_status'
         tags:
+          example:
+            - tag-1
           items:
-            example:
-              - tag-1
             type: string
           type: array
         title:
@@ -96535,7 +96548,8 @@ components:
               title:
                 $ref: '#/components/schemas/Cases_case_title'
               version:
-                description: The current version of the case. To determine this value, use the get case or find cases APIs.
+                description: |
+                  The current version of the case. To determine this value, use the get case or search cases (`_find`) APIs.
                 type: string
             required:
               - id

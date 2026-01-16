@@ -41541,7 +41541,6 @@
     "xpack.stackConnectors.components.index.error.notValidIndexText": "L’index n’est pas valide.",
     "xpack.stackConnectors.components.index.error.requiredDocumentJson": "Le document est requis et doit être un objet JSON valide.",
     "xpack.stackConnectors.components.index.executionTimeFieldLabel": "Champ temporel",
-    "xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription": "Utilisez le caractère * pour élargir votre recherche.",
     "xpack.stackConnectors.components.index.indexDocumentHelpLabel": "Exemple de document d'index.",
     "xpack.stackConnectors.components.index.indicesToQueryLabel": "Index",
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "Éditeur de code",

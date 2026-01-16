@@ -41582,7 +41582,6 @@
     "xpack.stackConnectors.components.index.error.notValidIndexText": "インデックスは有効ではありません。",
     "xpack.stackConnectors.components.index.error.requiredDocumentJson": "ドキュメントが必要です。有効なJSONオブジェクトにしてください。",
     "xpack.stackConnectors.components.index.executionTimeFieldLabel": "時間フィールド",
-    "xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription": "* で検索クエリの範囲を広げます。",
     "xpack.stackConnectors.components.index.indexDocumentHelpLabel": "インデックスドキュメントの例。",
     "xpack.stackConnectors.components.index.indicesToQueryLabel": "インデックス",
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "コードエディター",

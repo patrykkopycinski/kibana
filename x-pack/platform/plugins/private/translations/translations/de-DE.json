@@ -41135,7 +41135,6 @@
     "xpack.stackConnectors.components.index.error.notValidIndexText": "Der Index ist ungültig.",
     "xpack.stackConnectors.components.index.error.requiredDocumentJson": "Das Dokument ist erforderlich und muss ein gültiges JSON-Objekt sein.",
     "xpack.stackConnectors.components.index.executionTimeFieldLabel": "Zeitfeld",
-    "xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription": "Verwenden Sie *, um Ihre Suchanfrage zu erweitern.",
     "xpack.stackConnectors.components.index.indexDocumentHelpLabel": "Beispiel für ein Indexdokument.",
     "xpack.stackConnectors.components.index.indicesToQueryLabel": "Index",
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "Code-Editor",

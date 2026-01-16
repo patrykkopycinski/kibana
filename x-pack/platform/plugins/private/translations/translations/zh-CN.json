@@ -41562,7 +41562,6 @@
     "xpack.stackConnectors.components.index.error.notValidIndexText": "索引无效。",
     "xpack.stackConnectors.components.index.error.requiredDocumentJson": "“文档”必填，并且应为有效的 JSON 对象。",
     "xpack.stackConnectors.components.index.executionTimeFieldLabel": "时间字段",
-    "xpack.stackConnectors.components.index.howToBroadenSearchQueryDescription": "使用 * 可扩大您的查询范围。",
     "xpack.stackConnectors.components.index.indexDocumentHelpLabel": "索引文档示例。",
     "xpack.stackConnectors.components.index.indicesToQueryLabel": "索引",
     "xpack.stackConnectors.components.index.jsonDocAriaLabel": "代码编辑器",

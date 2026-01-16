@@ -9042,7 +9042,7 @@
     "visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage": "{shiftParam} 必须为数值",
     "visTypeVega.esQueryParser.timefilterValueErrorMessage": "{timefilter} 属性必须设置为 {trueValue}、{minValue} 或 {maxValue}",
     "visTypeVega.esQueryParser.unknownUnitValueErrorMessage": "{unitParamName} 值未知。必须是以下值之一：[{unitParamValues}]",
-    "visTypeVega.esQueryParser.unnamedRequest": "未命名的请求 #{index}",
+    "visTypeVega.queryParser.unnamedRequest": "未命名的请求 #{index}",
     "visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage": "{configName} 必须为对象",
     "visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage": "设置了 {queryParam} 时，不得使用 {urlContext} 和 {timefield}",
     "visTypeVega.function.help": "Vega 可视化",

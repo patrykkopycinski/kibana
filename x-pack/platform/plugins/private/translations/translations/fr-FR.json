@@ -9041,7 +9041,7 @@
     "visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage": "{shiftParam} doit être une valeur numérique",
     "visTypeVega.esQueryParser.timefilterValueErrorMessage": "La propriété {timefilter} doit être définie sur {trueValue}, {minValue} ou {maxValue}",
     "visTypeVega.esQueryParser.unknownUnitValueErrorMessage": "Valeur {unitParamName} inconnue. Doit être l'une des valeurs suivantes : [{unitParamValues}]",
-    "visTypeVega.esQueryParser.unnamedRequest": "Requête sans nom #{index}",
+    "visTypeVega.queryParser.unnamedRequest": "Requête sans nom #{index}",
     "visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage": "{configName} doit être un objet",
     "visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage": "{urlContext} et {timefield} ne doivent pas être utilisés lorsque {queryParam} est défini",
     "visTypeVega.function.help": "Visualisation Vega",

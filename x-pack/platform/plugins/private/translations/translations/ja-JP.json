@@ -9052,7 +9052,7 @@
     "visTypeVega.esQueryParser.shiftMustValueTypeErrorMessage": "{shiftParam} は数値でなければなりません",
     "visTypeVega.esQueryParser.timefilterValueErrorMessage": "{timefilter} のプロパティは {trueValue}、{minValue}、または {maxValue} に設定する必要があります",
     "visTypeVega.esQueryParser.unknownUnitValueErrorMessage": "不明な {unitParamName} 値。次のいずれかでなければなりません。[{unitParamValues}]",
-    "visTypeVega.esQueryParser.unnamedRequest": "無題のリクエスト#{index}",
+    "visTypeVega.queryParser.unnamedRequest": "無題のリクエスト#{index}",
     "visTypeVega.esQueryParser.urlBodyValueTypeErrorMessage": "{configName} はオブジェクトでなければなりません",
     "visTypeVega.esQueryParser.urlContextAndUrlTimefieldMustNotBeUsedErrorMessage": "{urlContext} と {timefield} は {queryParam} が設定されている場合使用できません",
     "visTypeVega.function.help": "Vega ビジュアライゼーション",

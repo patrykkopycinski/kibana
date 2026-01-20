@@ -1290,7 +1290,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "post": {
         "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
@@ -1460,7 +1460,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/agents/{id}": {
@@ -1509,7 +1509,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "get": {
         "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
@@ -1568,7 +1568,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "put": {
         "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
@@ -1736,7 +1736,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/conversations": {
@@ -1786,7 +1786,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/conversations/{conversation_id}": {
@@ -1835,7 +1835,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "get": {
         "description": "Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
@@ -1891,7 +1891,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/conversations/{conversation_id}/attachments": {
@@ -2519,7 +2519,7 @@
                     "type": "string"
                   },
                   "attachments": {
-                    "description": "Optional attachments to send with the message.",
+                    "description": "**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.",
                     "items": {
                       "additionalProperties": false,
                       "properties": {
@@ -2669,7 +2669,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/converse/async": {
@@ -2710,7 +2710,7 @@
                     "type": "string"
                   },
                   "attachments": {
-                    "description": "Optional attachments to send with the message.",
+                    "description": "**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.",
                     "items": {
                       "additionalProperties": false,
                       "properties": {
@@ -2889,7 +2889,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/mcp": {
@@ -2956,7 +2956,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/tools": {
@@ -3132,7 +3132,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "post": {
         "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
@@ -3333,7 +3333,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/tools/_execute": {
@@ -3638,7 +3638,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/agent_builder/tools/{toolId}": {
@@ -3687,7 +3687,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "get": {
         "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
@@ -3824,7 +3824,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       },
       "put": {
         "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
@@ -4025,7 +4025,7 @@
         "tags": [
           "agent builder"
         ],
-        "x-state": "Technical Preview; added in 9.2.0"
+        "x-state": "Added in 9.2.0"
       }
     },
     "/api/alerting/rule/{id}": {

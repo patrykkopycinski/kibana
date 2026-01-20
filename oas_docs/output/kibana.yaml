@@ -1279,7 +1279,7 @@ paths:
       summary: List agents
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1408,7 +1408,7 @@ paths:
       summary: Create an agent
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1450,7 +1450,7 @@ paths:
       summary: Delete an agent
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1500,7 +1500,7 @@ paths:
       summary: Get an agent by ID
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1627,7 +1627,7 @@ paths:
       summary: Update an agent
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1669,7 +1669,7 @@ paths:
       summary: List conversations
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1711,7 +1711,7 @@ paths:
       summary: Delete conversation by ID
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -1761,7 +1761,7 @@ paths:
       summary: Get conversation by ID
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2259,7 +2259,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: Optional attachments to send with the message.
+                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
                   items:
                     additionalProperties: false
                     type: object
@@ -2356,7 +2356,7 @@ paths:
       summary: Send chat message
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2576,7 +2576,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: Optional attachments to send with the message.
+                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
                   items:
                     additionalProperties: false
                     type: object
@@ -2688,7 +2688,7 @@ paths:
       summary: Send chat message (streaming)
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2744,7 +2744,7 @@ paths:
       summary: MCP server
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -2908,7 +2908,7 @@ paths:
       summary: List tools
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3063,7 +3063,7 @@ paths:
       summary: Create a tool
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3270,7 +3270,7 @@ paths:
       summary: Execute a Tool
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3312,7 +3312,7 @@ paths:
       summary: Delete a tool
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3439,7 +3439,7 @@ paths:
       summary: Get a tool by id
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -3593,7 +3593,7 @@ paths:
       summary: Update a tool
       tags:
         - agent builder
-      x-state: Technical Preview; added in 9.2.0
+      x-state: Added in 9.2.0
       x-metaTags:
         - content: Kibana
           name: product_name

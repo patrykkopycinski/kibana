@@ -24171,6 +24171,8 @@ paths:
                               - value
                           maxItems: 10
                           type: array
+                        has_agent_version_conditions:
+                          type: boolean
                         has_fleet_server:
                           type: boolean
                         id:
@@ -24917,6 +24919,8 @@ paths:
                       - value
                   maxItems: 10
                   type: array
+                has_agent_version_conditions:
+                  type: boolean
                 has_fleet_server:
                   type: boolean
                 id:
@@ -25154,6 +25158,8 @@ paths:
                             - value
                         maxItems: 10
                         type: array
+                      has_agent_version_conditions:
+                        type: boolean
                       has_fleet_server:
                         type: boolean
                       id:
@@ -25921,6 +25927,8 @@ paths:
                               - value
                           maxItems: 10
                           type: array
+                        has_agent_version_conditions:
+                          type: boolean
                         has_fleet_server:
                           type: boolean
                         id:
@@ -26667,6 +26675,8 @@ paths:
                             - value
                         maxItems: 10
                         type: array
+                      has_agent_version_conditions:
+                        type: boolean
                       has_fleet_server:
                         type: boolean
                       id:
@@ -27412,6 +27422,8 @@ paths:
                       - value
                   maxItems: 10
                   type: array
+                has_agent_version_conditions:
+                  type: boolean
                 has_fleet_server:
                   type: boolean
                 id:
@@ -27649,6 +27661,8 @@ paths:
                             - value
                         maxItems: 10
                         type: array
+                      has_agent_version_conditions:
+                        type: boolean
                       has_fleet_server:
                         type: boolean
                       id:
@@ -28508,6 +28522,8 @@ paths:
                             - value
                         maxItems: 10
                         type: array
+                      has_agent_version_conditions:
+                        type: boolean
                       has_fleet_server:
                         type: boolean
                       id:

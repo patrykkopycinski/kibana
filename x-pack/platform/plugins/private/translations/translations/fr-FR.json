@@ -3388,7 +3388,6 @@
     "expressionXY.dataLayer.showLines.help": "Afficher des lignes entre les points",
     "expressionXY.dataLayer.showPoints.help": "Afficher les points",
     "expressionXY.dataLayer.simpleView.help": "Afficher/masquer les détails",
-    "expressionXY.dataLayer.splitAccessor.help": "Colonne selon laquelle effectuer la division",
     "expressionXY.dataLayer.xAccessor.help": "Axe X",
     "expressionXY.dataLayer.xScaleType.help": "Type d'échelle de l'axe x",
     "expressionXY.decorationConfig.axisId.help": "ID de l’axe",

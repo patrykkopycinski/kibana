@@ -3382,7 +3382,6 @@
     "expressionXY.dataLayer.showLines.help": "在点间显示线",
     "expressionXY.dataLayer.showPoints.help": "显示点",
     "expressionXY.dataLayer.simpleView.help": "显示/隐藏详情",
-    "expressionXY.dataLayer.splitAccessor.help": "拆分要依据的列",
     "expressionXY.dataLayer.xAccessor.help": "X 轴",
     "expressionXY.dataLayer.xScaleType.help": "x 轴的缩放类型",
     "expressionXY.decorationConfig.axisId.help": "轴的 ID",

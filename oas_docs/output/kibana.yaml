@@ -2307,6 +2307,27 @@ paths:
                     visualizations:
                       description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
+                configuration_overrides:
+                  additionalProperties: false
+                  description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
+                  type: object
+                  properties:
+                    instructions:
+                      description: Custom instructions for the agent.
+                      type: string
+                    tools:
+                      description: Tool selection to enable for this execution.
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          tool_ids:
+                            items:
+                              type: string
+                            type: array
+                        required:
+                          - tool_ids
+                      type: array
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string
@@ -2624,6 +2645,27 @@ paths:
                     visualizations:
                       description: When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.
                       type: boolean
+                configuration_overrides:
+                  additionalProperties: false
+                  description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
+                  type: object
+                  properties:
+                    instructions:
+                      description: Custom instructions for the agent.
+                      type: string
+                    tools:
+                      description: Tool selection to enable for this execution.
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          tool_ids:
+                            items:
+                              type: string
+                            type: array
+                        required:
+                          - tool_ids
+                      type: array
                 connector_id:
                   description: Optional connector ID for the agent to use for external integrations.
                   type: string

@@ -99512,6 +99512,7 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+        - fileSize
       example: updatedAt
       type: string
     Security_Endpoint_Management_API_Cancel:

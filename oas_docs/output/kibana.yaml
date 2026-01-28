@@ -24425,6 +24425,11 @@ paths:
                                                       - beta
                                                       - experimental
                                                     type: string
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -24483,6 +24488,11 @@ paths:
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
@@ -24650,6 +24660,11 @@ paths:
                                     type: string
                                   updated_by:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     anyOf:
                                       - additionalProperties:
@@ -25412,6 +25427,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -25470,6 +25490,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -25637,6 +25662,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -26181,6 +26211,11 @@ paths:
                                                       - beta
                                                       - experimental
                                                     type: string
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -26239,6 +26274,11 @@ paths:
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
+                                                  var_group_selections:
+                                                    additionalProperties:
+                                                      type: string
+                                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                    type: object
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
@@ -26406,6 +26446,11 @@ paths:
                                     type: string
                                   updated_by:
                                     type: string
+                                  var_group_selections:
+                                    additionalProperties:
+                                      type: string
+                                    description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                    type: object
                                   vars:
                                     anyOf:
                                       - additionalProperties:
@@ -26929,6 +26974,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -26987,6 +27037,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -27154,6 +27209,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -27915,6 +27975,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -27973,6 +28038,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -28140,6 +28210,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -28776,6 +28851,11 @@ paths:
                                                     - beta
                                                     - experimental
                                                   type: string
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -28834,6 +28914,11 @@ paths:
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
+                                                var_group_selections:
+                                                  additionalProperties:
+                                                    type: string
+                                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                  type: object
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
@@ -29001,6 +29086,11 @@ paths:
                                   type: string
                                 updated_by:
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   anyOf:
                                     - additionalProperties:
@@ -30519,6 +30609,11 @@ paths:
                             enabled:
                               description: Enable or disable that stream. Defaults to `true` (enabled).
                               type: boolean
+                            var_group_selections:
+                              additionalProperties:
+                                type: string
+                              description: Variable group selections. Maps var_group name to the selected option name within that group.
+                              type: object
                             vars:
                               additionalProperties:
                                 anyOf:
@@ -30629,6 +30724,11 @@ paths:
                 policy_template:
                   description: The policy template to use for the agentless package policy. If not provided, the default policy template will be used.
                   type: string
+                var_group_selections:
+                  additionalProperties:
+                    type: string
+                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                  type: object
                 vars:
                   additionalProperties:
                     anyOf:
@@ -30944,6 +31044,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -31002,6 +31107,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -31169,6 +31279,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -37276,6 +37391,56 @@ paths:
                                 - content
                               type: string
                             - type: string
+                        var_groups:
+                          items:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              name:
+                                type: string
+                              options:
+                                items:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    hide_in_deployment_modes:
+                                      items:
+                                        enum:
+                                          - default
+                                          - agentless
+                                        type: string
+                                      maxItems: 2
+                                      type: array
+                                    name:
+                                      type: string
+                                    title:
+                                      type: string
+                                    vars:
+                                      items:
+                                        type: string
+                                      maxItems: 100
+                                      type: array
+                                  required:
+                                    - name
+                                    - title
+                                    - vars
+                                maxItems: 20
+                                type: array
+                              selector_title:
+                                type: string
+                              title:
+                                type: string
+                            required:
+                              - name
+                              - title
+                              - selector_title
+                              - options
+                          maxItems: 20
+                          type: array
                         vars:
                           items:
                             additionalProperties: {}
@@ -38816,6 +38981,56 @@ paths:
                               - content
                             type: string
                           - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
                       vars:
                         items:
                           additionalProperties: {}
@@ -39523,6 +39738,56 @@ paths:
                               - content
                             type: string
                           - type: string
+                      var_groups:
+                        items:
+                          additionalProperties: true
+                          type: object
+                          properties:
+                            description:
+                              type: string
+                            name:
+                              type: string
+                            options:
+                              items:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  description:
+                                    type: string
+                                  hide_in_deployment_modes:
+                                    items:
+                                      enum:
+                                        - default
+                                        - agentless
+                                      type: string
+                                    maxItems: 2
+                                    type: array
+                                  name:
+                                    type: string
+                                  title:
+                                    type: string
+                                  vars:
+                                    items:
+                                      type: string
+                                    maxItems: 100
+                                    type: array
+                                required:
+                                  - name
+                                  - title
+                                  - vars
+                              maxItems: 20
+                              type: array
+                            selector_title:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                            - name
+                            - title
+                            - selector_title
+                            - options
+                        maxItems: 20
+                        type: array
                       vars:
                         items:
                           additionalProperties: {}
@@ -46973,6 +47238,11 @@ paths:
                                             - beta
                                             - experimental
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -47031,6 +47301,11 @@ paths:
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             anyOf:
@@ -47198,6 +47473,11 @@ paths:
                           type: string
                         updated_by:
                           type: string
+                        var_group_selections:
+                          additionalProperties:
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
                         vars:
                           anyOf:
                             - additionalProperties:
@@ -47442,6 +47722,11 @@ paths:
                                     - beta
                                     - experimental
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -47573,6 +47858,11 @@ paths:
                       description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -47625,6 +47915,11 @@ paths:
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     anyOf:
@@ -47752,6 +48047,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         anyOf:
@@ -47928,6 +48228,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -47986,6 +48291,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -48153,6 +48463,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -48448,6 +48763,11 @@ paths:
                                             - beta
                                             - experimental
                                           type: string
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             additionalProperties: false
@@ -48506,6 +48826,11 @@ paths:
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
+                                        var_group_selections:
+                                          additionalProperties:
+                                            type: string
+                                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                          type: object
                                         vars:
                                           additionalProperties:
                                             anyOf:
@@ -48673,6 +48998,11 @@ paths:
                           type: string
                         updated_by:
                           type: string
+                        var_group_selections:
+                          additionalProperties:
+                            type: string
+                          description: Variable group selections. Maps var_group name to the selected option name within that group.
+                          type: object
                         vars:
                           anyOf:
                             - additionalProperties:
@@ -49017,6 +49347,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -49075,6 +49410,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -49242,6 +49582,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -49490,6 +49835,11 @@ paths:
                                     - beta
                                     - experimental
                                   type: string
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     additionalProperties: false
@@ -49619,6 +49969,11 @@ paths:
                       description: Indicates whether the package policy supports cloud connectors.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -49670,6 +50025,11 @@ paths:
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
+                                var_group_selections:
+                                  additionalProperties:
+                                    type: string
+                                  description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                  type: object
                                 vars:
                                   additionalProperties:
                                     anyOf:
@@ -49797,6 +50157,11 @@ paths:
                       description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
                       nullable: true
                       type: boolean
+                    var_group_selections:
+                      additionalProperties:
+                        type: string
+                      description: Variable group selections. Maps var_group name to the selected option name within that group.
+                      type: object
                     vars:
                       additionalProperties:
                         anyOf:
@@ -49972,6 +50337,11 @@ paths:
                                           - beta
                                           - experimental
                                         type: string
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           additionalProperties: false
@@ -50030,6 +50400,11 @@ paths:
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
+                                      var_group_selections:
+                                        additionalProperties:
+                                          type: string
+                                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                        type: object
                                       vars:
                                         additionalProperties:
                                           anyOf:
@@ -50197,6 +50572,11 @@ paths:
                         type: string
                       updated_by:
                         type: string
+                      var_group_selections:
+                        additionalProperties:
+                          type: string
+                        description: Variable group selections. Maps var_group name to the selected option name within that group.
+                        type: object
                       vars:
                         anyOf:
                           - additionalProperties:
@@ -50836,6 +51216,11 @@ paths:
                                                   - beta
                                                   - experimental
                                                 type: string
+                                              var_group_selections:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                type: object
                                               vars:
                                                 additionalProperties:
                                                   additionalProperties: false
@@ -50894,6 +51279,11 @@ paths:
                                               enabled:
                                                 description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
+                                              var_group_selections:
+                                                additionalProperties:
+                                                  type: string
+                                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                                type: object
                                               vars:
                                                 additionalProperties:
                                                   anyOf:
@@ -51061,6 +51451,11 @@ paths:
                                 type: string
                               updated_by:
                                 type: string
+                              var_group_selections:
+                                additionalProperties:
+                                  type: string
+                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                type: object
                               vars:
                                 anyOf:
                                   - additionalProperties:
@@ -51263,6 +51658,11 @@ paths:
                                               - beta
                                               - experimental
                                             type: string
+                                          var_group_selections:
+                                            additionalProperties:
+                                              type: string
+                                            description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                            type: object
                                           vars:
                                             additionalProperties:
                                               additionalProperties: false
@@ -51412,6 +51812,11 @@ paths:
                                 type: string
                               updated_by:
                                 type: string
+                              var_group_selections:
+                                additionalProperties:
+                                  type: string
+                                description: Variable group selections. Maps var_group name to the selected option name within that group.
+                                type: object
                               vars:
                                 additionalProperties:
                                   additionalProperties: false

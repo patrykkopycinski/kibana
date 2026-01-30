@@ -7594,7 +7594,6 @@
     "unifiedDocViewer.docView.table.ignored.singleUnknownTooltip": "このフィールドの値はElasticsearchによって無視されたため、検索またはフィルタリングできません。",
     "unifiedDocViewer.docView.table.searchPlaceHolder": "検索フィールド名または値",
     "unifiedDocViewer.docViews.json.jsonTitle": "JSON",
-    "unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled": "ES|QLでは、多値フィルタリングはサポートされていません。",
     "unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip": "フィールド表示のフィルター",
     "unifiedDocViewer.docViews.table.filterForValueButtonTooltip": "値でフィルター",
     "unifiedDocViewer.docViews.table.filterOutValueButtonTooltip": "値を除外",

@@ -7587,7 +7587,6 @@
     "unifiedDocViewer.docView.table.ignored.singleUnknownTooltip": "La valeur dans ce champ a été ignorée par Elasticsearch et ne peut pas être recherchée ni filtrée.",
     "unifiedDocViewer.docView.table.searchPlaceHolder": "Rechercher des noms ou valeurs de champs",
     "unifiedDocViewer.docViews.json.jsonTitle": "JSON",
-    "unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled": "Le filtrage multivalué n'est pas pris en charge dans ES|QL",
     "unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip": "Filtrer sur le champ",
     "unifiedDocViewer.docViews.table.filterForValueButtonTooltip": "Filtrer sur la valeur",
     "unifiedDocViewer.docViews.table.filterOutValueButtonTooltip": "Exclure la valeur",

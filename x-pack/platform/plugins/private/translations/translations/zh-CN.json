@@ -7586,7 +7586,6 @@
     "unifiedDocViewer.docView.table.ignored.singleUnknownTooltip": "此字段中的值被 Elasticsearch 忽略，无法搜索或筛选。",
     "unifiedDocViewer.docView.table.searchPlaceHolder": "搜索字段名称或值",
     "unifiedDocViewer.docViews.json.jsonTitle": "JSON",
-    "unifiedDocViewer.docViews.table.esqlMultivalueFilteringDisabled": "ES|QL 中不支持多值筛选",
     "unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip": "筛留存在的字段",
     "unifiedDocViewer.docViews.table.filterForValueButtonTooltip": "筛留值",
     "unifiedDocViewer.docViews.table.filterOutValueButtonTooltip": "筛除值",

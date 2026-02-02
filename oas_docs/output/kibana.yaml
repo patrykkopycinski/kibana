@@ -65760,6 +65760,7 @@ paths:
                                                                   description: A non-empty string.
                                                                   minLength: 1
                                                                   type: string
+                                                                minItems: 1
                                                                 type: array
                                                               ignore_failure:
                                                                 description: Continue pipeline execution if this processor fails
@@ -70223,6 +70224,7 @@ paths:
                                                               description: A non-empty string.
                                                               minLength: 1
                                                               type: string
+                                                            minItems: 1
                                                             type: array
                                                           ignore_failure:
                                                             description: Continue pipeline execution if this processor fails
@@ -74437,6 +74439,7 @@ paths:
                                                                   description: A non-empty string.
                                                                   minLength: 1
                                                                   type: string
+                                                                minItems: 1
                                                                 type: array
                                                               ignore_failure:
                                                                 description: Continue pipeline execution if this processor fails
@@ -78712,6 +78715,7 @@ paths:
                                                               description: A non-empty string.
                                                               minLength: 1
                                                               type: string
+                                                            minItems: 1
                                                             type: array
                                                           ignore_failure:
                                                             description: Continue pipeline execution if this processor fails
@@ -82924,6 +82928,7 @@ paths:
                                                   description: A non-empty string.
                                                   minLength: 1
                                                   type: string
+                                                minItems: 1
                                                 type: array
                                               ignore_failure:
                                                 description: Continue pipeline execution if this processor fails
@@ -87081,6 +87086,7 @@ paths:
                                                   description: A non-empty string.
                                                   minLength: 1
                                                   type: string
+                                                minItems: 1
                                                 type: array
                                               ignore_failure:
                                                 description: Continue pipeline execution if this processor fails

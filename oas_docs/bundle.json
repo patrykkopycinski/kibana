@@ -1222,7 +1222,7 @@
     },
     "/api/agent_builder/agents": {
       "get": {
-        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "List all available agents. Use this endpoint to retrieve complete agent information including their current configuration and assigned tools. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents",
         "parameters": [],
         "responses": {
@@ -1293,7 +1293,7 @@
         "x-state": "Added in 9.2.0"
       },
       "post": {
-        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Create a new agent. Use this endpoint to define the agent's behavior, appearance, and capabilities through comprehensive configuration options. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-agents",
         "parameters": [
           {
@@ -1465,7 +1465,7 @@
     },
     "/api/agent_builder/agents/{id}": {
       "delete": {
-        "description": "Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Delete an agent by ID. This action cannot be undone. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-agents-id",
         "parameters": [
           {
@@ -1512,7 +1512,7 @@
         "x-state": "Added in 9.2.0"
       },
       "get": {
-        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Get a specific agent by ID. Use this endpoint to retrieve the complete agent definition including all configuration details and tool assignments. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-agents-id",
         "parameters": [
           {
@@ -1571,7 +1571,7 @@
         "x-state": "Added in 9.2.0"
       },
       "put": {
-        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Update an existing agent configuration. Use this endpoint to modify any aspect of the agent's behavior, appearance, or capabilities. To learn more, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-agents-id",
         "parameters": [
           {
@@ -2483,7 +2483,7 @@
     },
     "/api/agent_builder/converse": {
       "post": {
-        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-converse",
         "parameters": [
           {
@@ -2954,9 +2954,19 @@
     },
     "/api/agent_builder/mcp": {
       "post": {
-        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "> warn\n> This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.\nTo learn more, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-mcp",
-        "parameters": [],
+        "parameters": [
+          {
+            "description": "Comma-separated list of namespaces to filter tools. Only tools matching the specified namespaces will be returned.",
+            "in": "query",
+            "name": "namespace",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3021,7 +3031,7 @@
     },
     "/api/agent_builder/tools": {
       "get": {
-        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools",
         "parameters": [],
         "responses": {
@@ -3195,7 +3205,7 @@
         "x-state": "Added in 9.2.0"
       },
       "post": {
-        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "post-agent-builder-tools",
         "parameters": [
           {
@@ -3398,7 +3408,7 @@
     },
     "/api/agent_builder/tools/_execute": {
       "post": {
-        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "post-agent-builder-tools-execute",
         "parameters": [
           {
@@ -3703,7 +3713,7 @@
     },
     "/api/agent_builder/tools/{toolId}": {
       "delete": {
-        "description": "Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "delete-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3750,7 +3760,7 @@
         "x-state": "Added in 9.2.0"
       },
       "get": {
-        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
+        "description": "Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.",
         "operationId": "get-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -3887,7 +3897,7 @@
         "x-state": "Added in 9.2.0"
       },
       "put": {
-        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
+        "description": "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.",
         "operationId": "put-agent-builder-tools-toolid",
         "parameters": [
           {
@@ -57355,6 +57365,29 @@
                                                             "description": "A non-empty string.",
                                                             "minLength": 1,
                                                             "type": "string"
+                                                          },
+                                                          "downsample": {
+                                                            "items": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "after": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "fixed_interval": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "after",
+                                                                "fixed_interval"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            "type": "array"
                                                           }
                                                         },
                                                         "type": "object"
@@ -62268,6 +62301,7 @@
                                                                     "minLength": 1,
                                                                     "type": "string"
                                                                   },
+                                                                  "minItems": 1,
                                                                   "type": "array"
                                                                 },
                                                                 "ignore_failure": {
@@ -65416,6 +65450,29 @@
                                                         "description": "A non-empty string.",
                                                         "minLength": 1,
                                                         "type": "string"
+                                                      },
+                                                      "downsample": {
+                                                        "items": {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "after": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "fixed_interval": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "after",
+                                                            "fixed_interval"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        "type": "array"
                                                       }
                                                     },
                                                     "type": "object"
@@ -70329,6 +70386,7 @@
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
+                                                              "minItems": 1,
                                                               "type": "array"
                                                             },
                                                             "ignore_failure": {
@@ -73011,6 +73069,29 @@
                                                             "description": "A non-empty string.",
                                                             "minLength": 1,
                                                             "type": "string"
+                                                          },
+                                                          "downsample": {
+                                                            "items": {
+                                                              "additionalProperties": false,
+                                                              "properties": {
+                                                                "after": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                },
+                                                                "fixed_interval": {
+                                                                  "description": "A non-empty string.",
+                                                                  "minLength": 1,
+                                                                  "type": "string"
+                                                                }
+                                                              },
+                                                              "required": [
+                                                                "after",
+                                                                "fixed_interval"
+                                                              ],
+                                                              "type": "object"
+                                                            },
+                                                            "type": "array"
                                                           }
                                                         },
                                                         "type": "object"
@@ -77924,6 +78005,7 @@
                                                                     "minLength": 1,
                                                                     "type": "string"
                                                                   },
+                                                                  "minItems": 1,
                                                                   "type": "array"
                                                                 },
                                                                 "ignore_failure": {
@@ -80721,6 +80803,29 @@
                                                         "description": "A non-empty string.",
                                                         "minLength": 1,
                                                         "type": "string"
+                                                      },
+                                                      "downsample": {
+                                                        "items": {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "after": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "fixed_interval": {
+                                                              "description": "A non-empty string.",
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "after",
+                                                            "fixed_interval"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        "type": "array"
                                                       }
                                                     },
                                                     "type": "object"
@@ -85634,6 +85739,7 @@
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
+                                                              "minItems": 1,
                                                               "type": "array"
                                                             },
                                                             "ignore_failure": {
@@ -88269,6 +88375,29 @@
                                             "description": "A non-empty string.",
                                             "minLength": 1,
                                             "type": "string"
+                                          },
+                                          "downsample": {
+                                            "items": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "after": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "fixed_interval": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "after",
+                                                "fixed_interval"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "type": "array"
                                           }
                                         },
                                         "type": "object"
@@ -93182,6 +93311,7 @@
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
+                                                  "minItems": 1,
                                                   "type": "array"
                                                 },
                                                 "ignore_failure": {
@@ -95790,6 +95920,29 @@
                                             "description": "A non-empty string.",
                                             "minLength": 1,
                                             "type": "string"
+                                          },
+                                          "downsample": {
+                                            "items": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "after": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "fixed_interval": {
+                                                  "description": "A non-empty string.",
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "required": [
+                                                "after",
+                                                "fixed_interval"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            "type": "array"
                                           }
                                         },
                                         "type": "object"
@@ -100703,6 +100856,7 @@
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
+                                                  "minItems": 1,
                                                   "type": "array"
                                                 },
                                                 "ignore_failure": {

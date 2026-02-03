@@ -30112,7 +30112,6 @@
     "xpack.observabilityAiAssistantManagement.settingsPage.knowledgeBaseLabel": "Wissensdatenbank",
     "xpack.observabilityAiAssistantManagement.settingsPage.productDocUninstallConfirmText": "Sind Sie sicher, dass Sie die Elastic-Dokumentation deinstallieren möchten?",
     "xpack.observabilityAiAssistantManagement.settingsPage.productDocUninstallConfirmTitle": "Deinstallation der Elastic-Dokumentation",
-    "xpack.observabilityAiAssistantManagement.settingsPage.searchConnector": "Suchkonnektoren",
     "xpack.observabilityAiAssistantManagement.settingsPage.searchConnectorIndexPatternDescription": "Indexmuster, das der KI-Assistent bei der Abfrage von Suchkonnektoren-Indizes (Teil der Wissensdatenbank) verwendet. Standardmäßig wird der Index für jeden Suchkonnektor abgefragt",
     "xpack.observabilityAiAssistantManagement.settingsPage.settingsLabel": "Einstellungen",
     "xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingLabel": "Funktionsaufrufe simulieren",

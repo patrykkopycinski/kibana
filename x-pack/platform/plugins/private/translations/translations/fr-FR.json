@@ -29666,7 +29666,6 @@
     "xpack.observability_onboarding.installIntegration.error.unauthorized": "Le privilège Kibana {requiredKibanaPrivileges} requis est manquant. Veuillez ajouter le privilège requis au rôle de l'utilisateur authentifié.",
     "xpack.observability_onboarding.installOtelCollector.configStep.copyCommand": "Copier dans le presse-papiers",
     "xpack.observability_onboarding.kubernetesPanel.exploreDashboard": "Découvrir le cluster Kubernetes",
-    "xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription": "Copiez et exécutez la commande d'installation. Veuillez noter que le manifeste suivant contient des limites de ressources qui peuvent ne pas être appropriées pour un environnement de production. Consultez notre guide sur {scalingLink} avant de déployer ce manifeste.",
     "xpack.observability_onboarding.kubernetesPanel.monitoringCluster": "Obtenez un aperçu de votre cluster Kubernetes avec ce tableau de bord prêt à l'emploi",
     "xpack.observability_onboarding.kubernetesPanel.scalingElasticAgentOnLinkLabel": "Mise à l'échelle d'Elastic Agent sur Kubernetes",
     "xpack.observability_onboarding.onboardingFlowForm.applicationDescription": "Monitorez l'application front-end et back-end que vous avez développée, configurez des moniteurs Synthetic",

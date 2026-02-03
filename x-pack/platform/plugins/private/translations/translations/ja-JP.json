@@ -29718,7 +29718,6 @@
     "xpack.observability_onboarding.installIntegration.error.unauthorized": "必要なkibana権限{requiredKibanaPrivileges}がありません。認証されたユーザーのロールに必要な権限を追加してください。",
     "xpack.observability_onboarding.installOtelCollector.configStep.copyCommand": "クリップボードにコピー",
     "xpack.observability_onboarding.kubernetesPanel.exploreDashboard": "Kubernetesクラスターを見る",
-    "xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription": "コピーして、インストールコマンドを実行します。次のマニフェストには、本番環境には適切ではない可能性があるリソース制限が含まれています。このマニフェストをデプロイする前に、{scalingLink}のガイドを確認してください。",
     "xpack.observability_onboarding.kubernetesPanel.monitoringCluster": "この組み込みのダッシュボードでKubernetesクラスターの概要を確認",
     "xpack.observability_onboarding.kubernetesPanel.scalingElasticAgentOnLinkLabel": "KubernetesでElasticエージェントを調整中",
     "xpack.observability_onboarding.onboardingFlowForm.applicationDescription": "開発したフロントエンドおよびバックエンドのアプリケーションを監視し、合成モニターを設定",

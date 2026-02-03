@@ -29698,7 +29698,6 @@
     "xpack.observability_onboarding.installIntegration.error.unauthorized": "缺失所需的 Kibana 权限 {requiredKibanaPrivileges}，请将所需权限添加到已通过身份验证的用户的角色。",
     "xpack.observability_onboarding.installOtelCollector.configStep.copyCommand": "复制到剪贴板",
     "xpack.observability_onboarding.kubernetesPanel.exploreDashboard": "浏览 Kubernetes 集群",
-    "xpack.observability_onboarding.kubernetesPanel.installElasticAgentDescription": "复制并运行安装命令。请注意，以下清单包含可能不适用于生产环境的资源限制，在部署此清单之前，请参阅 {scalingLink} 上的指南。",
     "xpack.observability_onboarding.kubernetesPanel.monitoringCluster": "使用这个现成的仪表板概览 Kubernetes 集群",
     "xpack.observability_onboarding.kubernetesPanel.scalingElasticAgentOnLinkLabel": "在 Kubernetes 上扩展 Elastic 代理",
     "xpack.observability_onboarding.onboardingFlowForm.applicationDescription": "监测您已开发的前端和后端应用程序，设置 Synthetics 监测",

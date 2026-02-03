@@ -36672,7 +36672,6 @@
     "xpack.securitySolution.exceptions.referenceModalDefaultDescription": "名前{listName}の例外リストを削除しますか？",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "例外リストを削除",
     "xpack.securitySolution.exceptions.referenceModalDescription": "この例外リストは、({referenceCount}) {referenceCount, plural, =1 {rule} other {個のルール}}に関連付けられています。この例外リストを削除すると、関連付けられたルールからの参照も削除されます。",
-    "xpack.securitySolution.exceptions.referenceModalSuccessDescription": "例外リスト{listId}が正常に削除されました。",
     "xpack.securitySolution.exceptions.referenceModalTitle": "例外リストを削除",
     "xpack.securitySolution.exceptions.sortBy": "並べ替え基準：",
     "xpack.securitySolution.exceptions.sortByCreateAt": "作成日時",

@@ -36241,7 +36241,6 @@
     "xpack.securitySolution.exceptions.referenceModalDefaultDescription": "Sind Sie sicher, dass Sie die Ausnahmeliste mit dem Namen {listName} löschen möchten?",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "Ausnahmeliste entfernen",
     "xpack.securitySolution.exceptions.referenceModalDescription": "Diese Ausnahmeliste ist mit ({referenceCount}) {referenceCount, plural, =1 {rule} other {Regeln}} verknüpft. Durch das Entfernen dieser Ausnahmeliste wird auch der Verweis darauf aus den zugehörigen Regeln entfernt.",
-    "xpack.securitySolution.exceptions.referenceModalSuccessDescription": "Ausnahmeliste – {listId} – wurde erfolgreich gelöscht.",
     "xpack.securitySolution.exceptions.referenceModalTitle": "Ausnahmeliste entfernen",
     "xpack.securitySolution.exceptions.sortBy": "Sortieren nach:",
     "xpack.securitySolution.exceptions.sortByCreateAt": "Erstellt am",

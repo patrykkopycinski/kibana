@@ -36619,7 +36619,6 @@
     "xpack.securitySolution.exceptions.referenceModalDefaultDescription": "Voulez-vous vraiment SUPPRIMER la liste d'exceptions nommée {listName} ?",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "Retirer la liste d'exceptions",
     "xpack.securitySolution.exceptions.referenceModalDescription": "Cette liste d'exceptions est associée à ({referenceCount}) {referenceCount, plural, =1 {rule} other {règles}}. Le retrait de cette liste d'exceptions supprimera également sa référence des règles associées.",
-    "xpack.securitySolution.exceptions.referenceModalSuccessDescription": "Liste d'exceptions - {listId} - supprimée.",
     "xpack.securitySolution.exceptions.referenceModalTitle": "Retirer la liste d'exceptions",
     "xpack.securitySolution.exceptions.sortBy": "Trier par :",
     "xpack.securitySolution.exceptions.sortByCreateAt": "Créé à",

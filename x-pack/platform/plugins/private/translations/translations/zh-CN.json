@@ -36653,7 +36653,6 @@
     "xpack.securitySolution.exceptions.referenceModalDefaultDescription": "是否确定要删除名为 {listName} 的例外列表？",
     "xpack.securitySolution.exceptions.referenceModalDeleteButton": "移除例外列表",
     "xpack.securitySolution.exceptions.referenceModalDescription": "此例外列表与（{referenceCount}）个{referenceCount, plural, =1 {规则} other {规则}}相关联。移除此例外列表还将会删除其对关联规则的引用。",
-    "xpack.securitySolution.exceptions.referenceModalSuccessDescription": "例外列表 - {listId} - 已成功删除。",
     "xpack.securitySolution.exceptions.referenceModalTitle": "移除例外列表",
     "xpack.securitySolution.exceptions.sortBy": "排序依据：",
     "xpack.securitySolution.exceptions.sortByCreateAt": "创建于",

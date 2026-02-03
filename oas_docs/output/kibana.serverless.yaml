@@ -2886,6 +2886,15 @@ paths:
       summary: List tools
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/tools" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/tools
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3041,6 +3050,55 @@ paths:
       summary: Create a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "https://${KIBANA_URL}/api/agent_builder/tools" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "id": "example-esql-tool",
+               "type": "esql",
+               "description": "Example ES|QL query tool for analyzing financial trades with time filtering",
+               "tags": ["analytics", "finance"],
+               "configuration": {
+                 "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                 "params": {
+                   "startTime": {
+                     "type": "date",
+                     "description": "Start time for the analysis in ISO format"
+                   },
+                   "limit": {
+                     "type": "integer",
+                     "description": "Maximum number of results to return"
+                   }
+                 }
+               }
+             }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/tools
+            {
+              "id": "example-esql-tool",
+              "type": "esql",
+              "description": "An ES|QL query tool for analyzing financial trades with time filtering",
+              "tags": ["analytics", "finance", "updated"],
+              "configuration": {
+                "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                "params": {
+                  "startTime": {
+                    "type": "date",
+                    "description": "Start time for the analysis in ISO format"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return"
+                  }
+                }
+              }
+            }
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3248,6 +3306,29 @@ paths:
       summary: Execute a Tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X POST "https://${KIBANA_URL}/api/agent_builder/tools/_execute" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "tool_id": "platform.core.search",
+               "tool_params": {
+                 "query": "can you find john doe's email from the employee index?"}
+               }
+             }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/tools/_execute
+            {
+              "tool_id": "platform.core.search",
+              "tool_params": {
+                "query": "can you find john doe's email from the employee index?"
+              }
+            }
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3290,6 +3371,16 @@ paths:
       summary: Delete a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X DELETE "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true"
+        - lang: Console
+          source: |
+            DELETE kbn:/api/agent_builder/tools/{toolId}
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3417,6 +3508,15 @@ paths:
       summary: Get a tool by id
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/tools/{toolId}
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -3571,6 +3671,51 @@ paths:
       summary: Update a tool
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+             -X PUT "https://${KIBANA_URL}/api/agent_builder/tools/{toolId}" \
+             -H "Authorization: ApiKey ${API_KEY}" \
+             -H "kbn-xsrf: true" \
+             -H "Content-Type: application/json" \
+             -d '{
+               "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+               "tags": ["analytics", "finance", "updated"],
+               "configuration": {
+                 "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                 "params": {
+                   "startTime": {
+                     "type": "date",
+                     "description": "Start time for the analysis in ISO format"
+                   },
+                   "limit": {
+                     "type": "integer",
+                     "description": "Maximum number of results to return"
+                   }
+                 }
+               }
+             }'
+        - lang: Console
+          source: |
+            PUT kbn:/api/agent_builder/tools/{toolId}
+            {
+              "description": "Updated ES|QL query tool for analyzing financial trades with time filtering",
+              "tags": ["analytics", "finance", "updated"],
+              "configuration": {
+                "query": "FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit",
+                "params": {
+                  "startTime": {
+                    "type": "date",
+                    "description": "Start time for the analysis in ISO format"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return"
+                  }
+                }
+              }
+            }
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless

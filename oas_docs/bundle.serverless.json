@@ -3202,6 +3202,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"https://${KIBANA_URL}/api/agent_builder/tools\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn:/api/agent_builder/tools\n"
+          }
+        ],
         "x-state": ""
       },
       "post": {
@@ -3402,6 +3412,16 @@
         "summary": "Create a tool",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X POST \"https://${KIBANA_URL}/api/agent_builder/tools\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"id\": \"example-esql-tool\",\n   \"type\": \"esql\",\n   \"description\": \"Example ES|QL query tool for analyzing financial trades with time filtering\",\n   \"tags\": [\"analytics\", \"finance\"],\n   \"configuration\": {\n     \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n     \"params\": {\n       \"startTime\": {\n         \"type\": \"date\",\n         \"description\": \"Start time for the analysis in ISO format\"\n       },\n       \"limit\": {\n         \"type\": \"integer\",\n         \"description\": \"Maximum number of results to return\"\n       }\n     }\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn:/api/agent_builder/tools\n{\n  \"id\": \"example-esql-tool\",\n  \"type\": \"esql\",\n  \"description\": \"An ES|QL query tool for analyzing financial trades with time filtering\",\n  \"tags\": [\"analytics\", \"finance\", \"updated\"],\n  \"configuration\": {\n    \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n    \"params\": {\n      \"startTime\": {\n        \"type\": \"date\",\n        \"description\": \"Start time for the analysis in ISO format\"\n      },\n      \"limit\": {\n        \"type\": \"integer\",\n        \"description\": \"Maximum number of results to return\"\n      }\n    }\n  }\n}\n"
+          }
         ],
         "x-state": ""
       }
@@ -3708,6 +3728,16 @@
         "tags": [
           "agent builder"
         ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X POST \"https://${KIBANA_URL}/api/agent_builder/tools/_execute\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"tool_id\": \"platform.core.search\",\n   \"tool_params\": {\n     \"query\": \"can you find john doe's email from the employee index?\"}\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "POST kbn:/api/agent_builder/tools/_execute\n{\n  \"tool_id\": \"platform.core.search\",\n  \"tool_params\": {\n    \"query\": \"can you find john doe's email from the employee index?\"\n  }\n}\n"
+          }
+        ],
         "x-state": ""
       }
     },
@@ -3756,6 +3786,16 @@
         "summary": "Delete a tool",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X DELETE \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\" \\\n  -H \"kbn-xsrf: true\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "DELETE kbn:/api/agent_builder/tools/{toolId}\n"
+          }
         ],
         "x-state": ""
       },
@@ -3893,6 +3933,16 @@
         "summary": "Get a tool by id",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n  -X GET \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n  -H \"Authorization: ApiKey ${API_KEY}\"\n"
+          },
+          {
+            "lang": "Console",
+            "source": "GET kbn:/api/agent_builder/tools/{toolId}\n"
+          }
         ],
         "x-state": ""
       },
@@ -4094,6 +4144,16 @@
         "summary": "Update a tool",
         "tags": [
           "agent builder"
+        ],
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "source": "curl \\\n -X PUT \"https://${KIBANA_URL}/api/agent_builder/tools/{toolId}\" \\\n -H \"Authorization: ApiKey ${API_KEY}\" \\\n -H \"kbn-xsrf: true\" \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"description\": \"Updated ES|QL query tool for analyzing financial trades with time filtering\",\n   \"tags\": [\"analytics\", \"finance\", \"updated\"],\n   \"configuration\": {\n     \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n     \"params\": {\n       \"startTime\": {\n         \"type\": \"date\",\n         \"description\": \"Start time for the analysis in ISO format\"\n       },\n       \"limit\": {\n         \"type\": \"integer\",\n         \"description\": \"Maximum number of results to return\"\n       }\n     }\n   }\n }'\n"
+          },
+          {
+            "lang": "Console",
+            "source": "PUT kbn:/api/agent_builder/tools/{toolId}\n{\n  \"description\": \"Updated ES|QL query tool for analyzing financial trades with time filtering\",\n  \"tags\": [\"analytics\", \"finance\", \"updated\"],\n  \"configuration\": {\n    \"query\": \"FROM financial_trades | WHERE execution_timestamp >= ?startTime | STATS trade_count=COUNT(*), avg_price=AVG(execution_price) BY symbol | SORT trade_count DESC | LIMIT ?limit\",\n    \"params\": {\n      \"startTime\": {\n        \"type\": \"date\",\n        \"description\": \"Start time for the analysis in ISO format\"\n      },\n      \"limit\": {\n        \"type\": \"integer\",\n        \"description\": \"Maximum number of results to return\"\n      }\n    }\n  }\n}\n"
+          }
         ],
         "x-state": ""
       }

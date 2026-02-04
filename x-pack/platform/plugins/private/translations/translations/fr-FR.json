@@ -4535,7 +4535,6 @@
     "indexPatternEditor.form.nameAriaLabel": "Champ de nom facultatif",
     "indexPatternEditor.form.titleAriaLabel": "Champ de modèle d'indexation",
     "indexPatternEditor.goToManagementPage": "Gérer les paramètres et afficher les détails de champ",
-    "indexPatternEditor.pagingLabel": "Lignes par page : {perPage}",
     "indexPatternEditor.previewPanel.viewModeGroup.allSourcesButton": "Toutes les sources",
     "indexPatternEditor.previewPanel.viewModeGroup.legend": "Sources visibles",
     "indexPatternEditor.previewPanel.viewModeGroup.matchingSourcesButton": "Sources correspondantes",

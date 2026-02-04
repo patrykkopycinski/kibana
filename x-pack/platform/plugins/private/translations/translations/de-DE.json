@@ -4516,7 +4516,6 @@
     "indexPatternEditor.form.nameAriaLabel": "Namensfeld optional",
     "indexPatternEditor.form.titleAriaLabel": "Indexmusterfeld",
     "indexPatternEditor.goToManagementPage": "Einstellungen verwalten und Felddetails anzeigen",
-    "indexPatternEditor.pagingLabel": "Zeilen pro Seite: {perPage}",
     "indexPatternEditor.previewPanel.viewModeGroup.allSourcesButton": "Alle Quellen",
     "indexPatternEditor.previewPanel.viewModeGroup.legend": "Sichtbare Quellen",
     "indexPatternEditor.previewPanel.viewModeGroup.matchingSourcesButton": "Übereinstimmende Quellen",

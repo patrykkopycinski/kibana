@@ -25790,7 +25790,6 @@
     "xpack.ml.dataVisualizer.pageHeader": "データビジュアライザー",
     "xpack.ml.datavisualizer.selector.dataVisualizerDescription": "機械学習データビジュアライザーツールは、ログファイルのメトリックとフィールド、または既存の Elasticsearch インデックスを分析し、データの理解を助けます。",
     "xpack.ml.datavisualizer.selector.dataVisualizerTitle": "データビジュアライザー",
-    "xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg": "ES|QLデータビジュアライザーはテクニカルプレビュー段階です。",
     "xpack.ml.datavisualizer.selector.importDataTitle": "ファイルのデータを可視化",
     "xpack.ml.datavisualizer.selector.selectDataViewButtonLabel": "データビューを選択",
     "xpack.ml.datavisualizer.selector.selectDataViewTitle": "データビューのデータを可視化",

@@ -25778,7 +25778,6 @@
     "xpack.ml.dataVisualizer.pageHeader": "数据可视化工具",
     "xpack.ml.datavisualizer.selector.dataVisualizerDescription": "Machine Learning 数据可视化工具通过分析日志文件或现有 Elasticsearch 索引中的指标和字段，帮助您理解数据。",
     "xpack.ml.datavisualizer.selector.dataVisualizerTitle": "数据可视化工具",
-    "xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg": "ES|QL 数据可视化工具处于技术预览状态。",
     "xpack.ml.datavisualizer.selector.importDataTitle": "可视化来自文件的数据",
     "xpack.ml.datavisualizer.selector.selectDataViewButtonLabel": "选择数据视图",
     "xpack.ml.datavisualizer.selector.selectDataViewTitle": "可视化来自数据视图的数据",

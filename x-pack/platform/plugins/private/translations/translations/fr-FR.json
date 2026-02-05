@@ -25743,7 +25743,6 @@
     "xpack.ml.dataVisualizer.pageHeader": "Data Visualizer (Visualiseur de données)",
     "xpack.ml.datavisualizer.selector.dataVisualizerDescription": "L'outil de Machine Learning Data Visualizer (Visualiseur de données) vous aide à comprendre vos données en analysant les indicateurs et les champs dans un fichier log ou un index Elasticsearch existant.",
     "xpack.ml.datavisualizer.selector.dataVisualizerTitle": "Data Visualizer (Visualiseur de données)",
-    "xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg": "Le visualiseur de données ES|QL est en version préliminaire technique.",
     "xpack.ml.datavisualizer.selector.importDataTitle": "Visualiser les données à partir d'un fichier",
     "xpack.ml.datavisualizer.selector.selectDataViewButtonLabel": "Sélectionner la vue de données",
     "xpack.ml.datavisualizer.selector.selectDataViewTitle": "Visualiser les données à partir d'une vue de données",

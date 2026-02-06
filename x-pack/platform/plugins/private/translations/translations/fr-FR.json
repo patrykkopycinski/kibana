@@ -7004,7 +7004,6 @@
     "securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureDetails": "Réouvrir les cas clôturés",
     "securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureName": "Rouvrir",
     "securitySolutionPackages.features.featureRegistry.securityGroupDescription": "Chaque privilège de sous-fonctionnalité de ce groupe doit être attribué individuellement. L'affectation globale n'est prise en charge que lorsque votre offre tarifaire n'autorise pas les privilèges de fonctionnalités individuelles.",
-    "securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName": "Tous",
     "securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description": "Modifiez les champs par défaut autorisés à être utilisés par l'assistant IA et Attack discovery. Anonymisez n'importe quel contenu pour les champs sélectionnés.",
     "securitySolutionPackages.features.featureRegistry.subFeatures.blockList": "Liste noire",
     "securitySolutionPackages.features.featureRegistry.subFeatures.blockList.description": "Étendez la protection d'Elastic Defend contre les processus malveillants et protégez-vous des applications potentiellement nuisibles.",

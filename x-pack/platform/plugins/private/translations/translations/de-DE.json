@@ -6856,7 +6856,6 @@
     "securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureDetails": "Geschlossene Tickets erneut öffnen",
     "securitySolutionPackages.features.featureRegistry.reopenCaseSubFeatureName": "Wieder öffnen",
     "securitySolutionPackages.features.featureRegistry.securityGroupDescription": "Jede Berechtigung für Unterfunktionen in dieser Gruppe muss individuell zugewiesen werden. Die globale Zuweisung wird nur unterstützt, wenn Ihr Tarif keine individuellen Funktionsberechtigungen zulässt.",
-    "securitySolutionPackages.features.featureRegistry.subFeatures.allPrivilegeName": "Alle",
     "securitySolutionPackages.features.featureRegistry.subFeatures.assistant.description": "Ändern Sie die Standard-Felder, die vom KI-Assistenten und der Angriffserkennung verwendet werden dürfen. Anonymisieren Sie jeglichen Inhalt für die ausgewählten Felder.",
     "securitySolutionPackages.features.featureRegistry.subFeatures.blockList": "Blockliste",
     "securitySolutionPackages.features.featureRegistry.subFeatures.blockList.description": "Erweitern Sie den Schutz von Elastic Defend gegen bösartige Prozesse und schützen Sie vor potenziell schädlichen Anwendungen.",

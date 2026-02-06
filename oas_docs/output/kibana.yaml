@@ -101231,7 +101231,6 @@ components:
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
       description: A minimal representation of Kibana's operational status.
-      type: object
       properties:
         status:
           additionalProperties: false
@@ -101255,10 +101254,11 @@ components:
             - overall
       required:
         - status
+      title: core_status_redactedResponse
+      type: object
     Kibana_HTTP_APIs_core_status_response:
       additionalProperties: false
       description: Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.
-      type: object
       properties:
         metrics:
           additionalProperties: false
@@ -101501,6 +101501,8 @@ components:
         - version
         - status
         - metrics
+      title: core_status_response
+      type: object
     Machine_learning_APIs_mlSync200Response:
       properties:
         datafeedsAdded:

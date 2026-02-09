@@ -3207,7 +3207,7 @@ paths:
                               - KO
                               - buy
                         tool_result_id: xTpT
-                        type: tabular_data
+                        type: esql_results
                 executeBuiltinToolExample:
                   description: Example response calling built-in platform.core.get_document_by_id tool
                   value:
@@ -3256,7 +3256,7 @@ paths:
                               - 89.93244177666526
                               - INTL_CORP_EU_B
                         tool_result_id: Voy8
-                        type: tabular_data
+                        type: esql_results
                 executeIndexSearchToolExample:
                   description: Example response calling custom example-index-search-tool tool
                   value:
@@ -3301,7 +3301,7 @@ paths:
                               - JAP_JGB_10YR
                               - sell
                         tool_result_id: uE8y
-                        type: tabular_data
+                        type: esql_results
           description: Indicates a successful response
       summary: Run a tool
       tags:

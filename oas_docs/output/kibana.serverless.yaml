@@ -29550,6 +29550,8 @@ paths:
                                     - UPG_WATCHING
                                     - UPG_ROLLBACK
                                   type: string
+                                reason:
+                                  type: string
                                 retry_error_msg:
                                   type: string
                                 retry_until:
@@ -30091,6 +30093,8 @@ paths:
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
                                 type: string
+                              reason:
+                                type: string
                               retry_error_msg:
                                 type: string
                               retry_until:
@@ -30487,6 +30491,8 @@ paths:
                                   - UPG_FAILED
                                   - UPG_WATCHING
                                   - UPG_ROLLBACK
+                                type: string
+                              reason:
                                 type: string
                               retry_error_msg:
                                 type: string

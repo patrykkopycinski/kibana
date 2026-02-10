@@ -2183,6 +2183,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
@@ -2521,6 +2526,11 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                action:
+                  description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
+                  enum:
+                    - regenerate
+                  type: string
                 agent_id:
                   default: elastic-ai-agent
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.

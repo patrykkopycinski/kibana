@@ -67476,6 +67476,16 @@ paths:
                                                                   - boolean
                                                                   - ip
                                                                   - geo_point
+                                                                  - integer
+                                                                  - short
+                                                                  - byte
+                                                                  - float
+                                                                  - half_float
+                                                                  - text
+                                                                  - wildcard
+                                                                  - version
+                                                                  - unsigned_long
+                                                                  - date_nanos
                                                                 type: string
                                                             required:
                                                               - type
@@ -76639,6 +76649,16 @@ paths:
                                                                   - boolean
                                                                   - ip
                                                                   - geo_point
+                                                                  - integer
+                                                                  - short
+                                                                  - byte
+                                                                  - float
+                                                                  - half_float
+                                                                  - text
+                                                                  - wildcard
+                                                                  - version
+                                                                  - unsigned_long
+                                                                  - date_nanos
                                                                 type: string
                                                             required:
                                                               - type
@@ -85946,6 +85966,16 @@ paths:
                                                   - boolean
                                                   - ip
                                                   - geo_point
+                                                  - integer
+                                                  - short
+                                                  - byte
+                                                  - float
+                                                  - half_float
+                                                  - text
+                                                  - wildcard
+                                                  - version
+                                                  - unsigned_long
+                                                  - date_nanos
                                                 type: string
                                             required:
                                               - type
@@ -90336,6 +90366,16 @@ paths:
                                                   - boolean
                                                   - ip
                                                   - geo_point
+                                                  - integer
+                                                  - short
+                                                  - byte
+                                                  - float
+                                                  - half_float
+                                                  - text
+                                                  - wildcard
+                                                  - version
+                                                  - unsigned_long
+                                                  - date_nanos
                                                 type: string
                                             required:
                                               - type

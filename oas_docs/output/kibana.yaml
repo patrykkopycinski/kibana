@@ -2254,6 +2254,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2597,6 +2603,12 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                _execution_mode:
+                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  enum:
+                    - local
+                    - task_manager
+                  type: string
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:

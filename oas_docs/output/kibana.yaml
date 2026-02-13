@@ -1904,12 +1904,14 @@ paths:
                 id:
                   description: Optional custom ID for the attachment.
                   type: string
+                origin: {}
                 type:
-                  description: The type of the attachment (e.g., text, json, visualization_ref).
+                  description: The type of the attachment (e.g., text, esql, visualization).
                   type: string
               required:
                 - type
                 - data
+                - origin
       responses:
         '200':
           content:

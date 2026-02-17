@@ -35,6 +35,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/248310
+  // Failing: See https://github.com/elastic/kibana/issues/245377
   describe.skip('Automatic agent upgrades', () => {
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);

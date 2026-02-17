@@ -30159,7 +30159,6 @@
     "xpack.observability.overviewLinkTitle": "概要",
     "xpack.observability.pages.alertDetails.pageTitle.duration": "期間",
     "xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate": "前回のステータス更新",
-    "xpack.observability.pages.alertDetails.pageTitle.ruleName": "ルール",
     "xpack.observability.pages.alertDetails.pageTitle.triggered": "実行済み",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingDescription": "AWS Enterprise Discount Program（EDP）に加入している場合は、割引率を入力してプロファイリング費用の計算を更新します。",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingName": "AWS EDP割引率（%）",

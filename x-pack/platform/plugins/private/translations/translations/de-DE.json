@@ -29759,7 +29759,6 @@
     "xpack.observability.overviewLinkTitle": "Überblick",
     "xpack.observability.pages.alertDetails.pageTitle.duration": "Dauer",
     "xpack.observability.pages.alertDetails.pageTitle.lastStatusUpdate": "Letztes Status-Update",
-    "xpack.observability.pages.alertDetails.pageTitle.ruleName": "Regel",
     "xpack.observability.pages.alertDetails.pageTitle.triggered": "Ausgelöst",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingDescription": "Wenn Sie für das AWS Enterprise Discount Program (EDP) registriert sind, geben Sie Ihren Rabattsatz ein, um die Berechnung der Profilerstellungskosten zu aktualisieren.",
     "xpack.observability.profilingAWSCostDiscountRateUiSettingName": "AWS EDP-Rabattprozentsatz (%)",

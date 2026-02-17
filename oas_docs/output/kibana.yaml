@@ -12320,7 +12320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete cases
       tags:
@@ -12377,7 +12377,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update cases
       tags:
@@ -12420,7 +12420,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Create a case
       tags:
@@ -12488,7 +12488,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Search cases
       tags:
@@ -12526,7 +12526,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case information
       tags:
@@ -12563,7 +12563,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get all alerts for a case
       tags:
@@ -12593,7 +12593,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete all case comments and alerts
       tags:
@@ -12637,7 +12637,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update a case comment or alert
       tags:
@@ -12681,7 +12681,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add a case comment or alert
       tags:
@@ -12716,7 +12716,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case comments and alerts
       tags:
@@ -12746,7 +12746,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Delete a case comment or alert
       tags:
@@ -12783,7 +12783,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get a case comment or alert
       tags:
@@ -12826,7 +12826,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Push a case to an external service
       tags:
@@ -12870,7 +12870,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Attach a file to a case
       tags:
@@ -12921,7 +12921,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Find case activity
       tags:
@@ -12967,7 +12967,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get cases for an alert
       tags:
@@ -13140,7 +13140,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case settings
       tags:
@@ -13317,7 +13317,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Add case settings
       tags:
@@ -13496,7 +13496,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Update case settings
       tags:
@@ -13555,7 +13555,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case connectors
       tags:
@@ -13607,7 +13607,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case creators
       tags:
@@ -13645,7 +13645,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
+                $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case tags
       tags:
@@ -101425,18 +101425,6 @@ components:
             body:
               type: string
         - $ref: '#/components/schemas/APM_UI_base_source_map_object'
-    Cases_4xx_response:
-      properties:
-        error:
-          example: Unauthorized
-          type: string
-        message:
-          type: string
-        statusCode:
-          example: 401
-          type: integer
-      title: Unsuccessful cases API response
-      type: object
     Cases_actions:
       enum:
         - add
@@ -101947,7 +101935,6 @@ components:
       title: Case response properties for updated_by
       type: object
     Cases_case_severity:
-      default: low
       description: The severity of the case.
       enum:
         - critical
@@ -102658,6 +102645,18 @@ components:
               enum:
                 - user
               type: string
+    Cases_response_4xx:
+      properties:
+        error:
+          example: Unauthorized
+          type: string
+        message:
+          type: string
+        statusCode:
+          example: 401
+          type: integer
+      title: Unsuccessful cases API response
+      type: object
     Cases_rule:
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.

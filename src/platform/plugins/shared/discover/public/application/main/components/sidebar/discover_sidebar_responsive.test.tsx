@@ -836,7 +836,8 @@ describe.skip('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(0);
   }, 10000);
 
-  describe('search bar customization', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/225126
+  describe.skip('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {
       mockUseCustomizations = false;
       const comp = await mountComponent({

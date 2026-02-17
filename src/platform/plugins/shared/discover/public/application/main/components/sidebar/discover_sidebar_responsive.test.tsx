@@ -882,7 +882,8 @@ describe.skip('discover responsive sidebar', function () {
     });
   });
 
-  describe('recommended fields', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253542
+  describe.skip('recommended fields', () => {
     it('should call getRecommendedFieldsAccessor on component mount', async () => {
       await mountComponent(props);
 

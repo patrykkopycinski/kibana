@@ -110,6 +110,7 @@ data: {"data":{"time_to_first_token":18486}}`;
 const userPrompt = 'Create a rule to detect suspicious login attempts';
 
 // FLAKY: https://github.com/elastic/kibana/issues/253599
+// FLAKY: https://github.com/elastic/kibana/issues/253600
 describe.skip(
   'AI Rule Creation',
   {

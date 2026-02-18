@@ -652,6 +652,7 @@ describe('Mappings editor: core', () => {
     }); // Close inner describe for props.value and props.onChange
 
     // FLAKY: https://github.com/elastic/kibana/issues/253549
+    // FLAKY: https://github.com/elastic/kibana/issues/253628
     describe.skip('semantic_text field tests', () => {
       beforeEach(async () => {
         setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);

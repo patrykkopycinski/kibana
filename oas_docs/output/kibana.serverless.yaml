@@ -1304,6 +1304,12 @@ paths:
                         required:
                           - tool_ids
                       type: array
+                    workflow_ids:
+                      items:
+                        description: Optional list of workflow IDs. When set, these workflows run before every agent execution, in order.
+                        type: string
+                      maxItems: 100
+                      type: array
                   required:
                     - tools
                 description:
@@ -1603,6 +1609,12 @@ paths:
                             type: array
                         required:
                           - tool_ids
+                      type: array
+                    workflow_ids:
+                      items:
+                        description: Updated list of workflow IDs. When set, these workflows run every agent execution, in order.
+                        type: string
+                      maxItems: 100
                       type: array
                 description:
                   description: Updated description of what the agent does.

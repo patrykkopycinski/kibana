@@ -16282,7 +16282,6 @@
     "xpack.fleet.agentDetails.unexceptedErrorTitle": "Fehler beim Laden des Agenten",
     "xpack.fleet.agentDetails.versionLabel": "Agentenversion",
     "xpack.fleet.agentDetails.viewAgentListTitle": "Alle Agenten anzeigen",
-    "xpack.fleet.agentDetails.viewDashboardButton.disabledNoIntegrationTooltip": "Agent-Dashboard nicht gefunden, Sie müssen die elastic_agent-Integration installieren.",
     "xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip": "Logs und Metriken für den Agenten sind in der Agent Policy nicht aktiviert.",
     "xpack.fleet.agentDetails.viewDashboardButtonLabel": "Weitere Agentenmetriken anzeigen",
     "xpack.fleet.agentDetailsIntegrations.inputErrorTitle.degraded": "Herabgestuft",

@@ -29831,6 +29831,8 @@ paths:
                           properties:
                             id:
                               type: string
+                            type:
+                              type: string
                             version:
                               type: string
                           required:
@@ -29838,6 +29840,11 @@ paths:
                             - version
                         audit_unenrolled_reason:
                           type: string
+                        capabilities:
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
                         components:
                           items:
                             additionalProperties: false
@@ -29920,10 +29927,18 @@ paths:
                           type: array
                         default_api_key_id:
                           type: string
+                        effective_config: {}
                         enrolled_at:
                           type: string
+                        health:
+                          additionalProperties: {}
+                          type: object
                         id:
                           type: string
+                        identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         last_checkin:
                           type: string
                         last_checkin_message:
@@ -29966,6 +29981,10 @@ paths:
                             type: string
                           maxItems: 100
                           type: array
+                        non_identifying_attributes:
+                          additionalProperties:
+                            type: string
+                          type: object
                         outputs:
                           additionalProperties:
                             additionalProperties: false
@@ -30000,6 +30019,8 @@ paths:
                         policy_revision:
                           nullable: true
                           type: number
+                        sequence_num:
+                          type: number
                         sort:
                           items: {}
                           maxItems: 10
@@ -30028,6 +30049,7 @@ paths:
                             - PERMANENT
                             - EPHEMERAL
                             - TEMPORARY
+                            - OPAMP
                           type: string
                         unenrolled_at:
                           type: string
@@ -30138,6 +30160,7 @@ paths:
                         - active
                         - enrolled_at
                         - local_metadata
+                        - effective_config
                     maxItems: 10000
                     type: array
                   nextSearchAfter:
@@ -30374,6 +30397,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -30381,6 +30406,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -30463,10 +30493,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -30509,6 +30547,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -30543,6 +30585,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -30571,6 +30615,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -30681,6 +30726,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -30773,6 +30819,8 @@ paths:
                         properties:
                           id:
                             type: string
+                          type:
+                            type: string
                           version:
                             type: string
                         required:
@@ -30780,6 +30828,11 @@ paths:
                           - version
                       audit_unenrolled_reason:
                         type: string
+                      capabilities:
+                        items:
+                          type: string
+                        maxItems: 100
+                        type: array
                       components:
                         items:
                           additionalProperties: false
@@ -30862,10 +30915,18 @@ paths:
                         type: array
                       default_api_key_id:
                         type: string
+                      effective_config: {}
                       enrolled_at:
                         type: string
+                      health:
+                        additionalProperties: {}
+                        type: object
                       id:
                         type: string
+                      identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       last_checkin:
                         type: string
                       last_checkin_message:
@@ -30908,6 +30969,10 @@ paths:
                           type: string
                         maxItems: 100
                         type: array
+                      non_identifying_attributes:
+                        additionalProperties:
+                          type: string
+                        type: object
                       outputs:
                         additionalProperties:
                           additionalProperties: false
@@ -30942,6 +31007,8 @@ paths:
                       policy_revision:
                         nullable: true
                         type: number
+                      sequence_num:
+                        type: number
                       sort:
                         items: {}
                         maxItems: 10
@@ -30970,6 +31037,7 @@ paths:
                           - PERMANENT
                           - EPHEMERAL
                           - TEMPORARY
+                          - OPAMP
                         type: string
                       unenrolled_at:
                         type: string
@@ -31080,6 +31148,7 @@ paths:
                       - active
                       - enrolled_at
                       - local_metadata
+                      - effective_config
                 required:
                   - item
           description: 'OK: A successful request.'
@@ -31261,6 +31330,71 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/fleet/agents/{agentId}/effective_config:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/effective_config</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get an agent's effective config by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+      operationId: get-fleet-agents-agentid-effective-config
+      parameters:
+        - description: The agent ID to get effective config of
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    effective_config: {}
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  effective_config: {}
+                required:
+                  - effective_config
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Get an agent's effective config
+      tags:
+        - Elastic Agents
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

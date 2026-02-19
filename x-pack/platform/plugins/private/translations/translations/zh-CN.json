@@ -16550,7 +16550,6 @@
     "xpack.fleet.agentDetails.unexceptedErrorTitle": "加载代理时出错",
     "xpack.fleet.agentDetails.versionLabel": "代理版本",
     "xpack.fleet.agentDetails.viewAgentListTitle": "查看所有代理",
-    "xpack.fleet.agentDetails.viewDashboardButton.disabledNoIntegrationTooltip": "找不到代理仪表板，您需要安装 elastic_agent 集成。",
     "xpack.fleet.agentDetails.viewDashboardButton.disabledNoLogsAndMetricsTooltip": "未在代理策略中为代理启用日志和指标。",
     "xpack.fleet.agentDetails.viewDashboardButtonLabel": "查看更多代理指标",
     "xpack.fleet.agentDetailsIntegrations.inputErrorTitle.degraded": "已降级",

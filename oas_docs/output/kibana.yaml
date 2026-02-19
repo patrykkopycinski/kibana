@@ -30016,21 +30016,30 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: If true, returns the policy as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for standalone agents
+          in: query
           name: standalone
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for Kubernetes deployment
+          in: query
           name: kubernetes
           required: false
           schema:
             type: boolean
+        - description: If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.
+          in: query
+          name: revision
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           content:
@@ -30103,21 +30112,30 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: If true, returns the policy as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for standalone agents
+          in: query
           name: standalone
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: If true, returns the policy formatted for Kubernetes deployment
+          in: query
           name: kubernetes
           required: false
           schema:
             type: boolean
+        - description: If provided, returns the policy at the specified revision. Cannot be used with standalone or kubernetes flags.
+          in: query
+          name: revision
+          required: false
+          schema:
+            type: number
       responses:
         '200':
           content:

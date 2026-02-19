@@ -22782,7 +22782,6 @@
     "xpack.lens.indexPattern.addColumnAriaLabel": "将字段添加或拖放到 {groupLabel}",
     "xpack.lens.indexPattern.addColumnAriaLabel.inline": "向 {groupLabel} 添加一个字段",
     "xpack.lens.indexPattern.advancedSettings": "高级",
-    "xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp": "将可用字段拖放到工作区并创建可视化。要更改可用字段，请编辑您的查询。",
     "xpack.lens.indexPattern.allFieldsLabelHelp": "将可用字段拖放到工作区并创建可视化。要更改可用字段，请选择不同数据视图，编辑您的查询或使用不同时间范围。一些字段类型无法在 Lens 中可视化，包括全文本字段和地理字段。",
     "xpack.lens.indexPattern.annotationsDimensionEditorLabel": "{groupLabel} 标注",
     "xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning": "由于数据的索引方式，此可视化的 {name} 可能为近似值。尝试按稀有度排序，而不是采用升序记录计数。有关此限制的详情，{link}。",

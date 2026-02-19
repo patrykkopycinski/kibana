@@ -22407,7 +22407,6 @@
     "xpack.lens.indexPattern.addColumnAriaLabel": "Fügen Sie ein Feld hinzu oder ziehen Sie es per Drag-and-Drop zu {groupLabel}",
     "xpack.lens.indexPattern.addColumnAriaLabel.inline": "Hinzufügen eines Felds zu {groupLabel}",
     "xpack.lens.indexPattern.advancedSettings": "Fortgeschritten",
-    "xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp": "Ziehen Sie verfügbare Felder per Drag-and-Drop in den Arbeitsbereich und erstellen Sie Visualisierungen. Um die verfügbaren Felder zu ändern, bearbeiten Sie Ihre Abfrage.",
     "xpack.lens.indexPattern.allFieldsLabelHelp": "Ziehen Sie verfügbare Felder per Drag-and-Drop in den Arbeitsbereich und erstellen Sie Visualisierungen. Um die verfügbaren Felder zu ändern, wählen Sie eine andere Datenansicht, bearbeiten Sie Ihre Abfragen oder verwenden Sie einen anderen Zeitraum. Einige Feldtypen können in Lens nicht visualisiert werden, darunter Volltext- und geografische Felder.",
     "xpack.lens.indexPattern.annotationsDimensionEditorLabel": "{groupLabel} Annotation",
     "xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning": "{name} für diese Visualisierung kann aufgrund der Indizierung der Daten ungefähr sein. Versuchen Sie, nach Seltenheit statt nach aufsteigender Anzahl von Datensätzen zu sortieren. Weitere Informationen zu diesem Grenzwert finden Sie {link}.",

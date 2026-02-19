@@ -22745,7 +22745,6 @@
     "xpack.lens.indexPattern.addColumnAriaLabel": "Ajouter ou glisser-déposer un champ dans {groupLabel}",
     "xpack.lens.indexPattern.addColumnAriaLabel.inline": "Ajouter un champ à {groupLabel}",
     "xpack.lens.indexPattern.advancedSettings": "Avancé",
-    "xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp": "Glissez-déposez les champs disponibles dans l’espace de travail et créez des visualisations. Pour modifier les champs disponibles, modifiez votre requête.",
     "xpack.lens.indexPattern.allFieldsLabelHelp": "Glissez-déposez les champs disponibles dans l’espace de travail et créez des visualisations. Pour modifier les champs disponibles, sélectionnez une vue de données différente, modifiez vos requêtes ou utilisez une plage temporelle différente. Certains types de champ ne peuvent pas être visualisés dans Lens, y compris les champ de texte intégral et champs géographiques.",
     "xpack.lens.indexPattern.annotationsDimensionEditorLabel": "Annotation {groupLabel}",
     "xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning": "{name} pour cette visualisation peut être approximatif en raison de la manière dont les données sont indexées. Essayez de trier par rareté plutôt que par nombre ascendant d’enregistrements. Pour en savoir plus sur cette limitation, {link}.",

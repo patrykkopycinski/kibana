@@ -22790,7 +22790,6 @@
     "xpack.lens.indexPattern.addColumnAriaLabel": "フィールドを追加するか、{groupLabel}までドラッグアンドドロップします",
     "xpack.lens.indexPattern.addColumnAriaLabel.inline": "{groupLabel} にフィールドを追加する",
     "xpack.lens.indexPattern.advancedSettings": "高度な設定",
-    "xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp": "使用可能なフィールドをワークスペースまでドラッグし、ビジュアライゼーションを作成します。使用可能なフィールドを変更するには、クエリーを編集します。",
     "xpack.lens.indexPattern.allFieldsLabelHelp": "使用可能なフィールドをワークスペースまでドラッグし、ビジュアライゼーションを作成します。使用可能なフィールドを変更するには、別のデータビューを選択するか、クエリーを編集するか、別の時間範囲を使用します。一部のフィールドタイプは、完全なテキストおよびグラフィックフィールドを含むLensでは、視覚化できません。",
     "xpack.lens.indexPattern.annotationsDimensionEditorLabel": "{groupLabel}注釈",
     "xpack.lens.indexPattern.ascendingCountPrecisionErrorWarning": "データのインデックス方法のため、このビジュアライゼーションの{name}は近似される場合があります。レコード数の昇順ではなく希少性で並べ替えてください。この制限の詳細については、{link}。",

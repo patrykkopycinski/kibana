@@ -2487,7 +2487,6 @@
     "discover.esqlMode.selectedColumnsCallout": "{esqlQueryColumnsNumber}フィールド中{selectedColumnsNumber}フィールドを表示します。利用可能なフィールドリストからさらに追加します。",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "破棄して切り替える",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "次回以降確認しない",
-    "discover.esqlToDataViewTransitionModal.feedbackLink": "ES|QLフィードバックを送信",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "保存して切り替え",
     "discover.esqlToDataViewTransitionModal.title": "保存されていない変更",
     "discover.esqlToDataviewTransitionModalBody": "データビューを切り替えると、現在のES|QLクエリが削除されます。作業が失われないようにするには、このセッションを保存してください。",

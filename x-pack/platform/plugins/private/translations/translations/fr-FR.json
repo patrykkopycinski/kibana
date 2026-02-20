@@ -2487,7 +2487,6 @@
     "discover.esqlMode.selectedColumnsCallout": "Affichage de {selectedColumnsNumber} champ(s) sur {esqlQueryColumnsNumber}. Ajoutez-en d'autres depuis la liste des champs disponibles.",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "Annuler et changer",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "Ne plus me demander",
-    "discover.esqlToDataViewTransitionModal.feedbackLink": "Soumettre des commentaires ES|QL",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "Sauvegarder et basculer",
     "discover.esqlToDataViewTransitionModal.title": "Modifications non enregistrées",
     "discover.esqlToDataviewTransitionModalBody": "Un changement de vue de données supprime la requête ES|QL en cours. Enregistrez cette session pour éviter de perdre votre travail.",

@@ -2480,7 +2480,6 @@
     "discover.esqlMode.selectedColumnsCallout": "显示 {selectedColumnsNumber} 个字段，共 {esqlQueryColumnsNumber} 个。从可用字段列表中添加更多字段。",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "丢弃并切换",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "不再询问我",
-    "discover.esqlToDataViewTransitionModal.feedbackLink": "提交 ES|QL 反馈",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "保存并切换",
     "discover.esqlToDataViewTransitionModal.title": "未保存的更改",
     "discover.esqlToDataviewTransitionModalBody": "切换数据视图会移除当前的 ES|QL 查询。保存此会话以避免丢失工作。",

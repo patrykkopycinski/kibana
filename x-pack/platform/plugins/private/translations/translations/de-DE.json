@@ -2468,7 +2468,6 @@
     "discover.esqlMode.selectedColumnsCallout": "Es werden {selectedColumnsNumber} von {esqlQueryColumnsNumber} Feldern angezeigt. Fügen Sie weitere Felder aus der Liste „Verfügbare Felder“ hinzu.",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "Verwerfen und wechseln",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "Fragen Sie mich nicht noch einmal",
-    "discover.esqlToDataViewTransitionModal.feedbackLink": "ES|QL-Feedback einreichen",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "Speichern und wechseln",
     "discover.esqlToDataViewTransitionModal.title": "Nicht gespeicherte Änderungen",
     "discover.esqlToDataviewTransitionModalBody": "Beim Wechseln der Datenquellen wird die aktuelle ES|QL-Abfrage entfernt. Speichern Sie diese Sitzung, um einen Arbeitsverlust zu vermeiden.",

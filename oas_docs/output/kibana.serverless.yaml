@@ -22348,6 +22348,20 @@ paths:
                                       type: string
                         agents:
                           type: number
+                        agents_per_version:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              count:
+                                type: number
+                              version:
+                                type: string
+                            required:
+                              - version
+                              - count
+                          maxItems: 1000
+                          type: array
                         data_output_id:
                           nullable: true
                           type: string
@@ -23350,6 +23364,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -24134,6 +24162,20 @@ paths:
                                       type: string
                         agents:
                           type: number
+                        agents_per_version:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              count:
+                                type: number
+                              version:
+                                type: string
+                            required:
+                              - version
+                              - count
+                          maxItems: 1000
+                          type: array
                         data_output_id:
                           nullable: true
                           type: string
@@ -24897,6 +24939,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -25898,6 +25954,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string
@@ -26774,6 +26844,20 @@ paths:
                                     type: string
                       agents:
                         type: number
+                      agents_per_version:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            count:
+                              type: number
+                            version:
+                              type: string
+                          required:
+                            - version
+                            - count
+                        maxItems: 1000
+                        type: array
                       data_output_id:
                         nullable: true
                         type: string

@@ -64084,6 +64084,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -69022,6 +69035,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -73701,6 +73727,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -78451,6 +78490,19 @@ paths:
                                         type: number
                                     required:
                                       - kql
+                                  - type: object
+                                    properties:
+                                      esql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            description: Full ES|QL query.
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - esql
                               type: array
                             rules:
                               items:
@@ -83130,6 +83182,19 @@ paths:
                                     type: number
                                 required:
                                   - kql
+                              - type: object
+                                properties:
+                                  esql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        description: Full ES|QL query.
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - esql
                           type: array
                         rules:
                           items:

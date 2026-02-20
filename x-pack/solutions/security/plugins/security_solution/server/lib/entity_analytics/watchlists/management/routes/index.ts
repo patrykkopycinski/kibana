@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export * from './asset_criticality';
-export * from './risk_engine';
-export * from './entity_store';
-export * from './monitoring';
-export * from './watchlists';
-export type { EntityAnalyticsPrivileges } from './common';
+export * from './create';
+export * from './get';
+export * from './list';
+
+export * from './update';

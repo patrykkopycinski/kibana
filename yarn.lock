@@ -6152,6 +6152,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cps-server-utils@link:src/platform/packages/shared/kbn-cps-server-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cps-utils@link:src/platform/packages/shared/kbn-cps-utils":
   version "0.0.0"
   uid ""

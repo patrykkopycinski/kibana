@@ -38713,8 +38713,6 @@
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>启用后，将在分析器查询中跳过冷层和冻结层</p>",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription": "配置之后，将不会在执行规则期间搜索指定数据层中的事件。<br/>这可能有助于提高规则性能或缩短执行时间。<br/>如果指定了多个数据层，请用逗号分隔值。例如：data_frozen,data_cold",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel": "从规则执行中排除冷或冻结数据层",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription": "<p>对 .kibana-event-log-* 索引启用扩展规则执行日志记录。在“规则详情”页面上显示纯执行事件。</p>",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel": "扩展规则执行日志记录",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug": "故障排查",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription": "<p>设置最低日志级别，规则将从该级别起将扩展日志写入到 .kibana-event-log-* 索引。这只会影响类型为“消息”的事件，其他事件将写入到 .kibana-event-log-*，而不论此设置及其日志级别如何。</p>",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError": "错误",

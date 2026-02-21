@@ -38732,8 +38732,6 @@
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>有効にすると、アナライザークエリーでコールドティアとフローズンティアがスキップされます</p>",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription": "構成されていると、指定したデータティアのイベントがルール実行中に検索されません。<br/>このため、ルールパフォーマンスが改善されたり、実行時間が短縮されたりする場合があります。<br/>複数のデータティアを指定する場合は、値をカンマで区切ってください。例：data_frozen,data_cold",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel": "コールドまたはフローズンデータティアをルール実行から除外",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription": "<p>.kibana-event-log-*インデックスへの拡張ルール実行ログを有効にします。［ルール詳細］ページでプレーン実行イベントが表示されます。</p>",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel": "拡張ルール実行ログ",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug": "デバッグ",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription": "<p>最小ログレベルを設定します。ルールは、このレベル以上の拡張ログを.kibana-event-log-*インデックスに書き込みます。これはメッセージタイプのイベントにのみ影響します。他のイベントは、この設定とログレベルに関係なく、.kibana-event-log-*に書き込まれます。</p>",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError": "エラー",

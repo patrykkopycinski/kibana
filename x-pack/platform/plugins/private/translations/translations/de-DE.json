@@ -38254,8 +38254,6 @@
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzerDescription": "<p>Wenn aktiviert, werden kalte und gefrorene Ebenen in Analysatorabfragen übersprungen</p>",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription": "Bei dieser Konfiguration werden Ereignisse aus den angegebenen Datenebenen bei der Ausführung von Regeln nicht gesucht. <br/>Dies könnte dazu beitragen, die Leistung der Regel zu verbessern oder die Ausführungszeit zu verkürzen. <br/>Wenn Sie mehrere Datenschichten angeben, trennen Sie die Werte mit Kommas. Beispiel: data_frozen,data_cold",
     "xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel": "Schließen Sie die kalte oder eingefrorene Datenebene von der Regelausführung aus",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription": "<p>Aktiviert das erweiterte Logging der Regelausführung in den .kibana-event-log-*-Indizes. Zeigt einfache Ausführungsereignisse auf der Seite mit den Regeldetails an.</p>",
-    "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel": "Erweiterte Protokollierung der Regelausführung",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug": "Fehlerbehebung",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription": "<p>Legt die Mindestprotokollebene fest, ab der Regeln erweiterte kibana-logs in .kibana-event-log-*-Indizes schreiben. Dies betrifft nur Ereignisse des Typs Nachricht, andere Ereignisse werden unabhängig von dieser Einstellung und ihrem Log-Level in .kibana-event-log-* geschrieben.</p>",
     "xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError": "Fehler",

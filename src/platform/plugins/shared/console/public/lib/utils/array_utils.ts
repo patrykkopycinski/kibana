@@ -7,21 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
-import type { SharedComponent } from './shared_component';
+export const asArray = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
+export const asStringArray = (value: unknown): string[] => {
+  if (typeof value === 'string') {
+    return [value];
   }
 
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string');
   }
-}
+
+  return [];
+};

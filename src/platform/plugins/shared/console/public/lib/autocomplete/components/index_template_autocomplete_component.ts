@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConstantComponent } from './constant_component';
+import { getAutocompleteInfo, ENTITIES } from '../../../services';
+import { ListComponent } from './list_component';
 import type { SharedComponent } from './shared_component';
 
-export class FullRequestComponent extends ConstantComponent {
-  readonly name: string;
-  constructor(
-    name: string,
-    parent: SharedComponent | undefined,
-    private readonly template: string
-  ) {
-    super(name, parent);
-    this.name = name;
+export class IndexTemplateAutocompleteComponent extends ListComponent {
+  constructor(name: string, parent?: SharedComponent) {
+    super(
+      name,
+      getAutocompleteInfo().getEntityProvider(ENTITIES.INDEX_TEMPLATES),
+      parent,
+      true,
+      true
+    );
   }
 
-  getTerms() {
-    return [{ name: this.name, snippet: this.template }];
+  getContextKey(): string {
+    return 'index_template';
   }
 }

@@ -25353,6 +25353,21 @@ paths:
                                                   - value
                                               description: Package variable (see integration documentation for more information)
                                               type: object
+                                            deprecated:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                description:
+                                                  type: string
+                                                replaced_by:
+                                                  additionalProperties:
+                                                    type: string
+                                                  type: object
+                                                since:
+                                                  type: string
+                                              required:
+                                                - description
+                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -25409,6 +25424,21 @@ paths:
                                                     required:
                                                       - dataset
                                                       - type
+                                                  deprecated:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      description:
+                                                        type: string
+                                                      replaced_by:
+                                                        additionalProperties:
+                                                          type: string
+                                                        type: object
+                                                      since:
+                                                        type: string
+                                                    required:
+                                                      - description
+                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -25473,6 +25503,21 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            deprecated:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                description:
+                                                  type: string
+                                                replaced_by:
+                                                  additionalProperties:
+                                                    type: string
+                                                  type: object
+                                                since:
+                                                  type: string
+                                              required:
+                                                - description
+                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -25481,6 +25526,21 @@ paths:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
+                                                  deprecated:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      description:
+                                                        type: string
+                                                      replaced_by:
+                                                        additionalProperties:
+                                                          type: string
+                                                        type: object
+                                                      since:
+                                                        type: string
+                                                    required:
+                                                      - description
+                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -26369,6 +26429,21 @@ paths:
                                                 - value
                                             description: Package variable (see integration documentation for more information)
                                             type: object
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -26425,6 +26500,21 @@ paths:
                                                   required:
                                                     - dataset
                                                     - type
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -26489,6 +26579,21 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -26497,6 +26602,21 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -27167,6 +27287,21 @@ paths:
                                                   - value
                                               description: Package variable (see integration documentation for more information)
                                               type: object
+                                            deprecated:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                description:
+                                                  type: string
+                                                replaced_by:
+                                                  additionalProperties:
+                                                    type: string
+                                                  type: object
+                                                since:
+                                                  type: string
+                                              required:
+                                                - description
+                                                - since
                                             enabled:
                                               type: boolean
                                             id:
@@ -27223,6 +27358,21 @@ paths:
                                                     required:
                                                       - dataset
                                                       - type
+                                                  deprecated:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      description:
+                                                        type: string
+                                                      replaced_by:
+                                                        additionalProperties:
+                                                          type: string
+                                                        type: object
+                                                      since:
+                                                        type: string
+                                                    required:
+                                                      - description
+                                                      - since
                                                   enabled:
                                                     type: boolean
                                                   id:
@@ -27287,6 +27437,21 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            deprecated:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                description:
+                                                  type: string
+                                                replaced_by:
+                                                  additionalProperties:
+                                                    type: string
+                                                  type: object
+                                                since:
+                                                  type: string
+                                              required:
+                                                - description
+                                                - since
                                             enabled:
                                               description: Enable or disable that input. Defaults to `true` (enabled).
                                               type: boolean
@@ -27295,6 +27460,21 @@ paths:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
+                                                  deprecated:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      description:
+                                                        type: string
+                                                      replaced_by:
+                                                        additionalProperties:
+                                                          type: string
+                                                        type: object
+                                                      since:
+                                                        type: string
+                                                    required:
+                                                      - description
+                                                      - since
                                                   enabled:
                                                     description: Enable or disable that stream. Defaults to `true` (enabled).
                                                     type: boolean
@@ -27944,6 +28124,21 @@ paths:
                                                 - value
                                             description: Package variable (see integration documentation for more information)
                                             type: object
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -28000,6 +28195,21 @@ paths:
                                                   required:
                                                     - dataset
                                                     - type
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -28064,6 +28274,21 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -28072,6 +28297,21 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -28959,6 +29199,21 @@ paths:
                                                 - value
                                             description: Package variable (see integration documentation for more information)
                                             type: object
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -29015,6 +29270,21 @@ paths:
                                                   required:
                                                     - dataset
                                                     - type
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -29079,6 +29349,21 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -29087,6 +29372,21 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -29849,6 +30149,21 @@ paths:
                                                 - value
                                             description: Package variable (see integration documentation for more information)
                                             type: object
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             type: boolean
                                           id:
@@ -29905,6 +30220,21 @@ paths:
                                                   required:
                                                     - dataset
                                                     - type
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   type: boolean
                                                 id:
@@ -29969,6 +30299,21 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             description: Enable or disable that input. Defaults to `true` (enabled).
                                             type: boolean
@@ -29977,6 +30322,21 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                deprecated:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    description:
+                                                      type: string
+                                                    replaced_by:
+                                                      additionalProperties:
+                                                        type: string
+                                                      type: object
+                                                    since:
+                                                      type: string
+                                                  required:
+                                                    - description
+                                                    - since
                                                 enabled:
                                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                                   type: boolean
@@ -31706,6 +32066,21 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      deprecated:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            type: string
+                          replaced_by:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          since:
+                            type: string
+                        required:
+                          - description
+                          - since
                       enabled:
                         description: Enable or disable that input. Defaults to `true` (enabled).
                         type: boolean
@@ -31714,6 +32089,21 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            deprecated:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                replaced_by:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                since:
+                                  type: string
+                              required:
+                                - description
+                                - since
                             enabled:
                               description: Enable or disable that stream. Defaults to `true` (enabled).
                               type: boolean
@@ -32084,6 +32474,21 @@ paths:
                                       - value
                                   description: Package variable (see integration documentation for more information)
                                   type: object
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -32140,6 +32545,21 @@ paths:
                                         required:
                                           - dataset
                                           - type
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -32204,6 +32624,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -32212,6 +32647,21 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -48508,6 +48958,21 @@ paths:
                                         - value
                                     description: Package variable (see integration documentation for more information)
                                     type: object
+                                  deprecated:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      description:
+                                        type: string
+                                      replaced_by:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                      since:
+                                        type: string
+                                    required:
+                                      - description
+                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -48564,6 +49029,21 @@ paths:
                                           required:
                                             - dataset
                                             - type
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -48628,6 +49108,21 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  deprecated:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      description:
+                                        type: string
+                                      replaced_by:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                      since:
+                                        type: string
+                                    required:
+                                      - description
+                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -48636,6 +49131,21 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -48992,6 +49502,21 @@ paths:
                                 - value
                             description: Package variable (see integration documentation for more information)
                             type: object
+                          deprecated:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           enabled:
                             type: boolean
                           id:
@@ -49048,6 +49573,21 @@ paths:
                                   required:
                                     - dataset
                                     - type
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -49242,6 +49782,21 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -49250,6 +49805,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -49498,6 +50068,21 @@ paths:
                                       - value
                                   description: Package variable (see integration documentation for more information)
                                   type: object
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -49554,6 +50139,21 @@ paths:
                                         required:
                                           - dataset
                                           - type
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -49618,6 +50218,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -49626,6 +50241,21 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -50033,6 +50663,21 @@ paths:
                                         - value
                                     description: Package variable (see integration documentation for more information)
                                     type: object
+                                  deprecated:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      description:
+                                        type: string
+                                      replaced_by:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                      since:
+                                        type: string
+                                    required:
+                                      - description
+                                      - since
                                   enabled:
                                     type: boolean
                                   id:
@@ -50089,6 +50734,21 @@ paths:
                                           required:
                                             - dataset
                                             - type
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -50153,6 +50813,21 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  deprecated:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      description:
+                                        type: string
+                                      replaced_by:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                      since:
+                                        type: string
+                                    required:
+                                      - description
+                                      - since
                                   enabled:
                                     description: Enable or disable that input. Defaults to `true` (enabled).
                                     type: boolean
@@ -50161,6 +50836,21 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           description: Enable or disable that stream. Defaults to `true` (enabled).
                                           type: boolean
@@ -50617,6 +51307,21 @@ paths:
                                       - value
                                   description: Package variable (see integration documentation for more information)
                                   type: object
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -50673,6 +51378,21 @@ paths:
                                         required:
                                           - dataset
                                           - type
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -50737,6 +51457,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -50745,6 +51480,21 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -51105,6 +51855,21 @@ paths:
                                 - value
                             description: Package variable (see integration documentation for more information)
                             type: object
+                          deprecated:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           enabled:
                             type: boolean
                           id:
@@ -51161,6 +51926,21 @@ paths:
                                   required:
                                     - dataset
                                     - type
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -51352,6 +52132,21 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          deprecated:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              replaced_by:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              since:
+                                type: string
+                            required:
+                              - description
+                              - since
                           enabled:
                             description: Enable or disable that input. Defaults to `true` (enabled).
                             type: boolean
@@ -51360,6 +52155,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that stream. Defaults to `true` (enabled).
                                   type: boolean
@@ -51607,6 +52417,21 @@ paths:
                                       - value
                                   description: Package variable (see integration documentation for more information)
                                   type: object
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   type: boolean
                                 id:
@@ -51663,6 +52488,21 @@ paths:
                                         required:
                                           - dataset
                                           - type
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         type: boolean
                                       id:
@@ -51727,6 +52567,21 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                deprecated:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    replaced_by:
+                                      additionalProperties:
+                                        type: string
+                                      type: object
+                                    since:
+                                      type: string
+                                  required:
+                                    - description
+                                    - since
                                 enabled:
                                   description: Enable or disable that input. Defaults to `true` (enabled).
                                   type: boolean
@@ -51735,6 +52590,21 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      deprecated:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          description:
+                                            type: string
+                                          replaced_by:
+                                            additionalProperties:
+                                              type: string
+                                            type: object
+                                          since:
+                                            type: string
+                                        required:
+                                          - description
+                                          - since
                                       enabled:
                                         description: Enable or disable that stream. Defaults to `true` (enabled).
                                         type: boolean
@@ -52486,6 +53356,21 @@ paths:
                                               - value
                                           description: Package variable (see integration documentation for more information)
                                           type: object
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           type: boolean
                                         id:
@@ -52542,6 +53427,21 @@ paths:
                                                 required:
                                                   - dataset
                                                   - type
+                                              deprecated:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  description:
+                                                    type: string
+                                                  replaced_by:
+                                                    additionalProperties:
+                                                      type: string
+                                                    type: object
+                                                  since:
+                                                    type: string
+                                                required:
+                                                  - description
+                                                  - since
                                               enabled:
                                                 type: boolean
                                               id:
@@ -52606,6 +53506,21 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        deprecated:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            description:
+                                              type: string
+                                            replaced_by:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                            since:
+                                              type: string
+                                          required:
+                                            - description
+                                            - since
                                         enabled:
                                           description: Enable or disable that input. Defaults to `true` (enabled).
                                           type: boolean
@@ -52614,6 +53529,21 @@ paths:
                                             additionalProperties: false
                                             type: object
                                             properties:
+                                              deprecated:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  description:
+                                                    type: string
+                                                  replaced_by:
+                                                    additionalProperties:
+                                                      type: string
+                                                    type: object
+                                                  since:
+                                                    type: string
+                                                required:
+                                                  - description
+                                                  - since
                                               enabled:
                                                 description: Enable or disable that stream. Defaults to `true` (enabled).
                                                 type: boolean
@@ -52928,6 +53858,21 @@ paths:
                                           - value
                                       description: Package variable (see integration documentation for more information)
                                       type: object
+                                    deprecated:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        description:
+                                          type: string
+                                        replaced_by:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                        since:
+                                          type: string
+                                      required:
+                                        - description
+                                        - since
                                     enabled:
                                       type: boolean
                                     id:
@@ -52984,6 +53929,21 @@ paths:
                                             required:
                                               - dataset
                                               - type
+                                          deprecated:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              replaced_by:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              since:
+                                                type: string
+                                            required:
+                                              - description
+                                              - since
                                           enabled:
                                             type: boolean
                                           id:

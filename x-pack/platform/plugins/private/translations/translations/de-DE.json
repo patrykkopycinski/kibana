@@ -31911,7 +31911,6 @@
     "xpack.security.management.apiKeys.table.statusColumnName": "Status",
     "xpack.security.management.apiKeys.table.statusExpired": "Abgelaufen",
     "xpack.security.management.apiKeys.table.statusExpires": "Läuft ab {timeFromNow}",
-    "xpack.security.management.apiKeys.table.tooManyResultsLabel": "Anzeigen von {limit} von {totalItemCount, plural, one {# api key} other {# API-Schlüssel}}",
     "xpack.security.management.apiKeys.table.typeColumnName": "Typ",
     "xpack.security.management.apiKeys.updateSuccessMessage": "API-Schlüssel „{name}“ aktualisiert",
     "xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage": "API-Schlüssel konnten nicht geladen werden, da die Abfrage nicht korrekt ist.",

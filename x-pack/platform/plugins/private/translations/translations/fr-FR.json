@@ -32251,7 +32251,6 @@
     "xpack.security.management.apiKeys.table.statusColumnName": "Statut",
     "xpack.security.management.apiKeys.table.statusExpired": "Expiré",
     "xpack.security.management.apiKeys.table.statusExpires": "Expire {timeFromNow}",
-    "xpack.security.management.apiKeys.table.tooManyResultsLabel": "Affichage de {limit} sur {totalItemCount, plural, one {# api key} other {# clés API}}",
     "xpack.security.management.apiKeys.table.typeColumnName": "Type",
     "xpack.security.management.apiKeys.updateSuccessMessage": "Mise à jour de la clé d'API \"{name}\" effectuée",
     "xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage": "Impossible de charger les clés d’API, car la requête est incorrecte.",

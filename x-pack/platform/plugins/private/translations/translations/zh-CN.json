@@ -32287,7 +32287,6 @@
     "xpack.security.management.apiKeys.table.statusColumnName": "状态",
     "xpack.security.management.apiKeys.table.statusExpired": "已过期",
     "xpack.security.management.apiKeys.table.statusExpires": "{timeFromNow} 后过期",
-    "xpack.security.management.apiKeys.table.tooManyResultsLabel": "显示 {limit} 个，共 {totalItemCount, plural, one {# 个 API 密钥} other {# 个 API 密钥}}",
     "xpack.security.management.apiKeys.table.typeColumnName": "类型",
     "xpack.security.management.apiKeys.updateSuccessMessage": "已更新 API 密钥“{name}”",
     "xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage": "无法加载 API 密钥，因为查询不正确。",

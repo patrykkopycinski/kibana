@@ -32306,7 +32306,6 @@
     "xpack.security.management.apiKeys.table.statusColumnName": "ステータス",
     "xpack.security.management.apiKeys.table.statusExpired": "期限切れ",
     "xpack.security.management.apiKeys.table.statusExpires": "Expires {timeFromNow}",
-    "xpack.security.management.apiKeys.table.tooManyResultsLabel": "表示中：{totalItemCount, plural, one {# api key} other {#個のAPIキー}}の{limit}",
     "xpack.security.management.apiKeys.table.typeColumnName": "型",
     "xpack.security.management.apiKeys.updateSuccessMessage": "APIキー''{name}''を更新しました",
     "xpack.security.management.apiKeysEmptyPrompt.badQueryErrorMessage": "クエリが正しくないため、APIキーを読み込めませんでした。",

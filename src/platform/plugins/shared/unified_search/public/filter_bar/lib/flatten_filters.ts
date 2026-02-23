@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  DashboardCapabilities,
-  DashboardLocatorParams,
-  DashboardState,
-  DashboardPinnedPanelsState,
-  DashboardPinnedPanel,
-} from './types';
+import type { Filter } from '@kbn/es-query';
+import { isCombinedFilter } from '@kbn/es-query';
 
-export { getReferencesForPanelId, prefixReferencesFromPanel } from './reference_utils';
+export const flattenFilters = (filters: Filter[]): Filter[] => {
+  const returnArray: Filter[] = [];
 
-export { migrateLegacyQuery } from './migrate_legacy_query';
-export { isDashboardSection } from './is_dashboard_section';
-export { isDashboardPanel } from './is_dashboard_panel';
+  const flattenFilterRecursively = (f: Filter) => {
+    if (isCombinedFilter(f)) {
+      f.meta.params.forEach(flattenFilterRecursively);
+    } else if (f) {
+      returnArray.push(f);
+    }
+  };
+
+  filters.forEach(flattenFilterRecursively);
+
+  return returnArray;
+};

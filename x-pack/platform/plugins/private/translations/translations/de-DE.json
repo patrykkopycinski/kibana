@@ -7588,7 +7588,6 @@
     "unifiedSearch.filter.filterBar.includeFilterButtonLabel": "Ergebnisse einschließen",
     "unifiedSearch.filter.filterBar.indexPatternSelectPlaceholder": "Wählen Sie eine Datenansicht aus",
     "unifiedSearch.filter.filterBar.invalidDateFormatProvidedErrorMessage": "Ungültiges Datumsformat wurde angegeben",
-    "unifiedSearch.filter.filterBar.labelWarningInfo": "Das Feld {fieldName} existiert nicht in der aktuellen Ansicht",
     "unifiedSearch.filter.filterBar.labelWarningText": "Warnung",
     "unifiedSearch.filter.filterBar.negatedFilterPrefix": "NICHT",
     "unifiedSearch.filter.filterBar.pinFilterButtonLabel": "An alle Apps anheften",

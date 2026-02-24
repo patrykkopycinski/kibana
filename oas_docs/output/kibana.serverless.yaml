@@ -29479,6 +29479,13 @@ paths:
                       maxLength: 255
                       minLength: 1
                       type: string
+                    target_csp:
+                      description: Target cloud service provider. If not provided, will be auto-detected from inputs.
+                      enum:
+                        - aws
+                        - azure
+                        - gcp
+                      type: string
                 description:
                   description: Policy description.
                   type: string

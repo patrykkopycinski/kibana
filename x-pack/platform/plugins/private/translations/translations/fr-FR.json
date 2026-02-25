@@ -682,7 +682,6 @@
     "controls.optionsList.editor.wildcardSearchLabel": "Contient",
     "controls.optionsList.editor.wildcardSearchTooltip": "Correspond aux valeurs qui contiennent la chaîne de recherche donnée. Les résultats peuvent prendre plus de temps à s'afficher.",
     "controls.optionsList.popover.allOptionsTitle": "Afficher toutes les options",
-    "controls.optionsList.popover.allowExpensiveQueriesWarning": "Le paramètre de cluster permettant d'autoriser les requêtes lourdes est désactivé, impliquant la désactivation d'autres fonctionnalités.",
     "controls.optionsList.popover.ariaLabel": "Fenêtre contextuelle pour le contrôle {fieldName}",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number} {totalOptions, plural, one {option} other {options}}",
     "controls.optionsList.popover.documentCountScreenReaderText": "Apparaît dans {documentCount, number} {documentCount, plural, one {document} other {documents}}",

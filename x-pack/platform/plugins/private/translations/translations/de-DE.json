@@ -682,7 +682,6 @@
     "controls.optionsList.editor.wildcardSearchLabel": "Enthält",
     "controls.optionsList.editor.wildcardSearchTooltip": "Stimmt mit Werten überein, die die angegebene Suchzeichenfolge enthalten. Das Ausfüllen der Ergebnisse kann länger dauern.",
     "controls.optionsList.popover.allOptionsTitle": "Alle Optionen anzeigen",
-    "controls.optionsList.popover.allowExpensiveQueriesWarning": "Die Clustering-Einstellung, um teure Abfragen zuzulassen, ist deaktiviert, daher sind einige Features deaktiviert.",
     "controls.optionsList.popover.ariaLabel": "Popover für {fieldName} Steuerung",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number} {totalOptions, plural, one {option} other {Optionen}}",
     "controls.optionsList.popover.documentCountScreenReaderText": "Erscheint in {documentCount, number} {documentCount, plural, one {document} other {Dokumenten}}",

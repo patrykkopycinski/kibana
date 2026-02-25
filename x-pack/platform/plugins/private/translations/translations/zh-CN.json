@@ -682,7 +682,6 @@
     "controls.optionsList.editor.wildcardSearchLabel": "包含",
     "controls.optionsList.editor.wildcardSearchTooltip": "匹配包含给定搜索字符串的值。可能需要更长时间来填充结果。",
     "controls.optionsList.popover.allOptionsTitle": "显示所有选项",
-    "controls.optionsList.popover.allowExpensiveQueriesWarning": "允许资源密集型查询的集群设置已关闭，因此会禁用某些功能。",
     "controls.optionsList.popover.ariaLabel": "{fieldName} 控件的弹出框",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number} 个{totalOptions, plural, one {选项} other {选项}}",
     "controls.optionsList.popover.documentCountScreenReaderText": "在 {documentCount, number} 个{documentCount, plural, one {文档} other {文档}}中出现",

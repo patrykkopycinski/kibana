@@ -682,7 +682,6 @@
     "controls.optionsList.editor.wildcardSearchLabel": "次を含む",
     "controls.optionsList.editor.wildcardSearchTooltip": "特定の検索文字列を含む値と一致します。結果が表示されるまでに時間がかかる場合があります。",
     "controls.optionsList.popover.allOptionsTitle": "すべてのオプションを表示",
-    "controls.optionsList.popover.allowExpensiveQueriesWarning": "コストがかかるクエリーを許可するクラスター設定がオフであるため、一部の機能が無効です。",
     "controls.optionsList.popover.ariaLabel": "{fieldName}コントロールのポップオーバー",
     "controls.optionsList.popover.cardinalityLabel": "{totalOptions, number}個の{totalOptions, plural, one {option} other {オプション}}",
     "controls.optionsList.popover.documentCountScreenReaderText": "{documentCount, number} {documentCount, plural, one {document} other {個のドキュメント}}に出現します",

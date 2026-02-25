@@ -2966,6 +2966,237 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/skills:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/skills</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all available skills (built-in and user-created).<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: get-agent-builder-skills
+      parameters: []
+      responses: {}
+      summary: List skills
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/skills</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new user-defined skill.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+      operationId: post-agent-builder-skills
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: Skill instructions content (markdown).
+                  type: string
+                description:
+                  description: Description of what the skill does.
+                  type: string
+                id:
+                  description: Unique identifier for the skill.
+                  type: string
+                name:
+                  description: Human-readable name for the skill.
+                  type: string
+                referenced_content:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: Content of the reference.
+                        type: string
+                      name:
+                        description: Name of the referenced content.
+                        type: string
+                      relativePath:
+                        description: Relative path of the referenced content.
+                        type: string
+                    required:
+                      - name
+                      - relativePath
+                      - content
+                  maxItems: 20
+                  type: array
+                tool_ids:
+                  default: []
+                  description: Tool IDs from the tool registry that this skill references.
+                  items:
+                    description: Tool ID from the tool registry.
+                    type: string
+                  maxItems: 5
+                  type: array
+              required:
+                - id
+                - name
+                - description
+                - content
+      responses: {}
+      summary: Create a skill
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/skills/{skillId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/skills/{skillId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a user-created skill by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+      operationId: delete-agent-builder-skills-skillid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the skill.
+          in: path
+          name: skillId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Delete a skill
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/skills/{skillId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a specific skill by ID.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: get-agent-builder-skills-skillid
+      parameters:
+        - description: The unique identifier of the skill.
+          in: path
+          name: skillId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Get a skill by id
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/skills/{skillId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update an existing user-created skill.<br/><br/>[Required authorization] Route required privileges: manage_agent_builder.
+      operationId: put-agent-builder-skills-skillid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the skill.
+          in: path
+          name: skillId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content:
+                  description: Updated skill instructions content.
+                  type: string
+                description:
+                  description: Updated description.
+                  type: string
+                name:
+                  description: Updated name for the skill.
+                  type: string
+                referenced_content:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      content:
+                        description: Content of the reference.
+                        type: string
+                      name:
+                        description: Name of the referenced content.
+                        type: string
+                      relativePath:
+                        description: Relative path of the referenced content.
+                        type: string
+                    required:
+                      - name
+                      - relativePath
+                      - content
+                  maxItems: 20
+                  type: array
+                tool_ids:
+                  description: Updated tool IDs from the tool registry.
+                  items:
+                    description: Updated tool ID.
+                    type: string
+                  maxItems: 5
+                  type: array
+      responses: {}
+      summary: Update a skill
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/tools:
     get:
       description: |-

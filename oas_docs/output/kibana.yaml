@@ -35800,6 +35800,7 @@ paths:
                             - INPUT_ACTION
                             - MIGRATE
                             - PRIVILEGE_LEVEL_CHANGE
+                            - ROLLBACK
                           type: string
                         version:
                           description: agent version number (UPGRADE action)

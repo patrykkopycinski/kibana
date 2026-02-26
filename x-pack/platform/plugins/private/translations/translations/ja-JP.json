@@ -43762,7 +43762,6 @@
     "xpack.triggersActionsUI.connectors.home.description": "サードパーティソフトウェアをアラートデータに連携します。",
     "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "ドキュメンテーション",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "ログ",
-    "xpack.triggersActionsUI.createConnectorFlyout": "コネクターフライアウトを作成",
     "xpack.triggersActionsUI.data.coreQueryParams.dateStartGTdateEndErrorMessage": "[dateStart]が[dateEnd]よりも大です",
     "xpack.triggersActionsUI.data.coreQueryParams.formattedFieldErrorMessage": "{fieldName}の無効な{formatName}形式：「{fieldValue}」",
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[interval]：[dateStart]が[dateEnd]と等しくない場合に指定する必要があります",

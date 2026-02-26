@@ -43269,7 +43269,6 @@
     "xpack.triggersActionsUI.connectors.home.description": "Verbinden Sie Drittanbieter-Software mit Ihren Alerting-Daten.",
     "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "Dokumentation",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "Logs",
-    "xpack.triggersActionsUI.createConnectorFlyout": "Connector-Flyout erstellen",
     "xpack.triggersActionsUI.data.coreQueryParams.dateStartGTdateEndErrorMessage": "[dateStart] ist größer als [dateEnd]",
     "xpack.triggersActionsUI.data.coreQueryParams.formattedFieldErrorMessage": "Ungültiges {formatName}-Format für {fieldName}: „{fieldValue}“",
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[Intervall]: muss angegeben werden, wenn [dateStart] nicht gleich [dateEnd] ist",

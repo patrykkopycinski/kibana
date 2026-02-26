@@ -43740,7 +43740,6 @@
     "xpack.triggersActionsUI.connectors.home.description": "连接第三方软件与您的告警数据。",
     "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "文档",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "日志",
-    "xpack.triggersActionsUI.createConnectorFlyout": "创建连接器弹出窗口",
     "xpack.triggersActionsUI.data.coreQueryParams.dateStartGTdateEndErrorMessage": "[dateStart]：晚于 [dateEnd]",
     "xpack.triggersActionsUI.data.coreQueryParams.formattedFieldErrorMessage": "{fieldName} 的 {formatName} 格式无效：“{fieldValue}”",
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[interval]：如果 [dateStart] 不等于 [dateEnd]，则必须指定",

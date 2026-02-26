@@ -43701,7 +43701,6 @@
     "xpack.triggersActionsUI.connectors.home.description": "Connectez des logiciels tiers avec vos données d'alerting.",
     "xpack.triggersActionsUI.connectors.home.documentationButtonLabel": "Documentation",
     "xpack.triggersActionsUI.connectors.home.logsTabTitle": "Logs",
-    "xpack.triggersActionsUI.createConnectorFlyout": "Créer un menu volant de connecteur",
     "xpack.triggersActionsUI.data.coreQueryParams.dateStartGTdateEndErrorMessage": "[dateStart] : est postérieure à [dateEnd]",
     "xpack.triggersActionsUI.data.coreQueryParams.formattedFieldErrorMessage": "format {formatName} non valide pour {fieldName} : \"{fieldValue}\"",
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[interval] : doit être spécifié si [dateStart] n'est pas égale à [dateEnd]",

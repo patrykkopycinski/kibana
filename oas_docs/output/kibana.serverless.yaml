@@ -2329,6 +2329,88 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}/origin</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: read_agent_builder.
+      operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the conversation.
+          in: path
+          name: conversation_id
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the attachment to update.
+          in: path
+          name: attachment_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateOriginExample:
+                description: Example request for linking an attachment to a saved visualization
+                value:
+                  origin:
+                    saved_object_id: abc123
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                origin: {}
+              required:
+                - origin
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateOriginResponseExample:
+                  description: Example response returning the attachment with updated origin
+                  value:
+                    attachment:
+                      active: true
+                      current_version: 1
+                      description: Sales chart
+                      id: att-123
+                      origin:
+                        saved_object_id: abc123
+                      type: visualization
+                      versions:
+                        - content_hash: sha256-xyz
+                          created_at: '2025-01-06T10:00:00.000Z'
+                          data:
+                            chart_type: bar
+                            esql: FROM sales | STATS count=COUNT(*) BY month
+                            query: Show monthly sales
+                            visualization: {}
+                          estimated_tokens: 50
+                          version: 1
+                    success: true
+          description: Indicates a successful response
+      summary: Update attachment origin
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/converse:
     post:
       description: |-

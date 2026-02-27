@@ -36721,7 +36721,6 @@
     "xpack.securitySolution.flyout.left.investigation.noDataDescription": "Il n'existe pas de guide d'investigation pour cette règle. {documentation} pour en ajouter un.",
     "xpack.securitySolution.flyout.left.investigation.noDataLinkText": "Modifier les paramètres de la règle",
     "xpack.securitySolution.flyout.left.investigation.previewMessage": "Le guide d'investigation n'est pas disponible dans l'aperçu des alertes.",
-    "xpack.securitySolution.flyout.left.investigationGuide": "Guide d'investigation",
     "xpack.securitySolution.flyout.left.investigations.tabLabel": "Investigation",
     "xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent": "Vous devez enregistrer la chronologie actuelle avant d'y attacher des notes.",
     "xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle": "Attacher à la chronologie actuelle",

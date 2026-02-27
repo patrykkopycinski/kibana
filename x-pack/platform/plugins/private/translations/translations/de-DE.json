@@ -36345,7 +36345,6 @@
     "xpack.securitySolution.flyout.left.investigation.noDataDescription": "Es gibt keinen Untersuchungsleitfaden für diese Regel. {documentation}, um einen hinzuzufügen.",
     "xpack.securitySolution.flyout.left.investigation.noDataLinkText": "Die Einstellungen der Regel bearbeiten",
     "xpack.securitySolution.flyout.left.investigation.previewMessage": "Der Untersuchungsleitfaden ist in der Alarmvorschau nicht verfügbar.",
-    "xpack.securitySolution.flyout.left.investigationGuide": "Untersuchungsleitfaden",
     "xpack.securitySolution.flyout.left.investigations.tabLabel": "Untersuchung",
     "xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutContent": "Sie müssen die aktuelle Zeitleiste speichern, bevor Sie Notizen daran anhängen.",
     "xpack.securitySolution.flyout.left.notes.attachToTimeline.calloutTitle": "An aktuelle Timeline anhängen",

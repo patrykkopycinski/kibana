@@ -60002,11 +60002,11 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new chat completion by using the Observability AI Assistant. 
+        Create a new chat completion by using the Observability AI Assistant.
 
-        The API returns the model's response based on the current conversation context. 
+        The API returns the model's response based on the current conversation context.
 
-        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM). 
+        It also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).
 
         This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: observability-ai-assistant-chat-complete
@@ -60015,7 +60015,7 @@ paths:
           application/json:
             examples:
               chatCompleteRequestExample:
-                $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteRequestExample'
+                $ref: '#/components/examples/Observability_AI_Assistant_API_ChatCompleteRequestExample'
             schema:
               type: object
               properties:
@@ -60058,7 +60058,7 @@ paths:
             application/json:
               examples:
                 chatCompleteResponseExample:
-                  $ref: '#/components/schemas/Observability_AI_Assistant_API_ChatCompleteResponseExample'
+                  $ref: '#/components/examples/Observability_AI_Assistant_API_ChatCompleteResponseExample'
               schema:
                 type: object
           description: Successful response
@@ -104156,6 +104156,45 @@ components:
             myjob2:
               success: true
         savedObjectsDeleted: {}
+    Observability_AI_Assistant_API_ChatCompleteRequestExample:
+      summary: Example of completing a chat interaction
+      value: |
+        {
+          "connectorId": "<connectorId>",
+          "disableFunctions": false,
+          "messages": [
+            {
+              "@timestamp": "2025-06-25T23:45:00.000Z",
+              "message": {
+                "role": "user",
+                "content": "Is my Elasticsearch cluster healthy right now?"
+              }
+            }
+          ],
+          "persist": false,
+          "actions": [
+            {
+              "name": "get_cluster_health",
+              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "includeShardStats": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              }
+            }
+          ],
+          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
+        }
+    Observability_AI_Assistant_API_ChatCompleteResponseExample:
+      summary: Get a chat completion from the Observability AI Assistant
+      value: |
+        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
+
+        data: [DONE]
     Saved_objects_key_rotation_response:
       summary: Encryption key rotation using default parameters.
       value:
@@ -109633,45 +109672,6 @@ components:
           $ref: '#/components/schemas/Machine_learning_APIs_mlSyncResponseSuccess'
       title: Sync API response for trained models
       type: object
-    Observability_AI_Assistant_API_ChatCompleteRequestExample:
-      summary: Example of completing a chat interaction
-      value: |
-        {
-          "connectorId": "<connectorId>",
-          "disableFunctions": false,
-          "messages": [
-            {
-              "@timestamp": "2025-06-25T23:45:00.000Z",
-              "message": {
-                "role": "user",
-                "content": "Is my Elasticsearch cluster healthy right now?"
-              }
-            }
-          ],
-          "persist": false,
-          "actions": [
-            {
-              "name": "get_cluster_health",
-              "description": "Fetch the current Elasticsearch cluster-health status and key metrics.",
-              "parameters": {
-                "type": "object",
-                "properties": {
-                  "includeShardStats": {
-                    "type": "boolean",
-                    "default": false
-                  }
-                }
-              }
-            }
-          ],
-          "instructions": ["When the user asks about Elasticsearch cluster health, use the get_cluster_health tool to retrieve cluster health, then summarize the response in plain English."]
-        }
-    Observability_AI_Assistant_API_ChatCompleteResponseExample:
-      summary: Get a chat completion from the Observability AI Assistant
-      value: |
-        data: {"model":"unknown","choices":[{"delta":{"content":"","function_call":{"name":"get_cluster_health","arguments":"{\"includeShardStats\":true}"}},"finish_reason":null,"index":0}],"created":1750936626911,"id":"9c8eff9b-4fd4-4203-a4ab-2e364688deff","object":"chat.completion.chunk"}
-
-        data: [DONE]
     Observability_AI_Assistant_API_Function:
       type: object
       properties:

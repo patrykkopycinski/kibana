@@ -14951,6 +14951,16 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates an index for Elastic Security alerts. Calling this API is not
+        required for the detection engine to function properly. You can create
+        rules and alerts without calling this API.
       operationId: CreateAlertsIndex
       responses:
         '200':
@@ -14994,12 +15004,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/detection_engine/privileges:
     get:
       description: |

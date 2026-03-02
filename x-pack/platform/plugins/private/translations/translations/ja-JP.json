@@ -44214,7 +44214,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip": "ルールの通知をスヌーズします。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton": "パーセンタイルを選択",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "このルールの過去{sampleLimit}実行期間の{percentileOrdinal}パーセンタイル（mm:ss）。",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle": "型",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle": "間隔",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel": "選択したすべてのルールを切り替え",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.durationTitle": "期間",

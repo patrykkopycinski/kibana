@@ -44192,7 +44192,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip": "对规则暂停通知。",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton": "选择百分位数",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "此规则过去的 {sampleLimit} 运行持续时间 (mm:ss) 的第 {percentileOrdinal} 个百分位。",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle": "类型",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle": "时间间隔",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel": "切换选择所有规则",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.durationTitle": "持续时间",

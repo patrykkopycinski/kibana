@@ -44150,7 +44150,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip": "Répéter les notifications pour une règle.",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton": "sélectionner le centile",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "{percentileOrdinal} centile des {sampleLimit} dernières durées d'exécution de cette règle (mm:ss).",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle": "Type",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle": "Intervalle",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel": "Basculer la sélection de toutes les règles",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.durationTitle": "Durée",

@@ -43703,7 +43703,6 @@
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip": "Schlummern Sie Benachrichtigungen für eine Regel.",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileSelectButton": "Perzentil auswählen",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleExecutionPercentileTooltip": "{percentileOrdinal} Perzentil der vergangenen {sampleLimit} Ausführungsdauern dieser Regel (mm:ss).",
-    "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.ruleTypeTitle": "Typ",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.scheduleTitle": "Intervall",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selectAllAriaLabel": "Umschalten der Auswahl aller Regeln",
     "xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.durationTitle": "Dauer",

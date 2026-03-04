@@ -25869,9 +25869,9 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - type: boolean
                                                         - type: string
                                                         - type: number
+                                                        - type: boolean
                                                         - items:
                                                             type: string
                                                           maxItems: 100
@@ -25898,9 +25898,9 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - type: boolean
                                                   - type: string
                                                   - type: number
+                                                  - type: boolean
                                                   - items:
                                                       type: string
                                                     maxItems: 100
@@ -26055,9 +26055,9 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -26945,9 +26945,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -26974,9 +26974,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -27131,9 +27131,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -27803,9 +27803,9 @@ paths:
                                                   vars:
                                                     additionalProperties:
                                                       anyOf:
-                                                        - type: boolean
                                                         - type: string
                                                         - type: number
+                                                        - type: boolean
                                                         - items:
                                                             type: string
                                                           maxItems: 100
@@ -27832,9 +27832,9 @@ paths:
                                             vars:
                                               additionalProperties:
                                                 anyOf:
-                                                  - type: boolean
                                                   - type: string
                                                   - type: number
+                                                  - type: boolean
                                                   - items:
                                                       type: string
                                                     maxItems: 100
@@ -27989,9 +27989,9 @@ paths:
                                         type: object
                                       - additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -28640,9 +28640,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -28669,9 +28669,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -28826,9 +28826,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -29715,9 +29715,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -29744,9 +29744,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -29901,9 +29901,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -30665,9 +30665,9 @@ paths:
                                                 vars:
                                                   additionalProperties:
                                                     anyOf:
-                                                      - type: boolean
                                                       - type: string
                                                       - type: number
+                                                      - type: boolean
                                                       - items:
                                                           type: string
                                                         maxItems: 100
@@ -30694,9 +30694,9 @@ paths:
                                           vars:
                                             additionalProperties:
                                               anyOf:
-                                                - type: boolean
                                                 - type: string
                                                 - type: number
+                                                - type: boolean
                                                 - items:
                                                     type: string
                                                   maxItems: 100
@@ -30851,9 +30851,9 @@ paths:
                                       type: object
                                     - additionalProperties:
                                         anyOf:
-                                          - type: boolean
                                           - type: string
                                           - type: number
+                                          - type: boolean
                                           - items:
                                               type: string
                                             maxItems: 100
@@ -32439,9 +32439,9 @@ paths:
                             vars:
                               additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -32468,9 +32468,9 @@ paths:
                       vars:
                         additionalProperties:
                           anyOf:
-                            - type: boolean
                             - type: string
                             - type: number
+                            - type: boolean
                             - items:
                                 type: string
                               maxItems: 100
@@ -32554,9 +32554,9 @@ paths:
                 vars:
                   additionalProperties:
                     anyOf:
-                      - type: boolean
                       - type: string
                       - type: number
+                      - type: boolean
                       - items:
                           type: string
                         maxItems: 100
@@ -32997,9 +32997,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -33026,9 +33026,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -33183,9 +33183,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -49463,9 +49463,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -49492,9 +49492,9 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100
@@ -49649,9 +49649,9 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -50137,9 +50137,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -50166,9 +50166,9 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -50269,9 +50269,9 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: boolean
                           - type: string
                           - type: number
+                          - type: boolean
                           - items:
                               type: string
                             maxItems: 100
@@ -50573,9 +50573,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -50602,9 +50602,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -50759,9 +50759,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -51168,9 +51168,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -51197,9 +51197,9 @@ paths:
                                   vars:
                                     additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100
@@ -51354,9 +51354,9 @@ paths:
                               type: object
                             - additionalProperties:
                                 anyOf:
-                                  - type: boolean
                                   - type: string
                                   - type: number
+                                  - type: boolean
                                   - items:
                                       type: string
                                     maxItems: 100
@@ -51812,9 +51812,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -51841,9 +51841,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -51998,9 +51998,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -52487,9 +52487,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -52516,9 +52516,9 @@ paths:
                           vars:
                             additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -52619,9 +52619,9 @@ paths:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - type: boolean
                           - type: string
                           - type: number
+                          - type: boolean
                           - items:
                               type: string
                             maxItems: 100
@@ -52922,9 +52922,9 @@ paths:
                                       vars:
                                         additionalProperties:
                                           anyOf:
-                                            - type: boolean
                                             - type: string
                                             - type: number
+                                            - type: boolean
                                             - items:
                                                 type: string
                                               maxItems: 100
@@ -52951,9 +52951,9 @@ paths:
                                 vars:
                                   additionalProperties:
                                     anyOf:
-                                      - type: boolean
                                       - type: string
                                       - type: number
+                                      - type: boolean
                                       - items:
                                           type: string
                                         maxItems: 100
@@ -53108,9 +53108,9 @@ paths:
                             type: object
                           - additionalProperties:
                               anyOf:
-                                - type: boolean
                                 - type: string
                                 - type: number
+                                - type: boolean
                                 - items:
                                     type: string
                                   maxItems: 100
@@ -53861,9 +53861,9 @@ paths:
                                               vars:
                                                 additionalProperties:
                                                   anyOf:
-                                                    - type: boolean
                                                     - type: string
                                                     - type: number
+                                                    - type: boolean
                                                     - items:
                                                         type: string
                                                       maxItems: 100
@@ -53890,9 +53890,9 @@ paths:
                                         vars:
                                           additionalProperties:
                                             anyOf:
-                                              - type: boolean
                                               - type: string
                                               - type: number
+                                              - type: boolean
                                               - items:
                                                   type: string
                                                 maxItems: 100
@@ -54047,9 +54047,9 @@ paths:
                                     type: object
                                   - additionalProperties:
                                       anyOf:
-                                        - type: boolean
                                         - type: string
                                         - type: number
+                                        - type: boolean
                                         - items:
                                             type: string
                                           maxItems: 100

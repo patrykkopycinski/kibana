@@ -2483,7 +2483,6 @@
     "discover.embeddable.totalResults": "{totalDocuments} {totalHitCount, plural, one {result} other {résultats}}",
     "discover.errorCalloutESQLReferenceButtonLabel": "Ouvrir la référence ES|QL",
     "discover.errorCalloutShowErrorMessage": "Afficher les détails",
-    "discover.esqlMode.selectedColumnsCallout": "Affichage de {selectedColumnsNumber} champ(s) sur {esqlQueryColumnsNumber}. Ajoutez-en d'autres depuis la liste des champs disponibles.",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "Annuler et changer",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "Ne plus me demander",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "Sauvegarder et basculer",

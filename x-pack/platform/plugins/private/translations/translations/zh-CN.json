@@ -2476,7 +2476,6 @@
     "discover.embeddable.totalResults": "{totalDocuments} 个{totalHitCount, plural, one {result} other {结果}}",
     "discover.errorCalloutESQLReferenceButtonLabel": "打开 ES|QL 参考",
     "discover.errorCalloutShowErrorMessage": "查看详情",
-    "discover.esqlMode.selectedColumnsCallout": "显示 {selectedColumnsNumber} 个字段，共 {esqlQueryColumnsNumber} 个。从可用字段列表中添加更多字段。",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "丢弃并切换",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "不再询问我",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "保存并切换",

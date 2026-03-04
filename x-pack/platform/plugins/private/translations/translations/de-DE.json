@@ -2464,7 +2464,6 @@
     "discover.embeddable.totalResults": "{totalDocuments} {totalHitCount, plural, one {result} other {Ergebnisse}}",
     "discover.errorCalloutESQLReferenceButtonLabel": "ES|QL-Referenz öffnen",
     "discover.errorCalloutShowErrorMessage": "Details anzeigen",
-    "discover.esqlMode.selectedColumnsCallout": "Es werden {selectedColumnsNumber} von {esqlQueryColumnsNumber} Feldern angezeigt. Fügen Sie weitere Felder aus der Liste „Verfügbare Felder“ hinzu.",
     "discover.esqlToDataViewTransitionModal.closeButtonLabel": "Verwerfen und wechseln",
     "discover.esqlToDataViewTransitionModal.dismissButtonLabel": "Fragen Sie mich nicht noch einmal",
     "discover.esqlToDataViewTransitionModal.saveButtonLabel": "Speichern und wechseln",

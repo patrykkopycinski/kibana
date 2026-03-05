@@ -23502,7 +23502,6 @@
     "xpack.lens.xyChart.stackingOptions": "堆叠",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "此设置仅在启用顶轴时应用。",
     "xpack.lens.xyChart.topAxisLabel": "顶轴",
-    "xpack.lens.xyChart.unsavedChanges": "未保存的更改",
     "xpack.lens.xyChart.valuesHistogramDisabledHelpText": "不能在直方图上更改此设置。",
     "xpack.lens.xyChart.valuesPercentageDisabledHelpText": "不能在百分比面积图上更改此设置。",
     "xpack.lens.xyChart.valuesStackedDisabledHelpText": "不能在堆积图或百分比条形图上更改此设置",

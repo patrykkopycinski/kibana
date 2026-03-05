@@ -23129,7 +23129,6 @@
     "xpack.lens.xyChart.stackingOptions": "Stacking",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Diese Einstellung gilt nur, wenn die obere Achse aktiviert ist.",
     "xpack.lens.xyChart.topAxisLabel": "Obere Achse",
-    "xpack.lens.xyChart.unsavedChanges": "Nicht gespeicherte Änderungen",
     "xpack.lens.xyChart.valuesHistogramDisabledHelpText": "Diese Einstellung kann bei Histogrammen nicht geändert werden.",
     "xpack.lens.xyChart.valuesPercentageDisabledHelpText": "Diese Einstellung kann bei Prozentflächendiagrammen nicht geändert werden.",
     "xpack.lens.xyChart.valuesStackedDisabledHelpText": "Diese Einstellung kann bei gestapelten oder prozentualen Balkendiagrammen nicht geändert werden.",

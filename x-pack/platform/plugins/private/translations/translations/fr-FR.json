@@ -23468,7 +23468,6 @@
     "xpack.lens.xyChart.stackingOptions": "Empilage",
     "xpack.lens.xyChart.topAxisDisabledHelpText": "Ce paramètre s'applique uniquement lorsque l'axe du haut est activé.",
     "xpack.lens.xyChart.topAxisLabel": "Axe du haut",
-    "xpack.lens.xyChart.unsavedChanges": "Modifications non enregistrées",
     "xpack.lens.xyChart.valuesHistogramDisabledHelpText": "Ce paramètre ne peut pas être modifié dans les histogrammes.",
     "xpack.lens.xyChart.valuesPercentageDisabledHelpText": "Ce paramètre ne peut pas être modifié dans les graphiques en aires à pourcentages.",
     "xpack.lens.xyChart.valuesStackedDisabledHelpText": "Ce paramètre ne peut pas être modifié dans les graphiques empilés ou les graphiques à barres à pourcentages",

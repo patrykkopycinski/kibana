@@ -38198,8 +38198,6 @@
     "xpack.securitySolution.uiSettings.defaultThreatIndexLabel": "Bedrohungs-Indizes",
     "xpack.securitySolution.uiSettings.defaultTimeRangeDescription": "<p>Standardzeitraum im Security-Zeitfilter.</p>",
     "xpack.securitySolution.uiSettings.defaultTimeRangeLabel": "Zeitraum für den Zeitfilter",
-    "xpack.securitySolution.uiSettings.enableCcsReadWarningLabel": "Warnung zu CCS-Regelberechtigungen",
-    "xpack.securitySolution.uiSettings.enableCcsWarningDescription": "<p>Ermöglicht Warnungen bei Berechtigungsprüfungen in Regeln für CCS-Indizes</p>",
     "xpack.securitySolution.uiSettings.enableGraphVisualizationLabel": "Graph-Visualisierung aktivieren",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Aktiviert den News-Feed</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Nachrichten-Feed",

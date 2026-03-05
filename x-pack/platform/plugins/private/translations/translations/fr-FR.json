@@ -36832,7 +36832,6 @@
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewAriaLabel": "Guide d'investigation",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage": "Le guide d'investigation n'est pas disponible dans l'aperçu des alertes.",
     "xpack.securitySolution.flyout.right.investigation.investigationGuide.previewTitle": "Guide d'investigation",
-    "xpack.securitySolution.flyout.right.investigation.sectionTitle": "Investigation",
     "xpack.securitySolution.flyout.right.network.networkPreviewTitle": "Aperçu des détails du réseau",
     "xpack.securitySolution.flyout.right.notes.addNoteButtonLabel": "Ajouter la note",
     "xpack.securitySolution.flyout.right.notes.fetchNotesErrorLabel": "Erreur lors de la récupération des notes",

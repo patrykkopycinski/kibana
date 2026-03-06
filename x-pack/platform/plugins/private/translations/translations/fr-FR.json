@@ -41849,8 +41849,6 @@
     "xpack.streams.streamsTable.openInNewTab": "Ouvrir dans un nouvel onglet",
     "xpack.streams.streamsTable.showClassicStreams": "Afficher les flux classiques",
     "xpack.streams.streamsTable.tableTitle": "Flux",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.description": "Le flux de données Elasticsearch sous-jacent pour ce flux classique est manquant. Recréez le flux de données pour restaurer le flux en envoyant des données avant d'utiliser les fonctionnalités de gestion.",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.title": "Flux de données manquant",
     "xpack.synthetics.active.label": "Actif",
     "xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel": "Éditeur de code JavaScript",
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "Exécute des scripts de tests synthétiques définis en ligne.",

@@ -41909,8 +41909,6 @@
     "xpack.streams.streamsTable.openInNewTab": "新しいタブで開く",
     "xpack.streams.streamsTable.showClassicStreams": "クラシックストリームを表示",
     "xpack.streams.streamsTable.tableTitle": "ストリーム",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.description": "このクラシックストリームの基盤となるElasticsearchデータストリームが欠落しています。管理機能を使用する前にデータを送信して、データストリームを再作成し、ストリームを復元します。",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.title": "データストリームがありません",
     "xpack.synthetics.active.label": "アクティブ",
     "xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel": "JavaScriptコードエディター",
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "インラインで定義されたSyntheticテストスクリプトを実行します。",

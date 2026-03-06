@@ -41423,8 +41423,6 @@
     "xpack.streams.streamsTable.openInNewTab": "In neuem Tab öffnen",
     "xpack.streams.streamsTable.showClassicStreams": "Klassische Streams anzeigen",
     "xpack.streams.streamsTable.tableTitle": "Streams",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.description": "Der zugrundeliegende Elasticsearch-Datenstrom für diesen klassischen Stream fehlt. Erzeugen Sie den Datenstream neu, um ihn durch Senden von Daten wiederherzustellen, bevor Sie die Verwaltungsfunktionen verwenden.",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.title": "Datenstrom fehlt",
     "xpack.synthetics.active.label": "Aktiv",
     "xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel": "JavaScript-Code-Editor",
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "Führt synthetische Testskripte aus, die inline definiert sind.",

@@ -41889,8 +41889,6 @@
     "xpack.streams.streamsTable.openInNewTab": "在新选项卡中打开",
     "xpack.streams.streamsTable.showClassicStreams": "显示经典流",
     "xpack.streams.streamsTable.tableTitle": "流计数",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.description": "此经典流的底层 Elasticsearch 数据流缺失。重新创建数据流以在使用管理功能之前通过发送数据来还原流。",
-    "xpack.streams.unmanagedStreamOverview.missingDatastream.title": "数据流缺失",
     "xpack.synthetics.active.label": "活动",
     "xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel": "JavaScript 代码编辑器",
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "运行内联定义的 Synthetics 测试脚本。",

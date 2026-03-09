@@ -2478,7 +2478,6 @@
     "discover.dropZoneTableLabel": "フィールドを列として表に追加するには、ゾーンをドロップします",
     "discover.embeddable.inspectorRequestDescription": "このリクエストはElasticsearchにクエリーをかけ、検索データを取得します。",
     "discover.embeddable.inspectorTableRequestTitle": "表",
-    "discover.embeddable.search.dataViewError": "データビュー{indexPatternId}が見つかりません",
     "discover.embeddable.search.displayName": "Discoverセッション",
     "discover.embeddable.totalDocuments": "{totalDocuments} {totalHitCount, plural, one {document} other {個のドキュメント}}",
     "discover.errorCalloutESQLReferenceButtonLabel": "ES|QL参照を開く",

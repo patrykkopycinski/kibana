@@ -2477,7 +2477,6 @@
     "discover.dropZoneTableLabel": "Abandonner la zone pour ajouter un champ en tant que colonne dans la table",
     "discover.embeddable.inspectorRequestDescription": "Cette requête interroge Elasticsearch afin de récupérer les données pour la recherche.",
     "discover.embeddable.inspectorTableRequestTitle": "Tableau",
-    "discover.embeddable.search.dataViewError": "Vue de données {indexPatternId} manquante",
     "discover.embeddable.search.displayName": "Session Discover",
     "discover.embeddable.totalDocuments": "{totalDocuments} {totalHitCount, plural, one {document} other {documents}}",
     "discover.embeddable.totalResults": "{totalDocuments} {totalHitCount, plural, one {result} other {résultats}}",

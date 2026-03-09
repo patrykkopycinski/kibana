@@ -2458,7 +2458,6 @@
     "discover.dropZoneTableLabel": "Ablagebereich, um ein Feld als Spalte zur Tabelle hinzuzufügen",
     "discover.embeddable.inspectorRequestDescription": "Diese Anfrage fragt Elasticsearch ab, um die Daten für die Suche abzurufen.",
     "discover.embeddable.inspectorTableRequestTitle": "Tabelle",
-    "discover.embeddable.search.dataViewError": "Datenquelle {indexPatternId} fehlt",
     "discover.embeddable.search.displayName": "Discover-Sitzung",
     "discover.embeddable.totalDocuments": "{totalDocuments} {totalHitCount, plural, one {document} other {Dokumente}}",
     "discover.embeddable.totalResults": "{totalDocuments} {totalHitCount, plural, one {result} other {Ergebnisse}}",

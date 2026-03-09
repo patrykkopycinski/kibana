@@ -2470,7 +2470,6 @@
     "discover.dropZoneTableLabel": "放置区域以将字段作为列添加到表中",
     "discover.embeddable.inspectorRequestDescription": "此请求将查询 Elasticsearch 以获取搜索的数据。",
     "discover.embeddable.inspectorTableRequestTitle": "表",
-    "discover.embeddable.search.dataViewError": "缺少数据视图 {indexPatternId}",
     "discover.embeddable.search.displayName": "Discover 会话",
     "discover.embeddable.totalDocuments": "{totalDocuments} {totalHitCount, plural, one {document} other {文档}}",
     "discover.embeddable.totalResults": "{totalDocuments} 个{totalHitCount, plural, one {result} other {结果}}",

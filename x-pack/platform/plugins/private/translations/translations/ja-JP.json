@@ -36913,7 +36913,6 @@
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.loadingAriaLabel": "グラフプレビュー",
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel": "テクニカルプレビュー",
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
-    "xpack.securitySolution.flyout.right.visualizations.sectionTitle": "ビジュアライゼーション",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.commandDescription": "基準",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.processDescription": "開始済み",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.ruleDescription": "ルールがある",

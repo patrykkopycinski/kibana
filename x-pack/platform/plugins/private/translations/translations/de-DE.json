@@ -36480,7 +36480,6 @@
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.loadingAriaLabel": "Graph-Vorschau",
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewLabel": "Technische Vorschau",
     "xpack.securitySolution.flyout.right.visualizations.graphPreview.technicalPreviewTooltip": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
-    "xpack.securitySolution.flyout.right.visualizations.sectionTitle": "Visualisierungen",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.commandDescription": "von",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.processDescription": "gestartet",
     "xpack.securitySolution.flyout.right.visualizations.sessionPreview.ruleDescription": "mit Regel",

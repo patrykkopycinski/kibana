@@ -41749,7 +41749,6 @@
     "xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage": "réponse nulle inattendue de xmatters",
     "xpack.stackConnectors.xmatters.unexpectedStatusErrorMessage": "Erreur de déclenchement du flux xMatters : statut inattendu {status}",
     "xpack.streams.actions.editFieldLabel": "Modifier le champ",
-    "xpack.streams.actions.mapFieldLabel": "Mapper le champ",
     "xpack.streams.actions.unpromoteFieldLabel": "Démapper le champ",
     "xpack.streams.actions.viewFieldLabel": "Voir le champ",
     "xpack.streams.appBreadcrumbTitle": "Flux",

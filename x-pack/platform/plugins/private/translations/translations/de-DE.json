@@ -41323,7 +41323,6 @@
     "xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage": "unerwartete Nullreaktion von xmatters",
     "xpack.stackConnectors.xmatters.unexpectedStatusErrorMessage": "Fehler beim Auslösen des xMatters-Flows: unerwarteter Status {status}",
     "xpack.streams.actions.editFieldLabel": "Feld bearbeiten",
-    "xpack.streams.actions.mapFieldLabel": "Kartenfeld",
     "xpack.streams.actions.unpromoteFieldLabel": "Feldzuordnung aufheben",
     "xpack.streams.actions.viewFieldLabel": "Feld anzeigen",
     "xpack.streams.appBreadcrumbTitle": "Streams",

@@ -41789,7 +41789,6 @@
     "xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage": "来自 xmatters 的异常空响应",
     "xpack.stackConnectors.xmatters.unexpectedStatusErrorMessage": "触发 xMatters 流时出错：非预期状态 {status}",
     "xpack.streams.actions.editFieldLabel": "编辑字段",
-    "xpack.streams.actions.mapFieldLabel": "映射字段",
     "xpack.streams.actions.unpromoteFieldLabel": "取消字段映射",
     "xpack.streams.actions.viewFieldLabel": "查看字段",
     "xpack.streams.appBreadcrumbTitle": "流计数",

@@ -41809,7 +41809,6 @@
     "xpack.stackConnectors.xmatters.unexpectedNullResponseErrorMessage": "xmattersからの予期しないnull応答",
     "xpack.stackConnectors.xmatters.unexpectedStatusErrorMessage": "xMattersフローのトリガーエラー：予期しないステータス{status}",
     "xpack.streams.actions.editFieldLabel": "フィールドの編集",
-    "xpack.streams.actions.mapFieldLabel": "フィールドのマッピング",
     "xpack.streams.actions.unpromoteFieldLabel": "フィールドのマッピング解除",
     "xpack.streams.actions.viewFieldLabel": "フィールドを表示",
     "xpack.streams.appBreadcrumbTitle": "ストリーム",

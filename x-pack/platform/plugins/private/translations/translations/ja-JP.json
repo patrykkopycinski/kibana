@@ -38151,8 +38151,6 @@
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent": "ES|QL ルールの使用を開始するには、{createEsqlRuleTypeLink}を確認してください。",
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipLink": "ドキュメンテーション",
     "xpack.securitySolution.ruleManagement.esqlValidation.errorMessage": "ES|QLの検証エラー：\"{message}\"",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError": "STATS...BY関数を使用しないクエリ（非集約クエリ）は、ソースコマンドの後にmetadata _id、_version、_index演算子を含める必要があります。例：FROM logs* metadata _id, _version, _index.さらに、メタデータプロパティ（_id、_version、_index）をクエリレスポンスで返さなければなりません。",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError": "STATS...BY関数を使用しないクエリ（非集約クエリ）は、ソースコマンドの後にmetadata _id、_version、_index演算子を含める必要があります。例：FROM logs* metadata _id, _version, _index.",
     "xpack.securitySolution.ruleManagement.esqlValidation.requiredError": "ES|QLクエリは必須です。",
     "xpack.securitySolution.ruleManagement.esqlValidation.unknownError": "ES|QLの検証中の不明なエラー",
     "xpack.securitySolution.ruleManagement.fields.esqlQuery.ariaLabel": "ヘルプポップオーバーを開く",

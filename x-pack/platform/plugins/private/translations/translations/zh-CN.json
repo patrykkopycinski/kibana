@@ -38131,8 +38131,6 @@
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent": "请访问我们的{createEsqlRuleTypeLink}以开始使用 ES|QL 规则。",
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipLink": "文档",
     "xpack.securitySolution.ruleManagement.esqlValidation.errorMessage": "验证 ES|QL 时出错：“{message}”",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError": "未使用 STATS...BY 函数的查询（非聚合查询）必须在源命令后包括“metadata _id, _version, _index”运算符。例如：FROM logs* metadata _id, _version, _index。此外，还必须在查询响应中返回元数据属性（_id、_version 和 _index）。",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError": "未使用 STATS...BY 函数的查询（非聚合查询）必须在源命令后包括“metadata _id, _version, _index”运算符。例如：FROM logs* metadata _id, _version, _index。",
     "xpack.securitySolution.ruleManagement.esqlValidation.requiredError": "ES|QL 查询必填。",
     "xpack.securitySolution.ruleManagement.esqlValidation.unknownError": "验证 ES|QL 时发生未知错误",
     "xpack.securitySolution.ruleManagement.fields.esqlQuery.ariaLabel": "打开帮助弹出框",

@@ -37696,8 +37696,6 @@
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipContent": "Sehen Sie sich unser {createEsqlRuleTypeLink} an, um mit der Nutzung der ES|QL-Regeln zu beginnen.",
     "xpack.securitySolution.ruleManagement.esqlQuery.esqlInfoTooltipLink": "Dokumentation",
     "xpack.securitySolution.ruleManagement.esqlValidation.errorMessage": "Fehler bei der Validierung von ES|QL: \"{message}\"",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError": "Abfragen, die nicht die STATS...BY-Funktion verwenden (nicht aggregierende Abfragen), müssen den Operator „Metadaten _id, _version, _index“ nach dem Quellbefehl enthalten. Zum Beispiel: FROM logs* Metadaten _id, _version, _index. Darüber hinaus müssen die Metadaten-Eigenschaften (_id, _version und _index) in der Abfrage-Reaktion zurückgegeben werden.",
-    "xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError": "Abfragen, die nicht die STATS...BY-Funktion verwenden (nicht aggregierende Abfragen), müssen den Operator „Metadaten _id, _version, _index“ nach dem Quellbefehl enthalten. Zum Beispiel: FROM logs* metadate _id, _version, _index.",
     "xpack.securitySolution.ruleManagement.esqlValidation.requiredError": "Eine ES|QL-Abfrage ist erforderlich.",
     "xpack.securitySolution.ruleManagement.esqlValidation.unknownError": "Unbekannter Fehler beim Validieren von ES|QL",
     "xpack.securitySolution.ruleManagement.fields.esqlQuery.ariaLabel": "Hilfe-Popover öffnen",

@@ -43015,7 +43015,6 @@
     "xpack.transform.transformList.deleteActionDisabledToolTipContent": "Stoppen Sie die Transformation, um sie zu löschen.",
     "xpack.transform.transformList.deleteActionNameText": "löschen",
     "xpack.transform.transformList.deleteBulkActionDisabledToolTipContent": "Eine oder mehrere ausgewählte Transformationen müssen gestoppt werden, um gelöscht zu werden.",
-    "xpack.transform.transformList.deleteManagedTransformDescription": "Löschen",
     "xpack.transform.transformList.deleteModalCancelButton": "Abbrechen",
     "xpack.transform.transformList.deleteModalDeleteButton": "Löschen",
     "xpack.transform.transformList.deleteModalTitle": "{transformId} löschen?",

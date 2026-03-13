@@ -43485,7 +43485,6 @@
     "xpack.transform.transformList.deleteActionDisabledToolTipContent": "停止数据帧作业，以便将其删除。",
     "xpack.transform.transformList.deleteActionNameText": "删除",
     "xpack.transform.transformList.deleteBulkActionDisabledToolTipContent": "一个或多个选定数据帧转换必须停止，才能删除。",
-    "xpack.transform.transformList.deleteManagedTransformDescription": "正在删除",
     "xpack.transform.transformList.deleteModalCancelButton": "取消",
     "xpack.transform.transformList.deleteModalDeleteButton": "删除",
     "xpack.transform.transformList.deleteModalTitle": "删除 {transformId}？",

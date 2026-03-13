@@ -43507,7 +43507,6 @@
     "xpack.transform.transformList.deleteActionDisabledToolTipContent": "削除するにはデータフレームジョブを停止してください。",
     "xpack.transform.transformList.deleteActionNameText": "削除",
     "xpack.transform.transformList.deleteBulkActionDisabledToolTipContent": "削除するには、選択されたトランスフォームのうちの1つまたは複数を停止する必要があります。",
-    "xpack.transform.transformList.deleteManagedTransformDescription": "削除中",
     "xpack.transform.transformList.deleteModalCancelButton": "キャンセル",
     "xpack.transform.transformList.deleteModalDeleteButton": "削除",
     "xpack.transform.transformList.deleteModalTitle": "{transformId}を削除しますか？",

@@ -908,7 +908,6 @@
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count} aktive Filter",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count} verfügbare Filter",
     "core.euiFlyout.screenReaderModalDialog": "Sie befinden sich in einem modalen Dialog. Drücken Sie die Esc-Taste oder tippen/klicken Sie außerhalb des Dialogfelds auf das schattierte Overlay, um es zu schließen.",
-    "core.euiFlyout.screenReaderNonModalDialog": "Sie befinden sich in einem nicht-modalen Dialog. Um den Dialog zu schließen, drücken Sie die Escape-Taste.",
     "core.euiFlyoutCloseButton.ariaLabel": "Schließen Sie dieses Dialogfeld",
     "core.euiForm.addressFormErrors": "Bitte beheben Sie die markierten Fehler.",
     "core.euiFormControlLayoutClearButton.label": "Eingabe löschen",

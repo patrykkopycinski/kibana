@@ -911,7 +911,6 @@
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count}個のアクティブなフィルター",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count}個の使用可能なフィルター",
     "core.euiFlyout.screenReaderModalDialog": "モーダルダイアログで操作しています。Escapeを押すか、影付きのオーバーレイでダイアログの外をタップ/クリックすると、ダイアログが閉じます。",
-    "core.euiFlyout.screenReaderNonModalDialog": "非モーダルダイアログで操作しています。ダイアログを閉じるには、Escapeを押します。",
     "core.euiFlyoutCloseButton.ariaLabel": "このダイアログを閉じる",
     "core.euiForm.addressFormErrors": "ハイライトされたエラーを修正してください。",
     "core.euiFormControlLayoutClearButton.label": "インプットを消去",

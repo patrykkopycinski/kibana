@@ -910,7 +910,6 @@
     "core.euiFilePicker.removeSelectedAriaLabel": "Supprimer les fichiers sélectionnés",
     "core.euiFilterButton.filterBadgeActiveAriaLabel": "{count} filtres actifs",
     "core.euiFilterButton.filterBadgeAvailableAriaLabel": "{count} filtres disponibles",
-    "core.euiFlyout.screenReaderNonModalDialog": "Vous êtes dans une boîte de dialogue non modale. Pour fermer la boîte de dialogue, appuyez sur Échap.",
     "core.euiFlyoutCloseButton.ariaLabel": "Fermer cette boîte de dialogue",
     "core.euiForm.addressFormErrors": "Veuillez remédier aux erreurs signalées en surbrillance.",
     "core.euiFormControlLayoutClearButton.label": "Effacer l'entrée",

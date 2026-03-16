@@ -30207,7 +30207,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "Vous n'avez pas autorisé OpenAI de manière à ce que l'assistant d'Elastic puisse formuler des réponses. Autoriser le modèle afin de continuer.",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "Informations d'identification manquantes",
     "xpack.observabilityAiAssistant.navControl.initFailureErrorTitle": "Échec de l'initialisation de l'assistant d'IA d'Observability",
-    "xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel": "Ouvrir l'assistant d'IA",
     "xpack.observabilityAiAssistant.rca.analysisCompleted": "Analyse terminée",
     "xpack.observabilityAiAssistant.rca.analysisError": "Échec de l'analyse : {errorMessage}",
     "xpack.observabilityAiAssistant.rca.analysisLoadingLabel": "Traitement...",

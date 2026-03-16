@@ -29863,7 +29863,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "Sie haben OpenAI nicht autorisiert, um Reaktionen vom Elastic Assistant zu generieren. Autorisieren Sie das Modell, um fortzufahren.",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "Fehlende Anmeldedaten",
     "xpack.observabilityAiAssistant.navControl.initFailureErrorTitle": "Initialisierung des Observability KI Assistant fehlgeschlagen",
-    "xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel": "Öffnen Sie den KI-Assistenten",
     "xpack.observabilityAiAssistant.rca.analysisCompleted": "Analyse abgeschlossen",
     "xpack.observabilityAiAssistant.rca.analysisError": "Analyse konnte nicht abgeschlossen werden: {errorMessage}",
     "xpack.observabilityAiAssistant.rca.analysisLoadingLabel": "Denkt nach …",

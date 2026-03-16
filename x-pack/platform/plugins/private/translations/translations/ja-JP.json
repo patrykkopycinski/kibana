@@ -30264,7 +30264,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "Elastic Assistantからの応答を生成するために、OpenAIを許可していません。続行するには、モデルを許可してください。",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "資格情報がありません",
     "xpack.observabilityAiAssistant.navControl.initFailureErrorTitle": "オブザーバビリティAI Assistantを初期化できませんでした",
-    "xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel": "AI Assistantを開く",
     "xpack.observabilityAiAssistant.rca.analysisCompleted": "完了した分析",
     "xpack.observabilityAiAssistant.rca.analysisError": "分析を完了できませんでした：{errorMessage}",
     "xpack.observabilityAiAssistant.rca.analysisLoadingLabel": "解析中...",

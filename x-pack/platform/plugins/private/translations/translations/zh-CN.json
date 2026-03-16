@@ -30243,7 +30243,6 @@
     "xpack.observabilityAiAssistant.missingCredentialsCallout.description": "您尚未授权 OpenAI 以从 Elastic 助手生成响应。授权模型以继续。",
     "xpack.observabilityAiAssistant.missingCredentialsCallout.title": "凭据缺失",
     "xpack.observabilityAiAssistant.navControl.initFailureErrorTitle": "无法初始化 Observability AI 助手",
-    "xpack.observabilityAiAssistant.navControl.openTheAIAssistantPopoverLabel": "打开 AI 助手",
     "xpack.observabilityAiAssistant.rca.analysisCompleted": "已完成分析",
     "xpack.observabilityAiAssistant.rca.analysisError": "未能完成分析：{errorMessage}",
     "xpack.observabilityAiAssistant.rca.analysisLoadingLabel": "正在思考......",

@@ -17,6 +17,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  VULNERABILITY_CHECK_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import { EXCEPTION_LIST_NAMESPACE_AWARE } from '@kbn/securitysolution-list-constants';
 
@@ -53,6 +54,7 @@ const SECURITY_RULE_TYPES = [
   SAVED_QUERY_RULE_TYPE_ID,
   THRESHOLD_RULE_TYPE_ID,
   NEW_TERMS_RULE_TYPE_ID,
+  VULNERABILITY_CHECK_RULE_TYPE_ID,
 ];
 
 const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({

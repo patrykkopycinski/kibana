@@ -109,6 +109,7 @@ import {
   VULNERABILITY_DETAIL_RIGHT_PANEL_ARIA_LABEL,
   VULNERABILITY_DETAIL_LEFT_PANEL_ARIA_LABEL,
   VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL,
+  VULNERABILITY_RESPONSE_CONSOLE_PREVIEW_ARIA_LABEL,
   WATCHLISTS_PANEL_ARIA_LABEL,
 } from './panel_aria_labels';
 import type { WatchlistsFlyoutExpandableFlyoutProps } from './entity_details/watchlists_right';
@@ -139,14 +140,17 @@ import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
 import type {
   VulnerabilityDetailRightPanelProps,
   VulnerabilityDetailLeftPanelProps,
+  VulnerabilityResponseConsolePanelProps,
 } from './vulnerability_details/types';
 import { VulnerabilityDetailProvider } from './vulnerability_details/context';
 import { VulnerabilityRightPanel } from './vulnerability_details/right';
 import { VulnerabilityLeftPanel } from './vulnerability_details/left';
+import { ResponseConsolePreviewPanel } from './vulnerability_details/response_console_preview';
 import {
   VulnerabilityDetailRightPanelKey,
   VulnerabilityDetailLeftPanelKey,
   VulnerabilityDetailPreviewPanelKey,
+  VulnerabilityResponseConsolePreviewKey,
 } from './vulnerability_details/constants';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
@@ -417,6 +421,21 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </VulnerabilityDetailProvider>
     ),
     'aria-label': VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL,
+  },
+  {
+    key: VulnerabilityResponseConsolePreviewKey,
+    component: (props) => {
+      const params = (props as VulnerabilityResponseConsolePanelProps).params;
+      return (
+        <ResponseConsolePreviewPanel
+          agentId={params.agentId}
+          hostName={params.hostName}
+          platform={params.platform}
+          command={params.command}
+        />
+      );
+    },
+    'aria-label': VULNERABILITY_RESPONSE_CONSOLE_PREVIEW_ARIA_LABEL,
   },
   {
     key: WatchlistsFlyoutKey,

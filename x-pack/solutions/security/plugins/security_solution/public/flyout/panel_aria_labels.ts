@@ -174,6 +174,11 @@ export const VULNERABILITY_DETAIL_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Vulnerability preview' }
 );
 
+export const VULNERABILITY_RESPONSE_CONSOLE_PREVIEW_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.flyout.panelAriaLabel.vulnerabilityResponseConsole',
+  { defaultMessage: 'Vulnerability response console' }
+);
+
 export const WATCHLISTS_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.watchlists',
   { defaultMessage: 'Watchlists' }

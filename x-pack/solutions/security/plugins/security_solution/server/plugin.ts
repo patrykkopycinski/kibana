@@ -508,11 +508,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
-    logger.info(
-      `[vulnerability-checker] Feature flag vulnerabilityCheckerEnabled=${experimentalFeatures.vulnerabilityCheckerEnabled}`
-    );
     if (experimentalFeatures.vulnerabilityCheckerEnabled) {
-      logger.info('[vulnerability-checker] Registering vulnerability check and CVE watch rule types');
       plugins.alerting.registerType(
         securityRuleTypeWrapper(
           createVulnerabilityCheckAlertType({

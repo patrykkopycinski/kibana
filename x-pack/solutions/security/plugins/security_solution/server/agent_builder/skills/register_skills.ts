@@ -18,7 +18,6 @@ import { createVulnerabilityAnalysisSkill } from './vulnerability_demo/vulnerabi
 import { createVulnerabilityTriageSkill } from './vulnerability_demo/vulnerability_triage_skill';
 import { createVulnerabilityPostureAdvisorSkill } from './vulnerability_demo/vulnerability_posture_advisor_skill';
 import { createVulnerabilityPrioritizationTuningSkill } from './vulnerability_demo/vulnerability_prioritization_tuning_skill';
-import { createVulnerabilityInvestigationSkill } from './vulnerability_demo/vulnerability_investigation_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -64,8 +63,5 @@ export const registerSkills = async ({
     agentBuilder.skills.register(createVulnerabilityTriageSkill());
     agentBuilder.skills.register(createVulnerabilityPostureAdvisorSkill());
     agentBuilder.skills.register(createVulnerabilityPrioritizationTuningSkill());
-    agentBuilder.skills.register(
-      createVulnerabilityInvestigationSkill(options.endpointAppContextService)
-    );
   }
 };

@@ -313,6 +313,9 @@ export const VulnerabilityCheckSpecificRuleParams = z.object({
   correlationTimespan: z.string().default('24h'),
   groupBy: z.array(z.string()).default(['host.name']),
   minCvssScore: z.number().min(0).max(10).default(0),
+  autonomousTriageEnabled: z.boolean().default(false),
+  triageConfidenceMin: z.number().min(0).max(1).default(0.8),
+  triageMaxAlertsPerRun: z.number().min(1).max(50).default(10),
 });
 
 export type VulnerabilityCheckRuleParams = BaseRuleParams & VulnerabilityCheckSpecificRuleParams;

@@ -35,6 +35,18 @@ import { searchUnifiedAlertsRoute } from '../lib/detection_engine/routes/unified
 import { setUnifiedAlertsWorkflowStatusRoute } from '../lib/detection_engine/routes/unified_alerts/set_workflow_status_route';
 import { setUnifiedAlertsTagsRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_tags_route';
 import { setUnifiedAlertsAssigneesRoute } from '../lib/detection_engine/routes/unified_alerts/set_alert_assignees_route';
+import { nlSearchRoute } from '../lib/detection_engine/routes/vulnerability/nl_search_route';
+import { riskNarrativeRoute } from '../lib/detection_engine/routes/vulnerability/risk_narrative_route';
+import { remediationPlanRoute } from '../lib/detection_engine/routes/vulnerability/remediation_plan_route';
+import { posturePredictionRoute } from '../lib/detection_engine/routes/vulnerability/posture_prediction_route';
+import { postureAdvisorRoute } from '../lib/detection_engine/routes/vulnerability/posture_advisor_route';
+import { anomaliesRoute } from '../lib/detection_engine/routes/vulnerability/anomalies_route';
+import { falsePositivesRoute } from '../lib/detection_engine/routes/vulnerability/false_positives_route';
+import { attackPathRoute } from '../lib/detection_engine/routes/vulnerability/attack_path_route';
+import { threatSynthesisRoute } from '../lib/detection_engine/routes/vulnerability/threat_synthesis_route';
+import { prioritizationPerformanceRoute } from '../lib/detection_engine/routes/vulnerability/prioritization_performance_route';
+import { prioritizationProposalsRoute } from '../lib/detection_engine/routes/vulnerability/prioritization_proposals_route';
+import { prioritizationFeedbackRoute } from '../lib/detection_engine/routes/vulnerability/prioritization_feedback_route';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
@@ -121,6 +133,20 @@ export const initRoutes = (
   setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
   setUnifiedAlertsTagsRoute(router, ruleDataClient);
   setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
+
+  // Vulnerability posture API routes
+  nlSearchRoute(router, ruleDataClient, getStartServices, logger);
+  riskNarrativeRoute(router, ruleDataClient, getStartServices, logger);
+  remediationPlanRoute(router, getStartServices, logger);
+  posturePredictionRoute(router, logger);
+  postureAdvisorRoute(router, ruleDataClient, getStartServices, logger);
+  anomaliesRoute(router, logger);
+  falsePositivesRoute(router, logger);
+  attackPathRoute(router, ruleDataClient, getStartServices, logger);
+  threatSynthesisRoute(router, getStartServices, logger);
+  prioritizationPerformanceRoute(router, logger);
+  prioritizationProposalsRoute(router, getStartServices, logger);
+  prioritizationFeedbackRoute(router, logger);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

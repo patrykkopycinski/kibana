@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "skill-deep-dive": {
+      "source": "davethegut/cursor-skill-deep-dive",
+      "sourceType": "github",
+      "computedHash": "f4987198831761cfc132127c0510c9eddef96a3401a99c032388d21e03d261fa"
+    }
+  }
+}

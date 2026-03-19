@@ -15,6 +15,10 @@ import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types
 import { getSecurityMlJobsSkill } from './security_ml_jobs';
 import { createVulnerabilityDemoSkill } from './vulnerability_demo';
 import { createVulnerabilityAnalysisSkill } from './vulnerability_demo/vulnerability_analysis_skill';
+import { createVulnerabilityTriageSkill } from './vulnerability_demo/vulnerability_triage_skill';
+import { createVulnerabilityPostureAdvisorSkill } from './vulnerability_demo/vulnerability_posture_advisor_skill';
+import { createVulnerabilityPrioritizationTuningSkill } from './vulnerability_demo/vulnerability_prioritization_tuning_skill';
+import { createVulnerabilityInvestigationSkill } from './vulnerability_demo/vulnerability_investigation_skill';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -52,9 +56,16 @@ export const registerSkills = async ({
   );
   await agentBuilder.skills.register(getSecurityMlJobsSkill({ getStartServices, logger, ml }));
 
-  agentBuilder.skills.register(
-    createVulnerabilityDemoSkill(options.endpointAppContextService)
-  );
+  agentBuilder.skills.register(createVulnerabilityDemoSkill(options.endpointAppContextService));
 
   agentBuilder.skills.register(createVulnerabilityAnalysisSkill());
+
+  if (experimentalFeatures.vulnerabilityCheckerEnabled) {
+    agentBuilder.skills.register(createVulnerabilityTriageSkill());
+    agentBuilder.skills.register(createVulnerabilityPostureAdvisorSkill());
+    agentBuilder.skills.register(createVulnerabilityPrioritizationTuningSkill());
+    agentBuilder.skills.register(
+      createVulnerabilityInvestigationSkill(options.endpointAppContextService)
+    );
+  }
 };

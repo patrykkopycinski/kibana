@@ -10,9 +10,10 @@ import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 import { createThreatHuntingAgent } from './threat_hunting_agent';
+import { createVulnerabilityInvestigationAgent } from './vulnerability_investigation_agent';
 
 /**
- * Registers all security agent builder tools with the agentBuilder plugin
+ * Registers all security agent builder agents with the agentBuilder plugin
  */
 export const registerAgents = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -20,4 +21,5 @@ export const registerAgents = async (
   logger: Logger
 ) => {
   agentBuilder.agents.register(createThreatHuntingAgent(core, logger));
+  agentBuilder.agents.register(createVulnerabilityInvestigationAgent(core, logger));
 };

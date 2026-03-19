@@ -340,6 +340,36 @@ export const DETECTION_ENGINE_SET_UNIFIED_ALERTS_ASSIGNEES_URL =
   `${DETECTION_ENGINE_UNIFIED_ALERTS_URL}/assignees` as const;
 
 /**
+ * Vulnerability posture API routes
+ */
+const INTERNAL_VULNERABILITY_POSTURE_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability_posture` as const;
+export const DETECTION_ENGINE_VULNERABILITY_NL_SEARCH_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability/nl_search` as const;
+export const DETECTION_ENGINE_VULNERABILITY_RISK_NARRATIVE_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability/risk_narrative` as const;
+export const DETECTION_ENGINE_VULNERABILITY_REMEDIATION_PLAN_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability/remediation_plan` as const;
+export const DETECTION_ENGINE_VULNERABILITY_ATTACK_PATHS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability/attack_paths` as const;
+export const DETECTION_ENGINE_VULNERABILITY_THREAT_SYNTHESIS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/vulnerability/threat_synthesis` as const;
+export const VULNERABILITY_POSTURE_PREDICTION_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/posture_prediction` as const;
+export const VULNERABILITY_POSTURE_ANOMALIES_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/anomalies` as const;
+export const VULNERABILITY_POSTURE_FALSE_POSITIVES_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/false_positives` as const;
+export const VULNERABILITY_POSTURE_ADVISOR_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/posture_advisor` as const;
+export const VULNERABILITY_PRIORITIZATION_PERFORMANCE_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/prioritization/performance` as const;
+export const VULNERABILITY_PRIORITIZATION_PROPOSALS_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/prioritization/proposals` as const;
+export const VULNERABILITY_PRIORITIZATION_FEEDBACK_URL =
+  `${INTERNAL_VULNERABILITY_POSTURE_URL}/prioritization/feedback` as const;
+
+/**
  * Telemetry detection endpoint for any previews requested of what data we are
  * providing through UI/UX and for e2e tests.
  *   curl http//localhost:5601/internal/security_solution/telemetry
@@ -726,3 +756,9 @@ export enum SecurityAgentBuilderAttachments {
 }
 
 export const THREAT_HUNTING_AGENT_ID = `${internalNamespaces.security}.agent`;
+
+/**
+ * Agent ID for the vulnerability investigation conversational interface.
+ * Used when opening the Agent Builder chat from the vulnerability flyout.
+ */
+export const VULNERABILITY_INVESTIGATION_AGENT_ID = `${internalNamespaces.security}.vulnerability-investigation-agent`;

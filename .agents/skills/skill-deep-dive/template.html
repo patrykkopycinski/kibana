@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{TITLE}}</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #388bfd33;
+      --green: #238636;
+      --green-text: #3fb950;
+      --purple: #8957e5;
+      --purple-text: #a371f7;
+      --yellow: #bf8700;
+      --yellow-text: #d4a72c;
+      --red: #da3633;
+      --red-text: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* --- Header --- */
+    .header {
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2.5rem 2rem 2rem;
+    }
+    .header .container { padding-top: 0; padding-bottom: 0; }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0.5rem 0 0.25rem;
+      border: none;
+      padding: 0;
+    }
+    .header p {
+      color: var(--text-muted);
+      margin: 0.25rem 0 0;
+      font-size: 1rem;
+    }
+    .header .meta {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .header .meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    /* --- Layout --- */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem 3rem;
+    }
+
+    /* --- Badge --- */
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    /* --- Table of Contents --- */
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .toc h2 {
+      font-size: 0.9rem;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { padding: 0.2rem 0; }
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .toc a:hover { text-decoration: underline; }
+
+    /* --- Typography --- */
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 2.5rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      color: var(--text);
+    }
+    p { margin: 0.75rem 0; color: var(--text-muted); }
+    .lead { font-size: 1.05rem; color: var(--text); }
+    strong { color: var(--text); }
+
+    /* --- Lists --- */
+    ul, ol { margin: 0.5rem 0; padding-left: 1.5rem; color: var(--text-muted); }
+    li { margin: 0.25rem 0; }
+
+    /* --- Tables --- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    th {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+    }
+    td { color: var(--text-muted); }
+
+    /* --- Code --- */
+    code {
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85em;
+      background: var(--surface);
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+    }
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* --- Summary / Callout Box --- */
+    .summary-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .summary-box p { margin: 0; color: var(--text); }
+
+    /* --- Flow Diagram --- */
+    .flow-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 320px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .flow-arrow {
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      padding: 0 0.25rem;
+    }
+    .node {
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .node-start { background: var(--accent-dim); color: var(--accent); }
+    .node-process { background: rgba(35,134,54,0.2); color: var(--green-text); }
+    .node-output { background: rgba(137,87,229,0.2); color: var(--purple-text); }
+    .node-decision { background: var(--surface); color: var(--text-muted); font-style: italic; }
+    .node-end { background: rgba(139,148,158,0.2); color: var(--text-muted); }
+    .branch-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* --- Tags --- */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(139,148,158,0.15);
+      color: var(--text-muted);
+      margin-right: 0.25rem;
+    }
+    .tag.blue { background: var(--accent-dim); color: var(--accent); }
+    .tag.green { background: rgba(35,134,54,0.2); color: var(--green-text); }
+    .tag.purple { background: rgba(137,87,229,0.2); color: var(--purple-text); }
+
+    /* --- Links --- */
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* --- Footer --- */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* --- Print --- */
+    @media print {
+      body { background: #fff; color: #222; padding: 1rem; }
+      .header { background: none; border-bottom: 2px solid #222; }
+      .header h1, h2, h3, strong { color: #222; }
+      .header p, p, td, li { color: #444; }
+      h2 { color: #0055aa; }
+      .badge { background: #e8f0fe; color: #0055aa; }
+      .summary-box { border-left-color: #0055aa; background: #f8f9fa; }
+      .summary-box p { color: #222; }
+      .toc { background: #f8f9fa; border-color: #ddd; }
+      .toc a { color: #0055aa; }
+      th { background: #f0f0f0; color: #222; }
+      td { color: #444; }
+      table, th, td { border-color: #ccc; }
+      code { background: #f0f0f0; border-color: #ddd; color: #222; }
+      pre { background: #f8f9fa; border-color: #ddd; }
+      pre code { color: #222; }
+      .flow-wrap { background: #f8f9fa; border-color: #ddd; }
+      .node { border-color: #ccc; }
+      .node-start { background: #e8f0fe; color: #0055aa; }
+      .node-process { background: #e6f4ea; color: #1a7f37; }
+      .node-output { background: #f3e8ff; color: #6e40c9; }
+      footer { border-top-color: #ccc; color: #666; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="container" style="padding-top:0;padding-bottom:0;">
+    <span class="badge">{{BADGE}}</span>
+    <h1>{{TITLE}}</h1>
+    <p>{{SUBTITLE}}</p>
+    <div class="meta">
+      <span>Repository: <strong>{{REPO}}</strong></span>
+      <span>Generated: {{GENERATED_DATE}}</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TABLE OF CONTENTS (generate from h2 sections) -->
+  <nav class="toc">
+    <h2>Contents</h2>
+    <ul>
+      <!-- Example:
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#key-files">Key Files &amp; Directories</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#key-concepts">Key Concepts &amp; Types</a></li>
+      <li><a href="#configuration">Configuration &amp; Setup</a></li>
+      <li><a href="#issues-prs">Related Issues &amp; PRs</a></li>
+      <li><a href="#further-reading">Further Reading</a></li>
+      -->
+    </ul>
+  </nav>
+
+  {{CONTENT}}
+
+  <footer>
+    Deep-dive reference for <strong>{{TOPIC}}</strong> in {{REPO}} &mdash;
+    Generated {{GENERATED_DATE}} &mdash;
+    <a href="https://github.com/{{REPO}}">View repository</a>
+  </footer>
+
+</div>
+
+</body>
+</html>

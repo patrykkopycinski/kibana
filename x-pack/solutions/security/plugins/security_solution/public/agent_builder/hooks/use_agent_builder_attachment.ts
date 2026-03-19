@@ -23,6 +23,14 @@ export interface UseAgentBuilderAttachmentParams {
    * Prompt/input text for the agent builder conversation
    */
   attachmentPrompt: string;
+  /**
+   * Optional agent ID to use. Defaults to THREAT_HUNTING_AGENT_ID.
+   */
+  agentId?: string;
+  /**
+   * Optional session tag for conversation context.
+   */
+  sessionTag?: string;
 }
 
 export interface UseAgentBuilderAttachmentResult {
@@ -40,6 +48,8 @@ export const useAgentBuilderAttachment = ({
   attachmentType,
   attachmentData,
   attachmentPrompt,
+  agentId: agentIdParam,
+  sessionTag: sessionTagParam,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
 
@@ -64,10 +74,17 @@ export const useAgentBuilderAttachment = ({
       newConversation: true,
       initialMessage: attachmentPrompt,
       attachments: [attachment],
-      sessionTag: 'security',
-      agentId: THREAT_HUNTING_AGENT_ID,
+      sessionTag: sessionTagParam ?? 'security',
+      agentId: agentIdParam ?? THREAT_HUNTING_AGENT_ID,
     });
-  }, [attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
+  }, [
+    attachmentType,
+    attachmentData,
+    attachmentPrompt,
+    agentIdParam,
+    sessionTagParam,
+    agentBuilder,
+  ]);
 
   return {
     openAgentBuilderFlyout,

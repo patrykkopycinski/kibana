@@ -48,6 +48,7 @@ import { prioritizationPerformanceRoute } from '../lib/detection_engine/routes/v
 import { prioritizationProposalsRoute } from '../lib/detection_engine/routes/vulnerability/prioritization_proposals_route';
 import { prioritizationFeedbackRoute } from '../lib/detection_engine/routes/vulnerability/prioritization_feedback_route';
 import { cveIngestRoute } from '../lib/detection_engine/routes/vulnerability/cve_ingest_route';
+import { zeroTouchRemediationRoute } from '../lib/detection_engine/routes/vulnerability/zero_touch_remediation_route';
 
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
@@ -149,6 +150,7 @@ export const initRoutes = (
   prioritizationProposalsRoute(router, getStartServices, logger);
   prioritizationFeedbackRoute(router, logger);
   cveIngestRoute(router, logger);
+  zeroTouchRemediationRoute(router, ruleDataClient, getStartServices, logger);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

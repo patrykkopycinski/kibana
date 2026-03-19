@@ -34,6 +34,18 @@ const transformQueryLanguage = (language: QueryLanguage) => {
   }
 };
 
+const normalizeQueryLanguage = (language?: string): QueryLanguage => {
+  switch (language) {
+    case 'eql':
+    case 'esql':
+    case 'kuery':
+    case 'lucene':
+      return language;
+    default:
+      return 'kuery';
+  }
+};
+
 interface TranslatedRuleQueryProps {
   migrationRule: RuleMigrationRule;
   matchedPrebuiltRule?: RuleResponse;
@@ -59,9 +71,12 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
           titleTooltip = i18n.MACHINE_LEARNING_RULE_TOOLTIP;
           queryPlaceholder = i18n.MACHINE_LEARNING_RULE_QUERY_PLACEHOLDER;
         } else {
-          title = i18n.PREBUILT_RULE_TITLE(transformQueryLanguage(matchedPrebuiltRule.language));
-          query = matchedPrebuiltRule.query ?? '';
-          language = matchedPrebuiltRule.language;
+          const prebuilt = matchedPrebuiltRule as unknown as { query?: string; language?: string };
+          title = i18n.PREBUILT_RULE_TITLE(
+            transformQueryLanguage(normalizeQueryLanguage(prebuilt.language))
+          );
+          query = prebuilt.query ?? '';
+          language = prebuilt.language ?? '';
         }
       }
       return {

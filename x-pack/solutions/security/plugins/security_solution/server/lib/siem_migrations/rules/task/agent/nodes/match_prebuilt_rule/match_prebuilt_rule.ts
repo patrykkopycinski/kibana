@@ -60,10 +60,16 @@ export const getMatchPrebuiltRuleNode = ({
     let promptTemplate: Awaited<ReturnType<ChatPromptTemplate['formatMessages']>>;
 
     const elasticSecurityRules = prebuiltRules.map((rule) => {
+      const target = rule.target as unknown as Record<string, unknown> | undefined;
+      const targetType = (target?.type as string | undefined) ?? '';
+      const targetQuery =
+        targetType !== 'machine_learning' && target && 'query' in target
+          ? String(target.query ?? '')
+          : '';
       return {
         name: rule.name,
         description: rule.description,
-        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
+        query: targetQuery,
       };
     });
 

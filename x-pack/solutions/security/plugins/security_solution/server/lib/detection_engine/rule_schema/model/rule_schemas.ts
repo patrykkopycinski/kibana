@@ -316,6 +316,8 @@ export const VulnerabilityCheckSpecificRuleParams = z.object({
   autonomousTriageEnabled: z.boolean().default(false),
   triageConfidenceMin: z.number().min(0).max(1).default(0.8),
   triageMaxAlertsPerRun: z.number().min(1).max(50).default(10),
+  otSafeMode: z.boolean().default(false),
+  customCpeOverrides: z.record(z.string(), z.string()).optional(),
 });
 
 export type VulnerabilityCheckRuleParams = BaseRuleParams & VulnerabilityCheckSpecificRuleParams;

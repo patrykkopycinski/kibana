@@ -228,6 +228,25 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
       };
     }
     case 'vulnerability_check': {
+      const extras = params as unknown as Record<string, unknown>;
+      const autonomousTriageEnabled =
+        typeof extras.autonomous_triage_enabled === 'boolean'
+          ? extras.autonomous_triage_enabled
+          : false;
+      const triageConfidenceMin =
+        typeof extras.triage_confidence_min === 'number' ? extras.triage_confidence_min : 0.8;
+      const triageMaxAlertsPerRun =
+        typeof extras.triage_max_alerts_per_run === 'number'
+          ? extras.triage_max_alerts_per_run
+          : 10;
+      const otSafeMode = typeof extras.ot_safe_mode === 'boolean' ? extras.ot_safe_mode : false;
+      const customCpeOverrides =
+        extras.custom_cpe_overrides &&
+        typeof extras.custom_cpe_overrides === 'object' &&
+        !Array.isArray(extras.custom_cpe_overrides)
+          ? (extras.custom_cpe_overrides as Record<string, string>)
+          : undefined;
+
       return {
         type: params.type,
         agentPolicyIds: params.agent_policy_ids,
@@ -236,6 +255,11 @@ const typeSpecificSnakeToCamel = (params: TypeSpecificCreateProps): TypeSpecific
         correlationTimespan: params.correlation_timespan ?? '24h',
         groupBy: params.group_by ?? ['host.name'],
         minCvssScore: params.min_cvss_score ?? 0,
+        autonomousTriageEnabled,
+        triageConfidenceMin,
+        triageMaxAlertsPerRun,
+        otSafeMode,
+        customCpeOverrides,
       };
     }
     default: {

@@ -51,7 +51,6 @@ import {
   ensureFleetSetup,
   fetchFleetOutputs,
   fetchFleetServerHostList,
-  fetchFleetServerUrl,
   fetchIntegrationPolicyList,
   fetchPackageInfo,
   generateFleetServiceToken,
@@ -86,6 +85,11 @@ interface StartedServer {
 interface StartFleetServerOptions {
   kbnClient: KbnClient;
   logger: ToolingLog;
+  /**
+   * Optional override for the Elasticsearch URL that Fleet Server should use.
+   * Useful in local/demo environments where Fleet output settings might be stale (e.g. ngrok).
+   */
+  elasticsearchUrl?: string;
   /** Policy ID that should be used to enroll the fleet-server agent */
   policy?: string;
   /** Agent version */
@@ -113,6 +117,7 @@ export interface StartedFleetServer extends StartedServer {
 export const startFleetServer = async ({
   kbnClient,
   logger: _logger,
+  elasticsearchUrl,
   policy,
   version,
   force = false,
@@ -139,9 +144,9 @@ export const startFleetServer = async ({
     const serviceToken = isServerless
       ? ''
       : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
-          retries: 2,
-          forever: false,
-        });
+        retries: 2,
+        forever: false,
+      });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
@@ -149,6 +154,7 @@ export const startFleetServer = async ({
       version,
       port,
       serviceToken,
+      elasticsearchUrl,
     });
 
     return {
@@ -257,6 +263,8 @@ interface StartFleetServerWithDockerOptions {
   policyId?: string;
   /** The service token for fleet server. Required for non-serverless env. */
   serviceToken?: string;
+  /** Optional override for the ES URL fleet-server should use */
+  elasticsearchUrl?: string;
   version?: string;
   port?: number;
 }
@@ -266,6 +274,7 @@ const startFleetServerWithDocker = async ({
   logger: log,
   policyId = '',
   serviceToken = '',
+  elasticsearchUrl,
   version,
   port = 8220,
 }: StartFleetServerWithDockerOptions): Promise<StartedServer> => {
@@ -273,14 +282,18 @@ const startFleetServerWithDocker = async ({
 
   let agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
   const localhostRealIp = getLocalhostRealIp();
-  const fleetServerUrl = `https://${localhostRealIp}:${port}`;
+  // For dockerized local demos, `host.docker.internal` is reliably reachable from containers.
+  // We also include a host-local URL for status checks from the host OS.
+  const fleetServerUrls = [`https://host.docker.internal:${port}`, `https://127.0.0.1:${port}`];
   const isServerless = await isServerlessKibanaFlavor(kbnClient);
-  const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
+  const esURL = new URL(elasticsearchUrl ?? (await getFleetElasticsearchOutputHost(kbnClient)));
   const containerName = `dev-fleet-server.${port}`;
   let fleetServerVersionInfo = '';
 
   log.info(
-    `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
+    `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URLs: ${fleetServerUrls.join(
+      ', '
+    )}`
   );
 
   let retryAttempt = 0;
@@ -312,21 +325,21 @@ const startFleetServerWithDocker = async ({
       try {
         const dockerArgs = isServerless
           ? getFleetServerStandAloneDockerArgs({
-              containerName,
-              hostname,
-              port,
-              esUrl: esURL.toString(),
-              agentVersion,
-            })
+            containerName,
+            hostname,
+            port,
+            esUrl: esURL.toString(),
+            agentVersion,
+          })
           : getFleetServerManagedDockerArgs({
-              containerName,
-              hostname,
-              port,
-              serviceToken,
-              policyId,
-              agentVersion,
-              esUrl: esURL.toString(),
-            });
+            containerName,
+            hostname,
+            port,
+            serviceToken,
+            policyId,
+            agentVersion,
+            esUrl: esURL.toString(),
+          });
 
         await execa('docker', ['kill', containerName])
           .then(() => {
@@ -348,10 +361,10 @@ const startFleetServerWithDocker = async ({
         log.info(`Fleet server started`);
 
         if (!isServerless) {
-          await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
+          await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrls);
         }
 
-        await updateFleetElasticsearchOutputHostNames(kbnClient, log);
+        await updateFleetElasticsearchOutputHostNames(kbnClient, log, elasticsearchUrl);
 
         if (isServerless) {
           log.info(`Waiting for Fleet Server [${hostname}] to start running`);
@@ -369,39 +382,37 @@ const startFleetServerWithDocker = async ({
             if (!(await isFleetServerRunning(kbnClient, log))) {
               throw enrollErr;
             }
-            log.info(
-              `Fleet server at [${fleetServerUrl}] is responding — proceeding despite enrollment lookup timeout`
-            );
+            log.info(`Fleet server is responding — proceeding despite enrollment lookup timeout`);
           }
         }
 
         fleetServerVersionInfo = isServerless
           ? (
-              await execa
-                .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
-                .catch((err) => {
-                  log.verbose(
-                    `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
-                    err
-                  );
-                  return { stdout: 'Unable to retrieve version information (serverless)' };
-                })
-            ).stdout
-          : (
-              await execa('docker', [
-                'exec',
-                containerName,
-                '/bin/bash',
-                '-c',
-                '/usr/share/elastic-agent/elastic-agent version',
-              ]).catch((err) => {
+            await execa
+              .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
+              .catch((err) => {
                 log.verbose(
-                  `Failed to retrieve agent version information from running instance.`,
+                  `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
                   err
                 );
-                return { stdout: 'Unable to retrieve version information' };
+                return { stdout: 'Unable to retrieve version information (serverless)' };
               })
-            ).stdout;
+          ).stdout
+          : (
+            await execa('docker', [
+              'exec',
+              containerName,
+              '/bin/bash',
+              '-c',
+              '/usr/share/elastic-agent/elastic-agent version',
+            ]).catch((err) => {
+              log.verbose(
+                `Failed to retrieve agent version information from running instance.`,
+                err
+              );
+              return { stdout: 'Unable to retrieve version information' };
+            })
+          ).stdout;
       } catch (error) {
         // Capture Docker container logs for diagnostics before retrying or throwing
         try {
@@ -441,7 +452,7 @@ Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
         type: 'docker',
         name: containerName,
         id: containerId,
-        url: fleetServerUrl,
+        url: fleetServerUrls[0],
         info,
         stop: async () => {
           log.info(
@@ -599,9 +610,9 @@ const getFleetServerStandAloneDockerArgs = ({
 const addFleetServerHostToFleetSettings = async (
   kbnClient: KbnClient,
   log: ToolingLog,
-  fleetServerHostUrl: string
+  fleetServerHostUrls: string[]
 ): Promise<FleetServerHost> => {
-  log.info(`Updating Fleet with new fleet server host: ${fleetServerHostUrl}`);
+  log.info(`Updating Fleet with new fleet server host URLs: ${fleetServerHostUrls.join(', ')}`);
 
   return log.indent(4, async () => {
     try {
@@ -609,7 +620,7 @@ const addFleetServerHostToFleetSettings = async (
 
       // If the fleet server URL is already configured, then do nothing and exit
       for (const fleetServerEntry of exitingFleetServerHostList.items) {
-        if (fleetServerEntry.host_urls.includes(fleetServerHostUrl)) {
+        if (fleetServerHostUrls.every((u) => fleetServerEntry.host_urls.includes(u))) {
           log.info('No update needed. Fleet server host URL already defined in fleet settings.');
           return fleetServerEntry;
         }
@@ -617,7 +628,7 @@ const addFleetServerHostToFleetSettings = async (
 
       const newFleetHostEntry: PostFleetServerHostsRequest['body'] = {
         name: `Dev fleet server running on localhost`,
-        host_urls: [fleetServerHostUrl],
+        host_urls: fleetServerHostUrls,
         is_default: true,
       };
 
@@ -636,9 +647,8 @@ const addFleetServerHostToFleetSettings = async (
             error.response.status === 403 &&
             ((error.response?.data?.message as string) ?? '').includes('disabled')
           ) {
-            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${
-              error.response.data.message
-            }].
+            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${error.response.data.message
+              }].
 
   ${chalk.red('Are you running this utility against a Serverless project?')}
   If so, the following entry should be added to your local
@@ -665,37 +675,57 @@ const addFleetServerHostToFleetSettings = async (
 
 const updateFleetElasticsearchOutputHostNames = async (
   kbnClient: KbnClient,
-  log: ToolingLog
+  log: ToolingLog,
+  elasticsearchUrl?: string
 ): Promise<void> => {
   log.info('Checking if Fleet output for Elasticsearch needs to be updated');
 
   return log.indent(4, async () => {
     try {
-      const localhostRealIp = getLocalhostRealIp();
+      const dockerReachableHost = 'host.docker.internal';
+      const desiredHost = (() => {
+        if (!elasticsearchUrl) return undefined;
+        const u = new URL(elasticsearchUrl);
+        if (isLocalhost(u.hostname)) {
+          u.hostname = dockerReachableHost;
+        }
+        return u.toString();
+      })();
       const fleetOutputs = await fetchFleetOutputs(kbnClient);
 
-      // make sure that all ES hostnames are using localhost real IP
+      // For dockerized agents, ensure output hosts use a hostname reachable from containers.
       for (const { id, ...output } of fleetOutputs.items) {
         if (output.type === 'elasticsearch') {
           if (output.hosts) {
             let needsUpdating = false;
             const updatedHosts: Output['hosts'] = [];
 
-            for (const host of output.hosts) {
-              const hostURL = new URL(host);
-
-              if (isLocalhost(hostURL.hostname)) {
+            if (desiredHost) {
+              if (output.hosts.length !== 1 || output.hosts[0] !== desiredHost) {
                 needsUpdating = true;
-                hostURL.hostname = localhostRealIp;
-                updatedHosts.push(hostURL.toString());
-
+                updatedHosts.push(desiredHost);
                 log.verbose(
-                  `Fleet Settings for Elasticsearch Output [Name: ${
-                    output.name
-                  } (id: ${id})]: Host [${host}] updated to [${hostURL.toString()}]`
+                  `Fleet Settings for Elasticsearch Output [Name: ${output.name} (id: ${id})]: Hosts replaced with [${desiredHost}]`
                 );
               } else {
-                updatedHosts.push(host);
+                updatedHosts.push(...output.hosts);
+              }
+            } else {
+              for (const host of output.hosts) {
+                const hostURL = new URL(host);
+
+                if (isLocalhost(hostURL.hostname)) {
+                  needsUpdating = true;
+                  hostURL.hostname = dockerReachableHost;
+                  updatedHosts.push(hostURL.toString());
+
+                  log.verbose(
+                    `Fleet Settings for Elasticsearch Output [Name: ${output.name
+                    } (id: ${id})]: Host [${host}] updated to [${hostURL.toString()}]`
+                  );
+                } else {
+                  updatedHosts.push(host);
+                }
               }
             }
 
@@ -714,7 +744,22 @@ const updateFleetElasticsearchOutputHostNames = async (
                   path: outputRoutesService.getUpdatePath(id),
                   body: update,
                 })
-                .catch(catchAxiosErrorFormatAndThrow);
+                .catch(catchAxiosErrorFormatAndThrow)
+                .catch((error: FormattedAxiosError) => {
+                  if (
+                    error.response.status === 400 &&
+                    ((error.response?.data?.message as string) ?? '').includes(
+                      'Preconfigured output'
+                    )
+                  ) {
+                    const desired = desiredHost ?? '<unknown>';
+                    throw new Error(
+                      `Fleet output [${id}] is preconfigured and cannot be updated via the Fleet API. ` +
+                      `Set xpack.fleet.outputs hosts in kibana config (or pass --xpack.fleet.outputs) to include: ${desired}`
+                    );
+                  }
+                  throw error;
+                });
             }
           }
         }
@@ -736,41 +781,65 @@ export const isFleetServerRunning = async (
   kbnClient: KbnClient,
   log: ToolingLog = createToolingLogger()
 ): Promise<boolean> => {
-  const fleetServerUrl = await fetchFleetServerUrl(kbnClient);
+  const fleetServerListResponse = await fetchFleetServerHostList(kbnClient);
+  const defaultFirst = [...fleetServerListResponse.items].sort((a, b) => {
+    if (a.is_default === b.is_default) return 0;
+    return a.is_default ? -1 : 1;
+  });
+  const candidates = defaultFirst.flatMap((item) => item.host_urls).filter(Boolean);
 
-  if (!fleetServerUrl) {
+  if (candidates.length === 0) {
     return false;
   }
 
-  const url = new URL(fleetServerUrl);
-  url.pathname = '/api/status';
+  const urls = candidates.map((candidate) => {
+    const u = new URL(candidate);
+    u.pathname = '/api/status';
+    return u;
+  });
 
   return pRetry(
     async () => {
-      return axios
-        .request({
-          method: 'GET',
-          url: url.toString(),
-          responseType: 'json',
-          // Custom agent to ensure we don't get cert errors
-          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-        })
-        .then((response) => {
-          log.debug(
-            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
-            response.data
-          );
-        })
-        .catch(catchAxiosErrorFormatAndThrow);
+      let lastError: unknown;
+      for (const url of urls) {
+        try {
+          await axios
+            .request({
+              method: 'GET',
+              url: url.toString(),
+              responseType: 'json',
+              // Custom agent to ensure we don't get cert errors
+              // Fleet Server's self-signed cert endpoint can reject TLS 1.3 handshakes in some local Docker
+              // environments; pin to TLS 1.2 for robustness.
+              httpsAgent: new https.Agent({
+                rejectUnauthorized: false,
+                minVersion: 'TLSv1.2',
+                maxVersion: 'TLSv1.2',
+              }),
+            })
+            .then((response) => {
+              log.debug(
+                `Fleet server is up and running at [${url.origin}]. Status: `,
+                response.data
+              );
+            })
+            .catch(catchAxiosErrorFormatAndThrow);
+          return;
+        } catch (e) {
+          lastError = e;
+        }
+      }
+      throw lastError;
     },
     {
       maxTimeout: 10000,
       retries: 5,
       onFailedAttempt: (e) => {
         log.warning(
-          `Fleet server not (yet) up at [${fleetServerUrl}]. Retrying... (attempt #${e.attemptNumber}, ${e.retriesLeft} retries left)`
+          `Fleet server not (yet) up at [${candidates.join(', ')}]. Retrying... (attempt #${e.attemptNumber
+          }, ${e.retriesLeft} retries left)`
         );
-        log.verbose(`Call to [${url.toString()}] failed with:`, e);
+        log.verbose(`Call to [${urls.map((u) => u.toString()).join(', ')}] failed with:`, e);
       },
     }
   )

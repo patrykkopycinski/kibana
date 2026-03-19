@@ -340,8 +340,7 @@ export const waitForHostToEnroll = async (
   if (!found) {
     throw Object.assign(
       new Error(
-        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${
-          timeoutMs / 1000
+        `Timed out waiting for host [${hostname}] to show up in Fleet. Waited ${timeoutMs / 1000
         } seconds`
       ),
       { agentId, hostname }
@@ -725,7 +724,7 @@ export const unEnrollFleetAgent = async (
 };
 
 /**
- * Un-enrolls a Fleet agent
+ * Retrieve the API enrollment key for a given Fleet Agent Policy.
  *
  * @param kbnClient
  * @param policyId
@@ -733,21 +732,9 @@ export const unEnrollFleetAgent = async (
 export const getAgentPolicyEnrollmentKey = async (
   kbnClient: KbnClient,
   policyId: string
-): Promise<string> => {
-  const { data } = await kbnClient
-    .request<GetEnrollmentAPIKeysResponse>({
-      method: 'GET',
-      path: enrollmentAPIKeyRouteService.getListPath(),
-      query: {
-        policy_id: policyId,
-      },
-      headers: {
-        'elastic-api-version': API_VERSIONS.public.v1,
-      },
-    })
-    .catch(catchAxiosErrorFormatAndThrow);
-
-  return data.items?.[0]?.api_key;
+): Promise<string | undefined> => {
+  // Fleet enrollment API keys list endpoint is filtered via KQL `kuery`, not `policy_id` query param.
+  return fetchAgentPolicyEnrollmentKey(kbnClient, policyId);
 };
 
 export const generateFleetServiceToken = async (

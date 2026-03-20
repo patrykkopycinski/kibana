@@ -7767,7 +7767,6 @@
     "unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect": "演算子を選択",
     "unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder": "最初にフィールドを選択してください...",
     "unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder": "最初に演算子を選択してください...",
-    "unifiedSearch.filter.options.addFilterButtonLabel": "フィルターを追加",
     "unifiedSearch.filter.options.applyAllFiltersButtonLabel": "すべてに適用",
     "unifiedSearch.filter.options.clearllFiltersButtonLabel": "すべて消去",
     "unifiedSearch.filter.options.disableAllFiltersButtonLabel": "すべて無効にする",

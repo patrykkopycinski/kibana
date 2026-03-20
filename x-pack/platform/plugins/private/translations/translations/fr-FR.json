@@ -7755,7 +7755,6 @@
     "unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect": "Sélectionner l'opérateur",
     "unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder": "Veuillez d'abord sélectionner un champ...",
     "unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder": "Veuillez d'abord sélectionner l'opérateur...",
-    "unifiedSearch.filter.options.addFilterButtonLabel": "Ajouter un filtre",
     "unifiedSearch.filter.options.applyAllFiltersButtonLabel": "Appliquer à tous",
     "unifiedSearch.filter.options.clearllFiltersButtonLabel": "Tout effacer",
     "unifiedSearch.filter.options.disableAllFiltersButtonLabel": "Tout désactiver",

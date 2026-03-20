@@ -7607,7 +7607,6 @@
     "unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect": "Operator auswählen",
     "unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder": "Bitte wählen Sie zuerst ein Feld aus...",
     "unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder": "Bitte wählen Sie zuerst den Operator aus...",
-    "unifiedSearch.filter.options.addFilterButtonLabel": "Filter hinzufügen",
     "unifiedSearch.filter.options.applyAllFiltersButtonLabel": "Auf alle anwenden",
     "unifiedSearch.filter.options.clearllFiltersButtonLabel": "Alles löschen",
     "unifiedSearch.filter.options.disableAllFiltersButtonLabel": "Alle deaktivieren",

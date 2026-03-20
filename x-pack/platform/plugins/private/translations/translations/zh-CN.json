@@ -7757,7 +7757,6 @@
     "unifiedSearch.filter.filtersBuilder.operatorSelectPlaceholderSelect": "选择运算符",
     "unifiedSearch.filter.filtersBuilder.selectFieldPlaceholder": "请首先选择字段......",
     "unifiedSearch.filter.filtersBuilder.selectOperatorPlaceholder": "请先选择运算符......",
-    "unifiedSearch.filter.options.addFilterButtonLabel": "添加筛选",
     "unifiedSearch.filter.options.applyAllFiltersButtonLabel": "应用于所有项",
     "unifiedSearch.filter.options.clearllFiltersButtonLabel": "全部清除",
     "unifiedSearch.filter.options.disableAllFiltersButtonLabel": "全部禁用",

@@ -522,7 +522,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerWorkflowSteps(
         plugins.workflowsExtensions,
         this.logger,
-        plugins.osquery?.createActionService
+        plugins.osquery?.createActionService as
+          | { create: (...args: unknown[]) => Promise<unknown> }
+          | undefined
       );
     }
 

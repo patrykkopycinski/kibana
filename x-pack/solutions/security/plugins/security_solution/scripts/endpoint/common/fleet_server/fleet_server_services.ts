@@ -144,9 +144,9 @@ export const startFleetServer = async ({
     const serviceToken = isServerless
       ? ''
       : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
-        retries: 2,
-        forever: false,
-      });
+          retries: 2,
+          forever: false,
+        });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
@@ -325,21 +325,21 @@ const startFleetServerWithDocker = async ({
       try {
         const dockerArgs = isServerless
           ? getFleetServerStandAloneDockerArgs({
-            containerName,
-            hostname,
-            port,
-            esUrl: esURL.toString(),
-            agentVersion,
-          })
+              containerName,
+              hostname,
+              port,
+              esUrl: esURL.toString(),
+              agentVersion,
+            })
           : getFleetServerManagedDockerArgs({
-            containerName,
-            hostname,
-            port,
-            serviceToken,
-            policyId,
-            agentVersion,
-            esUrl: esURL.toString(),
-          });
+              containerName,
+              hostname,
+              port,
+              serviceToken,
+              policyId,
+              agentVersion,
+              esUrl: esURL.toString(),
+            });
 
         await execa('docker', ['kill', containerName])
           .then(() => {
@@ -388,31 +388,31 @@ const startFleetServerWithDocker = async ({
 
         fleetServerVersionInfo = isServerless
           ? (
-            await execa
-              .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
-              .catch((err) => {
+              await execa
+                .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
+                .catch((err) => {
+                  log.verbose(
+                    `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                    err
+                  );
+                  return { stdout: 'Unable to retrieve version information (serverless)' };
+                })
+            ).stdout
+          : (
+              await execa('docker', [
+                'exec',
+                containerName,
+                '/bin/bash',
+                '-c',
+                '/usr/share/elastic-agent/elastic-agent version',
+              ]).catch((err) => {
                 log.verbose(
-                  `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                  `Failed to retrieve agent version information from running instance.`,
                   err
                 );
-                return { stdout: 'Unable to retrieve version information (serverless)' };
+                return { stdout: 'Unable to retrieve version information' };
               })
-          ).stdout
-          : (
-            await execa('docker', [
-              'exec',
-              containerName,
-              '/bin/bash',
-              '-c',
-              '/usr/share/elastic-agent/elastic-agent version',
-            ]).catch((err) => {
-              log.verbose(
-                `Failed to retrieve agent version information from running instance.`,
-                err
-              );
-              return { stdout: 'Unable to retrieve version information' };
-            })
-          ).stdout;
+            ).stdout;
       } catch (error) {
         // Capture Docker container logs for diagnostics before retrying or throwing
         try {
@@ -647,8 +647,9 @@ const addFleetServerHostToFleetSettings = async (
             error.response.status === 403 &&
             ((error.response?.data?.message as string) ?? '').includes('disabled')
           ) {
-            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${error.response.data.message
-              }].
+            log.error(`Attempt to update fleet server host URL in fleet failed with [403: ${
+              error.response.data.message
+            }].
 
   ${chalk.red('Are you running this utility against a Serverless project?')}
   If so, the following entry should be added to your local
@@ -720,7 +721,8 @@ const updateFleetElasticsearchOutputHostNames = async (
                   updatedHosts.push(hostURL.toString());
 
                   log.verbose(
-                    `Fleet Settings for Elasticsearch Output [Name: ${output.name
+                    `Fleet Settings for Elasticsearch Output [Name: ${
+                      output.name
                     } (id: ${id})]: Host [${host}] updated to [${hostURL.toString()}]`
                   );
                 } else {
@@ -755,7 +757,7 @@ const updateFleetElasticsearchOutputHostNames = async (
                     const desired = desiredHost ?? '<unknown>';
                     throw new Error(
                       `Fleet output [${id}] is preconfigured and cannot be updated via the Fleet API. ` +
-                      `Set xpack.fleet.outputs hosts in kibana config (or pass --xpack.fleet.outputs) to include: ${desired}`
+                        `Set xpack.fleet.outputs hosts in kibana config (or pass --xpack.fleet.outputs) to include: ${desired}`
                     );
                   }
                   throw error;
@@ -836,7 +838,8 @@ export const isFleetServerRunning = async (
       retries: 5,
       onFailedAttempt: (e) => {
         log.warning(
-          `Fleet server not (yet) up at [${candidates.join(', ')}]. Retrying... (attempt #${e.attemptNumber
+          `Fleet server not (yet) up at [${candidates.join(', ')}]. Retrying... (attempt #${
+            e.attemptNumber
           }, ${e.retriesLeft} retries left)`
         );
         log.verbose(`Call to [${urls.map((u) => u.toString()).join(', ')}] failed with:`, e);

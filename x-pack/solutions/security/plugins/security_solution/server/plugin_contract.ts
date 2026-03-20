@@ -112,7 +112,7 @@ export interface SecuritySolutionPluginSetup {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SecuritySolutionPluginStart { }
+export interface SecuritySolutionPluginStart {}
 
 export type SecuritySolutionPluginCoreSetupDependencies = CoreSetup<
   SecuritySolutionPluginStartDependencies,

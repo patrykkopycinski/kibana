@@ -670,13 +670,14 @@ export class Plugin implements ISecuritySolutionPlugin {
             this.logger
           ).catch((err) => {
             this.logger.warn(
-              `[vulnerability_check] ILM policy installation failed (non-fatal): ${(err as Error).message
+              `[vulnerability_check] ILM policy installation failed (non-fatal): ${
+                (err as Error).message
               }`
             );
           });
         }
       })
-      .catch(() => { }); // it shouldn't reject, but just in case
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
@@ -852,7 +853,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
           // Ensure policies have backing DOT indices (We don't need to `await` this.
           // It can run in the background)
-          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => { });
+          ensureIndicesExistsForPolicies(this.endpointAppContextService).catch(() => {});
 
           // Migrate endpoint data if space awareness is enabled
           // (We don't need to `await` this. It can run in the background)
@@ -860,7 +861,7 @@ export class Plugin implements ISecuritySolutionPlugin {
             logger.error(e);
           });
         })
-        .catch(() => { });
+        .catch(() => {});
 
       // License related start
       licenseService.start(this.licensing$);
@@ -884,7 +885,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           taskManager: plugins.taskManager,
           esClient: core.elasticsearch.client.asInternalUser,
         })
-        .catch(() => { }); // it shouldn't refuse, but just in case
+        .catch(() => {}); // it shouldn't refuse, but just in case
     }
 
     const uiSettingsClient = core.uiSettings.asScopedToClient(
@@ -915,7 +916,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         packageService,
         queryConfig
       )
-      .catch(() => { });
+      .catch(() => {});
 
     if (this.config.cdn?.url && this.config.cdn?.publicKey) {
       const cdnConfig: CdnConfig = {
@@ -923,10 +924,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         pubKey: this.config.cdn.publicKey,
       };
       this.logger.info('Starting artifact service with custom CDN config');
-      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => { });
+      artifactService.start(this.telemetryReceiver, cdnConfig).catch(() => {});
     } else {
       this.logger.info('Starting artifact service with default CDN config');
-      artifactService.start(this.telemetryReceiver).catch(() => { });
+      artifactService.start(this.telemetryReceiver).catch(() => {});
     }
 
     this.asyncTelemetryEventsSender.start(plugins.telemetry);
@@ -942,7 +943,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         esClient: core.elasticsearch.client.asInternalUser,
         registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
-      .catch(() => { });
+      .catch(() => {});
 
     const endpointPkgInstallationPromise = this.endpointContext.service
       .getInternalFleetServices()
@@ -960,7 +961,7 @@ export class Plugin implements ISecuritySolutionPlugin {
           await this.checkMetadataTransformsTask?.start({ taskManager: plugins.taskManager });
         }
       })
-      .catch(() => { }); // it shouldn't reject, but just in case
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     if (registerIngestCallback) {
       registerIngestCallback(
@@ -1029,12 +1030,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.asyncTelemetryEventsSender.stop().catch(() => { });
+    this.asyncTelemetryEventsSender.stop().catch(() => {});
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
-    this.completeExternalResponseActionsTask.stop().catch(() => { });
+    this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();

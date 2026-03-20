@@ -9,10 +9,12 @@
 
 ## Summary
 
-**Total gaps identified**: 4
+**Total gaps identified**: 3
 **Critical**: 0
 **High**: 2 (workarounds exist but suboptimal)
-**Medium**: 2 (nice-to-have improvements)
+**Medium**: 1 (nice-to-have improvement)
+
+**ELSER is NOT a gap** - It's deployed by default. We can use it with graceful fallback to Jaccard if ML node unavailable.
 
 **Overall assessment**: Spike dogfoods Elastic Stack exceptionally well (uses Elastic Workflows natively). Gaps are enhancement opportunities, not blockers.
 
@@ -105,43 +107,41 @@
 
 ---
 
-## Gap 3: Default ELSER Deployment for Security Solution 🟢 MEDIUM
+## ~~Gap 3: ELSER Deployment~~ ✅ NOT A GAP!
 
-**Use case**: Semantic alert deduplication using ELSER embeddings (beyond lexical Jaccard similarity)
+**Update**: ELSER is deployed by default in Elasticsearch. No platform team needed!
 
-**What we have**:
-- ✅ ELSER model (`.elser_model_2`) available in Elasticsearch ML
-- ✅ ML inference API (`esClient.ml.inferTrainedModel`)
-- ⚠️ ELSER NOT automatically deployed with Security Solution installations
+**Implementation approach**: Graceful fallback pattern
 
-**What's missing**:
-- **Default ELSER deployment**: Security Solution should deploy ELSER by default on ML nodes
-- **Inference endpoint creation**: Auto-create inference endpoint for alert feature embedding
+```typescript
+async function deduplicateWithFallback(alerts, esClient) {
+  try {
+    // Try ELSER semantic dedup (if ML node available)
+    const hasMLNode = await checkMLNodeAvailable(esClient);
+    if (hasMLNode) {
+      return await deduplicateWithELSER(alerts, esClient);
+    }
+  } catch (error) {
+    logger.warn(`ELSER unavailable, falling back to Jaccard: ${error.message}`);
+  }
 
-**Impact if gap filled**:
-- **Semantic dedup ready out-of-box**: No manual ML setup required
-- **Better dedup rates**: +15-30% improvement (from v2.1 analysis)
-- **Zero API costs**: ELSER is in-cluster (vs OpenAI embeddings $1,000/year)
+  // Fallback: Jaccard similarity (always works)
+  return await deduplicateWithJaccard(alerts);
+}
+```
 
-**Current workaround**:
-- Fall back to Jaccard similarity (deterministic, works well)
-- Admins can manually deploy ELSER if they want semantic dedup
-- Trade-offs:
-  - ✅ Pro: Jaccard is fast, proven, zero setup
-  - ⚠️ Con: Misses semantic equivalence (encoded commands, lexical variations)
+**This can ship in Phase 1!** No platform team dependency.
 
-**Feature request for ML / Security Solution teams**:
-1. Auto-deploy ELSER when Security Solution is installed
-2. Create inference endpoint for alert feature text embedding
-3. Add Advanced Setting: `securitySolution:useSemanticDedup` (default: true if ELSER available)
+**Benefit**:
+- Works everywhere (Jaccard fallback)
+- Automatically uses ELSER if ML node exists (better dedup)
+- Zero configuration required
 
-**Priority**: 🟢 **MEDIUM**
-**Estimated effort**: 1-2 weeks (deployment automation)
-**Benefit**: Enables semantic dedup for all Security customers without manual ML setup
+**Priority**: ✅ **IMPLEMENT NOW** (not a gap, just feature flag + fallback logic)
 
 ---
 
-## Gap 4: Entity Store Integration for Dynamic Risk Scoring 🟢 MEDIUM
+## Gap 3: Entity Store Integration for Dynamic Risk Scoring 🟢 MEDIUM
 
 **Use case**: Prioritize alerts using dynamic entity risk scores (not static rule risk_score)
 
@@ -209,17 +209,9 @@ alerts.sort((a, b) => b.adjustedRisk - a.adjustedRisk);
 - **Estimated effort**: 3-4 weeks
 - **Benefit**: Real-time event-driven automation
 
-### For ML Team
-
-**Issue 3**: Default ELSER Deployment for Security Solution
-- **Gap**: #3 (ELSER not auto-deployed)
-- **Priority**: MEDIUM
-- **Estimated effort**: 1-2 weeks
-- **Benefit**: Semantic dedup ready out-of-box
-
 ### For Entity Analytics Team
 
-**Issue 4**: Entity Store Integration API for Pipelines
+**Issue 3**: Entity Store Integration API for Pipelines
 - **Gap**: #4 (No easy API for entity risk lookup)
 - **Priority**: MEDIUM
 - **Estimated effort**: 1 week

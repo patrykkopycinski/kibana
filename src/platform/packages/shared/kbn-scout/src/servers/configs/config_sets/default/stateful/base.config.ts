@@ -105,6 +105,7 @@ export const defaultConfig: ScoutServerConfig = {
     serverArgs: [
       `--server.port=${servers.kibana.port}`,
       '--status.allowAnonymous=true',
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['vulnerabilityCheckerEnabled'])}`,
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
       // either include `kibanaServerTestUser` credentials, or credentials provided by the test
       // user, or none at all in case anonymous access is used.

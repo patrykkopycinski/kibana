@@ -67333,9 +67333,14 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - wired
+                          type: string
                       required:
                         - description
                         - ingest
+                        - type
                   required:
                     - dashboards
                     - rules
@@ -67614,9 +67619,14 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - classic
+                          type: string
                       required:
                         - description
                         - ingest
+                        - type
                   required:
                     - dashboards
                     - rules
@@ -67692,8 +67702,13 @@ paths:
                             required:
                               - name
                           type: array
+                        type:
+                          enum:
+                            - query
+                          type: string
                       required:
                         - description
+                        - type
                         - query
                   required:
                     - dashboards

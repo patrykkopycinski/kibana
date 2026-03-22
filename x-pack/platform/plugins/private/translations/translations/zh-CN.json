@@ -13413,7 +13413,6 @@
     "xpack.cases.userActions.attachment": "附件",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "未注册附件类型",
     "xpack.cases.userActions.attachments.alerts.successToasterTitle": "已删除 {totalAlerts, plural, =1 {1 个} other {{totalAlerts} 个}} {totalAlerts, plural, =1 {告警} other {告警}}",
-    "xpack.cases.userActions.attachments.comment.successToasterTitle": "已删除注释",
     "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "已删除附件",
     "xpack.cases.userActions.comment.unsavedDraftComment": "此注释具有未保存编辑",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "已添加以下类型的附件",

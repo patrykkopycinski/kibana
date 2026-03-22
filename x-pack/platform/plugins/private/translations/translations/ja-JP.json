@@ -13420,7 +13420,6 @@
     "xpack.cases.userActions.attachment": "添付ファイル",
     "xpack.cases.userActions.attachmentNotRegisteredErrorMsg": "アラートタイプが登録されていません",
     "xpack.cases.userActions.attachments.alerts.successToasterTitle": "{totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {件のアラート}}を削除しました",
-    "xpack.cases.userActions.attachments.comment.successToasterTitle": "削除されたコメント",
     "xpack.cases.userActions.attachments.registeredAttachment.successToasterTitle": "削除された添付ファイル",
     "xpack.cases.userActions.comment.unsavedDraftComment": "このコメントに、保存されていない編集があります",
     "xpack.cases.userActions.defaultEventAttachmentTitle": "タイプの添付ファイルが追加されました",

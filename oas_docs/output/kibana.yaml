@@ -350,10 +350,6 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, features, and installed plugins.
-  - description: |
-      Get information about the system status, resource usage, features, and installed plugins.
-    name: system
-    x-displayName: System
   - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       description: Task manager

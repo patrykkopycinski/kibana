@@ -38519,7 +38519,6 @@
     "xpack.securitySolution.uiSettings.defaultThreatIndexLabel": "Index de menaces",
     "xpack.securitySolution.uiSettings.defaultTimeRangeDescription": "<p>Période de temps par défaut dans le filtre de temps Security.</p>",
     "xpack.securitySolution.uiSettings.defaultTimeRangeLabel": "Période du filtre de temps",
-    "xpack.securitySolution.uiSettings.enableGraphVisualizationLabel": "Activer la visualisation de graphique",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>Active le fil d'actualités</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "Fil d'actualités",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer": "Exclure les niveaux froids de l'analyseur",

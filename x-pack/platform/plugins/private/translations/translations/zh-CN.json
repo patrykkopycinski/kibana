@@ -38558,7 +38558,6 @@
     "xpack.securitySolution.uiSettings.defaultThreatIndexLabel": "威胁索引",
     "xpack.securitySolution.uiSettings.defaultTimeRangeDescription": "<p>Security 时间筛选中的默认时段。</p>",
     "xpack.securitySolution.uiSettings.defaultTimeRangeLabel": "时间筛选时段",
-    "xpack.securitySolution.uiSettings.enableGraphVisualizationLabel": "启用 Graph 可视化",
     "xpack.securitySolution.uiSettings.enableNewsFeedDescription": "<p>启用新闻源</p>",
     "xpack.securitySolution.uiSettings.enableNewsFeedLabel": "新闻源",
     "xpack.securitySolution.uiSettings.excludeColdAndFrozenTiersInAnalyzer": "在分析器中排除冷层和冻结层",

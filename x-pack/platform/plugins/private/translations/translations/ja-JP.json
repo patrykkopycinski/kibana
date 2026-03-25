@@ -36602,7 +36602,6 @@
     "xpack.securitySolution.flyout.entityDetails.riskInputs": "リスク寄与を表示",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase": "既存のケースに追加",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase": "新しいケースに追加",
-    "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline": "新規タイムラインに追加",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel": "アクション",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title": "リスクインプット：{description}",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription": "{quantity}選択済み",

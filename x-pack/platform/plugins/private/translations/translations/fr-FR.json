@@ -36547,7 +36547,6 @@
     "xpack.securitySolution.flyout.entityDetails.riskInputs": "Voir les contributions au risque",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase": "Ajouter à un cas existant",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase": "Ajouter au nouveau cas",
-    "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline": "Ajouter une nouvelle chronologie",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel": "Actions",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title": "Entrée des risques : {description}",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription": "{quantity} sélectionnée",

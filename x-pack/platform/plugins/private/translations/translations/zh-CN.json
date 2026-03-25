@@ -36582,7 +36582,6 @@
     "xpack.securitySolution.flyout.entityDetails.riskInputs": "查看风险贡献",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase": "添加到现有案例",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase": "添加到新案例",
-    "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline": "添加到新时间线",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel": "操作",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title": "风险输入：{description}",
     "xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription": "{quantity} 个已选定",

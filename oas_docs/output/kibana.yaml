@@ -3521,7 +3521,6 @@ paths:
                         source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                         unmanaged_assets:
                           agents: []
-                          commands: []
                           hooks: []
                           lsp_servers: []
                           mcp_servers: []
@@ -3639,7 +3638,6 @@ paths:
                     source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                     unmanaged_assets:
                       agents: []
-                      commands: []
                       hooks: []
                       lsp_servers: []
                       mcp_servers: []
@@ -3736,7 +3734,6 @@ paths:
                     source_url: https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis
                     unmanaged_assets:
                       agents: []
-                      commands: []
                       hooks: []
                       lsp_servers: []
                       mcp_servers: []

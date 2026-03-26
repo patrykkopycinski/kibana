@@ -7,45 +7,38 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { DocumentDetailsContext } from '../../shared/context';
-import { PrevalenceDetails } from './prevalence_details';
-import { resetColdFrozenTierCalloutDismissedStateForTests } from '../../../../flyout_v2/prevalence/prevalence';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { PrevalenceDetails, resetColdFrozenTierCalloutDismissedStateForTests } from './prevalence';
 import {
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_DISMISS_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID,
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID,
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
-} from '../../../../flyout_v2/prevalence/test_ids';
-import { usePrevalence } from '../../../../flyout_v2/prevalence/hooks/use_prevalence';
-import { TestProviders } from '../../../../common/mock';
-import { licenseService } from '../../../../common/hooks/use_license';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
-import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+} from './test_ids';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { getColumns } from './utils/get_columns';
+import { usePrevalence } from './hooks/use_prevalence';
+import { TestProviders } from '../../common/mock';
+import { licenseService } from '../../common/hooks/use_license';
+import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
-jest.mock('@kbn/expandable-flyout');
-jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../common/components/user_privileges');
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockStorage = jest.fn();
 const mockUiSettingsGet = jest.fn();
 let mockServerless: unknown;
-jest.mock('../../../../common/lib/kibana', () => {
+jest.mock('../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
@@ -60,7 +53,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../flyout_v2/prevalence/hooks/use_prevalence');
+jest.mock('./hooks/use_prevalence');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -70,7 +63,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../../common/hooks/use_license', () => {
+jest.mock('../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
   };
@@ -84,12 +77,11 @@ jest.mock('../../../../common/hooks/use_license', () => {
 
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
-const panelContextValue = {
-  ...mockContextValue,
-  eventId: 'event id',
-  indexName: 'indexName',
-  scopeId: 'scopeId',
-} as unknown as DocumentDetailsContext;
+const SCOPE_ID = 'scopeId';
+const mockHit = buildDataTableRecord({
+  _id: 'event-id',
+  _index: 'indexName',
+} as EsHitRecord);
 
 const UPSELL_MESSAGE = 'Host and user prevalence are only available with a';
 
@@ -132,14 +124,22 @@ const mockPrevelanceReturnValue = {
   ],
 };
 
-const renderPrevalenceDetails = () =>
-  render(
+const renderCellActions: CellActionRenderer = ({ children }) => <>{children}</>;
+
+const renderPrevalenceDetails = ({
+  hit = mockHit,
+  isTimelineEnabled = true,
+}: {
+  hit?: typeof mockHit;
+  isTimelineEnabled?: boolean;
+} = {}) => {
+  const columns = getColumns(renderCellActions, isTimelineEnabled, SCOPE_ID);
+  return render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <PrevalenceDetails />
-      </DocumentDetailsContext.Provider>
+      <PrevalenceDetails hit={hit} investigationFields={[]} scopeId={SCOPE_ID} columns={columns} />
     </TestProviders>
   );
+};
 
 describe('PrevalenceDetails', () => {
   const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
@@ -150,11 +150,7 @@ describe('PrevalenceDetails', () => {
     mockServerless = undefined;
     mockUiSettingsGet.mockReturnValue(true);
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      timelinePrivileges: { read: true },
-      rulesPrivileges: { rules: { read: true } },
-    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
   });
 
   it('should render the table with all data if license is platinum', () => {
@@ -164,9 +160,9 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
-    expect(
-      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
-    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
       1
     );
@@ -178,34 +174,18 @@ describe('PrevalenceDetails', () => {
     ).toBeGreaterThan(1);
     expect(queryByTestId(PREVALENCE_DETAILS_UPSELL_TEST_ID)).not.toBeInTheDocument();
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
-    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)).toHaveLength(2);
   });
 
-  it('should render host and user name as clickable link', () => {
+  it('should render host and user name values in the table', () => {
     (usePrevalence as jest.Mock).mockReturnValue(mockPrevelanceReturnValue);
 
     const { getAllByTestId } = renderPrevalenceDetails();
-    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)).toHaveLength(2);
+    const valueCells = getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID);
 
-    getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)[0].click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: HostPreviewPanelKey,
-      params: {
-        hostName: 'test host',
-        scopeId: panelContextValue.scopeId,
-        banner: HOST_PREVIEW_BANNER,
-      },
-    });
-
-    getAllByTestId(PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID)[1].click();
-    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-      id: UserPreviewPanelKey,
-      params: {
-        userName: 'test user',
-        scopeId: panelContextValue.scopeId,
-        banner: USER_PREVIEW_BANNER,
-      },
-    });
+    expect(valueCells[0]).toHaveTextContent('value1');
+    expect(valueCells[1]).toHaveTextContent('value2');
+    expect(valueCells[2]).toHaveTextContent('test host');
+    expect(valueCells[3]).toHaveTextContent('test user');
   });
 
   it('should hide data in prevalence columns if license is not platinum', () => {
@@ -256,13 +236,7 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
-    const { getByTestId, getAllByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <PrevalenceDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId, getAllByTestId } = renderPrevalenceDetails();
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID)).toHaveTextContent('field1');
@@ -281,11 +255,7 @@ describe('PrevalenceDetails', () => {
     ).toBeGreaterThan(1);
   });
 
-  it('should render formatted numbers as text if user lacks timeline read privileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      timelinePrivileges: { read: false },
-      rulesPrivileges: { rules: { read: true } },
-    });
+  it('should render formatted numbers as text when timeline interactions are disabled', () => {
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -301,13 +271,34 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
-    const { getByTestId, queryAllByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <PrevalenceDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const { getAllByTestId, queryAllByTestId } = renderPrevalenceDetails({
+      isTimelineEnabled: false,
+    });
+
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_COUNT_TEXT_BUTTON_TEST_ID).length).toBe(2);
+    expect(
+      queryAllByTestId(PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID).length
+    ).toBe(0);
+  });
+
+  it('should render formatted numbers as text if user lacks timeline read privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (usePrevalence as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      data: [
+        {
+          field: 'field1',
+          values: ['value1'],
+          alertCount: 1000,
+          docCount: 2000000,
+          hostPrevalence: 0.05,
+          userPrevalence: 0.1,
+        },
+      ],
+    });
+
+    const { getByTestId, queryAllByTestId } = renderPrevalenceDetails();
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID)).toHaveTextContent('field1');
@@ -342,13 +333,7 @@ describe('PrevalenceDetails', () => {
       ],
     });
 
-    const { getByTestId } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <PrevalenceDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const { getByTestId } = renderPrevalenceDetails();
 
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID)).toHaveTextContent('value1');
@@ -387,9 +372,9 @@ describe('PrevalenceDetails', () => {
     expect(getByTestId(PREVALENCE_DETAILS_TABLE_TEST_ID)).toBeInTheDocument();
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID).length).toBeGreaterThan(1);
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID).length).toBeGreaterThan(1);
-    expect(
-      getAllByTestId(PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID).length
-    ).toBeGreaterThan(1);
+    expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
+      1
+    );
     expect(getAllByTestId(PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID).length).toBeGreaterThan(
       1
     );
@@ -470,17 +455,14 @@ describe('PrevalenceDetails', () => {
 
     unmount();
 
-    const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = render(
-      <TestProviders>
-        <DocumentDetailsContext.Provider
-          value={
-            { ...panelContextValue, eventId: 'event id 2' } as unknown as DocumentDetailsContext
-          }
-        >
-          <PrevalenceDetails />
-        </DocumentDetailsContext.Provider>
-      </TestProviders>
-    );
+    const anotherHit = buildDataTableRecord({
+      _id: 'event-id-2',
+      _index: 'indexName',
+    } as EsHitRecord);
+
+    const { queryByTestId: queryByTestIdAfterOpeningAnotherFlyout } = renderPrevalenceDetails({
+      hit: anotherHit,
+    });
 
     expect(
       queryByTestIdAfterOpeningAnotherFlyout(PREVALENCE_DETAILS_COLD_FROZEN_TIER_CALLOUT_TEST_ID)

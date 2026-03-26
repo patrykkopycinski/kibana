@@ -24298,6 +24298,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_features_disable_policy_change_acks_enabled:
+                              nullable: true
                             agent_internal:
                               nullable: true
                             agent_limits_go_max_procs:
@@ -25165,6 +25167,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_features_disable_policy_change_acks_enabled:
+                      nullable: true
                     agent_internal:
                       nullable: true
                     agent_limits_go_max_procs:
@@ -25401,6 +25405,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true
@@ -26288,6 +26294,8 @@ paths:
                               nullable: true
                             agent_download_timeout:
                               nullable: true
+                            agent_features_disable_policy_change_acks_enabled:
+                              nullable: true
                             agent_internal:
                               nullable: true
                             agent_limits_go_max_procs:
@@ -27153,6 +27161,8 @@ paths:
                             nullable: true
                           agent_download_timeout:
                             nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
+                            nullable: true
                           agent_internal:
                             nullable: true
                           agent_limits_go_max_procs:
@@ -28017,6 +28027,8 @@ paths:
                       nullable: true
                     agent_download_timeout:
                       nullable: true
+                    agent_features_disable_policy_change_acks_enabled:
+                      nullable: true
                     agent_internal:
                       nullable: true
                     agent_limits_go_max_procs:
@@ -28255,6 +28267,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true
@@ -29233,6 +29247,8 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
+                            nullable: true
+                          agent_features_disable_policy_change_acks_enabled:
                             nullable: true
                           agent_internal:
                             nullable: true

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { registerMetricsEbtEvents } from '../components/observability/metrics/telemetry/metrics_ebt_events';
 
-export function toArray<T>(value: T): UnwrapArray<T>[] {
-  if (value === undefined) return [];
-  return (Array.isArray(value) ? value : [value]) as UnwrapArray<T>[];
-}
+export const registerUnifiedChartSectionViewerEbtEvents = (analytics: AnalyticsServiceSetup) => {
+  registerMetricsEbtEvents(analytics);
+};

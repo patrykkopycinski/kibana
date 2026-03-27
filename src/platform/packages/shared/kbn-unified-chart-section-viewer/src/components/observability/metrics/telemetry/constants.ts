@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type UnwrapArray<T> = T extends Array<infer U> ? U : T;
-
-export function toArray<T>(value: T): UnwrapArray<T>[] {
-  if (value === undefined) return [];
-  return (Array.isArray(value) ? value : [value]) as UnwrapArray<T>[];
-}
+export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';

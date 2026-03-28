@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MARKDOWN_ID_REGEX = /^[a-z0-9_\-]+$/; // lowercase letters, numbers, hyphens, and underscores
-
-export const validateMarkdownId = (value: string): boolean =>
-  !!value && MARKDOWN_ID_REGEX.test(value);
+export { asCodeIdSchema } from './id';
+export type { AsCodeId } from './id';

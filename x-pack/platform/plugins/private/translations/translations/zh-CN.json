@@ -37035,7 +37035,6 @@
     "xpack.securitySolution.lists.cancelValueListsImportTitle": "取消导入",
     "xpack.securitySolution.lists.closeValueListsModalTitle": "关闭",
     "xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton": "管理值列表",
-    "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip": "具有管理集群权限的用户必须先访问规则页面，然后才能导入值列表。",
     "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip": "在字段值与列表中找到的值匹配时，使用值列表创建例外",
     "xpack.securitySolution.lists.exceptionListImportSuccessTitle": "已导入例外列表",
     "xpack.securitySolution.lists.exceptionListUploadError": "加载例外列表时出现错误。",

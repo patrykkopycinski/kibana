@@ -36997,7 +36997,6 @@
     "xpack.securitySolution.lists.cancelValueListsImportTitle": "Annuler l’importation",
     "xpack.securitySolution.lists.closeValueListsModalTitle": "Fermer",
     "xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton": "Gérer les listes de valeurs",
-    "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip": "Un utilisateur disposant des privilèges de gestion de cluster doit accéder à la page des règles avant que vous ne puissiez importer les listes de valeurs.",
     "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip": "Utiliser les listes de valeurs pour créer une exception lorsqu'une valeur de champ correspond à une valeur trouvée dans une liste",
     "xpack.securitySolution.lists.exceptionListImportSuccessTitle": "Liste d'exceptions importée",
     "xpack.securitySolution.lists.exceptionListUploadError": "Une erreur s'est produite lors du chargement de la liste d'exceptions.",

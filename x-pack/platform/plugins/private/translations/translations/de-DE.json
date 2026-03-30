@@ -36614,7 +36614,6 @@
     "xpack.securitySolution.lists.cancelValueListsImportTitle": "Import abbrechen",
     "xpack.securitySolution.lists.closeValueListsModalTitle": "Schließen",
     "xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton": "Wertelisten verwalten",
-    "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip": "Ein Nutzer mit Berechtigungen zum Verwalten des Clusters muss die Seite „Regeln“ besuchen, bevor Wertelisten importiert werden können.",
     "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip": "Verwenden Sie Wertelisten, um eine Ausnahme zu erstellen, wenn ein Feldwert mit einem Wert in einer Liste übereinstimmt",
     "xpack.securitySolution.lists.exceptionListImportSuccessTitle": "Ausnahmeliste wurde importiert",
     "xpack.securitySolution.lists.exceptionListUploadError": "Beim Hochladen der Ausnahmeliste ist ein Fehler aufgetreten.",

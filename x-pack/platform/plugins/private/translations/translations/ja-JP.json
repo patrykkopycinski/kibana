@@ -37055,7 +37055,6 @@
     "xpack.securitySolution.lists.cancelValueListsImportTitle": "インポートをキャンセル",
     "xpack.securitySolution.lists.closeValueListsModalTitle": "閉じる",
     "xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton": "値リストを管理",
-    "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonPrivilegesTooltip": "クラスターの管理権限が割り当てられたユーザーは、値リストをインポートする前に、［ルール］ページにアクセスする必要があります。",
     "xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButtonTooltip": "値リストを使用して、フィールド値がリストの値と一致したときに例外を作成します",
     "xpack.securitySolution.lists.exceptionListImportSuccessTitle": "例外リストがインポートされました",
     "xpack.securitySolution.lists.exceptionListUploadError": "例外リストのアップロード中にエラーが発生しました。",

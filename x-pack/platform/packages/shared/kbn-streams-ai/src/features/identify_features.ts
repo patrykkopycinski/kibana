@@ -57,7 +57,6 @@ export async function identifyFeatures({
   excludedFeatures,
   systemPrompt,
   inferenceClient,
-  logger,
   signal,
   previouslyIdentifiedFeatures = [],
 }: IdentifyFeaturesOptions): Promise<{
@@ -65,8 +64,6 @@ export async function identifyFeatures({
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  logger.debug(`Identifying features from ${sampleDocuments.length} sample documents`);
-
   const formattedDocuments = compact(
     sampleDocuments.map((hit) =>
       formatRawDocument({

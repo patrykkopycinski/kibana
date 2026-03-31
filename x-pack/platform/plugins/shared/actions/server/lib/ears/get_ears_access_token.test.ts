@@ -8,13 +8,13 @@
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../actions_config.mock';
-import { connectorTokenClientMock } from './connector_token_client.mock';
-import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
-import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { connectorTokenClientMock } from '../connector_token_client.mock';
+import { getEarsAccessToken } from './get_ears_access_token';
+import { requestEarsRefreshToken } from './request_ears_refresh_token';
 
-jest.mock('./request_oauth_refresh_token', () => ({
-  requestOAuthRefreshToken: jest.fn(),
+jest.mock('./request_ears_refresh_token', () => ({
+  requestEarsRefreshToken: jest.fn(),
 }));
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
@@ -22,6 +22,8 @@ const NOW = new Date('2024-01-15T12:00:00.000Z');
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
+
+const PROVIDER = 'my-provider';
 
 // A valid stored token: access token expires 1h from now, refresh token expires in 7 days
 const validToken = {
@@ -41,7 +43,7 @@ const expiredToken = {
   expiresAt: new Date('2024-01-15T11:00:00.000Z').toISOString(),
 };
 
-// Per-user token: access/refresh stored under credentials.accessToken / credentials.refreshToken
+// Per-user token stored under credentials.accessToken / credentials.refreshToken
 const validPerUserToken = {
   id: 'token-1',
   profileUid: 'profile-1',
@@ -74,21 +76,13 @@ const baseOpts = {
   connectorId: 'connector-1',
   logger,
   configurationUtilities,
-  credentials: {
-    config: {
-      clientId: 'my-client-id',
-      tokenUrl: 'https://auth.example.com/oauth/token',
-    },
-    secrets: {
-      clientSecret: 'my-client-secret',
-    },
-  },
+  provider: PROVIDER,
   connectorTokenClient,
 };
 
 let clock: sinon.SinonFakeTimers;
 
-describe('getOAuthAuthorizationCodeAccessToken', () => {
+describe('getEarsAccessToken', () => {
   beforeAll(() => {
     clock = sinon.useFakeTimers(NOW);
   });
@@ -98,42 +92,11 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
   });
   afterAll(() => clock.restore());
 
-  describe('credential validation', () => {
-    it('returns null and warns when clientId is missing', async () => {
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        credentials: {
-          ...baseOpts.credentials,
-          config: { ...baseOpts.credentials.config, clientId: '' },
-        },
-      });
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Missing required fields for requesting OAuth Authorization Code access token'
-      );
-      expect(connectorTokenClient.get).not.toHaveBeenCalled();
-    });
-
-    it('returns null and warns when clientSecret is missing', async () => {
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        credentials: { ...baseOpts.credentials, secrets: { clientSecret: '' } },
-      });
-
-      expect(result).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        'Missing required fields for requesting OAuth Authorization Code access token'
-      );
-      expect(connectorTokenClient.get).not.toHaveBeenCalled();
-    });
-  });
-
   describe('stored token retrieval', () => {
     it('returns null and warns when the token fetch reports errors', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: true, connectorToken: null });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -144,7 +107,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
     it('returns null and warns when no token is stored (user has not authorized yet)', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({ hasErrors: false, connectorToken: null });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -158,10 +121,10 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: validToken,
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBe('stored-access-token');
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+      expect(requestEarsRefreshToken).not.toHaveBeenCalled();
     });
 
     it('treats a token with no expiresAt as never-expiring', async () => {
@@ -170,10 +133,10 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: { ...validToken, expiresAt: undefined },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBe('stored-access-token');
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+      expect(requestEarsRefreshToken).not.toHaveBeenCalled();
     });
   });
 
@@ -184,7 +147,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: { ...expiredToken, refreshToken: undefined },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -201,7 +164,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
@@ -214,84 +177,27 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBe('Bearer new-access-token');
     });
 
-    it('calls requestOAuthRefreshToken with correct arguments including scope', async () => {
+    it('passes tokenUrl and refreshToken to requestEarsRefreshToken', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-      await getOAuthAuthorizationCodeAccessToken({ ...baseOpts, scope: 'openid profile' });
+      await getEarsAccessToken(baseOpts);
 
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        'https://auth.example.com/oauth/token',
+      expect(requestEarsRefreshToken).toHaveBeenCalledWith(
+        PROVIDER,
         logger,
-        {
-          refreshToken: 'stored-refresh-token',
-          clientId: 'my-client-id',
-          clientSecret: 'my-client-secret',
-          scope: 'openid profile',
-        },
-        configurationUtilities,
-        true // useBasicAuth defaults to true
-      );
-    });
-
-    it('spreads additionalFields into the refresh request body', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: expiredToken,
-      });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
-
-      await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        credentials: {
-          ...baseOpts.credentials,
-          config: {
-            ...baseOpts.credentials.config,
-            additionalFields: { tenant_id: 'abc123', custom_flag: true },
-          },
-        },
-      });
-
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(Object),
-        expect.objectContaining({ tenant_id: 'abc123', custom_flag: true }),
-        expect.any(Object),
-        expect.any(Boolean)
-      );
-    });
-
-    it('passes useBasicAuth: false when explicitly configured', async () => {
-      connectorTokenClient.get.mockResolvedValueOnce({
-        hasErrors: false,
-        connectorToken: expiredToken,
-      });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
-
-      await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        credentials: {
-          ...baseOpts.credentials,
-          config: { ...baseOpts.credentials.config, useBasicAuth: false },
-        },
-      });
-
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(Object),
-        expect.any(Object),
-        expect.any(Object),
-        false
+        { refreshToken: 'stored-refresh-token' },
+        configurationUtilities
       );
     });
 
@@ -300,9 +206,9 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-      await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      await getEarsAccessToken(baseOpts);
 
       expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith({
         id: 'token-1',
@@ -319,12 +225,12 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce({
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce({
         ...refreshResponse,
         refreshToken: undefined,
       });
 
-      await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      await getEarsAccessToken(baseOpts);
 
       expect(connectorTokenClient.updateWithRefreshToken).toHaveBeenCalledWith(
         expect.objectContaining({ refreshToken: 'stored-refresh-token' })
@@ -338,33 +244,30 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: validToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
-        ...baseOpts,
-        forceRefresh: true,
-      });
+      const result = await getEarsAccessToken({ ...baseOpts, forceRefresh: true });
 
       expect(result).toBe('Bearer new-access-token');
-      expect(requestOAuthRefreshToken).toHaveBeenCalledTimes(1);
+      expect(requestEarsRefreshToken).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('error handling', () => {
-    it('returns null and logs an error when requestOAuthRefreshToken throws', async () => {
+    it('returns null and logs an error when requestEarsRefreshToken throws', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockRejectedValueOnce(
-        new Error('token endpoint unreachable')
+      (requestEarsRefreshToken as jest.Mock).mockRejectedValueOnce(
+        new Error('EARS endpoint unreachable')
       );
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.error).toHaveBeenCalledWith(
-        'Failed to refresh access token for connectorId: connector-1. Error: token endpoint unreachable'
+        'Failed to refresh access token for connectorId: connector-1. Error: EARS endpoint unreachable'
       );
     });
 
@@ -373,12 +276,12 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
       connectorTokenClient.updateWithRefreshToken.mockRejectedValueOnce(
         new Error('DB write failed')
       );
 
-      const result = await getOAuthAuthorizationCodeAccessToken(baseOpts);
+      const result = await getEarsAccessToken(baseOpts);
 
       expect(result).toBeNull();
       expect(logger.error).toHaveBeenCalledWith(
@@ -389,7 +292,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
 
   describe('per-user auth mode', () => {
     it('returns null and warns when authMode is per-user but profileUid is missing', async () => {
-      const result = await getOAuthAuthorizationCodeAccessToken({
+      const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
       });
@@ -407,7 +310,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: validPerUserToken,
       });
 
-      await getOAuthAuthorizationCodeAccessToken({
+      await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
         profileUid: 'profile-1',
@@ -426,14 +329,14 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: validPerUserToken,
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
+      const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
         profileUid: 'profile-1',
       });
 
       expect(result).toBe('stored-per-user-access-token');
-      expect(requestOAuthRefreshToken).not.toHaveBeenCalled();
+      expect(requestEarsRefreshToken).not.toHaveBeenCalled();
     });
 
     it('refreshes using credentials.refreshToken for an expired per-user token', async () => {
@@ -441,20 +344,19 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         hasErrors: false,
         connectorToken: expiredPerUserToken,
       });
-      (requestOAuthRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
+      const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
         profileUid: 'profile-1',
       });
 
-      expect(requestOAuthRefreshToken).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(Object),
-        expect.objectContaining({ refreshToken: 'stored-per-user-refresh-token' }),
-        expect.any(Object),
-        expect.any(Boolean)
+      expect(requestEarsRefreshToken).toHaveBeenCalledWith(
+        PROVIDER,
+        logger,
+        { refreshToken: 'stored-per-user-refresh-token' },
+        configurationUtilities
       );
       expect(result).toBe('Bearer new-access-token');
     });
@@ -465,7 +367,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
         connectorToken: { ...validPerUserToken, credentials: {} },
       });
 
-      const result = await getOAuthAuthorizationCodeAccessToken({
+      const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
         profileUid: 'profile-1',
@@ -477,6 +379,31 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
           'Stored token has unexpected shape for connectorId: connector-1 (authMode: per-user)'
         )
       );
+    });
+  });
+
+  describe('concurrency lock', () => {
+    it('queues concurrent calls for the same connector so only one refresh runs', async () => {
+      const lockedConnectorId = 'connector-lock-test';
+      connectorTokenClient.get
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...expiredToken, connectorId: lockedConnectorId },
+        })
+        .mockResolvedValueOnce({
+          hasErrors: false,
+          connectorToken: { ...validToken, connectorId: lockedConnectorId },
+        });
+      (requestEarsRefreshToken as jest.Mock).mockResolvedValueOnce(refreshResponse);
+
+      const [result1, result2] = await Promise.all([
+        getEarsAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
+        getEarsAccessToken({ ...baseOpts, connectorId: lockedConnectorId }),
+      ]);
+
+      expect(requestEarsRefreshToken).toHaveBeenCalledTimes(1);
+      expect(result1).toBe('Bearer new-access-token');
+      expect(result2).toBe('stored-access-token');
     });
   });
 });

@@ -18759,8 +18759,6 @@
     "xpack.idxMgmt.createIndex.modal.indexMode.label": "インデックスモード",
     "xpack.idxMgmt.createIndex.modal.indexName.label": "インデックス名",
     "xpack.idxMgmt.createIndex.modal.invalidName.error": "インデックス名が有効ではありません",
-    "xpack.idxMgmt.createIndex.modal.saveButton": "作成",
-    "xpack.idxMgmt.createIndex.modal.title": "インデックスの作成",
     "xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage": "インデックスの作成が正常に完了しました：{indexName}",
     "xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage": "''{name}''という名前のテンプレートがすでに存在します。",
     "xpack.idxMgmt.createTemplate.cloneTemplatePageTitle": "テンプレート''{name}''の複製",

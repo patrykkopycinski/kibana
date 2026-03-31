@@ -18749,8 +18749,6 @@
     "xpack.idxMgmt.createIndex.modal.indexMode.label": "索引模式",
     "xpack.idxMgmt.createIndex.modal.indexName.label": "索引名称",
     "xpack.idxMgmt.createIndex.modal.invalidName.error": "索引名称无效",
-    "xpack.idxMgmt.createIndex.modal.saveButton": "创建",
-    "xpack.idxMgmt.createIndex.modal.title": "创建索引",
     "xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage": "已成功创建索引：{indexName}",
     "xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage": "已有名称为“{name}”的模板。",
     "xpack.idxMgmt.createTemplate.cloneTemplatePageTitle": "克隆模板“{name}”",

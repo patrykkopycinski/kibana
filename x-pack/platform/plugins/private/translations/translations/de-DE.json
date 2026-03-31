@@ -18473,8 +18473,6 @@
     "xpack.idxMgmt.createIndex.modal.indexMode.label": "Indexmodus",
     "xpack.idxMgmt.createIndex.modal.indexName.label": "Indexname",
     "xpack.idxMgmt.createIndex.modal.invalidName.error": "Der Indexname ist nicht gültig",
-    "xpack.idxMgmt.createIndex.modal.saveButton": "Erstellen",
-    "xpack.idxMgmt.createIndex.modal.title": "Index erstellen",
     "xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage": "Index erfolgreich erstellt: {indexName}",
     "xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage": "Es gibt bereits eine Vorlage mit dem Namen \"{name}“.",
     "xpack.idxMgmt.createTemplate.cloneTemplatePageTitle": "Klonen Sie die Vorlage „{name}“",

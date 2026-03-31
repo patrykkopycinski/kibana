@@ -18735,8 +18735,6 @@
     "xpack.idxMgmt.createIndex.modal.indexMode.label": "Mode d'index",
     "xpack.idxMgmt.createIndex.modal.indexName.label": "Nom de l'index",
     "xpack.idxMgmt.createIndex.modal.invalidName.error": "Le nom de l'index n'est pas valide",
-    "xpack.idxMgmt.createIndex.modal.saveButton": "Créer",
-    "xpack.idxMgmt.createIndex.modal.title": "Créer un index",
     "xpack.idxMgmt.createIndex.successfullyCreatedIndexMessage": "Création réussie de l'index : {indexName}",
     "xpack.idxMgmt.createRoute.duplicateTemplateIdErrorMessage": "Un modèle s'appelle déjà \"{name}\".",
     "xpack.idxMgmt.createTemplate.cloneTemplatePageTitle": "Cloner le modèle \"{name}\"",

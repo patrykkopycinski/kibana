@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { API_HEADERS, RULE_API_PATH, ALERTING_EVENTS_INDEX } from './constants';
+export const ALERTING_V2_RULE_API_PATH = '/api/alerting/v2/rules' as const;

@@ -1,6 +1,6 @@
 {
-  "type": "shared-browser",
-  "id": "@kbn/alerting-v2-episodes-ui",
+  "type": "shared-common",
+  "id": "@kbn/alerting-v2-constants",
   "owner": "@elastic/rna-project-team",
   "group": "platform",
   "visibility": "shared"

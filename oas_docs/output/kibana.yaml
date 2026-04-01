@@ -18981,6 +18981,12 @@ paths:
             items:
               $ref: '#/components/schemas/Security_Detections_API_GapFillStatus'
             type: array
+        - description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          in: query
+          name: gap_auto_fill_scheduler_id
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -86529,6 +86535,9 @@ components:
           enum:
             - delete
           type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
           items:
@@ -86559,6 +86568,9 @@ components:
         action:
           enum:
             - disable
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
           type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
@@ -86604,6 +86616,9 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
           items:
@@ -86709,6 +86724,9 @@ components:
             $ref: '#/components/schemas/Security_Detections_API_BulkActionEditPayload'
           minItems: 1
           type: array
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
           items:
@@ -86745,6 +86763,9 @@ components:
           enum:
             - enable
           type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
           items:
@@ -86777,6 +86798,9 @@ components:
         action:
           enum:
             - export
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
           type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
@@ -86826,6 +86850,9 @@ components:
           required:
             - start_date
             - end_date
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
           items:
@@ -86857,6 +86884,9 @@ components:
         action:
           enum:
             - run
+          type: string
+        gap_auto_fill_scheduler_id:
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
           type: string
         gap_fill_statuses:
           description: Gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
@@ -88037,6 +88067,7 @@ components:
         - unfilled
         - in_progress
         - filled
+        - error
       type: string
     Security_Detections_API_HistoryWindowStart:
       description: Start date to use when checking if a term has been seen before. Supports relative dates – for example, now-30d will search the last 30 days of data when checking if a term is new. We do not recommend using absolute dates, which can cause issues with rule performance due to querying increasing amounts of data over time.

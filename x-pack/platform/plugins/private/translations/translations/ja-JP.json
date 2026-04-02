@@ -39177,7 +39177,6 @@
     "xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances": "{numOfSlos, number}{numOfSlos, plural, one {SLO} other {個のSLO}}{instances} が含まれます",
     "xpack.slo.sloCardItem.euiPanel.lastSummaryUpdatedLabel": "{status}、要約の前回更新日：{value}",
     "xpack.slo.sloCardItemBadges.remoteBadgeLabel": "リモート",
-    "xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel": "インスタンス別にすべての関連するグループを表示",
     "xpack.slo.sloCreatePageTitle": "新規SLOを作成",
     "xpack.slo.sloDetails.badFilterLabel": "異常なイベント",
     "xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle": "残り予算エラー",

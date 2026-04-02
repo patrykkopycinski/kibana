@@ -39117,7 +39117,6 @@
     "xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances": "{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} inclus",
     "xpack.slo.sloCardItem.euiPanel.lastSummaryUpdatedLabel": "{status}, dernière mise à jour du résumé : {value}",
     "xpack.slo.sloCardItemBadges.remoteBadgeLabel": "Distant",
-    "xpack.slo.sloConfiguration.euiSwitch.showAllGroupByLabel": "Afficher toutes les instances de regroupement associées",
     "xpack.slo.sloCreatePageTitle": "Créer un nouveau SLO",
     "xpack.slo.sloDetails.badFilterLabel": "Événements mauvais",
     "xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle": "Budget d'erreur restant",

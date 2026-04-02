@@ -8,46 +8,46 @@
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-plugin/server/resources/datastreams/alert_events';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 
-export interface AlertingEpisodeStatusBadgeProps {
+export interface AlertEpisodeStatusBadgeProps {
   status: AlertEpisodeStatus;
 }
 
 /**
  * Renders a badge indicating the status of an alerting episode.
  */
-export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadgeProps) => {
-  if (status === 'inactive') {
+export const AlertEpisodeStatusBadge = ({ status }: AlertEpisodeStatusBadgeProps) => {
+  if (status === ALERT_EPISODE_STATUS.INACTIVE) {
     return (
-      <EuiBadge color="success" iconType="checkCircleFill">
+      <EuiBadge color="success">
         {i18n.translate('xpack.alertingV2EpisodesUi.inactiveStatusBadgeLabel', {
           defaultMessage: 'Inactive',
         })}
       </EuiBadge>
     );
   }
-  if (status === 'pending') {
+  if (status === ALERT_EPISODE_STATUS.PENDING) {
     return (
-      <EuiBadge color="warning" iconType="contrastFill">
+      <EuiBadge color="warning">
         {i18n.translate('xpack.alertingV2EpisodesUi.pendingStatusBadgeLabel', {
           defaultMessage: 'Pending',
         })}
       </EuiBadge>
     );
   }
-  if (status === 'active') {
+  if (status === ALERT_EPISODE_STATUS.ACTIVE) {
     return (
-      <EuiBadge color="danger" iconType="warningFill">
+      <EuiBadge color="danger">
         {i18n.translate('xpack.alertingV2EpisodesUi.activeStatusBadgeLabel', {
           defaultMessage: 'Active',
         })}
       </EuiBadge>
     );
   }
-  if (status === 'recovering') {
+  if (status === ALERT_EPISODE_STATUS.RECOVERING) {
     return (
-      <EuiBadge color="primary" iconType="undo">
+      <EuiBadge color="primary">
         {i18n.translate('xpack.alertingV2EpisodesUi.recoveringStatusBadgeLabel', {
           defaultMessage: 'Recovering',
         })}
@@ -55,7 +55,7 @@ export const AlertingEpisodeStatusBadge = ({ status }: AlertingEpisodeStatusBadg
     );
   }
   return (
-    <EuiBadge color="hollow" iconType="question">
+    <EuiBadge color="hollow">
       {i18n.translate('xpack.alertingV2EpisodesUi.unknownStatusBadgeLabel', {
         defaultMessage: 'Unknown',
       })}

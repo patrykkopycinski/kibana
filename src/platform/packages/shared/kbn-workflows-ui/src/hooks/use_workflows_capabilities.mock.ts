@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createMockWorkflowApi, type MockWorkflowApi } from './src/api/workflows_api.mock';
-export { createMockWorkflowsCapabilities } from './src/hooks/use_workflows_capabilities.mock';
+import type { WorkflowsManagementCapabilities } from './use_workflows_capabilities';
+
+export const createMockWorkflowsCapabilities = (): WorkflowsManagementCapabilities => ({
+  canCreateWorkflow: true,
+  canReadWorkflow: true,
+  canUpdateWorkflow: true,
+  canDeleteWorkflow: true,
+  canExecuteWorkflow: true,
+  canReadWorkflowExecution: true,
+  canCancelWorkflowExecution: true,
+});

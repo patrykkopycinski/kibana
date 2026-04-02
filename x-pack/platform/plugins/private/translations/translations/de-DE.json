@@ -31293,8 +31293,6 @@
     "xpack.searchIndices.connectionDetails.endpointTitle": "Elasticsearch-URL",
     "xpack.searchIndices.createIndex.docTitle": "Index erstellen",
     "xpack.searchIndices.documentsTabLabel": "Daten",
-    "xpack.searchIndices.elasticsearchIndices.createIndexTitle": "Index erstellen",
-    "xpack.searchIndices.elasticsearchIndices.startAppTitle": "Elasticsearch-Indizes",
     "xpack.searchIndices.guideSelectors.selectGuideTitle": "Wählen Sie einen Workflow-Leitfaden aus",
     "xpack.searchIndices.indexAction.ApiReferenceButtonLabel": "API-Referenz",
     "xpack.searchIndices.indexAction.useInPlaygroundButtonLabel": "Im Playground suchen",

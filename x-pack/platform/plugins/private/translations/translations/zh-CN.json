@@ -31666,8 +31666,6 @@
     "xpack.searchIndices.connectionDetails.endpointTitle": "Elasticsearch URL",
     "xpack.searchIndices.createIndex.docTitle": "创建索引",
     "xpack.searchIndices.documentsTabLabel": "数据",
-    "xpack.searchIndices.elasticsearchIndices.createIndexTitle": "创建索引",
-    "xpack.searchIndices.elasticsearchIndices.startAppTitle": "Elasticsearch 索引",
     "xpack.searchIndices.guideSelectors.selectGuideTitle": "选择工作流指南",
     "xpack.searchIndices.indexAction.ApiReferenceButtonLabel": "API 参考",
     "xpack.searchIndices.indexAction.useInPlaygroundButtonLabel": "在 Playground 中搜索",

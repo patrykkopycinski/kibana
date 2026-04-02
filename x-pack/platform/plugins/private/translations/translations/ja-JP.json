@@ -31686,8 +31686,6 @@
     "xpack.searchIndices.connectionDetails.endpointTitle": "Elasticsearch URL",
     "xpack.searchIndices.createIndex.docTitle": "インデックスの作成",
     "xpack.searchIndices.documentsTabLabel": "データ",
-    "xpack.searchIndices.elasticsearchIndices.createIndexTitle": "インデックスの作成",
-    "xpack.searchIndices.elasticsearchIndices.startAppTitle": "Elasticsearchインデックス",
     "xpack.searchIndices.guideSelectors.selectGuideTitle": "ワークフローガイドを選択",
     "xpack.searchIndices.indexAction.ApiReferenceButtonLabel": "API参照",
     "xpack.searchIndices.indexAction.useInPlaygroundButtonLabel": "Playgroundで検索",

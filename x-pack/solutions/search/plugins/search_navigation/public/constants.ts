@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('search indices APIs', function () {
-    loadTestFile(require.resolve('./status'));
-  });
-}
+export const SEARCH_INDEX_MANAGEMENT_LOCATOR_ID = 'SEARCH_INDEX_MANAGEMENT_LOCATOR_ID';

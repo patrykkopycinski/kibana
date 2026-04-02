@@ -36233,7 +36233,6 @@
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle": "实体",
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip": "实体数据可能需要几分钟才能显示",
     "xpack.securitySolution.entityAnalytics.entityStore.entitySource.filterTitle": "源",
-    "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription": "资产关键度",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription": "事件",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.riskDescription": "风险",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "异常",

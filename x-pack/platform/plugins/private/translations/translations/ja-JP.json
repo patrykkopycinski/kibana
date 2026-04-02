@@ -36253,7 +36253,6 @@
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle": "エンティティ",
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip": "エンティティデータが表示されるまでに数分かかる場合があります",
     "xpack.securitySolution.entityAnalytics.entityStore.entitySource.filterTitle": "送信元",
-    "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription": "アセット重要度",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription": "イベント",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.riskDescription": "リスク",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "異常",

@@ -36198,7 +36198,6 @@
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle": "Entités",
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip": "L’affichage des données d'entité peut prendre quelques minutes",
     "xpack.securitySolution.entityAnalytics.entityStore.entitySource.filterTitle": "Source",
-    "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription": "Criticité des ressources",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription": "Événements",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.riskDescription": "Risque",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "Anomalies",

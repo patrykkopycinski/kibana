@@ -35820,7 +35820,6 @@
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTitle": "Entitäten",
     "xpack.securitySolution.entityAnalytics.entityStore.entitiesList.tableTooltip": "Es kann einige Minuten dauern, bis Entitätsdaten angezeigt werden",
     "xpack.securitySolution.entityAnalytics.entityStore.entitySource.filterTitle": "Quelle",
-    "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.criticalityDescription": "Kritikalität von Assets",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.eventDescription": "Ereignisse",
     "xpack.securitySolution.entityAnalytics.entityStore.helpers.sourceField.riskDescription": "Risiko",
     "xpack.securitySolution.entityAnalytics.header.anomalies": "Anomalien",

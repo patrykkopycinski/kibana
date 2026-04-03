@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-export const createPrebuiltRuleAssetsClient = () => {
-  return {
-    fetchLatestAssets: jest.fn(),
-    fetchLatestVersions: jest.fn(),
-    fetchAssetsByVersion: jest.fn(),
-    fetchTagsByVersion: jest.fn(),
-    fetchDeprecatedRules: jest.fn(),
-  };
-};
+export { useDeprecatedRulesTableCallout } from './use_deprecated_rules_table_callout';
+export { useDeprecatedRuleDetailsCallout } from './use_deprecated_rule_details_callout';

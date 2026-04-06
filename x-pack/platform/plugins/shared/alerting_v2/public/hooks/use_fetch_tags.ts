@@ -8,14 +8,14 @@
 import { useService } from '@kbn/core-di-browser';
 import { useQuery } from '@kbn/react-query';
 import { NotificationPoliciesApi } from '../services/notification_policies_api';
-import { matcherSuggestionKeys } from './query_key_factory';
+import { notificationPolicyKeys } from './query_key_factory';
 
-export const useFetchDataFields = () => {
+export const useFetchTags = (params?: { search?: string }) => {
   const notificationPoliciesApi = useService(NotificationPoliciesApi);
 
   return useQuery<string[], Error>({
-    queryKey: matcherSuggestionKeys.dataFields(),
-    queryFn: () => notificationPoliciesApi.fetchDataFields(),
+    queryKey: notificationPolicyKeys.tags(params?.search),
+    queryFn: () => notificationPoliciesApi.fetchTags({ search: params?.search }),
     refetchOnWindowFocus: false,
     staleTime: 30 * 1000, // 30 seconds
   });

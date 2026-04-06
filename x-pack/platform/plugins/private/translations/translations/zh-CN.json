@@ -42246,7 +42246,6 @@
     "xpack.synthetics.monitorManagement.createLocationMonitors": "创建监测",
     "xpack.synthetics.monitorManagement.createMonitorLabel": "创建监测",
     "xpack.synthetics.monitorManagement.createPrivateLocations": "创建专用位置",
-    "xpack.synthetics.monitorManagement.deleteLocation": "删除位置",
     "xpack.synthetics.monitorManagement.deleteLocationLabel": "删除位置",
     "xpack.synthetics.monitorManagement.deleteLocationName": "删除“{location}”",
     "xpack.synthetics.monitorManagement.deleteMonitorNameLabel": "删除 {monitorCount, number} 个选定的{monitorCount, plural, one {监测} other {监测}}？",

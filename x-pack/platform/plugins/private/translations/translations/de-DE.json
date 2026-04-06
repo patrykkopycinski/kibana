@@ -41776,7 +41776,6 @@
     "xpack.synthetics.monitorManagement.createLocationMonitors": "Überwachen erstellen",
     "xpack.synthetics.monitorManagement.createMonitorLabel": "Überwachen erstellen",
     "xpack.synthetics.monitorManagement.createPrivateLocations": "Privaten Standort erstellen",
-    "xpack.synthetics.monitorManagement.deleteLocation": "Standort löschen",
     "xpack.synthetics.monitorManagement.deleteLocationLabel": "Standort löschen",
     "xpack.synthetics.monitorManagement.deleteLocationName": "Möchten Sie „{location}“ löschen?",
     "xpack.synthetics.monitorManagement.deleteMonitorNameLabel": "Möchten Sie {monitorCount, number} ausgewählte {monitorCount, plural, one {monitor} other {Monitors}} löschen?",

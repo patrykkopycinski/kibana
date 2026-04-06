@@ -42268,7 +42268,6 @@
     "xpack.synthetics.monitorManagement.createLocationMonitors": "監視の作成",
     "xpack.synthetics.monitorManagement.createMonitorLabel": "監視の作成",
     "xpack.synthetics.monitorManagement.createPrivateLocations": "非公開の場所を作成",
-    "xpack.synthetics.monitorManagement.deleteLocation": "場所を削除",
     "xpack.synthetics.monitorManagement.deleteLocationLabel": "場所を削除",
     "xpack.synthetics.monitorManagement.deleteLocationName": "「{location}」を削除",
     "xpack.synthetics.monitorManagement.deleteMonitorNameLabel": "{monitorCount, number}個の選択した{monitorCount, plural, one {monitor} other {モニター}}を削除しますか？",

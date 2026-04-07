@@ -15012,17 +15012,17 @@ paths:
             application/json:
               schema:
                 example:
-                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                  - createdAt: '2020-02-19T23:06:33.798Z'
+                    description: Investigating suspicious activity
+                    id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                    status: open
                     title: security_case
+                    totals:
+                      alerts: 1
+                      events: 0
+                      userComments: 0
                 items:
-                  type: object
-                  properties:
-                    id:
-                      description: The case identifier.
-                      type: string
-                    title:
-                      description: The case title.
-                      type: string
+                  $ref: '#/components/schemas/Cases_related_case'
                 maxItems: 10000
                 type: array
           description: Indicates a successful call.
@@ -73093,6 +73093,7 @@ components:
         duration: null
         external_service: null
         id: 293f1bc0-74f6-11ea-b83a-553aecdb28b6
+        observables: []
         owner: cases
         settings:
           syncAlerts: false
@@ -73101,6 +73102,7 @@ components:
         tags:
           - tag 1
         title: Case title 1
+        total_observables: 0
         totalAlerts: 0
         totalComment: 1
         totalEvents: 0
@@ -73166,6 +73168,7 @@ components:
         duration: null
         external_service: null
         id: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        observables: []
         owner: cases
         settings:
           extractObservables: false
@@ -73175,6 +73178,7 @@ components:
         tags:
           - tag 1
         title: Case title 1
+        total_observables: 0
         totalAlerts: 0
         totalComment: 0
         totalEvents: 0
@@ -73309,6 +73313,7 @@ components:
             duration: null
             external_service: null
             id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+            observables: []
             owner: cases
             settings:
               extractObservables: false
@@ -73318,6 +73323,7 @@ components:
             tags:
               - tag-1
             title: Case title
+            total_observables: 0
             totalAlerts: 0
             totalComment: 1
             totalEvents: 0
@@ -73428,6 +73434,7 @@ components:
         duration: null
         external_service: null
         id: c3ff7550-def1-4e90-b6bc-c9969a4a09b1
+        observables: []
         owner: observability
         settings:
           extractObservables: false
@@ -73438,6 +73445,7 @@ components:
           - observability
           - tag 1
         title: Observability case title 1
+        total_observables: 0
         totalAlerts: 1
         totalComment: 1
         totalEvents: 0
@@ -73478,6 +73486,7 @@ components:
         duration: null
         external_service: null
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
+        observables: []
         owner: cases
         settings:
           extractObservables: false
@@ -73487,6 +73496,7 @@ components:
         tags:
           - tag 1
         title: Case title 1
+        total_observables: 0
         totalAlerts: 1
         totalComment: 1
         totalEvents: 0
@@ -73566,6 +73576,7 @@ components:
             full_name: null
             username: elastic
         id: b917f300-0ed9-11ed-bd18-65557fe66949
+        observables: []
         owner: cases
         settings:
           extractObservables: false
@@ -73575,6 +73586,7 @@ components:
         tags:
           - tag 1
         title: Case title 1
+        total_observables: 0
         totalAlerts: 0
         totalComment: 0
         totalEvents: 0
@@ -73815,6 +73827,7 @@ components:
               full_name: null
               username: elastic
           id: 66b9aa00-94fa-11ea-9f74-e7e108796192
+          observables: []
           owner: cases
           settings:
             extractObservables: false
@@ -73824,6 +73837,7 @@ components:
           tags:
             - tag-1
           title: Case title 1
+          total_observables: 0
           totalAlerts: 0
           totalComment: 0
           totalEvents: 0
@@ -78800,6 +78814,24 @@ components:
       maxItems: 10
       nullable: true
       type: array
+    Cases_attachment_totals:
+      description: Counts of alerts, events, and user comments attached to a case.
+      properties:
+        alerts:
+          description: Number of alert attachments on the case.
+          type: integer
+        events:
+          description: Number of event attachments on the case.
+          type: integer
+        userComments:
+          description: Number of user comment attachments on the case.
+          type: integer
+      required:
+        - alerts
+        - events
+        - userComments
+      title: Attachment totals
+      type: object
     Cases_case_categories:
       items:
         $ref: '#/components/schemas/Cases_case_category'
@@ -78826,6 +78858,46 @@ components:
       description: The description for the case.
       maxLength: 30000
       type: string
+    Cases_case_observable:
+      description: A single observable attached to a case.
+      properties:
+        createdAt:
+          description: When the observable was created.
+          example: '2024-11-14T10:00:00.000Z'
+          format: date-time
+          type: string
+        description:
+          description: An optional description for the observable.
+          example: Source IP
+          nullable: true
+          type: string
+        id:
+          description: The observable identifier.
+          example: df927ab8-54ed-47d6-be07-9948c255c097
+          type: string
+        typeKey:
+          description: The observable type key.
+          example: observable-type-ipv4
+          type: string
+        updatedAt:
+          description: When the observable was last updated.
+          example: '2024-11-14T10:00:00.000Z'
+          format: date-time
+          nullable: true
+          type: string
+        value:
+          description: The observable value.
+          example: 10.0.0.8
+          type: string
+      required:
+        - id
+        - typeKey
+        - value
+        - description
+        - createdAt
+        - updatedAt
+      title: Case observable
+      type: object
     Cases_case_response_closed_by_properties:
       nullable: true
       properties:
@@ -78955,6 +79027,11 @@ components:
         id:
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
           type: string
+        observables:
+          description: Observables attached to the case.
+          items:
+            $ref: '#/components/schemas/Cases_case_observable'
+          type: array
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -78972,6 +79049,11 @@ components:
         title:
           example: Case title 1
           type: string
+        total_observables:
+          description: The number of observables attached to the case.
+          example: 0
+          nullable: true
+          type: integer
         totalAlerts:
           example: 0
           type: integer
@@ -79002,6 +79084,7 @@ components:
         - duration
         - external_service
         - id
+        - observables
         - owner
         - settings
         - severity
@@ -79010,6 +79093,7 @@ components:
         - title
         - totalAlerts
         - totalComment
+        - total_observables
         - updated_at
         - updated_by
         - version
@@ -79115,6 +79199,11 @@ components:
         id:
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
           type: string
+        observables:
+          description: Observables attached to the case.
+          items:
+            $ref: '#/components/schemas/Cases_case_observable'
+          type: array
         owner:
           $ref: '#/components/schemas/Cases_owner'
         settings:
@@ -79132,6 +79221,11 @@ components:
         title:
           example: Case title 1
           type: string
+        total_observables:
+          description: The number of observables attached to the case.
+          example: 0
+          nullable: true
+          type: integer
         totalAlerts:
           example: 0
           type: integer
@@ -79162,6 +79256,7 @@ components:
         - duration
         - external_service
         - id
+        - observables
         - owner
         - settings
         - severity
@@ -79170,6 +79265,7 @@ components:
         - title
         - totalAlerts
         - totalComment
+        - total_observables
         - updated_at
         - updated_by
         - version
@@ -80006,6 +80102,36 @@ components:
               enum:
                 - user
               type: string
+    Cases_related_case:
+      description: |
+        Summary of a case returned when listing cases that contain a given alert. This is a subset of the full case response.
+      properties:
+        createdAt:
+          description: When the case was created.
+          format: date-time
+          type: string
+        description:
+          description: The case description.
+          type: string
+        id:
+          description: The case identifier.
+          type: string
+        status:
+          $ref: '#/components/schemas/Cases_case_status'
+        title:
+          description: The case title.
+          type: string
+        totals:
+          $ref: '#/components/schemas/Cases_attachment_totals'
+      required:
+        - id
+        - title
+        - description
+        - status
+        - createdAt
+        - totals
+      title: Related case
+      type: object
     Cases_response_4xx:
       properties:
         error:

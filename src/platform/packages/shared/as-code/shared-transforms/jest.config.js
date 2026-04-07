@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  asCodeIdSchema,
-  asCodeMetaSchema,
-  getMeta,
-  asCodeQuerySchema,
-  type AsCodeMeta,
-  type AsCodeQuery,
-} from './src/schemas';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/as-code/shared-transforms'],
+};

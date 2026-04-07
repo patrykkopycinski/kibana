@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  asCodeIdSchema,
-  asCodeMetaSchema,
-  getMeta,
-  asCodeQuerySchema,
-  type AsCodeMeta,
-  type AsCodeQuery,
-} from './src/schemas';
+export { asCodeQuerySchema, type AsCodeQuery } from './schema';

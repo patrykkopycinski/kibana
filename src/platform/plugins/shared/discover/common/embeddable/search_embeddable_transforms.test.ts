@@ -164,6 +164,24 @@ describe('searchEmbeddableTransforms', () => {
         ref_id: 'session-xyz',
       });
     });
+
+    it('transforms by-reference state', () => {
+      const state: StoredSearchEmbeddableState = {
+        title: 'Test Title',
+        description: 'Test Description',
+      };
+      const result = getSearchEmbeddableTransforms(
+        mockDrilldownTransforms,
+        whenDisabled
+      ).transformOut?.(state, [
+        {
+          id: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389',
+          name: 'savedObjectRef',
+          type: 'search',
+        },
+      ]);
+      expect(result).toEqual({ ...state, savedObjectId: '2f360f30-ea74-11eb-b4c6-3d2afc1cb389' });
+    });
   });
 
   describe('transformIn', () => {

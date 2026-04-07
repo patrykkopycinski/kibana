@@ -40880,7 +40880,6 @@
     "xpack.streams.streamDetail.preview.error": "Fehler beim Laden der Vorschau",
     "xpack.streams.streamDetail.preview.header": "Datenvorschau",
     "xpack.streams.streamDetailRouting.add": "Speichern",
-    "xpack.streams.streamDetailRouting.addRule": "Einen neuen untergeordneten Stream erstellen",
     "xpack.streams.streamDetailRouting.cancel": "Abbrechen",
     "xpack.streams.streamDetailRouting.change": "Routing ändern",
     "xpack.streams.streamDetailRouting.deleted": "Stream wurde gelöscht",

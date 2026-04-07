@@ -41309,7 +41309,6 @@
     "xpack.streams.streamDetail.preview.error": "Erreur lors du chargement de l'aperçu",
     "xpack.streams.streamDetail.preview.header": "Aperçu de données",
     "xpack.streams.streamDetailRouting.add": "Enregistrer",
-    "xpack.streams.streamDetailRouting.addRule": "Créer un nouveau flux enfant",
     "xpack.streams.streamDetailRouting.cancel": "Annuler",
     "xpack.streams.streamDetailRouting.change": "Changer le routage",
     "xpack.streams.streamDetailRouting.deleted": "Flux supprimé",

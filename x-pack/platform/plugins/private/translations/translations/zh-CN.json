@@ -41350,7 +41350,6 @@
     "xpack.streams.streamDetail.preview.error": "加载预览时出错",
     "xpack.streams.streamDetail.preview.header": "数据预览",
     "xpack.streams.streamDetailRouting.add": "保存",
-    "xpack.streams.streamDetailRouting.addRule": "创建新的子流",
     "xpack.streams.streamDetailRouting.cancel": "取消",
     "xpack.streams.streamDetailRouting.change": "更改路由",
     "xpack.streams.streamDetailRouting.deleted": "流已删除",

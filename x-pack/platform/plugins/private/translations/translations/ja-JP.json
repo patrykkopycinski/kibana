@@ -41370,7 +41370,6 @@
     "xpack.streams.streamDetail.preview.error": "プレビューの読み込みエラー",
     "xpack.streams.streamDetail.preview.header": "データプレビュー",
     "xpack.streams.streamDetailRouting.add": "保存",
-    "xpack.streams.streamDetailRouting.addRule": "新しい子ストリームを作成",
     "xpack.streams.streamDetailRouting.cancel": "キャンセル",
     "xpack.streams.streamDetailRouting.change": "ルーティングを変更",
     "xpack.streams.streamDetailRouting.deleted": "ストリームが削除されました",

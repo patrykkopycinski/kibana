@@ -1,0 +1,452 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiSpacer,
+  useEuiTheme,
+  useIsWithinBreakpoints,
+} from '@elastic/eui';
+import { partition } from 'lodash/fp';
+import classNames from 'classnames';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
+import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
+import { css } from '@emotion/react';
+import { SolutionSideNavPanel } from './solution_side_nav_panel';
+import { SolutionSideNavItemPosition } from './types';
+import type { SolutionSideNavItem, Tracker } from './types';
+import { TELEMETRY_EVENT } from './telemetry/const';
+import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
+import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
+
+export const TOGGLE_PANEL_LABEL = i18n.translate('securitySolutionPackages.sideNav.togglePanel', {
+  defaultMessage: 'Toggle panel nav',
+});
+
+/**
+ * - `splitButton`: separate link row and spaces button to open the secondary panel (default)
+ * - `unifiedRow`: single row with trailing chevron; primary click navigates to the first child and toggles the panel
+ */
+export type SolutionSideNavInteractionVariant = 'splitButton' | 'unifiedRow';
+
+export interface SolutionSideNavProps {
+  /** All the items to display in the side navigation */
+  items: SolutionSideNavItem[];
+  /** The id of the selected item to highlight. It only affects the top level items rendered in the main panel */
+  selectedId: string;
+  /** The categories to group and separate the main items. Ignores `position: 'bottom'` items */
+  categories?: SeparatorLinkCategory[];
+  /** Css value for the bottom offset of the secondary panel. defaults to 0 */
+  panelBottomOffset?: string;
+  /** Css value for the top offset of the secondary panel. defaults to the generic kibana header height */
+  panelTopOffset?: string;
+  /**
+   * Presentation and interaction for panel opener rows. When `unifiedRow`, selected rows use primary background.
+   */
+  navLinkInteractionVariant?: SolutionSideNavInteractionVariant;
+  /**
+   * The tracker function to enable navigation Telemetry, this has to be bound with the plugin `appId`
+   * e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
+   * */
+  tracker?: Tracker;
+}
+type ActivePanelNav = string | null;
+/**
+ * The Solution side navigation main component
+ */
+export const SolutionSideNav: React.FC<SolutionSideNavProps> = React.memo(function SolutionSideNav({
+  items,
+  categories,
+  selectedId,
+  panelBottomOffset,
+  panelTopOffset,
+  navLinkInteractionVariant = 'splitButton',
+  tracker,
+}) {
+  const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
+
+  const [activePanelNavId, setActivePanelNavId] = useState<ActivePanelNav>(null);
+  const activePanelNavIdRef = useRef<ActivePanelNav>(null);
+
+  const openPanelNav = (id: string) => {
+    activePanelNavIdRef.current = id;
+    setActivePanelNavId(id);
+  };
+
+  const onClosePanelNav = useCallback(() => {
+    activePanelNavIdRef.current = null;
+    setActivePanelNavId(null);
+  }, []);
+
+  const onOutsidePanelClick = useCallback(() => {
+    const currentPanelNavId = activePanelNavIdRef.current;
+    setTimeout(() => {
+      // This event is triggered on outside click.
+      // Closing the side nav at the end of event loop to make sure it
+      // closes also if the active panel button has been clicked (toggle),
+      // but it does not close if any any other panel open button has been clicked.
+      if (activePanelNavIdRef.current === currentPanelNavId) {
+        onClosePanelNav();
+      }
+    });
+  }, [onClosePanelNav]);
+
+  const [topItems, bottomItems] = useMemo(
+    () =>
+      partition(
+        ({ position = SolutionSideNavItemPosition.top }) =>
+          position === SolutionSideNavItemPosition.top,
+        items
+      ),
+    [items]
+  );
+
+  return (
+    <TelemetryContextProvider tracker={tracker}>
+      <EuiFlexGroup
+        gutterSize="none"
+        direction="column"
+        css={css`
+          height: 100%;
+        `}
+      >
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="none" direction="column">
+            <EuiFlexItem grow={false}>
+              <SolutionSideNavItems
+                items={topItems}
+                categories={categories}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+                onClosePanelNav={onClosePanelNav}
+                navLinkInteractionVariant={navLinkInteractionVariant}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <SolutionSideNavItems
+                items={bottomItems}
+                selectedId={selectedId}
+                activePanelNavId={activePanelNavId}
+                isMobileSize={isMobileSize}
+                onOpenPanelNav={openPanelNav}
+                onClosePanelNav={onClosePanelNav}
+                navLinkInteractionVariant={navLinkInteractionVariant}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <SolutionSideNavPanels
+        items={items}
+        activePanelNavId={activePanelNavId}
+        onClose={onClosePanelNav}
+        onOutsideClick={onOutsidePanelClick}
+        bottomOffset={panelBottomOffset}
+        topOffset={panelTopOffset}
+      />
+    </TelemetryContextProvider>
+  );
+});
+
+interface SolutionSideNavItemsProps {
+  items: SolutionSideNavItem[];
+  selectedId: string;
+  activePanelNavId: ActivePanelNav;
+  isMobileSize: boolean;
+  onOpenPanelNav: (id: string) => void;
+  onClosePanelNav: () => void;
+  navLinkInteractionVariant: SolutionSideNavInteractionVariant;
+  categories?: SeparatorLinkCategory[];
+}
+/**
+ * The Solution side navigation items component.
+ * Renders either the top or bottom panel items, considering the categories if present.
+ * When `categories` is received all links that do not belong to any category are ignored.
+ */
+const SolutionSideNavItems: React.FC<SolutionSideNavItemsProps> = React.memo(
+  function SolutionSideNavItems({
+    items,
+    categories,
+    selectedId,
+    activePanelNavId,
+    isMobileSize,
+    onOpenPanelNav,
+    onClosePanelNav,
+    navLinkInteractionVariant,
+  }) {
+    if (!categories?.length) {
+      return (
+        <>
+          {items.map((item) => (
+            <SolutionSideNavItem
+              key={item.id}
+              item={item}
+              isSelected={selectedId === item.id}
+              isActive={activePanelNavId === item.id}
+              isMobileSize={isMobileSize}
+              onOpenPanelNav={onOpenPanelNav}
+              onClosePanelNav={onClosePanelNav}
+              navLinkInteractionVariant={navLinkInteractionVariant}
+            />
+          ))}
+        </>
+      );
+    }
+
+    return (
+      <>
+        {categories?.map((category, categoryIndex) => {
+          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+            const link = items.find((item) => item.id === linkId);
+            if (link) {
+              acc.push(link);
+            }
+            return acc;
+          }, []);
+
+          if (!categoryItems.length) {
+            return null;
+          }
+
+          return (
+            <React.Fragment key={categoryIndex}>
+              {categoryIndex !== 0 && <EuiSpacer size="s" />}
+              {categoryItems.map((item) => (
+                <SolutionSideNavItem
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedId === item.id}
+                  isActive={activePanelNavId === item.id}
+                  isMobileSize={isMobileSize}
+                  onOpenPanelNav={onOpenPanelNav}
+                  onClosePanelNav={onClosePanelNav}
+                  navLinkInteractionVariant={navLinkInteractionVariant}
+                />
+              ))}
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          );
+        })}
+      </>
+    );
+  }
+);
+
+interface SolutionSideNavItemProps {
+  item: SolutionSideNavItem;
+  isSelected: boolean;
+  isActive: boolean;
+  onOpenPanelNav: (id: string) => void;
+  onClosePanelNav: () => void;
+  isMobileSize: boolean;
+  navLinkInteractionVariant: SolutionSideNavInteractionVariant;
+}
+/**
+ * The Solution side navigation item component.
+ * Renders a single item for the main side navigation panel,
+ * and it adds a button to open the item secondary panel if needed.
+ */
+const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
+  function SolutionSideNavItem({
+    item,
+    isSelected,
+    isActive,
+    isMobileSize,
+    onOpenPanelNav,
+    navLinkInteractionVariant,
+  }) {
+    const { euiTheme } = useEuiTheme();
+    const { tracker } = useTelemetryContext();
+
+    const {
+      id,
+      href,
+      label,
+      items: childItems,
+      onClick,
+      iconType,
+      appendSeparator,
+      prependSeparator,
+    } = item;
+
+    const firstPanelChild = useMemo(
+      () => childItems?.find((child) => !child.disabled),
+      [childItems]
+    );
+
+    const effectiveHref =
+      navLinkInteractionVariant === 'unifiedRow' && firstPanelChild ? firstPanelChild.href : href;
+
+    const solutionSideNavItemStyles = SolutionSideNavItemStyles(
+      euiTheme,
+      navLinkInteractionVariant === 'unifiedRow' && isSelected ? 'primary' : 'default'
+    );
+    const itemClassNames = classNames(
+      'solutionSideNavItem',
+      { 'solutionSideNavItem--isSelected': isSelected },
+      solutionSideNavItemStyles
+    );
+    const buttonClassNames = classNames('solutionSideNavItemButton');
+
+    const hasPanelNav = useMemo(
+      () => !isMobileSize && childItems != null && childItems.length > 0,
+      [childItems, isMobileSize]
+    );
+
+    const listItemLabel = useMemo(() => {
+      if (hasPanelNav && navLinkInteractionVariant === 'unifiedRow') {
+        return (
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              width: 100%;
+            `}
+          >
+            <EuiFlexItem grow>{label}</EuiFlexItem>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.s }}>
+              <EuiIcon
+                type="arrowRight"
+                color="subdued"
+                aria-hidden={true}
+                data-test-subj={`solutionSideNavItemPanelHint-${id}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+      return label;
+    }, [hasPanelNav, navLinkInteractionVariant, label, id, euiTheme.size.s]);
+
+    const onLinkClicked: React.MouseEventHandler = useCallback(
+      (ev) => {
+        tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
+        onClick?.(ev);
+      },
+      [tracker, id, onClick]
+    );
+
+    const onButtonClick: React.MouseEventHandler = useCallback(() => {
+      tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION_TOGGLE}${id}`);
+      onOpenPanelNav(id);
+    }, [id, onOpenPanelNav, tracker]);
+
+    const onSingleRowLinkClick: React.MouseEventHandler = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        if (!hasPanelNav) {
+          onLinkClicked(ev);
+          return;
+        }
+        onButtonClick(ev);
+      },
+      [hasPanelNav, onButtonClick, onLinkClicked]
+    );
+
+    return (
+      <>
+        {prependSeparator ? <EuiHorizontalRule margin="xs" /> : null}
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiListGroup gutterSize="none">
+              <EuiListGroupItem
+                iconType={iconType}
+                label={listItemLabel}
+                href={effectiveHref}
+                wrapText
+                onClick={
+                  navLinkInteractionVariant === 'unifiedRow' ? onSingleRowLinkClick : onLinkClicked
+                }
+                className={itemClassNames}
+                color="text"
+                size="s"
+                id={`solutionSideNavItemLink-${id}`}
+                data-test-subj={`solutionSideNavItemLink-${id}`}
+              />
+            </EuiListGroup>
+          </EuiFlexItem>
+          {hasPanelNav && navLinkInteractionVariant === 'splitButton' && (
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                className={buttonClassNames}
+                display={isActive ? 'base' : 'empty'}
+                size="s"
+                color="text"
+                onClick={onButtonClick}
+                iconType="spaces"
+                iconSize="m"
+                aria-label={TOGGLE_PANEL_LABEL}
+                data-test-subj={`solutionSideNavItemButton-${id}`}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        {appendSeparator ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="xs" />}
+      </>
+    );
+  }
+);
+
+interface SolutionSideNavPanelsProps {
+  items: SolutionSideNavItem[];
+  activePanelNavId: ActivePanelNav;
+  onClose: () => void;
+  onOutsideClick: () => void;
+  bottomOffset?: string;
+  topOffset?: string;
+}
+/**
+ * The Solution side navigation panels component.
+ * Renders the secondary panel according to the `activePanelNavId` received.
+ */
+const SolutionSideNavPanels: React.FC<SolutionSideNavPanelsProps> = React.memo(
+  function SolutionSideNavPanels({
+    items,
+    activePanelNavId,
+    onClose,
+    onOutsideClick,
+    bottomOffset,
+    topOffset,
+  }) {
+    const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
+      () => items.find(({ id }) => id === activePanelNavId),
+      [items, activePanelNavId]
+    );
+
+    if (activePanelNavItem == null || !activePanelNavItem.items?.length) {
+      return null;
+    }
+
+    return (
+      <SolutionSideNavPanel
+        onClose={onClose}
+        onOutsideClick={onOutsideClick}
+        items={activePanelNavItem.items}
+        title={activePanelNavItem.label}
+        categories={activePanelNavItem.categories}
+        bottomOffset={bottomOffset}
+        topOffset={topOffset}
+      />
+    );
+  }
+);
+
+// eslint-disable-next-line import/no-default-export
+export default SolutionSideNav;

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * from './csv_upload';
-export * as WatchlistDataSources from './data_source';
+export * from './csv_upload.gen';

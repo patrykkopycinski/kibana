@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './management';
-export * from './sync';
-export * from './csv_upload';
-export * as WatchlistDataSources from './data_source';
+export const CSV_BATCH_SIZE = 1000;
+export const TYPE_HEADER = 'type';
+export const REQUIRED_CSV_HEADERS: string[] = [TYPE_HEADER];
+export const MAX_ITERATIONS = 100;
+export const LIST_PAGE_SIZE = 100;
+export const CSV_SOURCE_ID = 'csv';

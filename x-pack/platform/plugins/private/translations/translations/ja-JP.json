@@ -46663,7 +46663,6 @@
     "xpack.streams.failedToImportContentError": "コンテンツパックのインポートに失敗しました",
     "xpack.streams.failedToPreviewContentError": "コンテンツパックのプレビューに失敗しました",
     "xpack.streams.failedToSave": "保存できませんでした",
-    "xpack.streams.feedbackButtonLabel": "フィードバックを送信",
     "xpack.streams.fieldForm.stageButtonLabel": "ステージの変更",
     "xpack.streams.fieldFormType.typeSelectAriaLabel": "フィールド型",
     "xpack.streams.fieldSelector.customOptionText": "{searchValue}をカスタムフィールドとして追加",

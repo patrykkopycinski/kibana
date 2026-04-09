@@ -46470,7 +46470,6 @@
     "xpack.streams.failedToImportContentError": "Fehler beim Importieren des Inhaltspakets",
     "xpack.streams.failedToPreviewContentError": "Fehler bei der Vorschau des Inhaltspakets",
     "xpack.streams.failedToSave": "Speichern fehlgeschlagen",
-    "xpack.streams.feedbackButtonLabel": "Feedback geben",
     "xpack.streams.fieldForm.stageButtonLabel": "Phasenänderungen",
     "xpack.streams.fieldFormType.typeSelectAriaLabel": "Feldtyp",
     "xpack.streams.fieldSelector.customOptionText": "Fügen Sie {searchValue} als benutzerdefiniertes Feld hinzu",

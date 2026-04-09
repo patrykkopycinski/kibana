@@ -46516,7 +46516,6 @@
     "xpack.streams.failedToImportContentError": "Impossible d'importer le pack de contenu",
     "xpack.streams.failedToPreviewContentError": "Impossible de prévisualiser le pack de contenu",
     "xpack.streams.failedToSave": "Échec de l'enregistrement",
-    "xpack.streams.feedbackButtonLabel": "Donner un retour",
     "xpack.streams.fieldForm.stageButtonLabel": "Changements d'étapes",
     "xpack.streams.fieldFormType.typeSelectAriaLabel": "Type du champ",
     "xpack.streams.fieldSelector.customOptionText": "Ajouter {searchValue} comme champ personnalisé",

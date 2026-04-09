@@ -46664,7 +46664,6 @@
     "xpack.streams.failedToImportContentError": "无法导入内容包",
     "xpack.streams.failedToPreviewContentError": "内容包预览失败",
     "xpack.streams.failedToSave": "无法保存",
-    "xpack.streams.feedbackButtonLabel": "反馈",
     "xpack.streams.fieldForm.stageButtonLabel": "暂存更改",
     "xpack.streams.fieldFormType.typeSelectAriaLabel": "字段类型",
     "xpack.streams.fieldSelector.customOptionText": "将 {searchValue} 添加为自定义字段",

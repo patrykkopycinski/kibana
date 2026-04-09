@@ -31631,7 +31631,6 @@
     "xpack.observability_onboarding.firehosePanel.visualizeDataDescription": "Une fois le flux Firehose créé, la capture des données commencera automatiquement et les données entrantes seront affichées ci-dessous.",
     "xpack.observability_onboarding.firehosePanel.waitingForDataTitle": "Récupération de données depuis Amazon Data Firehose",
     "xpack.observability_onboarding.form.optional": "Facultatif",
-    "xpack.observability_onboarding.header.feedback": "Donner un retour",
     "xpack.observability_onboarding.insight.feedbackButtons.negative": "Non",
     "xpack.observability_onboarding.insight.feedbackButtons.positive": "Oui",
     "xpack.observability_onboarding.insight.feedbackButtons.title": "Cela a-t-il été utile ?",

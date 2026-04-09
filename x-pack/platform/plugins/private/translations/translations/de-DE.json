@@ -31606,7 +31606,6 @@
     "xpack.observability_onboarding.firehosePanel.visualizeDataDescription": "Sobald der Firehose-Stream erstellt ist, beginnt die Datenerfassung automatisch, und die eingehenden Daten werden unten angezeigt.",
     "xpack.observability_onboarding.firehosePanel.waitingForDataTitle": "Abrufen von Daten aus Amazon Kinesis Daten Firehose",
     "xpack.observability_onboarding.form.optional": "Optional",
-    "xpack.observability_onboarding.header.feedback": "Feedback geben",
     "xpack.observability_onboarding.insight.feedbackButtons.negative": "Nein",
     "xpack.observability_onboarding.insight.feedbackButtons.positive": "Ja",
     "xpack.observability_onboarding.insight.feedbackButtons.title": "War dies hilfreich?",

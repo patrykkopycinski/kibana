@@ -347,7 +347,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Edit rule with deleted connector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/259893
+    describe.skip('Edit rule with deleted connector', () => {
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {

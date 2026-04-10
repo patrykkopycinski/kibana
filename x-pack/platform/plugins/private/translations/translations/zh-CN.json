@@ -43570,7 +43570,6 @@
     "xpack.slo.item.actions.manageBurnRateRules": "管理消耗速度{count, plural, one {规则} other {规则}}",
     "xpack.slo.item.actions.manageRules": "管理规则",
     "xpack.slo.item.actions.notAvailable": "此操作不适用于远程 SLO",
-    "xpack.slo.item.actions.openMenuAriaLabel": "错误预算操作上下文菜单",
     "xpack.slo.item.actions.purge": "清除汇总数据",
     "xpack.slo.item.actions.remoteKibanaUrlUndefined": "此操作不适用于未定义 kibanaUrl 的远程 SLO",
     "xpack.slo.item.actions.reset": "重置",

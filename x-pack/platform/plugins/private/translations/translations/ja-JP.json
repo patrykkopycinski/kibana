@@ -43571,7 +43571,6 @@
     "xpack.slo.item.actions.manageBurnRateRules": "バーンレート{count, plural, one {rule} other {ルール}}を管理",
     "xpack.slo.item.actions.manageRules": "ルールの管理",
     "xpack.slo.item.actions.notAvailable": "このアクションはリモートSLOでは使用できません",
-    "xpack.slo.item.actions.openMenuAriaLabel": "エラー予算アクションのコンテキストメニュー",
     "xpack.slo.item.actions.purge": "ロールアップデータをパージ",
     "xpack.slo.item.actions.remoteKibanaUrlUndefined": "このアクションは、kibanaUrlが未定義のリモートSLOでは使用できません",
     "xpack.slo.item.actions.reset": "リセット",

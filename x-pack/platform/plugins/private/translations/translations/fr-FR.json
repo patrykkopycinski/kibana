@@ -43424,7 +43424,6 @@
     "xpack.slo.item.actions.manageBurnRateRules": "Gérer {count, plural, one {rule} other {règles}} du taux d'avancement",
     "xpack.slo.item.actions.manageRules": "Gérer les règles",
     "xpack.slo.item.actions.notAvailable": "Cette action n'est pas disponible pour les SLO distants",
-    "xpack.slo.item.actions.openMenuAriaLabel": "Erreur dans le menu contextuel des actions budgétaires",
     "xpack.slo.item.actions.purge": "Purger les données de cumul",
     "xpack.slo.item.actions.remoteKibanaUrlUndefined": "Cette action n'est pas disponible pour les SLO distants avec un URL Kibana non défini",
     "xpack.slo.item.actions.reset": "Réinitialiser",

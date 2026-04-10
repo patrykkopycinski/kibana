@@ -43385,7 +43385,6 @@
     "xpack.slo.item.actions.manageBurnRateRules": "Verwalten Sie die Burn-Rate {count, plural, one {rule} other {Regeln}}",
     "xpack.slo.item.actions.manageRules": "Regeln verwalten",
     "xpack.slo.item.actions.notAvailable": "Diese Aktion ist für Remote-SLOs nicht verfügbar",
-    "xpack.slo.item.actions.openMenuAriaLabel": "Kontextmenü für Fehlerbudgetaktionen",
     "xpack.slo.item.actions.purge": "Rollup-Daten bereinigen",
     "xpack.slo.item.actions.remoteKibanaUrlUndefined": "Diese Aktion ist für Remote-SLOs mit undefiniertem kibanaUrl nicht verfügbar.",
     "xpack.slo.item.actions.reset": "Zurücksetzen",

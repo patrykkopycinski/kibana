@@ -549,6 +549,7 @@ paths:
       summary: Handle OAuth callback
       tags:
         - connectors
+      x-state: Added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -569,6 +570,7 @@ paths:
           description: Returns the OAuth callback script
       summary: ''
       tags: []
+      x-state: Added in 9.4.0
       x-metaTags:
         - content: Kibana
           name: product_name

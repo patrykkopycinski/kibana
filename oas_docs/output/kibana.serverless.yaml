@@ -95927,6 +95927,7 @@ components:
           type: string
         criticality:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          nullable: true
         environment:
           type: string
         id:

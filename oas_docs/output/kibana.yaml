@@ -81988,6 +81988,10 @@ components:
         - additionalProperties: false
           type: object
           properties:
+            else:
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'
+              type: array
             steps:
               items:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_StreamlangStep'

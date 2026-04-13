@@ -45138,7 +45138,6 @@
     "xpack.spaces.management.validateSpace.invalidColorErrorMessage": "输入有效的 HEX 颜色代码。",
     "xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage": "最多输入 2 个字符。",
     "xpack.spaces.management.validateSpace.nameMaxLengthErrorMessage": "名称不能超过 1024 个字符。",
-    "xpack.spaces.management.validateSpace.requiredColorErrorMessage": "选择背景色。",
     "xpack.spaces.management.validateSpace.requiredImageErrorMessage": "上传图像。",
     "xpack.spaces.management.validateSpace.requiredInitialsErrorMessage": "输入缩写。",
     "xpack.spaces.management.validateSpace.requiredNameErrorMessage": "输入名称。",

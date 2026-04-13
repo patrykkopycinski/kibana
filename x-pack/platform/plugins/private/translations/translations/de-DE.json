@@ -44947,7 +44947,6 @@
     "xpack.spaces.management.validateSpace.invalidColorErrorMessage": "Geben Sie einen gültigen HEX-Farbcode ein.",
     "xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage": "Geben Sie nicht mehr als 2 Zeichen ein.",
     "xpack.spaces.management.validateSpace.nameMaxLengthErrorMessage": "Der Name darf nicht länger als 1024 Zeichen sein.",
-    "xpack.spaces.management.validateSpace.requiredColorErrorMessage": "Wählen Sie eine Hintergrundfarbe aus.",
     "xpack.spaces.management.validateSpace.requiredImageErrorMessage": "Laden Sie ein Bild hoch.",
     "xpack.spaces.management.validateSpace.requiredInitialsErrorMessage": "Geben Sie die Initialen ein.",
     "xpack.spaces.management.validateSpace.requiredNameErrorMessage": "Geben Sie einen Namen ein.",

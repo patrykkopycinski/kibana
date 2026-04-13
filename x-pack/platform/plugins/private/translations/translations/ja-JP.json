@@ -45138,7 +45138,6 @@
     "xpack.spaces.management.validateSpace.invalidColorErrorMessage": "有効なHEXカラーコードを入力します。",
     "xpack.spaces.management.validateSpace.maxLengthInitialsErrorMessage": "2文字以下で入力してください。",
     "xpack.spaces.management.validateSpace.nameMaxLengthErrorMessage": "名前は 1024 文字以内でなければなりません。",
-    "xpack.spaces.management.validateSpace.requiredColorErrorMessage": "背景色を選択します。",
     "xpack.spaces.management.validateSpace.requiredImageErrorMessage": "画像をアップロードします。",
     "xpack.spaces.management.validateSpace.requiredInitialsErrorMessage": "イニシャルを入力してください。",
     "xpack.spaces.management.validateSpace.requiredNameErrorMessage": "名前を入力します。",

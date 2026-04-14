@@ -27428,6 +27428,8 @@ paths:
                                               type: boolean
                                             migrate_from:
                                               type: string
+                                            name:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -28543,6 +28545,8 @@ paths:
                                             type: boolean
                                           migrate_from:
                                             type: string
+                                          name:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -29435,6 +29439,8 @@ paths:
                                               type: boolean
                                             migrate_from:
                                               type: string
+                                            name:
+                                              type: string
                                             policy_template:
                                               type: string
                                             streams:
@@ -30305,6 +30311,8 @@ paths:
                                           keep_enabled:
                                             type: boolean
                                           migrate_from:
+                                            type: string
+                                          name:
                                             type: string
                                           policy_template:
                                             type: string
@@ -31420,6 +31428,8 @@ paths:
                                             type: boolean
                                           migrate_from:
                                             type: string
+                                          name:
+                                            type: string
                                           policy_template:
                                             type: string
                                           streams:
@@ -32403,6 +32413,8 @@ paths:
                                           keep_enabled:
                                             type: boolean
                                           migrate_from:
+                                            type: string
+                                          name:
                                             type: string
                                           policy_template:
                                             type: string
@@ -34735,6 +34747,8 @@ paths:
                                 keep_enabled:
                                   type: boolean
                                 migrate_from:
+                                  type: string
+                                name:
                                   type: string
                                 policy_template:
                                   type: string
@@ -48574,6 +48588,8 @@ paths:
                                     type: boolean
                                   migrate_from:
                                     type: string
+                                  name:
+                                    type: string
                                   policy_template:
                                     type: string
                                   streams:
@@ -49123,6 +49139,8 @@ paths:
                           keep_enabled:
                             type: boolean
                           migrate_from:
+                            type: string
+                          name:
                             type: string
                           policy_template:
                             type: string
@@ -49695,6 +49713,8 @@ paths:
                                 keep_enabled:
                                   type: boolean
                                 migrate_from:
+                                  type: string
+                                name:
                                   type: string
                                 policy_template:
                                   type: string
@@ -50296,6 +50316,8 @@ paths:
                                   keep_enabled:
                                     type: boolean
                                   migrate_from:
+                                    type: string
+                                  name:
                                     type: string
                                   policy_template:
                                     type: string
@@ -50947,6 +50969,8 @@ paths:
                                   type: boolean
                                 migrate_from:
                                   type: string
+                                name:
+                                  type: string
                                 policy_template:
                                   type: string
                                 streams:
@@ -51500,6 +51524,8 @@ paths:
                           keep_enabled:
                             type: boolean
                           migrate_from:
+                            type: string
+                          name:
                             type: string
                           policy_template:
                             type: string
@@ -52068,6 +52094,8 @@ paths:
                                 keep_enabled:
                                   type: boolean
                                 migrate_from:
+                                  type: string
+                                name:
                                   type: string
                                 policy_template:
                                   type: string
@@ -53014,6 +53042,8 @@ paths:
                                           type: boolean
                                         migrate_from:
                                           type: string
+                                        name:
+                                          type: string
                                         policy_template:
                                           type: string
                                         streams:
@@ -53521,6 +53551,8 @@ paths:
                                     keep_enabled:
                                       type: boolean
                                     migrate_from:
+                                      type: string
+                                    name:
                                       type: string
                                     policy_template:
                                       type: string

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { KnowledgeIndicatorActionsCell } from './knowledge_indicator_actions_cell';
-export { KI_ROW_ACTION_MUTATION_KEY } from '../hooks/use_knowledge_indicator_actions';
+export { KnowledgeIndicatorsTable } from './knowledge_indicators_table';

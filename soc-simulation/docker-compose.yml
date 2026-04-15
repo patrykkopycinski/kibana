@@ -50,6 +50,9 @@ services:
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "soc-sim-random-32-char-encrypt-key!!"
       XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["${FLEET_ELASTICSEARCH_HOST:-http://elasticsearch:9200}"]'
       XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["${FLEET_SERVER_EXTERNAL_HOST:-http://fleet-server:8220}"]'
+      # Agent Builder: enable nav icon + experimental features (SML, skills)
+      UISETTINGS_OVERRIDES_AGENTBUILDER__NAVENABLED: "true"
+      UISETTINGS_OVERRIDES_AGENTBUILDER__EXPERIMENTALFEATURES: "true"
     ports:
       - "0.0.0.0:${KIBANA_PORT:-15601}:5601"
     depends_on:

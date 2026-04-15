@@ -32,8 +32,9 @@ RUN for d in plugins/*/; do \
       *) pip install -r "$d/requirements.txt" || true ;; esac; \
     done
 
-# Clone Atomic Red Team plugin
-RUN git clone --depth 1 --branch "${CALDERA_ATOMIC_PLUGIN_REF}" "${CALDERA_ATOMIC_PLUGIN_REPO}" plugins/atomic \
+# Clone Atomic Red Team plugin (remove stub if already exists from recursive clone)
+RUN rm -rf plugins/atomic \
+    && git clone --depth 1 --branch "${CALDERA_ATOMIC_PLUGIN_REF}" "${CALDERA_ATOMIC_PLUGIN_REPO}" plugins/atomic \
     && if [ -f plugins/atomic/requirements.txt ]; then pip install -r plugins/atomic/requirements.txt; fi
 
 # Copy config and entrypoint

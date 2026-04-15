@@ -303,19 +303,36 @@ if [[ -d "$WORKFLOWS_DIR" ]]; then
   if [[ ${#workflow_files[@]} -eq 0 ]]; then
     echo "  No workflow files found."
   else
-    wf_count=0
-    for wf_file in "${workflow_files[@]}"; do
-      wf_name="$(basename "${wf_file}" .yaml)"
-      payload_file=$(mktemp)
-      python3 -c "import json,sys; json.dump({'yaml':open(sys.argv[1]).read()},open(sys.argv[2],'w'))" "${wf_file}" "${payload_file}"
-      if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data-binary "@${payload_file}" > /dev/null 2>&1; then
-        echo "    Created: ${wf_name}"
-        wf_count=$(( wf_count + 1 ))
-      else
-        echo "    Failed: ${wf_name}"
-      fi
-    done
-    echo "  Done (${wf_count}/${#workflow_files[@]} workflow(s))."
+    # Build bulk payload: {"workflows": [{"yaml": "..."}, ...]}
+    payload_file=$(mktemp)
+    python3 - "${workflow_files[@]}" <<'PYEOF' > "${payload_file}"
+import json, sys
+files = sys.argv[1:]
+workflows = []
+for path in files:
+    with open(path) as f:
+        workflows.append({"yaml": f.read()})
+print(json.dumps({"workflows": workflows}))
+PYEOF
+    echo "  POST /api/workflows?overwrite=true (${#workflow_files[@]} workflow(s))"
+    if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data-binary "@${payload_file}" > /dev/null 2>&1; then
+      echo "  Done (${#workflow_files[@]}/${#workflow_files[@]} workflow(s))."
+    else
+      echo "  Bulk create failed, trying individual..."
+      wf_count=0
+      for wf_file in "${workflow_files[@]}"; do
+        wf_name="$(basename "${wf_file}" .yaml)"
+        single_file=$(mktemp)
+        python3 -c "import json,sys; json.dump({'yaml':open(sys.argv[1]).read()},open(sys.argv[2],'w'))" "${wf_file}" "${single_file}"
+        if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data-binary "@${single_file}" > /dev/null 2>&1; then
+          echo "    Created: ${wf_name}"
+          wf_count=$(( wf_count + 1 ))
+        else
+          echo "    Failed: ${wf_name}"
+        fi
+      done
+      echo "  Done (${wf_count}/${#workflow_files[@]} workflow(s))."
+    fi
   fi
 else
   echo "--- Workflows: directory not found, skipping ---"

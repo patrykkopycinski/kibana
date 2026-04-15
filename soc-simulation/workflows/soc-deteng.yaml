@@ -39,7 +39,7 @@ steps:
 
         If FP rate > 50%, recommend adding exceptions or raising thresholds.
         If a technique has no detection rule, recommend creating one.
-    timeout: 60s
+    timeout: 300s
 
   - name: log_result
     type: console

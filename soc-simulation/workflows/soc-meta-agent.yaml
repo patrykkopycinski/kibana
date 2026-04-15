@@ -48,7 +48,7 @@ steps:
 
         Current setup: 3 endpoint VMs, 8 SOC agents, 10 workflows, detection rules for T1059.004, T1033, T1496.
         If you identify coverage gaps, recommend creating new specialist workflows or agents.
-    timeout: 60s
+    timeout: 300s
 
   - name: log_result
     type: console

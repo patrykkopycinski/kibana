@@ -57,7 +57,7 @@ steps:
         {{ steps.get_open_alerts.output.hits.hits | json }}
 
         Respond with JSON array: [{"alert_index": 0, "classification": "...", "confidence": N, "reasoning": "...", "mitre_techniques": [...]}]
-    timeout: 60s
+    timeout: 300s
 
   - name: log_triage
     type: console

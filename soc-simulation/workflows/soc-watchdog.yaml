@@ -48,7 +48,7 @@ steps:
         Audit trail (last 10min): {{ steps.get_audit_trail.output | json }}
         Dead letters (last 1h): {{ steps.get_dead_letters.output.hits.total.value }} items
         Outcomes (last 1h): {{ steps.get_outcomes.output | json }}
-    timeout: 60s
+    timeout: 300s
 
   - name: log_result
     type: console

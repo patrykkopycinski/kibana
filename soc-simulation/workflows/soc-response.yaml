@@ -26,24 +26,14 @@ steps:
     condition: '${{ inputs.confidence >= 70 }}'
     steps:
       - name: log_response
-        type: elasticsearch.index
+        type: console
         with:
-          index: ".soc-response-actions"
-          document:
-            correlation_id: "{{ inputs.correlation_id }}"
-            action_type: containment
-            confidence_at_response: "{{ inputs.confidence }}"
-            status: executed
+          message: "Response action: correlation_id={{ inputs.correlation_id }} action_type=containment confidence={{ inputs.confidence }} status=executed"
 
       - name: audit
-        type: elasticsearch.index
+        type: console
         with:
-          index: ".soc-audit-trail"
-          document:
-            correlation_id: "{{ inputs.correlation_id }}"
-            agent_name: response
-            action: containment_executed
-            confidence: "{{ inputs.confidence }}"
+          message: "Response audit: agent=response action=containment_executed correlation_id={{ inputs.correlation_id }} confidence={{ inputs.confidence }}"
 
       - name: to_case
         type: workflow.executeAsync
@@ -58,11 +48,6 @@ steps:
 on-failure:
   fallback:
     - name: dead_letter
-      type: elasticsearch.index
+      type: console
       with:
-        index: ".soc-dead-letter"
-        body:
-          source: response_workflow
-          correlation_id: "{{ inputs.correlation_id }}"
-          error: "{{ error.message }}"
-          retry_count: 0
+        message: "Response workflow failure: source=response_workflow correlation_id={{ inputs.correlation_id }} error={{ error.message }}"

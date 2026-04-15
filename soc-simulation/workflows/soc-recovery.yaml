@@ -34,11 +34,6 @@ steps:
           message: "Retrying dead-letter item {{ foreach.item._id }} from {{ foreach.item._source.source }} (attempt {{ foreach.item._source.retry_count | plus: 1 }})"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        agent_name: recovery
-        action: dead_letter_scan
-        details:
-          items_found: "{{ steps.find_retryable.output.hits.total.value }}"
+      message: "Recovery audit: agent=recovery action=dead_letter_scan items_found={{ steps.find_retryable.output.hits.total.value }}"

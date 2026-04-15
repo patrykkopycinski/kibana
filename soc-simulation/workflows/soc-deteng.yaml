@@ -9,38 +9,21 @@ triggers:
       every: 30m
 
 steps:
-  - name: get_outcomes
-    type: elasticsearch.esql.query
-    with:
-      query: >
-        FROM .soc-outcomes
-        | WHERE @timestamp > NOW() - 30 MINUTES
-        | STATS count = COUNT(*), fp_count = COUNT_IF(disposition == "auto_closed_fp") BY techniques_observed
-      format: json
-
   - name: tune_rules
     type: ai.agent
     agent-id: soc-deteng-agent
     with:
       message: >
-        Analyze recent triage outcomes and tune detection rules:
-        {{ steps.get_outcomes.output | json }}
+        Analyze recent triage outcomes and tune detection rules.
+        Check .soc-outcomes for FP/TP patterns from the last 30 minutes.
     timeout: 300s
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        agent_name: deteng
-        action: rules_tuned
-        details: "{{ steps.tune_rules.output | json }}"
+      message: "DetEng audit: agent=deteng action=rules_tuned"
 
   - name: log_evolution
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-evolution-log"
-      document:
-        action_type: rule_tuning
-        agent_id: soc-deteng-agent
-        reasoning: "{{ steps.tune_rules.output.summary }}"
+      message: "DetEng Agent result: {{ steps.tune_rules.output | json }}"

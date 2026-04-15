@@ -32,37 +32,18 @@ steps:
     timeout: 180s
 
   - name: store_outcome
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-outcomes"
-      document:
-        correlation_id: "{{ inputs.correlation_id }}"
-        case_id: "{{ steps.create_case.output.case_id }}"
-        disposition: "{{ steps.create_case.output.disposition }}"
-        confidence_history: "{{ steps.create_case.output.confidence_history | json }}"
-        time_to_detect: "{{ steps.create_case.output.time_to_detect }}"
-        time_to_respond: "{{ steps.create_case.output.time_to_respond }}"
-        agents_involved: "{{ steps.create_case.output.agents_involved | json }}"
-        techniques_observed: "{{ steps.create_case.output.techniques_observed | json }}"
+      message: "Case creation outcome: {{ steps.create_case.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        correlation_id: "{{ inputs.correlation_id }}"
-        agent_name: case
-        action: case_created
-        confidence: "{{ inputs.confidence }}"
+      message: "Case audit: agent=case action=case_created correlation_id={{ inputs.correlation_id }} confidence={{ inputs.confidence }}"
 
 on-failure:
   fallback:
     - name: dead_letter
-      type: elasticsearch.index
+      type: console
       with:
-        index: ".soc-dead-letter"
-        body:
-          source: case_workflow
-          correlation_id: "{{ inputs.correlation_id }}"
-          error: "{{ error.message }}"
-          retry_count: 0
+        message: "Case workflow failure: source=case_workflow correlation_id={{ inputs.correlation_id }} error={{ error.message }}"

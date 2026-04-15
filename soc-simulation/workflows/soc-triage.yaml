@@ -30,29 +30,14 @@ steps:
     timeout: 120s
 
   - name: store_result
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-triage-results"
-      document:
-        correlation_id: "{{ steps.triage.output.correlation_id }}"
-        hop_count: 1
-        alert_ids: "{{ steps.triage.output.alert_ids | json }}"
-        classification: "{{ steps.triage.output.classification }}"
-        confidence: "{{ steps.triage.output.confidence }}"
-        reasoning: "{{ steps.triage.output.reasoning }}"
-        entities: "{{ steps.triage.output.entities | json }}"
-        mitre_techniques: "{{ steps.triage.output.mitre_techniques | json }}"
+      message: "Triage result: {{ steps.triage.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        correlation_id: "{{ steps.triage.output.correlation_id }}"
-        agent_name: triage
-        action: classified
-        confidence: "{{ steps.triage.output.confidence }}"
-        classification: "{{ steps.triage.output.classification }}"
+      message: "Triage audit: agent=triage action=classified confidence={{ steps.triage.output.confidence }} classification={{ steps.triage.output.classification }}"
 
   - name: route_high
     type: if
@@ -66,23 +51,13 @@ steps:
             triage_result: "{{ steps.triage.output | json }}"
     else:
       - name: auto_close
-        type: elasticsearch.index
+        type: console
         with:
-          index: ".soc-outcomes"
-          document:
-            correlation_id: "{{ steps.triage.output.correlation_id }}"
-            disposition: auto_closed_fp
-            confidence_history:
-              - agent: triage
-                confidence: "{{ steps.triage.output.confidence }}"
+          message: "Triage auto-close FP: correlation_id={{ steps.triage.output.correlation_id }} confidence={{ steps.triage.output.confidence }}"
 
 on-failure:
   fallback:
     - name: dead_letter
-      type: elasticsearch.index
+      type: console
       with:
-        index: ".soc-dead-letter"
-        body:
-          source: triage_workflow
-          error: "{{ error.message }}"
-          retry_count: 0
+        message: "Triage workflow failure: source=triage_workflow error={{ error.message }}"

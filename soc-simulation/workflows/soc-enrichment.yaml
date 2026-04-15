@@ -22,27 +22,14 @@ steps:
     timeout: 120s
 
   - name: store_enrichment
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-entity-enrichment"
-      document:
-        correlation_id: "{{ steps.enrich.output.correlation_id }}"
-        hop_count: "{{ steps.enrich.output.hop_count }}"
-        confidence: "{{ steps.enrich.output.confidence }}"
-        confidence_delta: "{{ steps.enrich.output.confidence_delta }}"
-        entities_enriched: "{{ steps.enrich.output.entities_enriched | json }}"
-        enrichment_summary: "{{ steps.enrich.output.enrichment_summary }}"
+      message: "Enrichment result: {{ steps.enrich.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        correlation_id: "{{ steps.enrich.output.correlation_id }}"
-        agent_name: entity
-        action: enriched
-        confidence: "{{ steps.enrich.output.confidence }}"
-        hop_count: "{{ steps.enrich.output.hop_count }}"
+      message: "Enrichment audit: agent=entity action=enriched confidence={{ steps.enrich.output.confidence }} hop_count={{ steps.enrich.output.hop_count }}"
 
   - name: route
     type: if
@@ -73,10 +60,6 @@ steps:
 on-failure:
   fallback:
     - name: dead_letter
-      type: elasticsearch.index
+      type: console
       with:
-        index: ".soc-dead-letter"
-        body:
-          source: enrichment_workflow
-          error: "{{ error.message }}"
-          retry_count: 0
+        message: "Enrichment workflow failure: source=enrichment_workflow error={{ error.message }}"

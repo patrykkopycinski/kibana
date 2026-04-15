@@ -18,37 +18,16 @@ steps:
     timeout: 120s
 
   - name: store_health
-    type: foreach
-    foreach: '{{ steps.check_health.output.agents_checked | json }}'
-    steps:
-      - name: write_health
-        type: elasticsearch.index
-        with:
-          index: ".soc-agent-health"
-          document:
-            agent_id: "{{ foreach.item.agent_id }}"
-            status: "{{ foreach.item.status }}"
-            throughput: "{{ foreach.item.throughput }}"
-            latency_p50: "{{ foreach.item.latency_p50 }}"
+    type: console
+    with:
+      message: "Watchdog health check result: {{ steps.check_health.output | json }}"
 
   - name: store_gaps
-    type: foreach
-    foreach: '{{ steps.check_health.output.coverage_gaps | json }}'
-    steps:
-      - name: write_gap
-        type: elasticsearch.index
-        with:
-          index: ".soc-coverage-gaps"
-          document:
-            technique_id: "{{ foreach.item.technique_id }}"
-            occurrences: "{{ foreach.item.occurrences }}"
-            avg_confidence: "{{ foreach.item.avg_confidence }}"
+    type: console
+    with:
+      message: "Watchdog coverage gaps: {{ steps.check_health.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        agent_name: watchdog
-        action: health_check
-        details: "{{ steps.check_health.output.summary }}"
+      message: "Watchdog audit: agent=watchdog action=health_check"

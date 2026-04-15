@@ -19,19 +19,11 @@ steps:
     timeout: 300s
 
   - name: log_evolution
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-evolution-log"
-      document:
-        action_type: meta_evolution
-        agent_id: soc-meta-agent
-        reasoning: "{{ steps.evolve.output.summary }}"
+      message: "Meta Agent evolution: {{ steps.evolve.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        agent_name: meta
-        action: evolved
-        details: "{{ steps.evolve.output | json }}"
+      message: "Meta Agent audit: agent=meta action=evolved"

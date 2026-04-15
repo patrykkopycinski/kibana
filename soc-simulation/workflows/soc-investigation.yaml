@@ -27,27 +27,14 @@ steps:
     timeout: 300s
 
   - name: store_findings
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-hunt-findings"
-      document:
-        correlation_id: "{{ steps.hunt.output.correlation_id }}"
-        hop_count: "{{ steps.hunt.output.hop_count }}"
-        confidence: "{{ steps.hunt.output.confidence }}"
-        confidence_delta: "{{ steps.hunt.output.confidence_delta }}"
-        hypotheses_tested: "{{ steps.hunt.output.hypotheses_tested | json }}"
-        iocs_discovered: "{{ steps.hunt.output.iocs_discovered | json }}"
-        investigation_summary: "{{ steps.hunt.output.investigation_summary }}"
+      message: "Investigation findings: {{ steps.hunt.output | json }}"
 
   - name: audit
-    type: elasticsearch.index
+    type: console
     with:
-      index: ".soc-audit-trail"
-      document:
-        correlation_id: "{{ steps.hunt.output.correlation_id }}"
-        agent_name: hunt
-        action: investigated
-        confidence: "{{ steps.hunt.output.confidence }}"
+      message: "Investigation audit: agent=hunt action=investigated confidence={{ steps.hunt.output.confidence }}"
 
   - name: route_after_hunt
     type: if
@@ -64,23 +51,13 @@ steps:
             iocs: "{{ steps.hunt.output.iocs_discovered | json }}"
     else:
       - name: close_inconclusive
-        type: elasticsearch.index
+        type: console
         with:
-          index: ".soc-outcomes"
-          document:
-            correlation_id: "{{ steps.hunt.output.correlation_id }}"
-            disposition: investigation_inconclusive
-            confidence_history:
-              - agent: hunt
-                confidence: "{{ steps.hunt.output.confidence }}"
+          message: "Investigation inconclusive: correlation_id={{ steps.hunt.output.correlation_id }} confidence={{ steps.hunt.output.confidence }}"
 
 on-failure:
   fallback:
     - name: dead_letter
-      type: elasticsearch.index
+      type: console
       with:
-        index: ".soc-dead-letter"
-        body:
-          source: investigation_workflow
-          error: "{{ error.message }}"
-          retry_count: 0
+        message: "Investigation workflow failure: source=investigation_workflow error={{ error.message }}"

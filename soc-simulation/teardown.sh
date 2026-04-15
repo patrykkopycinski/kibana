@@ -47,6 +47,7 @@ kb_curl() {
   curl -sf -u "${ES_USER}:${ES_PASSWORD}" \
     -H "kbn-xsrf: true" \
     -H "Content-Type: application/json" \
+    -H "Elastic-Api-Version: 2023-10-31" \
     "$@"
 }
 

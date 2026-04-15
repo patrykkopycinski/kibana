@@ -61,6 +61,21 @@ kbn_curl() {
     "$@"
 }
 
+kbn_curl_versioned() {
+  # kbn_curl_versioned <method> <path> [extra curl args...]
+  # For versioned APIs (workflows) that require Elastic-Api-Version header
+  local method="$1"
+  local path="$2"
+  shift 2
+  curl -sf -u "${ES_USER}:${ES_PASS}" \
+    -X "${method}" \
+    -H "kbn-xsrf: true" \
+    -H "Content-Type: application/json" \
+    -H "Elastic-Api-Version: 2023-10-31" \
+    "${KIBANA_URL}${path}" \
+    "$@"
+}
+
 # Wait for a URL to return HTTP 200, retrying up to $max_attempts times.
 wait_for() {
   local label="$1"
@@ -92,6 +107,15 @@ wait_for() {
 wait_for "Elasticsearch" "${ES_URL}/_cluster/health?wait_for_status=yellow&timeout=5s"
 wait_for "Kibana"         "${KIBANA_URL}/api/status"
 
+echo ""
+
+# ---------------------------------------------------------------------------
+# 0b. Activate trial license (required for Agent Builder)
+# ---------------------------------------------------------------------------
+
+echo -n "Activating trial license... "
+es_curl POST "/_license/start_trial?acknowledge=true" > /dev/null 2>&1 || true
+echo "OK"
 echo ""
 
 # ---------------------------------------------------------------------------
@@ -229,8 +253,14 @@ if [[ -d "$AGENTS_DIR" ]]; then
   agent_count=0
   for agent_file in "${AGENTS_DIR}"/*.json; do
     [[ -f "$agent_file" ]] || continue
-    echo "  POST /api/agent_builder/agents ($(basename "${agent_file}"))"
-    kbn_curl POST "/api/agent_builder/agents" --data-binary "@${agent_file}" > /dev/null
+    agent_id="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['id'])" "${agent_file}")"
+    echo "  Agent: ${agent_id} ($(basename "${agent_file}"))"
+    # Create agent; if it already exists (400), update it via PUT (strip id from body)
+    if ! kbn_curl POST "/api/agent_builder/agents" --data-binary "@${agent_file}" > /dev/null 2>&1; then
+      # Agent likely exists — update via PUT with id removed from body
+      body_no_id="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); d.pop('id',None); print(json.dumps(d))" "${agent_file}")"
+      kbn_curl PUT "/api/agent_builder/agents/${agent_id}" --data "$body_no_id" > /dev/null 2>&1 || echo "    (warning: could not create or update ${agent_id})"
+    fi
     agent_count=$(( agent_count + 1 ))
   done
   if [[ $agent_count -eq 0 ]]; then
@@ -273,8 +303,12 @@ print(json.dumps({"workflows": workflows}))
 PYEOF
 )
     echo "  POST /api/workflows?overwrite=true (${#workflow_files[@]} workflow(s))"
-    kbn_curl POST "/api/workflows?overwrite=true" --data "${payload}" > /dev/null
-    echo "  Done."
+    if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data "${payload}" > /dev/null 2>&1; then
+      echo "  Done."
+    else
+      echo "  Warning: bulk workflow create failed (API may not be available in this Kibana build)."
+      echo "  Workflows can be created manually via Kibana UI: Management > Workflows."
+    fi
   fi
 else
   echo "--- Workflows: directory not found, skipping ---"

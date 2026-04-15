@@ -1,0 +1,65 @@
+version: '1'
+name: SOC Alert Sweeper
+description: Scheduled sweep for untriaged alerts. Fetches open alerts, batch-triages them, chains to case creation.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+  - type: manual
+
+steps:
+  - name: get_open_alerts
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-*"
+      body:
+        query:
+          bool:
+            must:
+              - term:
+                  kibana.alert.workflow_status: open
+              - range:
+                  "@timestamp":
+                    gte: "now-30m"
+            must_not:
+              - term:
+                  kibana.alert.workflow_tags: soc-triaged
+        size: 10
+        sort:
+          - "@timestamp": desc
+        _source:
+          - kibana.alert.rule.name
+          - kibana.alert.severity
+          - kibana.alert.rule.threat
+          - host.hostname
+          - host.name
+          - process.name
+          - process.args
+          - user.name
+          - event.action
+          - "@timestamp"
+
+  - name: check_count
+    type: console
+    with:
+      message: "Alert Sweeper found {{ steps.get_open_alerts.output.hits.total.value }} open untriaged alerts"
+
+  - name: triage_batch
+    type: ai.agent
+    agent-id: soc-triage-agent
+    with:
+      message: >
+        Triage these open security alerts. For EACH alert, classify as TRUE_POSITIVE, FALSE_POSITIVE, or SUSPICIOUS with confidence 0-100.
+
+        Alerts:
+        {{ steps.get_open_alerts.output.hits.hits | json }}
+
+        Respond with JSON array: [{"alert_index": 0, "classification": "...", "confidence": N, "reasoning": "...", "mitre_techniques": [...]}]
+    timeout: 60s
+
+  - name: log_triage
+    type: console
+    with:
+      message: "Alert Sweeper triage results: {{ steps.triage_batch.output | json }}"

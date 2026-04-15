@@ -10,3 +10,6 @@ uiSettings:
   overrides:
     agentBuilder:experimentalFeatures: true
     agentBuilder:navEnabled: true
+
+# Increase connector response timeout (default 60s too short for AI agent tool calls)
+xpack.actions.responseTimeout: 300s

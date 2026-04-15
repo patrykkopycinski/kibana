@@ -1,6 +1,6 @@
 version: '1'
 name: SOC Watchdog
-description: Health monitoring. Checks agent throughput, dead letters, pipeline gaps, coverage gaps.
+description: Health monitoring. Fetches SOC metrics, then AI agent analyzes for issues.
 enabled: true
 
 triggers:
@@ -9,25 +9,48 @@ triggers:
       every: 5m
 
 steps:
-  - name: check_health
+  - name: get_audit_trail
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM .soc-audit-trail
+        | WHERE @timestamp > NOW() - 10 MINUTES
+        | STATS event_count = COUNT(*) BY agent_name
+      format: json
+
+  - name: get_dead_letters
+    type: elasticsearch.search
+    with:
+      index: ".soc-dead-letter"
+      body:
+        query:
+          range:
+            "@timestamp":
+              gte: "now-1h"
+        size: 0
+
+  - name: get_outcomes
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM .soc-outcomes
+        | WHERE @timestamp > NOW() - 1 HOUR
+        | STATS total = COUNT(*), avg_confidence = AVG(confidence) BY disposition
+      format: json
+
+  - name: analyze
     type: ai.agent
     agent-id: soc-watchdog-agent
     with:
       message: >
-        Run a health check on the SOC mesh. Query all indices for throughput, latency, dead letters, and coverage gaps.
-    timeout: 120s
+        Analyze this SOC health data and report status:
 
-  - name: store_health
+        Audit trail (last 10min): {{ steps.get_audit_trail.output | json }}
+        Dead letters (last 1h): {{ steps.get_dead_letters.output.hits.total.value }} items
+        Outcomes (last 1h): {{ steps.get_outcomes.output | json }}
+    timeout: 60s
+
+  - name: log_result
     type: console
     with:
-      message: "Watchdog health check result: {{ steps.check_health.output | json }}"
-
-  - name: store_gaps
-    type: console
-    with:
-      message: "Watchdog coverage gaps: {{ steps.check_health.output | json }}"
-
-  - name: audit
-    type: console
-    with:
-      message: "Watchdog audit: agent=watchdog action=health_check"
+      message: "Watchdog result: {{ steps.analyze.output | json }}"

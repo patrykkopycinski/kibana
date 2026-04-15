@@ -1,6 +1,6 @@
 version: '1'
 name: SOC Detection Engineering
-description: Scheduled feedback loop. Analyzes triage outcomes and tunes detection rules.
+description: Feedback loop. Fetches triage outcomes, then AI agent recommends rule tuning.
 enabled: true
 
 triggers:
@@ -9,21 +9,39 @@ triggers:
       every: 30m
 
 steps:
+  - name: get_outcomes
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM .soc-outcomes
+        | WHERE @timestamp > NOW() - 30 MINUTES
+        | STATS total = COUNT(*), fp_count = COUNT_IF(disposition == "auto_closed_fp"), avg_confidence = AVG(confidence) BY techniques_observed
+      format: json
+
+  - name: get_triage_results
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM .soc-triage-results
+        | WHERE @timestamp > NOW() - 30 MINUTES
+        | STATS total = COUNT(*) BY classification
+      format: json
+
   - name: tune_rules
     type: ai.agent
     agent-id: soc-deteng-agent
     with:
       message: >
-        Analyze recent triage outcomes and tune detection rules.
-        Check .soc-outcomes for FP/TP patterns from the last 30 minutes.
-    timeout: 300s
+        Analyze these triage outcomes and recommend detection rule tuning:
 
-  - name: audit
+        Outcomes by technique (last 30min): {{ steps.get_outcomes.output | json }}
+        Triage classifications (last 30min): {{ steps.get_triage_results.output | json }}
+
+        If FP rate > 50%, recommend adding exceptions or raising thresholds.
+        If a technique has no detection rule, recommend creating one.
+    timeout: 60s
+
+  - name: log_result
     type: console
     with:
-      message: "DetEng audit: agent=deteng action=rules_tuned"
-
-  - name: log_evolution
-    type: console
-    with:
-      message: "DetEng Agent result: {{ steps.tune_rules.output | json }}"
+      message: "DetEng result: {{ steps.tune_rules.output | json }}"

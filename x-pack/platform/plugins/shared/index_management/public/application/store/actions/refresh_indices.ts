@@ -7,26 +7,28 @@
 
 import { createAction } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
-import { openIndices as request } from '../../services';
+
+import { refreshIndices as request } from '../../services';
 import { clearRowStatus, reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
+import type { AppDispatch } from '../types';
+import { getHttpErrorToastMessage } from '../http_error';
 
-export const openIndicesStart = createAction('INDEX_MANAGEMENT_OPEN_INDICES_START');
-
-export const openIndices =
-  ({ indexNames }) =>
-  async (dispatch) => {
-    dispatch(openIndicesStart({ indexNames }));
+export const refreshIndicesStart = createAction('INDEX_MANAGEMENT_REFRESH_INDICES_START');
+export const refreshIndices =
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (dispatch: AppDispatch) => {
+    dispatch(refreshIndicesStart({ indexNames }));
     try {
       await request(indexNames);
     } catch (error) {
-      notificationService.showDangerToast(error.body.message);
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
       return dispatch(clearRowStatus({ indexNames }));
     }
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
-      i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
-        defaultMessage: 'Successfully opened {count, plural, one {# index} other {# indices} }',
+      i18n.translate('xpack.idxMgmt.refreshIndicesAction.successfullyRefreshedIndicesMessage', {
+        defaultMessage: 'Successfully refreshed {count, plural, one {# index} other {# indices} }',
         values: { count: indexNames.length },
       })
     );

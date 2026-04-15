@@ -6,10 +6,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import type { ComponentProps } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route } from '@kbn/shared-ux-router';
 import qs from 'query-string';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { History, Location } from 'history';
+import type { IndicesListColumn } from '@kbn/index-management-shared-types';
 
 import {
   EuiButton,
@@ -35,6 +40,7 @@ import {
   EuiText,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import type { Query, Pager, EuiSearchBarOnChangeArgs, SearchFilterConfig } from '@elastic/eui';
 import { get } from 'lodash';
 
 import {
@@ -42,6 +48,7 @@ import {
   PageError,
   reactRouterNavigate,
   attemptToURIDecode,
+  type Error as EsUiError,
 } from '../../../../../shared_imports';
 import { formatBytes } from '../../../../..';
 import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
@@ -54,6 +61,30 @@ import { CreateIndexButton } from '../create_index/create_index_button';
 import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_pagination';
 import { DocCountCell } from './doc_count';
 import { docCountApi } from './get_doc_count';
+import type { DocCountApi } from './get_doc_count';
+import type { Index } from '../../../../../../common';
+import type { ExtensionsService } from '../../../../../services';
+
+interface GetColumnConfigsParams {
+  showIndexStats: boolean;
+  showSizeAndDocCount: boolean;
+  history: History;
+  filterChanged: (filter: string | Query) => void;
+  extensionsService: ExtensionsService;
+  location: Location;
+  application: ApplicationStart;
+  http: HttpSetup;
+  docCountApi: DocCountApi;
+}
+
+interface IndexTableColumnConfig extends IndicesListColumn {
+  width?: string;
+  minWidth?: string;
+  maxWidth?: string;
+  className?: string;
+  align?: typeof RIGHT_ALIGNMENT;
+  readOnly?: boolean;
+}
 
 const getColumnConfigs = ({
   showIndexStats,
@@ -62,9 +93,11 @@ const getColumnConfigs = ({
   filterChanged,
   extensionsService,
   location,
-  docCountApi,
-}) => {
-  const columns = [
+  application,
+  http,
+  docCountApi: docCountApiInstance,
+}: GetColumnConfigsParams): IndexTableColumnConfig[] => {
+  const columns: IndexTableColumnConfig[] = [
     {
       fieldName: 'name',
       label: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -73,7 +106,7 @@ const getColumnConfigs = ({
       order: 10,
       width: '15em', // This is just a recommendation and the column will grow if there's extra space
       minWidth: '12em',
-      render: (index) => {
+      render: (index: Index) => {
         return (
           <>
             <EuiLink
@@ -95,7 +128,7 @@ const getColumnConfigs = ({
       width: '10em',
       minWidth: '7.5em',
       order: 80,
-      render: (index) => {
+      render: (index: Index) => {
         if (index.data_stream) {
           return (
             <EuiLink
@@ -122,8 +155,8 @@ const getColumnConfigs = ({
           defaultMessage: 'Documents count',
         }),
         order: 60,
-        render: (index) => {
-          return <DocCountCell indexName={index.name} docCountApi={docCountApi} />;
+        render: (index: Index) => {
+          return <DocCountCell indexName={index.name} docCountApi={docCountApiInstance} />;
         },
         readOnly: true,
         minWidth: '8em',
@@ -136,7 +169,7 @@ const getColumnConfigs = ({
         label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
           defaultMessage: 'Storage size',
         }),
-        render: (index) => formatBytes(index.size),
+        render: (index: Index) => formatBytes(index.size),
         order: 70,
         minWidth: '9em',
         width: '12em',
@@ -156,7 +189,7 @@ const getColumnConfigs = ({
         width: '7em',
         minWidth: '7em',
         className: 'eui-textNoWrap',
-        render: (index) => (index.health ? <DataHealth health={index.health} /> : undefined),
+        render: (index: Index) => (index.health ? <DataHealth health={index.health} /> : undefined),
       },
       {
         fieldName: 'status',
@@ -199,8 +232,46 @@ const getColumnConfigs = ({
   return columns.sort(({ order: orderA }, { order: orderB }) => orderA - orderB);
 };
 
-export class IndexTable extends Component {
-  static getDerivedStateFromProps(props, state) {
+interface IndexTableProps {
+  allIndices: Index[];
+  indices: Index[];
+  pager: Pager;
+  filter: string | Query;
+  sortField: string;
+  isSortAscending: boolean;
+  indicesLoading: boolean;
+  indicesError: false | { status?: number; body?: EsUiError };
+  indicesEnrichmentErrors: string[];
+  toggleNameToVisibleMap: Record<string, boolean>;
+  filterChanged: (filter: string | Query) => void;
+  pageChanged: (pageNumber: number) => void;
+  pageSizeChanged: (pageSize: number) => void;
+  sortChanged: (sortField: string, isSortAscending: boolean) => void;
+  toggleChanged: (toggleName: string, toggleValue: boolean) => void;
+  loadIndices: () => void;
+  performExtensionAction: (
+    requestMethod: (indexNames: string[], httpSetup: HttpSetup) => Promise<void>,
+    successMessage: string,
+    indexNames: string[]
+  ) => void;
+  history: History;
+  location: Location;
+  http: HttpSetup;
+}
+
+interface IndexTableState {
+  selectedIndicesMap: Record<string, boolean>;
+  selectionAnnouncement: string;
+  filterError?: globalThis.Error | null;
+}
+
+export class IndexTable extends Component<IndexTableProps, IndexTableState> {
+  docCountApi: DocCountApi;
+
+  static getDerivedStateFromProps(
+    props: IndexTableProps,
+    state: IndexTableState
+  ): Pick<IndexTableState, 'selectedIndicesMap'> | null {
     // Deselect any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
     const indexNames = props.indices.map((index) => index.name);
@@ -218,7 +289,7 @@ export class IndexTable extends Component {
     return null;
   }
 
-  constructor(props) {
+  constructor(props: IndexTableProps) {
     super(props);
 
     this.docCountApi = docCountApi(props.http);
@@ -233,14 +304,14 @@ export class IndexTable extends Component {
 
     const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
       this.props;
-    const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
+    const { filter, pageSize, pageIndex, rest } = this.readURLParams();
 
     if (filter) {
       try {
         const parsedFilter = EuiSearchBar.Query.parse(filter);
         filterChanged(parsedFilter);
       } catch (e) {
-        this.setState({ filterError: e });
+        this.setState({ filterError: e instanceof Error ? e : new Error(String(e)) });
       }
     }
     if (pageSize && PAGE_SIZE_OPTIONS.includes(pageSize)) {
@@ -258,7 +329,7 @@ export class IndexTable extends Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: IndexTableProps, prevState: IndexTableState) {
     const hadSelectedItems = Object.keys(prevState.selectedIndicesMap).length > 0;
     const hasSelectedItems = Object.keys(this.state.selectedIndicesMap).length > 0;
 
@@ -296,21 +367,26 @@ export class IndexTable extends Component {
     this.docCountApi.abort();
   }
 
-  readURLParams() {
+  readURLParams(): {
+    filter?: string;
+    pageSize?: number;
+    pageIndex?: number;
+    rest: ReturnType<typeof qs.parse>;
+  } {
     const { location } = this.props;
     const { filter, pageSize, pageIndex, ...rest } = qs.parse((location && location.search) || '');
     return {
-      filter: filter ? attemptToURIDecode(String(filter)) : undefined,
-      pageSize: pageSize ? Number(String(pageSize)) : undefined,
-      pageIndex: pageIndex ? Number(String(pageIndex)) : undefined,
-      ...rest,
+      filter: typeof filter === 'string' ? attemptToURIDecode(filter) : undefined,
+      pageSize: typeof pageSize === 'string' ? Number(pageSize) : undefined,
+      pageIndex: typeof pageIndex === 'string' ? Number(pageIndex) : undefined,
+      rest,
     };
   }
 
-  setURLParam(paramName, value) {
+  setURLParam(paramName: string, value: string | boolean) {
     const { location, history } = this.props;
     const { pathname, search } = location;
-    const params = qs.parse(search);
+    const params: Record<string, string | string[] | boolean | null | undefined> = qs.parse(search);
     if (value) {
       params[paramName] = value;
     } else {
@@ -319,7 +395,7 @@ export class IndexTable extends Component {
     history.push(pathname + '?' + qs.stringify(params));
   }
 
-  onSort = (column) => {
+  onSort = (column: string) => {
     const { sortField, isSortAscending, sortChanged } = this.props;
 
     const newIsSortAscending = sortField === column ? !isSortAscending : true;
@@ -381,19 +457,20 @@ export class IndexTable extends Component {
     );
   }
 
-  onFilterChanged = ({ query, error }) => {
+  onFilterChanged = ({ query, error }: EuiSearchBarOnChangeArgs) => {
     if (error) {
       this.setState({ filterError: error });
     } else {
-      this.setURLParam('filter', encodeURIComponent(query.text));
-      this.props.filterChanged(query);
+      const queryText = typeof query === 'string' ? query : query?.text ?? '';
+      this.setURLParam('filter', encodeURIComponent(queryText));
+      this.props.filterChanged(query ?? '');
       this.setState({ filterError: null });
     }
   };
 
-  getFilters = (extensionsService) => {
+  getFilters = (extensionsService: ExtensionsService): SearchFilterConfig[] => {
     const { allIndices } = this.props;
-    return extensionsService.filters.reduce((accum, filterExtension) => {
+    return extensionsService.filters.reduce<SearchFilterConfig[]>((accum, filterExtension) => {
       const filtersToAdd = filterExtension(allIndices);
       return [...accum, ...filtersToAdd];
     }, []);
@@ -405,7 +482,7 @@ export class IndexTable extends Component {
       return this.setState({ selectedIndicesMap: {} });
     }
     const { indices } = this.props;
-    const selectedIndicesMap = {};
+    const selectedIndicesMap: Record<string, boolean> = {};
     indices.forEach(({ name }) => {
       selectedIndicesMap[name] = true;
     });
@@ -414,7 +491,7 @@ export class IndexTable extends Component {
     });
   };
 
-  toggleItem = (name) => {
+  toggleItem = (name: string) => {
     this.setState(({ selectedIndicesMap }) => {
       const newMap = { ...selectedIndicesMap };
       if (newMap[name]) {
@@ -428,7 +505,7 @@ export class IndexTable extends Component {
     });
   };
 
-  isItemSelected = (name) => {
+  isItemSelected = (name: string) => {
     return !!this.state.selectedIndicesMap[name];
   };
 
@@ -441,7 +518,7 @@ export class IndexTable extends Component {
     return indexOfUnselectedItem === -1;
   };
 
-  buildHeader(columnConfigs) {
+  buildHeader(columnConfigs: IndexTableColumnConfig[]) {
     const { sortField, isSortAscending } = this.props;
     return columnConfigs.map(
       ({ fieldName, label, readOnly, width, minWidth, maxWidth, className, align }) => {
@@ -467,37 +544,36 @@ export class IndexTable extends Component {
     );
   }
 
-  buildRowCell(index, columnConfig) {
+  buildRowCell(index: Index, columnConfig: IndexTableColumnConfig) {
     if (columnConfig.render) {
       return columnConfig.render(index);
     }
     return get(index, columnConfig.fieldName);
   }
 
-  buildRowCells(index, columnConfigs) {
+  buildRowCells(index: Index, columnConfigs: IndexTableColumnConfig[]) {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
       const { fieldName, width, minWidth, maxWidth, className, align } = columnConfig;
+      const cellProps: ComponentProps<typeof EuiTableRowCell> = {
+        truncateText: false,
+        setScopeRow: fieldName === 'name',
+        'data-test-subj': `indexTableCell-${fieldName}`,
+        width,
+        minWidth,
+        maxWidth,
+        className,
+        align,
+      };
       return (
-        <EuiTableRowCell
-          key={`${fieldName}-${name}`}
-          truncateText={false}
-          setScopeRow={fieldName === 'name'}
-          data-test-subj={`indexTableCell-${fieldName}`}
-          header={fieldName}
-          width={width}
-          minWidth={minWidth}
-          maxWidth={maxWidth}
-          className={className}
-          align={align}
-        >
+        <EuiTableRowCell key={`${fieldName}-${name}`} {...cellProps}>
           {this.buildRowCell(index, columnConfig)}
         </EuiTableRowCell>
       );
     });
   }
 
-  renderBanners(extensionsService) {
+  renderBanners(extensionsService: ExtensionsService) {
     const { allIndices = [], filterChanged, performExtensionAction } = this.props;
     return extensionsService.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
@@ -546,7 +622,7 @@ export class IndexTable extends Component {
     });
   }
 
-  buildRows(columnConfigs) {
+  buildRows(columnConfigs: IndexTableColumnConfig[]) {
     const { indices = [] } = this.props;
     return indices.map((index) => {
       const { name } = index;
@@ -577,11 +653,7 @@ export class IndexTable extends Component {
     });
   }
 
-  onItemSelectionChanged = (selectedIndices) => {
-    this.setState({ selectedIndices });
-  };
-
-  renderToggleControl({ name, label }) {
+  renderToggleControl({ name, label }: { name: string; label: string }) {
     const { toggleNameToVisibleMap, toggleChanged } = this.props;
     return (
       <EuiFlexItem key={name} grow={false}>
@@ -662,7 +734,11 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config, core, plugins }) => {
+        {(context) => {
+          if (!context) {
+            throw new Error('"useAppContext" can only be called inside of AppContext.Provider!');
+          }
+          const { services, config, core, plugins } = context;
           const { extensionsService } = services;
           const { application, http } = core;
           const { share } = plugins;
@@ -677,6 +753,7 @@ export class IndexTable extends Component {
             http,
             docCountApi: this.docCountApi,
           });
+          const searchFilters = this.getFilters(extensionsService);
           const columnsCount = columnConfigs.length + 1;
           return (
             <EuiPageSection paddingSize="none">
@@ -745,11 +822,7 @@ export class IndexTable extends Component {
                   <>
                     <EuiFlexItem>
                       <EuiSearchBar
-                        filters={
-                          this.getFilters(extensionsService).length > 0
-                            ? this.getFilters(extensionsService)
-                            : null
-                        }
+                        filters={searchFilters.length > 0 ? searchFilters : undefined}
                         defaultQuery={filter}
                         query={filter}
                         box={{
@@ -844,7 +917,7 @@ export class IndexTable extends Component {
                           <NoMatch
                             loadIndices={loadIndices}
                             share={share}
-                            filter={filter}
+                            filter={typeof filter === 'string' ? filter : filter.text}
                             resetFilter={() => filterChanged('')}
                             extensionsService={extensionsService}
                           />
@@ -863,7 +936,9 @@ export class IndexTable extends Component {
                   pageChanged={pageChanged}
                   pageSizeChanged={pageSizeChanged}
                   readURLParams={() => this.readURLParams()}
-                  setURLParam={(paramName, value) => this.setURLParam(paramName, value)}
+                  setURLParam={(paramName: string, value: string | boolean) =>
+                    this.setURLParam(paramName, value)
+                  }
                 />
               ) : null}
             </EuiPageSection>

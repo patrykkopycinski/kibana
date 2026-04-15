@@ -10,10 +10,3 @@ uiSettings:
   overrides:
     agentBuilder:experimentalFeatures: true
     agentBuilder:navEnabled: true
-
-# Increase action execution timeout (default 60s is too short for AI agent tool calls)
-xpack.actions.run:
-  timeout: 300s
-  connectorTypeOverrides:
-    - id: .gen-ai
-      timeout: 300s

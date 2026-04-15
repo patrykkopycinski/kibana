@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Meta Agent
 description: System evolution. Analyzes performance, tunes agent ecosystem, creates specialists for coverage gaps.
-enabled: true
+enabled: false
 
 triggers:
   - type: scheduled

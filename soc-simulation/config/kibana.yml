@@ -1,6 +1,9 @@
 # SOC Simulation — Kibana configuration overrides
-# Note: elasticsearch.hosts, credentials, fleet settings come from environment variables
-# in docker-compose.yml. This file only adds settings not easily set via env vars.
+# This file is mounted into the Docker container, replacing the default kibana.yml.
+# All essential settings must be included here.
+
+# Bind to all interfaces (required for Docker port mapping)
+server.host: "0.0.0.0"
 
 # Enable experimental Agent Builder features (SML, skills)
 uiSettings:

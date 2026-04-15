@@ -12,8 +12,7 @@
         "tool_ids": [
           "platform.core.cases",
           "platform.core.execute_esql",
-          "platform.core.sml_search",
-          "platform.core.sml_attach"
+          "platform.core.search"
         ]
       }
     ]

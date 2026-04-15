@@ -10,12 +10,10 @@
     "tools": [
       {
         "tool_ids": [
-          "security.create_detection_rule",
           "security.alerts",
           "platform.core.execute_esql",
           "platform.core.generate_esql",
-          "platform.core.sml_search",
-          "platform.core.sml_attach"
+          "platform.core.search"
         ]
       }
     ]

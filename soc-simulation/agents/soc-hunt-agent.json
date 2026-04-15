@@ -13,10 +13,8 @@
           "security.alerts",
           "platform.core.execute_esql",
           "platform.core.generate_esql",
-          "security.attack_discovery_search",
           "security.security_labs_search",
-          "platform.core.sml_search",
-          "platform.core.sml_attach"
+          "platform.core.search"
         ]
       }
     ]

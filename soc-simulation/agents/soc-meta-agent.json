@@ -11,9 +11,8 @@
       {
         "tool_ids": [
           "platform.core.execute_esql",
-          "platform.core.sml_search",
-          "platform.core.sml_attach",
-          "security.create_detection_rule"
+          "platform.core.generate_esql",
+          "platform.core.search"
         ]
       }
     ]

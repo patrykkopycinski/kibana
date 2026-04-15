@@ -10,12 +10,10 @@
     "tools": [
       {
         "tool_ids": [
-          "security.entity_risk_score",
-          "security.get_entity",
-          "security.search_entities",
+          "security.alerts",
           "platform.core.execute_esql",
-          "platform.core.sml_search",
-          "platform.core.sml_attach"
+          "platform.core.search",
+          "platform.core.get_index_mapping"
         ]
       }
     ]

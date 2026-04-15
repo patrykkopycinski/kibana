@@ -7,6 +7,9 @@ services:
       xpack.security.enabled: "true"
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
       xpack.security.http.ssl.enabled: "false"
+      # Enable ML on this node with auto memory sizing
+      xpack.ml.use_auto_machine_memory_percent: "true"
+      node.roles: "master,data,ingest,ml,transform"
     ports:
       - "0.0.0.0:${ES_PORT:-19200}:9200"
     volumes:
@@ -15,7 +18,7 @@ services:
       test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200/_cluster/health || exit 1"]
       interval: 10s
       retries: 30
-    mem_limit: 4g
+    mem_limit: 6g
 
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION:-9.4.0-SNAPSHOT}
@@ -51,9 +54,7 @@ services:
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "soc-sim-random-32-char-encrypt-key!!"
       XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["${FLEET_ELASTICSEARCH_HOST:-http://elasticsearch:9200}"]'
       XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["${FLEET_SERVER_EXTERNAL_HOST:-http://fleet-server:8220}"]'
-      # Agent Builder: enable nav icon + experimental features (SML, skills)
-      UISETTINGS_OVERRIDES_AGENTBUILDER__NAVENABLED: "true"
-      UISETTINGS_OVERRIDES_AGENTBUILDER__EXPERIMENTALFEATURES: "true"
+      # Agent Builder settings are in config/kibana.yml via uiSettings.overrides
       # Enable all APIs — in production mode, internal APIs and versioned routes are restricted
       SERVER_VERSIONED_VERSIONRESOLUTION: "newest"
       SERVER_VERSIONED_STRICTCLIENTVERSIONCHECK: "false"

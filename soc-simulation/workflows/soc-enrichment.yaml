@@ -1,6 +1,6 @@
 version: '1'
 name: SOC Enrichment
-description: Entity enrichment pipeline. Deep-dives into entities from triage results.
+description: Entity enrichment pipeline for triage results.
 enabled: true
 
 triggers:
@@ -9,7 +9,6 @@ triggers:
 inputs:
   - name: triage_result
     type: string
-    required: true
 
 steps:
   - name: enrich
@@ -17,49 +16,11 @@ steps:
     agent-id: soc-entity-agent
     with:
       message: >
-        Enrich the following triage result with entity context:
+        Enrich this triage result with entity context:
         {{ inputs.triage_result }}
     timeout: 120s
 
-  - name: store_enrichment
+  - name: log_result
     type: console
     with:
-      message: "Enrichment result: {{ steps.enrich.output | json }}"
-
-  - name: audit
-    type: console
-    with:
-      message: "Enrichment audit: agent=entity action=enriched confidence={{ steps.enrich.output.confidence }} hop_count={{ steps.enrich.output.hop_count }}"
-
-  - name: route
-    type: if
-    condition: '${{ steps.enrich.output.confidence >= 70 }}'
-    steps:
-      - name: to_response
-        type: workflow.executeAsync
-        with:
-          workflow-id: soc-response
-          inputs:
-            correlation_id: "{{ steps.enrich.output.correlation_id }}"
-            confidence: "{{ steps.enrich.output.confidence }}"
-            alert_ids: "{{ steps.enrich.output.alert_ids | json }}"
-            entities: "{{ steps.enrich.output.entities_enriched | json }}"
-    else:
-      - name: to_investigation
-        type: if
-        condition: '${{ steps.enrich.output.confidence >= 40 }}'
-        steps:
-          - name: investigate
-            type: workflow.executeAsync
-            with:
-              workflow-id: soc-investigation
-              inputs:
-                triage_result: "{{ inputs.triage_result }}"
-                enrichment_result: "{{ steps.enrich.output | json }}"
-
-on-failure:
-  fallback:
-    - name: dead_letter
-      type: console
-      with:
-        message: "Enrichment workflow failure: source=enrichment_workflow error={{ error.message }}"
+      message: "SOC Enrichment result: {{ steps.enrich.output | json }}"

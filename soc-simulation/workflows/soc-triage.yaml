@@ -4,21 +4,14 @@ description: First responder workflow. Classifies alerts, assigns confidence, ro
 enabled: true
 
 triggers:
+  - type: manual
   - type: alert
 
 steps:
-  - name: deduplicate
-    type: elasticsearch.search
+  - name: log_alert
+    type: console
     with:
-      index: ".soc-triage-results"
-      body:
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-1h"
-        size: 0
+      message: "SOC Triage received alert: {{ event | json }}"
 
   - name: triage
     type: ai.agent
@@ -26,38 +19,10 @@ steps:
     with:
       message: >
         Triage the following alert(s):
-        {{ event.alerts | json }}
+        {{ event | json }}
     timeout: 120s
 
-  - name: store_result
+  - name: log_result
     type: console
     with:
-      message: "Triage result: {{ steps.triage.output | json }}"
-
-  - name: audit
-    type: console
-    with:
-      message: "Triage audit: agent=triage action=classified confidence={{ steps.triage.output.confidence }} classification={{ steps.triage.output.classification }}"
-
-  - name: route_high
-    type: if
-    condition: '${{ steps.triage.output.confidence >= 40 }}'
-    steps:
-      - name: enrich
-        type: workflow.executeAsync
-        with:
-          workflow-id: soc-enrichment
-          inputs:
-            triage_result: "{{ steps.triage.output | json }}"
-    else:
-      - name: auto_close
-        type: console
-        with:
-          message: "Triage auto-close FP: correlation_id={{ steps.triage.output.correlation_id }} confidence={{ steps.triage.output.confidence }}"
-
-on-failure:
-  fallback:
-    - name: dead_letter
-      type: console
-      with:
-        message: "Triage workflow failure: source=triage_workflow error={{ error.message }}"
+      message: "SOC Triage result: {{ steps.triage.output | json }}"

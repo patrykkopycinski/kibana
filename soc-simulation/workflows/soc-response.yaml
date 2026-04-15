@@ -1,53 +1,17 @@
 version: '1'
 name: SOC Response
-description: Deterministic containment and response actions. No LLM — confidence thresholds drive actions.
+description: Deterministic containment actions based on confidence thresholds.
 enabled: true
 
 triggers:
   - type: manual
 
 inputs:
-  - name: correlation_id
-    type: string
-    required: true
-  - name: confidence
-    type: number
-    required: true
-  - name: alert_ids
-    type: string
-  - name: entities
-    type: string
-  - name: iocs
+  - name: context
     type: string
 
 steps:
-  - name: respond
-    type: if
-    condition: '${{ inputs.confidence >= 70 }}'
-    steps:
-      - name: log_response
-        type: console
-        with:
-          message: "Response action: correlation_id={{ inputs.correlation_id }} action_type=containment confidence={{ inputs.confidence }} status=executed"
-
-      - name: audit
-        type: console
-        with:
-          message: "Response audit: agent=response action=containment_executed correlation_id={{ inputs.correlation_id }} confidence={{ inputs.confidence }}"
-
-      - name: to_case
-        type: workflow.executeAsync
-        with:
-          workflow-id: soc-case-creation
-          inputs:
-            correlation_id: "{{ inputs.correlation_id }}"
-            confidence: "{{ inputs.confidence }}"
-            alert_ids: "{{ inputs.alert_ids }}"
-            entities: "{{ inputs.entities }}"
-
-on-failure:
-  fallback:
-    - name: dead_letter
-      type: console
-      with:
-        message: "Response workflow failure: source=response_workflow correlation_id={{ inputs.correlation_id }} error={{ error.message }}"
+  - name: log_response
+    type: console
+    with:
+      message: "SOC Response action executed: {{ inputs.context }}"

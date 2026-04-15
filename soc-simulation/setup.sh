@@ -116,6 +116,20 @@ echo ""
 echo -n "Activating trial license... "
 es_curl POST "/_license/start_trial?acknowledge=true" > /dev/null 2>&1 || true
 echo "OK"
+
+# ---------------------------------------------------------------------------
+# 0c. Initialize Fleet + create Fleet Server policy
+# ---------------------------------------------------------------------------
+
+echo -n "Initializing Fleet... "
+kbn_curl POST "/api/fleet/setup" > /dev/null 2>&1 || true
+echo "OK"
+
+echo -n "Creating Fleet Server policy... "
+kbn_curl POST "/api/fleet/agent_policies" \
+  --data '{"id":"fleet-server-policy","name":"Fleet Server Policy","namespace":"default","is_default_fleet_server":true,"has_fleet_server":true}' \
+  > /dev/null 2>&1 || true
+echo "OK"
 echo ""
 
 # ---------------------------------------------------------------------------

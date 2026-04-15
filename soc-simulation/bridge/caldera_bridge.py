@@ -67,6 +67,7 @@ def claim_pending_command(es: Elasticsearch) -> dict | None:
     try:
         result = es.search(
             index=INDEX,
+            seq_no_primary_term=True,
             body={
                 "query": {"term": {"status": "pending"}},
                 "size": 1,

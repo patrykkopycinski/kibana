@@ -1,0 +1,32 @@
+{
+  "index_patterns": [".soc-outcomes"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "correlation_id": { "type": "keyword" },
+        "case_id": { "type": "keyword" },
+        "disposition": { "type": "keyword" },
+        "confidence_history": {
+          "type": "nested",
+          "properties": {
+            "agent": { "type": "keyword" },
+            "confidence": { "type": "integer" }
+          }
+        },
+        "time_to_detect": { "type": "long" },
+        "time_to_respond": { "type": "long" },
+        "agents_involved": { "type": "keyword" },
+        "techniques_observed": { "type": "keyword" },
+        "confidence_accuracy": { "type": "float" }
+      }
+    }
+  }
+}

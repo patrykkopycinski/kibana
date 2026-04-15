@@ -1,0 +1,33 @@
+{
+  "index_patterns": [".soc-entity-enrichment"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "correlation_id": { "type": "keyword" },
+        "hop_count": { "type": "integer" },
+        "confidence": { "type": "integer" },
+        "confidence_delta": { "type": "integer" },
+        "entities_enriched": {
+          "type": "nested",
+          "properties": {
+            "entity_id": { "type": "keyword" },
+            "risk_score": { "type": "integer" },
+            "asset_criticality": { "type": "keyword" },
+            "behavioral_anomalies": { "type": "keyword" },
+            "relationships": { "type": "keyword" },
+            "baseline_summary": { "type": "text" }
+          }
+        },
+        "enrichment_summary": { "type": "text" }
+      }
+    }
+  }
+}

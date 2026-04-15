@@ -1,0 +1,33 @@
+{
+  "index_patterns": [".soc-triage-results"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "correlation_id": { "type": "keyword" },
+        "hop_count": { "type": "integer" },
+        "alert_ids": { "type": "keyword" },
+        "classification": { "type": "keyword" },
+        "confidence": { "type": "integer" },
+        "reasoning": { "type": "text" },
+        "entities": {
+          "properties": {
+            "hosts": { "type": "keyword" },
+            "users": { "type": "keyword" },
+            "ips": { "type": "ip" }
+          }
+        },
+        "mitre_techniques": { "type": "keyword" },
+        "enrichment_requests": { "type": "keyword" },
+        "sml_patterns_matched": { "type": "keyword" }
+      }
+    }
+  }
+}

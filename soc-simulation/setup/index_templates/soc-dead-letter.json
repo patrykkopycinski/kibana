@@ -1,0 +1,22 @@
+{
+  "index_patterns": [".soc-dead-letter"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "source": { "type": "keyword" },
+        "correlation_id": { "type": "keyword" },
+        "error": { "type": "text" },
+        "retry_count": { "type": "integer" },
+        "alert_ids": { "type": "keyword" },
+        "last_retry_at": { "type": "date" }
+      }
+    }
+  }
+}

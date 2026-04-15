@@ -1,0 +1,23 @@
+{
+  "index_patterns": [".soc-response-actions"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "correlation_id": { "type": "keyword" },
+        "action_type": { "type": "keyword" },
+        "target": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "confidence_at_response": { "type": "integer" },
+        "workflow_execution_id": { "type": "keyword" }
+      }
+    }
+  }
+}

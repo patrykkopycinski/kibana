@@ -1,0 +1,22 @@
+{
+  "index_patterns": [".soc-evolution-log"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "action_type": { "type": "keyword" },
+        "agent_id": { "type": "keyword" },
+        "reasoning": { "type": "text" },
+        "before": { "type": "object", "enabled": false },
+        "after": { "type": "object", "enabled": false }
+      }
+    }
+  }
+}

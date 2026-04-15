@@ -1,0 +1,24 @@
+{
+  "index_patterns": [".soc-audit-trail"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "correlation_id": { "type": "keyword" },
+        "agent_name": { "type": "keyword" },
+        "action": { "type": "keyword" },
+        "confidence": { "type": "integer" },
+        "classification": { "type": "keyword" },
+        "hop_count": { "type": "integer" },
+        "details": { "type": "object", "enabled": false }
+      }
+    }
+  }
+}

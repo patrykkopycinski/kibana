@@ -1,0 +1,20 @@
+{
+  "index_patterns": [".soc-coverage-gaps"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "technique_id": { "type": "keyword" },
+        "occurrences": { "type": "integer" },
+        "avg_confidence": { "type": "float" }
+      }
+    }
+  }
+}

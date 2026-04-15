@@ -1,0 +1,27 @@
+{
+  "index_patterns": [".soc-attack-commands"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "status": { "type": "keyword" },
+        "difficulty": { "type": "integer" },
+        "profile": { "type": "keyword" },
+        "techniques": { "type": "keyword" },
+        "correlation_id": { "type": "keyword" },
+        "created_at": { "type": "date" },
+        "claimed_at": { "type": "date" },
+        "completed_at": { "type": "date" },
+        "operation_id": { "type": "keyword" },
+        "techniques_executed": { "type": "keyword" },
+        "error": { "type": "text" }
+      }
+    }
+  }
+}

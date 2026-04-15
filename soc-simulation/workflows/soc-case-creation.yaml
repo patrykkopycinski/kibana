@@ -1,19 +1,13 @@
 version: '1'
 name: SOC Case Creation
-description: Creates Kibana cases with full evidence chains and AI-generated summaries.
+description: Creates a Kibana case from triage results using AI.
 enabled: true
 
 triggers:
   - type: manual
 
 inputs:
-  - name: correlation_id
-    type: string
-  - name: confidence
-    type: number
-  - name: alert_ids
-    type: string
-  - name: entities
+  - name: alert_data
     type: string
 
 steps:
@@ -22,14 +16,11 @@ steps:
     agent-id: soc-case-agent
     with:
       message: >
-        Create a case for this security incident.
-        Correlation ID: {{ inputs.correlation_id }}
-        Confidence: {{ inputs.confidence }}
-        Alert IDs: {{ inputs.alert_ids }}
-        Entities: {{ inputs.entities }}
-    timeout: 180s
+        Create a Kibana case for this triaged alert:
+        {{ inputs.alert_data }}
+    timeout: 60s
 
   - name: log_result
     type: console
     with:
-      message: "Case creation completed for correlation_id={{ inputs.correlation_id }}"
+      message: "Case created: {{ steps.create_case.output | json }}"

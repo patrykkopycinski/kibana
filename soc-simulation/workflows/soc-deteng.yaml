@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Detection Engineering
 description: Scheduled feedback loop. Analyzes triage outcomes and tunes detection rules.
-enabled: false
+enabled: true
 
 triggers:
   - type: scheduled

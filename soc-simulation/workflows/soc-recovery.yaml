@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Recovery
 description: Dead letter recovery. Retries failed pipeline items up to 3 times.
-enabled: false
+enabled: true
 
 triggers:
   - type: scheduled

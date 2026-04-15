@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Difficulty Controller
 description: Performance-gated difficulty scaling. Evaluates SOC metrics and launches attack commands.
-enabled: false
+enabled: true
 
 triggers:
   - type: scheduled

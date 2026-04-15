@@ -1,0 +1,5 @@
+{"id":"soc-pipeline-dv","type":"index-pattern","attributes":{"title":".soc-triage-results,.soc-entity-enrichment,.soc-hunt-findings,.soc-response-actions,.soc-outcomes","timeFieldName":"@timestamp","name":"SOC Pipeline"},"references":[]}
+{"id":"soc-audit-trail-dv","type":"index-pattern","attributes":{"title":".soc-audit-trail","timeFieldName":"@timestamp","name":"SOC Audit Trail"},"references":[]}
+{"id":"soc-agent-health-dv","type":"index-pattern","attributes":{"title":".soc-agent-health","timeFieldName":"@timestamp","name":"SOC Agent Health"},"references":[]}
+{"id":"soc-evolution-dv","type":"index-pattern","attributes":{"title":".soc-evolution-log,.soc-coverage-gaps","timeFieldName":"@timestamp","name":"SOC Evolution"},"references":[]}
+{"id":"soc-attack-commands-dv","type":"index-pattern","attributes":{"title":".soc-attack-commands,.soc-difficulty-state","timeFieldName":"@timestamp","name":"SOC Attack Commands"},"references":[]}

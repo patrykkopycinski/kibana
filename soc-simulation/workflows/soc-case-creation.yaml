@@ -1,0 +1,68 @@
+version: '1'
+name: SOC Case Creation
+description: Creates Kibana cases with full evidence chains and AI-generated summaries.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: correlation_id
+    type: string
+    required: true
+  - name: confidence
+    type: number
+    required: true
+  - name: alert_ids
+    type: string
+  - name: entities
+    type: string
+
+steps:
+  - name: create_case
+    type: ai.agent
+    agent-id: soc-case-agent
+    with:
+      message: >
+        Create a case for this security incident.
+        Correlation ID: {{ inputs.correlation_id }}
+        Confidence: {{ inputs.confidence }}
+        Alert IDs: {{ inputs.alert_ids }}
+        Entities: {{ inputs.entities }}
+    timeout: 180s
+
+  - name: store_outcome
+    type: elasticsearch.index
+    with:
+      index: ".soc-outcomes"
+      document:
+        correlation_id: "{{ inputs.correlation_id }}"
+        case_id: "{{ steps.create_case.output.case_id }}"
+        disposition: "{{ steps.create_case.output.disposition }}"
+        confidence_history: "{{ steps.create_case.output.confidence_history | json }}"
+        time_to_detect: "{{ steps.create_case.output.time_to_detect }}"
+        time_to_respond: "{{ steps.create_case.output.time_to_respond }}"
+        agents_involved: "{{ steps.create_case.output.agents_involved | json }}"
+        techniques_observed: "{{ steps.create_case.output.techniques_observed | json }}"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        correlation_id: "{{ inputs.correlation_id }}"
+        agent_name: case
+        action: case_created
+        confidence: "{{ inputs.confidence }}"
+
+on-failure:
+  fallback:
+    - name: dead_letter
+      type: elasticsearch.index
+      with:
+        index: ".soc-dead-letter"
+        body:
+          source: case_workflow
+          correlation_id: "{{ inputs.correlation_id }}"
+          error: "{{ error.message }}"
+          retry_count: 0

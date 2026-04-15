@@ -1,0 +1,86 @@
+version: '1'
+name: SOC Investigation
+description: Deep threat hunting for ambiguous alerts. Runs structured investigations to raise or lower confidence.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: triage_result
+    type: string
+    required: true
+  - name: enrichment_result
+    type: string
+    required: true
+
+steps:
+  - name: hunt
+    type: ai.agent
+    agent-id: soc-hunt-agent
+    with:
+      message: >
+        Investigate this ambiguous alert. Triage result:
+        {{ inputs.triage_result }}
+        Entity enrichment:
+        {{ inputs.enrichment_result }}
+    timeout: 300s
+
+  - name: store_findings
+    type: elasticsearch.index
+    with:
+      index: ".soc-hunt-findings"
+      document:
+        correlation_id: "{{ steps.hunt.output.correlation_id }}"
+        hop_count: "{{ steps.hunt.output.hop_count }}"
+        confidence: "{{ steps.hunt.output.confidence }}"
+        confidence_delta: "{{ steps.hunt.output.confidence_delta }}"
+        hypotheses_tested: "{{ steps.hunt.output.hypotheses_tested | json }}"
+        iocs_discovered: "{{ steps.hunt.output.iocs_discovered | json }}"
+        investigation_summary: "{{ steps.hunt.output.investigation_summary }}"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        correlation_id: "{{ steps.hunt.output.correlation_id }}"
+        agent_name: hunt
+        action: investigated
+        confidence: "{{ steps.hunt.output.confidence }}"
+
+  - name: route_after_hunt
+    type: if
+    condition: '${{ steps.hunt.output.confidence >= 70 }}'
+    steps:
+      - name: to_response
+        type: workflow.executeAsync
+        with:
+          workflow-id: soc-response
+          inputs:
+            correlation_id: "{{ steps.hunt.output.correlation_id }}"
+            confidence: "{{ steps.hunt.output.confidence }}"
+            alert_ids: "{{ steps.hunt.output.related_alerts_found | json }}"
+            iocs: "{{ steps.hunt.output.iocs_discovered | json }}"
+    else:
+      - name: close_inconclusive
+        type: elasticsearch.index
+        with:
+          index: ".soc-outcomes"
+          document:
+            correlation_id: "{{ steps.hunt.output.correlation_id }}"
+            disposition: investigation_inconclusive
+            confidence_history:
+              - agent: hunt
+                confidence: "{{ steps.hunt.output.confidence }}"
+
+on-failure:
+  fallback:
+    - name: dead_letter
+      type: elasticsearch.index
+      with:
+        index: ".soc-dead-letter"
+        body:
+          source: investigation_workflow
+          error: "{{ error.message }}"
+          retry_count: 0

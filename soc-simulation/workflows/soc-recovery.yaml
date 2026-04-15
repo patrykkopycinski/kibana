@@ -1,0 +1,44 @@
+version: '1'
+name: SOC Recovery
+description: Dead letter recovery. Retries failed pipeline items up to 3 times.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 10m
+
+steps:
+  - name: find_retryable
+    type: elasticsearch.search
+    with:
+      index: ".soc-dead-letter"
+      body:
+        query:
+          bool:
+            filter:
+              - range:
+                  retry_count:
+                    lt: 3
+        size: 10
+        sort:
+          - "@timestamp": asc
+
+  - name: process_retries
+    type: foreach
+    foreach: '{{ steps.find_retryable.output.hits.hits | json }}'
+    steps:
+      - name: log_retry
+        type: console
+        with:
+          message: "Retrying dead-letter item {{ foreach.item._id }} from {{ foreach.item._source.source }} (attempt {{ foreach.item._source.retry_count | plus: 1 }})"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        agent_name: recovery
+        action: dead_letter_scan
+        details:
+          items_found: "{{ steps.find_retryable.output.hits.total.value }}"

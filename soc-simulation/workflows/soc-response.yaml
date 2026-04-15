@@ -1,0 +1,68 @@
+version: '1'
+name: SOC Response
+description: Deterministic containment and response actions. No LLM — confidence thresholds drive actions.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: correlation_id
+    type: string
+    required: true
+  - name: confidence
+    type: number
+    required: true
+  - name: alert_ids
+    type: string
+  - name: entities
+    type: string
+  - name: iocs
+    type: string
+
+steps:
+  - name: respond
+    type: if
+    condition: '${{ inputs.confidence >= 70 }}'
+    steps:
+      - name: log_response
+        type: elasticsearch.index
+        with:
+          index: ".soc-response-actions"
+          document:
+            correlation_id: "{{ inputs.correlation_id }}"
+            action_type: containment
+            confidence_at_response: "{{ inputs.confidence }}"
+            status: executed
+
+      - name: audit
+        type: elasticsearch.index
+        with:
+          index: ".soc-audit-trail"
+          document:
+            correlation_id: "{{ inputs.correlation_id }}"
+            agent_name: response
+            action: containment_executed
+            confidence: "{{ inputs.confidence }}"
+
+      - name: to_case
+        type: workflow.executeAsync
+        with:
+          workflow-id: soc-case-creation
+          inputs:
+            correlation_id: "{{ inputs.correlation_id }}"
+            confidence: "{{ inputs.confidence }}"
+            alert_ids: "{{ inputs.alert_ids }}"
+            entities: "{{ inputs.entities }}"
+
+on-failure:
+  fallback:
+    - name: dead_letter
+      type: elasticsearch.index
+      with:
+        index: ".soc-dead-letter"
+        body:
+          source: response_workflow
+          correlation_id: "{{ inputs.correlation_id }}"
+          error: "{{ error.message }}"
+          retry_count: 0

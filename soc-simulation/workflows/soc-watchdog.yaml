@@ -1,0 +1,54 @@
+version: '1'
+name: SOC Watchdog
+description: Health monitoring. Checks agent throughput, dead letters, pipeline gaps, coverage gaps.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+
+steps:
+  - name: check_health
+    type: ai.agent
+    agent-id: soc-watchdog-agent
+    with:
+      message: >
+        Run a health check on the SOC mesh. Query all indices for throughput, latency, dead letters, and coverage gaps.
+    timeout: 120s
+
+  - name: store_health
+    type: foreach
+    foreach: '{{ steps.check_health.output.agents_checked | json }}'
+    steps:
+      - name: write_health
+        type: elasticsearch.index
+        with:
+          index: ".soc-agent-health"
+          document:
+            agent_id: "{{ foreach.item.agent_id }}"
+            status: "{{ foreach.item.status }}"
+            throughput: "{{ foreach.item.throughput }}"
+            latency_p50: "{{ foreach.item.latency_p50 }}"
+
+  - name: store_gaps
+    type: foreach
+    foreach: '{{ steps.check_health.output.coverage_gaps | json }}'
+    steps:
+      - name: write_gap
+        type: elasticsearch.index
+        with:
+          index: ".soc-coverage-gaps"
+          document:
+            technique_id: "{{ foreach.item.technique_id }}"
+            occurrences: "{{ foreach.item.occurrences }}"
+            avg_confidence: "{{ foreach.item.avg_confidence }}"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        agent_name: watchdog
+        action: health_check
+        details: "{{ steps.check_health.output.summary }}"

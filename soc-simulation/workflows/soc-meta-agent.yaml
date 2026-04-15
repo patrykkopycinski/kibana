@@ -1,0 +1,37 @@
+version: '1'
+name: SOC Meta Agent
+description: System evolution. Analyzes performance, tunes agent ecosystem, creates specialists for coverage gaps.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+
+steps:
+  - name: evolve
+    type: ai.agent
+    agent-id: soc-meta-agent
+    with:
+      message: >
+        Analyze system-wide SOC performance and decide on evolution actions.
+        Check .soc-outcomes, .soc-coverage-gaps, .soc-agent-health for patterns.
+    timeout: 300s
+
+  - name: log_evolution
+    type: elasticsearch.index
+    with:
+      index: ".soc-evolution-log"
+      document:
+        action_type: meta_evolution
+        agent_id: soc-meta-agent
+        reasoning: "{{ steps.evolve.output.summary }}"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        agent_name: meta
+        action: evolved
+        details: "{{ steps.evolve.output | json }}"

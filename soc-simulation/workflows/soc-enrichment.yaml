@@ -1,0 +1,82 @@
+version: '1'
+name: SOC Enrichment
+description: Entity enrichment pipeline. Deep-dives into entities from triage results.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: triage_result
+    type: string
+    required: true
+
+steps:
+  - name: enrich
+    type: ai.agent
+    agent-id: soc-entity-agent
+    with:
+      message: >
+        Enrich the following triage result with entity context:
+        {{ inputs.triage_result }}
+    timeout: 120s
+
+  - name: store_enrichment
+    type: elasticsearch.index
+    with:
+      index: ".soc-entity-enrichment"
+      document:
+        correlation_id: "{{ steps.enrich.output.correlation_id }}"
+        hop_count: "{{ steps.enrich.output.hop_count }}"
+        confidence: "{{ steps.enrich.output.confidence }}"
+        confidence_delta: "{{ steps.enrich.output.confidence_delta }}"
+        entities_enriched: "{{ steps.enrich.output.entities_enriched | json }}"
+        enrichment_summary: "{{ steps.enrich.output.enrichment_summary }}"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        correlation_id: "{{ steps.enrich.output.correlation_id }}"
+        agent_name: entity
+        action: enriched
+        confidence: "{{ steps.enrich.output.confidence }}"
+        hop_count: "{{ steps.enrich.output.hop_count }}"
+
+  - name: route
+    type: if
+    condition: '${{ steps.enrich.output.confidence >= 70 }}'
+    steps:
+      - name: to_response
+        type: workflow.executeAsync
+        with:
+          workflow-id: soc-response
+          inputs:
+            correlation_id: "{{ steps.enrich.output.correlation_id }}"
+            confidence: "{{ steps.enrich.output.confidence }}"
+            alert_ids: "{{ steps.enrich.output.alert_ids | json }}"
+            entities: "{{ steps.enrich.output.entities_enriched | json }}"
+    else:
+      - name: to_investigation
+        type: if
+        condition: '${{ steps.enrich.output.confidence >= 40 }}'
+        steps:
+          - name: investigate
+            type: workflow.executeAsync
+            with:
+              workflow-id: soc-investigation
+              inputs:
+                triage_result: "{{ inputs.triage_result }}"
+                enrichment_result: "{{ steps.enrich.output | json }}"
+
+on-failure:
+  fallback:
+    - name: dead_letter
+      type: elasticsearch.index
+      with:
+        index: ".soc-dead-letter"
+        body:
+          source: enrichment_workflow
+          error: "{{ error.message }}"
+          retry_count: 0

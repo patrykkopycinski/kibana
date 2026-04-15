@@ -1,0 +1,62 @@
+version: '1'
+name: SOC Difficulty Controller
+description: Performance-gated difficulty scaling. Evaluates SOC metrics and launches attack commands.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+
+steps:
+  - name: get_metrics
+    type: elasticsearch.esql.query
+    with:
+      query: >
+        FROM .soc-outcomes
+        | WHERE @timestamp > NOW() - 30 MINUTES
+        | STATS
+            avg_mttd = AVG(time_to_detect),
+            avg_mttr = AVG(time_to_respond),
+            automation_rate = COUNT_IF(disposition == "auto_resolved") / COUNT(*) * 100,
+            avg_confidence_accuracy = AVG(confidence_accuracy)
+      format: json
+
+  - name: get_current_level
+    type: elasticsearch.search
+    with:
+      index: ".soc-difficulty-state"
+      body:
+        size: 1
+        sort:
+          - "@timestamp": desc
+
+  - name: evaluate
+    type: ai.agent
+    agent-id: soc-difficulty-evaluator
+    with:
+      message: >
+        Evaluate whether the SOC should graduate to the next difficulty level.
+        Current difficulty: {{ steps.get_current_level.output.hits.hits[0]._source.level }}
+        Metrics (last 30min):
+        {{ steps.get_metrics.output | json }}
+    timeout: 60s
+
+  - name: update_state
+    type: elasticsearch.index
+    with:
+      index: ".soc-difficulty-state"
+      body:
+        level: "{{ steps.evaluate.output.level }}"
+        decision: "{{ steps.evaluate.output.decision }}"
+        reasoning: "{{ steps.evaluate.output.reasoning }}"
+
+  - name: launch_attack
+    type: elasticsearch.index
+    with:
+      index: ".soc-attack-commands"
+      body:
+        status: pending
+        difficulty: "{{ steps.evaluate.output.level }}"
+        decision: "{{ steps.evaluate.output.decision }}"
+        reasoning: "{{ steps.evaluate.output.reasoning }}"

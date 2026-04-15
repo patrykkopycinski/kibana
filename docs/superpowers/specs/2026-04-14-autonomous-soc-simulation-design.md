@@ -33,56 +33,85 @@ This simulation demonstrates the "Shift from SOAR to Embedded Automation":
 
 ## 2. Architecture Overview
 
-### Deployment: Fully Cloud-Native
+### Deployment: Docker-First, Cloud-Ready
 
-The entire simulation runs in the cloud with zero local dependencies. Your machine is just a browser pointing at Kibana.
+Two deployment modes from the same artifact bundle. Development uses a local Docker Compose stack on non-conflicting ports; production upgrades to Elastic Cloud + GCE with zero artifact changes — only the `.env` file differs.
+
+#### Mode 1: Local Development (Docker Compose)
+
+All services run in `soc-simulation/docker-compose.yml` using `9.4.0-SNAPSHOT` images. Ports are chosen to avoid conflict with default Kibana dev (5601/5620) and ES (9200/9220) ports.
 
 ```
-GCP Project
+Your machine (Docker)
 ┌───────────────────────────────────────────────────────────┐
+│  docker-compose.yml                                       │
 │                                                           │
-│  ┌───────────────────┐      ┌──────────────────────────┐  │
-│  │ caldera-server    │      │ Elastic Cloud            │  │
-│  │ (GCE, e2-medium)  │      │  Elasticsearch           │  │
-│  │ Docker + Caldera  │      │  Kibana                  │  │
-│  │ :8888             │      │  (agents, workflows,     │  │
-│  │                   │      │   dashboards, rules,     │  │
-│  │                   │      │   SML, cases)            │  │
-│  └────────┬──────────┘      └────────────┬─────────────┘  │
-│           │                              │                │
-│           │     VPC internal network     │                │
-│  ┌────────┴──────────────────────────────┴─────────────┐  │
-│  │               Endpoint VMs (same VPC)               │  │
-│  │  ┌───────────┐  ┌───────────┐  ┌───────────┐       │  │
-│  │  │linux-ws-1 │  │linux-ws-2 │  │linux-sv-1 │       │  │
-│  │  │Workstation│  │Workstation│  │Server     │       │  │
-│  │  │Agent→Cloud│  │Agent→Cloud│  │Agent→Cloud│       │  │
-│  │  │Sandcat→Cal│  │Sandcat→Cal│  │Sandcat→Cal│       │  │
-│  │  └───────────┘  └───────────┘  └───────────┘       │  │
-│  │  (Cloud upgrade: add Windows + macOS VMs)           │  │
-│  └─────────────────────────────────────────────────────┘  │
+│  ┌──────────────────┐  ┌──────────────────────────────┐   │
+│  │ soc-elasticsearch│  │ soc-kibana                   │   │
+│  │ :19200           │  │ :15601                       │   │
+│  │ 9.4.0-SNAPSHOT   │  │ 9.4.0-SNAPSHOT               │   │
+│  └────────┬─────────┘  │ (agents, workflows,          │   │
+│           │            │  dashboards, rules, SML)      │   │
+│  ┌────────┴─────────┐  └──────────────┬───────────────┘   │
+│  │ soc-fleet-server │                 │                   │
+│  │ :18220           │                 │                   │
+│  │ 9.4.0-SNAPSHOT   │                 │                   │
+│  └──────────────────┘                 │                   │
+│                                       │                   │
+│  ┌──────────────────┐  ┌──────────────┴───────────────┐   │
+│  │ soc-caldera      │  │ soc-caldera-bridge           │   │
+│  │ :18888           │  │ polls ES → calls Caldera API │   │
+│  │ Caldera + Cortado│  │ (Python container)           │   │
+│  └──────────────────┘  └─────────────────────────────┘   │
 │                                                           │
 └───────────────────────────────────────────────────────────┘
 
-Your machine: just a browser → Kibana dashboard
+GCE VMs (always remote, both modes):
+┌────────────────────────────────────────────────────────┐
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐          │
+│  │linux-ws-1 │  │linux-ws-2 │  │linux-sv-1 │          │
+│  │Agent→Fleet│  │Agent→Fleet│  │Agent→Fleet│          │
+│  │Sandcat→Cal│  │Sandcat→Cal│  │Sandcat→Cal│          │
+│  └───────────┘  └───────────┘  └───────────┘          │
+│  (VMs reach Docker services via Tailscale / tunnel)    │
+└────────────────────────────────────────────────────────┘
+
+Port map:
+  ES       → localhost:19200
+  Kibana   → localhost:15601
+  Fleet    → localhost:18220
+  Caldera  → localhost:18888
 ```
 
-**Why fully cloud:**
-- No Tailscale needed — intra-VPC networking (~1ms latency)
-- No local Docker — zero local dependencies
-- Always-on — simulation runs 24/7 without your laptop
-- Shareable — anyone with Kibana access watches the demo live
-- Demo-ready from day one
+**Why local Docker:**
+- Access to latest `9.4.0-SNAPSHOT` features (`ai.agent`, `workflow.executeAsync`, event-driven workflows)
+- Non-conflicting ports — run alongside `yarn start` dev server
+- Portable — same `docker-compose.yml` runs on any machine
+- Fast iteration — restart services in seconds
+
+#### Mode 2: Cloud Production (Elastic Cloud + GCE)
+
+Same artifacts, different `.env`:
+
+```
+.env.cloud:
+  ES_URL=https://<deployment>.es.us-central1.gcp.cloud.es.io
+  KIBANA_URL=https://<deployment>.kb.us-central1.gcp.cloud.es.io
+  FLEET_URL=https://<deployment>.fleet.us-central1.gcp.cloud.es.io
+  CALDERA_URL=http://<caldera-gce-internal-ip>:8888
+  # Bridge polls ES_URL, calls CALDERA_URL — same container, different env
+```
+
+The Caldera bridge container runs on the GCE Caldera VM, polling Elastic Cloud ES. Endpoint VMs are GCE instances in the same VPC as Caldera. `setup.sh` points at the cloud Kibana URL — same APIs, same artifacts.
 
 ### Layer Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  LAYER 1: ATTACK EMULATION (Threat Generation)              │
-│  elastic/attack-emulation-cursor-plugin                     │
-│  Caldera (GCE VM) + Cortado + Atomic Red Team → GCE VMs    │
-│  with Elastic Defend → Performance-gated escalating         │
-│  difficulty                                                 │
+│  Caldera + Cortado + Atomic Red Team → endpoint VMs         │
+│  with Elastic Defend → Caldera Bridge (polls ES, calls      │
+│  Caldera API) → Performance-gated escalating difficulty     │
 ├─────────────────────────────────────────────────────────────┤
 │  LAYER 2: DETECTION (Signal Generation)                     │
 │  Elastic Defend telemetry → logs-endpoint.events.*          │
@@ -119,15 +148,19 @@ Your machine: just a browser → Kibana dashboard
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| **Deployment** | Fully cloud-native (Elastic Cloud + GCE) | Zero local deps, always-on, shareable, demo-ready |
-| **Caldera hosting** | Dedicated GCE VM in same VPC | Intra-VPC to endpoints, no Tailscale, always available |
+| **Deployment** | Docker-first, cloud-ready. Local: Docker Compose on non-default ports (19200/15601/18220/18888). Cloud: same artifacts, different `.env` | Access to latest 9.4.0-SNAPSHOT features; no port conflicts; portable artifacts |
+| **Stack images** | `9.4.0-SNAPSHOT` (ES, Kibana, Fleet Server) | Matches Kibana `main` branch version; has `ai.agent`, `workflow.executeAsync`, event-driven workflows |
+| **Caldera hosting** | Docker container (local) or GCE VM (cloud), same VPC as endpoints | Intra-network to endpoints; bridge decouples from workflow engine |
+| **Caldera bridge** | Polling agent — container polls `.soc-attack-commands` from ES, calls local Caldera API | Works in both local Docker and cloud GCE; no inbound networking required; consistent with index-based communication model |
 | **Inter-agent communication** | `workflow.executeAsync` chaining | No custom plugin needed, near-instant, payloads via `inputs`, works with existing infrastructure |
+| **Agent invocation** | `ai.agent` workflow step with `agent-id` property | Native workflow step type; passes message, returns structured output |
 | **Data persistence** | Shared Elasticsearch indices per agent | Scalable, queryable, dashboard-ready, audit trail built-in |
 | **Shared knowledge** | Agent Builder SML (Semantic Memory Layer) | Vector-backed knowledge base, all agents read/write, new agents inherit context |
 | **Response actions** | Deterministic workflows (no LLM) | Auditable, fast, safe — no hallucinated response actions |
-| **Attack generation** | elastic/attack-emulation-cursor-plugin | Real endpoints, real Elastic Defend, real detection rules — genuine telemetry |
+| **Attack generation** | Caldera + Cortado + Atomic Red Team via Caldera Bridge | Real endpoints, real Elastic Defend, real detection rules — genuine telemetry |
 | **Difficulty scaling** | Performance-gated (not timer-based) | Adapts to SOC competence, creates adversarial training dynamic |
-| **Dashboards** | NDJSON saved objects, git-tracked, deployed via setup workflow | Reproducible, diffable, reviewable |
+| **Dashboards** | NDJSON saved objects, git-tracked, deployed via setup script | Reproducible, diffable, reviewable |
+| **Portability** | All artifacts in `soc-simulation/`, deployed via `setup.sh` REST API calls | Point at any Kibana URL to deploy; `teardown.sh` reverses cleanly |
 | **Loop protection** | `hop_count` field, max 5 hops | Prevents circular agent chains |
 | **Failure recovery** | `.soc-dead-letter` + Recovery Workflow | No silent failures, automatic retry with max 3 attempts |
 | **Idempotency** | `correlation_id` deduplication check | Prevents duplicate processing from Task Manager retries |
@@ -143,7 +176,7 @@ Agents communicate through Elasticsearch indices as the durable data layer, with
 ```
 Detection Rule fires on real threat
     → alert trigger: Triage Workflow
-    → run_agent(Triage Agent), reads SML
+    → ai.agent(soc-triage-agent), reads SML
     → writes .soc-triage-results (with correlation_id, hop_count=1)
     → writes learned patterns to SML
     → on-failure: write to .soc-dead-letter
@@ -152,7 +185,7 @@ Detection Rule fires on real threat
 
 Enrichment Workflow (hop_count=2)
     → idempotency check on correlation_id
-    → run_agent(Entity Agent), reads SML
+    → ai.agent(soc-entity-agent), reads SML
     → writes .soc-entity-enrichment
     → writes baselines to SML
     → on-failure: .soc-dead-letter
@@ -160,7 +193,7 @@ Enrichment Workflow (hop_count=2)
                             → Response Workflow (confidence ≥ 70)
 
 Investigation Workflow (hop_count=3)
-    → run_agent(Hunt Agent), reads SML
+    → ai.agent(soc-hunt-agent), reads SML
     → writes .soc-hunt-findings
     → writes investigation patterns to SML
     → workflow.executeAsync → Response Workflow (if confidence now ≥ 70)
@@ -172,26 +205,33 @@ Response Workflow (deterministic, no agent)
     → workflow.executeAsync → Case Workflow
 
 Case Workflow
-    → run_agent(Case Agent)
+    → ai.agent(soc-case-agent)
     → creates Kibana case with full evidence chain
     → writes .soc-outcomes (final disposition, TTD, TTR, confidence_history)
     → writes to SML
 
 Scheduled: Meta Agent Workflow (every 15min)
+    → ai.agent(soc-meta-agent)
     → queries .soc-outcomes for patterns
     → tunes detection rules via security.create_detection_rule tool
     → creates new agents via Agent Builder API
     → writes .soc-evolution-log
 
 Scheduled: Watchdog Workflow (every 5min)
+    → ai.agent(soc-watchdog-agent)
     → checks agent throughput, latency, stalled pipelines
     → scans .soc-dead-letter for unrecovered items
     → signals Meta Agent on coverage gaps
 
 Scheduled: Recovery Workflow (every 10min)
-    → scans .soc-dead-letter
+    → scans .soc-dead-letter (deterministic, no agent)
     → retries failed items (max 3 attempts)
     → escalates to Watchdog if exhausted
+
+Scheduled: Difficulty Controller Workflow (every 5min)
+    → evaluates SOC metrics via ES|QL
+    → writes attack command to .soc-attack-commands
+    → Caldera Bridge picks up command, executes via Caldera API
 ```
 
 ### Communication Indices
@@ -207,7 +247,8 @@ Scheduled: Recovery Workflow (every 10min)
 | `.soc-evolution-log` | Meta Agent, DetEng Agent | Watchdog Agent | `action_type`, `agent_id`, `reasoning`, `before/after` |
 | `.soc-coverage-gaps` | Watchdog Agent | Meta Agent | `technique_id`, `occurrences`, `avg_confidence` |
 | `.soc-dead-letter` | All workflows (on-failure) | Recovery Workflow | `source`, `correlation_id`, `error`, `retry_count` |
-| `.soc-difficulty-state` | Difficulty Controller | Attack Launcher | `level`, `level_name`, `reasoning` |
+| `.soc-difficulty-state` | Difficulty Controller | Difficulty Controller | `level`, `level_name`, `reasoning` |
+| `.soc-attack-commands` | Difficulty Controller | Caldera Bridge | `status`, `difficulty`, `profile`, `techniques[]`, `operation_id` |
 | `.soc-audit-trail` | All workflows | Dashboards | `correlation_id`, `agent_name`, `action`, `timestamp` |
 
 ### Confidence Score Flow
@@ -240,25 +281,37 @@ Confidence adjustments:
 
 ## 4. Telemetry Generation & Attack Emulation
 
-### Infrastructure Stack (Fully Cloud)
+### Infrastructure Stack
 
-All infrastructure runs on GCP + Elastic Cloud:
+#### Local Mode (Docker Compose)
 
-| Component | Hosting | Spec | Purpose |
-|-----------|---------|------|---------|
-| Elasticsearch + Kibana | Elastic Cloud | Standard deployment | Data store, agent execution, dashboards |
-| Caldera server | GCE VM (`e2-medium`) | Docker, same VPC | Attack orchestration |
-| linux-ws-1 | GCE VM (`e2-small`) | Ubuntu, Elastic Agent + Sandcat | Workstation endpoint |
-| linux-ws-2 | GCE VM (`e2-small`) | Ubuntu, Elastic Agent + Sandcat | Workstation endpoint |
-| linux-sv-1 | GCE VM (`e2-small`) | Ubuntu, Elastic Agent + Sandcat | Server endpoint |
-| win-sv-1 (upgrade) | GCE VM (`e2-medium`) | Windows Server 2022, Elastic Agent + Sandcat | Windows server endpoint |
-| macos-ws-1 (upgrade) | Tart VM (local Apple Silicon) | macOS, Elastic Agent + Sandcat | macOS endpoint |
+| Service | Container | Image | Host Port | Internal Port | Purpose |
+|---------|-----------|-------|-----------|---------------|---------|
+| Elasticsearch | `soc-elasticsearch` | `elasticsearch:9.4.0-SNAPSHOT` | **19200** | 9200 | Data store |
+| Kibana | `soc-kibana` | `kibana:9.4.0-SNAPSHOT` | **15601** | 5601 | Agents, workflows, dashboards, rules, SML |
+| Fleet Server | `soc-fleet-server` | `elastic-agent:9.4.0-SNAPSHOT` | **18220** | 8220 | Endpoint agent enrollment |
+| Caldera | `soc-caldera` | Custom (Caldera + Cortado) | **18888** | 8888 | Attack orchestration |
+| Caldera Bridge | `soc-caldera-bridge` | Custom (Python) | — | — | Polls ES, triggers Caldera |
 
-Caldera VM setup:
-1. Provision GCE VM with container-optimized OS
-2. Pull and start Caldera Docker image
-3. Set `CALDERA_URL=http://<caldera-internal-ip>:8888`
-4. Endpoint VMs reach Caldera over VPC internal network
+Endpoint VMs always run on GCE (need real kernel for Elastic Defend, consistent environment for reproducible demos). In local mode, they enroll to Fleet Server via a public-facing tunnel or Tailscale; in cloud mode, they're in the same VPC.
+
+**GCE Endpoint VMs (both modes):**
+
+| VM | GCE Type | OS | Role |
+|----|----------|-----|------|
+| `soc-linux-ws-1` | `e2-small` | Ubuntu 22.04 | Workstation endpoint |
+| `soc-linux-ws-2` | `e2-small` | Ubuntu 22.04 | Workstation endpoint |
+| `soc-linux-sv-1` | `e2-small` | Ubuntu 22.04 | Server endpoint |
+
+Each VM runs Elastic Agent (→ Fleet Server → ES) and Sandcat (→ Caldera). In local mode, Caldera runs in Docker on your machine and GCE VMs reach it via Tailscale or a GCP-to-local tunnel. In cloud mode, Caldera runs on a GCE VM in the same VPC.
+
+#### Cloud Mode (Elastic Cloud + GCE)
+
+| Component | Hosting | Purpose |
+|-----------|---------|---------|
+| Elasticsearch + Kibana | Elastic Cloud | Same as local, managed |
+| Caldera + Bridge | GCE VM (`e2-medium`) | Bridge polls Elastic Cloud ES |
+| Endpoint VMs | GCE VMs (`e2-small`) | Same VPC as Caldera VM |
 
 ### Telemetry Flow
 
@@ -270,7 +323,7 @@ Caldera executes technique on GCE endpoint VM
         - Network events (logs-endpoint.events.network-*)
         - Registry events (logs-endpoint.events.registry-*)
         - DNS events (logs-endpoint.events.dns-*)
-    → Elastic Agent ships to Elastic Cloud
+    → Elastic Agent ships to Elasticsearch (local Docker or Elastic Cloud)
     → Detection rules evaluate (EQL, ES|QL, threshold, ML)
     → Alerts written to .alerts-security.alerts-default
     → Alert trigger fires Triage Workflow
@@ -322,26 +375,23 @@ steps:
         sort: [{ "@timestamp": "desc" }]
 
   - name: evaluate_graduation
-    type: ai.classify
+    type: ai.agent
+    agent-id: soc-difficulty-evaluator
     with:
-      input: >
+      message: >
+        Evaluate whether the SOC should graduate to the next difficulty level.
         Current difficulty: {{ steps.get_current_level.output.hits.hits.0._source.level }}
         Metrics (last 30min): MTTD={{ steps.get_metrics.output.values.0.avg_mttd }}s,
         automation_rate={{ steps.get_metrics.output.values.0.automation_rate }}%,
         confidence_accuracy={{ steps.get_metrics.output.values.0.avg_confidence_accuracy }}%
-      classes:
-        - name: escalate
-          description: "SOC consistently meets graduation criteria for current level"
-        - name: hold
-          description: "SOC is performing adequately but not yet ready to graduate"
-        - name: deescalate
-          description: "SOC is struggling, reduce difficulty to allow learning"
+        Respond with JSON: { "decision": "escalate|hold|deescalate", "reasoning": "..." }
+    timeout: 60s
 
   - name: compute_new_level
     type: data.set
     with:
       current_level: "{{ steps.get_current_level.output.hits.hits.0._source.level }}"
-      decision: "{{ steps.evaluate_graduation.output.class }}"
+      decision: "{{ steps.evaluate_graduation.output.decision }}"
 
   - name: update_state
     type: elasticsearch.index
@@ -349,25 +399,29 @@ steps:
       index: ".soc-difficulty-state"
       body:
         level: >
-          {%- if steps.evaluate_graduation.output.class == "escalate" -%}
+          {%- if steps.evaluate_graduation.output.decision == "escalate" -%}
             {%- assign new_level = steps.get_current_level.output.hits.hits[0]._source.level | plus: 1 -%}
             {%- if new_level > 5 %}5{%- else %}{{ new_level }}{%- endif -%}
-          {%- elsif steps.evaluate_graduation.output.class == "deescalate" -%}
+          {%- elsif steps.evaluate_graduation.output.decision == "deescalate" -%}
             {%- assign new_level = steps.get_current_level.output.hits.hits[0]._source.level | minus: 1 -%}
             {%- if new_level < 1 %}1{%- else %}{{ new_level }}{%- endif -%}
           {%- else -%}
             {{ steps.get_current_level.output.hits.hits[0]._source.level }}
           {%- endif -%}
         previous_level: "{{ steps.get_current_level.output.hits.hits.0._source.level }}"
-        decision: "{{ steps.evaluate_graduation.output.class }}"
+        decision: "{{ steps.evaluate_graduation.output.decision }}"
         reasoning: "{{ steps.evaluate_graduation.output.reasoning }}"
 
   - name: launch_attacks
-    type: workflow.executeAsync
+    type: elasticsearch.index
     with:
-      workflow-id: "soc-attack-launcher"
-      inputs:
-        difficulty: "{{ steps.evaluate_graduation.output.class }}"
+      index: ".soc-attack-commands"
+      document:
+        status: "pending"
+        difficulty: "{{ steps.update_state.output._source.level }}"
+        decision: "{{ steps.evaluate_graduation.output.decision }}"
+        reasoning: "{{ steps.evaluate_graduation.output.reasoning }}"
+        created_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
 ```
 
 #### Level 5 Adversarial Targeting
@@ -468,12 +522,13 @@ steps:
           message: "Duplicate alert, skipping"
     else:
       - name: triage
-        type: run_agent
+        type: ai.agent
+        agent-id: soc-triage-agent
         with:
-          agent-id: "soc-triage-agent"
-          input: >
+          message: >
             Triage the following alert(s):
             {{ event.alerts | json }}
+        timeout: 120s
 
       - name: store_result
         type: elasticsearch.index
@@ -507,7 +562,7 @@ steps:
           - match: "< 40"
             steps:
               - name: auto_close
-                type: kibana.set_alerts_status
+                type: kibana.SetAlertsStatus
                 with:
                   alert_ids: "{{ steps.triage.output.alert_ids }}"
                   status: "closed"
@@ -666,7 +721,7 @@ steps:
     condition: "inputs.confidence >= 70"
     steps:
       - name: acknowledge_alerts
-        type: kibana.set_alerts_status
+        type: kibana.SetAlertsStatus
         with:
           alert_ids: "{{ inputs.alert_ids }}"
           status: "acknowledged"
@@ -945,21 +1000,144 @@ Attack Emulation (Level N) generates technique
 
 ```
 soc-simulation/
+  docker-compose.yml          # Full local stack (ES, Kibana, Fleet, Caldera, Bridge)
+  .env.example                # Port config, credentials template
+  .env.cloud.example          # Cloud deployment config template
+  setup.sh                    # Deploy all artifacts to any Kibana/ES via REST APIs
+  teardown.sh                 # Reverse of setup.sh — clean removal
+
   setup/
-    index_templates/          # ES index templates (11 indices)
+    index_templates/          # ES index templates (12 indices, incl .soc-attack-commands)
     ilm_policies/             # ILM: soc-default (90d), soc-audit-permanent
     data_views/               # Kibana data views (5 NDJSON files)
     dashboards/               # Kibana dashboards (3 NDJSON files)
-    setup_workflow.yaml       # Deploys everything
-    teardown_workflow.yaml    # Cleanly removes everything
-  agents/                     # Agent Builder definitions (7 JSON files)
-  workflows/                  # Workflow YAML definitions (11 files)
+    seed_data/                # Initial .soc-difficulty-state (level=1)
+
+  agents/                     # Agent Builder definitions (8 JSON files, incl difficulty-evaluator)
+  workflows/                  # Workflow YAML definitions (~12 files)
   detection_rules/            # Baseline detection rules (NDJSON)
+
   caldera_profiles/           # Caldera adversary profiles (5 JSON files)
+  bridge/
+    caldera_bridge.py         # Polling agent: ES → Caldera API
+    requirements.txt          # elasticsearch, requests
+    Dockerfile                # soc-caldera-bridge container
+
   infra/
-    caldera_vm_setup.sh       # GCE VM provisioning for Caldera
-    endpoint_vm_setup.sh      # GCE VM provisioning for endpoints
+    caldera/
+      Dockerfile              # Caldera + Cortado custom image
+      entrypoint.sh           # Caldera startup
+      conf/                   # Caldera config (local.yml)
+    gce/
+      caldera_vm_setup.sh     # GCE VM provisioning for Caldera (cloud mode)
+      endpoint_vm_setup.sh    # GCE endpoint VM provisioning (both modes)
+      teardown_vms.sh         # Destroy GCE VMs
 ```
+
+### Caldera Bridge
+
+The bridge decouples the workflow engine from Caldera's network location. It's a Python container that polls Elasticsearch for attack commands and translates them into Caldera API calls.
+
+#### Architecture
+
+```
+Workflow Engine (inside Kibana)          Caldera Bridge Container        Caldera Container
+─────────────────────────────           ─────────────────────────       ──────────────────
+Difficulty Controller Workflow           caldera_bridge.py               Caldera API :8888
+  │                                       │                               │
+  │ elasticsearch.index                   │ polls every 30s               │
+  ├──→ .soc-attack-commands ──────────────┤                               │
+  │    { status: "pending",               │ finds pending command         │
+  │      difficulty: 3,                   │ updates status: "running"     │
+  │      profile: "targeted" }            │                               │
+  │                                       │ POST /api/v2/operations ──────┤
+  │                                       │   { adversary_id, group }     │
+  │                                       │                               │
+  │                                       │ polls operation status        │
+  │                                       │ until complete                │
+  │                                       │                               │
+  │                                       │ updates .soc-attack-commands: │
+  │                                       │   { status: "completed",      │
+  │                                       │     operation_id: "...",      │
+  │                                       │     techniques_executed: [] } │
+  │                                       │                               │
+  │    .soc-attack-commands ──────────────┤                               │
+  │    { status: "completed" }            │                               │
+```
+
+#### Bridge Behavior
+
+1. **Poll cycle**: Query `.soc-attack-commands` for `status: "pending"` every 30 seconds
+2. **Claim**: Atomically update `status: "pending"` → `"running"` (optimistic concurrency via `_seq_no`/`_primary_term`)
+3. **Profile mapping**: Map `difficulty` level to Caldera adversary profile ID from `caldera_profiles/`
+4. **Execute**: Create Caldera operation via REST API, targeting the `all-endpoints` group
+5. **Monitor**: Poll Caldera operation status every 15s until `finished` or `timeout` (10min)
+6. **Report**: Update `.soc-attack-commands` document with `status: "completed"`, `operation_id`, `techniques_executed[]`
+7. **Failure**: On Caldera API error or timeout, update `status: "failed"` with error detail
+
+#### .soc-attack-commands Index Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | keyword | `pending` → `running` → `completed` / `failed` |
+| `difficulty` | integer | 1–5 |
+| `profile` | keyword | Caldera adversary profile name |
+| `techniques` | keyword[] | Specific ATT&CK technique IDs (for Level 5 targeting) |
+| `correlation_id` | keyword | Unique command ID |
+| `created_at` | date | When the workflow wrote the command |
+| `claimed_at` | date | When bridge picked it up |
+| `completed_at` | date | When attack finished |
+| `operation_id` | keyword | Caldera operation ID (set by bridge) |
+| `techniques_executed` | keyword[] | Techniques actually run (set by bridge) |
+| `error` | text | Error message if failed |
+
+### Portability: setup.sh / teardown.sh
+
+Both scripts read configuration from `.env` (or `.env.cloud`) and use `curl` to hit Kibana/ES REST APIs. No Kibana CLI or SDK required.
+
+#### setup.sh flow
+
+```bash
+#!/usr/bin/env bash
+# Usage: ./setup.sh [--env .env.cloud]
+# Reads: ES_URL, KIBANA_URL, ES_USER, ES_PASS from .env
+
+# 1. Index templates
+for f in setup/index_templates/*.json; do
+  curl -X PUT "$ES_URL/_index_template/$(basename $f .json)" -d @$f
+done
+
+# 2. ILM policies
+for f in setup/ilm_policies/*.json; do
+  curl -X PUT "$ES_URL/_ilm/policy/$(basename $f .json)" -d @$f
+done
+
+# 3. Agents (Agent Builder API)
+for f in agents/*.json; do
+  curl -X POST "$KIBANA_URL/api/agent_builder/agents" -d @$f
+done
+
+# 4. Workflows (bulk create)
+# Reads each .yaml, assembles into bulk payload
+curl -X POST "$KIBANA_URL/api/workflows?overwrite=true" -d "$bulk_payload"
+
+# 5. Dashboards + data views (saved objects import)
+for f in setup/dashboards/*.ndjson setup/data_views/*.ndjson; do
+  curl -X POST "$KIBANA_URL/api/saved_objects/_import?overwrite=true" --form file=@$f
+done
+
+# 6. Detection rules
+curl -X POST "$KIBANA_URL/api/detection_engine/rules/_import?overwrite=true" --form file=@detection_rules/rules.ndjson
+
+# 7. Seed data
+for f in setup/seed_data/*.json; do
+  curl -X POST "$ES_URL/$(jq -r .index $f)/_doc" -d "$(jq .body $f)"
+done
+```
+
+#### teardown.sh flow
+
+Reverse order: delete detection rules (by tag `soc-simulation`), delete workflows, delete agents, delete saved objects, delete indices, delete ILM policies, delete index templates.
 
 ### Dashboard: Autonomous SOC Command Center
 
@@ -1066,17 +1244,19 @@ Clean removal: disable workflows → delete agents → delete indices → remove
 
 | Phase | Environment | Endpoints | Scale |
 |-------|------------|-----------|-------|
-| **Cloud Dev** | Elastic Cloud + 4 GCE VMs | 3 Linux + Caldera | ~10-30 alerts/hour |
-| **Cloud Demo** | Elastic Cloud + 6+ GCE VMs | 3 Linux + 1 Windows + Caldera | ~50 alerts/hour |
-| **Cloud Production** | Elastic Cloud + 8+ VMs | Linux/Windows/macOS + Caldera | ~100+ alerts/hour |
+| **Local Dev** | Docker Compose (9.4.0-SNAPSHOT) + 3 GCE VMs | 3 Linux + Caldera | ~10-30 alerts/hour |
+| **Cloud Demo** | Elastic Cloud + 4+ GCE VMs | 3 Linux + 1 Windows + Caldera + Bridge | ~50 alerts/hour |
+| **Cloud Production** | Elastic Cloud + 8+ GCE VMs | Linux/Windows/macOS + Caldera + Bridge | ~100+ alerts/hour |
 
-Scaling is configuration-only: add more VMs via `deploy_agents`, increase Caldera concurrency, same workflows/agents/dashboards.
+Scaling is configuration-only: add more VMs, increase Caldera concurrency, same `setup.sh`/artifacts/dashboards. The Caldera Bridge handles increased attack volume without changes (stateless poller).
 
 ---
 
 ## 10. Success Criteria
 
-- [ ] Fully cloud-native deployment (Elastic Cloud + GCE, zero local dependencies)
+- [ ] Docker Compose local stack running on non-default ports (19200/15601/18220/18888)
+- [ ] Portable artifacts: `setup.sh` deploys to any Kibana/ES; `teardown.sh` removes cleanly
+- [ ] Caldera Bridge polling `.soc-attack-commands` and executing attacks via Caldera API
 - [ ] Continuous telemetry generation from real endpoints via attack emulation
 - [ ] Full autonomous pipeline: detection → triage → enrichment → hunt → response → case
 - [ ] All 7 AI agents + 1 response workflow operational, communicating via workflow.executeAsync

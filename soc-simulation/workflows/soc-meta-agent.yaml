@@ -1,6 +1,6 @@
 version: '1'
 name: SOC Meta Agent
-description: System evolution. Analyzes performance, tunes agent ecosystem, creates specialists for coverage gaps.
+description: System evolution. Analyzes performance, creates specialist workflows and agents for coverage gaps.
 enabled: true
 
 triggers:
@@ -14,16 +14,12 @@ steps:
     agent-id: soc-meta-agent
     with:
       message: >
-        Analyze system-wide SOC performance and decide on evolution actions.
-        Check .soc-outcomes, .soc-coverage-gaps, .soc-agent-health for patterns.
-    timeout: 300s
+        Analyze the SOC mesh and decide if evolution actions are needed.
+        Current state: 3 endpoint VMs, 8 SOC agents, 10 workflows, detection rules for T1059.004, T1033, T1496.
+        Check if any coverage gaps need new specialist workflows or agents.
+    timeout: 60s
 
   - name: log_evolution
     type: console
     with:
-      message: "Meta Agent evolution: {{ steps.evolve.output | json }}"
-
-  - name: audit
-    type: console
-    with:
-      message: "Meta Agent audit: agent=meta action=evolved"
+      message: "Meta Agent decision: {{ steps.evolve.output | json }}"

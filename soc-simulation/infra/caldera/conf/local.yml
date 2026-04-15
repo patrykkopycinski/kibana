@@ -1,0 +1,13 @@
+# soc-simulation/infra/caldera/conf/local.yml
+# Caldera config overrides for SOC simulation
+app.contact.http: http://0.0.0.0:8888
+plugins:
+  - sandcat
+  - stockpile
+  - atomic
+  - cortado
+users:
+  red:
+    admin: admin
+  blue:
+    blue: admin

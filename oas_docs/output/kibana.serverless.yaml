@@ -60991,6 +60991,8 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            draft:
+                              type: boolean
                             fields:
                               $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                             routing:
@@ -81946,6 +81948,8 @@ components:
                   additionalProperties: false
                   type: object
                   properties:
+                    draft:
+                      type: boolean
                     fields:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_FieldDefinition'
                     routing:

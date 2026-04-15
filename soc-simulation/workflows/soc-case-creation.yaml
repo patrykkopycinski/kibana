@@ -9,10 +9,8 @@ triggers:
 inputs:
   - name: correlation_id
     type: string
-    required: true
   - name: confidence
     type: number
-    required: true
   - name: alert_ids
     type: string
   - name: entities
@@ -31,19 +29,7 @@ steps:
         Entities: {{ inputs.entities }}
     timeout: 180s
 
-  - name: store_outcome
+  - name: log_result
     type: console
     with:
-      message: "Case creation outcome: {{ steps.create_case.output | json }}"
-
-  - name: audit
-    type: console
-    with:
-      message: "Case audit: agent=case action=case_created correlation_id={{ inputs.correlation_id }} confidence={{ inputs.confidence }}"
-
-on-failure:
-  fallback:
-    - name: dead_letter
-      type: console
-      with:
-        message: "Case workflow failure: source=case_workflow correlation_id={{ inputs.correlation_id }} error={{ error.message }}"
+      message: "Case creation completed for correlation_id={{ inputs.correlation_id }}"

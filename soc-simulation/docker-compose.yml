@@ -53,6 +53,10 @@ services:
       # Agent Builder: enable nav icon + experimental features (SML, skills)
       UISETTINGS_OVERRIDES_AGENTBUILDER__NAVENABLED: "true"
       UISETTINGS_OVERRIDES_AGENTBUILDER__EXPERIMENTALFEATURES: "true"
+      # Enable all APIs — in production mode, internal APIs and versioned routes are restricted
+      SERVER_VERSIONED_VERSIONRESOLUTION: "newest"
+      SERVER_VERSIONED_STRICTCLIENTVERSIONCHECK: "false"
+      SERVER_RESTRICTINTERNALAPIS: "false"
     ports:
       - "0.0.0.0:${KIBANA_PORT:-15601}:5601"
     depends_on:

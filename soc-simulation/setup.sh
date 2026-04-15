@@ -303,26 +303,19 @@ if [[ -d "$WORKFLOWS_DIR" ]]; then
   if [[ ${#workflow_files[@]} -eq 0 ]]; then
     echo "  No workflow files found."
   else
-    # Build JSON payload: {"workflows": [{"yaml": "..."}, ...]}
-    payload=$(python3 - "${workflow_files[@]}" <<'PYEOF'
-import json, sys
-
-files = sys.argv[1:]
-workflows = []
-for path in files:
-    with open(path) as f:
-        workflows.append({"yaml": f.read()})
-
-print(json.dumps({"workflows": workflows}))
-PYEOF
-)
-    echo "  POST /api/workflows?overwrite=true (${#workflow_files[@]} workflow(s))"
-    if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data "${payload}" > /dev/null 2>&1; then
-      echo "  Done."
-    else
-      echo "  Warning: bulk workflow create failed (API may not be available in this Kibana build)."
-      echo "  Workflows can be created manually via Kibana UI: Management > Workflows."
-    fi
+    wf_count=0
+    for wf_file in "${workflow_files[@]}"; do
+      wf_name="$(basename "${wf_file}" .yaml)"
+      payload_file=$(mktemp)
+      python3 -c "import json,sys; json.dump({'yaml':open(sys.argv[1]).read()},open(sys.argv[2],'w'))" "${wf_file}" "${payload_file}"
+      if kbn_curl_versioned POST "/api/workflows?overwrite=true" --data-binary "@${payload_file}" > /dev/null 2>&1; then
+        echo "    Created: ${wf_name}"
+        wf_count=$(( wf_count + 1 ))
+      else
+        echo "    Failed: ${wf_name}"
+      fi
+    done
+    echo "  Done (${wf_count}/${#workflow_files[@]} workflow(s))."
   fi
 else
   echo "--- Workflows: directory not found, skipping ---"

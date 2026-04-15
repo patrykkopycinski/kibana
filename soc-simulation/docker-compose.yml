@@ -1,0 +1,139 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: soc-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "true"
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+      xpack.security.http.ssl.enabled: "false"
+    ports:
+      - "0.0.0.0:${ES_PORT:-19200}:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      retries: 30
+    mem_limit: 2g
+
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: soc-setup
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: "no"
+    command: >
+      bash -c '
+        echo "Setting kibana_system password...";
+        until curl -sf -u "elastic:${ELASTIC_PASSWORD:-changeme}" http://elasticsearch:9200; do sleep 5; done;
+        curl -sf -X POST -u "elastic:${ELASTIC_PASSWORD:-changeme}" \
+          -H "Content-Type: application/json" \
+          http://elasticsearch:9200/_security/user/kibana_system/_password \
+          -d "{\"password\":\"${ELASTIC_PASSWORD:-changeme}\"}" \
+        && echo " Done." || echo " Failed.";
+        touch /tmp/setup-done
+      '
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /tmp/setup-done ] || exit 1"]
+      interval: 5s
+      retries: 1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: soc-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: "soc-sim-random-32-char-encrypt-key!!"
+      XPACK_FLEET_AGENTS_ELASTICSEARCH_HOSTS: '["${FLEET_ELASTICSEARCH_HOST:-http://elasticsearch:9200}"]'
+      XPACK_FLEET_AGENTS_FLEET_SERVER_HOSTS: '["${FLEET_SERVER_EXTERNAL_HOST:-http://fleet-server:8220}"]'
+    ports:
+      - "0.0.0.0:${KIBANA_PORT:-15601}:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status || exit 1"]
+      interval: 10s
+      retries: 60
+      start_period: 30s
+
+  fleet-server:
+    image: docker.elastic.co/elastic-agent/elastic-agent:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: soc-fleet-server
+    environment:
+      FLEET_SERVER_ENABLE: "true"
+      FLEET_SERVER_HOST: "0.0.0.0"
+      FLEET_SERVER_INSECURE_HTTP: "true"
+      FLEET_SERVER_ELASTICSEARCH_HOST: http://elasticsearch:9200
+      FLEET_SERVER_ELASTICSEARCH_USERNAME: elastic
+      FLEET_SERVER_ELASTICSEARCH_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+      FLEET_SERVER_POLICY_ID: fleet-server-policy
+      FLEET_URL: http://fleet-server:8220
+      KIBANA_FLEET_SETUP: "1"
+      KIBANA_FLEET_HOST: http://kibana:5601
+      KIBANA_FLEET_USERNAME: elastic
+      KIBANA_FLEET_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+    ports:
+      - "0.0.0.0:${FLEET_PORT:-18220}:8220"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8220/api/status || exit 1"]
+      interval: 15s
+      retries: 60
+      start_period: 120s
+
+  caldera:
+    build:
+      context: ./infra/caldera
+      dockerfile: Dockerfile
+    container_name: soc-caldera
+    ports:
+      - "0.0.0.0:${CALDERA_PORT:-18888}:8888"
+      - "0.0.0.0:${CALDERA_CONTACT_TCP:-17010}:7010"
+      - "0.0.0.0:${CALDERA_CONTACT_HTTP:-17012}:7012"
+      - "0.0.0.0:${CALDERA_CONTACT_UDP:-17011}:7011/udp"
+    volumes:
+      - caldera_data:/opt/caldera/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8888/api/v2/health || exit 1"]
+      interval: 10s
+      retries: 30
+      start_period: 120s
+    restart: unless-stopped
+
+  caldera-bridge:
+    build:
+      context: ./bridge
+      dockerfile: Dockerfile
+    container_name: soc-caldera-bridge
+    environment:
+      ES_URL: http://elasticsearch:9200
+      ES_USER: elastic
+      ES_PASS: ${ELASTIC_PASSWORD:-changeme}
+      CALDERA_URL: http://caldera:8888
+      CALDERA_API_KEY: ${CALDERA_API_KEY:-ADMIN123}
+      POLL_INTERVAL_SECONDS: "30"
+      PROFILES_DIR: /app/profiles
+    volumes:
+      - ./caldera_profiles:/app/profiles:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      caldera:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caldera_data: {}
+  es_data: {}

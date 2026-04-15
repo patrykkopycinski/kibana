@@ -1,0 +1,8 @@
+{
+  "difficulty_level": 5,
+  "name": "adversarial-profile",
+  "adversary_id": "soc-sim-adversarial",
+  "group": "all-endpoints",
+  "description": "Novel techniques with anti-forensics. Targets techniques with no detection rule coverage, forcing SOC evolution.",
+  "techniques": []
+}

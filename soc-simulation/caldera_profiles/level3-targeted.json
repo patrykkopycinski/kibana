@@ -1,0 +1,8 @@
+{
+  "difficulty_level": 3,
+  "name": "targeted-profile",
+  "adversary_id": "soc-sim-targeted",
+  "group": "all-endpoints",
+  "description": "Multi-stage with evasion — spearphish, LOLBin execution, lateral movement, data staging.",
+  "techniques": ["T1204.002", "T1218.011", "T1021.004", "T1074.001"]
+}

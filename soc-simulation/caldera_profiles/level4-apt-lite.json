@@ -1,0 +1,8 @@
+{
+  "difficulty_level": 4,
+  "name": "apt-lite-profile",
+  "adversary_id": "soc-sim-apt-lite",
+  "group": "all-endpoints",
+  "description": "Full kill chain with stealth — supply chain, fileless execution, process injection, C2, exfiltration.",
+  "techniques": ["T1195.002", "T1055.012", "T1071.004", "T1041"]
+}

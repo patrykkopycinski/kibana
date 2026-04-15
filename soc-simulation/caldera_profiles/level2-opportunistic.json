@@ -1,0 +1,8 @@
+{
+  "difficulty_level": 2,
+  "name": "opportunistic-profile",
+  "adversary_id": "soc-sim-opportunistic",
+  "group": "all-endpoints",
+  "description": "2-stage chains — phishing to credential dump, exploit to crontab persistence.",
+  "techniques": ["T1566.001", "T1003.008", "T1053.003"]
+}

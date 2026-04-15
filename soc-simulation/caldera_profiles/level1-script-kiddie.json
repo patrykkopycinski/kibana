@@ -1,0 +1,8 @@
+{
+  "difficulty_level": 1,
+  "name": "script-kiddie-profile",
+  "adversary_id": "soc-sim-script-kiddie",
+  "group": "all-endpoints",
+  "description": "Single-stage, noisy attacks — crypto miner, reverse shell, whoami. Easy to detect.",
+  "techniques": ["T1059.004", "T1496", "T1033"]
+}

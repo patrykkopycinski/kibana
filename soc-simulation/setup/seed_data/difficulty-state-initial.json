@@ -1,0 +1,11 @@
+{
+  "index": ".soc-difficulty-state",
+  "body": {
+    "@timestamp": "2026-04-15T00:00:00.000Z",
+    "level": 1,
+    "level_name": "Script Kiddie",
+    "previous_level": 0,
+    "decision": "initial",
+    "reasoning": "Initial deployment — starting at Level 1 (Script Kiddie)"
+  }
+}

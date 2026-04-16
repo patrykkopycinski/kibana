@@ -65407,6 +65407,7 @@ paths:
           name: product_name
   /api/spaces/_disable_legacy_url_aliases:
     post:
+      description: Disable one or more legacy URL aliases so that they no longer resolve to their target saved objects.
       operationId: post-spaces-disable-legacy-url-aliases
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -65448,7 +65449,9 @@ paths:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: '#/components/examples/disable_legacy_url_request1'
-      responses: {}
+      responses:
+        '204':
+          description: Indicates a successful call.
       summary: Disable legacy URL aliases
       tags:
         - spaces
@@ -65490,7 +65493,17 @@ paths:
                   type: array
               required:
                 - objects
-      responses: {}
+            examples:
+              getShareableReferencesRequestExample1:
+                $ref: '#/components/examples/get_shareable_references_request1'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              examples:
+                getShareableReferencesResponseExample1:
+                  $ref: '#/components/examples/get_shareable_references_response1'
       summary: Get shareable references
       tags:
         - spaces
@@ -65663,6 +65676,7 @@ paths:
           name: product_name
   /api/spaces/space:
     get:
+      description: Retrieve all available Kibana spaces. The list includes only the spaces that the user is authorized to access.
       operationId: get-spaces-space
       parameters:
         - description: Specifies which authorization checks are applied to the API call. The default value is `any`.
@@ -65698,6 +65712,7 @@ paths:
         - content: Kibana
           name: product_name
     post:
+      description: Create a new Kibana space.
       operationId: post-spaces-space
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -65761,6 +65776,57 @@ paths:
                 $ref: '#/components/examples/create_space_request'
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  _reserved:
+                    type: boolean
+                  color:
+                    description: The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+                    type: string
+                  description:
+                    description: A description for the space.
+                    type: string
+                  disabledFeatures:
+                    default: []
+                    items:
+                      description: The list of features that are turned off in the space.
+                      type: string
+                    maxItems: 100
+                    type: array
+                  id:
+                    description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
+                    type: string
+                  imageUrl:
+                    description: The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
+                    type: string
+                  initials:
+                    description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
+                    maxLength: 2
+                    type: string
+                  name:
+                    description: 'The display name for the space. '
+                    minLength: 1
+                    type: string
+                  projectRouting:
+                    description: Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.
+                    type: string
+                  solution:
+                    enum:
+                      - security
+                      - oblt
+                      - es
+                      - classic
+                    type: string
+                required:
+                  - id
+                  - name
+              examples:
+                createSpaceResponseExample:
+                  $ref: '#/components/examples/get_space_response'
           description: Indicates a successful call.
       summary: Create a space
       tags:
@@ -65798,6 +65864,7 @@ paths:
         - content: Kibana
           name: product_name
     get:
+      description: Retrieve a single Kibana space by its identifier.
       operationId: get-spaces-space-id
       parameters:
         - description: The space identifier.
@@ -65821,6 +65888,7 @@ paths:
         - content: Kibana
           name: product_name
     put:
+      description: Update an existing Kibana space.
       operationId: put-spaces-space-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -78542,6 +78610,26 @@ components:
           - targetSpace: bills-space
             targetType: dashboard
             sourceId: 123
+    get_shareable_references_request1:
+      summary: Get shareable references
+      description: |
+        Collect references and space contexts for a dashboard saved object.
+      value:
+        objects:
+          - type: dashboard
+            id: my-dashboard-id
+    get_shareable_references_response1:
+      summary: Get shareable references response
+      description: |
+        A response that includes the collected references and the spaces where the objects exist.
+      value:
+        objects:
+          - type: dashboard
+            id: my-dashboard-id
+            spaces:
+              - default
+              - marketing
+            inboundReferences: []
     resolve_copy_saved_objects_request1:
       summary: Resolve conflict errors
       description: |

@@ -61246,6 +61246,7 @@ paths:
           name: product_name
   /api/spaces/space:
     get:
+      description: Retrieve all available Kibana spaces. The list includes only the spaces that the user is authorized to access.
       operationId: get-spaces-space
       parameters:
         - description: Specifies which authorization checks are applied to the API call. The default value is `any`.
@@ -61281,6 +61282,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      description: Create a new Kibana space.
       operationId: post-spaces-space
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -61337,6 +61339,50 @@ paths:
                 $ref: '#/components/examples/create_space_request'
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  _reserved:
+                    type: boolean
+                  color:
+                    description: The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.
+                    type: string
+                  description:
+                    description: A description for the space.
+                    type: string
+                  disabledFeatures:
+                    default: []
+                    items:
+                      description: The list of features that are turned off in the space.
+                      type: string
+                    maxItems: 100
+                    type: array
+                  id:
+                    description: The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.
+                    type: string
+                  imageUrl:
+                    description: The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.
+                    type: string
+                  initials:
+                    description: One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.
+                    maxLength: 2
+                    type: string
+                  name:
+                    description: 'The display name for the space. '
+                    minLength: 1
+                    type: string
+                  projectRouting:
+                    description: Cross-project search default routing configuration for this space. Controls whether searches are scoped to a single project or span multiple projects in serverless environments.
+                    type: string
+                required:
+                  - id
+                  - name
+              examples:
+                createSpaceResponseExample:
+                  $ref: '#/components/examples/get_space_response'
           description: Indicates a successful call.
       summary: Create a space
       tags:
@@ -61374,6 +61420,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      description: Retrieve a single Kibana space by its identifier.
       operationId: get-spaces-space-id
       parameters:
         - description: The space identifier.
@@ -61397,6 +61444,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
+      description: Update an existing Kibana space.
       operationId: put-spaces-space-id
       parameters:
         - description: A required header to protect against CSRF attacks

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
+import React from 'react';
 
-export const addLicense = createAction('LICENSE_MANAGEMENT_ADD_LICENSE');
+const FocusTrapReact = (props: { children: React.ReactNode }) =>
+  React.createElement('div', null, props.children);
+
+export = FocusTrapReact;

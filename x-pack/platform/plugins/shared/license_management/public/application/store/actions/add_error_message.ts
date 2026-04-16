@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import { createAction } from 'redux-actions';
 
-export default (props) => <div>{props.children}</div>;
+export const addUploadErrorMessage = createAction<string | React.ReactNode>(
+  'LICENSE_MANAGEMENT_ADD_UPLOAD_ERROR_MESSAGE'
+);

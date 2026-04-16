@@ -10810,7 +10810,6 @@
     "xpack.apm.alertDetails.error.toastDescription": "アラート詳細ページのグラフを読み込めません。アラートが新しく作成された場合は、ページを更新してください。",
     "xpack.apm.alertDetails.error.toastTitle": "アラート時間範囲を特定するときにエラーが発生しました。",
     "xpack.apm.alertDetails.thresholdTitle": "しきい値を超えました",
-    "xpack.apm.alertDetails.viewInApm": "APMで表示",
     "xpack.apm.alerting.fields.environment": "環境",
     "xpack.apm.alerting.fields.error.group.id": "エラーグループキー",
     "xpack.apm.alerting.fields.service": "サービス",

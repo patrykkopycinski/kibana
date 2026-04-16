@@ -10774,7 +10774,6 @@
     "xpack.apm.alertDetails.error.toastDescription": "Die Diagramme der Seite mit den Alert-Details konnten nicht geladen werden. Bitte versuchen Sie, die Seite zu aktualisieren, wenn der Alert neu erstellt wird.",
     "xpack.apm.alertDetails.error.toastTitle": "Bei der Identifizierung des Warnungszeitbereichs ist ein Fehler aufgetreten.",
     "xpack.apm.alertDetails.thresholdTitle": "Schwellenwert überschritten",
-    "xpack.apm.alertDetails.viewInApm": "In APM anzeigen",
     "xpack.apm.alerting.fields.environment": "Umgebung",
     "xpack.apm.alerting.fields.error.group.id": "Fehlergruppierungsschlüssel",
     "xpack.apm.alerting.fields.service": "Service",

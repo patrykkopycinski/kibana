@@ -10808,7 +10808,6 @@
     "xpack.apm.alertDetails.error.toastDescription": "无法加载告警详情页面的图表。如果告警为新建告警，请尝试刷新该页面",
     "xpack.apm.alertDetails.error.toastTitle": "识别告警时间范围时出错。",
     "xpack.apm.alertDetails.thresholdTitle": "超出阈值",
-    "xpack.apm.alertDetails.viewInApm": "在 APM 中查看",
     "xpack.apm.alerting.fields.environment": "环境",
     "xpack.apm.alerting.fields.error.group.id": "错误分组密钥",
     "xpack.apm.alerting.fields.service": "服务",

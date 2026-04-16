@@ -78362,6 +78362,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -78503,6 +78506,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -78646,6 +78652,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -78734,6 +78743,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -79539,6 +79551,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -79680,6 +79695,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -79823,6 +79841,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -79911,6 +79932,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -81782,6 +81806,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -81919,6 +81946,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -82057,6 +82087,9 @@ components:
           type: boolean
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string
@@ -82139,6 +82172,9 @@ components:
           type: string
         name:
           type: string
+        otel_disable_beatsauth:
+          nullable: true
+          type: boolean
         otel_exporter_config_yaml:
           nullable: true
           type: string

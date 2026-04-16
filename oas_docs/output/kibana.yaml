@@ -36073,6 +36073,7 @@ paths:
                             - degraded
                             - updating
                             - starting
+                            - disconnected
                           type: string
                         last_known_status:
                           enum:
@@ -36639,6 +36640,7 @@ paths:
                           - degraded
                           - updating
                           - starting
+                          - disconnected
                         type: string
                       last_known_status:
                         enum:
@@ -37061,6 +37063,7 @@ paths:
                           - degraded
                           - updating
                           - starting
+                          - disconnected
                         type: string
                       last_known_status:
                         enum:

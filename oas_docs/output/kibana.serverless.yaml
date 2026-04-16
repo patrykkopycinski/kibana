@@ -63320,7 +63320,7 @@ paths:
             {
               "ids": ["workflow-c3d4e5f6-a7b8-9012-cdef-234567890123", "workflow-d4e5f6a7-b8c9-0123-defa-345678901234"]
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63438,7 +63438,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows?size=20&page=1
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63565,7 +63565,7 @@ paths:
                 { "id": "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901", "yaml": "name: Second workflow\nenabled: false\ndescription: Another workflow\ntriggers:\n  - type: manual\nsteps:\n  - name: log_step\n    type: console\n    with:\n      message: \"Hello from second workflow\"\n" }
               ]
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63622,7 +63622,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/aggs?fields=tags&fields=createdBy
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63687,7 +63687,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/connectors
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63803,7 +63803,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}?includeInput=true&includeOutput=true
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63848,7 +63848,7 @@ paths:
         - lang: Console
           source: |
             POST kbn://api/workflows/executions/{executionId}/cancel
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63911,7 +63911,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/children
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64018,7 +64018,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/logs?size=100&page=1
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64105,7 +64105,7 @@ paths:
                 "comment": "Approved by analyst"
               }
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64174,7 +64174,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/executions/{executionId}/step/{stepExecutionId}
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64270,7 +64270,7 @@ paths:
             {
               "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"]
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64367,7 +64367,7 @@ paths:
               "ids": ["workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890", "workflow-b2c3d4e5-f6a7-8901-bcde-f12345678901"],
               "source": ["name", "enabled"]
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64434,7 +64434,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/schema?loose=false
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64485,7 +64485,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/stats
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64596,7 +64596,7 @@ paths:
               "workflowYaml": "name: Example definition\nenabled: true\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"",
               "contextOverride": { "inputs": { "message": "override message" } }
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64697,7 +64697,7 @@ paths:
               "workflowId": "workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
               "inputs": { "message": "test message" }
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64842,7 +64842,7 @@ paths:
             {
               "yaml": "name: Example definition\nenabled: true\ndescription: This is a workflow example\ntriggers:\n  - type: manual\ninputs:\n  - name: message\n    type: string\n    default: \"hello world\"\nsteps:\n  - name: hello_world_step\n    type: console\n    with:\n      message: \"{{ inputs.message }}\"\n"
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64902,7 +64902,7 @@ paths:
         - lang: Console
           source: |
             DELETE kbn://api/workflows/workflow/{id}
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -64983,7 +64983,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/workflow/{id}
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65098,7 +65098,7 @@ paths:
               "enabled": true,
               "tags": ["production"]
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65188,7 +65188,7 @@ paths:
         - lang: Console
           source: |
             POST kbn://api/workflows/workflow/{id}/clone
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65274,7 +65274,7 @@ paths:
                 "message": "hello from the API"
               }
             }
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65405,7 +65405,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65450,7 +65450,7 @@ paths:
         - lang: Console
           source: |
             POST kbn://api/workflows/workflow/{workflowId}/executions/cancel
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -65545,7 +65545,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/workflows/workflow/{workflowId}/executions/steps?includeInput=true
-      x-state: ''
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

@@ -26478,13 +26478,25 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.
+        List all agent binary download sources.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.
       operationId: get-fleet-agent-download-sources
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getDownloadSourcesExample:
+                  description: List of agent binary download sources
+                  value:
+                    items:
+                      - host: https://artifacts.elastic.co/downloads/
+                        id: download-source-id-1
+                        is_default: true
+                        name: Elastic Artifacts
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -26605,10 +26617,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -26626,7 +26645,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
@@ -26641,7 +26660,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Create a new agent binary download source.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-agent-download-sources
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26654,6 +26673,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postDownloadSourceRequestExample:
+                description: Create a new agent binary download source
+                value:
+                  host: https://my-custom-host.example.com/downloads/
+                  is_default: false
+                  name: My custom download source
             schema:
               additionalProperties: false
               type: object
@@ -26759,6 +26785,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postDownloadSourceExample:
+                  description: The created agent binary download source
+                  value:
+                    item:
+                      host: https://my-custom-host.example.com/downloads/
+                      id: download-source-id-2
+                      is_default: false
+                      name: My custom download source
               schema:
                 additionalProperties: false
                 type: object
@@ -26867,10 +26902,17 @@ paths:
                       - host
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -26888,7 +26930,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -26923,6 +26965,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteDownloadSourceExample:
+                  description: The download source was successfully deleted
+                  value:
+                    id: download-source-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -26931,10 +26978,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -26952,7 +27006,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No download source was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent binary source download-source-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -26979,6 +27044,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getDownloadSourceExample:
+                  description: An agent binary download source
+                  value:
+                    item:
+                      host: https://artifacts.elastic.co/downloads/
+                      id: download-source-id-1
+                      is_default: true
+                      name: Elastic Artifacts
               schema:
                 additionalProperties: false
                 type: object
@@ -27087,10 +27161,17 @@ paths:
                       - host
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -27108,7 +27189,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No download source was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent binary source download-source-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -27141,6 +27233,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putDownloadSourceRequestExample:
+                description: Update an agent binary download source
+                value:
+                  host: https://updated-host.example.com/downloads/
+                  is_default: false
+                  name: Updated download source
             schema:
               additionalProperties: false
               type: object
@@ -27246,6 +27345,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putDownloadSourceExample:
+                  description: The updated agent binary download source
+                  value:
+                    item:
+                      host: https://updated-host.example.com/downloads/
+                      id: download-source-id-1
+                      is_default: false
+                      name: Updated download source
               schema:
                 additionalProperties: false
                 type: object
@@ -27354,10 +27462,17 @@ paths:
                       - host
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -27375,7 +27490,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No download source was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Download source download-source-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -39557,6 +39683,14 @@ paths:
           name: product_name
   /api/fleet/check-permissions:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Check whether the current user has the required permissions to use Fleet. Optionally verifies Fleet Server setup privileges.
       operationId: get-fleet-check-permissions
       parameters:
         - in: query
@@ -39568,6 +39702,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                checkPermissionsMissingPrivilegesExample:
+                  description: The current user is missing Fleet privileges
+                  value:
+                    error: MISSING_PRIVILEGES
+                    success: false
+                checkPermissionsSuccessExample:
+                  description: The current user has all required Fleet permissions
+                  value:
+                    success: true
               schema:
                 additionalProperties: false
                 type: object
@@ -39582,10 +39726,17 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39603,19 +39754,13 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Check permissions
       tags:
         - Fleet internals
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/fleet/cloud_connectors:
     get:
       description: |-
@@ -40505,7 +40650,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.
+        List all enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.
       operationId: get-fleet-enrollment-api-keys
       parameters:
         - in: query
@@ -40529,6 +40674,29 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getEnrollmentApiKeysExample:
+                  description: List of enrollment API keys
+                  value:
+                    items:
+                      - active: true
+                        api_key: api-key-value-1
+                        api_key_id: api-key-id-1
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        id: key-id-1
+                        name: Default policy enrollment key
+                        policy_id: policy-id-1
+                    list:
+                      - active: true
+                        api_key: api-key-value-1
+                        api_key_id: api-key-id-1
+                        created_at: '2024-01-01T00:00:00.000Z'
+                        id: key-id-1
+                        name: Default policy enrollment key
+                        policy_id: policy-id-1
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -40614,10 +40782,17 @@ paths:
                   - page
                   - perPage
                   - list
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40635,7 +40810,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
@@ -40650,7 +40825,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Create an enrollment API key for a given agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-enrollment-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40663,6 +40838,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postEnrollmentApiKeyRequestExample:
+                description: Create an enrollment API key for an agent policy
+                value:
+                  expiration: '2025-01-01T00:00:00.000Z'
+                  name: My enrollment key
+                  policy_id: policy-id-1
             schema:
               additionalProperties: false
               type: object
@@ -40679,6 +40861,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postEnrollmentApiKeyExample:
+                  description: The created enrollment API key
+                  value:
+                    action: created
+                    item:
+                      active: true
+                      api_key: api-key-value-1
+                      api_key_id: api-key-id-1
+                      created_at: '2024-01-01T00:00:00.000Z'
+                      id: key-id-1
+                      name: My enrollment key
+                      policy_id: policy-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -40721,10 +40916,17 @@ paths:
                 required:
                   - item
                   - action
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40742,7 +40944,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -40777,6 +40979,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEnrollmentApiKeyExample:
+                  description: The enrollment API key was successfully revoked
+                  value:
+                    action: deleted
               schema:
                 additionalProperties: false
                 type: object
@@ -40787,10 +40994,17 @@ paths:
                     type: string
                 required:
                   - action
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40808,7 +41022,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No enrollment API key was found with the given ID
+                  value:
+                    error: Not Found
+                    message: EnrollmentAPIKey key-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -40835,6 +41060,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getEnrollmentApiKeyExample:
+                  description: An enrollment API key
+                  value:
+                    item:
+                      active: true
+                      api_key: api-key-value-1
+                      api_key_id: api-key-id-1
+                      created_at: '2024-01-01T00:00:00.000Z'
+                      id: key-id-1
+                      name: Default policy enrollment key
+                      policy_id: policy-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -40872,10 +41109,17 @@ paths:
                       - created_at
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40893,7 +41137,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No enrollment API key was found with the given ID
+                  value:
+                    error: Not Found
+                    message: EnrollmentAPIKey key-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -47113,13 +47368,27 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all OR fleet-settings-read.
+        List all Fleet Server hosts.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-settings-read.
       operationId: get-fleet-fleet-server-hosts
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getFleetServerHostsExample:
+                  description: List of Fleet Server hosts
+                  value:
+                    items:
+                      - host_urls:
+                          - https://fleet-server.example.com:8220
+                        id: fleet-server-host-id-1
+                        is_default: true
+                        is_preconfigured: false
+                        name: Default Fleet Server
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -47243,10 +47512,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -47264,7 +47540,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
@@ -47279,7 +47555,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Create a new Fleet Server host.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-fleet-server-hosts
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -47292,6 +47568,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postFleetServerHostRequestExample:
+                description: Create a new Fleet Server host
+                value:
+                  host_urls:
+                    - https://fleet-server.example.com:8220
+                  is_default: false
+                  name: My Fleet Server
             schema:
               additionalProperties: false
               type: object
@@ -47400,6 +47684,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postFleetServerHostExample:
+                  description: The created Fleet Server host
+                  value:
+                    item:
+                      host_urls:
+                        - https://fleet-server.example.com:8220
+                      id: fleet-server-host-id-2
+                      is_default: false
+                      is_preconfigured: false
+                      name: My Fleet Server
               schema:
                 additionalProperties: false
                 type: object
@@ -47511,10 +47806,17 @@ paths:
                       - id
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -47532,7 +47834,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -47567,6 +47869,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteFleetServerHostExample:
+                  description: The Fleet Server host was successfully deleted
+                  value:
+                    id: fleet-server-host-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -47575,10 +47882,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -47596,7 +47910,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No Fleet Server host was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet server fleet-server-host-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -47623,6 +47948,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getFleetServerHostExample:
+                  description: A Fleet Server host
+                  value:
+                    item:
+                      host_urls:
+                        - https://fleet-server.example.com:8220
+                      id: fleet-server-host-id-1
+                      is_default: true
+                      is_preconfigured: false
+                      name: Default Fleet Server
               schema:
                 additionalProperties: false
                 type: object
@@ -47734,10 +48070,17 @@ paths:
                       - id
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -47755,7 +48098,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No Fleet Server host was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet server fleet-server-host-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -47788,6 +48142,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putFleetServerHostRequestExample:
+                description: Update a Fleet Server host
+                value:
+                  host_urls:
+                    - https://updated-fleet-server.example.com:8220
+                  is_default: false
+                  name: Updated Fleet Server
             schema:
               additionalProperties: false
               type: object
@@ -47889,6 +48251,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putFleetServerHostExample:
+                  description: The updated Fleet Server host
+                  value:
+                    item:
+                      host_urls:
+                        - https://updated-fleet-server.example.com:8220
+                      id: fleet-server-host-id-1
+                      is_default: false
+                      is_preconfigured: false
+                      name: Updated Fleet Server
               schema:
                 additionalProperties: false
                 type: object
@@ -48000,10 +48373,17 @@ paths:
                       - id
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -48021,7 +48401,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No Fleet Server host was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet server fleet-server-host-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -54321,13 +54712,25 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-read.
+        List all Fleet proxies.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-proxies
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getFleetProxiesExample:
+                  description: List of Fleet proxies
+                  value:
+                    items:
+                      - id: proxy-id-1
+                        is_preconfigured: false
+                        name: My proxy
+                        url: http://proxy.example.com:3128
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -54380,10 +54783,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54401,7 +54811,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get proxies
       tags:
         - Fleet proxies
@@ -54416,7 +54826,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Create a new Fleet proxy.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-proxies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -54429,6 +54839,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postFleetProxyRequestExample:
+                description: Create a new Fleet proxy
+                value:
+                  name: My proxy
+                  url: http://proxy.example.com:3128
             schema:
               additionalProperties: false
               type: object
@@ -54466,6 +54882,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postFleetProxyExample:
+                  description: The created Fleet proxy
+                  value:
+                    item:
+                      id: proxy-id-2
+                      is_preconfigured: false
+                      name: My proxy
+                      url: http://proxy.example.com:3128
               schema:
                 additionalProperties: false
                 type: object
@@ -54506,10 +54931,17 @@ paths:
                       - name
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54527,7 +54959,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create a proxy
       tags:
         - Fleet proxies
@@ -54562,6 +54994,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteFleetProxyExample:
+                  description: The Fleet proxy was successfully deleted
+                  value:
+                    id: proxy-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -54570,10 +55007,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54591,7 +55035,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No proxy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet proxy proxy-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Delete a proxy
       tags:
         - Fleet proxies
@@ -54618,6 +55073,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getFleetProxyExample:
+                  description: A Fleet proxy
+                  value:
+                    item:
+                      id: proxy-id-1
+                      is_preconfigured: false
+                      name: My proxy
+                      url: http://proxy.example.com:3128
               schema:
                 additionalProperties: false
                 type: object
@@ -54658,10 +55122,17 @@ paths:
                       - name
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54679,7 +55150,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No proxy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Fleet proxy proxy-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get a proxy
       tags:
         - Fleet proxies
@@ -54712,6 +55194,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putFleetProxyRequestExample:
+                description: Update a Fleet proxy
+                value:
+                  name: Updated proxy
+                  url: http://updated-proxy.example.com:3128
             schema:
               additionalProperties: false
               type: object
@@ -54745,6 +55233,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putFleetProxyExample:
+                  description: The updated Fleet proxy
+                  value:
+                    item:
+                      id: proxy-id-1
+                      is_preconfigured: false
+                      name: Updated proxy
+                      url: http://updated-proxy.example.com:3128
               schema:
                 additionalProperties: false
                 type: object
@@ -54785,10 +55282,17 @@ paths:
                       - name
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54806,7 +55310,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No proxy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Proxy proxy-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Update a proxy
       tags:
         - Fleet proxies
@@ -55178,7 +55693,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Create a Fleet Server service token. The token is used to enroll Fleet Server instances with Kibana.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-service-tokens
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -55191,6 +55706,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postGenerateServiceTokenRequestExample:
+                description: Generate a service token for a remote Fleet Server
+                value:
+                  remote: true
             schema:
               additionalProperties: false
               nullable: true
@@ -55203,6 +55723,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postGenerateServiceTokenExample:
+                  description: The generated Fleet Server service token
+                  value:
+                    name: elastic/fleet-server/token-1234567890
+                    value: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTEyMzQ1Njc4OTA6QUJDREVGR0hJSktMTU5P
               schema:
                 additionalProperties: false
                 type: object
@@ -55214,10 +55740,17 @@ paths:
                 required:
                   - name
                   - value
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -55235,7 +55768,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create a service token
       tags:
         - Fleet service tokens
@@ -55251,13 +55784,27 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-read.
+        Get the global Fleet settings.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-settings
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getSettingsExample:
+                  description: The current Fleet settings
+                  value:
+                    item:
+                      delete_unenrolled_agents:
+                        enabled: false
+                        is_preconfigured: false
+                      has_seen_add_data_notice: true
+                      id: fleet-default-settings
+                      output_secret_storage_requirements_met: true
+                      prerelease_integrations_enabled: false
+                      secret_storage_requirements_met: true
+                      version: WzEsMV0=
               schema:
                 additionalProperties: false
                 type: object
@@ -55334,10 +55881,17 @@ paths:
                         type: string
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -55355,10 +55909,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: Fleet settings have not been initialized
+                  value:
+                    error: Not Found
+                    message: Settings not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -55367,7 +55928,7 @@ paths:
                     type: string
                 required:
                   - message
-          description: Not found.
+          description: Not Found
       summary: Get settings
       tags:
         - Fleet internals
@@ -55382,7 +55943,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Update the global Fleet settings.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: put-fleet-settings
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -55395,6 +55956,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putSettingsRequestExample:
+                description: Update Fleet settings to enable pre-release integrations
+                value:
+                  prerelease_integrations_enabled: true
             schema:
               additionalProperties: false
               type: object
@@ -55434,6 +56000,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putSettingsExample:
+                  description: The updated Fleet settings
+                  value:
+                    item:
+                      delete_unenrolled_agents:
+                        enabled: false
+                        is_preconfigured: false
+                      has_seen_add_data_notice: true
+                      id: fleet-default-settings
+                      output_secret_storage_requirements_met: true
+                      prerelease_integrations_enabled: true
+                      secret_storage_requirements_met: true
+                      version: WzIsMV0=
               schema:
                 additionalProperties: false
                 type: object
@@ -55510,10 +56090,17 @@ paths:
                         type: string
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -55531,10 +56118,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: Fleet settings have not been initialized
+                  value:
+                    error: Not Found
+                    message: Settings not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -55543,7 +56137,7 @@ paths:
                     type: string
                 required:
                   - message
-          description: Not found.
+          description: Not Found
       summary: Update settings
       tags:
         - Fleet internals
@@ -55667,12 +56261,28 @@ paths:
           name: product_name
   /api/fleet/space_settings:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/space_settings</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the Fleet settings for the current Kibana space.
       operationId: get-fleet-space-settings
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getSpaceSettingsExample:
+                  description: The Fleet settings for the current Kibana space
+                  value:
+                    item:
+                      allowed_namespace_prefixes:
+                        - team-a
+                        - team-b
               schema:
                 additionalProperties: false
                 type: object
@@ -55692,19 +56302,13 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
       summary: Get space settings
       tags: []
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/space_settings</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     put:
       description: |-
         **Spaces method and path for this operation:**
@@ -55713,7 +56317,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Create or update Fleet settings for the current Kibana space.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: put-fleet-space-settings
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -55726,6 +56330,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putSpaceSettingsRequestExample:
+                description: Update allowed namespace prefixes for the current Kibana space
+                value:
+                  allowed_namespace_prefixes:
+                    - team-a
+                    - team-b
             schema:
               additionalProperties: false
               type: object
@@ -55739,6 +56350,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putSpaceSettingsExample:
+                  description: The updated Fleet settings for the current Kibana space
+                  value:
+                    item:
+                      allowed_namespace_prefixes:
+                        - team-a
+                        - team-b
               schema:
                 additionalProperties: false
                 type: object
@@ -55758,7 +56377,7 @@ paths:
                       - allowed_namespace_prefixes
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
       summary: Create space settings
       tags: []
       x-state: Generally available; added in 9.1.0

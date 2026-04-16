@@ -10774,7 +10774,6 @@
     "xpack.apm.alertDetails.error.toastDescription": "Impossible de charger les graphiques de la page de détails d’alerte. Veuillez essayer d’actualiser la page si l’alerte vient d’être créée",
     "xpack.apm.alertDetails.error.toastTitle": "Une erreur s’est produite lors de l’identification de la plage temporelle de l’alerte.",
     "xpack.apm.alertDetails.thresholdTitle": "Seuil dépassé",
-    "xpack.apm.alertDetails.viewInApm": "Afficher dans APM",
     "xpack.apm.alerting.fields.environment": "Environnement",
     "xpack.apm.alerting.fields.error.group.id": "Clé du groupe d'erreurs",
     "xpack.apm.alerting.fields.service": "Service",

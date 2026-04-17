@@ -32253,6 +32253,14 @@ paths:
           name: product_name
   /api/fleet/agent_status:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a summary of agent statuses for a given agent policy.
       operationId: get-fleet-agent-status
       parameters:
         - in: query
@@ -32277,6 +32285,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentStatusExample:
+                  description: Agent status summary for an agent policy
+                  value:
+                    results:
+                      error: 1
+                      offline: 2
+                      online: 5
+                      other: 0
+                      updating: 0
+                    totalInactive: 0
               schema:
                 additionalProperties: false
                 type: object
@@ -32322,10 +32341,17 @@ paths:
                       - active
                 required:
                   - results
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -32343,19 +32369,13 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get an agent status summary
       tags:
         - Elastic Agent status
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_status</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/fleet/agent_status/data:
     get:
       description: |-
@@ -32365,7 +32385,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Get the data streams that an agent is actively sending data to.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agent-status-data
       parameters:
         - in: query
@@ -32396,6 +32416,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentDataExample:
+                  description: Data streams the agent is actively sending data to
+                  value:
+                    items:
+                      - data:
+                          logs-nginx.access-default:
+                            - id: agent-id-1
+                              name: my-host
+                    total: 1
+                    totalMonitoring: 0
               schema:
                 additionalProperties: false
                 type: object
@@ -32420,10 +32451,17 @@ paths:
                 required:
                   - items
                   - dataPreview
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -32441,7 +32479,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get incoming agent data
       tags:
         - Elastic Agents
@@ -33688,7 +33726,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        List agents, with optional filtering and pagination.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents
       parameters:
         - in: query
@@ -33774,6 +33812,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentsExample:
+                  description: List of agents
+                  value:
+                    items:
+                      - active: true
+                        enrolled_at: '2024-01-01T00:00:00.000Z'
+                        id: agent-id-1
+                        policy_id: agent-policy-id-1
+                        policy_revision: 1
+                        status: online
+                        type: PERMANENT
+                        updated_at: '2024-01-01T00:00:00.000Z'
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -34147,10 +34201,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34168,7 +34229,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agents
       tags:
         - Elastic Agents
@@ -34183,7 +34244,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Retrieve agents associated with specific action IDs.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: post-fleet-agents
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -34196,6 +34257,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postGetAgentsByActionsRequestExample:
+                description: Retrieve agents associated with specific action IDs
+                value:
+                  actionIds:
+                    - action-id-1
+                    - action-id-2
             schema:
               additionalProperties: false
               type: object
@@ -34211,6 +34279,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postGetAgentsByActionsExample:
+                  description: Agents associated with the given actions
+                  value:
+                    items:
+                      - active: true
+                        id: agent-id-1
+                        policy_id: agent-policy-id-1
+                        status: online
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -34222,10 +34300,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34243,7 +34328,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agents by action ids
       tags:
         - Elastic Agents
@@ -34278,6 +34363,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteAgentExample:
+                  description: Agent successfully deleted
+                  value:
+                    id: agent-id-1
+                    success: true
               schema:
                 additionalProperties: false
                 type: object
@@ -34288,10 +34379,17 @@ paths:
                     type: string
                 required:
                   - action
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34309,7 +34407,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent agent-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Delete an agent
       tags:
         - Elastic Agents
@@ -34342,6 +34451,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentExample:
+                  description: Agent details
+                  value:
+                    item:
+                      active: true
+                      agent_id: agent-id-1
+                      enrolled_at: '2024-01-01T00:00:00.000Z'
+                      id: agent-id-1
+                      local_metadata:
+                        elastic:
+                          agent:
+                            version: 8.17.0
+                        host:
+                          hostname: my-host
+                        os:
+                          name: linux
+                      policy_id: agent-policy-id-1
+                      policy_revision: 1
+                      status: online
+                      type: PERMANENT
+                      updated_at: '2024-01-01T00:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -34695,10 +34826,17 @@ paths:
                       - effective_config
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34716,7 +34854,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent agent-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get an agent
       tags:
         - Elastic Agents
@@ -34749,6 +34898,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putAgentRequestExample:
+                description: Update agent tags
+                value:
+                  tags:
+                    - production
+                    - linux
             schema:
               additionalProperties: false
               type: object
@@ -34765,6 +34921,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putAgentExample:
+                  description: Updated agent details
+                  value:
+                    item:
+                      active: true
+                      enrolled_at: '2024-01-01T00:00:00.000Z'
+                      id: agent-id-1
+                      policy_id: agent-policy-id-1
+                      policy_revision: 1
+                      status: online
+                      tags:
+                        - production
+                        - linux
+                      type: PERMANENT
+                      updated_at: '2024-01-01T00:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -35118,10 +35290,17 @@ paths:
                       - effective_config
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35139,7 +35318,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent agent-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Update an agent by ID
       tags:
         - Elastic Agents
@@ -35155,7 +35345,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Create a new action for a specific agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-actions
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -35173,6 +35363,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postAgentActionRequestExample:
+                description: Create a UNENROLL action for an agent
+                value:
+                  action:
+                    type: UNENROLL
             schema:
               additionalProperties: false
               type: object
@@ -35224,6 +35420,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postAgentActionExample:
+                  description: Created agent action
+                  value:
+                    item:
+                      agents:
+                        - agent-id-1
+                      created_at: '2024-01-01T00:00:00.000Z'
+                      id: action-id-1
+                      type: UNENROLL
               schema:
                 additionalProperties: false
                 type: object
@@ -35272,10 +35478,17 @@ paths:
                       - ack_data
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35293,7 +35506,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create an agent action
       tags:
         - Elastic Agent actions
@@ -35392,6 +35605,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postMigrateAgentRequestExample:
+                description: Migrate a single agent to another cluster
+                value:
+                  enrollment_token: enrollment-token-value
+                  settings:
+                    retry_max: 5
+                  uri: https://fleet-server.example.com:8220
             schema:
               additionalProperties: false
               type: object
@@ -35445,6 +35666,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postMigrateAgentExample:
+                  description: Agent migration initiated
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -35453,10 +35679,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35474,7 +35707,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Migrate a single agent
       tags:
         - Elastic Agents
@@ -35597,7 +35830,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Reassign an agent to a different agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -35615,6 +35848,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postReassignAgentRequestExample:
+                description: Reassign an agent to a different policy
+                value:
+                  policy_id: agent-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -35627,14 +35865,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postReassignAgentExample:
+                  description: Agent successfully reassigned
+                  value: {}
               schema:
                 additionalProperties: false
                 type: object
                 properties: {}
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35652,7 +35901,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Reassign an agent
       tags:
         - Elastic Agent actions
@@ -35668,7 +35917,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Request a diagnostics bundle from a specific agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: post-fleet-agents-agentid-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -35686,6 +35935,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postRequestDiagnosticsRequestExample:
+                description: Request a diagnostics bundle from an agent
+                value:
+                  additional_metrics:
+                    - CPU
             schema:
               additionalProperties: false
               nullable: true
@@ -35702,6 +35957,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postRequestDiagnosticsExample:
+                  description: Diagnostics action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -35710,10 +35970,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: Agent agent-id-1 does not support request diagnostics action.
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35731,7 +35998,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
@@ -35829,7 +36096,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll a specific agent, optionally revoking its enrollment API key.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -35847,6 +36114,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postUnenrollAgentRequestExample:
+                description: Unenroll an agent, optionally revoking the enrollment API key
+                value:
+                  revoke: false
             schema:
               additionalProperties: false
               nullable: true
@@ -35856,7 +36128,26 @@ paths:
                   type: boolean
                 revoke:
                   type: boolean
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postUnenrollAgentExample:
+                  description: Agent successfully unenrolled
+                  value: {}
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+          description: Bad Request
       summary: Unenroll an agent
       tags:
         - Elastic Agent actions
@@ -35872,7 +36163,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Upgrade a specific agent to a newer version.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-agentid-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -35890,6 +36181,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postUpgradeAgentRequestExample:
+                description: Upgrade an agent to a specific version
+                value:
+                  version: 8.17.0
             schema:
               additionalProperties: false
               type: object
@@ -35908,14 +36204,25 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postUpgradeAgentExample:
+                  description: Agent upgrade initiated
+                  value: {}
               schema:
                 additionalProperties: false
                 type: object
                 properties: {}
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -35933,7 +36240,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Upgrade an agent
       tags:
         - Elastic Agent actions
@@ -35949,7 +36256,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Get a list of files uploaded by a specific agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-agentid-uploads
       parameters:
         - in: path
@@ -35961,6 +36268,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentUploadsExample:
+                  description: List of files uploaded by the agent
+                  value:
+                    items:
+                      - actionId: action-id-1
+                        createTime: '2024-01-01T00:00:00.000Z'
+                        filePath: /tmp/diagnostics-2024-01-01.zip
+                        id: file-id-1
+                        name: diagnostics-2024-01-01.zip
+                        status: READY
               schema:
                 additionalProperties: false
                 type: object
@@ -36002,10 +36320,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36023,7 +36348,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agent uploads
       tags:
         - Elastic Agents
@@ -36039,7 +36364,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Get the current status of recent agent actions.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-action-status
       parameters:
         - in: query
@@ -36074,6 +36399,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getActionStatusExample:
+                  description: Status of recent agent actions
+                  value:
+                    items:
+                      - actionId: action-id-1
+                        completionTime: '2024-01-01T00:05:00.000Z'
+                        creationTime: '2024-01-01T00:00:00.000Z'
+                        nbAgentsAck: 2
+                        nbAgentsActioned: 2
+                        nbAgentsFailed: 0
+                        status: COMPLETE
+                        type: UPGRADE
               schema:
                 additionalProperties: false
                 type: object
@@ -36183,10 +36521,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36204,7 +36549,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get an agent action status
       tags:
         - Elastic Agent actions
@@ -36220,7 +36565,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Cancel a pending action for a specific agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-actions-actionid-cancel
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -36235,10 +36580,27 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postCancelActionRequestExample:
+                description: Cancel an agent action
+                value: {}
       responses:
         '200':
           content:
             application/json:
+              examples:
+                postCancelActionExample:
+                  description: Cancellation action created
+                  value:
+                    item:
+                      agents:
+                        - agent-id-1
+                      created_at: '2024-01-01T00:00:00.000Z'
+                      id: cancel-action-id-1
+                      type: CANCEL
               schema:
                 additionalProperties: false
                 type: object
@@ -36287,10 +36649,17 @@ paths:
                       - ack_data
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36308,7 +36677,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Cancel an agent action
       tags:
         - Elastic Agent actions
@@ -36324,13 +36693,21 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Get a list of Elastic Agent versions available for upgrade.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-available-versions
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getAvailableVersionsExample:
+                  description: List of available agent versions for upgrade
+                  value:
+                    items:
+                      - 8.17.0
+                      - 8.16.3
+                      - 8.16.2
               schema:
                 additionalProperties: false
                 type: object
@@ -36342,10 +36719,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36363,7 +36747,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get available agent versions
       tags:
         - Elastic Agents
@@ -36392,6 +36776,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkMigrateAgentsRequestExample:
+                description: Migrate multiple agents to another cluster
+                value:
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
+                  enrollment_token: enrollment-token-value
+                  settings:
+                    retry_max: 5
+                  uri: https://fleet-server.example.com:8220
             schema:
               additionalProperties: false
               type: object
@@ -36453,6 +36848,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkMigrateAgentsExample:
+                  description: Bulk agent migration initiated
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -36461,10 +36861,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36482,7 +36889,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Migrate multiple agents
       tags:
         - Elastic Agents
@@ -36602,7 +37009,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Reassign multiple agents to a different agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-reassign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -36615,6 +37022,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkReassignAgentsRequestExample:
+                description: Reassign multiple agents to a different policy
+                value:
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
+                  policy_id: agent-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -36640,6 +37055,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkReassignAgentsExample:
+                  description: Bulk reassign action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -36648,10 +37068,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36669,7 +37096,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
@@ -36685,7 +37112,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Request diagnostics bundles from multiple agents.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: post-fleet-agents-bulk-request-diagnostics
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -36698,6 +37125,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkRequestDiagnosticsRequestExample:
+                description: Request diagnostics bundles from multiple agents
+                value:
+                  additional_metrics:
+                    - CPU
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
             schema:
               additionalProperties: false
               type: object
@@ -36724,6 +37160,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkRequestDiagnosticsExample:
+                  description: Bulk diagnostics action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -36732,10 +37173,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36753,7 +37201,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
@@ -36871,7 +37319,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Unenroll multiple agents, optionally revoking their enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-unenroll
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -36884,6 +37332,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkUnenrollAgentsRequestExample:
+                description: Unenroll multiple agents
+                value:
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
+                  revoke: false
             schema:
               additionalProperties: false
               type: object
@@ -36914,6 +37370,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkUnenrollAgentsExample:
+                  description: Bulk unenroll action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -36922,10 +37383,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -36943,7 +37411,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
@@ -36959,7 +37427,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Add or remove tags across multiple agents.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-update-agent-tags
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -36972,6 +37440,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkUpdateAgentTagsRequestExample:
+                description: Add and remove tags across multiple agents
+                value:
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
+                  tagsToAdd:
+                    - production
+                  tagsToRemove:
+                    - staging
             schema:
               additionalProperties: false
               type: object
@@ -37004,6 +37483,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkUpdateAgentTagsExample:
+                  description: Bulk action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -37012,10 +37496,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37033,7 +37524,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
@@ -37049,7 +37540,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-all.
+        Upgrade multiple agents to a newer version, with optional rollout controls.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: post-fleet-agents-bulk-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -37062,6 +37553,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkUpgradeAgentsRequestExample:
+                description: Upgrade multiple agents to a specific version
+                value:
+                  agents:
+                    - agent-id-1
+                    - agent-id-2
+                  rollout_duration_seconds: 3600
+                  version: 8.17.0
             schema:
               additionalProperties: false
               type: object
@@ -37098,6 +37598,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkUpgradeAgentsExample:
+                  description: Bulk upgrade action result
+                  value:
+                    actionId: action-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -37106,10 +37611,17 @@ paths:
                     type: string
                 required:
                   - actionId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37127,7 +37639,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
@@ -37162,6 +37674,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteAgentUploadFileExample:
+                  description: Uploaded file successfully deleted
+                  value:
+                    deleted: true
+                    id: file-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -37173,10 +37691,17 @@ paths:
                 required:
                   - id
                   - deleted
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37194,7 +37719,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete an uploaded file
       tags:
         - Elastic Agents
@@ -37227,12 +37752,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentUploadFileExample:
+                  description: The uploaded file content as a stream
+                  value: <binary file content>
               schema:
                 type: object
-          description: 'OK: A successful request.'
+          description: Successful response — returns the uploaded file content
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37250,7 +37786,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get an uploaded file
       tags:
         - Elastic Agents
@@ -37468,7 +38004,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agents-read.
+        Get a list of all tags used across enrolled agents.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-tags
       parameters:
         - in: query
@@ -37486,6 +38022,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentTagsExample:
+                  description: List of tags used across agents
+                  value:
+                    items:
+                      - production
+                      - linux
+                      - datacenter-1
               schema:
                 additionalProperties: false
                 type: object
@@ -37497,10 +38041,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -37518,7 +38069,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agent tags
       tags:
         - Elastic Agents
@@ -39114,7 +39665,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Retrieve multiple Kibana saved object assets by their IDs and types.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: post-fleet-epm-bulk-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -39127,6 +39678,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkGetAssetsRequestExample:
+                description: Retrieve multiple assets by their IDs and types
+                value:
+                  assetIds:
+                    - id: dashboard-id-1
+                      type: dashboard
+                    - id: index-pattern-id-1
+                      type: index_pattern
             schema:
               additionalProperties: false
               type: object
@@ -39151,6 +39711,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkGetAssetsExample:
+                  description: Requested assets
+                  value:
+                    items:
+                      - appLink: /app/dashboards#/view/dashboard-id-1
+                        attributes:
+                          title: My Dashboard
+                        id: dashboard-id-1
+                        type: dashboard
               schema:
                 additionalProperties: false
                 type: object
@@ -39186,10 +39756,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39207,7 +39784,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
@@ -39223,7 +39800,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get a list of integration categories.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-categories
       parameters:
         - in: query
@@ -39240,6 +39817,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getCategoriesExample:
+                  description: List of integration categories
+                  value:
+                    items:
+                      - count: 42
+                        id: security
+                        title: Security
+                      - count: 38
+                        id: observability
+                        title: Observability
               schema:
                 additionalProperties: false
                 type: object
@@ -39267,10 +39855,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39288,7 +39883,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
@@ -39304,7 +39899,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Create a new custom integration package with user-defined data streams.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-custom-integrations
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -39317,6 +39912,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postCreateCustomIntegrationRequestExample:
+                description: Create a new custom integration
+                value:
+                  datasets:
+                    - name: my_custom_logs.access
+                      type: logs
+                  integrationName: my_custom_logs
             schema:
               additionalProperties: false
               type: object
@@ -39352,6 +39955,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postCreateCustomIntegrationExample:
+                  description: Custom integration successfully created
+                  value:
+                    _meta:
+                      install_source: custom
+                    items:
+                      - id: my_custom_logs-logs-my_custom_logs.access
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -39429,10 +40041,17 @@ paths:
                 required:
                   - items
                   - _meta
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39450,7 +40069,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -39466,7 +40085,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all AND integrations-all.
+        Update the datasets of an existing custom integration package.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.
       operationId: put-fleet-epm-custom-integrations-pkgname
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -39484,6 +40103,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putUpdateCustomIntegrationRequestExample:
+                description: Update a custom integration
+                value:
+                  datasets:
+                    - name: my_custom_logs.access
+                      type: logs
+                  integrationName: my_custom_logs
             schema:
               additionalProperties: false
               type: object
@@ -39499,10 +40126,23 @@ paths:
                 - readMeData
       responses:
         '200':
-          description: 'OK: A successful request.'
+          content:
+            application/json:
+              examples:
+                putUpdateCustomIntegrationExample:
+                  description: Custom integration successfully updated
+                  value: {}
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39520,7 +40160,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Update a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -39536,7 +40176,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get a list of data streams created by installed integration packages.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-data-streams
       parameters:
         - in: query
@@ -39574,6 +40214,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getDataStreamsExample:
+                  description: List of data streams from installed packages
+                  value:
+                    data_streams:
+                      - ilm_policy: logs-default
+                        index_template: logs-system.syslog
+                        name: logs-system.syslog-default
+                        package: system
+                        package_version: 1.55.0
+                        title: System syslog logs
               schema:
                 additionalProperties: false
                 type: object
@@ -39591,10 +40242,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39612,7 +40270,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get data streams
       tags:
         - Data streams
@@ -39628,7 +40286,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get a list of integration packages available in the registry.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages
       parameters:
         - in: query
@@ -39655,6 +40313,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackagesExample:
+                  description: List of available integration packages
+                  value:
+                    items:
+                      - categories:
+                          - cloud
+                        description: Collect logs and metrics from Amazon Web Services
+                        id: aws
+                        name: aws
+                        status: not_installed
+                        title: AWS
+                        version: 2.10.0
+                    searchExcluded: 0
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -40128,10 +40801,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40149,7 +40829,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
@@ -40164,7 +40844,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40188,6 +40868,11 @@ paths:
             type: boolean
       requestBody:
         content:
+          application/gzip:
+            examples:
+              postInstallByUploadRequestExample:
+                description: Upload a .zip or .tar.gz package archive (max 100MB)
+                value: <binary package archive>
           application/gzip; application/zip:
             schema:
               format: binary
@@ -40273,7 +40958,17 @@ paths:
                 required:
                   - items
                   - _meta
-          description: 'OK: A successful request.'
+            application/json:
+              examples:
+                postInstallByUploadExample:
+                  description: Package successfully installed from upload
+                  value:
+                    _meta:
+                      install_source: upload
+                    items:
+                      - id: my-custom-package-logs-default
+                        type: index_template
+          description: Successful response
         '400':
           content:
             application/gzip; application/zip:
@@ -40294,7 +40989,15 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+          description: Bad Request
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
@@ -40310,7 +41013,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install multiple packages from the Elastic Package Registry in a single request.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-bulk
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40328,6 +41031,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkInstallPackagesRequestExample:
+                description: Install multiple packages from the registry
+                value:
+                  packages:
+                    - system
+                    - aws
             schema:
               additionalProperties: false
               type: object
@@ -40360,6 +41070,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkInstallPackagesExample:
+                  description: Bulk install results
+                  value:
+                    items:
+                      - name: system
+                        result:
+                          assets: []
+                          status: installed
+                      - name: aws
+                        result:
+                          assets: []
+                          status: installed
               schema:
                 additionalProperties: false
                 type: object
@@ -40473,10 +41196,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40494,7 +41224,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -40510,7 +41240,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Rollback multiple packages to their previous versions.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-bulk-rollback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40604,7 +41334,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Get the status and results of a bulk package rollback operation.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: get-fleet-epm-packages-bulk-rollback-taskid
       parameters:
         - description: Task ID of the bulk operation
@@ -40700,7 +41430,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Uninstall multiple packages in a single operation.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-bulk-uninstall
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40713,6 +41443,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkUninstallPackagesRequestExample:
+                description: Uninstall multiple packages
+                value:
+                  packages:
+                    - name: aws
+                    - name: gcp
             schema:
               additionalProperties: false
               type: object
@@ -40741,6 +41478,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkUninstallPackagesExample:
+                  description: Bulk uninstall task initiated
+                  value:
+                    taskId: task-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -40749,10 +41491,17 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40770,7 +41519,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk uninstall packages
       tags:
         - Elastic Package Manager (EPM)
@@ -40786,7 +41535,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Get the status and results of a bulk package uninstall operation.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: get-fleet-epm-packages-bulk-uninstall-taskid
       parameters:
         - description: Task ID of the bulk operation
@@ -40799,6 +41548,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getBulkOperationDetailsExample:
+                  description: Details of the bulk operation task
+                  value:
+                    packages:
+                      - name: system
+                        result: installed
+                      - name: elastic_agent
+                        result: installed
+                    status: success
               schema:
                 additionalProperties: false
                 type: object
@@ -40837,10 +41596,17 @@ paths:
                     type: string
                 required:
                   - status
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40858,7 +41624,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get Bulk uninstall packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -40874,7 +41640,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Upgrade multiple packages to their latest versions.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-bulk-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40887,6 +41653,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkUpgradePackagesRequestExample:
+                description: Upgrade multiple packages to their latest versions
+                value:
+                  packages:
+                    - name: system
+                    - name: elastic_agent
             schema:
               additionalProperties: false
               type: object
@@ -40919,6 +41692,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkUpgradePackagesExample:
+                  description: Bulk upgrade task initiated
+                  value:
+                    taskId: task-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -40927,10 +41705,17 @@ paths:
                     type: string
                 required:
                   - taskId
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40948,7 +41733,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk upgrade packages
       tags:
         - Elastic Package Manager (EPM)
@@ -40964,7 +41749,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Get the status and results of a bulk package upgrade operation.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: get-fleet-epm-packages-bulk-upgrade-taskid
       parameters:
         - description: Task ID of the bulk operation
@@ -40977,6 +41762,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getBulkOperationDetailsExample:
+                  description: Details of the bulk operation task
+                  value:
+                    packages:
+                      - name: system
+                        result: installed
+                      - name: elastic_agent
+                        result: installed
+                    status: success
               schema:
                 additionalProperties: false
                 type: object
@@ -41015,10 +41810,17 @@ paths:
                     type: string
                 required:
                   - status
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -41036,7 +41838,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get Bulk upgrade packages details
       tags:
         - Elastic Package Manager (EPM)
@@ -41052,7 +41854,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Uninstall a package and remove all its assets.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -41076,6 +41878,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletePackageExample:
+                  description: Package successfully deleted
+                  value:
+                    items:
+                      - id: aws-logs-aws.cloudwatch_logs-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -41141,10 +41950,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -41162,7 +41978,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
@@ -41170,6 +41986,14 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get information about a package by name, returning the latest installed or available version.
       operationId: get-fleet-epm-packages-pkgname
       parameters:
         - in: path
@@ -41202,6 +42026,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackageInfoExample:
+                  description: Package details and installation status
+                  value:
+                    item:
+                      assets:
+                        kibana:
+                          dashboard: []
+                          index_pattern: []
+                      categories:
+                        - cloud
+                      description: Collect logs and metrics from Amazon Web Services
+                      name: aws
+                      status: installed
+                      title: AWS
+                      version: 2.10.0
               schema:
                 additionalProperties: false
                 type: object
@@ -41742,10 +42582,17 @@ paths:
                       - has_policies
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -41763,19 +42610,13 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -41784,7 +42625,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install the latest version of a package from the Elastic Package Registry.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -41826,6 +42667,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postInstallPackageRequestExample:
+                description: Install a package, optionally ignoring constraints
+                value:
+                  ignore_constraints: false
             schema:
               additionalProperties: false
               nullable: true
@@ -41841,6 +42687,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postInstallPackageExample:
+                  description: Package successfully installed
+                  value:
+                    _meta:
+                      install_source: registry
+                    items:
+                      - id: aws-logs-aws.cloudwatch_logs-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -41918,10 +42773,17 @@ paths:
                 required:
                   - items
                   - _meta
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -41939,7 +42801,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -41954,7 +42816,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Update settings for a package, such as whether policies are kept up to date automatically.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: put-fleet-epm-packages-pkgname
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -41972,6 +42834,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putUpdatePackageRequestExample:
+                description: Update keep_policies_up_to_date setting for a package
+                value:
+                  keepPoliciesUpToDate: true
             schema:
               additionalProperties: false
               type: object
@@ -41984,6 +42851,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putUpdatePackageExample:
+                  description: Updated package settings
+                  value:
+                    item:
+                      keepPoliciesUpToDate: true
+                      name: aws
+                      version: 2.10.0
               schema:
                 additionalProperties: false
                 type: object
@@ -42516,10 +43391,17 @@ paths:
                       - assets
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -42537,7 +43419,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
@@ -42553,7 +43435,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Uninstall a specific version of a package and remove all its assets.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -42582,6 +43464,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletePackageExample:
+                  description: Package successfully deleted
+                  value:
+                    items:
+                      - id: aws-logs-aws.cloudwatch_logs-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -42647,10 +43536,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -42668,7 +43564,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
@@ -42676,6 +43572,14 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get information about a specific version of a package.
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - in: path
@@ -42713,6 +43617,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackageInfoExample:
+                  description: Package details and installation status
+                  value:
+                    item:
+                      assets:
+                        kibana:
+                          dashboard: []
+                          index_pattern: []
+                      categories:
+                        - cloud
+                      description: Collect logs and metrics from Amazon Web Services
+                      name: aws
+                      status: installed
+                      title: AWS
+                      version: 2.10.0
               schema:
                 additionalProperties: false
                 type: object
@@ -43253,10 +44173,17 @@ paths:
                       - has_policies
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -43274,19 +44201,13 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
     post:
       description: |-
         **Spaces method and path for this operation:**
@@ -43295,7 +44216,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a specific version of a package from the Elastic Package Registry.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -43342,6 +44263,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postInstallPackageRequestExample:
+                description: Install a package, optionally ignoring constraints
+                value:
+                  ignore_constraints: false
             schema:
               additionalProperties: false
               nullable: true
@@ -43357,6 +44283,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postInstallPackageExample:
+                  description: Package successfully installed
+                  value:
+                    _meta:
+                      install_source: registry
+                    items:
+                      - id: aws-logs-aws.cloudwatch_logs-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -43434,10 +44369,17 @@ paths:
                 required:
                   - items
                   - _meta
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -43455,7 +44397,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -43470,7 +44412,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Update settings for a specific version of a package.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: put-fleet-epm-packages-pkgname-pkgversion
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -43493,6 +44435,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putUpdatePackageRequestExample:
+                description: Update keep_policies_up_to_date setting for a package
+                value:
+                  keepPoliciesUpToDate: true
             schema:
               additionalProperties: false
               type: object
@@ -43505,6 +44452,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putUpdatePackageExample:
+                  description: Updated package settings
+                  value:
+                    item:
+                      keepPoliciesUpToDate: true
+                      name: aws
+                      version: 2.10.0
               schema:
                 additionalProperties: false
                 type: object
@@ -44037,10 +44992,17 @@ paths:
                       - assets
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44058,7 +45020,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
@@ -44074,7 +45036,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get the contents of a specific file from a package.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
         - in: path
@@ -44096,11 +45058,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackageFileExample:
+                  description: The content of the requested package file
+                  value: <file content>
               schema: {}
-          description: 'OK: A successful request.'
+          description: Successful response — returns the file content
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44118,7 +45091,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
@@ -44134,7 +45107,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Delete datastream assets for a specific input package, by data stream name.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44163,6 +45136,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletePackageDatastreamAssetsExample:
+                  description: Package datastream assets successfully deleted
+                  value:
+                    items:
+                      - id: logs-my_package.access-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -44171,10 +45151,17 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44192,7 +45179,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete assets for an input package
       tags:
         - Elastic Package Manager (EPM)
@@ -44208,7 +45195,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get the list of packages that a specific package depends on.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-pkgname-pkgversion-dependencies
       parameters:
         - description: Package name
@@ -44305,7 +45292,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Delete Kibana assets (dashboards, visualizations, etc.) for a specific package version.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44329,6 +45316,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteKibanaAssetsExample:
+                  description: Kibana assets successfully deleted
+                  value:
+                    items:
+                      - id: dashboard-id-1
+                        type: dashboard
               schema:
                 additionalProperties: false
                 type: object
@@ -44337,10 +45331,17 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44358,7 +45359,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -44373,7 +45374,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install Kibana assets (dashboards, visualizations, etc.) for a specific package version.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-pkgversion-kibana-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44396,6 +45397,10 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postInstallKibanaAssetsRequestExample:
+                description: Install Kibana assets for a specific package version
+                value: {}
             schema:
               additionalProperties: false
               nullable: true
@@ -44414,6 +45419,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postInstallKibanaAssetsExample:
+                  description: Kibana assets successfully installed
+                  value:
+                    items:
+                      - id: dashboard-id-1
+                        type: dashboard
               schema:
                 additionalProperties: false
                 type: object
@@ -44422,10 +45434,17 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44443,7 +45462,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -44459,7 +45478,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install Kibana alert rule assets for a specific package version.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-pkgversion-rule-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44482,6 +45501,10 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postInstallRuleAssetsRequestExample:
+                description: Install alert rule assets for a specific package version
+                value: {}
             schema:
               additionalProperties: false
               nullable: true
@@ -44493,6 +45516,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postInstallRuleAssetsExample:
+                  description: Rule assets successfully installed
+                  value:
+                    items:
+                      - id: rule-asset-id-1
+                        type: security_rule
               schema:
                 additionalProperties: false
                 type: object
@@ -44501,10 +45531,17 @@ paths:
                     type: boolean
                 required:
                   - success
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44522,7 +45559,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Install Kibana alert rule for a package
       tags:
         - Elastic Package Manager (EPM)
@@ -44531,6 +45568,14 @@ paths:
           name: product_name
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Reauthorize Elasticsearch transforms installed by a package with secondary authorization headers.
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44558,6 +45603,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postReauthorizeTransformsRequestExample:
+                description: Reauthorize transforms for a package
+                value:
+                  transforms:
+                    - destinations:
+                        - index: logs-transform-dest
+                      transformId: logs-transform-1
             schema:
               additionalProperties: false
               type: object
@@ -44579,6 +45632,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postReauthorizeTransformsExample:
+                  description: Transforms successfully reauthorized
+                  value:
+                    - success: true
+                      transformId: logs-transform-1
               schema:
                 items:
                   additionalProperties: false
@@ -44596,10 +45655,17 @@ paths:
                     - error
                 maxItems: 10000
                 type: array
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44617,19 +45683,13 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/fleet/epm/packages/{pkgName}/review_upgrade:
     post:
       description: |-
@@ -44639,7 +45699,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Review and accept or reject a pending policy upgrade for a package that contains deprecations.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-review-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44736,7 +45796,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Rollback a package to its previously installed version.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages-pkgname-rollback
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -44814,7 +45874,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get usage statistics for a specific package, such as the number of agent policies using it.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
         - in: path
@@ -44826,6 +45886,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackageStatsExample:
+                  description: Usage stats for a specific package
+                  value:
+                    response:
+                      agent_policy_count: 3
               schema:
                 additionalProperties: false
                 type: object
@@ -44843,10 +45909,17 @@ paths:
                       - package_policy_count
                 required:
                   - response
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -44864,7 +45937,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
@@ -44880,7 +45953,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get a list of all currently installed integration packages.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-installed
       parameters:
         - in: query
@@ -44933,6 +46006,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getInstalledPackagesExample:
+                  description: List of installed integration packages
+                  value:
+                    items:
+                      - name: system
+                        status: installed
+                        title: System
+                        version: 1.55.0
+                      - name: elastic_agent
+                        status: installed
+                        title: Elastic Agent
+                        version: 1.15.0
+                    searchExcluded: 0
+                    total: 2
               schema:
                 additionalProperties: false
                 type: object
@@ -45009,10 +46097,17 @@ paths:
                 required:
                   - items
                   - total
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45030,7 +46125,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
@@ -45046,13 +46141,20 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get the list of packages that cannot be uninstalled (e.g. elastic_agent, fleet_server).<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-limited
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getLimitedPackagesExample:
+                  description: List of packages that cannot be uninstalled
+                  value:
+                    items:
+                      - elastic_agent
+                      - fleet_server
               schema:
                 additionalProperties: false
                 type: object
@@ -45064,10 +46166,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45085,7 +46194,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
@@ -45101,7 +46210,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get an inputs template for a package, used to pre-populate package policy forms.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
         - in: path
@@ -45138,6 +46247,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getInputsTemplateExample:
+                  description: Inputs template for a package
+                  value:
+                    inputs:
+                      - description: Collect logs from log files
+                        title: Collect logs from files
+                        type: logfile
+                        vars:
+                          - name: paths
+                            required: true
+                            title: Paths
+                            type: text
               schema:
                 anyOf:
                   - type: string
@@ -45228,10 +46350,17 @@ paths:
                             type: object
                     required:
                       - inputs
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45249,7 +46378,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
@@ -45265,13 +46394,18 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
+        Get the GPG key ID used to verify the signatures of packages from the Elastic Package Registry.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-verification-key-id
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getVerificationKeyIdExample:
+                  description: The GPG key ID used to verify package signatures
+                  value:
+                    id: D27D666CD88E42B4
               schema:
                 additionalProperties: false
                 type: object
@@ -45281,10 +46415,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45302,7 +46443,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)

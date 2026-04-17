@@ -27603,7 +27603,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
+        List all agent policies.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
       operationId: get-fleet-agent-policies
       parameters:
         - in: query
@@ -27670,6 +27670,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentPoliciesExample:
+                  description: List of agent policies
+                  value:
+                    items:
+                      - description: A sample agent policy
+                        id: agent-policy-id-1
+                        is_managed: false
+                        is_protected: false
+                        name: My agent policy
+                        namespace: default
+                        revision: 1
+                        status: active
+                        updated_at: '2024-01-15T10:00:00.000Z'
+                        updated_by: user1
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -28496,10 +28514,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -28517,7 +28542,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get agent policies
       tags:
         - Elastic Agent policies
@@ -28532,7 +28557,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-all.
+        Create a new agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.
       operationId: post-fleet-agent-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -28550,6 +28575,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postAgentPolicyRequestExample:
+                description: Create a new agent policy
+                value:
+                  description: A sample agent policy
+                  monitoring_enabled:
+                    - logs
+                    - metrics
+                  name: My agent policy
+                  namespace: default
             schema:
               additionalProperties: false
               type: object
@@ -28788,6 +28823,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postAgentPolicyExample:
+                  description: The created agent policy
+                  value:
+                    item:
+                      description: A sample agent policy
+                      id: agent-policy-id-2
+                      is_managed: false
+                      is_protected: false
+                      name: My agent policy
+                      namespace: default
+                      revision: 1
+                      status: active
+                      updated_at: '2024-01-15T10:00:00.000Z'
+                      updated_by: user1
               schema:
                 additionalProperties: false
                 type: object
@@ -29602,10 +29652,17 @@ paths:
                       - revision
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -29623,7 +29680,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create an agent policy
       tags:
         - Elastic Agent policies
@@ -29639,7 +29696,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
+        Get multiple agent policies by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
       operationId: post-fleet-agent-policies-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -29660,6 +29717,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkGetAgentPoliciesRequestExample:
+                description: Retrieve multiple agent policies by ID
+                value:
+                  ids:
+                    - agent-policy-id-1
+                    - agent-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -29681,6 +29745,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkGetAgentPoliciesExample:
+                  description: The requested agent policies
+                  value:
+                    items:
+                      - id: agent-policy-id-1
+                        is_managed: false
+                        is_protected: false
+                        name: My agent policy
+                        namespace: default
+                        revision: 1
+                        status: active
+                        updated_at: '2024-01-15T10:00:00.000Z'
+                        updated_by: user1
               schema:
                 additionalProperties: false
                 type: object
@@ -30498,10 +30576,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -30519,7 +30604,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: One or more agent policies were not found
+                  value:
+                    error: Not Found
+                    message: An error message describing what went wrong
+                    statusCode: 404
+          description: Not Found
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
@@ -30555,6 +30651,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentPolicyExample:
+                  description: An agent policy
+                  value:
+                    item:
+                      description: A sample agent policy
+                      id: agent-policy-id-1
+                      is_managed: false
+                      is_protected: false
+                      name: My agent policy
+                      namespace: default
+                      revision: 1
+                      status: active
+                      updated_at: '2024-01-15T10:00:00.000Z'
+                      updated_by: user1
               schema:
                 additionalProperties: false
                 type: object
@@ -31369,10 +31480,17 @@ paths:
                       - revision
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -31390,7 +31508,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found
+                    statusCode: 404
+          description: Not Found
       summary: Get an agent policy
       tags:
         - Elastic Agent policies
@@ -31431,6 +31560,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putAgentPolicyRequestExample:
+                description: Update an agent policy
+                value:
+                  description: An updated agent policy description
+                  monitoring_enabled:
+                    - logs
+                  name: Updated agent policy
+                  namespace: default
             schema:
               additionalProperties: false
               type: object
@@ -31671,6 +31809,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putAgentPolicyExample:
+                  description: The updated agent policy
+                  value:
+                    item:
+                      description: An updated agent policy description
+                      id: agent-policy-id-1
+                      is_managed: false
+                      is_protected: false
+                      name: Updated agent policy
+                      namespace: default
+                      revision: 2
+                      status: active
+                      updated_at: '2024-01-15T11:00:00.000Z'
+                      updated_by: user1
               schema:
                 additionalProperties: false
                 type: object
@@ -32485,10 +32638,17 @@ paths:
                       - revision
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -32506,7 +32666,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
@@ -32522,7 +32682,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+        Get the auto-upgrade status for agents assigned to an agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status
       parameters:
         - in: path
@@ -32534,6 +32694,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAutoUpgradeAgentsStatusExample:
+                  description: Auto-upgrade status for agents in the policy
+                  value:
+                    agentsCount: 5
+                    currentVersion: 8.16.0
+                    failedAgentsCount: 0
+                    upgradedAgentsCount: 3
+                    upgradingAgentsCount: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -32579,10 +32748,17 @@ paths:
                 required:
                   - currentVersions
                   - totalAgents
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -32600,7 +32776,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get auto upgrade agent status
       tags:
         - Elastic Agent policies
@@ -32642,6 +32818,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postCopyAgentPolicyRequestExample:
+                description: Copy an agent policy with a new name
+                value:
+                  description: A copy of the original agent policy
+                  name: Copy of my agent policy
             schema:
               additionalProperties: false
               type: object
@@ -32657,6 +32839,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postCopyAgentPolicyExample:
+                  description: The copied agent policy
+                  value:
+                    item:
+                      description: A copy of the original agent policy
+                      id: agent-policy-id-copy-1
+                      is_managed: false
+                      is_protected: false
+                      name: Copy of my agent policy
+                      namespace: default
+                      revision: 1
+                      status: active
+                      updated_at: '2024-01-15T11:00:00.000Z'
+                      updated_by: user1
               schema:
                 additionalProperties: false
                 type: object
@@ -33471,10 +33668,17 @@ paths:
                       - revision
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -33492,7 +33696,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Copy an agent policy
       tags:
         - Elastic Agent policies
@@ -33544,12 +33748,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getDownloadAgentPolicyExample:
+                  description: The agent policy download response
+                  value:
+                    item: 'id: agent-policy-id-1\nrevision: 1\noutputs:\n  default:\n    type: elasticsearch\n    hosts:\n      - https://elasticsearch.example.com:9200\n'
               schema:
                 type: string
-          description: 'OK: A successful request.'
+          description: Successful response — returns the agent policy as a YAML file download
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -33567,10 +33783,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -33588,7 +33811,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Download an agent policy
       tags:
         - Elastic Agent policies
@@ -33640,6 +33863,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getFullAgentPolicyExample:
+                  description: The full agent policy configuration
+                  value:
+                    item:
+                      agent:
+                        monitoring:
+                          logs: true
+                          metrics: true
+                      id: agent-policy-id-1
+                      inputs: []
+                      outputs:
+                        default:
+                          hosts:
+                            - https://elasticsearch.example.com:9200
+                          type: elasticsearch
+                      revision: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -34146,10 +34386,17 @@ paths:
                           - inputs
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34167,7 +34414,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found
+                    statusCode: 404
+          description: Not Found
       summary: Get a full agent policy
       tags:
         - Elastic Agent policies
@@ -34195,6 +34453,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentPolicyOutputsExample:
+                  description: Outputs associated with the agent policy
+                  value:
+                    item:
+                      data_output:
+                        id: output-id-1
+                        name: Default output
+                        type: elasticsearch
+                      monitoring_output:
+                        id: output-id-1
+                        name: Default output
+                        type: elasticsearch
               schema:
                 additionalProperties: false
                 type: object
@@ -34259,10 +34530,17 @@ paths:
                       - data
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34280,7 +34558,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No agent policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Agent policy not found
+                    statusCode: 404
+          description: Not Found
       summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
@@ -34309,6 +34598,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postDeleteAgentPolicyRequestExample:
+                description: Delete an agent policy by ID
+                value:
+                  agentPolicyId: agent-policy-id-1
             schema:
               additionalProperties: false
               type: object
@@ -34324,6 +34618,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postDeleteAgentPolicyExample:
+                  description: The agent policy was successfully deleted
+                  value:
+                    id: agent-policy-id-1
+                    name: My agent policy
               schema:
                 additionalProperties: false
                 type: object
@@ -34335,10 +34635,17 @@ paths:
                 required:
                   - id
                   - name
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34356,7 +34663,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete an agent policy
       tags:
         - Elastic Agent policies
@@ -34385,6 +34692,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postListAgentPolicyOutputsRequestExample:
+                description: Get outputs for multiple agent policies
+                value:
+                  ids:
+                    - agent-policy-id-1
+                    - agent-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -34401,6 +34715,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postListAgentPolicyOutputsExample:
+                  description: Outputs associated with the requested agent policies
+                  value:
+                    items:
+                      - agent_policy_id: agent-policy-id-1
+                        data_output:
+                          id: output-id-1
+                          name: Default output
+                          type: elasticsearch
+                        monitoring_output:
+                          id: output-id-1
+                          name: Default output
+                          type: elasticsearch
               schema:
                 additionalProperties: false
                 type: object
@@ -34468,10 +34796,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -34489,7 +34824,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
@@ -39859,7 +40194,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List all Fleet cloud connectors.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-connectors
       parameters:
         - description: The page number for pagination.
@@ -39884,6 +40219,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getCloudConnectorsExample:
+                  description: List of Fleet cloud connectors
+                  value:
+                    items:
+                      - accountType: single-account
+                        cloudProvider: aws
+                        created_at: '2024-01-15T10:00:00.000Z'
+                        id: cloud-connector-id-1
+                        name: My AWS connector
+                        packagePolicyCount: 2
+                        updated_at: '2024-01-15T10:00:00.000Z'
+                        vars: {}
               schema:
                 additionalProperties: false
                 type: object
@@ -39930,10 +40278,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -39951,7 +40306,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
@@ -39967,7 +40322,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Create a new Fleet cloud connector.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: post-fleet-cloud-connectors
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -39980,6 +40335,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postCloudConnectorRequestExample:
+                description: Create a new AWS cloud connector
+                value:
+                  accountType: single-account
+                  cloudProvider: aws
+                  name: My AWS connector
+                  vars: {}
             schema:
               additionalProperties: false
               type: object
@@ -40044,6 +40407,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postCloudConnectorExample:
+                  description: The created Fleet cloud connector
+                  value:
+                    item:
+                      accountType: single-account
+                      cloudProvider: aws
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      id: cloud-connector-id-2
+                      name: My AWS connector
+                      packagePolicyCount: 0
+                      updated_at: '2024-01-15T10:00:00.000Z'
+                      vars: {}
               schema:
                 additionalProperties: false
                 type: object
@@ -40087,10 +40463,17 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40108,7 +40491,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
@@ -40125,7 +40508,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Delete a cloud connector by ID. Use the `force` query parameter to delete even if package policies are still using it.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: delete-fleet-cloud-connectors-cloudconnectorid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40151,6 +40534,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteCloudConnectorExample:
+                  description: The cloud connector was successfully deleted
+                  value:
+                    id: cloud-connector-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -40159,10 +40547,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40180,7 +40575,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
@@ -40196,7 +40591,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        Get a cloud connector by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-connectors-cloudconnectorid
       parameters:
         - description: The unique identifier of the cloud connector.
@@ -40209,6 +40604,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getCloudConnectorExample:
+                  description: A Fleet cloud connector
+                  value:
+                    item:
+                      accountType: single-account
+                      cloudProvider: aws
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      id: cloud-connector-id-1
+                      name: My AWS connector
+                      packagePolicyCount: 2
+                      updated_at: '2024-01-15T10:00:00.000Z'
+                      vars: {}
               schema:
                 additionalProperties: false
                 type: object
@@ -40252,10 +40660,17 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40273,7 +40688,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
@@ -40289,7 +40704,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Update a cloud connector by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: put-fleet-cloud-connectors-cloudconnectorid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -40308,6 +40723,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putCloudConnectorRequestExample:
+                description: Update a Fleet cloud connector
+                value:
+                  name: Updated AWS connector
+                  vars: {}
             schema:
               additionalProperties: false
               type: object
@@ -40361,6 +40782,19 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putCloudConnectorExample:
+                  description: The updated Fleet cloud connector
+                  value:
+                    item:
+                      accountType: single-account
+                      cloudProvider: aws
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      id: cloud-connector-id-1
+                      name: Updated AWS connector
+                      packagePolicyCount: 2
+                      updated_at: '2024-01-15T11:00:00.000Z'
+                      vars: {}
               schema:
                 additionalProperties: false
                 type: object
@@ -40404,10 +40838,17 @@ paths:
                       - updated_at
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -40425,7 +40866,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
@@ -40442,7 +40883,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        Get a list of package policies that are using a given cloud connector.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-connectors-cloudconnectorid-usage
       parameters:
         - description: The unique identifier of the cloud connector.
@@ -48642,7 +49083,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Get the Kubernetes manifest for deploying Elastic Agent.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes
       parameters:
         - in: query
@@ -48664,6 +49105,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getK8sManifestExample:
+                  description: The Kubernetes manifest for deploying Elastic Agent
+                  value:
+                    item: 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: agent-node-datastreams\n  namespace: kube-system\n'
               schema:
                 additionalProperties: false
                 type: object
@@ -48672,10 +49118,17 @@ paths:
                     type: string
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -48693,7 +49146,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
@@ -48709,7 +49162,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download the Kubernetes manifest for deploying Elastic Agent.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes-download
       parameters:
         - in: query
@@ -48731,12 +49184,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getDownloadK8sManifestExample:
+                  description: The Kubernetes manifest download
+                  value: 'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: agent-node-datastreams\n  namespace: kube-system\n'
               schema:
                 type: string
-          description: 'OK: A successful request.'
+          description: Successful response — returns the Kubernetes manifest as a YAML file download
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -48754,10 +49218,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No manifest was found
+                  value:
+                    error: Not Found
+                    message: Agent manifest not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -48775,7 +49246,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Download an agent manifest
       tags:
         - Elastic Agent policies
@@ -48791,7 +49262,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Generate an API key for Logstash to use with a Fleet output.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-logstash-api-keys
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48805,6 +49276,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postLogstashApiKeyExample:
+                  description: The generated Logstash API key
+                  value:
+                    api_key: TiNAGG4BaaMdaH1tRfuU:KnR6yE41RrSowb0kQ0HWoA
               schema:
                 additionalProperties: false
                 type: object
@@ -48813,10 +49289,17 @@ paths:
                     type: string
                 required:
                   - api_key
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -48834,7 +49317,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
@@ -48955,13 +49438,28 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.
+        List all Fleet outputs.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.
       operationId: get-fleet-outputs
       parameters: []
       responses:
         '200':
           content:
             application/json:
+              examples:
+                getOutputsExample:
+                  description: List of Fleet outputs
+                  value:
+                    items:
+                      - hosts:
+                          - https://elasticsearch.example.com:9200
+                        id: output-id-1
+                        is_default: true
+                        is_default_monitoring: true
+                        name: Default output
+                        type: elasticsearch
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -48986,10 +49484,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49007,7 +49512,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get outputs
       tags:
         - Fleet outputs
@@ -49022,7 +49527,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-all.
+        Create a new Fleet output.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: post-fleet-outputs
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49035,6 +49540,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postOutputRequestExample:
+                description: Create a new Elasticsearch output
+                value:
+                  hosts:
+                    - https://elasticsearch.example.com:9200
+                  is_default: false
+                  is_default_monitoring: false
+                  name: My output
+                  type: elasticsearch
             schema:
               anyOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_elasticsearch'
@@ -49045,6 +49560,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postOutputExample:
+                  description: The created Fleet output
+                  value:
+                    item:
+                      hosts:
+                        - https://elasticsearch.example.com:9200
+                      id: output-id-2
+                      is_default: false
+                      is_default_monitoring: false
+                      name: My output
+                      type: elasticsearch
               schema:
                 additionalProperties: false
                 type: object
@@ -49057,10 +49584,17 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49078,7 +49612,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Create output
       tags:
         - Fleet outputs
@@ -49113,6 +49647,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteOutputExample:
+                  description: The output was successfully deleted
+                  value:
+                    id: output-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -49121,10 +49660,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49142,10 +49688,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No output was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Output output-id-1 not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49163,7 +49716,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Not found.
+          description: Not Found
       summary: Delete output
       tags:
         - Fleet outputs
@@ -49190,6 +49743,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getOutputExample:
+                  description: A Fleet output
+                  value:
+                    item:
+                      hosts:
+                        - https://elasticsearch.example.com:9200
+                      id: output-id-1
+                      is_default: true
+                      is_default_monitoring: true
+                      name: Default output
+                      type: elasticsearch
               schema:
                 additionalProperties: false
                 type: object
@@ -49202,10 +49767,17 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49223,7 +49795,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No output was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Output output-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Get output
       tags:
         - Fleet outputs
@@ -49256,6 +49839,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putOutputRequestExample:
+                description: Update a Fleet output
+                value:
+                  hosts:
+                    - https://updated-elasticsearch.example.com:9200
+                  name: Updated output
             schema:
               anyOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_update_output_elasticsearch'
@@ -49266,6 +49856,18 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putOutputExample:
+                  description: The updated Fleet output
+                  value:
+                    item:
+                      hosts:
+                        - https://updated-elasticsearch.example.com:9200
+                      id: output-id-1
+                      is_default: true
+                      is_default_monitoring: true
+                      name: Updated output
+                      type: elasticsearch
               schema:
                 additionalProperties: false
                 type: object
@@ -49278,10 +49880,17 @@ paths:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49299,7 +49908,18 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No output was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Output output-id-1 not found
+                    statusCode: 404
+          description: Not Found
       summary: Update output
       tags:
         - Fleet outputs
@@ -49315,7 +49935,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-settings-read.
+        Get the latest health status of an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-outputs-outputid-health
       parameters:
         - in: path
@@ -49327,6 +49947,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getOutputHealthExample:
+                  description: The latest health status of a Fleet output
+                  value:
+                    message: ''
+                    state: HEALTHY
+                    timestamp: '2024-01-15T10:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -49344,10 +49971,17 @@ paths:
                   - state
                   - message
                   - timestamp
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49365,7 +49999,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get the latest output health
       tags:
         - Fleet outputs
@@ -49374,6 +50008,14 @@ paths:
           name: product_name
   /api/fleet/package_policies:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all package policies.
       operationId: get-fleet-package-policies
       parameters:
         - in: query
@@ -49426,6 +50068,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackagePoliciesExample:
+                  description: List of package policies
+                  value:
+                    items:
+                      - created_at: '2024-01-15T10:00:00.000Z'
+                        enabled: true
+                        id: package-policy-id-1
+                        inputs: []
+                        name: nginx-1
+                        namespace: default
+                        package:
+                          name: nginx
+                          title: Nginx
+                          version: 1.20.0
+                        policy_ids:
+                          - agent-policy-id-1
+                        updated_at: '2024-01-15T10:00:00.000Z'
+                    page: 1
+                    perPage: 20
+                    total: 1
               schema:
                 additionalProperties: false
                 type: object
@@ -49945,10 +50608,17 @@ paths:
                   - total
                   - page
                   - perPage
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -49966,20 +50636,22 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Get package policies
       tags:
         - Fleet package policies
       x-metaTags:
         - content: Kibana
           name: product_name
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    post:
+
+        Create a new package policy and assign it to an agent policy.
       operationId: post-fleet-package-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50000,6 +50672,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postPackagePolicyRequestExample:
+                description: Create a new nginx package policy
+                value:
+                  inputs: {}
+                  name: nginx-1
+                  namespace: default
+                  package:
+                    name: nginx
+                    version: 1.20.0
+                  policy_ids:
+                    - agent-policy-id-1
             schema:
               anyOf:
                 - additionalProperties: false
@@ -50553,6 +51237,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postPackagePolicyExample:
+                  description: The created package policy
+                  value:
+                    item:
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      enabled: true
+                      id: package-policy-id-2
+                      inputs: []
+                      name: nginx-1
+                      namespace: default
+                      package:
+                        name: nginx
+                        title: Nginx
+                        version: 1.20.0
+                      policy_ids:
+                        - agent-policy-id-1
+                      updated_at: '2024-01-15T10:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -51060,10 +51762,17 @@ paths:
                       - created_by
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -51081,10 +51790,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '409':
           content:
             application/json:
+              examples:
+                conflictExample:
+                  description: A package policy with the same name already exists
+                  value:
+                    error: Conflict
+                    message: An error message describing what went wrong
+                    statusCode: 409
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -51102,21 +51818,23 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A conflict occurred.
+          description: Conflict
       summary: Create a package policy
       tags:
         - Fleet package policies
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/package_policies/_bulk_get:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/_bulk_get</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/fleet/package_policies/_bulk_get:
-    post:
+
+        Get multiple package policies by ID.
       operationId: post-fleet-package-policies-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51137,6 +51855,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postBulkGetPackagePoliciesRequestExample:
+                description: Retrieve multiple package policies by ID
+                value:
+                  ids:
+                    - package-policy-id-1
+                    - package-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -51155,6 +51880,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postBulkGetPackagePoliciesExample:
+                  description: The requested package policies
+                  value:
+                    items:
+                      - created_at: '2024-01-15T10:00:00.000Z'
+                        enabled: true
+                        id: package-policy-id-1
+                        inputs: []
+                        name: nginx-1
+                        namespace: default
+                        package:
+                          name: nginx
+                          title: Nginx
+                          version: 1.20.0
+                        policy_ids:
+                          - agent-policy-id-1
+                        updated_at: '2024-01-15T10:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -51665,10 +52408,17 @@ paths:
                     type: array
                 required:
                   - items
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -51686,10 +52436,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: One or more package policies were not found
+                  value:
+                    error: Not Found
+                    message: Package policy package-policy-id-2 not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -51698,19 +52455,13 @@ paths:
                     type: string
                 required:
                   - message
-          description: Not found.
+          description: Not Found
       summary: Bulk get package policies
       tags:
         - Fleet package policies
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/_bulk_get</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
       description: |-
@@ -51744,6 +52495,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deletePackagePolicyExample:
+                  description: The package policy was successfully deleted
+                  value:
+                    id: package-policy-id-1
               schema:
                 additionalProperties: false
                 type: object
@@ -51752,10 +52508,17 @@ paths:
                     type: string
                 required:
                   - id
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -51773,7 +52536,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Delete a package policy
       tags:
         - Fleet package policies
@@ -51808,6 +52571,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getPackagePolicyExample:
+                  description: A package policy
+                  value:
+                    item:
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      enabled: true
+                      id: package-policy-id-1
+                      inputs: []
+                      name: nginx-1
+                      namespace: default
+                      package:
+                        name: nginx
+                        title: Nginx
+                        version: 1.20.0
+                      policy_ids:
+                        - agent-policy-id-1
+                      updated_at: '2024-01-15T10:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -52315,10 +53096,17 @@ paths:
                       - created_by
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -52336,10 +53124,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '404':
           content:
             application/json:
+              examples:
+                notFoundExample:
+                  description: No package policy was found with the given ID
+                  value:
+                    error: Not Found
+                    message: Package policy package-policy-id-1 not found
+                    statusCode: 404
               schema:
                 additionalProperties: false
                 type: object
@@ -52348,7 +53143,7 @@ paths:
                     type: string
                 required:
                   - message
-          description: Not found.
+          description: Not Found
       summary: Get a package policy
       tags:
         - Fleet package policies
@@ -52389,6 +53184,19 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              putPackagePolicyRequestExample:
+                description: Update a package policy
+                value:
+                  enabled: true
+                  inputs: {}
+                  name: nginx-1-updated
+                  namespace: default
+                  package:
+                    name: nginx
+                    version: 1.20.0
+                  policy_ids:
+                    - agent-policy-id-1
             schema:
               anyOf:
                 - additionalProperties: false
@@ -52934,6 +53742,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                putPackagePolicyExample:
+                  description: The updated package policy
+                  value:
+                    item:
+                      created_at: '2024-01-15T10:00:00.000Z'
+                      enabled: true
+                      id: package-policy-id-1
+                      inputs: []
+                      name: nginx-1-updated
+                      namespace: default
+                      package:
+                        name: nginx
+                        title: Nginx
+                        version: 1.20.0
+                      policy_ids:
+                        - agent-policy-id-1
+                      updated_at: '2024-01-15T11:00:00.000Z'
               schema:
                 additionalProperties: false
                 type: object
@@ -53441,10 +54267,17 @@ paths:
                       - created_by
                 required:
                   - item
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53462,10 +54295,17 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
         '403':
           content:
             application/json:
+              examples:
+                forbiddenExample:
+                  description: The update is not authorized for this package
+                  value:
+                    error: Forbidden
+                    message: An error message describing what went wrong
+                    statusCode: 403
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53483,7 +54323,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: Forbidden.
+          description: Forbidden
       summary: Update a package policy
       tags:
         - Fleet package policies
@@ -53499,7 +54339,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
+        Delete multiple package policies by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
       operationId: post-fleet-package-policies-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -53512,6 +54352,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postDeletePackagePoliciesRequestExample:
+                description: Delete multiple package policies by ID
+                value:
+                  packagePolicyIds:
+                    - package-policy-id-1
+                    - package-policy-id-2
             schema:
               additionalProperties: false
               type: object
@@ -53529,6 +54376,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postDeletePackagePoliciesExample:
+                  description: Results of the bulk delete operation
+                  value:
+                    - id: package-policy-id-1
+                      success: true
+                    - id: package-policy-id-2
+                      success: true
               schema:
                 items:
                   additionalProperties: false
@@ -53613,10 +54468,17 @@ paths:
                     - package
                 maxItems: 10000
                 type: array
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53634,7 +54496,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Bulk delete package policies
       tags:
         - Fleet package policies
@@ -53663,6 +54525,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postUpgradePackagePoliciesRequestExample:
+                description: Upgrade package policies to the latest version
+                value:
+                  packagePolicyIds:
+                    - package-policy-id-1
             schema:
               additionalProperties: false
               type: object
@@ -53678,6 +54546,13 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postUpgradePackagePoliciesExample:
+                  description: Results of the upgrade operation
+                  value:
+                    - id: package-policy-id-1
+                      name: nginx-1
+                      success: true
               schema:
                 items:
                   additionalProperties: false
@@ -53704,10 +54579,17 @@ paths:
                     - success
                 maxItems: 10000
                 type: array
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -53725,7 +54607,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Upgrade a package policy
       tags:
         - Fleet package policies
@@ -53741,7 +54623,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
+        Preview the changes that would be applied by upgrading a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: post-fleet-package-policies-upgrade-dryrun
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -53754,6 +54636,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              postDryRunPackagePoliciesRequestExample:
+                description: Dry run an upgrade of a package policy
+                value:
+                  packagePolicyIds:
+                    - package-policy-id-1
             schema:
               additionalProperties: false
               type: object
@@ -53771,6 +54659,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                postDryRunPackagePoliciesExample:
+                  description: Preview of the package policy upgrade diff
+                  value:
+                    - diff:
+                        - id: package-policy-id-1
+                          name: nginx-1
+                          package:
+                            name: nginx
+                            version: 1.20.0
+                        - name: nginx-1
+                          package:
+                            name: nginx
+                            version: 1.21.0
+                      hasErrors: false
+                      name: nginx-1
               schema:
                 items:
                   additionalProperties: false
@@ -54764,10 +55668,17 @@ paths:
                     - hasErrors
                 maxItems: 10000
                 type: array
-          description: 'OK: A successful request.'
+          description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -54785,7 +55696,7 @@ paths:
                 required:
                   - message
                   - attributes
-          description: A bad request.
+          description: Bad Request
       summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies

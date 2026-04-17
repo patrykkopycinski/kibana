@@ -34326,7 +34326,6 @@
     "xpack.searchInferenceEndpoints.endpoint": "终端",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "无选项",
     "xpack.searchInferenceEndpoints.filter.options": "{totalCount, plural, one {# option} other {# 个选项}}",
-    "xpack.searchInferenceEndpoints.inferenceEndpointsTitle": "推理终端",
     "xpack.searchInferenceEndpoints.serviceProvider": "服务",
     "xpack.searchInferenceEndpoints.table.caption": "推理终端表",
     "xpack.searchInferenceEndpoints.taskType": "类型",

@@ -36,6 +36,11 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  // Agent/skill/rule management tools
+  createAgent: platformCoreTool('create_agent'),
+  updateAgent: platformCoreTool('update_agent'),
+  manageSkills: platformCoreTool('manage_skills'),
+  manageDetectionRules: platformCoreTool('manage_detection_rules'),
 } as const;
 
 /**

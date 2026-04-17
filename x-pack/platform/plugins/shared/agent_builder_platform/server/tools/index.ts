@@ -25,6 +25,10 @@ import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
+import { createAgentTool } from './create_agent';
+import { updateAgentTool } from './update_agent';
+import { manageSkillsTool } from './manage_skills';
+import { manageDetectionRulesTool } from './manage_detection_rules';
 
 export const registerTools = ({
   coreSetup,
@@ -47,6 +51,10 @@ export const registerTools = ({
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
     casesTool(coreSetup),
+    createAgentTool(coreSetup),
+    updateAgentTool(coreSetup),
+    manageSkillsTool(coreSetup),
+    manageDetectionRulesTool(coreSetup),
   ];
 
   if (setupDeps.workflowsManagement) {

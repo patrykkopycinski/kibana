@@ -12,6 +12,7 @@ import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_atta
 import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
 import { createWorkflowSmlType } from './sml_types/workflow';
+import { registerDeployWorkflowTool } from './tools/deploy_workflow_tool';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
@@ -44,6 +45,7 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetExamplesTool(agentBuilder);
 
   registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
+  registerDeployWorkflowTool(agentBuilder, api);
 
   registerWorkflowYamlAttachment(agentBuilder, api);
   registerWorkflowYamlDiffAttachment(agentBuilder);

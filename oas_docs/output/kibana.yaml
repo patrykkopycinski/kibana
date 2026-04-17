@@ -70538,7 +70538,8 @@ paths:
                     properties:
                       id:
                         maxLength: 255
-                        pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$
+                        minLength: 3
+                        pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
                         type: string
                       yaml:
                         maxLength: 1048576
@@ -71793,7 +71794,8 @@ paths:
               properties:
                 id:
                   maxLength: 255
-                  pattern: ^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$
+                  minLength: 3
+                  pattern: ^[a-z0-9]([a-z0-9-]*[a-z0-9])?$
                   type: string
                 yaml:
                   maxLength: 1048576

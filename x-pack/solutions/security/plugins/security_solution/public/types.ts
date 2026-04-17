@@ -89,6 +89,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
+import type { AutonomousSoc } from './autonomous_soc';
 import type { SiemReadiness } from './siem_readiness';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
@@ -260,6 +261,7 @@ export interface SubPlugins {
   alerts: Detections;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
+  autonomousSoc: AutonomousSoc;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
@@ -285,6 +287,7 @@ export interface StartedSubPlugins {
   alerts: Awaited<ReturnType<Detections['start']>>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
+  autonomousSoc: ReturnType<AutonomousSoc['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;

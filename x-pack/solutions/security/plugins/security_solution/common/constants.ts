@@ -95,6 +95,7 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export const EXPLORE_DATA_VIEW_PREFIX = 'explore-data-view' as const;
 
 export const EXPLORE_PATH = '/explore' as const;
+export const AUTONOMOUS_SOC_PATH = '/autonomous_soc' as const;
 export const DASHBOARDS_PATH = '/dashboards' as const;
 export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;

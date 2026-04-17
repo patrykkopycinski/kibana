@@ -28,11 +28,13 @@ import { exploreLinks } from '../../explore/links';
 import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
+import { autonomousSocLinks } from '../../autonomous_soc/links';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
+  autonomousSocLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -72,6 +74,7 @@ export const getFilteredLinks = async (
 
   return Object.freeze([
     dashboardsLinks,
+    autonomousSocLinks,
     core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? alertDetectionsLinks
       : alertsLink,

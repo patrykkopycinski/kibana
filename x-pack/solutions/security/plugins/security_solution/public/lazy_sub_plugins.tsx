@@ -12,6 +12,7 @@
 
 import { AssetInventory } from './asset_inventory';
 import { AttackDiscovery } from './attack_discovery';
+import { AutonomousSoc } from './autonomous_soc';
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
@@ -38,6 +39,7 @@ import { Configurations } from './configurations';
 const subPluginClasses = {
   AssetInventory,
   AttackDiscovery,
+  AutonomousSoc,
   Detections,
   Cases,
   Exceptions,

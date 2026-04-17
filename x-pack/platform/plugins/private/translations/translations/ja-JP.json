@@ -34329,7 +34329,6 @@
     "xpack.searchInferenceEndpoints.endpoint": "エンドポイント",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "オプションなし",
     "xpack.searchInferenceEndpoints.filter.options": "{totalCount, plural, one {# option} other {#件のオプション}}",
-    "xpack.searchInferenceEndpoints.inferenceEndpointsTitle": "推論エンドポイント",
     "xpack.searchInferenceEndpoints.serviceProvider": "サービス",
     "xpack.searchInferenceEndpoints.table.caption": "推論エンドポイントテーブル",
     "xpack.searchInferenceEndpoints.taskType": "型",

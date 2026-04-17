@@ -34205,7 +34205,6 @@
     "xpack.searchInferenceEndpoints.endpoint": "Endpoint-",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "Keine Optionen",
     "xpack.searchInferenceEndpoints.filter.options": "{totalCount, plural, one {# option} other {# Optionen}}",
-    "xpack.searchInferenceEndpoints.inferenceEndpointsTitle": "Inferenz-Endpoints",
     "xpack.searchInferenceEndpoints.serviceProvider": "Service",
     "xpack.searchInferenceEndpoints.table.caption": "Inferenz-Endpoints-Tabelle",
     "xpack.searchInferenceEndpoints.taskType": "Typ",

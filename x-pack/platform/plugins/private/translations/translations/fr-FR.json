@@ -34227,7 +34227,6 @@
     "xpack.searchInferenceEndpoints.endpoint": "Point de terminaison",
     "xpack.searchInferenceEndpoints.filter.emptyMessage": "Aucune option",
     "xpack.searchInferenceEndpoints.filter.options": "{totalCount, plural, one {# option} other {# options}}",
-    "xpack.searchInferenceEndpoints.inferenceEndpointsTitle": "Points de terminaison d'inférence",
     "xpack.searchInferenceEndpoints.serviceProvider": "Service",
     "xpack.searchInferenceEndpoints.table.caption": "Tableau des points de terminaison d'inférence",
     "xpack.searchInferenceEndpoints.taskType": "Type",

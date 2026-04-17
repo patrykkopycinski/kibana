@@ -65492,11 +65492,12 @@ paths:
         Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
       operationId: get-workflows-aggs
       parameters:
-        - description: Fields to aggregate on.
+        - description: Field or fields to aggregate on.
           in: query
           name: fields
           required: true
           schema:
+            description: Fields to aggregate on.
             items:
               description: Field name to aggregate.
               type: string

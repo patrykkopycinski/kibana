@@ -35674,7 +35674,6 @@
     "xpack.securitySolution.appLinks.rules": "SIEMルール",
     "xpack.securitySolution.appLinks.rulesDescription": "脅威の検出と監視のための検出ルールの作成および管理します。",
     "xpack.securitySolution.appLinks.siem_readiness": "SIEMの準備",
-    "xpack.securitySolution.appLinks.siemMigrationsDashboards.badge": "テクニカルプレビュー",
     "xpack.securitySolution.appLinks.siemMigrationsDashboards.description": "AIを活用した自動移行を使用して、ダッシュボードをElasticに移行してください。",
     "xpack.securitySolution.appLinks.siemMigrationsRules.description": "AIを活用した自動移行を使用して、SIEMルールをElasticに移行します。",
     "xpack.securitySolution.appLinks.timeline.templates": "テンプレート",

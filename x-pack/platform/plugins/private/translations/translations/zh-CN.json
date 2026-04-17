@@ -35674,7 +35674,6 @@
     "xpack.securitySolution.appLinks.rules": "SIEM 规则",
     "xpack.securitySolution.appLinks.rulesDescription": "创建和管理检测规则以用于威胁检测和监测。",
     "xpack.securitySolution.appLinks.siem_readiness": "SIEM 准备度",
-    "xpack.securitySolution.appLinks.siemMigrationsDashboards.badge": "技术预览",
     "xpack.securitySolution.appLinks.siemMigrationsDashboards.description": "使用 AI 驱动的自动迁移功能，将您的仪表板迁移到 Elastic。",
     "xpack.securitySolution.appLinks.siemMigrationsRules.description": "利用 AI 驱动的自动迁移功能，将您的 SIEM 规则迁移到 Elastic。",
     "xpack.securitySolution.appLinks.timeline.templates": "模板",

@@ -35551,7 +35551,6 @@
     "xpack.securitySolution.appLinks.rules": "SIEM-Regeln",
     "xpack.securitySolution.appLinks.rulesDescription": "Erstellen und verwalten Sie Erkennungsregeln für die Bedrohungserkennung und -Monitoring.",
     "xpack.securitySolution.appLinks.siem_readiness": "SIEM-Bereitschaft",
-    "xpack.securitySolution.appLinks.siemMigrationsDashboards.badge": "Technische Vorschau",
     "xpack.securitySolution.appLinks.siemMigrationsDashboards.description": "Migrieren Sie Ihre Dashboards zu Elastic mithilfe der KI-gestützten automatischen Migration.",
     "xpack.securitySolution.appLinks.siemMigrationsRules.description": "Migrieren Sie mithilfe der KI-gestützten automatischen Migration Ihre SIEM-Regeln zu Elastic.",
     "xpack.securitySolution.appLinks.timeline.templates": "Vorlagen",

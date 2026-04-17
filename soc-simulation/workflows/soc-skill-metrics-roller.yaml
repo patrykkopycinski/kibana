@@ -1,0 +1,127 @@
+version: '1'
+name: SOC Skill Metrics Roller
+description: >
+  Hourly rollup: for every skill observed in .soc-evolution-log (source
+  of the last 7 days), upsert one document into .soc-skill-metrics with
+  invocation counts, success rate, and ROI estimates (hours_saved, cost_saved).
+  This is the source-of-truth for the "Skills ROI" dashboard row.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  baseline_minutes_saved_per_success: 25
+  analyst_hourly_rate_usd: 90
+
+steps:
+  - name: rollup
+    type: elasticsearch.search
+    with:
+      index: ".soc-evolution-log"
+      body:
+        size: 0
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-7d"
+              - exists:
+                  field: "source"
+        aggs:
+          by_skill:
+            terms:
+              field: "source"
+              size: 500
+            aggs:
+              invocations_24h:
+                filter:
+                  range:
+                    "@timestamp":
+                      gte: "now-24h"
+              invocations_7d:
+                filter:
+                  range:
+                    "@timestamp":
+                      gte: "now-7d"
+              success_24h:
+                filter:
+                  bool:
+                    must:
+                      - range:
+                          "@timestamp":
+                            gte: "now-24h"
+                      - term: { result: "applied" }
+              failure_24h:
+                filter:
+                  bool:
+                    must:
+                      - range:
+                          "@timestamp":
+                            gte: "now-24h"
+                      - terms:
+                          result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
+              success_7d:
+                filter:
+                  bool:
+                    must:
+                      - range:
+                          "@timestamp":
+                            gte: "now-7d"
+                      - term: { result: "applied" }
+              failure_7d:
+                filter:
+                  bool:
+                    must:
+                      - range:
+                          "@timestamp":
+                            gte: "now-7d"
+                      - terms:
+                          result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
+              last_run:
+                max:
+                  field: "@timestamp"
+
+  - name: upsert_metrics
+    type: foreach
+    foreach: "{{ steps.rollup.output.aggregations.by_skill.buckets | default: [] }}"
+    steps:
+      - name: write_doc
+        type: elasticsearch.index
+        with:
+          index: .soc-skill-metrics
+          id: "{{ foreach.item.key }}"
+          document:
+            skill_id: "{{ foreach.item.key }}"
+            invocations_24h: "{{ foreach.item.invocations_24h.doc_count | default: 0 }}"
+            invocations_7d:  "{{ foreach.item.invocations_7d.doc_count  | default: 0 }}"
+            success_count_24h: "{{ foreach.item.success_24h.doc_count | default: 0 }}"
+            failure_count_24h: "{{ foreach.item.failure_24h.doc_count | default: 0 }}"
+            success_count_7d:  "{{ foreach.item.success_7d.doc_count  | default: 0 }}"
+            failure_count_7d:  "{{ foreach.item.failure_7d.doc_count  | default: 0 }}"
+            success_rate_7d: >-
+              {% assign s = foreach.item.success_7d.doc_count | default: 0 %}
+              {% assign f = foreach.item.failure_7d.doc_count | default: 0 %}
+              {% assign total = s | plus: f %}
+              {% if total > 0 %}{{ s | times: 1.0 | divided_by: total }}{% else %}0{% endif %}
+            hours_saved_est_7d: >-
+              {% assign s = foreach.item.success_7d.doc_count | default: 0 %}
+              {{ s | times: consts.baseline_minutes_saved_per_success | divided_by: 60.0 }}
+            cost_saved_usd_est_7d: >-
+              {% assign s = foreach.item.success_7d.doc_count | default: 0 %}
+              {% assign hrs = s | times: consts.baseline_minutes_saved_per_success | divided_by: 60.0 %}
+              {{ hrs | times: consts.analyst_hourly_rate_usd }}
+            baseline_minutes_saved: "{{ consts.baseline_minutes_saved_per_success }}"
+            analyst_hourly_rate_usd: "{{ consts.analyst_hourly_rate_usd }}"
+            estimate: true
+            last_run_ts: "{{ foreach.item.last_run.value_as_string | default: null }}"
+            updated_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Skill metrics rolled up for {{ steps.rollup.output.aggregations.by_skill.buckets | size | default: 0 }} skill(s)."

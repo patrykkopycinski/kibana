@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/workflow_registry.schema.json",
+  "title": "AutoSOC Workflow Registry Entry",
+  "description": "One document per canonical workflow, seeded from soc-simulation/workflows/_registry.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["workflow_id", "automation_level", "connectors", "summary", "owner", "last_seeded_at"],
+  "properties": {
+    "workflow_id":      { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+    "automation_level": { "type": "string", "enum": ["fully_auto", "semi_auto", "human_in_the_loop"] },
+    "connectors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "elastic_defend",
+          "elastic_detection_rules",
+          "elastic_cases",
+          "elastic_fleet",
+          "caldera",
+          "osquery",
+          "kill_switch",
+          "artifact_registry",
+          "evolution_log",
+          "recommendations",
+          "regression_gate",
+          "trust_scores",
+          "outcomes",
+          "audit_trail",
+          "forensic_summary",
+          "skill_metrics",
+          "hunt_findings"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "model_tier": {
+      "type": "string",
+      "description": "Intended model tier for any LLM step in this workflow. 'planner' = strategic reasoning (Opus); 'analyst' = routine analysis / triage (Sonnet); 'bulk' = high-volume summarization (Haiku); 'mixed' = combination. The AI connector-id in the workflow YAML stays canonical ('opus'); operators can re-point the underlying Kibana connector to the tier they want without code changes.",
+      "enum": ["planner", "analyst", "bulk", "mixed", "none"]
+    },
+    "summary":        { "type": "string", "minLength": 5, "maxLength": 300 },
+    "owner":          { "type": "string", "enum": ["canonical", "autosoc"] },
+    "last_seeded_at": { "type": "string", "format": "date-time" }
+  }
+}

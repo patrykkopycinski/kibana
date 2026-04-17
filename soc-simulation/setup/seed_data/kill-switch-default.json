@@ -1,0 +1,13 @@
+{
+  "index": ".soc-kill-switch",
+  "doc_id": "global",
+  "create_if_missing": true,
+  "body": {
+    "@timestamp": "2026-04-16T00:00:00.000Z",
+    "autonomy_enabled": true,
+    "scope": "global",
+    "reason": "Default bootstrap value. Flip to false to halt all autonomous AutoSOC mutations.",
+    "set_by": "bootstrap",
+    "previous_state": null
+  }
+}

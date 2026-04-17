@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/mutation_intent.schema.json",
+  "title": "Mutation Intent",
+  "description": "Internal schema used by the soc-autonomous-applier workflow. The meta-agent emits a mutation_intent for every change it wants to make to an autosoc-owned artifact; the soc-autonomous-applier workflow runs deterministic governance gates (kill-switch, ownership, budget, cooldown, loop-detection) against this shape, then dispatches the validated intent to soc-autonomous-applier-agent for snapshot + tool-based execution.",
+  "type": "object",
+  "required": ["details"],
+  "properties": {
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_type", "artifact_id", "op", "reason", "expected_ownership"],
+      "properties": {
+        "artifact_type": { "type": "string", "enum": ["agent", "skill", "workflow", "rule", "exception"] },
+        "artifact_id": { "type": "string", "minLength": 1 },
+        "op": { "type": "string", "enum": ["create", "update", "delete", "enable", "disable"] },
+        "expected_ownership": {
+          "type": "string",
+          "enum": ["autosoc", "canonical", "platform"],
+          "description": "What the meta-agent believes the artifact's owner is. The applier verifies against the registry before mutating."
+        },
+        "reason": { "type": "string", "minLength": 20 },
+        "new_definition": {
+          "type": "object",
+          "description": "Required for op=create|update. The full artifact definition the applier will PUT.",
+          "additionalProperties": true
+        },
+        "patch": {
+          "type": "object",
+          "description": "Optional partial definition for op=update. Applier merges with current state.",
+          "additionalProperties": true
+        },
+        "parent_recommendation_id": { "type": ["string", "null"] },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^(agent|skill|workflow|rule|exception):[A-Za-z0-9._-]+$" }
+        }
+      }
+    }
+  }
+}

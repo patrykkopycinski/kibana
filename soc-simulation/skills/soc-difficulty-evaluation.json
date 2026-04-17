@@ -1,0 +1,10 @@
+{
+  "id": "soc-difficulty-evaluation",
+  "name": "SOC Difficulty Evaluation",
+  "description": "Evaluates SOC performance and decides whether to escalate, hold, or de-escalate attack difficulty. Activates when asked about difficulty levels, graduation criteria, or performance-gated escalation.",
+  "content": "# SOC Difficulty Evaluation Skill\n\nEvaluate SOC performance against graduation criteria and recommend difficulty changes.\n\n## Graduation Criteria\n\n| Level | MTTD | Automation Rate | Additional Requirements |\n|-------|------|-----------------|------------------------|\n| L1 → L2 | <5min | >80% | 5 consecutive auto-resolved alerts |\n| L2 → L3 | <10min | >75% | Confidence accuracy >75% |\n| L3 → L4 | <15min | >70% | Triage agent correlates across hosts |\n| L4 → L5 | <20min | >65% | Meta-agent has tuned ≥3 rules |\n| L5 (max) | — | — | Meta-agent has created specialist capabilities |\n\n## Decision Logic\n\n1. **ESCALATE**: SOC meets ALL criteria for next level\n2. **HOLD**: SOC is performing adequately but hasn't met all criteria\n3. **DE-ESCALATE**: SOC is struggling (confidence < 50, FP rate > 50%, MTTD > 30min)\n\n## Output Format\n\n```json\n{\n  \"current_level\": 1,\n  \"new_level\": 1,\n  \"decision\": \"escalate|hold|deescalate\",\n  \"reasoning\": \"data-backed explanation\",\n  \"metrics_summary\": {\n    \"mttd_seconds\": 0,\n    \"automation_rate\": 0,\n    \"fp_rate\": 0,\n    \"confidence_accuracy\": 0\n  },\n  \"criteria_met\": [\"list of satisfied graduation criteria\"],\n  \"criteria_missing\": [\"list of unsatisfied criteria\"]\n}\n```\n\nSelf-validate: new_level must be integer 1-5, reasoning must be non-empty.",
+  "tool_ids": [
+    "platform.core.execute_esql",
+    "platform.core.search"
+  ]
+}

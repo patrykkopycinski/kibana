@@ -1,0 +1,30 @@
+{
+  "index_patterns": [".soc-reasoning-trace"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":        { "type": "date" },
+        "run_id":            { "type": "keyword" },
+        "agent_id":          { "type": "keyword" },
+        "step_index":        { "type": "integer" },
+        "step_type":         { "type": "keyword" },
+        "content":           { "type": "text" },
+        "tool_name":         { "type": "keyword" },
+        "tool_args":         { "type": "object", "enabled": false },
+        "tool_result_ref":   { "type": "keyword" },
+        "total_steps":       { "type": "integer" },
+        "tool_call_count":   { "type": "integer" },
+        "total_duration_ms": { "type": "long" },
+        "final_status":      { "type": "keyword" },
+        "final_output_ref":  { "type": "keyword" }
+      }
+    }
+  }
+}

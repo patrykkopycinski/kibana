@@ -1,0 +1,41 @@
+{
+  "index_patterns": [".soc-artifact-registry"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "created_at": { "type": "date" },
+        "type": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "name": { "type": "keyword" },
+        "description": { "type": "text" },
+        "owner": { "type": "keyword" },
+        "origin": { "type": "keyword" },
+        "created_by": { "type": "keyword" },
+        "parent_recommendation_id": { "type": "keyword" },
+        "parent_artifact_id": { "type": "keyword" },
+        "definition_hash": { "type": "keyword" },
+        "state": { "type": "keyword" },
+        "last_snapshot_id": { "type": "keyword" },
+        "mutation_count": { "type": "long" },
+        "last_mutation_at": { "type": "date" },
+        "last_mutation_reason": { "type": "text" },
+        "dependencies": { "type": "keyword" },
+        "dependents": { "type": "keyword" },
+        "tags": { "type": "keyword" },
+        "schema_version": { "type": "integer" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Authoritative ownership & dependency registry for AutoSOC-managed artifacts (agents, skills, workflows, rules, exceptions, cases). Doc _id is '<type>:<artifact_id>'.",
+    "owner": "autosoc-governance",
+    "schema_version": 1
+  }
+}

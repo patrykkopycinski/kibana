@@ -1,17 +1,56 @@
 version: '1'
 name: SOC Response
-description: Deterministic containment actions based on confidence thresholds.
+description: Deterministic containment actions (no AI). Logs actions, writes to audit trail, chains to Case Creation.
 enabled: true
 
 triggers:
   - type: manual
 
 inputs:
-  - name: context
+  - name: investigation_result
+    type: string
+  - name: alert_data
     type: string
 
 steps:
-  - name: log_response
+  - name: log_response_start
     type: console
     with:
-      message: "SOC Response action executed: {{ inputs.context }}"
+      message: "SOC Response initiated for: {{ inputs.investigation_result }}"
+
+  - name: write_response_action
+    type: elasticsearch.index
+    with:
+      index: .soc-response-actions
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        action_type: "log_and_escalate"
+        source: "soc-response"
+        investigation_result: "{{ inputs.investigation_result }}"
+        status: "completed"
+
+  - name: write_audit
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: "response_action"
+        source: "soc-response"
+        details: "Deterministic response logged for escalated alert"
+        status: "completed"
+
+  - name: write_outcome
+    type: elasticsearch.index
+    with:
+      index: .soc-outcomes
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        correlation_id: "response-{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        disposition: "responded"
+        agents_involved: "soc-triage-agent,soc-entity-agent,soc-hunt-agent"
+
+  - name: log_response_done
+    type: console
+    with:
+      message: "SOC Response actions completed, chaining to case creation"

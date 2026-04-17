@@ -1,0 +1,26 @@
+{
+  "index_patterns": [".soc-trust-scores"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "tier": { "type": "keyword" },
+        "total_proposals": { "type": "integer" },
+        "approved_count": { "type": "integer" },
+        "rejected_count": { "type": "integer" },
+        "applied_count": { "type": "integer" },
+        "failed_count": { "type": "integer" },
+        "approval_rate": { "type": "float" },
+        "auto_approve_eligible": { "type": "boolean" },
+        "confidence_threshold": { "type": "float" },
+        "window_days": { "type": "integer" }
+      }
+    }
+  }
+}

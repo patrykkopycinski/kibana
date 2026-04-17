@@ -11,12 +11,33 @@
     "mappings": {
       "properties": {
         "@timestamp": { "type": "date" },
+        "source": { "type": "keyword" },
+        "event_type": { "type": "keyword" },
         "action_type": { "type": "keyword" },
+        "result": { "type": "keyword" },
+        "reason": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } } },
         "agent_id": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" },
+        "op": { "type": "keyword" },
+        "tool_called": { "type": "keyword" },
+        "intent_rec_id": { "type": "keyword" },
+        "correlation_id": { "type": "keyword" },
+        "run_id": { "type": "keyword" },
+        "owner": { "type": "keyword" },
         "reasoning": { "type": "text" },
+        "before_state": { "type": "object", "enabled": false },
+        "after_state": { "type": "object", "enabled": false },
         "before": { "type": "object", "enabled": false },
-        "after": { "type": "object", "enabled": false }
+        "after": { "type": "object", "enabled": false },
+        "metrics_snapshot": { "type": "object", "enabled": false },
+        "evolution_output": { "type": "object", "enabled": false }
       }
     }
+  },
+  "_meta": {
+    "description": "Append-only audit trail for every self-governance / evolution decision. Governance gates in soc-autonomous-applier aggregate on `source`, `result`, `artifact_id`, `artifact_type` — these MUST remain top-level `keyword` fields.",
+    "owner": "autosoc-governance",
+    "schema_version": 2
   }
 }

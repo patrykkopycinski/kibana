@@ -1,56 +1,144 @@
 version: '1'
 name: SOC Watchdog
-description: Health monitoring. Fetches SOC metrics, then AI agent analyzes for issues.
+description: >
+  Health monitoring and coverage gap detection. Uses deterministic ES queries for
+  KPI checks and writes structured health reports. The meta-agent's health-check
+  skill handles the analysis if anomalies are detected.
 enabled: true
 
 triggers:
   - type: scheduled
     with:
-      every: 5m
+      every: 15m
+  - type: manual
 
 steps:
-  - name: get_audit_trail
-    type: elasticsearch.esql.query
-    with:
-      query: >
-        FROM .soc-audit-trail
-        | WHERE @timestamp > NOW() - 10 MINUTES
-        | STATS event_count = COUNT(*) BY agent_name
-      format: json
-
-  - name: get_dead_letters
+  # ── Gather aggregated signals (NOT raw docs — avoids LLM token overrun) ──
+  - name: outcomes_agg
     type: elasticsearch.search
     with:
-      index: ".soc-dead-letter"
+      index: ".soc-outcomes"
       body:
+        size: 0
+        query:
+          range:
+            "@timestamp":
+              gte: "now-6h"
+        aggs:
+          total: { value_count: { field: "@timestamp" } }
+          by_disposition:
+            terms: { field: "disposition", size: 20 }
+          avg_confidence:
+            avg: { field: "confidence" }
+          by_technique:
+            terms: { field: "techniques_observed", size: 10 }
+            aggs:
+              avg_conf: { avg: { field: "confidence" } }
+              fp_count:
+                filter: { term: { disposition: "auto_closed_fp" } }
+
+  - name: triage_agg
+    type: elasticsearch.search
+    with:
+      index: ".soc-triage-results"
+      body:
+        size: 0
+        query:
+          range:
+            "@timestamp":
+              gte: "now-6h"
+        aggs:
+          total: { value_count: { field: "@timestamp" } }
+          by_disposition:
+            terms: { field: "disposition", size: 20 }
+
+  - name: pipeline_agg
+    type: elasticsearch.search
+    with:
+      index: ".soc-metrics"
+      body:
+        size: 0
         query:
           range:
             "@timestamp":
               gte: "now-1h"
-        size: 0
+        aggs:
+          total: { value_count: { field: "@timestamp" } }
+          by_status:
+            terms: { field: "status", size: 10 }
 
-  - name: get_outcomes
-    type: elasticsearch.esql.query
+  - name: dead_letter_count
+    type: elasticsearch.search
     with:
-      query: >
-        FROM .soc-outcomes
-        | WHERE @timestamp > NOW() - 1 HOUR
-        | STATS total = COUNT(*), avg_confidence = AVG(confidence) BY disposition
-      format: json
+      index: ".soc-dead-letter"
+      body:
+        size: 0
+        query:
+          bool:
+            must:
+              - term: { status: "failed" }
+              - range: { "@timestamp": { gte: "now-1h" } }
 
-  - name: analyze
+  # ── Analyze with meta-agent's health-check skill ─────────────────
+  - name: health_check
     type: ai.agent
-    agent-id: soc-watchdog-agent
+    agent-id: soc-meta-agent
+    connector-id: opus
     with:
       message: >
-        Analyze this SOC health data and report status:
+        Perform SOC health monitoring using your health-check skill.
 
-        Audit trail (last 10min): {{ steps.get_audit_trail.output | json }}
-        Dead letters (last 1h): {{ steps.get_dead_letters.output.hits.total.value }} items
-        Outcomes (last 1h): {{ steps.get_outcomes.output | json }}
+        KPI summary (aggregated, last 6h):
+          Outcomes total: {{ steps.outcomes_agg.output.aggregations.total.value }}
+          Outcomes by disposition: {{ steps.outcomes_agg.output.aggregations.by_disposition.buckets | json }}
+          Avg confidence: {{ steps.outcomes_agg.output.aggregations.avg_confidence.value }}
+          By technique (top 10): {{ steps.outcomes_agg.output.aggregations.by_technique.buckets | json }}
+
+          Triage total: {{ steps.triage_agg.output.aggregations.total.value }}
+          Triage by disposition: {{ steps.triage_agg.output.aggregations.by_disposition.buckets | json }}
+
+          Pipeline (1h): {{ steps.pipeline_agg.output.aggregations.total.value }} runs,
+          by status: {{ steps.pipeline_agg.output.aggregations.by_status.buckets | json }}
+
+          Dead-letter failed (1h): {{ steps.dead_letter_count.output.hits.total.value }}
+
+        Thresholds:
+          - Dead-letter failed > 10 → FAILING
+          - Pipeline runs == 0 in last hour → STALLED
+          - FP ratio > 0.7 across outcomes → REVIEW_DETECTIONS
+
+        Compute:
+          1) FP ratio = fp_count / total
+          2) Which techniques have low confidence (< 0.6) and non-FP disposition?
+          3) Dead-letter status
+          4) Pipeline status
+          5) Recommendations (1-3 concrete, actionable items)
+
+        Use your search tools only if you need per-document details for a specific technique.
+        Output a structured health report. Self-validate: every numeric field must be finite.
     timeout: 300s
+
+  # ── Write results ────────────────────────────────────────────────
+  - name: write_coverage_gaps
+    type: elasticsearch.index
+    with:
+      index: .soc-coverage-gaps
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc-watchdog"
+        health_report: "{{ steps.health_check.output | json }}"
+
+  - name: write_audit
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: "health_check"
+        source: "soc-watchdog"
+        details: "{{ steps.health_check.output | json }}"
 
   - name: log_result
     type: console
     with:
-      message: "Watchdog result: {{ steps.analyze.output | json }}"
+      message: "SOC Watchdog health check complete"

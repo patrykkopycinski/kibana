@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/rule_creation.schema.json",
+  "title": "Rule Creation",
+  "description": "Proposal for a brand-new detection rule. Every new rule MUST be created DISABLED and run in shadow mode for at least one regression cycle before it can be enabled (even autonomously).",
+  "type": "object",
+  "required": ["details"],
+  "properties": {
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_type", "name", "description", "query", "risk_score", "severity", "from", "to_interval", "techniques", "shadow_mode", "pattern_evidence"],
+      "properties": {
+        "rule_type": { "type": "string", "enum": ["eql", "esql", "kql", "threshold", "threat_match"] },
+        "name": { "type": "string", "minLength": 5, "maxLength": 200 },
+        "description": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2000,
+          "description": "Describes what the rule DETECTS — no reasoning or agent commentary. Start with 'Detects ...'"
+        },
+        "query": { "type": "string", "minLength": 1 },
+        "language": { "type": "string", "enum": ["eql", "esql", "kuery", "lucene"] },
+        "index_patterns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "threshold": {
+          "type": "object",
+          "description": "Required when rule_type=threshold.",
+          "additionalProperties": false,
+          "properties": {
+            "field": { "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+            "value": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "risk_score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "from": { "type": "string", "pattern": "^now-\\d+[smhd]$" },
+        "to_interval": { "type": "string", "pattern": "^\\d+[smhd]$" },
+        "techniques": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^T\\d{4}(\\.\\d{3})?$" },
+          "minItems": 1
+        },
+        "shadow_mode": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["created_disabled", "must_run_regression_before_enable", "min_days_in_shadow"],
+          "properties": {
+            "created_disabled": { "type": "boolean", "const": true },
+            "must_run_regression_before_enable": { "type": "boolean", "const": true },
+            "min_days_in_shadow": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "pattern_evidence": { "$ref": "pattern_finding.schema.json#/$defs/pattern_finding" }
+      }
+    }
+  }
+}

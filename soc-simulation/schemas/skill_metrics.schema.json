@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/skill_metrics.schema.json",
+  "title": "AutoSOC Skill Metrics Rollup",
+  "description": "Per-skill rollup of invocations, success rate, and ROI estimates. Upserted by soc-skill-metrics-roller.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "skill_id",
+    "invocations_24h",
+    "invocations_7d",
+    "success_count_24h",
+    "failure_count_24h",
+    "success_rate_7d",
+    "hours_saved_est_7d",
+    "cost_saved_usd_est_7d",
+    "estimate",
+    "updated_at"
+  ],
+  "properties": {
+    "skill_id":             { "type": "string", "minLength": 1 },
+    "invocations_24h":      { "type": "integer", "minimum": 0 },
+    "invocations_7d":       { "type": "integer", "minimum": 0 },
+    "success_count_24h":    { "type": "integer", "minimum": 0 },
+    "failure_count_24h":    { "type": "integer", "minimum": 0 },
+    "success_count_7d":     { "type": "integer", "minimum": 0 },
+    "failure_count_7d":     { "type": "integer", "minimum": 0 },
+    "success_rate_7d":      { "type": "number",  "minimum": 0, "maximum": 1 },
+    "hours_saved_est_7d":   { "type": "number",  "minimum": 0 },
+    "cost_saved_usd_est_7d":{ "type": "number",  "minimum": 0 },
+    "baseline_minutes_saved": { "type": "number", "minimum": 0 },
+    "analyst_hourly_rate_usd":{ "type": "number", "minimum": 0 },
+    "estimate":             { "type": "boolean", "const": true },
+    "last_run_ts":          { "type": ["string", "null"], "format": "date-time" },
+    "last_failure_reason":  { "type": ["string", "null"] },
+    "updated_at":           { "type": "string", "format": "date-time" }
+  }
+}

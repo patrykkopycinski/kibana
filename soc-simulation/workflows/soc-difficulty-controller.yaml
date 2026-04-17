@@ -1,38 +1,102 @@
 version: '1'
 name: SOC Difficulty Controller
-description: Performance-gated difficulty scaling. Evaluates SOC metrics and launches attack commands.
+description: >
+  Performance-gated difficulty escalation. Gathers SOC metrics deterministically,
+  then uses the meta-agent's difficulty-evaluation skill to decide on escalation.
 enabled: true
 
 triggers:
   - type: scheduled
     with:
-      every: 5m
+      every: 30m
+  - type: manual
 
 steps:
+  - name: get_recent_outcomes
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes"
+      body:
+        query:
+          range:
+            "@timestamp":
+              gte: "now-6h"
+        size: 50
+        sort:
+          - "@timestamp": desc
+
   - name: get_current_level
     type: elasticsearch.search
     with:
       index: ".soc-difficulty-state"
       body:
+        query:
+          match_all: {}
         size: 1
+        sort:
+          - "@timestamp": desc
+
+  - name: get_triage_stats
+    type: elasticsearch.search
+    with:
+      index: ".soc-triage-results"
+      body:
+        query:
+          range:
+            "@timestamp":
+              gte: "now-6h"
+        size: 30
         sort:
           - "@timestamp": desc
 
   - name: evaluate
     type: ai.agent
-    agent-id: soc-difficulty-evaluator
+    agent-id: soc-meta-agent
+    connector-id: opus
     with:
       message: >
-        Evaluate whether the SOC should graduate to the next difficulty level.
-        Check .soc-outcomes for the last 30 minutes of MTTD, MTTR, automation rate, and confidence accuracy metrics.
+        Evaluate SOC performance and determine if attack difficulty should change.
+        Use your difficulty-evaluation knowledge.
+
+        Current difficulty level: {{ steps.get_current_level.output.hits.hits.0._source.level }}
+
+        Rules:
+        - If SOC consistently triages with confidence > 80 and low FP rate: INCREASE difficulty
+        - If SOC struggles (confidence < 50, high FP rate, slow response): DECREASE difficulty
+        - Otherwise: MAINTAIN current level
+
+        Difficulty scale: 1 (basic) to 5 (APT-level)
+
+        Self-validate: ensure new_level is an integer 1-5, reasoning is non-empty.
+
+        Respond with: {"current_level": N, "new_level": N, "reasoning": "...", "metrics_summary": "..."}
+
+        Recent outcomes:
+        {{ steps.get_recent_outcomes.output.hits.hits | json }}
+
+        Recent triage results:
+        {{ steps.get_triage_stats.output.hits.hits | json }}
     timeout: 300s
 
-  - name: update_state
-    type: console
+  - name: write_difficulty_state
+    type: elasticsearch.index
     with:
-      message: "Difficulty Controller state update: {{ steps.evaluate.output | json }}"
+      index: .soc-difficulty-state
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        reasoning: "{{ steps.evaluate.output | json }}"
+        source: "soc-difficulty-controller"
 
   - name: launch_attack
+    type: elasticsearch.index
+    with:
+      index: .soc-attack-commands
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        status: "pending"
+        source: "soc-difficulty-controller"
+
+  - name: log_result
     type: console
     with:
-      message: "Difficulty Controller attack command: level={{ steps.evaluate.output.level }} decision={{ steps.evaluate.output.decision }}"
+      message: "Difficulty Controller evaluation: {{ steps.evaluate.output | json }}"

@@ -57,8 +57,10 @@ apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 echo "Docker installed."
-echo "To start Caldera and Bridge, copy docker-compose.yml and run:"
-echo "  docker compose up -d caldera caldera-bridge"
+echo "To start Caldera, copy docker-compose.yml and run:"
+echo "  docker compose up -d caldera"
+echo "(attack dispatch + polling is now driven by soc-caldera-dispatcher and"
+echo " soc-caldera-poller workflows in the Kibana stack — no Python sidecars needed)"
 echo "=== Setup complete ==="
 STARTUP
 )"
@@ -70,5 +72,5 @@ echo "Next steps:"
 echo "  1. SSH in: gcloud compute ssh $VM_NAME --zone=$GCP_ZONE"
 echo "  2. Copy soc-simulation/ to the VM"
 echo "  3. Create .env.cloud with ES_URL, ES_USER, ES_PASS, CALDERA_API_KEY"
-echo "  4. Run: docker compose up -d caldera caldera-bridge"
+echo "  4. Run: docker compose up -d caldera"
 echo "  5. Note the VM's internal IP for endpoint Sandcat configuration"

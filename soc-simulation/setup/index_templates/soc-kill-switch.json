@@ -1,0 +1,27 @@
+{
+  "index_patterns": [".soc-kill-switch"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "autonomy_enabled": { "type": "boolean" },
+        "reason": { "type": "text" },
+        "set_by": { "type": "keyword" },
+        "previous_state": { "type": "boolean" },
+        "scope": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Single-document kill switch (_id='global') and per-scope overrides. When autonomy_enabled=false, every governed mutation path must block.",
+    "owner": "autosoc-governance",
+    "schema_version": 1
+  }
+}

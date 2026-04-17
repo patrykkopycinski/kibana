@@ -1,0 +1,118 @@
+version: '1'
+name: SOC Registry Retro-Tag
+description: >
+  Populates / refreshes .soc-artifact-registry with canonical-vs-autosoc-owned
+  metadata for every agent, skill, and workflow currently live in Kibana.
+
+  Ownership rule (deterministic — no agent required):
+    - first dash-separated token of artifact_id is `soc` or `caldera` -> owner=canonical
+    - everything else (including `auto-*`, `autosoc-*`, custom names) -> owner=autosoc
+
+  The first-token check uses Liquid's `split: '-' | first` filter so `autosoc-xxx`
+  and `auto-xxx` are NOT matched by the canonical rule (unlike a naive
+  substring `contains 'soc-'` which would falsely match them).
+
+  This workflow is pure Elastic: kibana.request + foreach + elasticsearch.index.
+  No Python, no sidecars. Triggered once at the end of setup.sh and on demand
+  from the Workflows UI.
+enabled: true
+
+triggers:
+  - type: manual
+
+steps:
+  # ── Inventory ────────────────────────────────────────────────────────
+  - name: list_agents
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/agent_builder/agents
+
+  - name: list_skills
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/agent_builder/skills
+
+  - name: list_workflows
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/workflows
+
+  # ── Agents -> registry rows ──────────────────────────────────────────
+  - name: tag_agents
+    type: foreach
+    foreach: "{{ steps.list_agents.output.results | default: steps.list_agents.output }}"
+    steps:
+      - name: write_agent_row
+        type: elasticsearch.update
+        with:
+          index: .soc-artifact-registry
+          id: "agent:{{ foreach.item.id }}"
+          doc_as_upsert: true
+          doc:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            type: "agent"
+            artifact_id: "{{ foreach.item.id }}"
+            name: "{{ foreach.item.name | default: foreach.item.id }}"
+            description: "{{ foreach.item.description | default: '' }}"
+            owner: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical{% else %}autosoc{% endif %}"
+            origin: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical-file{% else %}meta-created{% endif %}"
+            created_by: "{{ foreach.item.created_by.username | default: foreach.item.created_by | default: 'unknown' }}"
+            state: "active"
+            schema_version: 1
+            tags: ["retro-tagged"]
+
+  # ── Skills -> registry rows ──────────────────────────────────────────
+  - name: tag_skills
+    type: foreach
+    foreach: "{{ steps.list_skills.output.results | default: steps.list_skills.output }}"
+    steps:
+      - name: write_skill_row
+        type: elasticsearch.update
+        with:
+          index: .soc-artifact-registry
+          id: "skill:{{ foreach.item.id }}"
+          doc_as_upsert: true
+          doc:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            type: "skill"
+            artifact_id: "{{ foreach.item.id }}"
+            name: "{{ foreach.item.name | default: foreach.item.id }}"
+            description: "{{ foreach.item.description | default: '' }}"
+            owner: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical{% else %}autosoc{% endif %}"
+            origin: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical-file{% else %}meta-created{% endif %}"
+            created_by: "{{ foreach.item.created_by.username | default: foreach.item.created_by | default: 'unknown' }}"
+            state: "active"
+            schema_version: 1
+            tags: ["retro-tagged"]
+
+  # ── Workflows -> registry rows ──────────────────────────────────────
+  - name: tag_workflows
+    type: foreach
+    foreach: "{{ steps.list_workflows.output.results | default: steps.list_workflows.output }}"
+    steps:
+      - name: write_workflow_row
+        type: elasticsearch.update
+        with:
+          index: .soc-artifact-registry
+          id: "workflow:{{ foreach.item.id }}"
+          doc_as_upsert: true
+          doc:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            type: "workflow"
+            artifact_id: "{{ foreach.item.id }}"
+            name: "{{ foreach.item.name | default: foreach.item.id }}"
+            description: "{{ foreach.item.description | default: '' }}"
+            owner: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical{% else %}autosoc{% endif %}"
+            origin: "{% assign head = foreach.item.id | split: '-' | first %}{% if head == 'soc' or head == 'caldera' %}canonical-file{% else %}meta-created{% endif %}"
+            created_by: "{{ foreach.item.createdBy.username | default: foreach.item.created_by.username | default: foreach.item.created_by | default: 'unknown' }}"
+            state: "active"
+            schema_version: 1
+            tags: ["retro-tagged"]
+
+  - name: log_done
+    type: console
+    with:
+      message: "Registry retro-tag complete"

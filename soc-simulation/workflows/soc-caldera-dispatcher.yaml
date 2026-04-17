@@ -1,0 +1,142 @@
+version: '1'
+name: SOC Caldera Dispatcher
+description: >
+  Claims the oldest pending attack command from .soc-attack-commands, looks up
+  the matching adversary profile from .soc-attack-profiles, and POSTs a new
+  operation to the Caldera REST API.
+
+  Replaces the former caldera-bridge Python sidecar — this workflow runs on a
+  scheduled trigger every 30s and is purely Elastic-native: elasticsearch.*,
+  http, and foreach/if steps only.
+
+  Pairs with soc-caldera-poller, which watches running operations and writes
+  back techniques_executed once Caldera reports state=finished|cleanup|paused.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30s
+  - type: manual
+
+consts:
+  caldera_url: "http://caldera:8888"
+  caldera_api_key: "ADMIN123"
+  batch_size: 3
+
+steps:
+  # ── Pull pending commands, oldest first ──────────────────────────────
+  - name: pending_commands
+    type: elasticsearch.search
+    with:
+      index: ".soc-attack-commands"
+      body:
+        size: 3
+        seq_no_primary_term: true
+        query:
+          term:
+            status: "pending"
+        sort:
+          - "created_at": asc
+
+  # ── Dispatch each command ────────────────────────────────────────────
+  - name: dispatch
+    type: foreach
+    foreach: "{{ steps.pending_commands.output.hits.hits | default: [] }}"
+    steps:
+      # Optimistic-concurrency claim: only takes the doc if seq_no/primary_term
+      # still match what we saw on the search. Another dispatcher run (or
+      # another replica) that beats us will 409; we simply skip.
+      - name: claim_command
+        type: elasticsearch.document.update
+        with:
+          index: ".soc-attack-commands"
+          id: "{{ foreach.item._id }}"
+          if_seq_no: "{{ foreach.item._seq_no }}"
+          if_primary_term: "{{ foreach.item._primary_term }}"
+          body:
+            doc:
+              status: "running"
+              claimed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+              claimed_by: "soc-caldera-dispatcher"
+
+      # Lookup the adversary profile for this difficulty level
+      - name: profile_lookup
+        type: elasticsearch.document.get
+        with:
+          index: ".soc-attack-profiles"
+          id: "level-{{ foreach.item._source.difficulty }}"
+
+      # Fail-fast when the profile is missing (seeded from caldera_profiles/ at setup time)
+      - name: missing_profile
+        type: elasticsearch.document.update
+        with:
+          index: ".soc-attack-commands"
+          id: "{{ foreach.item._id }}"
+          body:
+            doc:
+              status: "failed"
+              completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+              error: "No adversary profile found for difficulty level {{ foreach.item._source.difficulty }}. Reseed caldera_profiles via setup.sh."
+        if: "{{ steps.profile_lookup.output.found != true }}"
+
+      # POST the Caldera operation
+      - name: create_operation
+        type: http
+        with:
+          url: "{{ consts.caldera_url }}/api/v2/operations"
+          method: POST
+          headers:
+            KEY: "{{ consts.caldera_api_key }}"
+            Content-Type: application/json
+          body:
+            name: "soc-sim-{{ 'now' | date: '%Y%m%d-%H%M%S' }}-{{ foreach.item._id }}"
+            adversary:
+              adversary_id: "{{ steps.profile_lookup.output._source.adversary_id }}"
+            group: "{{ steps.profile_lookup.output._source.group | default: 'all-endpoints' }}"
+          timeout: 30s
+        if: "{{ steps.profile_lookup.output.found == true }}"
+
+      # Stash the operation id on the command doc for the poller to pick up
+      - name: record_operation_id
+        type: elasticsearch.document.update
+        with:
+          index: ".soc-attack-commands"
+          id: "{{ foreach.item._id }}"
+          body:
+            doc:
+              caldera_operation_id: "{{ steps.create_operation.output.id | default: steps.create_operation.output.operation_id }}"
+              caldera_adversary_id: "{{ steps.profile_lookup.output._source.adversary_id }}"
+              dispatched_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        if: >-
+          {{ steps.profile_lookup.output.found == true
+             and (steps.create_operation.output.id | default: steps.create_operation.output.operation_id) != null }}
+
+      # Operation creation failed — mark the command failed so it doesn't re-claim forever
+      - name: mark_operation_failed
+        type: elasticsearch.document.update
+        with:
+          index: ".soc-attack-commands"
+          id: "{{ foreach.item._id }}"
+          body:
+            doc:
+              status: "failed"
+              completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+              error: "Caldera operation creation failed (HTTP {{ steps.create_operation.output.status_code | default: 'unknown' }})"
+        if: >-
+          {{ steps.profile_lookup.output.found == true
+             and (steps.create_operation.output.id | default: steps.create_operation.output.operation_id) == null }}
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: caldera_dispatcher_tick
+        pending_batch_size: "{{ steps.pending_commands.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Caldera dispatcher tick complete — dispatched {{ steps.pending_commands.output.hits.hits | size | default: 0 }} commands"

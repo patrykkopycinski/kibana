@@ -1,47 +1,311 @@
 version: '1'
 name: SOC Detection Engineering
-description: Feedback loop. Fetches triage outcomes, then AI agent recommends rule tuning.
+description: >
+  Scheduled rule health review. Runs in two phases so that tactical tuning and
+  strategic authoring have clear ownership and blast radius:
+
+  Phase 1 — Signal Quality: tunes existing rules (exceptions, thresholds)
+            based on triage outcomes. Emits `redesign_required` for rules that
+            are structurally noisy.
+
+  Phase 2 — Principal Detection Engineering: closes coverage gaps with new
+            rules (always DISABLED) and redesigns rules flagged in Phase 1.
+
+  Both phases write recommendations into .soc-recommendations with distinct
+  `source` values so the human reviewer and the soc-autonomous-applier can
+  route them correctly.
 enabled: true
 
 triggers:
   - type: scheduled
     with:
       every: 30m
+  - type: manual
 
 steps:
-  - name: get_outcomes
-    type: elasticsearch.esql.query
-    with:
-      query: >
-        FROM .soc-outcomes
-        | WHERE @timestamp > NOW() - 30 MINUTES
-        | STATS total = COUNT(*), fp_count = COUNT_IF(disposition == "auto_closed_fp"), avg_confidence = AVG(confidence) BY techniques_observed
-      format: json
+  # ──────────────────────────────────────────────────────────────────────
+  # Shared inputs
+  # ──────────────────────────────────────────────────────────────────────
 
-  - name: get_triage_results
-    type: elasticsearch.esql.query
+  - name: get_recent_outcomes
+    type: elasticsearch.search
     with:
-      query: >
-        FROM .soc-triage-results
-        | WHERE @timestamp > NOW() - 30 MINUTES
-        | STATS total = COUNT(*) BY classification
-      format: json
+      index: ".soc-outcomes"
+      body:
+        query:
+          range:
+            "@timestamp":
+              gte: "now-6h"
+        size: 50
+        sort:
+          - "@timestamp": desc
 
-  - name: tune_rules
+  - name: get_coverage_gaps
+    type: elasticsearch.search
+    with:
+      index: ".soc-coverage-gaps"
+      body:
+        query:
+          range:
+            "@timestamp":
+              gte: "now-24h"
+        size: 20
+        sort:
+          - "@timestamp": desc
+
+  - name: get_rejected_recs
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      body:
+        query:
+          bool:
+            filter:
+              - terms:
+                  source: ["soc-deteng", "soc-deteng-agent", "soc-signal-quality-agent"]
+              - range:
+                  "@timestamp":
+                    gte: "now-7d"
+            should:
+              - term:
+                  status: rejected
+              - exists:
+                  field: sub_items
+            minimum_should_match: 1
+        size: 20
+        sort:
+          - "@timestamp": desc
+        _source:
+          - title
+          - summary
+          - rejection_reason
+          - reviewed_at
+          - sub_items
+          - source
+
+  - name: get_open_redesign_flags
+    type: elasticsearch.search
+    with:
+      index: ".soc-evolution-log"
+      body:
+        query:
+          bool:
+            filter:
+              - term: { source: "soc-signal-quality-agent" }
+              - term: { event_type: "redesign_required" }
+              - range:
+                  "@timestamp":
+                    gte: "now-24h"
+        size: 20
+        sort:
+          - "@timestamp": desc
+        _source:
+          - "@timestamp"
+          - rule_id
+          - analysis_output
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Phase 1 — Signal Quality Agent (tactical FP/TP tuning)
+  # ──────────────────────────────────────────────────────────────────────
+
+  - name: analyze_signal_quality
     type: ai.agent
-    agent-id: soc-deteng-agent
+    agent-id: soc-signal-quality-agent
+    connector-id: opus
     with:
       message: >
-        Analyze these triage outcomes and recommend detection rule tuning:
+        Tune existing detection rules using recent triage outcomes as ground truth.
 
-        Outcomes by technique (last 30min): {{ steps.get_outcomes.output | json }}
-        Triage classifications (last 30min): {{ steps.get_triage_results.output | json }}
+        Follow the tuning matrix in your instructions. DO NOT create new rules.
+        If a rule is structurally noisy, emit `redesign_required` and let the
+        Principal Detection Engineer rewrite it in Phase 2.
 
-        If FP rate > 50%, recommend adding exceptions or raising thresholds.
-        If a technique has no detection rule, recommend creating one.
+        Previously rejected recommendations (learn from these — do NOT repeat):
+        {{ steps.get_rejected_recs.output.hits.hits | json }}
+
+        Recent outcomes (last 6h):
+        {{ steps.get_recent_outcomes.output.hits.hits | json }}
+
+        Respond with JSON:
+        {
+          "findings": [ /* per-rule tuning observations */ ],
+          "summary":  "...",
+          "intents":  [ /* mutation_intent objects for each exception / threshold / disable
+                           — same envelope as soc-meta (details.artifact_type="rule"|"exception",
+                           artifact_id="auto-*", op="update|enable|disable", expected_ownership="autosoc",
+                           patch|new_definition, evidence[], expected_impact{}) */ ]
+        }
     timeout: 300s
+
+  - name: write_signal_quality_evolution_log
+    type: elasticsearch.index
+    with:
+      index: .soc-evolution-log
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc-signal-quality-agent"
+        event_type: "signal_quality_tuning"
+        analysis_output: "{{ steps.analyze_signal_quality.output | json }}"
+
+  - name: write_signal_quality_recommendation
+    type: elasticsearch.index
+    with:
+      index: .soc-recommendations
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "signal-quality-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        type: "rule_tuning"
+        source: "soc-signal-quality-agent"
+        source_doc_id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
+        status: "pending"
+        title: "Signal Quality tuning - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
+        summary: "{{ steps.analyze_signal_quality.output.message }}"
+        details: "{{ steps.analyze_signal_quality.output | json }}"
+        reasoning: "Tactical FP/TP tuning based on .soc-outcomes"
+        confidence: 75
+        track: "agentic"
+        expected_impact: "{{ steps.analyze_signal_quality.output.expected_impact | default: {} }}"
+        evidence: "{{ steps.analyze_signal_quality.output.evidence | default: [] }}"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Phase 2 — Principal Detection Engineering (strategic authoring)
+  # ──────────────────────────────────────────────────────────────────────
+
+  - name: analyze_principal_deteng
+    type: ai.agent
+    agent-id: soc-deteng-agent
+    connector-id: opus
+    with:
+      message: >
+        Close coverage gaps with NEW rules (DISABLED), redesign rules flagged
+        by the Signal Quality agent, and deprecate stale rules. Do NOT tune
+        existing rules for FP/TP — that is Phase 1's job.
+
+        Apply your instructions' validation rules on every new/redesigned rule:
+        - execute the query against a 24h window
+        - reject if >10k hits or catch-all
+        - confirm fields exist in the target mapping
+        - require a concrete MITRE tactic + technique
+
+        Open redesign flags from Phase 1 (prioritize these):
+        {{ steps.get_open_redesign_flags.output.hits.hits | json }}
+
+        Coverage gaps (last 24h):
+        {{ steps.get_coverage_gaps.output.hits.hits | json }}
+
+        Signal Quality output from Phase 1 (for context):
+        {{ steps.analyze_signal_quality.output | json }}
+
+        Previously rejected recommendations (learn from these — do NOT repeat):
+        {{ steps.get_rejected_recs.output.hits.hits | json }}
+
+        Respond with JSON:
+        {
+          "findings": [ /* per-rule authoring/redesign observations */ ],
+          "summary":  "...",
+          "intents":  [ /* mutation_intent objects for each new/redesigned/retired rule
+                           — details.artifact_type="rule", artifact_id="auto-*",
+                           op="create|update|delete", expected_ownership="autosoc",
+                           new_definition (full rule payload with enabled:false for new rules),
+                           evidence[] (must cite coverage gap or redesign flag),
+                           expected_impact{} with coverage_delta_pct or fp_reduction_pct */ ]
+        }
+    timeout: 300s
+
+  - name: write_principal_evolution_log
+    type: elasticsearch.index
+    with:
+      index: .soc-evolution-log
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc-deteng-agent"
+        event_type: "principal_deteng_cycle"
+        analysis_output: "{{ steps.analyze_principal_deteng.output | json }}"
+
+  - name: write_principal_recommendation
+    type: elasticsearch.index
+    with:
+      index: .soc-recommendations
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "deteng-principal-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        type: "rule_authoring"
+        source: "soc-deteng-agent"
+        source_doc_id: "{{ steps.write_principal_evolution_log.output._id }}"
+        status: "pending"
+        title: "Principal DetEng cycle - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
+        summary: "{{ steps.analyze_principal_deteng.output.message }}"
+        details: "{{ steps.analyze_principal_deteng.output | json }}"
+        reasoning: "Strategic rule authoring driven by coverage gaps + Signal Quality redesign flags"
+        confidence: 75
+        track: "agentic"
+        expected_impact: "{{ steps.analyze_principal_deteng.output.expected_impact | default: {} }}"
+        evidence: "{{ steps.analyze_principal_deteng.output.evidence | default: [] }}"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Fan-out: materialize concrete mutation intents from BOTH phases
+  # Each concrete intent becomes its own .soc-recommendations doc with
+  # type=mutation_intent, which soc-autonomous-applier picks up under
+  # governance gates.
+  # ──────────────────────────────────────────────────────────────────────
+
+  - name: write_signal_quality_intents
+    type: foreach
+    foreach: "{{ steps.analyze_signal_quality.output.intents | default: [] }}"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: .soc-recommendations
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "sq-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc-signal-quality-agent"
+            source_doc_id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
+            status: "pending"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            reasoning: "{{ foreach.item.reasoning | default: 'Signal-quality tuning' }}"
+            confidence: "{{ foreach.item.confidence | default: 75 }}"
+            track: "{{ foreach.item.track | default: 'agentic' }}"
+            housekeeping: "{{ foreach.item.housekeeping | default: false }}"
+            expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+            details: "{{ foreach.item.details }}"
+
+  - name: write_principal_intents
+    type: foreach
+    foreach: "{{ steps.analyze_principal_deteng.output.intents | default: [] }}"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: .soc-recommendations
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "deteng-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc-deteng-agent"
+            source_doc_id: "{{ steps.write_principal_evolution_log.output._id }}"
+            status: "pending"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            reasoning: "{{ foreach.item.reasoning | default: 'Principal DetEng authoring' }}"
+            confidence: "{{ foreach.item.confidence | default: 75 }}"
+            track: "{{ foreach.item.track | default: 'agentic' }}"
+            housekeeping: "{{ foreach.item.housekeeping | default: false }}"
+            expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+            details: "{{ foreach.item.details }}"
 
   - name: log_result
     type: console
     with:
-      message: "DetEng result: {{ steps.tune_rules.output | json }}"
+      message: >-
+        Detection Engineering cycle complete —
+        {{ steps.analyze_signal_quality.output.intents | size | default: 0 }} signal-quality
+        + {{ steps.analyze_principal_deteng.output.intents | size | default: 0 }} principal intent(s)
+        dispatched to soc-autonomous-applier.

@@ -1,0 +1,17 @@
+{
+  "index": ".soc-governance-budgets",
+  "doc_id": "global:defaults",
+  "create_if_missing": true,
+  "body": {
+    "@timestamp": "2026-04-16T00:00:00.000Z",
+    "window": "defaults",
+    "scope": "global",
+    "artifact_type": "*",
+    "artifact_id": "*",
+    "mutations_in_window": 0,
+    "limit": 0,
+    "exceeded": false,
+    "cooldown_seconds": 0,
+    "reason": "Reference row documenting default budget knobs. Real budgets are written per-scope at runtime. Defaults: global.hourly=50, global.daily=200, per_artifact.hourly=5, per_artifact.daily=20, cooldown_seconds=300."
+  }
+}

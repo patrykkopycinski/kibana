@@ -12,13 +12,31 @@
       "properties": {
         "@timestamp": { "type": "date" },
         "correlation_id": { "type": "keyword" },
+        "run_id": { "type": "keyword" },
+        "event_type": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "stage": { "type": "keyword" },
         "agent_name": { "type": "keyword" },
         "action": { "type": "keyword" },
+        "pipeline": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "reason": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } } },
         "confidence": { "type": "integer" },
         "classification": { "type": "keyword" },
+        "disposition": { "type": "keyword" },
         "hop_count": { "type": "integer" },
+        "pending_count": { "type": "integer" },
+        "recent_24h_total": { "type": "integer" },
+        "budget_remaining": { "type": "integer" },
+        "autonomy_enabled": { "type": "boolean" },
+        "kill_switch": { "type": "object", "enabled": false },
         "details": { "type": "object", "enabled": false }
       }
     }
+  },
+  "_meta": {
+    "description": "Operator-visible SOC action audit trail. Top-level `event_type`, `source`, `stage`, `pipeline` MUST stay as `keyword` so dashboards and governance queries can aggregate without relying on `.keyword` subfields.",
+    "owner": "autosoc-governance",
+    "schema_version": 2
   }
 }

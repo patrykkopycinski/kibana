@@ -1,39 +1,49 @@
 version: '1'
 name: SOC Recovery
-description: Dead letter recovery. Retries failed pipeline items up to 3 times.
+description: Dead-letter recovery. Finds stalled pipeline entries and logs them for manual review.
 enabled: true
 
 triggers:
   - type: scheduled
     with:
       every: 10m
+  - type: manual
 
 steps:
-  - name: find_retryable
+  - name: find_stalled
     type: elasticsearch.search
     with:
       index: ".soc-dead-letter"
       body:
         query:
           bool:
-            filter:
+            must:
+              - term:
+                  status: "failed"
               - range:
-                  retry_count:
-                    lt: 3
-        size: 10
+                  "@timestamp":
+                    gte: "now-1h"
+        size: 20
         sort:
-          - "@timestamp": asc
+          - "@timestamp": desc
 
-  - name: process_retries
-    type: foreach
-    foreach: '{{ steps.find_retryable.output.hits.hits | json }}'
-    steps:
-      - name: log_retry
-        type: console
-        with:
-          message: "Retrying dead-letter item {{ foreach.item._id }} from {{ foreach.item._source.source }} (attempt {{ foreach.item._source.retry_count | plus: 1 }})"
-
-  - name: audit
+  - name: log_stalled_count
     type: console
     with:
-      message: "Recovery audit: agent=recovery action=dead_letter_scan items_found={{ steps.find_retryable.output.hits.total.value }}"
+      message: "Recovery found {{ steps.find_stalled.output.hits.total.value }} stalled entries"
+
+  - name: write_recovery_log
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: "dead_letter_recovery"
+        source: "soc-recovery"
+        stalled_count: "{{ steps.find_stalled.output.hits.total.value }}"
+        details: "Recovery scan complete. Stalled entries logged for review."
+
+  - name: log_done
+    type: console
+    with:
+      message: "SOC Recovery scan complete"

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/rule_patch.schema.json",
+  "title": "Rule Patch",
+  "description": "Incremental change to an existing detection rule. Must emit `patch_fields` — the exact fields to write — and the `current_values` the agent read, so the applier can detect drift.",
+  "type": "object",
+  "required": ["details"],
+  "properties": {
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rule_id", "action", "patch_fields", "current_values", "impact_prediction"],
+      "properties": {
+        "rule_id": { "type": "string", "minLength": 1 },
+        "rule_name": { "type": ["string", "null"] },
+        "action": {
+          "type": "string",
+          "enum": [
+            "raise_threshold",
+            "lower_threshold",
+            "tighten_query",
+            "broaden_query",
+            "enable",
+            "disable",
+            "add_note",
+            "change_severity",
+            "change_risk_score"
+          ]
+        },
+        "patch_fields": {
+          "type": "object",
+          "description": "Exact object shape matching the Detection Engine rule update API.",
+          "additionalProperties": true
+        },
+        "current_values": {
+          "type": "object",
+          "description": "Snapshot of the fields the agent read before proposing the change. Enables drift detection.",
+          "additionalProperties": true
+        },
+        "impact_prediction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["expected_fp_reduction_pct", "expected_tp_impact"],
+          "properties": {
+            "expected_fp_reduction_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+            "expected_tp_impact": { "type": "string", "enum": ["none", "minor", "moderate", "significant", "unknown"] },
+            "reasoning": { "type": "string" }
+          }
+        },
+        "regression_guard": {
+          "type": "object",
+          "description": "Results of the agent running the proposed patch against its self-check dataset. Mandatory.",
+          "additionalProperties": false,
+          "required": ["dataset_size", "passed", "failed"],
+          "properties": {
+            "dataset_size": { "type": "integer", "minimum": 0 },
+            "passed": { "type": "integer", "minimum": 0 },
+            "failed": { "type": "integer", "minimum": 0 },
+            "notes": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

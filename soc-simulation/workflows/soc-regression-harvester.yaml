@@ -1,0 +1,124 @@
+version: '1'
+name: SOC Regression Harvester
+description: >
+  Periodically harvests confirmed TP/FP triage outcomes into the immutable
+  .soc-regression-dataset. Every rejected or auto-closed-as-FP recommendation
+  becomes a labelled regression case used by the regression gate before any
+  autonomous mutation is allowed to land.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+steps:
+  # ── Gather recently-labelled outcomes: any triage with explicit disposition ──
+  - name: get_labelled_outcomes
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes"
+      body:
+        size: 100
+        sort:
+          - "@timestamp": "desc"
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-2h"
+              - terms:
+                  disposition:
+                    - "true_positive_high"
+                    - "true_positive_low"
+                    - "benign_positive"
+                    - "auto_closed_fp"
+              - term:
+                  harvested_for_regression: false
+
+  # ── Gather rejected recommendations — these are explicit negative training signals ──
+  - name: get_rejected_recs
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      body:
+        size: 100
+        sort:
+          - "@timestamp": "desc"
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-2h"
+              - term:
+                  status: "rejected"
+              - term:
+                  harvested_for_regression: false
+
+  # ── Let the meta-agent turn outcomes into frozen regression cases ──
+  - name: harvest_cases
+    type: ai.agent
+    agent-id: soc-meta-agent
+    connector-id: opus
+    with:
+      message: >
+        You are harvesting regression test cases from labelled triage outcomes and rejected recommendations.
+        A regression case is a minimal, reproducible fixture (rule_id + alert fingerprint + expected disposition)
+        that any future autonomous mutation MUST continue to satisfy.
+
+        INPUT — labelled outcomes (first 100):
+        {{ steps.get_labelled_outcomes.output.hits.hits | json }}
+
+        INPUT — rejected recommendations (first 100):
+        {{ steps.get_rejected_recs.output.hits.hits | json }}
+
+        For each row:
+          1. Extract rule_id, rule_name, alert_fingerprint, a minimal alert_sample (host/user/process only).
+          2. Label with expected_disposition (from outcome.disposition) or derive from rejection reason.
+          3. Emit ONE object per case with this exact shape:
+             {
+               "case_id": "reg_<rule_id>_<fingerprint_6>",
+               "source_outcome_id": "<_id or null>",
+               "source_triage_id": "<triage_id or null>",
+               "rule_id": "...", "rule_name": "...",
+               "alert_fingerprint": "...",
+               "alert_sample": { "host_name": "...", "user_name": "...", "process_name": "..." },
+               "expected_disposition": "...",
+               "expected_confidence": 0.9,
+               "expected_techniques": ["T1059"],
+               "expected_next_step": "escalate_to_case",
+               "labels": ["harvested","from-outcome"],
+               "label_source": "triage_outcome",
+               "frozen": true,
+               "scenario_tag": "<rule_name short slug>"
+             }
+
+        Self-validate:
+          - DO NOT emit duplicates (check fingerprint+rule_id across both inputs before output).
+          - DO NOT emit a case when disposition is "unknown" or "suspicious_needs_hunt".
+          - alert_sample must be <= 20 fields.
+
+        Output ONLY a JSON array of case objects.
+    timeout: 240s
+
+  # ── Persist to regression dataset ──
+  - name: write_cases
+    type: elasticsearch.index
+    with:
+      index: .soc-regression-dataset
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        harvest_run_id: "{{ execution.id }}"
+        cases_raw: "{{ steps.harvest_cases.output | json }}"
+        source_outcomes_count: "{{ steps.get_labelled_outcomes.output.hits.hits | size }}"
+        source_rejections_count: "{{ steps.get_rejected_recs.output.hits.hits | size }}"
+        notes:
+          - "Raw harvest payload; the regression gate reads individual cases from the dataset after a downstream extractor flattens them."
+
+  - name: log_done
+    type: console
+    with:
+      message: "Regression Harvester: captured cases and stored to .soc-regression-dataset"

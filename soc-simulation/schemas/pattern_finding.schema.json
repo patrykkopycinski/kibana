@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/pattern_finding.schema.json",
+  "title": "Pattern Finding",
+  "description": "Evidence backing any 'the agent found a pattern' claim. No pattern is trusted without it.",
+  "$defs": {
+    "pattern_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["discovery_method", "sample_size", "time_range", "query", "aggregation", "statistical_support"],
+      "properties": {
+        "discovery_method": {
+          "type": "string",
+          "enum": [
+            "esql_aggregation",
+            "kql_histogram",
+            "attack_discovery_search",
+            "ml_anomaly_detection",
+            "human_suggested"
+          ]
+        },
+        "sample_size": { "type": "integer", "minimum": 10, "description": "Fewer than 10 samples means 'anecdote', not 'pattern'." },
+        "time_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["from", "to"],
+          "properties": {
+            "from": { "type": "string" },
+            "to": { "type": "string" }
+          }
+        },
+        "query": { "type": "string", "minLength": 20, "description": "The exact ES|QL / KQL used. Must be reproducible." },
+        "aggregation": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Field(s) the agent grouped by and the resulting counts. Enables a human to rerun and verify."
+        },
+        "statistical_support": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["confidence", "explanation"],
+          "properties": {
+            "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+            "p_value": { "type": ["number", "null"] },
+            "baseline_rate": { "type": ["number", "null"] },
+            "observed_rate": { "type": ["number", "null"] },
+            "explanation": { "type": "string", "minLength": 20 }
+          }
+        },
+        "reproducibility_link": {
+          "type": ["string", "null"],
+          "description": "Link to saved Discover / Lens view or ES|QL session for the operator to reproduce."
+        }
+      }
+    }
+  },
+  "$ref": "#/$defs/pattern_finding"
+}

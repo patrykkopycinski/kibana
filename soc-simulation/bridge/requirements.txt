@@ -1,3 +1,0 @@
-# soc-simulation/bridge/requirements.txt
-elasticsearch>=8.0.0,<10.0.0
-requests>=2.28.0,<3.0.0

@@ -1,0 +1,42 @@
+{
+  "index_patterns": [".soc-metrics"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "pipeline": { "type": "keyword" },
+        "cycle_id": { "type": "keyword" },
+        "stage": { "type": "keyword" },
+        "alerts_processed": { "type": "integer" },
+        "classifications": {
+          "properties": {
+            "true_positive": { "type": "integer" },
+            "false_positive": { "type": "integer" },
+            "suspicious": { "type": "integer" }
+          }
+        },
+        "cycle_duration_ms": { "type": "long" },
+        "stages_completed": { "type": "keyword" },
+        "case_created": { "type": "boolean" },
+        "errors": { "type": "integer" },
+        "status": { "type": "keyword" },
+        "tokens_used": {
+          "properties": {
+            "prompt": { "type": "long" },
+            "completion": { "type": "long" },
+            "total": { "type": "long" }
+          }
+        },
+        "estimated_cost_usd": { "type": "float" },
+        "agent_invocations": { "type": "integer" },
+        "tool_calls": { "type": "integer" }
+      }
+    }
+  }
+}

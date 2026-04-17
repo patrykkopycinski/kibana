@@ -1,11 +1,19 @@
 version: '1'
 name: SOC Triage
-description: First responder workflow. Classifies alerts, assigns confidence, routes through pipeline.
+description: >
+  Unified triage workflow (alert-triggered). Runs classification, entity enrichment,
+  and deep investigation in a single agent call. Writes the flattened triage verdict
+  to `.soc-triage-results` and a derived outcome to `.soc-outcomes`. The disposition
+  is derived from the agent output — it is NOT hardcoded.
 enabled: true
 
 triggers:
   - type: manual
   - type: alert
+
+consts:
+  run_id: "triage-{{ workflow.run_id | default: 'run' }}-{{ 'now' | date: '%s%3N' }}"
+  now_iso: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
 steps:
   - name: log_alert
@@ -16,13 +24,105 @@ steps:
   - name: triage
     type: ai.agent
     agent-id: soc-triage-agent
+    connector-id: opus
     with:
       message: >
-        Triage the following alert(s):
+        Run the full triage pipeline on this security alert:
+        Phase 1 — Classify as TRUE_POSITIVE, FALSE_POSITIVE, or SUSPICIOUS with confidence 0-100.
+        Phase 2 — If confidence >= 40, enrich with entity context (risk scores, baselines, relationships).
+        Phase 3 — If still ambiguous (confidence 40-69), conduct structured threat hunt.
+        Phase 4 — If TRUE_POSITIVE or SUSPICIOUS with confidence >= 50, check for attack chain correlation
+                   using security.attack_discovery_search.
+
+        Produce multi-dimensional classification. Respond with STRICT JSON (no prose):
+
+        {
+          "classification":     "TRUE_POSITIVE" | "FALSE_POSITIVE" | "SUSPICIOUS",
+          "confidence":         0-100,
+          "disposition":        "TRUE_POSITIVE" | "BENIGN_TRUE_POSITIVE" | "FALSE_POSITIVE"
+                               | "POLICY_VIOLATION" | "INCONCLUSIVE" | "DUPLICATE",
+          "threat_category":    "commodity_malware" | "targeted_attack" | "insider_threat" | "misuse"
+                               | "unauthorized_access" | "data_exfiltration" | "lateral_movement"
+                               | "persistence" | "reconnaissance" | "unknown",
+          "kill_chain_stage":   "reconnaissance" | "weaponization" | "delivery" | "exploitation"
+                               | "installation" | "c2" | "actions_on_objectives" | "unknown",
+          "business_impact":    { "data_at_risk": [...], "systems_at_risk": [...], "criticality": "low|medium|high|critical" },
+          "recommended_action": "close_fp" | "open_case" | "enrich_only" | "escalate",
+          "reasoning":          "<concise rationale>",
+          "evidence":           [ { "summary": "...", "source_ref": "<doc id|query>", "confidence": 0.0-1.0 } ]
+        }
+
+        Self-validate: every field above MUST be populated. `disposition` MUST be one of the enumerated values
+        (never "triaged" or other placeholders). `confidence` MUST be an integer 0-100.
+
+        Alert data:
         {{ event | json }}
-    timeout: 120s
+    timeout: 600s
+
+  # Flatten the triage output at the top of the doc so dashboards and
+  # aggregations don't have to reach into triage_output.* to get the verdict.
+  - name: write_triage_result
+    type: elasticsearch.index
+    with:
+      index: .soc-triage-results
+      document:
+        "@timestamp": "{{ consts.now_iso }}"
+        run_id: "{{ consts.run_id }}"
+        source: "soc-triage"
+        stage: "unified_triage"
+        pipeline: "soc-triage"
+        alert_id: "{{ event.id | default: event._id | default: 'unknown' }}"
+        rule_id: "{{ event['kibana.alert.rule.uuid'] | default: event.rule.id | default: null }}"
+        rule_name: "{{ event['kibana.alert.rule.name'] | default: event.rule.name | default: null }}"
+        classification: "{{ steps.triage.output.classification | default: 'SUSPICIOUS' }}"
+        confidence: "{{ steps.triage.output.confidence | default: 0 }}"
+        disposition: "{{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }}"
+        threat_category: "{{ steps.triage.output.threat_category | default: 'unknown' }}"
+        kill_chain_stage: "{{ steps.triage.output.kill_chain_stage | default: 'unknown' }}"
+        recommended_action: "{{ steps.triage.output.recommended_action | default: null }}"
+        reasoning: "{{ steps.triage.output.reasoning | default: null }}"
+        business_impact: "{{ steps.triage.output.business_impact | default: empty }}"
+        evidence: "{{ steps.triage.output.evidence | default: empty }}"
+        triage_output: "{{ steps.triage.output | json }}"
+
+  # Outcomes are the single source of truth for SLO/rollup dashboards. The
+  # `disposition` on this doc is the agent's disposition — never "triaged".
+  - name: write_outcome
+    type: elasticsearch.index
+    with:
+      index: .soc-outcomes
+      document:
+        "@timestamp": "{{ consts.now_iso }}"
+        correlation_id: "{{ consts.run_id }}"
+        pipeline: "soc-triage"
+        stage: "unified_triage"
+        agents_involved: ["soc-triage-agent"]
+        classification: "{{ steps.triage.output.classification | default: 'SUSPICIOUS' }}"
+        confidence: "{{ steps.triage.output.confidence | default: 0 }}"
+        disposition: "{{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }}"
+        threat_category: "{{ steps.triage.output.threat_category | default: 'unknown' }}"
+        kill_chain_stage: "{{ steps.triage.output.kill_chain_stage | default: 'unknown' }}"
+        triage_result_ref: "{{ steps.write_triage_result.output._id | default: null }}"
+
+  - name: write_reasoning_trace
+    type: elasticsearch.index
+    with:
+      index: .soc-reasoning-trace
+      document:
+        "@timestamp": "{{ consts.now_iso }}"
+        run_id: "{{ consts.run_id }}"
+        agent_id: "soc-triage-agent"
+        step_index: 0
+        step_type: "run_summary"
+        content: "Triage run for alert {{ event.id | default: 'unknown' }} → disposition={{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }} confidence={{ steps.triage.output.confidence | default: 0 }}"
+        run_summary:
+          total_steps: 1
+          tool_call_count: 0
+          total_duration_ms: null
+          final_status: "completed"
+          final_output_ref: "{{ steps.write_triage_result.output._id | default: null }}"
 
   - name: log_result
     type: console
     with:
-      message: "SOC Triage result: {{ steps.triage.output | json }}"
+      message: "SOC Triage complete → disposition={{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }} confidence={{ steps.triage.output.confidence | default: 0 }} run_id={{ consts.run_id }}"

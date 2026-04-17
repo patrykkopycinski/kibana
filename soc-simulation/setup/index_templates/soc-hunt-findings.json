@@ -11,22 +11,12 @@
     "mappings": {
       "properties": {
         "@timestamp": { "type": "date" },
-        "correlation_id": { "type": "keyword" },
-        "hop_count": { "type": "integer" },
-        "confidence": { "type": "integer" },
-        "confidence_delta": { "type": "integer" },
-        "hypotheses_tested": {
-          "type": "nested",
-          "properties": {
-            "hypothesis": { "type": "text" },
-            "queries_executed": { "type": "text" },
-            "evidence": { "type": "text" },
-            "verdict": { "type": "keyword" }
-          }
-        },
-        "iocs_discovered": { "type": "keyword" },
-        "related_alerts_found": { "type": "keyword" },
-        "investigation_summary": { "type": "text" }
+        "source": { "type": "keyword" },
+        "hunt_output": { "type": "text" },
+        "hunt_type": { "type": "keyword" },
+        "findings_count": { "type": "integer" },
+        "techniques_hunted": { "type": "keyword" },
+        "status": { "type": "keyword" }
       }
     }
   }

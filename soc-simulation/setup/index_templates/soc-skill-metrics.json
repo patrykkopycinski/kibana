@@ -1,0 +1,30 @@
+{
+  "index_patterns": [".soc-skill-metrics"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "skill_id":               { "type": "keyword" },
+        "invocations_24h":        { "type": "integer" },
+        "invocations_7d":         { "type": "integer" },
+        "success_count_24h":      { "type": "integer" },
+        "failure_count_24h":      { "type": "integer" },
+        "success_count_7d":       { "type": "integer" },
+        "failure_count_7d":       { "type": "integer" },
+        "success_rate_7d":        { "type": "float" },
+        "hours_saved_est_7d":     { "type": "float" },
+        "cost_saved_usd_est_7d":  { "type": "float" },
+        "baseline_minutes_saved": { "type": "float" },
+        "analyst_hourly_rate_usd":{ "type": "float" },
+        "estimate":               { "type": "boolean" },
+        "last_run_ts":            { "type": "date" },
+        "last_failure_reason":    { "type": "text" },
+        "updated_at":             { "type": "date" }
+      }
+    }
+  }
+}

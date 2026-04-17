@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/recommendation.schema.json",
+  "title": "AutoSOC Recommendation",
+  "description": "Envelope for any decision an AutoSOC agent wants to surface or apply. Discriminated by `type`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "rec_id",
+    "schema_version",
+    "type",
+    "source",
+    "status",
+    "title",
+    "summary",
+    "confidence",
+    "details",
+    "track",
+    "expected_impact",
+    "evidence"
+  ],
+  "properties": {
+    "rec_id": { "type": "string", "pattern": "^[a-z0-9_-]{8,64}$" },
+    "schema_version": { "type": "integer", "enum": [1, 2] },
+    "type": {
+      "type": "string",
+      "enum": [
+        "triage_verdict",
+        "rule_patch",
+        "rule_creation",
+        "rule_exception",
+        "capability_gap",
+        "mutation_intent",
+        "no_action"
+      ]
+    },
+    "source": { "type": "string", "minLength": 1 },
+    "source_doc_id": { "type": ["string", "null"] },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "approved", "rejected", "applied", "failed", "auto-applied", "auto-rejected"]
+    },
+    "title": { "type": "string", "minLength": 3, "maxLength": 200 },
+    "summary": { "type": "string", "minLength": 10, "maxLength": 2000 },
+    "reasoning": { "type": "string", "maxLength": 4000 },
+    "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "details": {
+      "description": "Shape depends on `type`; see type-specific schemas.",
+      "type": "object"
+    },
+    "track": {
+      "type": "string",
+      "enum": ["deterministic", "agentic"],
+      "description": "Deterministic recommendations come from workflow-driven analysis; agentic recommendations come from LLM-reasoned analysis. Operators surface both side-by-side."
+    },
+    "expected_impact": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Typed forecast of the business impact if this recommendation is applied. Empty object is permitted ONLY when housekeeping=true.",
+      "properties": {
+        "fp_reduction_pct":      { "type": "number", "minimum": 0, "maximum": 100 },
+        "tp_gain_pct":           { "type": "number", "minimum": 0, "maximum": 100 },
+        "mttr_reduction_minutes":{ "type": "number", "minimum": 0 },
+        "hours_saved_per_week":  { "type": "number", "minimum": 0 },
+        "coverage_delta_pct":    { "type": "number" }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Supporting evidence items. At least one entry is required unless housekeeping=true.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["summary", "source_ref", "confidence"],
+        "properties": {
+          "summary":    { "type": "string", "minLength": 1, "maxLength": 500 },
+          "source_ref": { "type": "string", "minLength": 1, "description": "ES|QL query, document id, or URI." },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "housekeeping": {
+      "type": "boolean",
+      "default": false,
+      "description": "When true, evidence[] may be empty and expected_impact may be {}. Use for metadata-only mutations."
+    },
+    "self_validation": {
+      "type": "object",
+      "description": "Mandatory agent self-validation step results. An agent MUST populate this before emitting the recommendation.",
+      "additionalProperties": false,
+      "required": ["performed", "checks"],
+      "properties": {
+        "performed": { "type": "boolean" },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "passed"],
+            "additionalProperties": false,
+            "properties": {
+              "name":     { "type": "string" },
+              "passed":   { "type": "boolean" },
+              "evidence": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "autosoc_owned_target": {
+      "type": "boolean",
+      "description": "True if the target artifact was originally created by AutoSOC — enables auto-apply without human approval."
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "type": { "const": "triage_verdict" } } }, "then": { "$ref": "triage_verdict.schema.json#" } },
+    { "if": { "properties": { "type": { "const": "rule_patch" } } },     "then": { "$ref": "rule_patch.schema.json#" } },
+    { "if": { "properties": { "type": { "const": "rule_creation" } } },  "then": { "$ref": "rule_creation.schema.json#" } },
+    { "if": { "properties": { "type": { "const": "rule_exception" } } }, "then": { "$ref": "rule_exception.schema.json#" } },
+    { "if": { "properties": { "type": { "const": "capability_gap" } } }, "then": { "$ref": "capability_gap.schema.json#" } },
+    { "if": { "properties": { "type": { "const": "mutation_intent" } } },"then": { "$ref": "mutation_intent.schema.json#" } },
+    {
+      "if": {
+        "anyOf": [
+          { "properties": { "housekeeping": { "const": false } } },
+          { "not": { "required": ["housekeeping"] } }
+        ]
+      },
+      "then": {
+        "properties": {
+          "evidence": { "type": "array", "minItems": 1 }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+version: '1'
+name: SOC Regression Gate
+description: >
+  The final gate every autonomous mutation passes through. Runs the proposed
+  change against every frozen regression case and writes a pass/fail verdict to
+  .soc-regression-runs. The soc-autonomous-applier blocks any mutation whose
+  gate_result != 'pass'. Fully deterministic — no LLM involved in the gate
+  decision itself; the agent only produces the per-case replay summary.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: candidate_artifact_ref
+    type: string
+    required: true
+  - name: candidate_definition_hash
+    type: string
+    required: true
+  - name: baseline_artifact_ref
+    type: string
+    required: false
+  - name: baseline_definition_hash
+    type: string
+    required: false
+  - name: trigger
+    type: string
+    required: true
+
+steps:
+  # ── Fetch frozen dataset ──────────────────────────────────────────────
+  - name: get_cases
+    type: elasticsearch.search
+    with:
+      index: ".soc-regression-dataset"
+      body:
+        size: 500
+        sort:
+          - "@timestamp": "desc"
+        query:
+          bool:
+            filter:
+              - term:
+                  frozen: true
+
+  # ── Replay: per case, have the candidate rule/agent produce a verdict,
+  #     compare to expected_disposition and collect pass/fail counts. The
+  #     agent is asked ONLY to simulate/predict; it does not mutate anything. ──
+  - name: replay_candidate
+    type: ai.agent
+    agent-id: soc-meta-agent
+    connector-id: opus
+    with:
+      message: >
+        You are a DETERMINISTIC regression gate. Do NOT improvise or fix cases;
+        score them.
+
+        candidate_artifact_ref: {{ inputs.candidate_artifact_ref }}
+        candidate_definition_hash: {{ inputs.candidate_definition_hash }}
+        baseline_artifact_ref: {{ inputs.baseline_artifact_ref | default: 'n/a' }}
+        trigger: {{ inputs.trigger }}
+
+        Frozen regression cases (up to 500):
+        {{ steps.get_cases.output.hits.hits | json }}
+
+        For each case:
+          1. Determine whether the candidate change would (a) still triage the case
+             to its expected_disposition, and (b) still produce expected_next_step.
+          2. Emit {"case_id","passed":true|false,"reason":"..."}.
+
+        Then compute:
+          passed_total, failed_total, regressions (failed that baseline previously passed).
+
+        Gate rule:
+          gate_result = "fail" if regressions > 0
+          gate_result = "pass" otherwise
+
+        Output ONLY:
+          { "per_case": [...], "passed": N, "failed": N, "regressions": N,
+            "regression_delta": 0.0, "gate_result": "pass"|"fail",
+            "gate_reason": "<short>" }
+    timeout: 420s
+
+  # ── Persist gate outcome ──────────────────────────────────────────────
+  - name: write_run
+    type: elasticsearch.index
+    with:
+      index: .soc-regression-runs
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        run_id: "{{ execution.id }}"
+        trigger: "{{ inputs.trigger }}"
+        candidate_artifact_ref: "{{ inputs.candidate_artifact_ref }}"
+        candidate_definition_hash: "{{ inputs.candidate_definition_hash }}"
+        baseline_artifact_ref: "{{ inputs.baseline_artifact_ref | default: '' }}"
+        baseline_definition_hash: "{{ inputs.baseline_definition_hash | default: '' }}"
+        dataset_size: "{{ steps.get_cases.output.hits.hits | size }}"
+        passed: "{{ steps.replay_candidate.output.passed | default: 0 }}"
+        failed: "{{ steps.replay_candidate.output.failed | default: 0 }}"
+        regressions: "{{ steps.replay_candidate.output.regressions | default: 0 }}"
+        regression_delta: "{{ steps.replay_candidate.output.regression_delta | default: 0.0 }}"
+        gate_result: "{{ steps.replay_candidate.output.gate_result | default: 'skipped' }}"
+        gate_reason: "{{ steps.replay_candidate.output.gate_reason | default: 'replay returned no verdict' }}"
+        per_case: "{{ steps.replay_candidate.output.per_case | default: [] }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Regression Gate: {{ steps.replay_candidate.output.gate_result | default: 'skipped' }} for {{ inputs.candidate_artifact_ref }}"

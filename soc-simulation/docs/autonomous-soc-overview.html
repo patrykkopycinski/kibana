@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>Autonomous SOC — Technical Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0B1222;
+    --surface: #131D33;
+    --surface2: #1A2744;
+    --surface3: #1F2F4D;
+    --border: #253553;
+    --accent: #00BCD4;
+    --accent2: #7C4DFF;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 40px 56px 60px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+  code {
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Header ──────────────────────────────────────── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .header-left .subtitle {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+  .header-right { display: flex; gap: 10px; align-items: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid;
+  }
+  .badge-live { color: var(--green); border-color: rgba(0,230,118,0.3); background: rgba(0,230,118,0.08); }
+  .badge-live::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .badge-phase { color: var(--amber); border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.08); }
+  .badge-date { color: var(--text2); border-color: var(--border); background: var(--surface); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  /* ── Section ─────────────────────────────────────── */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--text3); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .section-title .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px; font-size: 11px; font-weight: 800;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--accent);
+  }
+
+  /* ── Grid ─────────────────────────────────────────── */
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g23 { grid-template-columns: 2fr 1fr; }
+  .g32 { grid-template-columns: 1fr 2fr; }
+  .span-2 { grid-column: span 2; }
+  .span-3 { grid-column: span 3; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text3); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ── KPI Row ──────────────────────────────────────── */
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 28px; }
+  .kpi {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px; text-align: center;
+  }
+  .kpi-value { font-size: 26px; font-weight: 800; line-height: 1; }
+  .kpi-label {
+    font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--text2); margin-top: 5px;
+  }
+
+  /* ── Tables ───────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text3); text-align: left; padding: 0 8px 7px; border-bottom: 1px solid var(--border);
+  }
+  td {
+    font-size: 11px; padding: 6px 8px; border-bottom: 1px solid rgba(37,53,83,0.4);
+    vertical-align: top; color: var(--text2);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.name { font-weight: 600; color: var(--text); white-space: nowrap; }
+
+  .pill {
+    display: inline-block; font-size: 9px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; white-space: nowrap;
+  }
+  .pill-cyan { background: rgba(0,188,212,0.12); color: var(--accent); border: 1px solid rgba(0,188,212,0.2); }
+  .pill-purple { background: rgba(124,77,255,0.12); color: var(--accent2); border: 1px solid rgba(124,77,255,0.2); }
+  .pill-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .pill-amber { background: rgba(255,215,64,0.12); color: var(--amber); border: 1px solid rgba(255,215,64,0.2); }
+  .pill-red { background: rgba(255,82,82,0.12); color: var(--red); border: 1px solid rgba(255,82,82,0.2); }
+  .pill-pink { background: rgba(240,98,146,0.12); color: var(--pink); border: 1px solid rgba(240,98,146,0.2); }
+  .pill-blue { background: rgba(68,138,255,0.12); color: var(--blue); border: 1px solid rgba(68,138,255,0.2); }
+
+  /* ── Architecture ─────────────────────────────────── */
+  .arch-flow { display: flex; align-items: center; justify-content: center; gap: 5px; }
+  .arch-node {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 11px; font-size: 10px; font-weight: 600; text-align: center; min-width: 90px;
+  }
+  .arch-node small { display: block; font-size: 8px; font-weight: 400; color: var(--text3); margin-top: 1px; }
+  .arch-arrow { color: var(--accent); font-size: 14px; flex-shrink: 0; }
+
+  /* ── Lists ────────────────────────────────────────── */
+  .feature-list { list-style: none; }
+  .feature-list li {
+    font-size: 11px; padding: 4px 0; color: var(--text2);
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .feature-list li::before { content: '→'; color: var(--accent); font-weight: 600; flex-shrink: 0; }
+  .feature-list li strong { color: var(--text); }
+
+  /* ── Tier visual ──────────────────────────────────── */
+  .tier-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 7px;
+  }
+  .tier-num {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 6px; font-size: 11px; font-weight: 800; flex-shrink: 0;
+  }
+  .tier-content { flex: 1; }
+  .tier-title { font-size: 11px; font-weight: 700; color: var(--text); }
+  .tier-desc { font-size: 10px; color: var(--text3); }
+
+  /* ── Agent pill ───────────────────────────────────── */
+  .agent-pill {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 12px; font-size: 10px;
+  }
+  .agent-icon {
+    width: 24px; height: 24px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+
+  /* ── Footer ───────────────────────────────────────── */
+  .footer {
+    margin-top: 28px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; font-size: 9px; color: var(--text3);
+  }
+
+  /* ── Compact utility ──────────────────────────────── */
+  .mt-sm { margin-top: 8px; }
+  .mb-sm { margin-bottom: 8px; }
+  .text-xs { font-size: 10px; }
+  .text-muted { color: var(--text3); }
+  .text-accent { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="header">
+  <div class="header-left">
+    <h1>Autonomous SOC</h1>
+    <div class="subtitle">Technical Reference — Self-evolving Security Operations Center on Elastic AI Agent Builder & Workflows</div>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-live">Running</span>
+    <span class="badge badge-phase">Spike / PoC</span>
+    <span class="badge badge-date">April 2026</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     KPIs
+     ═══════════════════════════════════════════════════════════ -->
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-value" style="color:var(--accent)">13</div><div class="kpi-label">Workflows</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--accent2)">4</div><div class="kpi-label">AI Agents</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--pink)">7</div><div class="kpi-label">Skills</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--green)">20</div><div class="kpi-label">ES Indices</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--amber)">7</div><div class="kpi-label">Detection Rules</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--red)">5</div><div class="kpi-label">Attack Profiles</div></div>
+  <div class="kpi"><div class="kpi-value" style="color:var(--blue)">7</div><div class="kpi-label">Infra Services</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     1. ARCHITECTURE DIAGRAM
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">1</span> System Architecture Diagram</div>
+  <div class="card" style="padding:28px 24px;">
+    <svg viewBox="0 0 1400 780" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
+      <defs>
+        <marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00BCD4" stroke-width="1.2"/></marker>
+        <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#7C4DFF" stroke-width="1.2"/></marker>
+        <marker id="ah-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00E676" stroke-width="1.2"/></marker>
+        <marker id="ah-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FFD740" stroke-width="1.2"/></marker>
+        <marker id="ah-pink" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#F06292" stroke-width="1.2"/></marker>
+        <marker id="ah-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FF5252" stroke-width="1.2"/></marker>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
+      </defs>
+
+      <!-- ── Layer labels ── -->
+      <text x="14" y="42" fill="#5A7198" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Inter,sans-serif">ATTACK SIMULATION</text>
+      <text x="14" y="172" fill="#5A7198" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Inter,sans-serif">DETECTION LAYER</text>
+      <text x="14" y="312" fill="#5A7198" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Inter,sans-serif">TRIAGE PIPELINE (5-MIN SWEEP)</text>
+      <text x="14" y="502" fill="#5A7198" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Inter,sans-serif">EVOLUTION &amp; FEEDBACK LOOPS</text>
+      <text x="14" y="682" fill="#5A7198" font-size="9" font-weight="700" letter-spacing="1.5" font-family="Inter,sans-serif">DATA LAYER (ELASTICSEARCH)</text>
+
+      <!-- ── Horizontal dividers ── -->
+      <line x1="0" y1="145" x2="1400" y2="145" stroke="#253553" stroke-width="0.5" stroke-dasharray="6,4"/>
+      <line x1="0" y1="285" x2="1400" y2="285" stroke="#253553" stroke-width="0.5" stroke-dasharray="6,4"/>
+      <line x1="0" y1="475" x2="1400" y2="475" stroke="#253553" stroke-width="0.5" stroke-dasharray="6,4"/>
+      <line x1="0" y1="655" x2="1400" y2="655" stroke="#253553" stroke-width="0.5" stroke-dasharray="6,4"/>
+
+      <!-- ════════════════ ATTACK SIMULATION LAYER ════════════════ -->
+      <!-- Caldera -->
+      <rect x="60" y="56" width="160" height="68" rx="8" fill="#1A2744" stroke="#FF5252" stroke-width="1.5"/>
+      <text x="140" y="80" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Caldera</text>
+      <text x="140" y="96" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">MITRE ATT&amp;CK Emulation</text>
+      <text x="140" y="112" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">L1–L5 Adversary Profiles</text>
+
+      <!-- Difficulty Controller -->
+      <rect x="310" y="56" width="160" height="68" rx="8" fill="#1A2744" stroke="#F06292" stroke-width="1.5"/>
+      <text x="390" y="80" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Difficulty Controller</text>
+      <text x="390" y="96" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Adaptive escalation</text>
+      <text x="390" y="112" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 30m · skill on meta</text>
+
+      <!-- Fleet Server -->
+      <rect x="560" y="56" width="160" height="68" rx="8" fill="#1A2744" stroke="#448AFF" stroke-width="1.5"/>
+      <text x="640" y="80" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Fleet Server</text>
+      <text x="640" y="96" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Elastic Agent</text>
+      <text x="640" y="112" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">endpoint events → ES</text>
+
+      <!-- Caldera Workflows (dispatcher + poller) -->
+      <rect x="810" y="56" width="160" height="68" rx="8" fill="#1A2744" stroke="#4FC3F7" stroke-width="1.5"/>
+      <text x="890" y="80" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Caldera Workflows</text>
+      <text x="890" y="96" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">dispatcher + poller · Elastic-native</text>
+      <text x="890" y="112" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 30s · no Python sidecars</text>
+
+      <!-- Arrows: Caldera → Fleet, Difficulty ↔ Caldera -->
+      <line x1="220" y1="90" x2="305" y2="90" stroke="#F06292" stroke-width="1.2" marker-end="url(#ah-pink)"/>
+      <line x1="220" y1="90" x2="555" y2="90" stroke="#FF5252" stroke-width="1.2" marker-end="url(#ah-red)" stroke-dasharray="4,3"/>
+      <line x1="470" y1="90" x2="555" y2="90" stroke="#448AFF" stroke-width="1.2" marker-end="url(#ah)" opacity="0"/>
+      <line x1="970" y1="90" x2="725" y2="90" stroke="#FF5252" stroke-width="1.2" marker-end="url(#ah-red)" stroke-dasharray="4,3"/>
+
+      <!-- ════════════════ DETECTION LAYER ════════════════ -->
+      <rect x="60" y="186" width="180" height="76" rx="8" fill="#1A2744" stroke="#FF5252" stroke-width="1.5"/>
+      <text x="150" y="212" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Detection Rules</text>
+      <text x="150" y="228" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">7 custom · 1m interval</text>
+      <text x="150" y="244" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">ES|QL · EQL · Threshold · KQL</text>
+
+      <!-- DetEng Agent -->
+      <rect x="330" y="186" width="180" height="76" rx="8" fill="#1A2744" stroke="#FFD740" stroke-width="1.5"/>
+      <text x="420" y="212" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">DetEng Agent</text>
+      <text x="420" y="228" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Rule tuning · exceptions · new rules</text>
+      <text x="420" y="244" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 30m · max 5 changes</text>
+
+      <!-- Proactive Hunter -->
+      <rect x="600" y="186" width="180" height="76" rx="8" fill="#1A2744" stroke="#00E676" stroke-width="1.5"/>
+      <text x="690" y="212" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Proactive Hunter</text>
+      <text x="690" y="228" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Hypothesis + anomaly + IOC</text>
+      <text x="690" y="244" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 2h · proactive-hunt skill</text>
+
+      <!-- Attack Discovery -->
+      <rect x="870" y="186" width="180" height="76" rx="8" fill="#1A2744" stroke="#448AFF" stroke-width="1.5"/>
+      <text x="960" y="212" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Attack Discovery</text>
+      <text x="960" y="228" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Chain correlation</text>
+      <text x="960" y="244" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">attack-chain-analysis skill</text>
+
+      <!-- Arrow: DetEng → Rules -->
+      <line x1="330" y1="224" x2="245" y2="224" stroke="#FFD740" stroke-width="1.2" marker-end="url(#ah-amber)"/>
+
+      <!-- ════════════════ TRIAGE PIPELINE ════════════════ -->
+      <!-- Phase boxes -->
+      <rect x="60" y="326" width="145" height="126" rx="8" fill="#1A2744" stroke="#00BCD4" stroke-width="1.5"/>
+      <text x="132" y="350" text-anchor="middle" fill="#00BCD4" font-size="9" font-weight="700" font-family="Inter,sans-serif">PHASE 1</text>
+      <text x="132" y="368" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Classification</text>
+      <text x="132" y="386" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">TP / FP / Suspicious</text>
+      <text x="132" y="404" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Confidence 0–100</text>
+      <text x="132" y="420" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Disposition · Threat Category</text>
+      <text x="132" y="436" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Kill Chain Stage · Impact</text>
+
+      <rect x="230" y="326" width="145" height="126" rx="8" fill="#1A2744" stroke="#00BCD4" stroke-width="1.5"/>
+      <text x="302" y="350" text-anchor="middle" fill="#00BCD4" font-size="9" font-weight="700" font-family="Inter,sans-serif">PHASE 2</text>
+      <text x="302" y="368" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Enrichment</text>
+      <text x="302" y="386" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Entity context</text>
+      <text x="302" y="404" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">7-day baselines</text>
+      <text x="302" y="420" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Risk scores · Relationships</text>
+      <text x="302" y="436" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Confidence adjustment</text>
+
+      <rect x="400" y="326" width="145" height="126" rx="8" fill="#1A2744" stroke="#00BCD4" stroke-width="1.5"/>
+      <text x="472" y="350" text-anchor="middle" fill="#00BCD4" font-size="9" font-weight="700" font-family="Inter,sans-serif">PHASE 3</text>
+      <text x="472" y="368" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Investigation</text>
+      <text x="472" y="386" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Deep threat hunt</text>
+      <text x="472" y="404" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Process trees · Network</text>
+      <text x="472" y="420" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Lateral movement</text>
+      <text x="472" y="436" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Security Labs IOC intel</text>
+
+      <rect x="570" y="326" width="145" height="126" rx="8" fill="#1A2744" stroke="#7C4DFF" stroke-width="1.5"/>
+      <text x="642" y="350" text-anchor="middle" fill="#7C4DFF" font-size="9" font-weight="700" font-family="Inter,sans-serif">PHASE 4</text>
+      <text x="642" y="368" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Correlation</text>
+      <text x="642" y="386" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Attack chain detection</text>
+      <text x="642" y="404" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Kill chain reconstruction</text>
+      <text x="642" y="420" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Campaign detection</text>
+      <text x="642" y="436" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Chain confidence scoring</text>
+
+      <!-- Response tiers -->
+      <rect x="740" y="326" width="175" height="126" rx="8" fill="#1A2744" stroke="#00E676" stroke-width="1.5"/>
+      <text x="827" y="348" text-anchor="middle" fill="#00E676" font-size="9" font-weight="700" font-family="Inter,sans-serif">TIERED RESPONSE</text>
+      <text x="827" y="368" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="600" font-family="Inter,sans-serif">T0 Observe · T1 Record</text>
+      <text x="827" y="388" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="600" font-family="Inter,sans-serif">T2 Contain · T3 Eradicate</text>
+      <text x="827" y="408" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Host isolation · Account disable</text>
+      <text x="827" y="424" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">IOC blocklist · Full IR</text>
+      <text x="827" y="440" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">containment-playbook skill</text>
+
+      <!-- Case + Human Review -->
+      <rect x="940" y="326" width="140" height="56" rx="8" fill="#1A2744" stroke="#FFD740" stroke-width="1.5"/>
+      <text x="1010" y="350" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Cases</text>
+      <text x="1010" y="368" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Auto-created + alert attach</text>
+
+      <rect x="940" y="396" width="140" height="56" rx="8" fill="#1A2744" stroke="#FFD740" stroke-width="1.5"/>
+      <text x="1010" y="420" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Human Review</text>
+      <text x="1010" y="436" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Approve / Reject</text>
+
+      <!-- Dashboard -->
+      <rect x="1110" y="326" width="140" height="126" rx="8" fill="#1A2744" stroke="#00BCD4" stroke-width="2"/>
+      <text x="1180" y="358" text-anchor="middle" fill="#00BCD4" font-size="9" font-weight="700" font-family="Inter,sans-serif">COMMAND CENTER</text>
+      <text x="1180" y="378" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="600" font-family="Inter,sans-serif">React + EUI</text>
+      <text x="1180" y="396" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">9 Tabs · 30s refresh</text>
+      <text x="1180" y="412" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Recommendations</text>
+      <text x="1180" y="428" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Approve / Reject / Apply</text>
+      <text x="1180" y="444" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Graduated autonomy</text>
+
+      <!-- Phase arrows -->
+      <line x1="205" y1="389" x2="225" y2="389" stroke="#00BCD4" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="375" y1="389" x2="395" y2="389" stroke="#00BCD4" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="545" y1="389" x2="565" y2="389" stroke="#00BCD4" stroke-width="1.5" marker-end="url(#ah)"/>
+      <line x1="715" y1="389" x2="735" y2="389" stroke="#00E676" stroke-width="1.5" marker-end="url(#ah-green)"/>
+      <line x1="915" y1="354" x2="935" y2="354" stroke="#FFD740" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+      <line x1="1080" y1="389" x2="1105" y2="389" stroke="#00BCD4" stroke-width="1.5" marker-end="url(#ah)"/>
+
+      <!-- Unified Triage Agent label -->
+      <rect x="60" y="296" width="660" height="18" rx="4" fill="rgba(0,188,212,0.08)" stroke="none"/>
+      <text x="390" y="310" text-anchor="middle" fill="#00BCD4" font-size="9" font-weight="700" letter-spacing="1" font-family="Inter,sans-serif">soc-triage-agent (unified: classification + enrichment + investigation + correlation)</text>
+
+      <!-- Detection → Triage arrow -->
+      <line x1="150" y1="262" x2="150" y2="321" stroke="#FF5252" stroke-width="1.2" marker-end="url(#ah-red)"/>
+      <text x="158" y="296" fill="#5A7198" font-size="7" font-family="Inter,sans-serif">alerts</text>
+
+      <!-- Attack Discovery → Phase 4 -->
+      <line x1="960" y1="262" x2="670" y2="321" stroke="#448AFF" stroke-width="1.2" marker-end="url(#ah)" stroke-dasharray="4,3"/>
+
+      <!-- Fleet → Detection -->
+      <line x1="640" y1="124" x2="200" y2="181" stroke="#448AFF" stroke-width="1.2" marker-end="url(#ah)" stroke-dasharray="4,3"/>
+      <text x="400" y="150" fill="#5A7198" font-size="7" font-family="Inter,sans-serif">endpoint events</text>
+
+      <!-- ════════════════ EVOLUTION LOOPS ════════════════ -->
+      <!-- Meta Agent -->
+      <rect x="60" y="516" width="200" height="110" rx="8" fill="#1A2744" stroke="#7C4DFF" stroke-width="1.5"/>
+      <text x="160" y="540" text-anchor="middle" fill="#7C4DFF" font-size="9" font-weight="700" font-family="Inter,sans-serif">EVOLUTION ENGINE</text>
+      <text x="160" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Meta Agent</text>
+      <text x="160" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Tiered strategy: T1→T2a/b→T3</text>
+      <text x="160" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Workflows → Skills → Agents</text>
+      <text x="160" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 30m · max 1 action/cycle</text>
+
+      <!-- Gap Analyzer -->
+      <rect x="290" y="516" width="180" height="110" rx="8" fill="#1A2744" stroke="#FF5252" stroke-width="1.5"/>
+      <text x="380" y="540" text-anchor="middle" fill="#FF5252" font-size="9" font-weight="700" font-family="Inter,sans-serif">SELF-IMPROVING</text>
+      <text x="380" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Gap Analyzer</text>
+      <text x="380" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Unused tools · data sources</text>
+      <text x="380" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Kill chain gaps · calibration drift</text>
+      <text x="380" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 4h · gap-analyzer skill</text>
+
+      <!-- Watchdog -->
+      <rect x="500" y="516" width="170" height="110" rx="8" fill="#1A2744" stroke="#00E676" stroke-width="1.5"/>
+      <text x="585" y="540" text-anchor="middle" fill="#00E676" font-size="9" font-weight="700" font-family="Inter,sans-serif">HEALTH MONITOR</text>
+      <text x="585" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Watchdog</text>
+      <text x="585" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">KPIs · MITRE coverage</text>
+      <text x="585" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Pipeline health thresholds</text>
+      <text x="585" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 15m · health-check skill</text>
+
+      <!-- Arch Reviewer -->
+      <rect x="700" y="516" width="170" height="110" rx="8" fill="#1A2744" stroke="#448AFF" stroke-width="1.5"/>
+      <text x="785" y="540" text-anchor="middle" fill="#448AFF" font-size="9" font-weight="700" font-family="Inter,sans-serif">ARCHITECTURE</text>
+      <text x="785" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Arch Reviewer</text>
+      <text x="785" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Consolidation opportunities</text>
+      <text x="785" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Anti-pattern detection</text>
+      <text x="785" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 6h · arch-review skill</text>
+
+      <!-- Trust Scorer -->
+      <rect x="900" y="516" width="170" height="110" rx="8" fill="#1A2744" stroke="#FFD740" stroke-width="1.5"/>
+      <text x="985" y="540" text-anchor="middle" fill="#FFD740" font-size="9" font-weight="700" font-family="Inter,sans-serif">GRADUATED AUTONOMY</text>
+      <text x="985" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Trust Scorer</text>
+      <text x="985" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Approval rates per tier</text>
+      <text x="985" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Auto-approve eligibility</text>
+      <text x="985" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 30m</text>
+
+      <!-- Rec Applier -->
+      <rect x="1100" y="516" width="170" height="110" rx="8" fill="#1A2744" stroke="#F06292" stroke-width="1.5"/>
+      <text x="1185" y="540" text-anchor="middle" fill="#F06292" font-size="9" font-weight="700" font-family="Inter,sans-serif">EXECUTION</text>
+      <text x="1185" y="560" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700" font-family="Inter,sans-serif">Rec Applier</text>
+      <text x="1185" y="578" text-anchor="middle" fill="#8DA0BE" font-size="9" font-family="Inter,sans-serif">Execute approved recs</text>
+      <text x="1185" y="594" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">Rules · Skills · Workflows</text>
+      <text x="1185" y="610" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 5m · validates first</text>
+
+      <!-- Evolution → Triage feedback arrow -->
+      <path d="M160,516 L160,460 L132,456" stroke="#7C4DFF" stroke-width="1.2" fill="none" marker-end="url(#ah-purple)" stroke-dasharray="4,3"/>
+      <text x="90" y="490" fill="#7C4DFF" font-size="7" font-family="Inter,sans-serif">evolves pipeline</text>
+
+      <!-- Meta → DetEng arrow -->
+      <path d="M200,520 L420,470 L420,262" stroke="#FFD740" stroke-width="1" fill="none" marker-end="url(#ah-amber)" stroke-dasharray="4,3"/>
+
+      <!-- Gap Analyzer → Meta -->
+      <line x1="290" y1="571" x2="265" y2="571" stroke="#FF5252" stroke-width="1.2" marker-end="url(#ah-red)"/>
+      <text x="275" y="564" fill="#FF5252" font-size="7" font-family="Inter,sans-serif" text-anchor="middle">gaps</text>
+
+      <!-- Rec Applier ← Dashboard -->
+      <path d="M1185,516 L1185,456 L1180,456" stroke="#F06292" stroke-width="1.2" fill="none" marker-end="url(#ah-pink)" stroke-dasharray="4,3"/>
+
+      <!-- ════════════════ DATA LAYER ════════════════ -->
+      <rect x="60" y="670" width="1210" height="88" rx="10" fill="#131D33" stroke="#253553" stroke-width="1"/>
+      <text x="80" y="694" fill="#00BCD4" font-size="10" font-weight="700" font-family="Inter,sans-serif">Elasticsearch 9.4.0-SNAPSHOT</text>
+      <text x="380" y="694" fill="#5A7198" font-size="9" font-family="Inter,sans-serif">20 indices · ILM 90d retention · Single-node · ML enabled</text>
+
+      <!-- Index pills -->
+      <rect x="80" y="704" width="110" height="20" rx="4" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.2)"/>
+      <text x="135" y="718" text-anchor="middle" fill="#00BCD4" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-triage-results</text>
+
+      <rect x="200" y="704" width="95" height="20" rx="4" fill="rgba(0,188,212,0.1)" stroke="rgba(0,188,212,0.2)"/>
+      <text x="247" y="718" text-anchor="middle" fill="#00BCD4" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-outcomes</text>
+
+      <rect x="305" y="704" width="115" height="20" rx="4" fill="rgba(124,77,255,0.1)" stroke="rgba(124,77,255,0.2)"/>
+      <text x="362" y="718" text-anchor="middle" fill="#7C4DFF" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-evolution-log</text>
+
+      <rect x="430" y="704" width="130" height="20" rx="4" fill="rgba(124,77,255,0.1)" stroke="rgba(124,77,255,0.2)"/>
+      <text x="495" y="718" text-anchor="middle" fill="#7C4DFF" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-recommendations</text>
+
+      <rect x="570" y="704" width="115" height="20" rx="4" fill="rgba(0,230,118,0.1)" stroke="rgba(0,230,118,0.2)"/>
+      <text x="627" y="718" text-anchor="middle" fill="#00E676" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-coverage-gaps</text>
+
+      <rect x="695" y="704" width="115" height="20" rx="4" fill="rgba(0,230,118,0.1)" stroke="rgba(0,230,118,0.2)"/>
+      <text x="752" y="718" text-anchor="middle" fill="#00E676" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-hunt-findings</text>
+
+      <rect x="820" y="704" width="115" height="20" rx="4" fill="rgba(255,215,64,0.1)" stroke="rgba(255,215,64,0.2)"/>
+      <text x="877" y="718" text-anchor="middle" fill="#FFD740" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-trust-scores</text>
+
+      <rect x="945" y="704" width="120" height="20" rx="4" fill="rgba(255,82,82,0.1)" stroke="rgba(255,82,82,0.2)"/>
+      <text x="1005" y="718" text-anchor="middle" fill="#FF5252" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-response-actions</text>
+
+      <rect x="1075" y="704" width="100" height="20" rx="4" fill="rgba(240,98,146,0.1)" stroke="rgba(240,98,146,0.2)"/>
+      <text x="1125" y="718" text-anchor="middle" fill="#F06292" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-audit-trail</text>
+
+      <text x="665" y="748" text-anchor="middle" fill="#5A7198" font-size="8" font-family="Inter,sans-serif">+ .soc-entity-enrichment · .soc-metrics · .soc-agent-health · .soc-connector-health · .soc-detection-metrics · .soc-dead-letter · .soc-difficulty-state · .soc-pipeline-lock · .soc-attack-commands · .soc-agent-registry</text>
+
+      <!-- Data layer arrows -->
+      <line x1="132" y1="452" x2="132" y2="665" stroke="#00BCD4" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+      <line x1="380" y1="626" x2="380" y2="665" stroke="#FF5252" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+      <line x1="585" y1="626" x2="585" y2="665" stroke="#00E676" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+      <line x1="985" y1="626" x2="985" y2="665" stroke="#FFD740" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+      <line x1="1185" y1="626" x2="1185" y2="665" stroke="#F06292" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     2. PIPELINE FLOW
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">2</span> End-to-End Pipeline Flow</div>
+  <div class="card">
+    <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Alert-to-Case Pipeline — 5-minute sweep cycle</div>
+    <div class="arch-flow">
+      <div class="arch-node" style="border-color:var(--red)"><span>Caldera</span><small>MITRE ATT&CK</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node"><span>Fleet Agent</span><small>Endpoint events</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node"><span>Detection Rules</span><small>7 custom rules</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Alert Sweeper</span><small>soc-alert-sweeper</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Triage</span><small>TP / FP / Susp</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Enrichment</span><small>Entity context</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Investigation</span><small>Threat hunt</small></div>
+      <span class="arch-arrow">→</span>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Response</span><small>Case + actions</small></div>
+      <span class="arch-arrow" style="font-size:18px">⟶</span>
+      <div class="arch-node" style="border-color:var(--amber)"><span>Human Review</span><small>Approve / Reject</small></div>
+    </div>
+    <div class="arch-flow" style="margin-top:10px; gap:20px;">
+      <div style="display:flex; align-items:center; gap:5px;">
+        <div class="arch-node" style="min-width:70px; padding:5px 8px; border-color:var(--accent2)"><span>Meta</span><small>30m · tiered (T1→T2a/b→T3)</small></div>
+        <span class="text-xs text-muted">workflows → enrich agents → new agents</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:5px;">
+        <div class="arch-node" style="min-width:70px; padding:5px 8px; border-color:var(--accent2)"><span>DetEng</span><small>30m</small></div>
+        <span class="text-xs text-muted">rule tuning, exceptions, threshold changes</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:5px;">
+        <div class="arch-node" style="min-width:70px; padding:5px 8px; border-color:var(--green)"><span>Watchdog</span><small>15m</small></div>
+        <span class="text-xs text-muted">health, gaps, MITRE coverage</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:5px;">
+        <div class="arch-node" style="min-width:70px; padding:5px 8px; border-color:var(--pink)"><span>Difficulty</span><small>30m</small></div>
+        <span class="text-xs text-muted">adaptive adversary L1–L5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     3. INFRASTRUCTURE
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">3</span> Infrastructure — <code>docker-compose.yml</code></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Service</th><th>Image</th><th>Ports</th><th>Mem</th><th>Health</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="name">elasticsearch</td><td><code>elasticsearch:9.4.0-SNAPSHOT</code></td><td><code>19200→9200</code></td><td>8 GB</td><td><code>/_cluster/health</code></td><td>Single-node, ML enabled, <code>ES_JAVA_OPTS -Xms2g -Xmx2g</code></td></tr>
+        <tr><td class="name">kibana</td><td><code>kibana:9.4.0-SNAPSHOT</code></td><td><code>15601→5601</code></td><td>4 GB</td><td><code>/api/status</code></td><td>Mounts <code>config/kibana.yml</code>, Agent Builder + Workflows enabled</td></tr>
+        <tr><td class="name">fleet-server</td><td><code>elastic-agent:9.4.0-SNAPSHOT</code></td><td><code>18220→8220</code></td><td>—</td><td><code>8220/api/status</code></td><td>Fleet Server mode, policy <code>fleet-server-policy</code></td></tr>
+        <tr><td class="name">caldera</td><td>Custom build <code>./infra/caldera</code></td><td><code>18888→8888</code>, <code>17010-12</code></td><td>—</td><td><code>/api/v2/health</code></td><td>MITRE Caldera for attack emulation, TCP/HTTP/UDP contacts</td></tr>
+        <tr><td class="name">setup</td><td>ES image (one-shot)</td><td>—</td><td>—</td><td>—</td><td>Sets <code>kibana_system</code> password</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     4. TIERED EVOLUTION
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">4</span> Tiered Self-Evolution Strategy</div>
+  <div class="grid g23">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Meta Agent Decision Model</div>
+      <div class="tier-row">
+        <div class="tier-num" style="background:rgba(0,188,212,0.15); border:1px solid rgba(0,188,212,0.3); color:var(--accent);">1</div>
+        <div class="tier-content">
+          <div class="tier-title">Deterministic Workflow <span class="pill pill-cyan">PREFER</span></div>
+          <div class="tier-desc">For predictable tasks: ES aggregations, threshold alerts, data cleanup, notifications. Uses only <code>elasticsearch.*</code>, <code>kibana.request</code>, <code>console</code> steps. No LLM cost, 100% reliable.</div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-num" style="background:rgba(0,230,118,0.15); border:1px solid rgba(0,230,118,0.3); color:var(--green);">2a</div>
+        <div class="tier-content">
+          <div class="tier-title">Create / Update Skill <span class="pill pill-purple">MODULAR KNOWLEDGE</span></div>
+          <div class="tier-desc">Reusable knowledge modules bundling domain expertise (<code>content</code>) + tool access (<code>tool_ids</code>). Created via <code>POST /api/agent_builder/skills</code>. Auto-matched to agents by the platform. Use for playbooks, runbooks, environment baselines, technique-specific response plans.</div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-num" style="background:rgba(124,77,255,0.15); border:1px solid rgba(124,77,255,0.3); color:var(--accent2);">2b</div>
+        <div class="tier-content">
+          <div class="tier-title">Enrich Existing Agent <span class="pill pill-purple">BEHAVIORAL PATCH</span></div>
+          <div class="tier-desc">Appends an <code>instruction_patch</code> to a core agent's prompt via <code>workflow_modify_step</code>. Additive only — never removes or contradicts existing behavior. Use for agent-specific tweaks (thresholds, output format). Targets: triage, entity, hunt, deteng, watchdog.</div>
+        </div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-num" style="background:rgba(255,82,82,0.15); border:1px solid rgba(255,82,82,0.3); color:var(--red);">3</div>
+        <div class="tier-content">
+          <div class="tier-title">New Agent <span class="pill pill-red">LAST RESORT</span></div>
+          <div class="tier-desc">Requires: (a) task needs LLM reasoning, (b) no existing agent covers domain, (c) no duplicate in registry, (d) ≥3 data points justify need. Must include <code>justification[]</code> array. Creates agent + scheduled workflow.</div>
+        </div>
+      </div>
+      <div class="mt-sm text-xs text-muted">Rate limits: max 1 action/cycle. Oscillation guard (>10% swing 3×) → <code>no_action</code>. All decisions go to <code>.soc-recommendations</code> for human review.</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Decision Examples</div>
+      <table>
+        <thead><tr><th>Gap</th><th>Tier</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>Hourly FP rate report</td><td><span class="pill pill-cyan">T1</span></td><td>ES date_histogram agg, no reasoning</td></tr>
+          <tr><td>Lateral movement playbook</td><td><span class="pill" style="background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.3); color:var(--green);">T2a</span></td><td>Reusable skill — hunt + triage agents benefit</td></tr>
+          <tr><td>Environment baselines (benign procs)</td><td><span class="pill" style="background:rgba(0,230,118,0.15); border-color:rgba(0,230,118,0.3); color:var(--green);">T2a</span></td><td>Shared knowledge all agents use for classification</td></tr>
+          <tr><td>Cron FP threshold tweak</td><td><span class="pill pill-purple">T2b</span></td><td>Agent-specific behavioral change in triage</td></tr>
+          <tr><td>IOC feed ingestion</td><td><span class="pill pill-cyan">T1</span></td><td>Scheduled HTTP + ES index</td></tr>
+          <tr><td>Phishing email NLP</td><td><span class="pill pill-red">T3</span></td><td>LLM required, no agent covers email</td></tr>
+        </tbody>
+      </table>
+      <div class="mt-sm">
+        <div class="card-title" style="margin-top:12px"><span class="dot" style="background:var(--green)"></span>Applier Agent Actions</div>
+        <table>
+          <thead><tr><th>Action</th><th>Execution</th></tr></thead>
+          <tbody>
+            <tr><td class="name">create_workflow</td><td>Deploy YAML via <code>workflow_set_yaml</code></td></tr>
+            <tr><td class="name">create_skill</td><td>One-shot <code>kibana.request</code> → <code>POST /api/agent_builder/skills</code></td></tr>
+            <tr><td class="name">update_skill</td><td>One-shot <code>kibana.request</code> → <code>PUT /api/agent_builder/skills/{id}</code></td></tr>
+            <tr><td class="name">enrich_agent</td><td>Append patch via <code>workflow_modify_step</code></td></tr>
+            <tr><td class="name">create_agent</td><td>Deploy agent + workflow YAML</td></tr>
+            <tr><td class="name">add_exception</td><td>Frontend → <code>POST /api/detection_engine/rules/{id}/exceptions</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     5. WORKFLOW MESH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">5</span> Workflow Mesh — 13 Workflows, 6 Step Types</div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Workflow</th><th>Trigger</th><th>Steps</th><th>Agent</th><th>Timeout</th><th>Reads</th><th>Writes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="name">soc-alert-sweeper</td>
+          <td><span class="pill pill-cyan">5m</span></td>
+          <td>21 steps</td>
+          <td>triage × 2, entity, hunt</td>
+          <td>600s / 120s</td>
+          <td><code>.alerts-security.alerts-*</code></td>
+          <td><code>.soc-triage-results</code>, <code>entity-enrichment</code>, <code>investigation-findings</code>, <code>response-actions</code>, <code>audit-trail</code>, <code>outcomes</code> + <code>kibana.request</code> (tags, cases, alert attach)</td>
+        </tr>
+        <tr>
+          <td class="name">soc-recommendation-applier</td>
+          <td><span class="pill pill-cyan">5m</span></td>
+          <td>5 steps</td>
+          <td>rec-applier</td>
+          <td>300s</td>
+          <td><code>.soc-recommendations</code></td>
+          <td><code>.soc-audit-trail</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-recovery</td>
+          <td><span class="pill pill-green">10m</span></td>
+          <td>4 steps</td>
+          <td>—</td>
+          <td>—</td>
+          <td><code>.soc-dead-letter</code></td>
+          <td><code>.soc-audit-trail</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-watchdog</td>
+          <td><span class="pill pill-green">15m</span></td>
+          <td>6 steps</td>
+          <td>watchdog</td>
+          <td>600s</td>
+          <td><code>.soc-outcomes</code>, <code>triage-results</code></td>
+          <td><code>.soc-coverage-gaps</code>, <code>audit-trail</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-meta</td>
+          <td><span class="pill pill-amber">30m</span></td>
+          <td>10 steps</td>
+          <td>meta</td>
+          <td>600s</td>
+          <td><code>.soc-outcomes</code>, <code>evolution-log</code>, <code>coverage-gaps</code>, <code>agent-registry</code>, <code>recommendations</code></td>
+          <td><code>.soc-evolution-log</code>, <code>recommendations</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-deteng</td>
+          <td><span class="pill pill-amber">30m</span></td>
+          <td>7 steps</td>
+          <td>deteng</td>
+          <td>300s</td>
+          <td><code>.soc-outcomes</code>, <code>coverage-gaps</code>, <code>recommendations</code></td>
+          <td><code>.soc-evolution-log</code>, <code>recommendations</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-trust-scorer</td>
+          <td><span class="pill pill-amber">30m</span></td>
+          <td>4 steps</td>
+          <td>meta</td>
+          <td>120s</td>
+          <td><code>.soc-recommendations</code> (aggs by type+status)</td>
+          <td><code>.soc-trust-scores</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-difficulty-controller</td>
+          <td><span class="pill pill-amber">30m</span></td>
+          <td>6 steps</td>
+          <td>difficulty-evaluator</td>
+          <td>300s</td>
+          <td><code>.soc-outcomes</code>, <code>difficulty-state</code></td>
+          <td><code>.soc-difficulty-state</code>, <code>attack-commands</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-triage</td>
+          <td><span class="pill pill-pink">manual/alert</span></td>
+          <td>5 steps</td>
+          <td>triage</td>
+          <td>300s</td>
+          <td>—</td>
+          <td><code>.soc-triage-results</code>, <code>outcomes</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-enrichment</td>
+          <td><span class="pill pill-pink">manual</span></td>
+          <td>4 steps</td>
+          <td>entity</td>
+          <td>300s</td>
+          <td>—</td>
+          <td><code>.soc-entity-enrichment</code>, <code>outcomes</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-investigation</td>
+          <td><span class="pill pill-pink">manual</span></td>
+          <td>4 steps</td>
+          <td>hunt</td>
+          <td>300s</td>
+          <td>—</td>
+          <td><code>.soc-investigation-findings</code>, <code>outcomes</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-response</td>
+          <td><span class="pill pill-pink">manual</span></td>
+          <td>5 steps</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td><code>.soc-response-actions</code>, <code>audit-trail</code>, <code>outcomes</code></td>
+        </tr>
+        <tr>
+          <td class="name">soc-gap-analyzer</td>
+          <td><span class="pill pill-amber">4h</span></td>
+          <td>9 steps</td>
+          <td>meta (gap-analyzer skill)</td>
+          <td>600s</td>
+          <td>All indices inventory, agents, skills, triage-results, outcomes, response-actions, recommendations, coverage-gaps</td>
+          <td><code>.soc-evolution-log</code>, <code>.soc-recommendations</code> (type: capability_gap)</td>
+        </tr>
+        <tr>
+          <td class="name">soc-proactive-hunter</td>
+          <td><span class="pill pill-cyan">2h</span></td>
+          <td>8 steps</td>
+          <td>triage (proactive-hunt skill)</td>
+          <td>600s</td>
+          <td><code>.soc-triage-results</code>, <code>.alerts-security.alerts-*</code>, <code>.soc-hunt-findings</code></td>
+          <td><code>.soc-hunt-findings</code>, <code>.soc-audit-trail</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mt-sm text-xs text-muted">Step types used: <code>ai.agent</code>, <code>elasticsearch.search</code>, <code>elasticsearch.index</code>, <code>kibana.request</code>, <code>console</code>. All agent steps use <code>connector-id: opus</code> (Claude Opus 4.7).</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     6. AGENT MESH
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">6</span> AI Agent Mesh — 4 Agents + 7 Skills, <code>connector-id: opus</code> (Claude Opus 4.7)</div>
+  <p style="color:var(--text2);margin-bottom:16px">Consolidated from 9 agents to 4 via mandatory self-validation, agent merging, and skill/workflow conversion.
+    Extended with 4 new skills for proactive hunting, attack chain analysis, capability gap detection, and tiered response containment.
+    Entity enrichment and threat hunting are now phases within the unified triage agent. Watchdog, difficulty evaluation,
+    and architecture review are skills on the meta-agent. Case creation and response are deterministic workflows.</p>
+  <div class="card">
+    <table>
+      <thead><tr><th>Agent</th><th>Role</th><th>Tools</th><th>Output Format</th><th>Safety Constraints</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="name">soc-triage-agent</td>
+          <td>Unified alert pipeline: classification (Phase 1) → entity enrichment (Phase 2) → deep investigation (Phase 3). Replaces former entity-agent and hunt-agent.</td>
+          <td><code>security.alerts</code>, <code>entity_risk_score</code>, <code>get_entity</code>, <code>search_entities</code>, <code>security_labs_search</code>, <code>execute_esql</code>, <code>generate_esql</code>, <code>search</code>, <code>get_index_mapping</code>, <code>sml_search</code>, <code>sml_attach</code></td>
+          <td>JSON: classification, confidence 0-100, confidence_history[], entities_enriched[], hypotheses_tested[], evidence_summary, validation_errors[]</td>
+          <td>Mandatory self-validation: all alerts classified, confidence 0-100, no missing fields</td>
+        </tr>
+        <tr>
+          <td class="name">soc-meta-agent</td>
+          <td>System evolution via tiered strategy (T1→T2a/b→T3). Also handles health monitoring, difficulty evaluation, and architecture review via skills.</td>
+          <td><code>create_agent</code>, <code>update_agent</code>, <code>manage_skills</code>, <code>manage_detection_rules</code>, <code>deploy_workflow</code>, <code>validate_workflow</code>, <code>get_step_definitions</code>, <code>execute_esql</code>, <code>search</code></td>
+          <td>JSON: action + tier + workflow_yaml / skill_definition / instruction_patch / agent_definition</td>
+          <td>Validate workflows before deploy. Verify agent exists before patching. Max 1 action/cycle, oscillation guard.</td>
+        </tr>
+        <tr>
+          <td class="name">soc-deteng-agent</td>
+          <td>Detection engineering: rule tuning, exception management, threshold changes, new rule creation with tiered rule types (ES|QL, EQL, Threshold, KQL)</td>
+          <td><code>security.alerts</code>, <code>execute_esql</code>, <code>generate_esql</code>, <code>search</code>, <code>get_index_mapping</code>, <code>sml_*</code>, <code>manage_detection_rules</code></td>
+          <td>JSON: rules_tuned (with patch_fields), rules_created (with reasoning), rules_disabled</td>
+          <td>Mandatory query validation (dry-run, no catch-all). Max 5 changes/30m. Rules created as DISABLED.</td>
+        </tr>
+        <tr>
+          <td class="name">soc-rec-applier-agent</td>
+          <td>Execute approved recommendations: rule patches, workflow deployment, skill creation, agent enrichment</td>
+          <td><code>manage_skills</code>, <code>update_agent</code>, <code>create_agent</code>, <code>deploy_workflow</code>, <code>validate_workflow</code>, <code>manage_detection_rules</code>, <code>search</code></td>
+          <td>JSON: applied[], skipped[], nothing_to_do</td>
+          <td>Validates before executing: rule existence, workflow validation, agent existence. Only approved items.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Skills (modular knowledge on soc-meta-agent)</div>
+    <table>
+      <thead><tr><th>Skill</th><th>Purpose</th><th>Trigger</th></tr></thead>
+      <tbody>
+        <tr><td class="name">soc-health-check</td><td>KPI analysis, coverage gap detection, pipeline health thresholds</td><td>Watchdog workflow (every 15m)</td></tr>
+        <tr><td class="name">soc-difficulty-evaluation</td><td>Graduation criteria evaluation, difficulty escalation L1–L5</td><td>Difficulty controller (every 30m)</td></tr>
+        <tr><td class="name">soc-architecture-review</td><td>Consolidation opportunities, anti-pattern detection, component inventory analysis</td><td>Arch reviewer workflow (every 6h)</td></tr>
+        <tr><td class="name">soc-capability-gap-analyzer</td><td>Proactive gap detection: unused tools, untapped data sources, kill chain coverage gaps, confidence calibration drift</td><td>Gap analyzer workflow (every 4h)</td></tr>
+        <tr><td class="name">soc-attack-chain-analysis</td><td>Kill chain reconstruction from correlated alerts, campaign detection, chain confidence scoring</td><td>Triage agent during Phase 4 (correlation)</td></tr>
+        <tr><td class="name">soc-proactive-hunt</td><td>Hypothesis-driven ATT&CK technique chaining, anomaly detection queries, intelligence-driven IOC sweeps</td><td>Proactive hunter workflow (every 2h)</td></tr>
+        <tr><td class="name">soc-containment-playbook</td><td>Tiered response playbooks (Tier 0–3): observe, record, contain (host isolation, account disable), eradicate (full IR)</td><td>Sweeper response evaluation step</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     7. DATA MODEL
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">7</span> Elasticsearch Data Model — 20 Indices</div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent)"></span>Data Stream Indices (ILM: delete after 90d)</div>
+      <table>
+        <thead><tr><th>Index</th><th>Key Fields</th><th>Written By</th></tr></thead>
+        <tbody>
+          <tr><td class="name">.soc-triage-results</td><td>classification, confidence, alert_ids, mitre_techniques, entities{hosts,users,ips}</td><td>triage, sweeper</td></tr>
+          <tr><td class="name">.soc-entity-enrichment</td><td>entities_enriched (nested), enrichment_summary, confidence_delta</td><td>enrichment, sweeper</td></tr>
+          <tr><td class="name">.soc-hunt-findings</td><td>iocs_discovered, hypotheses_tested (nested), investigation_summary</td><td>investigation</td></tr>
+          <tr><td class="name">.soc-outcomes</td><td>disposition, case_id, confidence_history (nested), time_to_detect/respond, agents_involved</td><td>all pipeline workflows</td></tr>
+          <tr><td class="name">.soc-response-actions</td><td>action_type, target, status, workflow_execution_id, confidence_at_response</td><td>response, sweeper</td></tr>
+          <tr><td class="name">.soc-coverage-gaps</td><td>technique_id, occurrences, avg_confidence</td><td>watchdog</td></tr>
+          <tr><td class="name">.soc-agent-health</td><td>agent_id, status, throughput, latency_p50/p95, error_rate</td><td>watchdog</td></tr>
+          <tr><td class="name">.soc-evolution-log</td><td>action_type, agent_id, reasoning, before, after; applier writes source, artifact_id, artifact_type, op, result (applied/failure/blocked_canonical/blocked_budget/blocked_cooldown/blocked_loop), reason</td><td>meta, deteng, soc-autonomous-applier</td></tr>
+          <tr><td class="name">.soc-metrics</td><td>pipeline, cycle_id, alerts_processed, classifications, cycle_duration_ms, tokens_used, estimated_cost_usd, status</td><td>sweeper</td></tr>
+          <tr><td class="name">.soc-connector-health</td><td>connector_id, connector_name, status, latency_ms, consecutive_failures, fallback_connector_id</td><td>watchdog</td></tr>
+          <tr><td class="name">.soc-detection-metrics</td><td>attack_id, technique_id, time_to_detect_ms, time_to_triage_ms, triage_classification, triage_correct</td><td>attack sim</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Regular Indices + Audit</div>
+      <table>
+        <thead><tr><th>Index</th><th>Key Fields</th><th>ILM</th></tr></thead>
+        <tbody>
+          <tr><td class="name">.soc-recommendations</td><td>rec_id, type, source, status, title, summary, details (disabled), sub_items (disabled), confidence, rejection_reason, reviewed_at</td><td>—</td></tr>
+          <tr><td class="name">.soc-dead-letter</td><td>source, correlation_id, error, retry_count, last_retry_at</td><td>permanent</td></tr>
+          <tr><td class="name">.soc-difficulty-state</td><td>level, previous_level, level_name, decision, reasoning</td><td>permanent</td></tr>
+          <tr><td class="name">.soc-pipeline-lock</td><td>pipeline, status, acquired_at, released_at, alert_count, cycle_duration_ms</td><td>permanent</td></tr>
+          <tr><td class="name">.soc-trust-scores</td><td>tier, total_proposals, approved_count, rejected_count, approval_rate, auto_approve_eligible</td><td>permanent</td></tr>
+          <tr><td class="name">.soc-attack-commands</td><td>status, profile, difficulty, techniques, operation_id, claimed_at, completed_at</td><td>90d</td></tr>
+          <tr><td class="name">.soc-audit-trail</td><td>correlation_id, agent_name, action, classification, confidence, details (disabled)</td><td>permanent (DS)</td></tr>
+          <tr><td class="name">.soc-agent-registry</td><td>agent_id, name, created_at (dynamic mapping)</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="mt-sm text-xs text-muted"><code>sub_items</code> and <code>details</code> use <code>enabled: false</code> (opaque JSON blobs — not indexed, only stored). This allows arbitrary nested structures without mapping explosion.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     8. DETECTION & ADVERSARY
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">8</span> Detection Rules & Adversary Profiles</div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--red)"></span>Detection Rules (7 custom, 1m interval)</div>
+      <table>
+        <thead><tr><th>Rule</th><th>MITRE</th><th>Indices</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Shell Command Execution</td><td><span class="pill pill-red">T1059.004</span></td><td>endpoint.events.process, system.auth</td></tr>
+          <tr><td class="name">Crypto Mining Activity</td><td><span class="pill pill-red">T1496</span></td><td>endpoint.events.process</td></tr>
+          <tr><td class="name">System Owner Discovery</td><td><span class="pill pill-red">T1033</span></td><td>endpoint.events.process</td></tr>
+          <tr><td class="name">Suspicious Process (Temp)</td><td><span class="pill pill-red">T1204</span></td><td>endpoint.events.process</td></tr>
+          <tr><td class="name">Lateral Movement SSH/RDP</td><td><span class="pill pill-red">T1021</span></td><td>endpoint.events.network</td></tr>
+          <tr><td class="name">Credential Dumping</td><td><span class="pill pill-red">T1003</span></td><td>endpoint.events.process, file</td></tr>
+          <tr><td class="name">Persistence Cron/Task</td><td><span class="pill pill-red">T1053.003</span></td><td>endpoint.events.process, file</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--pink)"></span>Caldera Adversary Profiles (L1–L5)</div>
+      <table>
+        <thead><tr><th>Level</th><th>Profile</th><th>Techniques</th><th>Style</th></tr></thead>
+        <tbody>
+          <tr><td class="name">L1</td><td>Script Kiddie</td><td>T1059, T1496, T1033</td><td>Single-stage, noisy</td></tr>
+          <tr><td class="name">L2</td><td>Opportunistic</td><td>T1566, T1003, T1053</td><td>2-stage chains</td></tr>
+          <tr><td class="name">L3</td><td>Targeted</td><td>T1204, T1218, T1021, T1074</td><td>Multi-stage + evasion</td></tr>
+          <tr><td class="name">L4</td><td>APT Lite</td><td>T1195, T1055, T1071, T1041</td><td>Full kill chain</td></tr>
+          <tr><td class="name">L5</td><td>Adversarial</td><td><em>dynamic</em></td><td>Novel TTPs, anti-forensics</td></tr>
+        </tbody>
+      </table>
+      <div class="mt-sm text-xs text-muted">Difficulty controller auto-escalates/deescalates based on SOC TP rate, MTTD, and automation rate. Bridge claims <code>.soc-attack-commands</code> with optimistic locking (<code>seq_no_primary_term</code>), polls Caldera operation status every 15s (max 600s).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     9. DASHBOARD
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">9</span> Command Center Dashboard — React + EUI</div>
+  <div class="grid g23">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--amber)"></span>9 Tabs, 30s Auto-Refresh</div>
+      <table>
+        <thead><tr><th>Tab</th><th>Components</th><th>Data Sources</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Overview</td><td>KPI Hero Row, sparklines (hourly), classification breakdown, MITRE panel, pipeline grid, agent workload</td><td>All <code>.soc-*</code> indices, aggregated client-side</td></tr>
+          <tr><td class="name">Recommendations</td><td>EuiBasicTable with per-sub-item approve/reject, rejection reason modal, one-click Apply for exceptions, rule detail links</td><td><code>.soc-recommendations</code></td></tr>
+          <tr><td class="name">Triage Results</td><td>Table: timestamp, classification badge, confidence, MITRE, source, reasoning</td><td><code>.soc-triage-results</code></td></tr>
+          <tr><td class="name">Response Actions</td><td>ResponseActionsPanel with action types, targets, status</td><td><code>.soc-response-actions</code></td></tr>
+          <tr><td class="name">MITRE Coverage</td><td>MitreTechniquePanel, MitreTacticGrid, CoverageGapsPanel</td><td><code>.soc-coverage-gaps</code>, triage classifications</td></tr>
+          <tr><td class="name">Evolution Log</td><td>EvolutionLogPanel: timeline of all agent/workflow changes</td><td><code>.soc-evolution-log</code></td></tr>
+          <tr><td class="name">Agent Health</td><td>PipelineStatusGrid, outcomes table (disposition, agents involved)</td><td><code>.soc-outcomes</code>, <code>agent-health</code></td></tr>
+          <tr><td class="name">System Health</td><td>Pipeline success rate, cycle metrics, trust scores per tier (graduated autonomy), auto-approve eligibility, recent cycle log</td><td><code>.soc-metrics</code>, <code>.soc-trust-scores</code></td></tr>
+          <tr><td class="name">Audit Trail</td><td>Full audit table: timestamp, event type, source, details</td><td><code>.soc-audit-trail</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--green)"></span>Frontend APIs</div>
+      <table>
+        <thead><tr><th>Operation</th><th>Endpoint</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Read data</td><td><code>POST /internal/search/es</code> (via Kibana HTTP)</td></tr>
+          <tr><td class="name">Update recommendation</td><td><code>POST /api/console/proxy</code> → <code>{idx}/_update/{id}?refresh=true</code></td></tr>
+          <tr><td class="name">Apply exception</td><td><code>POST /api/detection_engine/rules/{id}/exceptions</code> (v2023-10-31)</td></tr>
+        </tbody>
+      </table>
+      <div class="mt-sm">
+        <div class="card-title" style="margin-top:12px"><span class="dot" style="background:var(--accent)"></span>KPI Metrics (SocKPIs)</div>
+        <ul class="feature-list">
+          <li><strong>automationRate</strong> — % alerts processed without human intervention</li>
+          <li><strong>truePositiveRate</strong> / <strong>falsePositiveRate</strong> / <strong>suspiciousRate</strong></li>
+          <li><strong>avgConfidence</strong> — mean triage confidence score</li>
+          <li><strong>alertsProcessedToday</strong> / <strong>alertsProcessedTotal</strong></li>
+          <li><strong>casesCreated</strong> — total cases via pipeline</li>
+          <li><strong>agentsActive</strong> / <strong>agentsDegraded</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     10. SETUP PIPELINE
+     ═══════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">10</span> Bootstrap Pipeline — <code>setup.sh</code></div>
+  <div class="card">
+    <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+      <span class="pill pill-cyan">1. Wait for ES+Kibana</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-green">2. Trial license</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-green">3. Fleet setup</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-purple">4. ILM policies</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-purple">5. Index templates</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-purple">6. Create indices</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-purple">7. Seed data streams</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-amber">8. Seed data</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-pink">9. Deploy agents</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-pink">10. Deploy workflows</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-blue">11. Import dashboards</span>
+      <span class="arch-arrow">→</span>
+      <span class="pill pill-red">12. Import detection rules</span>
+    </div>
+    <div class="mt-sm grid g3" style="gap:10px;">
+      <div class="text-xs text-muted"><strong>Agents:</strong> <code>POST /api/agent_builder/agents</code>, fallback <code>PUT /api/agent_builder/agents/{id}</code> (upsert)</div>
+      <div class="text-xs text-muted"><strong>Workflows:</strong> <code>POST /api/workflows?overwrite=true</code> with <code>Elastic-Api-Version: 2023-10-31</code>, body <code>{"workflows":[{"yaml":"..."}]}</code></div>
+      <div class="text-xs text-muted"><strong>Rules:</strong> <code>POST /api/detection_engine/rules/_import?overwrite=true</code> (NDJSON multipart)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <span>Elastic Security · AI Agent Builder & Workflows · Spike / PoC</span>
+  <span>Stack: ES + Kibana 9.4.0-SNAPSHOT · Caldera · Fleet Server · Native Agent Builder tools</span>
+  <span>Confidential — Internal Engineering Reference</span>
+</div>
+
+</body>
+</html>

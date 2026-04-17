@@ -1,0 +1,190 @@
+{
+  "$schema": "../schemas/workflow_registry.schema.json",
+  "description": "Authored manifest of canonical AutoSOC workflow metadata. setup.sh reads this file and upserts one document per workflow into .soc-workflow-registry. Every canonical workflow file (soc-*.yaml) under this directory MUST have exactly one entry here; setup.sh fails closed otherwise. model_tier documents the intended Opus/Sonnet/Haiku tier for cost optimization; the physical connector id in YAML stays 'opus' and operators choose the model by swapping the underlying Kibana connector config.",
+  "workflows": [
+    {
+      "workflow_id": "soc-alert-sweeper",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_detection_rules", "elastic_cases"],
+      "summary": "Sweeps open detection-engine alerts and dispatches them to soc-triage for disposition.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-arch-reviewer",
+      "automation_level": "semi_auto",
+      "connectors": ["artifact_registry", "recommendations"],
+      "summary": "Periodic architecture review that emits capability_gap recommendations for operator approval.",
+      "model_tier": "planner",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-autonomous-applier",
+      "automation_level": "fully_auto",
+      "connectors": ["artifact_registry", "kill_switch", "recommendations", "evolution_log"],
+      "summary": "Governance-gated applier for autonomous mutation_intent recommendations: enforces ownership, budget, cooldown, kill-switch, loop detection, and snapshot-before-mutate.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-caldera-dispatcher",
+      "automation_level": "fully_auto",
+      "connectors": ["caldera", "elastic_fleet"],
+      "summary": "Dispatches Caldera operations to emulate adversary TTPs against the lab fleet.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-caldera-poller",
+      "automation_level": "fully_auto",
+      "connectors": ["caldera", "elastic_fleet"],
+      "summary": "Polls Caldera for operation status and streams results into the evolution log.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-case-creation",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_cases", "elastic_detection_rules"],
+      "summary": "Creates and, on close, emits a forensic summary for every triaged true-positive alert.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-deteng",
+      "automation_level": "semi_auto",
+      "connectors": ["elastic_detection_rules", "recommendations"],
+      "summary": "Detection-engineering loop: proposes rule_patch / rule_creation recommendations backed by evidence.",
+      "model_tier": "planner",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-difficulty-controller",
+      "automation_level": "fully_auto",
+      "connectors": ["caldera", "evolution_log"],
+      "summary": "Adjusts attack-profile difficulty based on observed detection/response performance.",
+      "model_tier": "bulk",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-gap-analyzer",
+      "automation_level": "semi_auto",
+      "connectors": ["artifact_registry", "recommendations"],
+      "summary": "Analyses coverage gaps across MITRE ATT&CK and emits capability_gap recommendations.",
+      "model_tier": "planner",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-meta",
+      "automation_level": "fully_auto",
+      "connectors": ["artifact_registry", "recommendations", "evolution_log"],
+      "summary": "Meta-agent loop: observes SOC state and emits mutation_intent recommendations to evolve AutoSOC-owned artifacts.",
+      "model_tier": "planner",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-proactive-hunter",
+      "automation_level": "semi_auto",
+      "connectors": ["elastic_detection_rules", "recommendations", "osquery"],
+      "summary": "Proactive threat hunt across signal sources; emits hunt findings and candidate detections.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-recommendation-applier",
+      "automation_level": "human_in_the_loop",
+      "connectors": ["elastic_detection_rules", "elastic_cases", "recommendations"],
+      "summary": "Applies operator-approved deterministic recommendations (rule patches, exceptions, etc.) to the detection engine.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-recovery",
+      "automation_level": "fully_auto",
+      "connectors": ["artifact_registry", "kill_switch", "elastic_detection_rules"],
+      "summary": "Recovery workflow triggered on kill-switch or regression failure: restores snapshots and disables misbehaving artifacts.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-registry-retro-tag",
+      "automation_level": "fully_auto",
+      "connectors": ["artifact_registry"],
+      "summary": "Retroactively tags owner metadata on artifacts that were created before the registry existed.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-regression-gate",
+      "automation_level": "fully_auto",
+      "connectors": ["regression_gate", "elastic_detection_rules", "recommendations"],
+      "summary": "Replays the regression dataset against any proposed rule change and blocks apply on failure.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-regression-harvester",
+      "automation_level": "fully_auto",
+      "connectors": ["regression_gate", "elastic_cases"],
+      "summary": "Harvests verified case outcomes into the regression dataset for future gating.",
+      "model_tier": "bulk",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-response",
+      "automation_level": "semi_auto",
+      "connectors": ["elastic_defend", "elastic_fleet", "elastic_cases"],
+      "summary": "Response-path containment playbook: host isolation, process kill, and user-notification fan-out.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-triage",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_detection_rules", "recommendations", "elastic_cases"],
+      "summary": "LLM-assisted triage: produces a triage_verdict recommendation per alert with evidence and expected_impact.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-trust-scorer",
+      "automation_level": "fully_auto",
+      "connectors": ["trust_scores", "evolution_log"],
+      "summary": "Scores the trust of AutoSOC-owned artifacts based on outcome history; feeds ownership-gated apply decisions.",
+      "model_tier": "bulk",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-shift-handover",
+      "automation_level": "fully_auto",
+      "connectors": ["evolution_log", "outcomes", "audit_trail", "forensic_summary"],
+      "summary": "Every 8h, composes an operator-facing narrative summary of autonomous SOC activity and writes it to .soc-shift-handover.",
+      "model_tier": "bulk",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-skill-metrics-roller",
+      "automation_level": "fully_auto",
+      "connectors": ["evolution_log", "skill_metrics"],
+      "summary": "Hourly rollup of per-skill invocation counts, success rate, and estimated hours/cost saved into .soc-skill-metrics.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-forensic-summarizer",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_cases", "hunt_findings", "forensic_summary"],
+      "summary": "Polls Kibana Cases every 15m for closed cases and emits a single immutable forensic summary per case to .soc-forensic-summary.",
+      "model_tier": "bulk",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-watchdog",
+      "automation_level": "fully_auto",
+      "connectors": ["kill_switch", "evolution_log", "artifact_registry"],
+      "summary": "Watchdog loop that trips the kill switch when budget, regression, or loop-detection thresholds are breached.",
+      "model_tier": "analyst",
+      "owner": "canonical"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "index_patterns": [".soc-governance-budgets"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "window": { "type": "keyword" },
+        "scope": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "mutations_in_window": { "type": "long" },
+        "limit": { "type": "long" },
+        "exceeded": { "type": "boolean" },
+        "cooldown_seconds": { "type": "long" },
+        "last_mutation_at": { "type": "date" },
+        "next_mutation_allowed_at": { "type": "date" },
+        "reason": { "type": "text" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Rate-limit + cooldown counters for AutoSOC autonomous mutations. Doc _id schema: '<scope>:<artifact_type>:<artifact_id>:<window>'.",
+    "owner": "autosoc-governance",
+    "schema_version": 1
+  }
+}

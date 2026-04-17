@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/capability_gap.schema.json",
+  "title": "Capability Gap",
+  "description": "Meta-agent finding: a SOC capability that is missing or underpowered. Proposes the artifact to create/modify to close the gap.",
+  "type": "object",
+  "required": ["details"],
+  "properties": {
+    "details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gap_id", "gap_name", "gap_category", "impact", "proposed_artifact", "supporting_metrics"],
+      "properties": {
+        "gap_id": { "type": "string", "pattern": "^gap_[a-z0-9_]{4,60}$" },
+        "gap_name": { "type": "string", "minLength": 5, "maxLength": 200 },
+        "gap_category": {
+          "type": "string",
+          "enum": [
+            "detection_coverage",
+            "enrichment",
+            "triage_quality",
+            "response_automation",
+            "observability",
+            "feedback_loop",
+            "data_pipeline"
+          ]
+        },
+        "impact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["severity", "affected_areas", "estimated_cost_of_inaction"],
+          "properties": {
+            "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+            "affected_areas": { "type": "array", "items": { "type": "string" } },
+            "estimated_cost_of_inaction": { "type": "string" }
+          }
+        },
+        "proposed_artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "id", "name", "rationale"],
+          "properties": {
+            "kind": { "type": "string", "enum": ["skill", "agent", "workflow", "rule", "data_view", "index_template"] },
+            "id": { "type": "string", "minLength": 3 },
+            "name": { "type": "string", "minLength": 3 },
+            "rationale": { "type": "string", "minLength": 20 },
+            "reuse_check": {
+              "type": "object",
+              "description": "Mandatory. Did the meta-agent first look for an existing artifact to EXTEND rather than create net-new?",
+              "additionalProperties": false,
+              "required": ["checked", "candidates_considered"],
+              "properties": {
+                "checked": { "type": "boolean" },
+                "candidates_considered": { "type": "array", "items": { "type": "string" } },
+                "why_new_is_better": { "type": "string" }
+              }
+            }
+          }
+        },
+        "supporting_metrics": {
+          "type": "object",
+          "description": "Quantitative evidence the gap exists. A gap without numbers must NOT be emitted.",
+          "additionalProperties": true,
+          "required": ["sample_size_days", "query_used"],
+          "properties": {
+            "sample_size_days": { "type": "integer", "minimum": 1 },
+            "query_used": { "type": "string", "minLength": 10 },
+            "metric_values": { "type": "object", "additionalProperties": true }
+          }
+        }
+      }
+    }
+  }
+}

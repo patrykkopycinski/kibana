@@ -10,7 +10,7 @@ services:
       # Enable ML on this node with enough memory for model deployments
       xpack.ml.use_auto_machine_memory_percent: "true"
       xpack.ml.max_machine_memory_percent: "50"
-      node.roles: "master,data,ingest,ml,transform"
+      node.roles: "master,data,ingest,ml,transform,remote_cluster_client"
       ES_JAVA_OPTS: "-Xms2g -Xmx2g"
     ports:
       - "0.0.0.0:${ES_PORT:-19200}:9200"
@@ -33,12 +33,16 @@ services:
       bash -c '
         echo "Setting kibana_system password...";
         until curl -sf -u "elastic:${ELASTIC_PASSWORD:-changeme}" http://elasticsearch:9200; do sleep 5; done;
-        curl -sf -X POST -u "elastic:${ELASTIC_PASSWORD:-changeme}" \
+        if curl -sf -X POST -u "elastic:${ELASTIC_PASSWORD:-changeme}" \
           -H "Content-Type: application/json" \
           http://elasticsearch:9200/_security/user/kibana_system/_password \
-          -d "{\"password\":\"${ELASTIC_PASSWORD:-changeme}\"}" \
-        && echo " Done." || echo " Failed.";
-        touch /tmp/setup-done
+          -d "{\"password\":\"${ELASTIC_PASSWORD:-changeme}\"}"; then
+          echo " Done.";
+          touch /tmp/setup-done;
+        else
+          echo " Failed — setup-done NOT created." >&2;
+          exit 1;
+        fi
       '
     healthcheck:
       test: ["CMD-SHELL", "[ -f /tmp/setup-done ] || exit 1"]
@@ -126,27 +130,15 @@ services:
       start_period: 120s
     restart: unless-stopped
 
-  caldera-bridge:
-    build:
-      context: ./bridge
-      dockerfile: Dockerfile
-    container_name: soc-caldera-bridge
-    environment:
-      ES_URL: http://elasticsearch:9200
-      ES_USER: elastic
-      ES_PASS: ${ELASTIC_PASSWORD:-changeme}
-      CALDERA_URL: http://caldera:8888
-      CALDERA_API_KEY: ${CALDERA_API_KEY:-ADMIN123}
-      POLL_INTERVAL_SECONDS: "30"
-      PROFILES_DIR: /app/profiles
-    volumes:
-      - ./caldera_profiles:/app/profiles:ro
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      caldera:
-        condition: service_healthy
-    restart: unless-stopped
+  # Caldera command dispatch and polling is now done by two native workflows —
+  # soc-caldera-dispatcher and soc-caldera-poller — which use elasticsearch.*,
+  # http, and foreach steps. No Python bridge is required. The former
+  # caldera-bridge service was removed; this file now contains ONLY:
+  #   - elasticsearch  (stack)
+  #   - kibana         (stack)
+  #   - fleet-server   (stack)
+  #   - elastic-agent  (stack)
+  #   - caldera        (third-party attack emulator, driven by the workflows above)
 
 volumes:
   caldera_data: {}

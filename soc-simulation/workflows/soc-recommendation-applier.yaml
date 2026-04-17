@@ -1,0 +1,121 @@
+version: '1'
+name: SOC Recommendation Applier
+description: >
+  Picks up recommendations with approved status or approved sub-items and executes them
+  using the SOC Recommendation Applier Agent with self-management tools.
+  Includes a validation step that confirms approved items exist before execution.
+  Runs every 5 minutes to process approved items from the review queue.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+  - type: manual
+
+steps:
+  - name: get_approved_recs
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      body:
+        query:
+          bool:
+            must:
+              - terms:
+                  status:
+                    - approved
+            must_not:
+              - term:
+                  status: applied
+              - term:
+                  status: failed
+        size: 3
+        sort:
+          - "@timestamp": asc
+        _source:
+          - rec_id
+          - type
+          - source
+          - status
+          - title
+          - summary
+          - details
+          - sub_items
+          - confidence
+
+  - name: log_check
+    type: console
+    with:
+      message: "Applier: found {{ steps.get_approved_recs.output.hits.total.value }} approved recommendations"
+
+  - name: check_has_approved
+    type: condition
+    with:
+      condition: "{{ steps.get_approved_recs.output.hits.total.value }} > 0"
+      if_true: apply_recommendations
+      if_false: log_nothing
+
+  - name: log_nothing
+    type: console
+    with:
+      message: "Applier: no approved recommendations to process"
+    end: true
+
+  - name: apply_recommendations
+    type: ai.agent
+    agent-id: soc-rec-applier-agent
+    connector-id: opus
+    with:
+      message: >
+        You are the SOC Recommendation Applier. Execute ONLY the approved items below.
+
+        CANDIDATE RECOMMENDATIONS:
+        {{ steps.get_approved_recs.output.hits.hits | json }}
+
+        EXECUTION RULES:
+        1. Check each document's sub_items field:
+           - If sub_items exist: only execute sub-items where sub_items[N].status = "approved"
+           - If NO sub_items but parent status = "approved": execute everything
+           - If parent status = "pending" and no approved sub_items: SKIP entirely
+        2. If sub_items[N].status = "applied": SKIP (already done)
+
+        SELF-VALIDATION:
+        Before executing any action, validate:
+        - For rule operations: confirm the rule_id exists using manage_detection_rules
+        - For workflow deployment: validate_workflow BEFORE deploy_workflow
+        - For skill creation: verify tool_ids are valid
+        - For agent patches: verify target agent exists
+        If validation fails, mark the item as "failed" with the validation error and move on.
+
+        FOR RULE TUNING RECOMMENDATIONS (type=rule_tuning):
+        - add_exception / update_exception: Use platform.core.manage_detection_rules with operation='patch'
+        - raise_threshold / lower_threshold: Use operation='patch' with the patch_fields
+        - enable / disable: Use operation='enable' or 'disable'
+        - create: Use operation='create' with enabled=false
+
+        FOR AGENT EVOLUTION RECOMMENDATIONS (type=agent_evolution):
+        - create_workflow: Use platform.workflows.deploy_workflow
+        - create_skill: Use platform.core.manage_skills
+        - enrich_agent / refine_agent: Use platform.core.update_agent
+        - create_agent: Use platform.core.create_agent + deploy_workflow
+
+        IMPORTANT:
+        - Validate before executing. If validation fails, skip the item and report the error.
+        - If nothing needs to be done, respond: {"applied": [], "skipped": [...], "nothing_to_do": true}
+    timeout: 300s
+
+  - name: log_application
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: "recommendation_applied"
+        source: "soc-recommendation-applier"
+        details: "{{ steps.apply_recommendations.output | json }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Applier: recommendation processing complete"

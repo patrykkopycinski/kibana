@@ -1,0 +1,105 @@
+version: '1'
+name: SOC Forensic Summarizer
+description: >
+  Polls Kibana Cases every 15 minutes for closed cases that do not yet have a
+  forensic summary. For each, aggregates IOCs, YARA rules, attribution, and
+  exceptions produced during the investigation, then emits ONE immutable
+  document to .soc-forensic-summary (op_type=create, case_id as doc_id).
+
+  This replaces the PM vision's "forensic post-investigation panel": the
+  dashboard row reads this index directly, producing a consolidated view of
+  every durable artifact captured for each investigation.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+  - type: manual
+
+steps:
+  - name: poll_closed_cases
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/cases/_find?status=closed&perPage=50&sortField=updatedAt&sortOrder=desc
+
+  - name: existing_summaries
+    type: elasticsearch.search
+    with:
+      index: ".soc-forensic-summary"
+      body:
+        size: 500
+        _source: ["case_id"]
+        query:
+          match_all: {}
+
+  - name: emit_summaries
+    type: foreach
+    foreach: "{{ steps.poll_closed_cases.output.cases | default: [] }}"
+    steps:
+      # Pull investigation artefacts for this case from the hunt/outcome indices.
+      - name: hunt_findings
+        type: elasticsearch.search
+        with:
+          index: ".soc-hunt-findings"
+          body:
+            size: 100
+            query:
+              bool:
+                filter:
+                  - term: { case_id.keyword: "{{ foreach.item.id }}" }
+
+      - name: compose_summary
+        type: ai.agent
+        agent-id: soc-triage-agent
+        connector-id: opus
+        with:
+          message: >
+            The following Kibana case has just been closed. Produce a durable
+            forensic summary (JSON only) consolidating every meaningful artefact
+            from the investigation. Cite only data that appears in the inputs
+            below — DO NOT invent IOCs.
+
+            case = {{ foreach.item | json }}
+            hunt_findings = {{ steps.hunt_findings.output.hits.hits | json }}
+
+            Return ONLY:
+            {
+              "verdict": "true_positive|false_positive|benign_true_positive|inconclusive",
+              "iocs":              [ {"type":"...","value":"...","confidence":0.0} ],
+              "yara_rules":        [ {"name":"...","body":"...","added_to_rules_index": false } ],
+              "attribution":       { "actor": null, "campaign": null, "ttps": [] },
+              "exceptions_created":[ {"rule_id":"...","exception_id":"..."} ],
+              "summary_markdown":  "<markdown string, <= 2000 chars>"
+            }
+        timeout: 120s
+        if: >-
+          {% assign seen_ids = '' %}
+          {% for d in steps.existing_summaries.output.hits.hits %}
+            {% assign seen_ids = seen_ids | append: ',' | append: d._source.case_id %}
+          {% endfor %}
+          {% assign needle = ',' | append: foreach.item.id %}
+          {{ seen_ids contains needle | not }}
+
+      - name: write_summary
+        type: elasticsearch.index
+        with:
+          index: .soc-forensic-summary
+          id: "{{ foreach.item.id }}"
+          op_type: create
+          document:
+            case_id:          "{{ foreach.item.id }}"
+            closed_at:        "{{ foreach.item.closedAt | default: foreach.item.updatedAt }}"
+            verdict:          "{{ steps.compose_summary.output.verdict | default: 'inconclusive' }}"
+            iocs:             "{{ steps.compose_summary.output.iocs | default: [] }}"
+            yara_rules:       "{{ steps.compose_summary.output.yara_rules | default: [] }}"
+            attribution:      "{{ steps.compose_summary.output.attribution | default: {} }}"
+            exceptions_created: "{{ steps.compose_summary.output.exceptions_created | default: [] }}"
+            summary_markdown: "{{ steps.compose_summary.output.summary_markdown | default: 'No summary available.' }}"
+        if: "{{ steps.compose_summary.output != nil }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Forensic summarizer tick complete ({{ steps.poll_closed_cases.output.cases | size | default: 0 }} closed case(s) inspected)."

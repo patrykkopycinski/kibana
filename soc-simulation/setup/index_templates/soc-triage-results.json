@@ -12,11 +12,21 @@
       "properties": {
         "@timestamp": { "type": "date" },
         "correlation_id": { "type": "keyword" },
+        "run_id": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "stage": { "type": "keyword" },
+        "pipeline": { "type": "keyword" },
+        "batch_size": { "type": "integer" },
         "hop_count": { "type": "integer" },
+        "alert_id": { "type": "keyword" },
         "alert_ids": { "type": "keyword" },
+        "rule_id": { "type": "keyword" },
+        "rule_name": { "type": "keyword" },
         "classification": { "type": "keyword" },
         "confidence": { "type": "integer" },
-        "reasoning": { "type": "text" },
+        "reasoning": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 512 } } },
+        "recommended_action": { "type": "keyword" },
+        "evidence_summary": { "type": "text" },
         "entities": {
           "properties": {
             "hosts": { "type": "keyword" },
@@ -25,6 +35,33 @@
           }
         },
         "mitre_techniques": { "type": "keyword" },
+        "disposition": { "type": "keyword" },
+        "threat_category": { "type": "keyword" },
+        "kill_chain_stage": { "type": "keyword" },
+        "business_impact": {
+          "properties": {
+            "data_at_risk": { "type": "keyword" },
+            "systems_at_risk": { "type": "integer" },
+            "criticality": { "type": "keyword" }
+          }
+        },
+        "attack_chain": {
+          "properties": {
+            "chain_id": { "type": "keyword" },
+            "position_in_chain": { "type": "integer" },
+            "chain_length": { "type": "integer" },
+            "related_alert_ids": { "type": "keyword" }
+          }
+        },
+        "evidence": {
+          "type": "nested",
+          "properties": {
+            "summary": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 512 } } },
+            "source_ref": { "type": "keyword", "ignore_above": 2048 },
+            "confidence": { "type": "float" }
+          }
+        },
+        "triage_output": { "type": "object", "enabled": false },
         "enrichment_requests": { "type": "keyword" },
         "sml_patterns_matched": { "type": "keyword" }
       }

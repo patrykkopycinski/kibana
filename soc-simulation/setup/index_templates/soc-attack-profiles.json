@@ -1,0 +1,23 @@
+{
+  "index_patterns": [".soc-attack-profiles"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "difficulty_level": { "type": "integer" },
+        "name": { "type": "keyword" },
+        "adversary_id": { "type": "keyword" },
+        "group": { "type": "keyword" },
+        "description": { "type": "text" },
+        "techniques": { "type": "keyword" },
+        "source_file": { "type": "keyword" },
+        "seeded_at": { "type": "date" }
+      }
+    }
+  }
+}

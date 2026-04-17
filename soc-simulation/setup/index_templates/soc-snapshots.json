@@ -1,0 +1,36 @@
+{
+  "index_patterns": [".soc-snapshots"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "snapshot_id": { "type": "keyword" },
+        "artifact_ref": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "mutation_op": { "type": "keyword" },
+        "mutation_reason": { "type": "text" },
+        "mutation_source": { "type": "keyword" },
+        "parent_recommendation_id": { "type": "keyword" },
+        "before": { "type": "object", "enabled": false },
+        "after": { "type": "object", "enabled": false },
+        "definition_hash_before": { "type": "keyword" },
+        "definition_hash_after": { "type": "keyword" },
+        "rollback_status": { "type": "keyword" },
+        "rolled_back_at": { "type": "date" },
+        "rolled_back_by": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Immutable pre-mutation snapshots for every autonomous change AutoSOC makes. Enables one-command rollback. Uses permanent ILM.",
+    "owner": "autosoc-governance",
+    "schema_version": 1
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/reasoning_trace.schema.json",
+  "title": "AutoSOC Agent Reasoning Step",
+  "description": "One document per reasoning step emitted by an AutoSOC agent. A run_summary rollup is written once per run_id on completion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_id", "agent_id", "step_index", "step_type", "@timestamp"],
+  "properties": {
+    "run_id":    { "type": "string", "minLength": 1 },
+    "agent_id":  { "type": "string", "minLength": 1 },
+    "step_index":{ "type": "integer", "minimum": 0 },
+    "step_type": {
+      "type": "string",
+      "enum": [
+        "thought",
+        "tool_call",
+        "tool_result",
+        "decision",
+        "recommendation",
+        "run_summary"
+      ]
+    },
+    "content":           { "type": ["string", "null"], "maxLength": 8000 },
+    "tool_name":         { "type": ["string", "null"] },
+    "tool_args":         { "type": ["object", "null"] },
+    "tool_result_ref":   { "type": ["string", "null"] },
+    "@timestamp":        { "type": "string", "format": "date-time" },
+    "total_steps":       { "type": "integer", "minimum": 0, "description": "run_summary only" },
+    "tool_call_count":   { "type": "integer", "minimum": 0, "description": "run_summary only" },
+    "total_duration_ms": { "type": "integer", "minimum": 0, "description": "run_summary only" },
+    "final_status": {
+      "type": "string",
+      "enum": ["success", "failure", "aborted"],
+      "description": "run_summary only"
+    },
+    "final_output_ref":  { "type": ["string", "null"], "description": "run_summary only" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "step_type": { "const": "run_summary" } }, "required": ["step_type"] },
+      "then": { "required": ["total_steps", "tool_call_count", "final_status"] }
+    }
+  ]
+}

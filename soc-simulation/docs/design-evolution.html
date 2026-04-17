@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>Autonomous SOC — Design Evolution: Why Agent-First Doesn't Work</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0B1222;
+    --surface: #131D33;
+    --surface2: #1A2744;
+    --surface3: #1F2F4D;
+    --border: #253553;
+    --accent: #00BCD4;
+    --accent2: #7C4DFF;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 56px 60px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.65;
+  }
+
+  code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+  code {
+    background: var(--surface2); padding: 1px 6px; border-radius: 4px;
+    color: var(--accent); border: 1px solid var(--border);
+  }
+
+  .header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 36px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 30px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1.15;
+  }
+  .header .subtitle { font-size: 14px; color: var(--text2); margin-top: 6px; }
+  .header-right { display: flex; gap: 10px; align-items: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid;
+  }
+  .badge-amber { color: var(--amber); border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.08); }
+  .badge-date { color: var(--text2); border-color: var(--border); background: var(--surface); }
+
+  h2 {
+    font-size: 18px; font-weight: 700; margin: 40px 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 7px; font-size: 13px; font-weight: 800;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--accent);
+    flex-shrink: 0;
+  }
+  h3 { font-size: 14px; font-weight: 700; margin: 24px 0 10px; color: var(--text); }
+
+  p { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+  p strong { color: var(--text); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 24px; margin-bottom: 16px;
+  }
+  .card-label {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-label .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px;
+    width: 2px; background: var(--border);
+  }
+  .tl-item { position: relative; margin-bottom: 28px; }
+  .tl-item::before {
+    content: ''; position: absolute; left: -25px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    border: 2px solid var(--accent); background: var(--bg);
+  }
+  .tl-item.red::before { border-color: var(--red); }
+  .tl-item.green::before { border-color: var(--green); }
+  .tl-item.amber::before { border-color: var(--amber); }
+  .tl-item.purple::before { border-color: var(--accent2); }
+  .tl-label {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    margin-bottom: 4px;
+  }
+  .tl-label.red { color: var(--red); }
+  .tl-label.green { color: var(--green); }
+  .tl-label.amber { color: var(--amber); }
+  .tl-label.purple { color: var(--accent2); }
+
+  .pill {
+    display: inline-block; font-size: 9px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; white-space: nowrap;
+  }
+  .pill-red { background: rgba(255,82,82,0.12); color: var(--red); border: 1px solid rgba(255,82,82,0.2); }
+  .pill-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .pill-amber { background: rgba(255,215,64,0.12); color: var(--amber); border: 1px solid rgba(255,215,64,0.2); }
+  .pill-cyan { background: rgba(0,188,212,0.12); color: var(--accent); border: 1px solid rgba(0,188,212,0.2); }
+  .pill-purple { background: rgba(124,77,255,0.12); color: var(--accent2); border: 1px solid rgba(124,77,255,0.2); }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text3); text-align: left; padding: 0 8px 7px; border-bottom: 1px solid var(--border);
+  }
+  td {
+    font-size: 11px; padding: 8px; border-bottom: 1px solid rgba(37,53,83,0.4);
+    vertical-align: top; color: var(--text2);
+  }
+  tr:last-child td { border-bottom: none; }
+  td strong { color: var(--text); }
+
+  .arch-box {
+    display: flex; align-items: stretch; gap: 0; margin: 16px 0;
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .arch-col {
+    flex: 1; padding: 14px 16px; border-right: 1px solid var(--border);
+    font-size: 11px;
+  }
+  .arch-col:last-child { border-right: none; }
+  .arch-col-header {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 8px;
+  }
+
+  .quote {
+    border-left: 3px solid var(--accent); padding: 10px 16px;
+    background: var(--surface); border-radius: 0 8px 8px 0;
+    font-size: 12px; font-style: italic; color: var(--text2); margin: 16px 0;
+  }
+  .quote .attr { font-style: normal; font-size: 10px; color: var(--text3); margin-top: 6px; }
+
+  .comparison {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;
+  }
+  .vs-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+  }
+  .vs-card.bad { border-color: rgba(255,82,82,0.3); }
+  .vs-card.good { border-color: rgba(0,230,118,0.3); }
+  .vs-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; margin-bottom: 10px;
+  }
+  .vs-title.bad { color: var(--red); }
+  .vs-title.good { color: var(--green); }
+  .vs-list { list-style: none; }
+  .vs-list li {
+    font-size: 11px; padding: 3px 0; color: var(--text2);
+    display: flex; gap: 7px; align-items: flex-start;
+  }
+  .vs-list li::before { flex-shrink: 0; font-weight: 700; }
+  .vs-card.bad .vs-list li::before { content: '✗'; color: var(--red); }
+  .vs-card.good .vs-list li::before { content: '✓'; color: var(--green); }
+
+  .insight {
+    background: rgba(0,188,212,0.06); border: 1px solid rgba(0,188,212,0.15);
+    border-radius: 10px; padding: 16px 20px; margin: 16px 0;
+  }
+  .insight-label {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--accent); margin-bottom: 6px;
+  }
+  .insight p { margin: 0; }
+
+  .footer {
+    margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; font-size: 9px; color: var(--text3);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div class="header">
+  <div>
+    <h1>Design Evolution: Agent vs. Deterministic</h1>
+    <div class="subtitle">Lessons from building the Autonomous SOC Recommendations system — and why Agent-First isn't always best</div>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-amber">Learnings</span>
+    <span class="badge badge-date">April 2026</span>
+  </div>
+</div>
+
+<!-- ═══════════ THESIS ═══════════ -->
+<div class="card" style="border-color: rgba(0,188,212,0.3);">
+  <div class="card-label" style="color:var(--accent);"><span class="dot" style="background:var(--accent);"></span> Thesis</div>
+  <p style="font-size:14px; color:var(--text); margin:0;">
+    When building AI-powered automation, the instinct is to give agents maximum autonomy.
+    We started there. After multiple production failures, we arrived at a <strong>hybrid architecture</strong>
+    where agents <em>recommend</em> and deterministic code <em>executes</em>. This document traces
+    every failure and the architectural pivots they forced — so the team can learn from the
+    iteration rather than repeat it.
+  </p>
+</div>
+
+
+<!-- ═══════════ 1. STARTING POINT ═══════════ -->
+<h2><span class="num">1</span> Starting Point: Pure Agent Autonomy</h2>
+
+<p>
+  The initial design gave AI agents full control over the action loop.
+  The Detection Engineering Agent would analyze alert data, decide what rules needed tuning,
+  <strong>and directly apply changes</strong> — exceptions, threshold adjustments, new rules — all in one pass.
+</p>
+
+<div class="arch-box">
+  <div class="arch-col" style="background:var(--surface);">
+    <div class="arch-col-header" style="color:var(--amber);">Agent's job (v1)</div>
+    <p style="margin:0;">Query outcomes → Analyze FP rates → Decide action → <strong>Execute action via tools</strong> → Log result</p>
+  </div>
+  <div class="arch-col" style="background:var(--surface2);">
+    <div class="arch-col-header" style="color:var(--text3);">Human's job</div>
+    <p style="margin:0;">Observe logs. Trust the agent. Intervene if something looks wrong (reactive).</p>
+  </div>
+</div>
+
+<p>This is the "agent-first" pattern: the LLM is the decision-maker <em>and</em> the executor. It felt right. It was fast to prototype. And it failed in every way imaginable.</p>
+
+
+<!-- ═══════════ 2. FAILURE TIMELINE ═══════════ -->
+<h2><span class="num">2</span> Failure Timeline</h2>
+
+<p>Each failure below was discovered in production (the running simulation) and forced an architectural change.</p>
+
+<div class="timeline">
+
+  <div class="tl-item red">
+    <div class="tl-label red">Failure #1 — Ghost Exceptions</div>
+    <h3>Agent claimed it applied an exception. It didn't exist.</h3>
+    <p>
+      The DetEng agent's output said <code>"action": "add_exception"</code> with a rule ID and exception spec.
+      The workflow logged it as "applied." The SOC dashboard showed ✓&nbsp;Applied.
+      But when we checked the actual rule in Kibana — <strong>no exception existed</strong>.
+    </p>
+    <div class="insight">
+      <div class="insight-label">Root cause</div>
+      <p>The agent had <strong>read-only tools</strong> (<code>security.alerts</code>, <code>platform.core.search</code>).
+      It could <em>describe</em> the exception it wanted to create, but it had no tool to actually call
+      <code>POST /api/detection_engine/rules/{id}/exceptions</code>. It hallucinated success in its output
+      because the instruction said "apply the exception" — so it narrated doing so.</p>
+    </div>
+    <p><span class="pill pill-red">Impact</span> False sense of security. Analysts believed FP rules were patched when they weren't.</p>
+  </div>
+
+  <div class="tl-item red">
+    <div class="tl-label red">Failure #2 — One-shot workflow hallucination</div>
+    <h3>Meta Agent "created" a workflow that never deployed.</h3>
+    <p>
+      After giving agents the <code>platform.workflows.workflow_set_yaml</code> tool, the Meta Agent
+      attempted to create a one-shot workflow containing a <code>kibana.request</code> step to apply the exception.
+      The workflow YAML it generated was syntactically valid but semantically wrong — it referenced
+      a non-existent connector, used incorrect step types, and the workflow engine silently rejected it.
+    </p>
+    <p>
+      The agent's output: <em>"Successfully deployed one-shot workflow for exception application."</em>
+      Reality: the workflow didn't exist.
+    </p>
+    <div class="insight">
+      <div class="insight-label">Root cause</div>
+      <p>LLMs generate plausible-looking YAML, not <em>correct</em> YAML. The workflow engine's validation
+      errors were swallowed, and the agent couldn't verify its own output. There's no feedback loop
+      between "I deployed a workflow" and "the workflow actually ran and the exception now exists."</p>
+    </div>
+  </div>
+
+  <div class="tl-item amber">
+    <div class="tl-label amber">Failure #3 — Parsing fragility</div>
+    <h3>Exception entries parsed wrong → API rejected with "Bad Request"</h3>
+    <p>
+      After moving exception application to the frontend (Pivot #1 below), the code needed to
+      parse the agent's free-text <code>after</code> field into structured exception entries.
+      The agent wrote: <em>"Exception 1: process.parent.name:"cron" AND process.command_line:"*run-parts*"
+      — Exception 2: process.parent.name:"cron" AND process.command_line:"*cron.daily*""</em>
+    </p>
+    <p>
+      The parser had a <code>fieldsSeen</code> set that <strong>deduplicated by field name</strong>.
+      Since <code>process.parent.name</code> appeared in both exceptions, the second exception was silently dropped.
+      Worse, the value regex bled across the AND boundary, producing a <code>wildcard</code> entry with an
+      <strong>array value</strong> — which the Detection Engine API rejected as a Bad Request.
+    </p>
+    <div class="insight">
+      <div class="insight-label">Root cause</div>
+      <p>Agent output is <strong>unstructured natural language</strong> with embedded field:value pairs.
+      Parsing it reliably requires understanding the agent's formatting conventions, which change
+      across runs. Every new phrasing pattern broke the parser.</p>
+    </div>
+    <p><span class="pill pill-amber">Impact</span> 3 parser rewrites. Each fix broke a different edge case.</p>
+  </div>
+
+  <div class="tl-item red">
+    <div class="tl-label red">Failure #4 — Rule creation without a Kibana UUID</div>
+    <h3>Agent recommended rules but couldn't create them — and no way to preview.</h3>
+    <p>
+      The DetEng agent's instructions said "create new rules as DISABLED and return the rule_id."
+      The agent dutifully included <code>"rule_id": "auto-generated-t1033-v1"</code> in its output.
+      But this was <strong>a string the agent made up</strong> — no rule existed in Kibana with this ID.
+    </p>
+    <p>
+      The dashboard showed the recommendation with a proposed rule config, but the "View rule" link
+      was hidden for pending items because there was no actual Kibana rule to link to. The user
+      had to approve <em>blind</em> — reading a JSON blob instead of the native rule details UI.
+    </p>
+    <div class="insight">
+      <div class="insight-label">Root cause</div>
+      <p>The agent lacked the tools to create rules via the Detection Engine API. It could only
+      <em>describe</em> the rule it wanted. The gap between "agent recommends" and "system provisions"
+      had no bridge.</p>
+    </div>
+  </div>
+
+  <div class="tl-item amber">
+    <div class="tl-label amber">Failure #5 — Agent proliferation</div>
+    <h3>Meta Agent kept spawning new sub-agents instead of reusing existing ones.</h3>
+    <p>
+      The Meta Agent's evolution strategy was: "identify a gap → create a new agent + workflow."
+      After a few cycles, the system had <strong>10+ custom agents</strong>, many overlapping in capability.
+      There was <code>soc-hunt-deep-agent</code>, <code>soc-anomaly-monitor</code>,
+      <code>soc-correlation-engine</code> — all essentially querying the same data with slightly different prompts.
+    </p>
+    <div class="insight">
+      <div class="insight-label">Root cause</div>
+      <p>An LLM's default strategy for "solve this problem" is "create a new thing." Without explicit
+      tiers (reuse → enrich → create), the cheapest cognitive path is always "new agent." This is
+      analogous to junior engineers creating new microservices instead of adding a method to an
+      existing one.</p>
+    </div>
+    <p><span class="pill pill-amber">Impact</span> Resource waste, connector quota exhaustion, overlapping workflows fighting each other.</p>
+  </div>
+
+</div>
+
+
+<!-- ═══════════ 3. ARCHITECTURAL PIVOTS ═══════════ -->
+<h2><span class="num">3</span> Architectural Pivots</h2>
+
+<p>Each failure forced a specific pivot. The pivots form a progression from "trust the agent" to "agents recommend, deterministic code executes."</p>
+
+<table>
+  <tr>
+    <th>Pivot</th>
+    <th>Triggered by</th>
+    <th>Before</th>
+    <th>After</th>
+    <th>Principle</th>
+  </tr>
+  <tr>
+    <td><strong>#1 — FE-driven exceptions</strong></td>
+    <td>Failures #1, #2</td>
+    <td>Agent applies exceptions via tools/workflows</td>
+    <td>Frontend calls Detection Engine API directly</td>
+    <td>Deterministic execution for write operations</td>
+  </tr>
+  <tr>
+    <td><strong>#2 — Structured parsing</strong></td>
+    <td>Failure #3</td>
+    <td>Regex parser with field dedup</td>
+    <td>Group-aware parser: split by exception → split by AND → parse conditions</td>
+    <td>Never trust agent output format to be stable</td>
+  </tr>
+  <tr>
+    <td><strong>#3 — Workflow-driven provisioner</strong></td>
+    <td>Failure #4</td>
+    <td>Agent recommends rules; user approves blind</td>
+    <td>Deterministic Elastic workflow (<code>soc-autonomous-applier</code>) creates DISABLED rules via native Kibana APIs; dashboard links to real Kibana rules</td>
+    <td>Side-effects belong in deterministic pipelines (workflows), not LLM tool calls or custom sidecars</td>
+  </tr>
+  <tr>
+    <td><strong>#4 — Tiered evolution</strong></td>
+    <td>Failure #5</td>
+    <td>Meta Agent creates new agents for every gap</td>
+    <td>T1: deterministic workflows → T2a: skills → T2b: enrich agent → T3: new agent (last resort)</td>
+    <td>Constrain the blast radius of LLM decisions</td>
+  </tr>
+  <tr>
+    <td><strong>#5 — Human-in-the-Loop</strong></td>
+    <td>All failures</td>
+    <td>Agent decides and executes autonomously</td>
+    <td>Agent recommends; human reviews per-item; deterministic code executes on approval</td>
+    <td>Humans approve intent; machines execute precisely</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════ 4. BEFORE / AFTER ═══════════ -->
+<h2><span class="num">4</span> Before / After Architecture</h2>
+
+<div class="comparison">
+  <div class="vs-card bad">
+    <div class="vs-title bad">❌ &nbsp;Agent-First (v1)</div>
+    <ul class="vs-list">
+      <li>Agent decides + executes in one pass</li>
+      <li>Write operations via LLM tool calls</li>
+      <li>Success is whatever the agent <em>says</em> happened</li>
+      <li>No human review before side-effects</li>
+      <li>Exceptions/rules created only if agent formats API calls correctly</li>
+      <li>Meta Agent creates new agents for every gap</li>
+      <li>No preview — user approves a JSON blob</li>
+    </ul>
+  </div>
+  <div class="vs-card good">
+    <div class="vs-title good">✓ &nbsp;Hybrid (current)</div>
+    <ul class="vs-list">
+      <li>Agent recommends with structured output</li>
+      <li>Write operations via deterministic Elastic workflows (FE + <code>soc-autonomous-applier</code>)</li>
+      <li>Success is verified via API response + UI state</li>
+      <li>Human reviews each recommendation individually (or full autonomy for <code>auto-*</code> artifacts — registry owner <code>autosoc</code>)</li>
+      <li>Rules pre-created as DISABLED by workflow; user sees native Kibana UI</li>
+      <li>Meta Agent follows tiered strategy: reuse → enrich → create</li>
+      <li>Full preview — user clicks "View rule" → native Kibana rule details page</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ═══════════ 5. THE PATTERN ═══════════ -->
+<h2><span class="num">5</span> The Pattern: Recommend / Review / Execute</h2>
+
+<p>
+  The system converged on a three-phase pattern that applies to every action type.
+  The key insight: <strong>separate the LLM's strength (reasoning) from its weakness (precise execution)</strong>.
+</p>
+
+<div class="arch-box">
+  <div class="arch-col" style="background:var(--surface);">
+    <div class="arch-col-header" style="color:var(--accent);">Phase 1 — Recommend</div>
+    <p style="margin:0;"><strong>Who:</strong> AI Agent</p>
+    <p style="margin:0; margin-top:6px;">Agent analyzes data, identifies patterns, and outputs structured recommendations.
+    No side-effects. Read-only tools only.</p>
+    <p style="margin:0; margin-top:6px;"><span class="pill pill-cyan">LLM Strength</span> Pattern recognition, reasoning, natural language analysis</p>
+  </div>
+  <div class="arch-col" style="background:var(--surface2);">
+    <div class="arch-col-header" style="color:var(--amber);">Phase 2 — Review</div>
+    <p style="margin:0;"><strong>Who:</strong> Human + Deterministic Bridge</p>
+    <p style="margin:0; margin-top:6px;">Bridge provisions resources (DISABLED rules) so user can preview in native UI.
+    Human reviews each item, sees real rule config, approves or rejects with reason.</p>
+    <p style="margin:0; margin-top:6px;"><span class="pill pill-amber">Human Strength</span> Judgment, context, accountability</p>
+  </div>
+  <div class="arch-col" style="background:var(--surface);">
+    <div class="arch-col-header" style="color:var(--green);">Phase 3 — Execute</div>
+    <p style="margin:0;"><strong>Who:</strong> Deterministic Code</p>
+    <p style="margin:0; margin-top:6px;">Frontend or bridge calls APIs directly. Enable rule, create exception, deploy workflow.
+    Exact API payloads. Verified responses. Immediate UI feedback.</p>
+    <p style="margin:0; margin-top:6px;"><span class="pill pill-green">Code Strength</span> Precision, reliability, verifiability</p>
+  </div>
+</div>
+
+<div class="insight">
+  <div class="insight-label">Why this works</div>
+  <p>Each phase uses the right tool for the job. LLMs are excellent at analyzing 500 alerts and saying
+  "this pattern is a false positive because of cron maintenance." They are terrible at constructing
+  a syntactically valid <code>POST /api/detection_engine/rules/{id}/exceptions</code> request with the
+  right entry types, operators, and values. By keeping them in the "recommend" lane and letting
+  deterministic code handle execution, every action either succeeds completely or fails with a clear error.</p>
+</div>
+
+
+<!-- ═══════════ 6. ACTION-BY-ACTION ═══════════ -->
+<h2><span class="num">6</span> Action-by-Action Breakdown</h2>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Agent Does</th>
+    <th>Bridge Does</th>
+    <th>Human Does</th>
+    <th>Frontend Does</th>
+  </tr>
+  <tr>
+    <td><strong>Rule Exception</strong></td>
+    <td>Recommends field:value conditions in <code>after</code> text</td>
+    <td>—</td>
+    <td>Reviews description, approves/rejects</td>
+    <td>Parses <code>after</code> → structured entries → <code>POST /exceptions</code></td>
+  </tr>
+  <tr>
+    <td><strong>New Rule</strong></td>
+    <td>Outputs full rule spec (name, query, technique, severity)</td>
+    <td>Creates DISABLED rule via Detection Engine API; stores Kibana UUID</td>
+    <td>Clicks "View rule" → inspects in native UI → Enable or Delete</td>
+    <td><code>PATCH</code> to enable or <code>DELETE</code> to remove</td>
+  </tr>
+  <tr>
+    <td><strong>Agent Enrichment</strong></td>
+    <td>Outputs instruction patch for target agent</td>
+    <td>—</td>
+    <td>Reviews instruction diff</td>
+    <td>Rec Applier agent deploys via <code>PUT /agents/{id}</code></td>
+  </tr>
+  <tr>
+    <td><strong>Skill Creation</strong></td>
+    <td>Outputs skill definition (name, content, tool_ids)</td>
+    <td>—</td>
+    <td>Reviews skill content</td>
+    <td>Rec Applier agent deploys via <code>POST /skills</code></td>
+  </tr>
+  <tr>
+    <td><strong>New Workflow</strong></td>
+    <td>Outputs workflow YAML</td>
+    <td>—</td>
+    <td>Reviews workflow definition</td>
+    <td>Rec Applier agent deploys via Workflows API</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════ 7. KEY PRINCIPLES ═══════════ -->
+<h2><span class="num">7</span> Principles for Agent-Powered Systems</h2>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">1. Agents recommend; code executes</h3>
+  <p style="margin:0;">Never let an LLM perform write operations directly. The moment an agent calls
+  <code>POST /api/…</code> through a tool, you've lost verifiability. The agent can hallucinate success,
+  mis-format payloads, or silently fail. Deterministic code either succeeds or throws.</p>
+</div>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">2. Never trust agent output format stability</h3>
+  <p style="margin:0;">The same agent with the same prompt will format its output differently across runs.
+  Field ordering changes, quoting conventions change, prose wrappers appear and disappear.
+  Any parser that relies on a specific format <em>will</em> break. Build parsers that handle multiple
+  conventions, and always validate before sending to APIs.</p>
+</div>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">3. Preview before commit</h3>
+  <p style="margin:0;">When an agent recommends creating a resource (rule, agent, workflow), create it in
+  a disabled/draft state immediately so the human can inspect it in the native UI.
+  Reviewing a JSON blob is not reviewing. Reviewing a real rule in the rule details page — with
+  query highlighting, threat mapping, and preview results — is reviewing.</p>
+</div>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">4. Constrain the blast radius of LLM decisions</h3>
+  <p style="margin:0;">Left unconstrained, LLMs default to "create new things" rather than "modify existing things."
+  A tiered strategy (reuse → enrich → create) with explicit justification requirements at each tier
+  prevents agent sprawl and keeps the system maintainable.</p>
+</div>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">5. Rejection is training data</h3>
+  <p style="margin:0;">When a human rejects a recommendation with a reason, that reason is fed back to the agent
+  in subsequent cycles. This creates a feedback loop that doesn't require fine-tuning — the
+  agent sees <em>"User rejected this because the cron pattern is benign"</em> and adjusts its future
+  recommendations. Rejection reasons are as valuable as approvals.</p>
+</div>
+
+<div class="card" style="margin-bottom: 12px;">
+  <h3 style="margin-top:0;">6. Bridge the provision gap with workflows, not sidecars</h3>
+  <p style="margin:0;">There's often a gap between "agent recommends X" and "X exists in the system for review."
+  A deterministic Elastic workflow (<code>soc-autonomous-applier</code>) polls for pending recommendations and
+  provisions resources via native Kibana APIs &mdash; no Python sidecars. This closes the gap while keeping
+  all governance (kill-switch, ownership, budgets, cooldowns, loop detection) in the same engine that
+  runs everything else in the stack.</p>
+</div>
+
+
+<!-- ═══════════ 8. METRICS ═══════════ -->
+<h2><span class="num">8</span> Impact</h2>
+
+<table>
+  <tr>
+    <th>Metric</th>
+    <th>Agent-First (v1)</th>
+    <th>Hybrid (current)</th>
+  </tr>
+  <tr>
+    <td><strong>Exception apply success rate</strong></td>
+    <td><span class="pill pill-red">0%</span> — agent hallucinated all applies</td>
+    <td><span class="pill pill-green">100%</span> — FE calls API with validated entries</td>
+  </tr>
+  <tr>
+    <td><strong>Rule creation + preview</strong></td>
+    <td><span class="pill pill-red">No preview</span> — JSON blob only</td>
+    <td><span class="pill pill-green">Full preview</span> — native Kibana rule details page</td>
+  </tr>
+  <tr>
+    <td><strong>Time from recommendation to action</strong></td>
+    <td>~0s (agent auto-executed) but <em>action was fake</em></td>
+    <td>~30s (bridge provisions) + human review time, but <em>action is real</em></td>
+  </tr>
+  <tr>
+    <td><strong>Agents created by Meta Agent</strong></td>
+    <td>10+ (mostly redundant)</td>
+    <td>3 (tiered strategy: workflows first, skills second)</td>
+  </tr>
+  <tr>
+    <td><strong>Parser failures on agent output</strong></td>
+    <td>N/A (agent "applied" directly)</td>
+    <td>0 after group-aware parser (3rd rewrite)</td>
+  </tr>
+  <tr>
+    <td><strong>Feedback loop to agent</strong></td>
+    <td>None — agent decided and forgot</td>
+    <td>Rejection reasons fed back in next cycle's prompt</td>
+  </tr>
+</table>
+
+
+<!-- ═══════════ 9. HARDENING ═══════════ -->
+<h2><span class="num">9</span> Hardening Phase — Production Resilience</h2>
+
+<div class="card">
+  <p style="font-size:13px; color:var(--text2); margin-bottom:16px;">
+    After the agent-first-to-hybrid rewrite, we layered operational hardening to make
+    the system survivable in a real SOC environment.
+  </p>
+  <table>
+    <thead><tr><th>Improvement</th><th>What</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="name">Pipeline Locking</td>
+        <td><code>.soc-pipeline-lock</code> with optimistic acquire/release in sweeper workflow</td>
+        <td>Prevents concurrent sweeper cycles from double-processing the same alert batch</td>
+      </tr>
+      <tr>
+        <td class="name">Graduated Autonomy</td>
+        <td><code>.soc-trust-scores</code> index + <code>soc-trust-scorer</code> workflow — computes approval rates per evolution tier</td>
+        <td>Tiers with &ge;90% approval rate over 5+ proposals auto-approve; low-trust tiers require extra justification</td>
+      </tr>
+      <tr>
+        <td class="name">Rollback Snapshots</td>
+        <td>Every mutation snapshots the target to <code>.soc-snapshots</code> before change; every <code>.soc-evolution-log</code> row records the <code>result</code> (<code>applied</code>, <code>failure</code>, <code>blocked_canonical</code>, <code>blocked_budget</code>, <code>blocked_cooldown</code>, <code>blocked_loop</code>) plus <code>reason</code>, <code>artifact_id</code>, <code>artifact_type</code>, <code>op</code></td>
+        <td>Enables precise undo of any agent-initiated change without manual investigation</td>
+      </tr>
+      <tr>
+        <td class="name">Connector Resilience</td>
+        <td><code>.soc-connector-health</code> tracking + watchdog monitoring of consecutive failures</td>
+        <td>Automatic fallback recommendation when primary AI connector degrades (&gt;3 consecutive failures)</td>
+      </tr>
+      <tr>
+        <td class="name">Pipeline Metrics</td>
+        <td><code>.soc-metrics</code> with per-cycle alert counts, classifications, duration, token usage, cost</td>
+        <td>Full observability into pipeline throughput, cost/alert, and failure rates — exposed in System Health dashboard tab</td>
+      </tr>
+      <tr>
+        <td class="name">Attack Sim Metrics</td>
+        <td><code>.soc-detection-metrics</code> with time-to-detect and time-to-triage per technique</td>
+        <td>Closed-loop measurement: attack fires &rarr; rule detects &rarr; agent triages &rarr; time is measured</td>
+      </tr>
+      <tr>
+        <td class="name">Feedback Loop</td>
+        <td>Meta-agent queries <code>.soc-evolution-log</code> for recent tool failures before proposing</td>
+        <td>Prevents repeating patterns that the system already knows fail</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════ 10. TAKEAWAY ═══════════ -->
+<h2><span class="num">10</span> The Takeaway</h2>
+
+<div class="card" style="border-color: rgba(0,188,212,0.3);">
+  <p style="font-size:14px; color:var(--text); margin-bottom:12px;">
+    <strong>"Agent-first" is not the same as "agent-only."</strong>
+  </p>
+  <p style="font-size:13px; color:var(--text2); margin:0;">
+    The agent is the best part of this system — it genuinely identifies patterns in alert data
+    that would take a human analyst hours. But the moment we asked it to <em>also</em> be the executor,
+    every failure mode of LLMs (hallucination, format instability, lack of verification) became
+    a production incident. The hybrid architecture keeps the agent doing what it's brilliant at
+    (reasoning) and hands execution to code that's brilliant at being precise.
+    <br><br>
+    This isn't a limitation of the current models. It's a systems design principle:
+    <strong>separate the decision-maker from the executor, and put a human in between.</strong>
+    <br><br>
+    The hardening phase adds the final layer: <strong>the system must be observable, recoverable,
+    and cost-aware.</strong> Graduated autonomy means trust is earned, not assumed. Rollback snapshots
+    mean mistakes are fixable. Pipeline locking means concurrent runs can't corrupt state.
+    These aren't features — they're the difference between a demo and a system.
+  </p>
+</div>
+
+
+<!-- ═══════════ 10. CONSOLIDATION ═══════════ -->
+<h2><span class="num">11</span> Agent Consolidation — 9 → 4 Agents</h2>
+
+<div class="card">
+  <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Why consolidate?</div>
+  <p>The 9-agent architecture worked but created unnecessary LLM overhead. Entity enrichment and
+    hunt investigation shared 70% of their tools with triage. Context was lost between agent hops
+    in the pipeline (3 separate LLM calls passed JSON strings, losing nuance each time).
+    Watchdog and difficulty evaluator were single-purpose agents that ran one tool each —
+    skills with deterministic workflow wrappers accomplish the same at zero LLM cost.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--green)"></span>What changed</div>
+  <table>
+    <thead><tr><th>Before (9 agents)</th><th>After (4 agents)</th><th>Mechanism</th></tr></thead>
+    <tbody>
+      <tr><td>soc-triage-agent + soc-entity-agent + soc-hunt-agent</td><td>soc-triage-agent (unified)</td><td>Merged: entity enrichment is Phase 2, investigation is Phase 3 within triage</td></tr>
+      <tr><td>soc-watchdog-agent</td><td>soc-health-check <em>(skill)</em></td><td>Converted to skill on meta-agent + deterministic health-check workflow</td></tr>
+      <tr><td>soc-difficulty-evaluator</td><td>soc-difficulty-evaluation <em>(skill)</em></td><td>Converted to skill on meta-agent + deterministic difficulty workflow</td></tr>
+      <tr><td>soc-case-agent</td><td><em>(removed)</em></td><td>Case creation already deterministic (<code>kibana.request</code> in sweeper)</td></tr>
+      <tr><td>—</td><td>soc-architecture-review <em>(skill)</em></td><td>New: periodic architecture audit every 6h</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Mandatory Self-Validation</div>
+  <p>Every agent and workflow now validates its own output before passing it downstream. This is a
+    system-wide invariant, not an optional best practice. Validation failures are logged to
+    <code>.soc-evolution-log</code> with <code>result: "validation_failed"</code> so the meta-agent can
+    track patterns and improve.</p>
+  <table>
+    <thead><tr><th>Output Type</th><th>Validation Required</th></tr></thead>
+    <tbody>
+      <tr><td>Detection rule (query)</td><td>Dry-run against real data: &gt;0 and &lt;10k results. No catch-all patterns. Description-query alignment.</td></tr>
+      <tr><td>Detection rule (exception)</td><td>Confirm field names exist in index mapping via <code>get_index_mapping</code></td></tr>
+      <tr><td>Recommendation</td><td>All required fields populated. <code>patch_fields</code> non-empty for threshold changes.</td></tr>
+      <tr><td>Workflow deployment</td><td>Call <code>validate_workflow</code> before <code>deploy_workflow</code>. Reject on errors.</td></tr>
+      <tr><td>Skill creation</td><td>Verify tool_ids are real registered tools. Content non-empty.</td></tr>
+      <tr><td>Agent enrichment</td><td>Verify target agent exists before patching instructions.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="insight">
+  <div class="insight-label">Key insight</div>
+  <p>Agent consolidation is not about having fewer agents — it's about <strong>eliminating context loss
+    between LLM calls</strong>. When triage, enrichment, and investigation are separate agents, each call
+    starts with a JSON summary of the previous step's output. The LLM loses the reasoning chain,
+    misinterprets fields, and makes decisions based on incomplete context. A single unified triage
+    agent processes the alert end-to-end, maintaining full reasoning context across all phases.
+    This produces higher-quality classifications <em>and</em> costs less (1 LLM call instead of 3).</p>
+</div>
+
+
+<!-- ═══════════ Section 12 ═══════════ -->
+<div class="section-number">12</div>
+<h2>Depth Extension — From Reactive to Proactive</h2>
+
+<p>The initial AutoSOC was structurally sound but operationally shallow — binary TP/FP classification,
+  per-alert triage with no correlation, reactive-only hunting, and a response system that logged but
+  never contained. The depth extension addresses five dimensions simultaneously.</p>
+
+<div class="card">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pillar 1: Richer Classification Taxonomy (6 dispositions)</div>
+  <p>Binary TP/FP is a Level-1 analyst taxonomy. The extended system classifies alerts across four
+    independent dimensions: <strong>disposition</strong> (TRUE_POSITIVE, BENIGN_TRUE_POSITIVE,
+    FALSE_POSITIVE, POLICY_VIOLATION, INCONCLUSIVE, DUPLICATE), <strong>threat category</strong>
+    (commodity malware, targeted attack, insider threat, etc.), <strong>kill chain stage</strong>
+    (mapped from MITRE ATT&CK techniques), and <strong>business impact</strong> (data at risk,
+    systems at risk, criticality level).</p>
+  <p>This enables downstream systems to make nuanced decisions: a BENIGN_TRUE_POSITIVE doesn't
+    need containment but does need SML baseline updates. A POLICY_VIOLATION needs HR notification,
+    not incident response.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pillar 2: Attack Chain Correlation</div>
+  <p>The <code>security.attack_discovery_search</code> tool was registered in the codebase but
+    completely unused. We integrated it into the triage pipeline with a pre-triage correlation step
+    that groups alerts by entity (host, user, IP) and maps MITRE techniques to kill chain stages.
+    When alerts form a progression (Delivery → Exploitation → Installation), the triage agent treats
+    them as a coordinated attack chain rather than isolated events.</p>
+  <p>New skill: <code>soc-attack-chain-analysis</code> defines the kill chain detection algorithm,
+    confidence boosting rules, and campaign detection logic.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pillar 3: Proactive Threat Hunting</div>
+  <p>The system now hunts for threats that haven't triggered any alert. Three hunt types:</p>
+  <ul>
+    <li><strong>Hypothesis-driven:</strong> After observing T1059 (execution), proactively query for
+      T1071 (C2 beaconing) and T1048 (exfiltration) on the same hosts.</li>
+    <li><strong>Anomaly-driven:</strong> Periodic ES|QL queries for behavioral deviations — new login
+      sources, first-time process relationships, unusual outbound connections.</li>
+    <li><strong>Intelligence-driven:</strong> When Security Labs returns new IOCs, sweep all logs
+      for matches.</li>
+  </ul>
+  <p>The <code>soc-proactive-hunter</code> workflow runs every 2 hours, and findings go to
+    <code>.soc-hunt-findings</code>.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pillar 4: Tiered Response Automation</div>
+  <p>The response system moved from a no-op (<code>log_and_escalate</code>) to a four-tier model:</p>
+  <table>
+    <thead><tr><th>Tier</th><th>Name</th><th>Confidence</th><th>Actions</th><th>Approval</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>Observe</td><td>&lt; 40</td><td>Close, no action</td><td>None</td></tr>
+      <tr><td>1</td><td>Record</td><td>40–59</td><td>Create case, tag entities</td><td>None</td></tr>
+      <tr><td>2</td><td>Contain</td><td>60–79</td><td>Isolate host, disable account, block IOCs</td><td>Human approval</td></tr>
+      <tr><td>3</td><td>Eradicate</td><td>≥ 80</td><td>Full playbook: isolate + preserve + terminate</td><td>Human approval</td></tr>
+    </tbody>
+  </table>
+  <p>Tier 2+ actions use Elastic Defend response actions API (host isolation, process kill, file retrieval)
+    and require human approval via the recommendations workflow.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pillar 5: Self-Improving Capability Gap Analyzer</div>
+  <p>The gap analyzer makes the system <strong>self-aware of its own limitations</strong>. Running
+    every 4 hours, it inventories all available tools, data sources, and detection rules, then compares
+    against what the system actually uses. Signals include: unused tools, untapped data sources,
+    incomplete kill chain coverage, classification blind spots, response gaps, stale SML baselines,
+    rule coverage drift, and confidence calibration drift.</p>
+  <p>Findings are written to <code>.soc-recommendations</code> as <code>capability_gap</code> type,
+    enabling the meta-agent to autonomously address the highest-impact gaps.</p>
+</div>
+
+<div class="insight">
+  <div class="insight-label">Key insight</div>
+  <p>The gap analyzer is intentionally the first pillar implemented because it bootstraps the others.
+    Once running, it discovers the unused <code>attack_discovery_search</code> tool, the classification
+    blind spots, and the response no-op — effectively recommending Pillars 2–4 as capability gaps.
+    This makes the system self-extending rather than requiring manual extension for every new capability.</p>
+</div>
+
+
+<!-- ═══════════ Section 13 ═══════════ -->
+<div class="section-number">13</div>
+<h2>Self-Governance Rails &amp; the Autonomy Pivot</h2>
+
+<p>With consolidation (Section 10) and depth extension (Section 11) in place, the system reached a
+  new failure mode: <strong>it was smart enough to propose changes faster than humans could review
+  them</strong>. Queues of <code>.soc-recommendations</code> grew; stale recommendations poisoned the
+  feedback loop; and the limiting factor became human review latency, not detection quality. Section
+  12 is the answer — and it arrives with a hard architectural constraint: <em>everything must run on
+  the Elastic Stack. No custom Python sidecars.</em></p>
+
+<div class="card">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Two-tier Ownership Model</div>
+  <p>The registry <code>.soc-artifact-registry</code> tags every artifact (agent, skill, workflow,
+    rule) with one of two owners:</p>
+  <ul style="margin-top:4px;">
+    <li><strong>canonical</strong> — installed by <code>setup.sh</code>. Human-owned. NEVER
+      auto-mutated, regardless of kill-switch state. This is the safety floor.</li>
+    <li><strong>autosoc</strong> (registry value, <code>auto-*</code> prefix convention) — created by
+      AutoSOC during a mutation cycle. Safe targets for autonomous exception adds, threshold tweaks,
+      redesigns, and deprecations. All are created DISABLED for detection rules; enable is a separate
+      gated step.</li>
+  </ul>
+  <p style="margin-top:6px;">Retro-tagging at deploy time is done by the
+    <code>soc-registry-retro-tag</code> workflow (pure Elastic-native — no Python). The deterministic
+    rule is: first dash-segment of <code>artifact_id</code> is <code>soc</code> or
+    <code>caldera</code> → <code>owner=canonical</code>; anything else → <code>owner=autosoc</code>.
+    The convention for AutoSOC-created artifacts is the <code>auto-*</code> prefix (e.g.
+    <code>auto-phishing-analyzer-agent</code>) — never <code>autosoc-*</code> or any variant
+    containing <code>soc-</code>, to keep the prefix check unambiguous.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Five Deterministic Gates (the Rails)</div>
+  <p>Before any agent-proposed mutation is applied, five deterministic gates run in
+    <code>soc-autonomous-applier</code>. Each is an Elasticsearch query or <code>if</code>
+    step — no LLM reasoning is permitted at this layer.</p>
+  <table>
+    <thead><tr><th>Gate</th><th>Check</th><th>Rejection record</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1. Kill switch</strong></td><td>Latest <code>.soc-kill-switch</code> document with <code>scope: global</code> has <code>autonomy_enabled: false</code> (i.e. autonomy disabled)</td><td>Entire applier run aborts; a single row is written to <code>.soc-audit-trail</code> with <code>event_type: autonomous_applier_abort</code>, <code>reason: kill_switch_active</code></td></tr>
+      <tr><td><strong>2. Ownership</strong></td><td>Target's <code>owner</code> in <code>.soc-artifact-registry</code> is <strong>not</strong> <code>canonical</code>, AND the first dash-segment of <code>artifact_id</code> is neither <code>soc</code> nor <code>caldera</code></td><td><code>result: blocked_canonical</code> (intent marked <code>rejected</code>)</td></tr>
+      <tr><td><strong>3. Budget</strong></td><td>Count of applied mutations in <code>.soc-evolution-log</code> over the last 24h is under <code>daily_budget_all</code></td><td><code>result: blocked_budget</code> (intent stays <code>pending</code> — deferred)</td></tr>
+      <tr><td><strong>4. Cooldown</strong></td><td>Same <code>artifact_id</code> has no <code>result: applied</code> row within <code>cooldown_seconds</code></td><td><code>result: blocked_cooldown</code> (intent stays <code>pending</code> — deferred)</td></tr>
+      <tr><td><strong>5. Loop detection</strong></td><td>Same <code>artifact_id</code> has fewer than <code>loop_threshold</code> attempts (applied OR failed) within <code>loop_window_seconds</code></td><td><code>result: blocked_loop</code> (intent marked <code>rejected</code>)</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:6px;">Only when all five pass is the <code>mutation_intent</code> dispatched to
+    <code>soc-autonomous-applier-agent</code>, which snapshots the target to
+    <code>.soc-snapshots</code>, calls the native mutation tool, updates the registry, and closes the
+    intent. Every transition is mirrored into <code>.soc-evolution-log</code>.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--green)"></span>DetEng Split — Principal vs Signal Quality</div>
+  <p>Autonomy requires clear blast-radius ownership. The single <code>soc-deteng-agent</code> is split
+    into two focused agents with non-overlapping scope:</p>
+  <table>
+    <thead><tr><th>Agent</th><th>Owns</th><th>Does NOT own</th></tr></thead>
+    <tbody>
+      <tr><td><strong>soc-deteng-agent</strong> (Principal DetEng)</td><td>New rules from coverage gaps · rule redesigns · deprecating stale rules · MITRE mapping</td><td>FP/TP tuning · adding exceptions · threshold tweaks</td></tr>
+      <tr><td><strong>soc-signal-quality-agent</strong></td><td>Adding exceptions · raising/lowering thresholds · environment-wide exceptions · last-resort disables · <code>redesign_required</code> flags</td><td>Creating new rules · writing new queries · MITRE authoring</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:6px;">The Signal Quality agent runs first in the DetEng workflow; its
+    <code>redesign_required</code> flags flow to Principal DetEng on the same cycle. This creates a
+    explicit handoff that the deterministic applier can validate — no more "agent silently disabled a
+    rule because it was noisy."</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Regression Harness</div>
+  <p>The <code>soc-regression-harvester</code> workflow snapshots high-signal <code>.soc-outcomes</code>
+    cases into <code>.soc-regression-dataset</code> (rejected recommendations are kept as
+    <em>negative</em> regression cases — they capture what the system should <strong>not</strong> do
+    again). The <code>soc-regression-gate</code> workflow re-runs the dataset against the current
+    triage model after every applier cycle; any regression blocks further autonomous mutations until
+    a human acknowledges it.</p>
+</div>
+
+<div class="card" style="margin-top:12px">
+  <div class="card-title"><span class="dot" style="background:var(--coral)"></span>Pure-Elastic Pivot</div>
+  <p>The original design had a Python <code>meta-bridge</code> (polling for provisioning) and a
+    Python <code>caldera-bridge</code> (driving Caldera operations). Both are gone. Every side-effect
+    now runs in a workflow using only <code>elasticsearch.*</code>, <code>kibana.request</code>,
+    <code>http</code>, and <code>foreach/if</code> steps:</p>
+  <table>
+    <thead><tr><th>Removed (Python)</th><th>Replacement (Elastic workflow)</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>autosoc_governance.py</code> + <code>applier.py</code></td><td><code>soc-autonomous-applier</code> + <code>soc-autonomous-applier-agent</code></td><td>Governance gates + snapshot + apply + audit</td></tr>
+      <tr><td><code>retro_tag.py</code></td><td><code>soc-registry-retro-tag</code></td><td>Classify legacy artifacts on first deploy</td></tr>
+      <tr><td><code>caldera_bridge.py</code> (dispatch side)</td><td><code>soc-caldera-dispatcher</code></td><td>Claim pending <code>.soc-attack-commands</code> w/ optimistic concurrency, look up profile, POST operation</td></tr>
+      <tr><td><code>caldera_bridge.py</code> (poll side)</td><td><code>soc-caldera-poller</code></td><td>Poll running operations, write <code>techniques_executed</code> back on completion</td></tr>
+      <tr><td><code>meta_bridge.py</code></td><td>Native Agent Builder tools (<code>platform.core.*</code>, <code>platform.workflows.*</code>)</td><td>Agent/skill/workflow/rule CRUD directly from the meta agent</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:6px;">The constraint is a feature: governance state (kill-switch, budgets,
+    registry) lives in the same engine that runs the system. One control surface. One audit log
+    (<code>.soc-evolution-log</code>). One rollback mechanism (<code>.soc-snapshots</code>). No glue.</p>
+</div>
+
+<div class="insight">
+  <div class="insight-label">Key insight</div>
+  <p>Autonomy without deterministic rails is a demo; deterministic rails without autonomy is a
+    dashboard. Section 12's bet is that <strong>governance-as-workflows</strong> — kill switch,
+    ownership, budget, cooldown, loop detection — is the only design that lets both coexist without
+    either side (agents or humans) becoming the bottleneck. The pure-Elastic pivot is what makes it
+    operable: one engine, one query language, one audit index, one set of tools. When something
+    breaks, you don't grep Python sidecars; you run an ES|QL query against
+    <code>.soc-evolution-log</code>.</p>
+</div>
+
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<div class="footer">
+  <span>Autonomous SOC · Design Evolution · Elastic Security</span>
+  <span>Internal — Engineering Reference · April 2026</span>
+</div>
+
+</body>
+</html>

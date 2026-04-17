@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://autosoc.local/schemas/shift_handover.schema.json",
+  "title": "AutoSOC Shift Handover",
+  "description": "One document per shift window summarising everything the autonomous SOC did for the incoming operator.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "shift_id",
+    "shift_start_ts",
+    "shift_end_ts",
+    "narrative_markdown",
+    "counters",
+    "generated_at"
+  ],
+  "properties": {
+    "shift_id": {
+      "type": "string",
+      "pattern": "^shift-\\d{4}-\\d{2}-\\d{2}T\\d{2}(-\\d+h)?$",
+      "description": "Stable id derived from shift_end_ts, e.g. shift-2026-04-16T16-8h."
+    },
+    "shift_start_ts": { "type": "string", "format": "date-time" },
+    "shift_end_ts":   { "type": "string", "format": "date-time" },
+    "narrative_markdown": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable narrative starting with a greeting line."
+    },
+    "highlights": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "summary"],
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "rule_change",
+              "case_opened",
+              "case_closed",
+              "mutation_applied",
+              "mutation_blocked",
+              "kill_switch_event",
+              "budget_breach",
+              "regression_failure",
+              "skill_run"
+            ]
+          },
+          "summary":  { "type": "string", "maxLength": 500 },
+          "doc_ref":  { "type": "string" },
+          "severity": { "type": "string", "enum": ["info", "warn", "critical"] }
+        }
+      }
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "skill_runs",
+        "rules_changed",
+        "cases_opened",
+        "cases_closed",
+        "kill_switch_events",
+        "budget_breaches"
+      ],
+      "properties": {
+        "skill_runs":         { "type": "integer", "minimum": 0 },
+        "rules_changed":      { "type": "integer", "minimum": 0 },
+        "cases_opened":       { "type": "integer", "minimum": 0 },
+        "cases_closed":       { "type": "integer", "minimum": 0 },
+        "kill_switch_events": { "type": "integer", "minimum": 0 },
+        "budget_breaches":    { "type": "integer", "minimum": 0 },
+        "mutations_applied":  { "type": "integer", "minimum": 0 },
+        "mutations_blocked":  { "type": "integer", "minimum": 0 }
+      }
+    },
+    "generated_at": { "type": "string", "format": "date-time" }
+  }
+}

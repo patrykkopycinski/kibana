@@ -1,0 +1,41 @@
+{
+  "index_patterns": [".soc-shift-handover"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":         { "type": "date" },
+        "shift_id":           { "type": "keyword" },
+        "shift_start_ts":     { "type": "date" },
+        "shift_end_ts":       { "type": "date" },
+        "narrative_markdown": { "type": "text" },
+        "highlights": {
+          "type": "nested",
+          "properties": {
+            "category": { "type": "keyword" },
+            "summary":  { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 512 } } },
+            "doc_ref":  { "type": "keyword" },
+            "severity": { "type": "keyword" }
+          }
+        },
+        "counters": {
+          "properties": {
+            "skill_runs":         { "type": "integer" },
+            "rules_changed":      { "type": "integer" },
+            "cases_opened":       { "type": "integer" },
+            "cases_closed":       { "type": "integer" },
+            "kill_switch_events": { "type": "integer" },
+            "budget_breaches":    { "type": "integer" },
+            "mutations_applied":  { "type": "integer" },
+            "mutations_blocked":  { "type": "integer" }
+          }
+        },
+        "generated_at": { "type": "date" }
+      }
+    }
+  }
+}

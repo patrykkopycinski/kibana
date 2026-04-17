@@ -1,0 +1,51 @@
+{
+  "index_patterns": [".soc-recommendations"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "rec_id": { "type": "keyword" },
+        "type": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "source_doc_id": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "title": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+        "summary": { "type": "text" },
+        "details": { "type": "object", "enabled": false },
+        "reasoning": { "type": "text" },
+        "confidence": { "type": "integer" },
+        "reviewed_by": { "type": "keyword" },
+        "reviewed_at": { "type": "date" },
+        "review_decision": { "type": "keyword" },
+        "rejection_reason": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+        "applied_at": { "type": "date" },
+        "apply_error": { "type": "text" },
+        "sub_items": { "type": "object", "enabled": false },
+        "track": { "type": "keyword" },
+        "housekeeping": { "type": "boolean" },
+        "expected_impact": {
+          "properties": {
+            "fp_reduction_pct": { "type": "float" },
+            "tp_gain_pct": { "type": "float" },
+            "mttr_reduction_minutes": { "type": "float" },
+            "hours_saved_per_week": { "type": "float" },
+            "coverage_delta_pct": { "type": "float" }
+          }
+        },
+        "evidence": {
+          "type": "nested",
+          "properties": {
+            "summary": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 512 } } },
+            "source_ref": { "type": "keyword", "ignore_above": 2048 },
+            "confidence": { "type": "float" }
+          }
+        }
+      }
+    }
+  }
+}

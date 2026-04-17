@@ -3,3 +3,4 @@
 {"id":"soc-agent-health-dv","type":"index-pattern","attributes":{"title":".soc-agent-health","timeFieldName":"@timestamp","name":"SOC Agent Health"},"references":[]}
 {"id":"soc-evolution-dv","type":"index-pattern","attributes":{"title":".soc-evolution-log,.soc-coverage-gaps","timeFieldName":"@timestamp","name":"SOC Evolution"},"references":[]}
 {"id":"soc-attack-commands-dv","type":"index-pattern","attributes":{"title":".soc-attack-commands,.soc-difficulty-state","timeFieldName":"@timestamp","name":"SOC Attack Commands"},"references":[]}
+{"id":"soc-recent-events-dv","type":"index-pattern","attributes":{"title":".soc-evolution-log,.soc-audit-trail,.soc-dead-letter","timeFieldName":"@timestamp","name":"SOC Recent Events (evolution + audit + DLQ)"},"references":[]}

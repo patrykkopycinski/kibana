@@ -1,0 +1,21 @@
+{
+  "index_patterns": [".soc-pipeline-lock"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "pipeline": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "acquired_at": { "type": "date" },
+        "released_at": { "type": "date" },
+        "alert_count": { "type": "integer" },
+        "cycle_duration_ms": { "type": "long" }
+      }
+    }
+  }
+}

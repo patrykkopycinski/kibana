@@ -1,0 +1,37 @@
+{
+  "index_patterns": [".soc-regression-dataset"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "case_id": { "type": "keyword" },
+        "source_outcome_id": { "type": "keyword" },
+        "source_triage_id": { "type": "keyword" },
+        "rule_id": { "type": "keyword" },
+        "rule_name": { "type": "keyword" },
+        "alert_fingerprint": { "type": "keyword" },
+        "alert_sample": { "type": "object", "enabled": false },
+        "expected_disposition": { "type": "keyword" },
+        "expected_confidence": { "type": "float" },
+        "expected_techniques": { "type": "keyword" },
+        "expected_next_step": { "type": "keyword" },
+        "labels": { "type": "keyword" },
+        "label_source": { "type": "keyword" },
+        "frozen": { "type": "boolean" },
+        "scenario_tag": { "type": "keyword" },
+        "notes": { "type": "text" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Immutable regression test cases captured from TP/FP triage outcomes. Used as the gate for autonomous agent/rule mutations. 'frozen=true' means the case is locked for regression use and must never be mutated by AutoSOC.",
+    "owner": "autosoc-governance",
+    "schema_version": 1
+  }
+}

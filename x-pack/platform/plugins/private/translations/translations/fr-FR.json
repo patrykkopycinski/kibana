@@ -35570,7 +35570,6 @@
     "xpack.securitySolution.appLinks.rules": "Règles SIEM",
     "xpack.securitySolution.appLinks.rulesDescription": "Créez et gérez les règles de détection pour la détection et le monitoring des menaces.",
     "xpack.securitySolution.appLinks.siem_readiness": "Préparation SIEM",
-    "xpack.securitySolution.appLinks.siemMigrationsDashboards.badge": "Version d'évaluation technique",
     "xpack.securitySolution.appLinks.siemMigrationsDashboards.description": "Migréz vos tableaux de bord vers Elastic en utilisant la migration automatique optimisée par l'IA.",
     "xpack.securitySolution.appLinks.siemMigrationsRules.description": "Migrez vos règles SIEM vers Elastic en utilisant la migration automatique optimisée par l'IA.",
     "xpack.securitySolution.appLinks.timeline.templates": "Modèles",

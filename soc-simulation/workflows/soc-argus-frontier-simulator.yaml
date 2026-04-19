@@ -1,0 +1,104 @@
+version: '1'
+name: SOC Argus — Frontier Simulator (M2.4)
+description: >
+  Argus M2.4 — Frontier-adversary simulation mode. Runs only while the
+  Mythos-class preset is armed. Picks one primitive + variant axis from the
+  on-disk variant bank (soc-simulation/scripts/argus-variant-bank/) and emits a
+  single labelled event into .soc-eval-corpus-<corpus_id>. Every tick is
+  recorded in .soc-audit-trail for shift-handover and governance.
+
+  Why this exists:
+    * The M2.1 Detection Eval Vertical needs a continuous, labelled,
+      Mythos-era corpus — not ad-hoc exports.
+    * Caldera (L5) emulates real execution against the lab fleet. The
+      frontier simulator is deliberately decoupled: it produces corpus
+      rows, not executed attacks, so M2.1 can replay them deterministically
+      without network side-effects.
+    * Polymorphism axes (command_args, process_ancestry, encoding_layers,
+      etc.) come from the level-6 profile's argus_metadata and are materialised
+      into the variant bank.
+
+  Day-1 scope: single primitive (T1003.001) with one hand-crafted variant.
+  Phase 2 of issue m2-4 grows the variant bank to >=20 variants across
+  >=3 mutation axes and teaches the simulator to randomise selection.
+
+  Related Argus artifacts:
+    * docs/argus/scaffolds/m2-4-simulator-contract.md
+    * docs/argus/kickoff/day-1-m2-4.md
+    * docs/argus/issues/m2-4-frontier-simulation.md
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  corpus_id: "argus-corpus-mythos-2026-04"
+  primitive_id: "T1003.001"
+  variant_axis: "command_args"
+  variant_index: 0
+
+steps:
+  - name: check_preset_armed
+    type: elasticsearch.search
+    with:
+      index: .soc-audit-trail
+      size: 1
+      query:
+        bool:
+          filter:
+            - term: { event_type: argus_mythos_preset_armed }
+          must:
+            - range: { "@timestamp": { gte: "now-12h" } }
+
+  - name: gate_armed
+    type: console
+    with:
+      message: "{% if steps.check_preset_armed.output.hits.total.value > 0 %}yes{% else %}no{% endif %}"
+
+  - name: emit_variant
+    type: elasticsearch.index
+    with:
+      index: ".soc-eval-corpus-{{ consts.corpus_id }}"
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        _argus:
+          corpus_id: "{{ consts.corpus_id }}"
+          primitive_id: "{{ consts.primitive_id }}"
+          variant_axis: "{{ consts.variant_axis }}"
+          variant_index: "{{ consts.variant_index }}"
+          source: "soc-argus-frontier-simulator"
+          should_fire: true
+          expected_rule_ids:
+            - "mythos.cred-dumping.lsass"
+            - "mythos.cred-dumping.minidump"
+        process:
+          name: "lsass.exe"
+          command_line: "procdump -ma lsass.exe out.dmp"
+          parent:
+            name: "powershell.exe"
+        host:
+          os:
+            family: windows
+        event:
+          category: ["process"]
+          type: ["start"]
+    if: "steps.gate_armed.output: yes"
+
+  - name: audit
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: argus_frontier_sim_tick
+        source: "soc-argus-frontier-simulator"
+        preset_armed: "{{ steps.gate_armed.output }}"
+        corpus_id: "{{ consts.corpus_id }}"
+        primitive_id: "{{ consts.primitive_id }}"
+        variant_axis: "{{ consts.variant_axis }}"
+        variant_index: "{{ consts.variant_index }}"

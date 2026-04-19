@@ -185,6 +185,30 @@
       "summary": "Watchdog loop that trips the kill switch when budget, regression, or loop-detection thresholds are breached.",
       "model_tier": "analyst",
       "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-detection-eval",
+      "automation_level": "fully_auto",
+      "connectors": ["recommendations", "detection_eval_runs", "audit_trail", "kibana_security_solution"],
+      "summary": "Argus M2.1 \u2014 Detection Eval Vertical. Poller that reads the latest rows from .soc-detection-eval-runs (populated by the @kbn/evals-suite-argus-detection Playwright suite) and feeds pass/fail + variant-coverage metrics into soc-regression-gate and the Argus Detection Eval Scorecard panel.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-frontier-simulator",
+      "automation_level": "human_in_the_loop",
+      "connectors": ["caldera", "audit_trail", "eval_corpus"],
+      "summary": "Argus M2.4 \u2014 Frontier Simulator. Runs on a 30m schedule only while the Mythos-class preset is armed. Picks one primitive + variant axis from the on-disk variant bank and emits a single labelled event into .soc-eval-corpus-<corpus_id> for the M2.1 Detection Eval Vertical to replay. Produces corpus rows, not executed attacks \u2014 Caldera remains L5 territory.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-arm-mythos-preset",
+      "automation_level": "human_in_the_loop",
+      "connectors": ["artifact_registry", "audit_trail", "caldera"],
+      "summary": "Argus Phase 1 \u2014 Manual-only arming switch for the Mythos-class adversary preset. Writes a signed arming record to the artifact registry and audit trail; the simulator and Caldera level-6 profile refuse to run unless this arm is active and within its window.",
+      "model_tier": "none",
+      "owner": "canonical"
     }
   ]
 }

@@ -1,0 +1,124 @@
+version: '1'
+name: SOC Detection Eval (Argus M2.1)
+description: >
+  Argus Detection Eval Vertical — thin wrapper around @kbn/evals that scores detection
+  rules against a labelled Mythos-era corpus and writes one row per rule+run into
+  .soc-detection-eval-runs.
+
+  This workflow does NOT implement an eval harness. It composes the existing
+  unified skill evaluation platform (security-team#16546) by invoking a named suite
+  `detection-rule-vertical` whose definition ships with the Security Solution
+  plugin. The Argus-specific responsibilities that live here:
+
+    * Iterate over the detection-rule candidates from .soc-recommendations where
+      the origin is M2.2 exploit_to_detection OR human-authored with eval_requested=true.
+    * For each candidate, invoke the eval suite via kibana.request to produce a
+      snapshot_id + scores.
+    * Persist one row per rule per run into .soc-detection-eval-runs so the
+      regression-gate cascade (soc-regression-gate) has a consumable signal.
+    * Emit a heartbeat for the activity feed so demo operators can watch progress.
+
+  NOTE: scoring and corpus definition are owned by @kbn/evals + the plugin code
+  under x-pack/solutions/security/plugins/security_solution/server/lib/argus/.
+  This workflow is deliberately mechanical — all intelligence lives in the suite.
+
+  Triggers:
+    * scheduled 10m      : picks up any rule marked eval_requested=true
+    * manual              : demo operators can force a sweep
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 10m
+  - type: manual
+
+consts:
+  corpus_id: "argus-corpus-mythos-2026-04"
+  suite_id: "detection-rule-vertical"
+  max_candidates_per_run: 10
+
+steps:
+  # ── Pick up candidates ──────────────────────────────────────────────
+  - name: fetch_candidates
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: 10
+      query:
+        bool:
+          filter:
+            - term: { artifact_type: "mutation_intent" }
+            - term: { status: "eval_requested" }
+          should:
+            - term: { "argus.origin": "exploit_to_detection" }
+            - term: { eval_requested_by: "human" }
+
+  # ── Per-candidate evaluation ────────────────────────────────────────
+  - name: evaluate
+    type: foreach
+    foreach: "{{ steps.fetch_candidates.output.hits.hits }}"
+    steps:
+      - name: invoke_eval_suite
+        type: kibana.request
+        with:
+          method: POST
+          path: "/internal/security_solution/argus/evals/run"
+          body:
+            suite_id: "{{ consts.suite_id }}"
+            rule_id: "{{ foreach.item._source.rule_id }}"
+            rule_version: "{{ foreach.item._source.patch.version | default: 'latest' }}"
+            corpus_id: "{{ consts.corpus_id }}"
+
+      - name: persist_eval_run
+        type: elasticsearch.index
+        with:
+          index: .soc-detection-eval-runs
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            run_id: "{{ steps.invoke_eval_suite.output.run_id }}"
+            rule_id: "{{ foreach.item._source.rule_id }}"
+            rule_version: "{{ foreach.item._source.patch.version | default: 'latest' }}"
+            corpus_id: "{{ consts.corpus_id }}"
+            snapshot_id: "{{ steps.invoke_eval_suite.output.snapshot_id }}"
+            scores:
+              precision: "{{ steps.invoke_eval_suite.output.scores.precision | default: 0 }}"
+              recall: "{{ steps.invoke_eval_suite.output.scores.recall | default: 0 }}"
+              fp_rate_baseline: "{{ steps.invoke_eval_suite.output.scores.fp_rate_baseline | default: 0 }}"
+              variant_coverage: "{{ steps.invoke_eval_suite.output.scores.variant_coverage | default: 0 }}"
+            expected_fires: "{{ steps.invoke_eval_suite.output.expected_fires | default: 0 }}"
+            observed_fires: "{{ steps.invoke_eval_suite.output.observed_fires | default: 0 }}"
+            gate_decision: "{{ steps.invoke_eval_suite.output.gate_decision | default: 'marginal' }}"
+            adversarial_inputs: "{{ steps.invoke_eval_suite.output.adversarial_input_ids | default: [] }}"
+            source_recommendation_id: "{{ foreach.item._id }}"
+
+      - name: update_candidate_status
+        type: elasticsearch.update
+        with:
+          index: ".soc-recommendations"
+          id: "{{ foreach.item._id }}"
+          doc:
+            eval_completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            eval_snapshot_id: "{{ steps.invoke_eval_suite.output.snapshot_id }}"
+            eval_gate_decision: "{{ steps.invoke_eval_suite.output.gate_decision | default: 'marginal' }}"
+            status: "{% assign _gd = steps.invoke_eval_suite.output.gate_decision | default: 'marginal' %}{% if _gd == 'pass' %}auto_apply_ready{% elsif _gd == 'fail' %}blocked_eval{% else %}pending_review{% endif %}"
+
+  # ── Heartbeat ───────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: argus_detection_eval_tick
+        source: "soc-detection-eval"
+        candidates_evaluated: "{{ steps.fetch_candidates.output.hits.hits | size | default: 0 }}"
+        suite_id: "{{ consts.suite_id }}"
+        corpus_id: "{{ consts.corpus_id }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Argus detection-eval tick complete — evaluated {{ steps.fetch_candidates.output.hits.hits | size | default: 0 }} candidate rule(s)"

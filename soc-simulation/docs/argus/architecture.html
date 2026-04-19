@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1400">
+<title>ARGUS — Architecture One-Pager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #080D1A;
+    --surface: #10192E;
+    --surface2: #17223E;
+    --surface3: #1E2C4F;
+    --border: #253553;
+    --argus: #00E5FF;
+    --accent2: #7C4DFF;
+    --mythos: #FF3366;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 36px 44px 44px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: var(--surface2); padding: 1px 5px; border-radius: 3px; color: var(--argus); border: 1px solid var(--border); }
+
+  /* ── Header ──────────────────────────────────────── */
+  .hero {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 28px; align-items: center;
+    margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+  }
+  .mark {
+    width: 60px; height: 60px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 800; color: var(--bg);
+  }
+  .hero h1 {
+    font-size: 32px; font-weight: 900; letter-spacing: -0.6px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero .sub {
+    font-size: 12px; color: var(--text2); margin-top: 2px; font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .pitch {
+    display: flex; flex-direction: column; gap: 6px; text-align: right;
+    font-size: 10.5px; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .pitch strong { color: var(--argus); font-weight: 700; }
+
+  /* ── 2-Paragraph Pitch ──────────────────────────── */
+  .pitch-block {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px;
+  }
+  .pitch-col {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; position: relative;
+  }
+  .pitch-col .p-label {
+    font-size: 9.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--argus); margin-bottom: 8px;
+  }
+  .pitch-col.threat { border-left: 3px solid var(--mythos); }
+  .pitch-col.threat .p-label { color: var(--mythos); }
+  .pitch-col.answer { border-left: 3px solid var(--argus); }
+  .pitch-col p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .pitch-col p strong { color: var(--text); font-weight: 600; }
+  .pitch-col p em { color: var(--argus); font-style: normal; font-weight: 600; }
+  .pitch-col.threat p em { color: var(--mythos); }
+
+  /* ── Architecture SVG card ──────────────────────── */
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+  .arch-card svg { width: 100%; height: auto; display: block; }
+
+  .section-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Legend / metrics row ───────────────────────── */
+  .bottom-row {
+    display: grid; grid-template-columns: 1.1fr 1fr 0.9fr; gap: 18px;
+  }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .panel h3 {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .panel h3 .d { width: 8px; height: 8px; border-radius: 50%; }
+
+  .layer-row { display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(37,53,83,0.35); }
+  .layer-row:last-child { border-bottom: none; }
+  .layer-row .ln { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 800; color: var(--text2); }
+  .layer-row .nm { font-size: 12px; color: var(--text); font-weight: 600; }
+  .layer-row .ct { font-size: 10.5px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  .layer-row.l1 .ln { color: var(--blue); }
+  .layer-row.l2 .ln { color: var(--accent2); }
+  .layer-row.l3 .ln { color: var(--argus); }
+  .layer-row.l4 .ln { color: var(--green); }
+  .layer-row.l5 .ln { color: var(--amber); }
+
+  .metric {
+    display: grid; grid-template-columns: 1fr auto; align-items: baseline;
+    padding: 7px 0; border-bottom: 1px solid rgba(37,53,83,0.35);
+  }
+  .metric:last-child { border-bottom: none; }
+  .metric .mn { font-size: 11.5px; color: var(--text); font-weight: 500; }
+  .metric .mt { font-size: 12.5px; color: var(--argus); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .metric .desc { grid-column: 1 / -1; font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .pressure { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(37,53,83,0.35); align-items: flex-start; }
+  .pressure:last-child { border-bottom: none; }
+  .pressure .p-num {
+    width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+    background: rgba(255,51,102,0.15); color: var(--mythos);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+  }
+  .pressure .p-txt { font-size: 11px; color: var(--text2); line-height: 1.45; }
+  .pressure .p-txt strong { color: var(--text); font-weight: 600; }
+
+  .footer {
+    margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text3);
+  }
+
+  @media print {
+    body { background: white; color: black; padding: 18px; max-width: 100%; }
+    .hero h1 { -webkit-text-fill-color: #00BCD4; background: none; }
+    .arch-card, .panel, .pitch-col { break-inside: avoid; }
+    .mark { background: #00BCD4; color: white; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═════ HERO ═════ -->
+<div class="hero">
+  <div class="mark">A</div>
+  <div>
+    <h1>ARGUS Architecture</h1>
+    <div class="sub">Autonomous · Resilient · Guardian for · Unified · Security</div>
+  </div>
+  <div class="pitch">
+    <span><strong>One-Pager</strong> · Phase 1 · v1</span>
+    <span>Elastic Security · Internal</span>
+  </div>
+</div>
+
+<!-- ═════ 2-PARAGRAPH PITCH ═════ -->
+<div class="pitch-block">
+  <div class="pitch-col threat">
+    <div class="p-label">The Mythos-Era Threat</div>
+    <p>
+      Frontier models like Anthropic's <strong>Mythos</strong> can discover zero-day vulnerabilities,
+      generate working exploits, synthesize <strong>dozens of polymorphic variants in minutes</strong>,
+      and operate autonomously across a kill chain. This compresses the exploit lifecycle from
+      months to hours, explodes the variant space, makes adversaries
+      <em>goal-directed agents</em>, and creates a reasoning asymmetry against any signature-bound
+      SOC. The classical SOC architecture was not designed for this threat model.
+    </p>
+  </div>
+  <div class="pitch-col answer">
+    <div class="p-label">Argus — The Architectural Answer</div>
+    <p>
+      <strong>ARGUS</strong> matches attacker autonomy with defender autonomy. A mesh of
+      planner-class Agent Builder agents reason over an <em>Elastic telemetry moat</em>, propose
+      mutations through a <em>validation gate</em> (backtest · regression · mutation-robustness
+      eval), execute under <em>governance</em> (snapshot → apply → observe → rollback), and leave
+      a <em>resolvable OTLP reasoning trace</em> for every action. Production is 100%
+      Elastic-Stack-native. Caldera generates telemetry only.
+    </p>
+  </div>
+</div>
+
+<!-- ═════ ARCHITECTURE DIAGRAM ═════ -->
+<div class="section-title">The Five Layers</div>
+<div class="arch-card">
+<svg viewBox="0 0 1240 620" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00E5FF" stroke-width="1.4"/></marker>
+    <marker id="ah-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#7C4DFF" stroke-width="1.4"/></marker>
+    <marker id="ah-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00E676" stroke-width="1.4"/></marker>
+    <marker id="ah-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FFD740" stroke-width="1.4"/></marker>
+    <marker id="ah-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#448AFF" stroke-width="1.4"/></marker>
+    <marker id="ah-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FF3366" stroke-width="1.4"/></marker>
+    <linearGradient id="bg-sense" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#448AFF" stop-opacity="0.10"/><stop offset="1" stop-color="#448AFF" stop-opacity="0.02"/></linearGradient>
+    <linearGradient id="bg-hyp" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7C4DFF" stop-opacity="0.10"/><stop offset="1" stop-color="#7C4DFF" stop-opacity="0.02"/></linearGradient>
+    <linearGradient id="bg-val" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00E5FF" stop-opacity="0.10"/><stop offset="1" stop-color="#00E5FF" stop-opacity="0.02"/></linearGradient>
+    <linearGradient id="bg-act" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00E676" stop-opacity="0.10"/><stop offset="1" stop-color="#00E676" stop-opacity="0.02"/></linearGradient>
+    <linearGradient id="bg-gov" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFD740" stop-opacity="0.10"/><stop offset="1" stop-color="#FFD740" stop-opacity="0.02"/></linearGradient>
+  </defs>
+
+  <!-- Adversary column (left) -->
+  <rect x="22" y="30" width="150" height="560" rx="12" fill="#17223E" stroke="#FF3366" stroke-width="1.2" stroke-dasharray="4,4"/>
+  <text x="97" y="58" text-anchor="middle" fill="#FF3366" font-size="10" font-weight="800" letter-spacing="1.5" font-family="Inter,sans-serif">ADVERSARY</text>
+  <text x="97" y="78" text-anchor="middle" fill="#E8EDF5" font-size="14" font-weight="800" font-family="Inter,sans-serif">Mythos-class</text>
+  <text x="97" y="94" text-anchor="middle" fill="#8DA0BE" font-size="10" font-family="Inter,sans-serif">frontier agent</text>
+
+  <rect x="42" y="120" width="110" height="40" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+  <text x="97" y="138" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">0-day discovery</text>
+  <text x="97" y="152" text-anchor="middle" fill="#8DA0BE" font-size="8">hours, not months</text>
+
+  <rect x="42" y="170" width="110" height="40" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+  <text x="97" y="188" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Variant explosion</text>
+  <text x="97" y="202" text-anchor="middle" fill="#8DA0BE" font-size="8">N polymorphs</text>
+
+  <rect x="42" y="220" width="110" height="40" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+  <text x="97" y="238" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Agentic chain</text>
+  <text x="97" y="252" text-anchor="middle" fill="#8DA0BE" font-size="8">goal-directed</text>
+
+  <rect x="42" y="270" width="110" height="40" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+  <text x="97" y="288" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Planner reasoning</text>
+  <text x="97" y="302" text-anchor="middle" fill="#8DA0BE" font-size="8">asymmetric</text>
+
+  <text x="97" y="560" text-anchor="middle" fill="#5A7198" font-size="9" font-family="JetBrains Mono,monospace">Caldera · sandboxed</text>
+  <text x="97" y="574" text-anchor="middle" fill="#5A7198" font-size="9" font-family="JetBrains Mono,monospace">telemetry only</text>
+
+  <!-- Attack arrow into Sensing -->
+  <line x1="172" y1="170" x2="215" y2="170" stroke="#FF3366" stroke-width="1.5" marker-end="url(#ah-red)"/>
+
+  <!-- ═════ LAYER 1 · SENSING ═════ -->
+  <rect x="215" y="50" width="990" height="96" rx="10" fill="url(#bg-sense)" stroke="#448AFF" stroke-width="1.2"/>
+  <text x="232" y="74" fill="#448AFF" font-size="10" font-weight="800" letter-spacing="1.5">01 · SENSING</text>
+  <text x="232" y="90" fill="#8DA0BE" font-size="10">Ground truth at machine speed</text>
+
+  <rect x="380" y="62" width="130" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+  <text x="445" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Elastic Agent</text>
+  <text x="445" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">Endpoint · Fleet · osquery</text>
+  <text x="445" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">ECS · logs-* · alerts-*</text>
+
+  <rect x="525" y="62" width="140" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+  <text x="595" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Shadow AI Pack</text>
+  <text x="595" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">integrations#18123</text>
+  <text x="595" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">endpoint CAASM for AI</text>
+
+  <rect x="680" y="62" width="140" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+  <text x="750" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Reasoning Traces</text>
+  <text x="750" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">OTLP → Elasticsearch</text>
+  <text x="750" y="114" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ M2.5</text>
+
+  <rect x="835" y="62" width="140" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+  <text x="905" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Exploit Intel</text>
+  <text x="905" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">KEV · EPSS · SSVC · PoC</text>
+  <text x="905" y="114" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ M2.3 · kibana#258041</text>
+
+  <rect x="990" y="62" width="200" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+  <text x="1090" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Argus Eval Scenarios</text>
+  <text x="1090" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">Caldera + mutation datasets</text>
+  <text x="1090" y="114" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ M2.1 · logs-argus_eval.scenarios-*</text>
+
+  <!-- ═════ LAYER 2 · HYPOTHESIS ═════ -->
+  <rect x="215" y="158" width="990" height="96" rx="10" fill="url(#bg-hyp)" stroke="#7C4DFF" stroke-width="1.2"/>
+  <text x="232" y="182" fill="#7C4DFF" font-size="10" font-weight="800" letter-spacing="1.5">02 · HYPOTHESIS</text>
+  <text x="232" y="198" fill="#8DA0BE" font-size="10">Planner agents reasoning over the telemetry</text>
+
+  <rect x="380" y="170" width="120" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="440" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Triage</text>
+  <text x="440" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-triage-agent</text>
+  <text x="440" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">5-min sweep</text>
+
+  <rect x="515" y="170" width="120" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="575" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">DetEng</text>
+  <text x="575" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-deteng-agent</text>
+  <text x="575" y="220" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ M2.2 · kibana#258362</text>
+
+  <rect x="650" y="170" width="120" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="710" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Hunter</text>
+  <text x="710" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-proactive-hunter</text>
+  <text x="710" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 2h</text>
+
+  <rect x="785" y="170" width="120" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="845" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">XDR Correlate</text>
+  <text x="845" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">kibana#257949</text>
+  <text x="845" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">ES|QL chains</text>
+
+  <rect x="920" y="170" width="135" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="987" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Meta</text>
+  <text x="987" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-meta-agent</text>
+  <text x="987" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">mutation_intent</text>
+
+  <rect x="1070" y="170" width="120" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+  <text x="1130" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Gap Analyzer</text>
+  <text x="1130" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-gap-analyzer</text>
+  <text x="1130" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">every 4h</text>
+
+  <!-- ═════ LAYER 3 · VALIDATION ═════ -->
+  <rect x="215" y="266" width="990" height="96" rx="10" fill="url(#bg-val)" stroke="#00E5FF" stroke-width="1.2"/>
+  <text x="232" y="290" fill="#00E5FF" font-size="10" font-weight="800" letter-spacing="1.5">03 · VALIDATION</text>
+  <text x="232" y="306" fill="#8DA0BE" font-size="10">Quality gate · no mutation ships unscored</text>
+
+  <rect x="380" y="278" width="140" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+  <text x="450" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Backtester</text>
+  <text x="450" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-rule-backtester</text>
+  <text x="450" y="330" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">historical alerts</text>
+
+  <rect x="535" y="278" width="140" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+  <text x="605" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Regression Gate</text>
+  <text x="605" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-regression-gate</text>
+  <text x="605" y="330" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">replay · block-on-fail</text>
+
+  <rect x="690" y="278" width="165" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+  <text x="772" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Detection Eval Vertical</text>
+  <text x="772" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">@kbn/evals · rule preview API</text>
+  <text x="772" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ M2.1 · sec-team#16546</text>
+
+  <rect x="870" y="278" width="165" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+  <text x="952" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Mutation-Robust Scorer</text>
+  <text x="952" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">detection.mutation_robust</text>
+  <text x="952" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ evaluator</text>
+
+  <rect x="1050" y="278" width="140" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+  <text x="1120" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Trust Scorer</text>
+  <text x="1120" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-trust-scorer</text>
+  <text x="1120" y="330" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">per-artifact</text>
+
+  <!-- ═════ LAYER 4 · ACTION ═════ -->
+  <rect x="215" y="374" width="990" height="96" rx="10" fill="url(#bg-act)" stroke="#00E676" stroke-width="1.2"/>
+  <text x="232" y="398" fill="#00E676" font-size="10" font-weight="800" letter-spacing="1.5">04 · ACTION</text>
+  <text x="232" y="414" fill="#8DA0BE" font-size="10">Gated autonomous execution · reversible</text>
+
+  <rect x="380" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+  <text x="455" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Autonomous Applier</text>
+  <text x="455" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">snapshot + ownership</text>
+  <text x="455" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">budget + cooldown</text>
+
+  <rect x="545" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+  <text x="620" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Post-Apply Observer</text>
+  <text x="620" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-post-apply-observer</text>
+  <text x="620" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">rollback watchdog</text>
+
+  <rect x="710" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+  <text x="785" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Response</text>
+  <text x="785" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-response</text>
+  <text x="785" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">isolation · disable</text>
+
+  <rect x="875" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+  <text x="950" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Containment Playbook</text>
+  <text x="950" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-containment-playbook</text>
+  <text x="950" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">tiered (T0–T3)</text>
+
+  <rect x="1040" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+  <text x="1115" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Recovery</text>
+  <text x="1115" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-recovery</text>
+  <text x="1115" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">snapshot restore</text>
+
+  <!-- ═════ LAYER 5 · GOVERNANCE ═════ -->
+  <rect x="215" y="482" width="990" height="96" rx="10" fill="url(#bg-gov)" stroke="#FFD740" stroke-width="1.2"/>
+  <text x="232" y="506" fill="#FFD740" font-size="10" font-weight="800" letter-spacing="1.5">05 · GOVERNANCE</text>
+  <text x="232" y="522" fill="#8DA0BE" font-size="10">Every decision auditable · every trace resolvable</text>
+
+  <rect x="380" y="494" width="140" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+  <text x="450" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Watchdog</text>
+  <text x="450" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">kill-switch · loop</text>
+  <text x="450" y="546" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">15-min ticks</text>
+
+  <rect x="535" y="494" width="160" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+  <text x="615" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Autonomy Decisions</text>
+  <text x="615" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">.soc-autonomy-decisions</text>
+  <text x="615" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ trace_id linked</text>
+
+  <rect x="710" y="494" width="140" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+  <text x="780" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Self-Learning Loop</text>
+  <text x="780" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-self-learning-loop</text>
+  <text x="780" y="546" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">calibration</text>
+
+  <rect x="865" y="494" width="150" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+  <text x="940" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Shift Handover</text>
+  <text x="940" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-shift-handover</text>
+  <text x="940" y="546" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono,monospace">8h narrative</text>
+
+  <rect x="1030" y="494" width="160" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+  <text x="1110" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Argus Console</text>
+  <text x="1110" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">Security Solution UI</text>
+  <text x="1110" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono,monospace">Δ Phase 3</text>
+
+  <!-- Vertical flow arrows between layers -->
+  <line x1="750" y1="146" x2="750" y2="158" stroke="#00E5FF" stroke-width="1.5" marker-end="url(#ah-cyan)"/>
+  <line x1="750" y1="254" x2="750" y2="266" stroke="#00E5FF" stroke-width="1.5" marker-end="url(#ah-cyan)"/>
+  <line x1="750" y1="362" x2="750" y2="374" stroke="#00E676" stroke-width="1.5" marker-end="url(#ah-green)"/>
+  <line x1="750" y1="470" x2="750" y2="482" stroke="#FFD740" stroke-width="1.5" marker-end="url(#ah-amber)"/>
+
+  <!-- Feedback loop arc: governance → hypothesis -->
+  <path d="M 1200 530 Q 1240 530 1240 400 Q 1240 200 1220 200 L 1195 200" fill="none" stroke="#FFD740" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#ah-amber)"/>
+  <text x="1237" y="400" text-anchor="end" fill="#FFD740" font-size="8" font-family="JetBrains Mono,monospace" transform="rotate(-90 1237 400)">trust · calibration · drift</text>
+
+  <!-- Tiny label: data substrate -->
+  <text x="620" y="608" text-anchor="middle" fill="#5A7198" font-size="9.5" font-family="JetBrains Mono,monospace" letter-spacing="1">
+    Shared substrate: Elasticsearch · .soc-* indices · OTLP traces · Agent Builder · Workflows · Task Manager
+  </text>
+</svg>
+</div>
+
+<!-- ═════ BOTTOM ROW ═════ -->
+<div class="bottom-row">
+
+  <div class="panel">
+    <h3><span class="d" style="background: var(--argus);"></span>Layers &amp; Contracts</h3>
+    <div class="layer-row l1"><span class="ln">01</span><span class="nm">Sensing</span><span class="ct">ECS · OTLP · <code>logs-argus_eval.*</code></span></div>
+    <div class="layer-row l2"><span class="ln">02</span><span class="nm">Hypothesis</span><span class="ct">agents emit <code>mutation_intent</code></span></div>
+    <div class="layer-row l3"><span class="ln">03</span><span class="nm">Validation</span><span class="ct">backtest · regression · eval</span></div>
+    <div class="layer-row l4"><span class="ln">04</span><span class="nm">Action</span><span class="ct">snapshot → apply → observe</span></div>
+    <div class="layer-row l5"><span class="ln">05</span><span class="nm">Governance</span><span class="ct">trust · trace · audit</span></div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="d" style="background: var(--mythos);"></span>Four Pressures</h3>
+    <div class="pressure"><span class="p-num">P1</span><span class="p-txt"><strong>Time compression</strong> — exploit lifecycle collapses to hours.</span></div>
+    <div class="pressure"><span class="p-num">P2</span><span class="p-txt"><strong>Variant explosion</strong> — N polymorphs per CVE; static rules break.</span></div>
+    <div class="pressure"><span class="p-num">P3</span><span class="p-txt"><strong>Agentic adversary</strong> — goal-directed chains, not single TTPs.</span></div>
+    <div class="pressure"><span class="p-num">P4</span><span class="p-txt"><strong>Capability asymmetry</strong> — frontier reasoner vs fixed-function SOC.</span></div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="d" style="background: var(--green);"></span>Demo Scorecard</h3>
+    <div class="metric"><span class="mn">T2D new CVE</span><span class="mt">&lt; 15 min</span></div>
+    <div class="metric"><span class="mn">Mutation-robust</span><span class="mt">&gt; 0.75</span></div>
+    <div class="metric"><span class="mn">Frontier resilience</span><span class="mt">&gt; 0.70</span></div>
+    <div class="metric"><span class="mn">FPR on benign</span><span class="mt">&lt; 0.02</span></div>
+    <div class="metric"><span class="mn">Trust-gate pass</span><span class="mt">0.60–0.85</span></div>
+    <div class="metric"><span class="mn">Trace completeness</span><span class="mt">1.00</span></div>
+  </div>
+
+</div>
+
+<!-- ═════ FOOTER ═════ -->
+<div class="footer">
+  <span><strong>ARGUS</strong> · Architecture One-Pager · v1</span>
+  <span>Companion: <code>threat-model.html</code> · <code>capability-map.md</code> · <code>demo-storyboard.md</code></span>
+  <span>Confidential — Elastic Security Internal</span>
+</div>
+
+</body>
+</html>

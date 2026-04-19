@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600">
+<title>ARGUS — Mythos-Era Threat Model</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #080D1A;
+    --surface: #10192E;
+    --surface2: #17223E;
+    --surface3: #1E2C4F;
+    --border: #253553;
+    --border2: #324770;
+    --accent: #00BCD4;
+    --accent2: #7C4DFF;
+    --argus: #00E5FF;
+    --mythos: #FF3366;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background:
+      radial-gradient(ellipse at top left, rgba(0,188,212,0.06), transparent 40%),
+      radial-gradient(ellipse at top right, rgba(255,51,102,0.05), transparent 40%),
+      var(--bg);
+    color: var(--text);
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 40px 56px 60px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+  }
+
+  code, .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+  code {
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--argus);
+    border: 1px solid var(--border);
+  }
+
+  a { color: var(--argus); text-decoration: none; border-bottom: 1px dotted rgba(0,229,255,0.35); }
+  a:hover { border-bottom-color: var(--argus); }
+
+  /* ── Header ──────────────────────────────────────── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: flex-end;
+    margin-bottom: 44px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    gap: 40px;
+  }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--argus); margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: 56px; font-weight: 900; letter-spacing: -1.5px; line-height: 1;
+    background: linear-gradient(135deg, #00E5FF 0%, #7C4DFF 60%, #F06292 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero h1 .caps { letter-spacing: -1px; }
+  .hero .tagline {
+    font-size: 17px; color: var(--text2); margin-top: 14px; max-width: 720px;
+    font-weight: 300;
+  }
+  .hero .tagline strong { color: var(--text); font-weight: 600; }
+  .hero .acronym {
+    font-size: 11px; color: var(--text3); margin-top: 10px; font-family: 'JetBrains Mono', monospace;
+  }
+  .hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    padding: 6px 14px; border-radius: 20px; border: 1px solid;
+  }
+  .badge-argus { color: var(--argus); border-color: rgba(0,229,255,0.35); background: rgba(0,229,255,0.08); }
+  .badge-argus::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--argus); box-shadow: 0 0 10px var(--argus); }
+  .badge-phase { color: var(--amber); border-color: rgba(255,215,64,0.35); background: rgba(255,215,64,0.06); }
+  .badge-confidential { color: var(--pink); border-color: rgba(240,98,146,0.3); background: rgba(240,98,146,0.06); }
+
+  /* ── Section ─────────────────────────────────────── */
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 12px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px; font-size: 12px; font-weight: 900;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    color: var(--bg);
+  }
+  .section-title .rule {
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
+  }
+  .section-lede {
+    font-size: 15px; color: var(--text2); margin-bottom: 22px; max-width: 960px; font-weight: 400;
+  }
+  .section-lede strong { color: var(--text); font-weight: 600; }
+
+  /* ── Grid ─────────────────────────────────────────── */
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .g23 { grid-template-columns: 2fr 1fr; }
+  .g32 { grid-template-columns: 1fr 2fr; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px;
+    transition: border-color 120ms;
+  }
+  .card:hover { border-color: var(--border2); }
+  .card-title {
+    font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px;
+    color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Pressure cards (the big four) ────────────────── */
+  .pressure-card {
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);
+    border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  .pressure-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--mythos), var(--amber));
+  }
+  .pressure-card .p-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700; color: var(--mythos); letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .pressure-card h3 {
+    font-size: 18px; font-weight: 800; color: var(--text); margin: 6px 0 12px;
+    letter-spacing: -0.3px;
+  }
+  .pressure-card p {
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+  }
+  .pressure-card .counter {
+    margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border2);
+    font-size: 12px; color: var(--text2);
+  }
+  .pressure-card .counter strong { color: var(--argus); font-weight: 600; }
+
+  /* ── Principle cards ──────────────────────────────── */
+  .principle {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--argus);
+  }
+  .principle .label {
+    font-size: 10px; font-weight: 800; color: var(--argus); letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .principle h4 {
+    font-size: 15px; font-weight: 700; color: var(--text); margin: 6px 0 8px;
+  }
+  .principle p { font-size: 12.5px; color: var(--text2); line-height: 1.55; }
+
+  /* ── Layer visual ─────────────────────────────────── */
+  .layer-stack {
+    display: flex; flex-direction: column; gap: 2px;
+    background: var(--surface2); border-radius: 14px; padding: 14px; border: 1px solid var(--border);
+  }
+  .layer {
+    display: grid; grid-template-columns: 120px 1fr auto;
+    gap: 18px; align-items: center;
+    padding: 16px 18px; border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .layer-name {
+    font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .layer-desc { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+  .layer-desc strong { color: var(--text); font-weight: 600; }
+  .layer-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; color: var(--text3); text-align: right; max-width: 260px;
+  }
+  .layer-1 { border-left: 3px solid var(--blue); }
+  .layer-1 .layer-name { color: var(--blue); }
+  .layer-2 { border-left: 3px solid var(--accent2); }
+  .layer-2 .layer-name { color: var(--accent2); }
+  .layer-3 { border-left: 3px solid var(--argus); }
+  .layer-3 .layer-name { color: var(--argus); }
+  .layer-4 { border-left: 3px solid var(--green); }
+  .layer-4 .layer-name { color: var(--green); }
+  .layer-5 { border-left: 3px solid var(--amber); }
+  .layer-5 .layer-name { color: var(--amber); }
+
+  /* ── Table ────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text3); text-align: left; padding: 0 10px 9px; border-bottom: 1px solid var(--border);
+  }
+  td {
+    font-size: 12px; padding: 9px 10px; border-bottom: 1px solid rgba(37,53,83,0.4);
+    vertical-align: top; color: var(--text2); line-height: 1.55;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.name { font-weight: 600; color: var(--text); white-space: nowrap; }
+  td strong { color: var(--text); font-weight: 600; }
+
+  /* ── Pill ─────────────────────────────────────────── */
+  .pill {
+    display: inline-block; font-size: 9.5px; font-weight: 700; padding: 2px 9px;
+    border-radius: 10px; white-space: nowrap; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .pill-cyan { background: rgba(0,188,212,0.12); color: var(--accent); border: 1px solid rgba(0,188,212,0.2); }
+  .pill-argus { background: rgba(0,229,255,0.12); color: var(--argus); border: 1px solid rgba(0,229,255,0.25); }
+  .pill-purple { background: rgba(124,77,255,0.12); color: var(--accent2); border: 1px solid rgba(124,77,255,0.2); }
+  .pill-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.2); }
+  .pill-amber { background: rgba(255,215,64,0.12); color: var(--amber); border: 1px solid rgba(255,215,64,0.2); }
+  .pill-red { background: rgba(255,82,82,0.12); color: var(--red); border: 1px solid rgba(255,82,82,0.2); }
+  .pill-mythos { background: rgba(255,51,102,0.12); color: var(--mythos); border: 1px solid rgba(255,51,102,0.25); }
+  .pill-pink { background: rgba(240,98,146,0.12); color: var(--pink); border: 1px solid rgba(240,98,146,0.2); }
+  .pill-blue { background: rgba(68,138,255,0.12); color: var(--blue); border: 1px solid rgba(68,138,255,0.2); }
+  .pill-muted { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+  /* ── Callout ──────────────────────────────────────── */
+  .callout {
+    background: linear-gradient(135deg, rgba(255,51,102,0.08), rgba(124,77,255,0.06));
+    border: 1px solid rgba(255,51,102,0.25);
+    border-radius: 12px; padding: 22px 26px;
+    margin-bottom: 22px;
+  }
+  .callout .callout-label {
+    font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--mythos); margin-bottom: 8px;
+  }
+  .callout p { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .callout p strong { color: var(--mythos); font-weight: 700; }
+
+  .callout-argus {
+    background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(124,77,255,0.06));
+    border: 1px solid rgba(0,229,255,0.25);
+  }
+  .callout-argus .callout-label { color: var(--argus); }
+  .callout-argus p strong { color: var(--argus); }
+
+  /* ── Feature list ─────────────────────────────────── */
+  .feature-list { list-style: none; }
+  .feature-list li {
+    font-size: 12.5px; padding: 5px 0; color: var(--text2);
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.55;
+  }
+  .feature-list li::before {
+    content: '›'; color: var(--argus); font-weight: 800; flex-shrink: 0;
+    font-size: 14px; line-height: 1.3;
+  }
+  .feature-list li strong { color: var(--text); font-weight: 600; }
+
+  /* ── Phase roadmap ─────────────────────────────────── */
+  .phase {
+    display: grid; grid-template-columns: 200px 1fr;
+    gap: 24px; padding: 24px 0; border-bottom: 1px dashed var(--border);
+  }
+  .phase:last-child { border-bottom: none; }
+  .phase-label {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.5px;
+    color: var(--text3); text-transform: uppercase;
+  }
+  .phase-name {
+    font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; line-height: 1.1;
+  }
+  .phase-window {
+    font-size: 11px; color: var(--argus); font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Footer ───────────────────────────────────────── */
+  .footer {
+    margin-top: 44px; padding-top: 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10.5px; color: var(--text3);
+  }
+  .footer strong { color: var(--text2); }
+
+  /* ── Utility ──────────────────────────────────────── */
+  .mt-sm { margin-top: 10px; }
+  .mt-md { margin-top: 18px; }
+  .mb-sm { margin-bottom: 10px; }
+  .text-xs { font-size: 10.5px; }
+  .text-muted { color: var(--text3); }
+
+  @media print {
+    body { background: white; color: black; padding: 20px; }
+    .hero h1 { -webkit-text-fill-color: #00BCD4; }
+    .card, .principle, .pressure-card, .layer { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     HERO
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Argus · Mythos-Era Threat Model</div>
+    <h1 class="caps">Defending at<br/>Machine Speed.</h1>
+    <p class="tagline">
+      <strong>ARGUS</strong> is the Autonomous Resilient Guardian for Unified Security — an
+      Elastic-Stack-native autonomous SOC designed to withstand <strong>frontier-model
+      adversaries</strong> capable of compressing the exploit lifecycle from months to hours
+      and producing exploit variants faster than humans can write detection rules.
+    </p>
+    <div class="acronym">A · R · G · U · S  —  Autonomous · Resilient · Guardian for · Unified · Security</div>
+  </div>
+  <div class="hero-right">
+    <span class="badge badge-argus">Strategy v1 · Phase 1</span>
+    <span class="badge badge-phase">Demo-Ready Narrative</span>
+    <span class="badge badge-confidential">Internal · Elastic Security</span>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     1. THE MYTHOS-ERA THREAT
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">1</span> The Mythos-Era Threat <span class="rule"></span></div>
+
+  <div class="callout">
+    <div class="callout-label">Why This Strategy Exists</div>
+    <p>
+      Anthropic's <strong>Mythos</strong> — restricted under Project Glasswing — demonstrates
+      that a single frontier model can discover zero-day vulnerabilities, generate working
+      exploits, synthesize <strong>dozens of polymorphic variants in minutes</strong>, and operate
+      autonomously across a kill chain. Every commercial defender must now assume adversaries
+      have access to equivalent capabilities, whether from <em>Mythos itself</em>, its successors,
+      or open-source approximations. The traditional SOC — built around human-tempo triage,
+      signature rules, and CVE patch windows — is architecturally misaligned with this threat.
+      Argus is our architectural response.
+    </p>
+  </div>
+
+  <div class="section-lede">
+    A Mythos-era adversary applies <strong>four pressures</strong> that existing SOC architectures
+    were not designed to absorb. The shape of Argus is a direct answer to each.
+  </div>
+
+  <div class="grid g2">
+
+    <div class="pressure-card">
+      <div class="p-num">Pressure #1</div>
+      <h3>Exploit Time Compression</h3>
+      <p>
+        CVE disclosure to weaponized exploit collapses from weeks to hours. The defender's
+        traditional patch/detect window disappears. Human-tempo detection engineering (author,
+        review, deploy) cannot keep pace with automated exploit generation.
+      </p>
+      <div class="counter">
+        <strong>Argus counter:</strong> Exploit-to-Detection Synthesis — draft ES|QL/EQL rules
+        directly from CVE + PoC within minutes of disclosure, gated by backtest + regression.
+      </div>
+    </div>
+
+    <div class="pressure-card">
+      <div class="p-num">Pressure #2</div>
+      <h3>Exploit-Variant Explosion</h3>
+      <p>
+        A single vulnerability spawns N polymorphic variants — different encodings, loaders,
+        LOLBins, evasion paths. A detection rule tuned to the first public PoC is bypassed by
+        the second. Rule quality must be measured against an evolving mutation set, not a
+        static one.
+      </p>
+      <div class="counter">
+        <strong>Argus counter:</strong> Mutation-robust detection evaluation — rules are scored
+        against generated exploit variants (<code>detection.mutation_robust</code> evaluator)
+        before they ship.
+      </div>
+    </div>
+
+    <div class="pressure-card">
+      <div class="p-num">Pressure #3</div>
+      <h3>Agentic Adversary Behavior</h3>
+      <p>
+        Attackers become long-running goal-directed agents: reconnaissance, exploitation, lateral
+        movement and exfiltration are orchestrated by a planner that reasons about the defender's
+        responses. Telemetry shape changes — fewer obvious signatures, more goal-aligned sequences.
+      </p>
+      <div class="counter">
+        <strong>Argus counter:</strong> Defender autonomy matched to attacker autonomy — long-running
+        planner agents (meta, deteng, hunter, triage) operating on <code>.soc-*</code> state with
+        governance-gated mutation.
+      </div>
+    </div>
+
+    <div class="pressure-card">
+      <div class="p-num">Pressure #4</div>
+      <h3>Capability Asymmetry</h3>
+      <p>
+        The attacker has a frontier-class reasoner. The defender typically does not. Without
+        deliberate design choices, the SOC becomes a slow, signature-bound fixed function against
+        a fast, reasoning adversary — a losing geometry.
+      </p>
+      <div class="counter">
+        <strong>Argus counter:</strong> Telemetry moat + stack-native reasoning agents. Elastic's
+        data gravity is the asymmetric advantage the attacker cannot replicate remotely.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     2. ARGUS DESIGN PRINCIPLES
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">2</span> Design Principles <span class="rule"></span></div>
+  <div class="section-lede">
+    Five non-negotiable principles. Every feature we ship must answer to at least one of them;
+    features that violate them get cut.
+  </div>
+
+  <div class="grid g2">
+
+    <div class="principle">
+      <div class="label">Principle 1</div>
+      <h4>Defender autonomy matches attacker autonomy</h4>
+      <p>
+        If the adversary is a long-running goal-directed agent, the defender must be too. Argus
+        operates as a mesh of planner-class agents with shared state in Elasticsearch — not a
+        human running queries with copilots. Autonomy is not a feature; it is the <em>architectural
+        baseline</em>.
+      </p>
+    </div>
+
+    <div class="principle">
+      <div class="label">Principle 2</div>
+      <h4>Telemetry is the moat</h4>
+      <p>
+        The frontier model's ceiling is set by the data it reaches. Argus treats the Elastic
+        telemetry surface — endpoint, network, cloud, identity, <em>and</em> agent reasoning traces —
+        as a single queryable substrate. The attacker's reasoner does not have this; we exploit that
+        asymmetry.
+      </p>
+    </div>
+
+    <div class="principle">
+      <div class="label">Principle 3</div>
+      <h4>Autonomous action is auditable and gated</h4>
+      <p>
+        Every mutation — rule patch, rule creation, exception, containment — passes through a
+        snapshot → backtest → regression → apply → observe → rollback cascade. Every decision
+        writes a reasoning trace to <code>.soc-autonomy-decisions</code>. No black-box autonomy.
+      </p>
+    </div>
+
+    <div class="principle">
+      <div class="label">Principle 4</div>
+      <h4>Detection quality is continuously measured</h4>
+      <p>
+        Rules ship with <em>numbers</em>: precision, recall, mutation-robustness, FPR-on-benign,
+        p95 latency. The detection eval harness replays Caldera-sourced scenarios and mutation
+        sets through the <code>rule preview</code> API on every proposed change. A rule without a
+        score does not ship.
+      </p>
+    </div>
+
+    <div class="principle">
+      <div class="label">Principle 5</div>
+      <h4>Elastic-Stack-native in production</h4>
+      <p>
+        Caldera earns its keep as a <strong>telemetry generator</strong>. Everything
+        production — detection, correlation, reasoning, governance, evaluation, UI — is built on
+        Elasticsearch, Kibana, Workflows, Agent Builder, <code>@kbn/evals</code>, Task Manager,
+        and native OTLP. No Python sidecars in the critical path.
+      </p>
+    </div>
+
+    <div class="principle" style="border-left-color: var(--mythos);">
+      <div class="label" style="color: var(--mythos);">Non-goal</div>
+      <h4>We are not trying to out-reason the attacker</h4>
+      <p>
+        Argus wins through <em>data proximity, speed of mutation, and governance rigor</em>, not by
+        fielding a bigger reasoner. The strategy assumes we will always be 6–18 months behind
+        frontier capability — and designs for resilience under that assumption.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     3. THE FIVE-LAYER ARCHITECTURE
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">3</span> The Five-Layer Architecture <span class="rule"></span></div>
+  <div class="section-lede">
+    Argus organizes capabilities into five layers, each with a distinct contract. Existing
+    Elastic work maps cleanly into these layers; the <span class="pill pill-mythos">Δ Mythos-era</span>
+    deltas are the new investments Phase 2 delivers.
+  </div>
+
+  <div class="layer-stack">
+
+    <div class="layer layer-1">
+      <div class="layer-name">1 · Sensing</div>
+      <div class="layer-desc">
+        <strong>Ground truth at machine speed.</strong> Endpoint, network, cloud, identity,
+        AI-tool usage (Shadow AI Discovery Pack), reasoning-trace spans.
+        Single schema, ECS-aligned, queried by everything upstream.
+      </div>
+      <div class="layer-tech">
+        Elastic Agent · Fleet · Endpoint · osquery<br/>
+        integrations#18123 · logs-argus_eval.* · OTLP<br/>
+        <span class="pill pill-mythos" style="margin-top:4px">Δ reasoning-trace ingest</span>
+      </div>
+    </div>
+
+    <div class="layer layer-2">
+      <div class="layer-name">2 · Hypothesis</div>
+      <div class="layer-desc">
+        <strong>Reasoning over the telemetry.</strong> Triage, proactive hunt, detection
+        engineering, correlation, attack-chain reconstruction. Planner-class agents that emit
+        <em>proposed mutations</em>, not autonomous actions.
+      </div>
+      <div class="layer-tech">
+        soc-triage · soc-deteng · soc-proactive-hunter<br/>
+        kibana#257949 (XDR correlation) · kibana#259559 (default skills)<br/>
+        <span class="pill pill-mythos" style="margin-top:4px">Δ exploit→detection synth · zero-day hypothesizer</span>
+      </div>
+    </div>
+
+    <div class="layer layer-3">
+      <div class="layer-name">3 · Validation</div>
+      <div class="layer-desc">
+        <strong>Quality gate before any change touches production.</strong> Backtest against
+        historical alerts, regression dataset replay, mutation-robustness scoring,
+        FPR-on-benign measurement. The heart of the "detection eval vertical."
+      </div>
+      <div class="layer-tech">
+        soc-rule-backtester · soc-regression-gate · @kbn/evals<br/>
+        security-team#16546 (AESOP + online evals)<br/>
+        <span class="pill pill-mythos" style="margin-top:4px">Δ M2.1 · detection eval vertical</span>
+      </div>
+    </div>
+
+    <div class="layer layer-4">
+      <div class="layer-name">4 · Action</div>
+      <div class="layer-desc">
+        <strong>Gated autonomous execution.</strong> Rule deploy, exception, host isolation,
+        account disable, IOC blocklist. Snapshot → apply → post-apply observe → rollback on regression.
+        Nothing irreversible without explicit operator approval.
+      </div>
+      <div class="layer-tech">
+        soc-autonomous-applier · soc-post-apply-observer<br/>
+        soc-recovery · soc-response · soc-containment-playbook<br/>
+        <span class="pill pill-mythos" style="margin-top:4px">Δ trust-tier thresholds for frontier-class mutations</span>
+      </div>
+    </div>
+
+    <div class="layer layer-5">
+      <div class="layer-name">5 · Governance</div>
+      <div class="layer-desc">
+        <strong>Every autonomous decision is auditable.</strong> Trust scoring per agent,
+        budget + cooldown + kill-switch enforcement, full reasoning traces, shift handover
+        narratives, evolution log, dead-letter routing.
+      </div>
+      <div class="layer-tech">
+        soc-trust-scorer · soc-watchdog · soc-self-learning-loop<br/>
+        .soc-autonomy-decisions · .soc-evolution-log · .soc-audit-trail<br/>
+        <span class="pill pill-mythos" style="margin-top:4px">Δ M2.5 · reasoning-trace governance (OTLP→ES)</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout callout-argus" style="margin-top: 24px;">
+    <div class="callout-label">Layer Contract</div>
+    <p>
+      Layers communicate through <strong>Elasticsearch state</strong>, not RPC. Each layer writes
+      structured documents with a stable schema; downstream layers read. This is a deliberate
+      design choice: it makes the system <em>trivially auditable</em>, <em>replay-testable</em>,
+      and <em>survivable across agent restarts</em>. It is also how we keep the frontier
+      reasoner honest — everything it "decides" is a document we can inspect.
+    </p>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     4. PRESSURE → CAPABILITY MAP
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">4</span> Pressure → Capability Map <span class="rule"></span></div>
+  <div class="section-lede">
+    Every Phase-2 milestone is anchored to a named adversary pressure. If a milestone does not
+    reduce one of these four, it does not belong in Argus.
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 200px">Adversary pressure</th>
+          <th>Argus capability</th>
+          <th style="width: 160px">Milestone</th>
+          <th style="width: 220px">Layer · Existing anchor</th>
+          <th style="width: 120px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#1 Time compression</span></td>
+          <td><strong>Exploit-to-Detection Synthesis</strong> — draft ES|QL/EQL rule from CVE + PoC in minutes, gated by backtest + regression.</td>
+          <td><span class="pill pill-argus">M2.2</span></td>
+          <td>Hypothesis · <code>kibana#258362</code></td>
+          <td><span class="pill pill-amber">Extends existing PR</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#1 Time compression</span></td>
+          <td><strong>Mythos-era exploit probability enrichment</strong> — per-CVE <code>exploit_probability_24h</code> field driving patch-window risk scoring.</td>
+          <td><span class="pill pill-argus">M2.3</span></td>
+          <td>Sensing → Hypothesis · <code>kibana#258041</code></td>
+          <td><span class="pill pill-amber">Extends existing PR</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#2 Variant explosion</span></td>
+          <td><strong>Detection Eval Vertical</strong> — mutation-robust evaluator, FPR-on-benign, latency-p95, wired into every rule proposal.</td>
+          <td><span class="pill pill-argus">M2.1</span></td>
+          <td>Validation · <code>security-team#16546</code></td>
+          <td><span class="pill pill-green">New sub-issue</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#3 Agentic adversary</span></td>
+          <td><strong>Frontier-Adversary Simulation Mode</strong> — <code>mythos_class_adversary</code> preset in the difficulty controller with goal-directed chained TTPs.</td>
+          <td><span class="pill pill-argus">M2.4</span></td>
+          <td>Sensing (telemetry gen) · <code>soc-difficulty-controller</code></td>
+          <td><span class="pill pill-green">New preset</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#3 Agentic adversary</span></td>
+          <td><strong>Reasoning-Trace Governance</strong> — every Argus agent emits OTLP spans → Elasticsearch; each autonomous action references a trace id.</td>
+          <td><span class="pill pill-argus">M2.5</span></td>
+          <td>Governance · native OTLP → ES</td>
+          <td><span class="pill pill-green">New capability</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">#4 Capability asymmetry</span></td>
+          <td><strong>Telemetry-first detection surface</strong> — Shadow-AI-Discovery telemetry becomes an Argus sensor; rules and behaviors land in Argus rule packs.</td>
+          <td><span class="pill pill-argus">M2.1 + M2.2</span></td>
+          <td>Sensing · <code>integrations#18123</code></td>
+          <td><span class="pill pill-cyan">In-flight upstream</span></td>
+        </tr>
+        <tr>
+          <td class="name"><span class="pill pill-mythos">All four</span></td>
+          <td><strong>Argus Console</strong> — a single pane of glass showing mutation cascade, reasoning trace, scorecard, and demo-ready posture. Phase-3.</td>
+          <td><span class="pill pill-argus">P3</span></td>
+          <td>Governance (UX) · Security Solution plugin</td>
+          <td><span class="pill pill-muted">Phase 3</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     5. ROADMAP
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">5</span> 24-Week Roadmap <span class="rule"></span></div>
+  <div class="section-lede">
+    Three phases. Phase 1 establishes narrative and demo posture. Phase 2 delivers the five
+    Mythos-specific capabilities. Phase 3 closes the autonomy loop and productizes the console.
+  </div>
+
+  <div class="card">
+
+    <div class="phase">
+      <div class="phase-label">
+        <span class="phase-num">Phase 1</span>
+        <span class="phase-name">Foundations &amp; Narrative</span>
+        <span class="phase-window">Weeks 0 – 4</span>
+      </div>
+      <div>
+        <ul class="feature-list">
+          <li><strong>Argus threat model</strong> <span class="pill pill-argus">this doc</span> — primary strategic artifact; named adversary pressures, design principles, layer map.</li>
+          <li><strong>Argus architecture one-pager</strong> — printable, demo-ready diagram of the five layers + two-paragraph pitch.</li>
+          <li><strong>Capability mapping matrix</strong> — every existing Kibana PR / security-team issue mapped to a layer and pressure.</li>
+          <li><strong>Mythos-era simulation preset</strong> — <code>mythos_class_adversary</code> Caldera profile (telemetry-only, sandboxed).</li>
+          <li><strong>Demo storyboard v1</strong> — three scripted scenarios (CVE response, frontier simulation, governance trace), ~10 min total.</li>
+        </ul>
+        <div class="mt-sm text-xs text-muted">Exit criterion: a single person can walk the demo end-to-end using these artifacts with zero slide deck.</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-label">
+        <span class="phase-num">Phase 2</span>
+        <span class="phase-name">Mythos-Specific Capabilities</span>
+        <span class="phase-window">Weeks 4 – 16</span>
+      </div>
+      <div>
+        <ul class="feature-list">
+          <li><strong>M2.1 · Detection Eval Vertical</strong> — new sub-issue under <code>security-team#16546</code>. Evaluators: <code>detection.precision</code>, <code>.recall</code>, <code>.mutation_robust</code>, <code>.fpr_on_benign</code>, <code>.latency_p95</code>. Data stream <code>logs-argus_eval.scenarios-*</code>. Workflow <code>soc-detection-eval.yaml</code> wired to the rule preview API.</li>
+          <li><strong>M2.2 · Exploit-to-Detection Synthesis</strong> — extends <code>kibana#258362</code> (deteng skill) with a <code>synthesize_detection_from_exploit</code> tool: CVE + PoC → draft rule → auto-backtest → <code>pending_review</code>.</li>
+          <li><strong>M2.3 · Mythos-era Exploit Probability</strong> — extends <code>kibana#258041</code> (vuln checker) with a <code>mythos_era.exploit_probability_24h</code> field enriched from KEV / EPSS / SSVC / public PoC availability.</li>
+          <li><strong>M2.4 · Frontier-Adversary Simulation Mode</strong> — level-6 preset in the difficulty controller; goal-directed chained profile emulating planner-class adversary behavior. Caldera-only, sandboxed.</li>
+          <li><strong>M2.5 · Reasoning-Trace Governance</strong> — every Argus agent emits OTLP spans into Elasticsearch; every <code>.soc-autonomy-decisions</code> row carries <code>trace_id</code>. Auditable chain-of-thought.</li>
+        </ul>
+        <div class="mt-sm text-xs text-muted">Exit criterion: end-to-end demo — new CVE published at T+0 ⇒ rule drafted, evaluated, gated, applied, trace visible — in under 15 min.</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-label">
+        <span class="phase-num">Phase 3</span>
+        <span class="phase-name">Closing the Loop</span>
+        <span class="phase-window">Weeks 16 – 24</span>
+      </div>
+      <div>
+        <ul class="feature-list">
+          <li><strong>Drift detection</strong> — eval scores decaying over time trigger mutation proposals (retrain / redesign / deprecate) via the meta-agent.</li>
+          <li><strong>Trust-tier thresholds for frontier-class mutations</strong> — higher bar for rules that originated from exploit synthesis; more human-in-the-loop until trust is earned.</li>
+          <li><strong>Playbook learning loop</strong> — containment outcomes feed back into <code>soc-containment-playbook</code> skill; successful chains are reinforced, failures deprecated.</li>
+          <li><strong>Glasswing-compatible ingestion</strong> — optional feed of defender-facing intelligence (if/when Anthropic opens it) flows into the Sensing layer as an enrichment source.</li>
+          <li><strong>Argus Console</strong> — dedicated UI in the Security Solution plugin: mutation cascade timeline, reasoning-trace viewer, scorecard, demo mode.</li>
+        </ul>
+        <div class="mt-sm text-xs text-muted">Exit criterion: system self-maintains under a realistic adversary mix for 30 consecutive days with operator approval rate &gt; 80% and rollback rate &lt; 2%.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     6. SUCCESS METRICS
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">6</span> Demo-Grade Scorecard <span class="rule"></span></div>
+  <div class="section-lede">
+    Six numbers. Each is tied to an adversary pressure or a principle. Every scorecard review
+    walks these; everything else is supporting detail.
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Metric</th>
+          <th>What it measures</th>
+          <th>Target</th>
+          <th>Source of truth</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="name">1</td>
+          <td class="name">Time-to-detection (T2D) for new CVE</td>
+          <td>Wall-clock from CVE disclosure to first deployed (gated-approved) detection rule against Argus lab traffic.</td>
+          <td><strong>&lt; 15 min</strong> (p95)</td>
+          <td><code>.soc-evolution-log</code> + <code>kibana#258362</code> timestamps</td>
+        </tr>
+        <tr>
+          <td class="name">2</td>
+          <td class="name">Mutation-robustness score</td>
+          <td>Fraction of generated exploit variants a shipped rule still catches. Computed by <code>detection.mutation_robust</code> evaluator in M2.1.</td>
+          <td><strong>&gt; 0.75</strong> (median)</td>
+          <td><code>@kbn/evals</code> results · <code>logs-argus_eval.scenarios-*</code></td>
+        </tr>
+        <tr>
+          <td class="name">3</td>
+          <td class="name">Frontier-adversary resilience</td>
+          <td>Detection rate against <code>mythos_class_adversary</code> preset across a 7-day window.</td>
+          <td><strong>&gt; 0.70</strong> (7-day)</td>
+          <td><code>.soc-outcomes</code> joined with <code>.soc-attack-commands</code></td>
+        </tr>
+        <tr>
+          <td class="name">4</td>
+          <td class="name">Autonomous-action trust-gate pass rate</td>
+          <td>Proposed mutations that pass backtest + regression + trust cascade and reach the applier.</td>
+          <td><strong>0.60 – 0.85</strong> band</td>
+          <td><code>.soc-autonomy-decisions</code></td>
+        </tr>
+        <tr>
+          <td class="name">5</td>
+          <td class="name">False-positive rate on benign load</td>
+          <td><code>detection.fpr_on_benign</code> from M2.1; new rules must not regress this.</td>
+          <td><strong>&lt; 0.02</strong> weekly avg</td>
+          <td><code>@kbn/evals</code> benign dataset runs</td>
+        </tr>
+        <tr>
+          <td class="name">6</td>
+          <td class="name">Governance trace completeness</td>
+          <td>Fraction of autonomous actions with a resolvable <code>trace_id</code> + reasoning span.</td>
+          <td><strong>1.00</strong> (hard gate)</td>
+          <td>OTLP → ES traces joined to <code>.soc-autonomy-decisions</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     7. EXIT CRITERIA
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="section">
+  <div class="section-title"><span class="num">7</span> "Argus Is Demo-Ready" Checklist <span class="rule"></span></div>
+  <div class="section-lede">
+    What has to be true before we put Argus in front of a customer, a keynote, or an exec.
+  </div>
+
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background: var(--argus);"></span>Narrative</div>
+      <ul class="feature-list">
+        <li><strong>Threat model doc</strong> tells the Mythos story in under 3 minutes.</li>
+        <li><strong>One-pager architecture</strong> prints legibly on a single page.</li>
+        <li><strong>Capability map</strong> resolves every Argus feature to a GitHub artifact.</li>
+        <li><strong>Storyboard</strong> rehearsed end-to-end with &lt; 10 min run time.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background: var(--green);"></span>System</div>
+      <ul class="feature-list">
+        <li><strong>M2.1 eval vertical</strong> running on every rule change; scorecard live.</li>
+        <li><strong>M2.2 exploit-to-detection</strong> produces a gated rule from a staged CVE in &lt; 15 min.</li>
+        <li><strong>M2.4 frontier preset</strong> running in the lab against the production Argus stack.</li>
+        <li><strong>M2.5 reasoning traces</strong> resolvable for 100% of autonomous actions.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-argus mt-md">
+    <div class="callout-label">The One-Sentence Pitch</div>
+    <p>
+      <em>"Argus is what you get when you assume the attacker has Mythos and design the SOC as
+      a planner-class mesh on top of the world's best telemetry substrate — fast enough to
+      draft detection rules in minutes, disciplined enough to gate every autonomous action
+      with a trace, and honest enough to score its own rules against the variants the
+      attacker will generate."</em>
+    </p>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════════════════════
+     FOOTER
+     ═════════════════════════════════════════════════════════════════ -->
+<div class="footer">
+  <span><strong>ARGUS</strong> · Strategy v1 · Phase 1 Deliverable</span>
+  <span>Companion artifacts: <a href="./architecture.html">architecture.html</a> · <a href="./capability-map.md">capability-map.md</a> · <a href="./demo-storyboard.md">demo-storyboard.md</a> · <a href="./metrics.md">metrics.md</a></span>
+  <span>Confidential — Internal Engineering Reference</span>
+</div>
+
+</body>
+</html>

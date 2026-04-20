@@ -216,6 +216,7 @@ tags:
       Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
+  - name: Security entity store
   - description: |
       Exceptions are associated with detection and endpoint rules, and are used to prevent a rule from generating an alert from incoming events, even when the rule's other criteria are met. They can help reduce the number of false positives and prevent trusted processes and network activity from generating unnecessary alerts.
 
@@ -63854,6 +63855,1245 @@ paths:
       summary: Get prompts
       tags:
         - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the Entity Store log extraction configuration.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateLogExtractionExample:
+                description: Update the log extraction configuration with a new lookback period and frequency.
+                summary: Update log extraction settings
+                value:
+                  logExtraction:
+                    fieldHistoryLength: 15
+                    frequency: 10m
+                    lookbackPeriod: 6h
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateSuccessExample:
+                  description: The Entity Store configuration was successfully updated.
+                  summary: Entity Store updated
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidDurationExample:
+                  description: A log extraction parameter has an invalid duration format.
+                  summary: Invalid duration parameter
+                  value:
+                    error: Bad Request
+                    message: '[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)'
+                    statusCode: 400
+          description: Bad request.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The Entity Store has not been installed yet.
+                  summary: Entity Store not installed
+                  value:
+                    error: Not Found
+                    message: Entity store is not installed
+                    statusCode: 404
+          description: Entity Store not found.
+      summary: Update the Entity Store
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"logExtraction":{"lookbackPeriod":"6h","frequency":"10m","fieldHistoryLength":15}}' \
+              "${KIBANA_URL}/api/security/entity_store"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store
+            {
+              "logExtraction": {
+                "lookbackPeriod": "6h",
+                "frequency": "10m",
+                "fieldHistoryLength": 15
+              }
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/entities:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/entities</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List entity records from the Entity Store with paging, sorting, and filtering. Supports two modes: page-based pagination (page/per_page) and cursor-based pagination (searchAfter). The two modes cannot be combined.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: get-security-entity-store-entities
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                emptyResultExample:
+                  description: No entities matched the query.
+                  summary: Empty result
+                  value:
+                    page: 1
+                    per_page: 10
+                    records: []
+                    total: 0
+                pageModeExample:
+                  description: A paginated list of host entities sorted by timestamp in descending order, including query inspection data.
+                  summary: Page mode response with host entities
+                  value:
+                    inspect:
+                      dsl:
+                        - '{"index":["entities-latest-default"],"body":{"terms":{"entity.EngineMetadata.Type":["host"]}}}'
+                      response:
+                        - '{"took":1,"timed_out":false,"hits":{"total":{"value":1,"relation":"eq"}}}'
+                    page: 1
+                    per_page: 10
+                    records:
+                      - '@timestamp': '2026-04-10T08:30:00.000Z'
+                        asset:
+                          criticality: high_impact
+                          environment: production
+                        entity:
+                          attributes:
+                            asset: true
+                            managed: true
+                          id: host:web-server-prod-01
+                          lifecycle:
+                            first_seen: '2026-01-15T10:00:00.000Z'
+                            last_activity: '2026-04-10T08:30:00.000Z'
+                          name: web-server-prod-01
+                          risk:
+                            calculated_level: Moderate
+                            calculated_score: 47.5
+                            calculated_score_norm: 47.5
+                          source:
+                            - logs
+                          type: host
+                        host:
+                          hostname:
+                            - web-server-prod-01.example.com
+                          ip:
+                            - 10.0.1.42
+                          name: web-server-prod-01
+                          os:
+                            name: Ubuntu
+                            type: linux
+                    total: 1
+                searchAfterModeExample:
+                  description: A cursor-based response with entities and a search_after token for the next page.
+                  summary: Search-after mode response
+                  value:
+                    entities:
+                      - '@timestamp': '2026-04-10T08:30:00.000Z'
+                        entity:
+                          id: user:jane.doe@example.com
+                          name: jane.doe
+                          type: user
+                        user:
+                          email:
+                            - jane.doe@example.com
+                          name: jane.doe
+                    nextSearchAfter:
+                      - 1712736600000
+                      - 1
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                invalidFilterExample:
+                  description: The provided Kibana Query Language filter could not be parsed.
+                  summary: Invalid filter
+                  value:
+                    error: Bad Request
+                    message: |-
+                      Invalid filter: Expected "(", "{", value, whitespace but ":" found.
+                      invalid :: query
+                      ---------^
+                    statusCode: 400
+                mixedModesExample:
+                  description: Cannot combine page-based pagination with cursor-based pagination in the same request.
+                  summary: Mixed pagination modes
+                  value:
+                    error: Bad Request
+                    message: '[request query]: Cannot combine page/per_page with searchAfter'
+                    statusCode: 400
+          description: Bad request.
+      summary: List entities
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=%40timestamp&sort_order=desc"
+        - lang: Console
+          source: |
+            GET kbn://api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=@timestamp&sort_order=desc
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/entities/:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/entities/</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete a single entity record from the Entity Store. The entity is immediately removed from the latest index.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: delete-security-entity-store-entities
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              deleteEntityExample:
+                description: Delete a single entity from the Entity Store using its entity identifier.
+                summary: Delete an entity by identifier
+                value:
+                  entityId: host:web-server-prod-01
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSuccessExample:
+                  description: The entity was found and successfully removed from the latest index.
+                  summary: Entity deleted
+                  value:
+                    deleted: true
+          description: Indicates the entity was successfully deleted.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No entity with the specified identifier exists in the Entity Store.
+                  summary: Entity not found
+                  value:
+                    error: Not Found
+                    message: Entity ID 'host:web-server-prod-01' not found
+                    statusCode: 404
+          description: Entity not found.
+      summary: Delete an entity
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X DELETE -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entityId":"host:web-server-prod-01"}' \
+              "${KIBANA_URL}/api/security/entity_store/entities/"
+        - lang: Console
+          source: |
+            DELETE kbn://api/security/entity_store/entities/
+            {
+              "entityId": "host:web-server-prod-01"
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/entities/{entityType}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/entities/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Create a new entity record in the Entity Store for the specified entity type.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-entities-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createHostEntityExample:
+                description: Create a new host entity record with basic host and entity fields. The entity identifier must match the auto-generated format for the entity type.
+                summary: Create a host entity
+                value:
+                  asset:
+                    business_unit: Engineering
+                    criticality: high_impact
+                    environment: production
+                  entity:
+                    attributes:
+                      asset: true
+                      managed: true
+                    id: host:web-server-prod-01
+                    name: web-server-prod-01
+                    source:
+                      - manual
+                    type: host
+                  host:
+                    hostname:
+                      - web-server-prod-01.example.com
+                    ip:
+                      - 10.0.1.42
+                    name: web-server-prod-01
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createSuccessExample:
+                  description: The entity record was successfully created in the Entity Store.
+                  summary: Entity created
+                  value:
+                    ok: true
+          description: Indicates the entity was successfully created.
+        '400':
+          content:
+            application/json:
+              examples:
+                euidMismatchExample:
+                  description: The supplied entity identifier does not match the auto-generated identifier derived from the entity fields.
+                  summary: Entity identifier mismatch
+                  value:
+                    error: Bad Request
+                    message: 'Bad request: Supplied ID my-custom-id does not match generated EUID host:web-server-prod-01'
+                    statusCode: 400
+          description: Bad request.
+        '409':
+          content:
+            application/json:
+              examples:
+                conflictExample:
+                  description: An entity with the specified identifier already exists.
+                  summary: Entity already exists
+                  value:
+                    error: Conflict
+                    message: Entity ID 'host:web-server-prod-01' already exists
+                    statusCode: 409
+          description: Conflict.
+      summary: Create an entity
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entity":{"id":"host:web-server-prod-01","name":"web-server-prod-01","type":"host","source":["manual"],"attributes":{"asset":true}},"host":{"name":"web-server-prod-01","ip":["10.0.1.42"]}}' \
+              "${KIBANA_URL}/api/security/entity_store/entities/host"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/entities/host
+            {
+              "entity": {
+                "id": "host:web-server-prod-01",
+                "name": "web-server-prod-01",
+                "type": "host",
+                "source": ["manual"],
+                "attributes": { "asset": true }
+              },
+              "host": {
+                "name": "web-server-prod-01",
+                "ip": ["10.0.1.42"]
+              }
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/entities/{entityType}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update an existing entity record in the Entity Store. By default only certain fields can be updated. Set the `force` query parameter to `true` to update protected fields.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-entities-entitytype
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateEntityAttributesExample:
+                description: Update the attributes of an existing user entity. Fields like entity.name and entity.type are protected and require the force query parameter.
+                summary: Update entity attributes
+                value:
+                  entity:
+                    attributes:
+                      managed: true
+                      mfa_enabled: true
+                    id: user:jane.doe@example.com
+                    lifecycle:
+                      last_activity: '2026-04-10T14:30:00.000Z'
+                    name: jane.doe
+                    type: user
+                  user:
+                    email:
+                      - jane.doe@example.com
+                    name: jane.doe
+                    roles:
+                      - admin
+                      - analyst
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateSuccessExample:
+                  description: The entity record was successfully updated.
+                  summary: Entity updated
+                  value:
+                    ok: true
+          description: Indicates the entity was successfully updated.
+        '400':
+          content:
+            application/json:
+              examples:
+                protectedFieldsExample:
+                  description: The request attempts to update protected fields without the force query parameter.
+                  summary: Protected fields without force
+                  value:
+                    error: Bad Request
+                    message: 'Bad request: The following attributes are not allowed to be updated without forcing it (?force=true): entity.name, entity.type'
+                    statusCode: 400
+          description: Bad request.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: No entity with the specified identifier exists.
+                  summary: Entity not found
+                  value:
+                    error: Not Found
+                    message: Entity ID 'user:jane.doe@example.com' not found
+                    statusCode: 404
+          description: Entity not found.
+      summary: Update an entity
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entity":{"id":"user:jane.doe@example.com","name":"jane.doe","type":"user","attributes":{"managed":true,"mfa_enabled":true}},"user":{"name":"jane.doe"}}' \
+              "${KIBANA_URL}/api/security/entity_store/entities/user?force=true"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/entities/user?force=true
+            {
+              "entity": {
+                "id": "user:jane.doe@example.com",
+                "name": "jane.doe",
+                "type": "user",
+                "attributes": { "managed": true, "mfa_enabled": true }
+              },
+              "user": { "name": "jane.doe" }
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/entities/bulk:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/entities/bulk</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update multiple entity records in the Entity Store in a single request.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-entities-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkUpdateExample:
+                description: Update a host entity and a user entity in a single request.
+                summary: Bulk update multiple entities
+                value:
+                  entities:
+                    - doc:
+                        entity:
+                          attributes:
+                            asset: true
+                          id: host:web-server-prod-01
+                          name: web-server-prod-01
+                          type: host
+                        host:
+                          name: web-server-prod-01
+                      type: host
+                    - doc:
+                        entity:
+                          attributes:
+                            managed: true
+                          id: user:jane.doe@example.com
+                          name: jane.doe
+                          type: user
+                        user:
+                          name: jane.doe
+                      type: user
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkUpdatePartialExample:
+                  description: Some entities were updated but others encountered Elasticsearch-level errors.
+                  summary: Partial success with errors
+                  value:
+                    errors:
+                      - _id: 5de9f93a68a72532e736bf5a6184b06300b9cabf
+                        reason: '[5de9f93a68a72532e736bf5a6184b06300b9cabf]: document missing'
+                        status: 404
+                        type: document_missing_exception
+                    ok: true
+                bulkUpdateSuccessExample:
+                  description: All entities were successfully updated with no errors.
+                  summary: All entities updated
+                  value:
+                    errors: []
+                    ok: true
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                protectedFieldsExample:
+                  description: The request attempts to update protected fields without the force query parameter.
+                  summary: Protected fields without force
+                  value:
+                    error: Bad Request
+                    message: 'Bad request: The following attributes are not allowed to be updated without forcing it (?force=true): entity.name, entity.type'
+                    statusCode: 400
+          description: Bad request.
+      summary: Bulk update entities
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entities":[{"type":"host","doc":{"entity":{"id":"host:web-server-prod-01","name":"web-server-prod-01","type":"host","attributes":{"asset":true}},"host":{"name":"web-server-prod-01"}}}]}' \
+              "${KIBANA_URL}/api/security/entity_store/entities/bulk?force=true"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/entities/bulk?force=true
+            {
+              "entities": [
+                {
+                  "type": "host",
+                  "doc": {
+                    "entity": {
+                      "id": "host:web-server-prod-01",
+                      "name": "web-server-prod-01",
+                      "type": "host",
+                      "attributes": { "asset": true }
+                    },
+                    "host": { "name": "web-server-prod-01" }
+                  }
+                }
+              ]
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/install:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/install</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install the Entity Store, creating engines for the specified entity types and configuring log extraction.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-install
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              installDefaultExample:
+                description: Install the Entity Store for all entity types with default log extraction settings.
+                summary: Install with default entity types
+                value:
+                  entityTypes:
+                    - user
+                    - host
+                    - service
+                    - generic
+                  logExtraction: {}
+              installWithCustomSettingsExample:
+                description: Install the Entity Store for host entities only with a custom lookback period and field history length.
+                summary: Install with custom log extraction
+                value:
+                  entityTypes:
+                    - host
+                  logExtraction:
+                    delay: 2m
+                    fieldHistoryLength: 20
+                    filter: 'host.os.type: linux'
+                    frequency: 5m
+                    lookbackPeriod: 12h
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                alreadyInstalledExample:
+                  description: All requested entity types were already installed.
+                  summary: Already installed
+                  value:
+                    ok: true
+          description: Indicates all requested entity types are already installed.
+        '201':
+          content:
+            application/json:
+              examples:
+                installSuccessExample:
+                  description: The Entity Store was installed and engines are being created.
+                  summary: Entity Store installed
+                  value:
+                    ok: true
+          description: Indicates the Entity Store was successfully installed.
+        '403':
+          content:
+            application/json:
+              examples:
+                forbiddenExample:
+                  description: The user does not have the required Elasticsearch privileges.
+                  summary: Insufficient privileges
+                  value:
+                    error: Forbidden
+                    message: User 'analyst' has insufficient privileges
+                    statusCode: 403
+          description: Insufficient privileges.
+      summary: Install the Entity Store
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entityTypes":["user","host","service","generic"],"logExtraction":{}}' \
+              "${KIBANA_URL}/api/security/entity_store/install"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/install
+            {
+              "entityTypes": ["user", "host", "service", "generic"],
+              "logExtraction": {}
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/group:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/group</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: get-security-entity-store-resolution-group
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                resolutionGroupExample:
+                  description: Returns the resolution group for an entity, including the target entity, all aliases, and the group size.
+                  summary: Resolution group with linked entities
+                  value:
+                    aliases:
+                      - '@timestamp': '2026-04-10T08:25:00.000Z'
+                        entity:
+                          id: user:jdoe@example.com
+                          name: jdoe
+                          relationships:
+                            resolution:
+                              resolved_to: user:jane.doe@example.com
+                          type: user
+                        user:
+                          name: jdoe
+                    group_size: 2
+                    target:
+                      '@timestamp': '2026-04-10T08:30:00.000Z'
+                      entity:
+                        id: user:jane.doe@example.com
+                        name: jane.doe
+                        type: user
+                      user:
+                        email:
+                          - jane.doe@example.com
+                        name: jane.doe
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                truncatedSearchExample:
+                  description: The resolution search returned too many results and was truncated.
+                  summary: Search results truncated
+                  value:
+                    error: Bad Request
+                    message: Resolution search truncated
+                    statusCode: 400
+          description: Bad request.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: The specified entity does not exist or has no resolution group.
+                  summary: Entity not found
+                  value:
+                    error: Not Found
+                    message: 'Entities not found: [user:nonexistent@example.com]'
+                    statusCode: 404
+          description: Entity not found.
+      summary: Get resolution group
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/resolution/group?entity_id=user%3Ajane.doe%40example.com"
+        - lang: Console
+          source: |
+            GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/link:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/link</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Link one or more entities to a target entity, creating a resolution group. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: post-security-entity-store-resolution-link
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              linkEntitiesExample:
+                description: Link two user entities to a target entity, creating a resolution group.
+                summary: Link entities to a target
+                value:
+                  entity_ids:
+                    - user:jdoe@example.com
+                    - user:j.doe@example.com
+                  target_id: user:jane.doe@example.com
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                linkSuccessExample:
+                  description: The entities were successfully linked to the target entity.
+                  summary: Entities linked
+                  value:
+                    linked:
+                      - user:jdoe@example.com
+                      - user:j.doe@example.com
+                    skipped: []
+                    target_id: user:jane.doe@example.com
+          description: Indicates a successful response.
+        '400':
+          content:
+            application/json:
+              examples:
+                mixedTypesExample:
+                  description: All entities in a resolution group must be of the same type.
+                  summary: Mixed entity types
+                  value:
+                    error: Bad Request
+                    message: Cannot link entities of different types
+                    statusCode: 400
+                selfLinkExample:
+                  description: Cannot link an entity to itself.
+                  summary: Self-link error
+                  value:
+                    error: Bad Request
+                    message: Cannot link entity 'user:jane.doe@example.com' to itself.
+                    statusCode: 400
+          description: Bad request.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: One or more of the specified entity identifiers were not found.
+                  summary: Entities not found
+                  value:
+                    error: Not Found
+                    message: 'Entities not found: [user:nonexistent@example.com, user:also-nonexistent@example.com]'
+                    statusCode: 404
+          description: Entities not found.
+      summary: Link entities
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"target_id":"user:jane.doe@example.com","entity_ids":["user:jdoe@example.com"]}' \
+              "${KIBANA_URL}/api/security/entity_store/resolution/link"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/resolution/link
+            {
+              "target_id": "user:jane.doe@example.com",
+              "entity_ids": ["user:jdoe@example.com"]
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/resolution/unlink:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/resolution/unlink</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Remove one or more entities from their resolution group. Requires an enterprise license.<br/><br/>[Required authorization] Route required privileges: securitySolution AND securitySolution-entity-analytics.
+      operationId: post-security-entity-store-resolution-unlink
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              unlinkEntitiesExample:
+                description: Remove entities from their resolution group, restoring them as standalone entities.
+                summary: Unlink entities from their resolution group
+                value:
+                  entity_ids:
+                    - user:jdoe@example.com
+                    - user:j.doe@example.com
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                unlinkSuccessExample:
+                  description: The entities were successfully removed from their resolution group.
+                  summary: Entities unlinked
+                  value:
+                    skipped: []
+                    unlinked:
+                      - user:jdoe@example.com
+                      - user:j.doe@example.com
+          description: Indicates a successful response.
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundExample:
+                  description: One or more of the specified entity identifiers were not found.
+                  summary: Entities not found
+                  value:
+                    error: Not Found
+                    message: 'Entities not found: [user:nonexistent@example.com]'
+                    statusCode: 404
+          description: Entities not found.
+      summary: Unlink entities
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entity_ids":["user:jdoe@example.com"]}' \
+              "${KIBANA_URL}/api/security/entity_store/resolution/unlink"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/resolution/unlink
+            {
+              "entity_ids": ["user:jdoe@example.com"]
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/start:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/start</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Start previously stopped entity engines, resuming data processing for the specified entity types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-start
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              startAllExample:
+                description: Start all stopped entity engines.
+                summary: Start all entity engines
+                value:
+                  entityTypes:
+                    - user
+                    - host
+                    - service
+                    - generic
+              startSingleExample:
+                description: Start only the host entity engine.
+                summary: Start a single entity engine
+                value:
+                  entityTypes:
+                    - host
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                startSuccessExample:
+                  description: The specified entity engines were successfully started.
+                  summary: Engines started
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+      summary: Start Entity Store engines
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entityTypes":["user","host","service","generic"]}' \
+              "${KIBANA_URL}/api/security/entity_store/start"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/start
+            {
+              "entityTypes": ["user", "host", "service", "generic"]
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/status:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: get-security-entity-store-status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                notInstalledExample:
+                  description: The Entity Store has not been installed.
+                  summary: Entity Store not installed
+                  value:
+                    engines: []
+                    status: not_installed
+                runningStatusExample:
+                  description: The Entity Store is running with two started engines using default settings.
+                  summary: Entity Store running
+                  value:
+                    engines:
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 30s
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxPageSearchSize: 10000
+                        status: started
+                        timeout: 25s
+                        timestampField: '@timestamp'
+                        type: host
+                      - delay: 1m
+                        docsPerSecond: -1
+                        enrichPolicyExecutionInterval: null
+                        fieldHistoryLength: 10
+                        filter: ''
+                        frequency: 30s
+                        indexPattern: ''
+                        lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
+                        lookbackPeriod: 3h
+                        maxPageSearchSize: 10000
+                        status: started
+                        timeout: 25s
+                        timestampField: '@timestamp'
+                        type: user
+                    status: running
+          description: Indicates a successful response.
+      summary: Get Entity Store status
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+              "${KIBANA_URL}/api/security/entity_store/status?include_components=false"
+        - lang: Console
+          source: |
+            GET kbn://api/security/entity_store/status?include_components=false
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/stop:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/stop</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Stop running entity engines, pausing data processing for the specified entity types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: put-security-entity-store-stop
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              stopAllExample:
+                description: Stop all running entity engines.
+                summary: Stop all entity engines
+                value:
+                  entityTypes:
+                    - user
+                    - host
+                    - service
+                    - generic
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                stopSuccessExample:
+                  description: The specified entity engines were successfully stopped.
+                  summary: Engines stopped
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+      summary: Stop Entity Store engines
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entityTypes":["user","host","service","generic"]}' \
+              "${KIBANA_URL}/api/security/entity_store/stop"
+        - lang: Console
+          source: |
+            PUT kbn://api/security/entity_store/stop
+            {
+              "entityTypes": ["user", "host", "service", "generic"]
+            }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/uninstall:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/uninstall</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Uninstall the Entity Store, removing engines and associated resources for the specified entity types.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-uninstall
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              uninstallAllExample:
+                description: Uninstall all entity engines from the Entity Store.
+                summary: Uninstall all entity types
+                value:
+                  entityTypes:
+                    - user
+                    - host
+                    - service
+                    - generic
+              uninstallSingleExample:
+                description: Uninstall only the host engine from the Entity Store.
+                summary: Uninstall a single entity type
+                value:
+                  entityTypes:
+                    - host
+            schema: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                uninstallSuccessExample:
+                  description: The specified entity engines were successfully uninstalled.
+                  summary: Entity Store uninstalled
+                  value:
+                    ok: true
+          description: Indicates a successful response.
+      summary: Uninstall the Entity Store
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"entityTypes":["user","host","service","generic"]}' \
+              "${KIBANA_URL}/api/security/entity_store/uninstall"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/uninstall
+            {
+              "entityTypes": ["user", "host", "service", "generic"]
+            }
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

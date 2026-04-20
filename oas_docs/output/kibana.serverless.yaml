@@ -66486,6 +66486,8 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                draft:
+                  type: boolean
                 status:
                   enum:
                     - enabled
@@ -66717,6 +66719,8 @@ paths:
                                     description: A non-empty string.
                                     minLength: 1
                                     type: string
+                                  draft:
+                                    type: boolean
                                   status:
                                     enum:
                                       - enabled
@@ -87713,6 +87717,8 @@ components:
                             description: A non-empty string.
                             minLength: 1
                             type: string
+                          draft:
+                            type: boolean
                           status:
                             enum:
                               - enabled

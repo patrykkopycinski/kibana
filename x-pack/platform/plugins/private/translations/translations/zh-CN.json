@@ -2964,7 +2964,6 @@
     "esql.flyout.minimumWidth.small": "小",
     "esql.flyout.previewValues.placeholder": "值预览",
     "esql.flyout.saveLabel": "保存",
-    "esql.flyout.selectionType.callout": "要确保多选控件正常运行，必须在 ES|QL 查询中使用{mvContainsLink}。",
     "esql.flyout.selectionType.label": "选择项",
     "esql.flyout.selectionType.multi": "允许多选",
     "esql.flyout.selectionType.single": "只允许单选",

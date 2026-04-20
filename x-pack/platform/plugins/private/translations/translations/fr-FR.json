@@ -2949,7 +2949,6 @@
     "esql.flyout.minimumWidth.small": "Petite",
     "esql.flyout.previewValues.placeholder": "Aperçu des valeurs",
     "esql.flyout.saveLabel": "Enregistrer",
-    "esql.flyout.selectionType.callout": "Vous devez utiliser {mvContainsLink} dans votre requête ES|QL pour que les contrôles à sélection multiple fonctionnent.",
     "esql.flyout.selectionType.label": "Sélections",
     "esql.flyout.selectionType.multi": "Permettre des sélections multiples",
     "esql.flyout.selectionType.single": "N’autoriser qu’une sélection unique",

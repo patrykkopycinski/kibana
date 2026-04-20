@@ -2947,7 +2947,6 @@
     "esql.flyout.minimumWidth.small": "Klein",
     "esql.flyout.previewValues.placeholder": "Vorschau der Werte",
     "esql.flyout.saveLabel": "Speichern",
-    "esql.flyout.selectionType.callout": "Sie müssen {mvContainsLink} in Ihrer ES|QL-Abfrage verwenden, damit die Steuerelemente zur Mehrfachauswahl funktionieren.",
     "esql.flyout.selectionType.label": "Auswahlen",
     "esql.flyout.selectionType.multi": "Mehrfachauswahl zulassen",
     "esql.flyout.selectionType.single": "Nur eine einzige Auswahl zulassen",

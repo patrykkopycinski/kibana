@@ -97,7 +97,6 @@
     "aiAssistantManagementSelection.breadcrumb.index": "KI-Assistenten",
     "aiAssistantManagementSelection.headerButton.aiAgentLabel": "KI-Agent",
     "aiAssistantManagementSelection.headerButton.applyLabel": "Weiter",
-    "aiAssistantManagementSelection.headerButton.betaLabel": "BETA",
     "aiAssistantManagementSelection.headerButton.cancelLabel": "Abbrechen",
     "aiAssistantManagementSelection.headerButton.description": "Wählen Sie aus, welche Chat-Funktion Sie in Kibana verwenden möchten. {learnMoreLink}. <bold>Diese Einstellung gilt für alle Nutzer im Bereich.</bold> Um dies später zu ändern, gehen Sie zu {genAiSettings}.",
     "aiAssistantManagementSelection.headerButton.label": "AI Assistant",

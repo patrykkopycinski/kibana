@@ -97,7 +97,6 @@
     "aiAssistantManagementSelection.breadcrumb.index": "Assistants d'IA",
     "aiAssistantManagementSelection.headerButton.aiAgentLabel": "Agent IA",
     "aiAssistantManagementSelection.headerButton.applyLabel": "Continuer",
-    "aiAssistantManagementSelection.headerButton.betaLabel": "Bêta",
     "aiAssistantManagementSelection.headerButton.cancelLabel": "Annuler",
     "aiAssistantManagementSelection.headerButton.description": "Choisissez quelle expérience de chat utiliser dans Kibana. {learnMoreLink}. <bold>Ce paramètre s’applique à tous les utilisateurs de l’espace.</bold> Pour le modifier plus tard, allez sur {genAiSettings}.",
     "aiAssistantManagementSelection.headerButton.label": "Assistant d'IA",

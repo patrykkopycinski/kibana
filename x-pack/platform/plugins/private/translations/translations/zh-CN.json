@@ -97,7 +97,6 @@
     "aiAssistantManagementSelection.breadcrumb.index": "AI 助手",
     "aiAssistantManagementSelection.headerButton.aiAgentLabel": "AI 代理",
     "aiAssistantManagementSelection.headerButton.applyLabel": "继续",
-    "aiAssistantManagementSelection.headerButton.betaLabel": "公测版",
     "aiAssistantManagementSelection.headerButton.cancelLabel": "取消",
     "aiAssistantManagementSelection.headerButton.description": "选择在 Kibana 中使用哪种聊天体验。{learnMoreLink}。<bold>此设置适用于空间内的所有用户。</bold>要以后更改此项，请前往 {genAiSettings}。",
     "aiAssistantManagementSelection.headerButton.label": "AI 助手",

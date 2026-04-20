@@ -97,7 +97,6 @@
     "aiAssistantManagementSelection.breadcrumb.index": "AI Assistant",
     "aiAssistantManagementSelection.headerButton.aiAgentLabel": "AIエージェント",
     "aiAssistantManagementSelection.headerButton.applyLabel": "続行",
-    "aiAssistantManagementSelection.headerButton.betaLabel": "ベータ",
     "aiAssistantManagementSelection.headerButton.cancelLabel": "キャンセル",
     "aiAssistantManagementSelection.headerButton.description": "Kibana全体でどのチャット体験を使用するか選択します。{learnMoreLink}。<bold>この設定はスペース内のすべてのユーザーに適用されます。</bold>後で変更する場合は、{genAiSettings}に移動してください。",
     "aiAssistantManagementSelection.headerButton.label": "AI Assistant",

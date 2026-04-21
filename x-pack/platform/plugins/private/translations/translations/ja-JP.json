@@ -46292,7 +46292,6 @@
     "xpack.streams.addAttachmentFlyout.searchPlaceholder": "添付ファイルを検索する",
     "xpack.streams.addAttachmentFlyout.selectedAttachmentsCount": "{count}件の添付ファイルが選択されました",
     "xpack.streams.addAttachmentFlyout.totalAttachmentsCount": "{count}件の添付ファイル",
-    "xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder": "重要度を選択",
     "xpack.streams.advancedFieldMappingOptions.docs.label": "パラメータはJSONで定義できます。{link}",
     "xpack.streams.advancedFieldMappingOptions.error": "無効な高度なフィールドマッピングパラメーター。JSON オブジェクトとして定義する必要があります。",
     "xpack.streams.advancedFieldMappingOptions.label": "高度なフィールドマッピングパラメーター",

@@ -46293,7 +46293,6 @@
     "xpack.streams.addAttachmentFlyout.searchPlaceholder": "搜索附件",
     "xpack.streams.addAttachmentFlyout.selectedAttachmentsCount": "{count} 个附件已选择",
     "xpack.streams.addAttachmentFlyout.totalAttachmentsCount": "{count} 附件",
-    "xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder": "选择严重程度",
     "xpack.streams.advancedFieldMappingOptions.docs.label": "参数可以用 JSON 定义。{link}",
     "xpack.streams.advancedFieldMappingOptions.error": "高级字段映射参数无效。它应该被定义为一个 JSON 对象。",
     "xpack.streams.advancedFieldMappingOptions.label": "高级字段映射参数",

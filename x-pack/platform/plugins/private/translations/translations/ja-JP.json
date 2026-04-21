@@ -2947,7 +2947,6 @@
     "esql.flyout.controlTypeOptions.valuesFromQueryLabel": "クエリの値",
     "esql.flyout.controlTypeOptionsOptions.disabledTooltip": "現在、関数やフィールド名を置換できるのは［固定値］タイプのみです。",
     "esql.flyout.controlTypeOptionsOptions.label": "型",
-    "esql.flyout.controlTypeOptionsOptions.placeholder": "コントロールタイプを選択してください",
     "esql.flyout.displayMultipleColsCallout.description": "現在、クエリは{totalColumns}列を返しています。列{chooseColumnPopover}を選択するか、{boldText}を使用します。",
     "esql.flyout.displayMultipleColsCallout.title": "クエリは1つの列を返す必要があります",
     "esql.flyout.displayNoValuesForControlCallout.title": "このクエリは値を返していません。編集して、再度実行してください。",

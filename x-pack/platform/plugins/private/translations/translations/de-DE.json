@@ -46099,7 +46099,6 @@
     "xpack.streams.addAttachmentFlyout.searchPlaceholder": "Nach Anhängen suchen",
     "xpack.streams.addAttachmentFlyout.selectedAttachmentsCount": "{count} Anlagen ausgewählt",
     "xpack.streams.addAttachmentFlyout.totalAttachmentsCount": "{count} Anhänge",
-    "xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder": "Schweregrad auswählen",
     "xpack.streams.advancedFieldMappingOptions.docs.label": "Parameter können mit JSON definiert werden. {link}",
     "xpack.streams.advancedFieldMappingOptions.error": "Ungültige erweiterte Parameter für das Feld-Mapping. Es sollte als JSON-Objekt festgelegt werden.",
     "xpack.streams.advancedFieldMappingOptions.label": "Erweiterte Parameter für Feld-Mapping",

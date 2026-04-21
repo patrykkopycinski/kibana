@@ -46141,7 +46141,6 @@
     "xpack.streams.addAttachmentFlyout.searchPlaceholder": "Rechercher les pièces jointes",
     "xpack.streams.addAttachmentFlyout.selectedAttachmentsCount": "{count} pièces jointes sélectionnées",
     "xpack.streams.addAttachmentFlyout.totalAttachmentsCount": "{count} pièces jointes",
-    "xpack.streams.addSignificantEventFlyout.manualFlow.severityPlaceholder": "Sélectionner le niveau de gravité",
     "xpack.streams.advancedFieldMappingOptions.docs.label": "Les paramètres peuvent être définis avec JSON. {link}",
     "xpack.streams.advancedFieldMappingOptions.error": "Paramètres avancés de mapping des champs non valides. Ils doivent être définis comme des objets JSON.",
     "xpack.streams.advancedFieldMappingOptions.label": "Paramètres avancés de mapping de champ",

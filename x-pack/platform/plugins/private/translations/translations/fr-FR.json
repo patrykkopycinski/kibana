@@ -2931,7 +2931,6 @@
     "esql.flyout.controlTypeOptions.valuesFromQueryLabel": "Valeurs d'une requête",
     "esql.flyout.controlTypeOptionsOptions.disabledTooltip": "Pour le moment, seul le type [Valeurs statiques] est proposé pour le remplacement de fonctions ou de noms de champs.",
     "esql.flyout.controlTypeOptionsOptions.label": "Type",
-    "esql.flyout.controlTypeOptionsOptions.placeholder": "Choisir un type de contrôle",
     "esql.flyout.displayMultipleColsCallout.description": "Votre recherche renvoie actuellement {totalColumns} colonnes. Choisissez une colonne {chooseColumnPopover} ou utilisez {boldText}.",
     "esql.flyout.displayMultipleColsCallout.title": "Votre requête doit renvoyer une seule colonne.",
     "esql.flyout.displayNoValuesForControlCallout.title": "Cette requête ne renvoie aucune valeur. Modifiez-le et exécutez-le à nouveau.",

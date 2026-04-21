@@ -2946,7 +2946,6 @@
     "esql.flyout.controlTypeOptions.valuesFromQueryLabel": "查询中的值",
     "esql.flyout.controlTypeOptionsOptions.disabledTooltip": "当前，仅[静态值]类型可用于替代函数或字段名称。",
     "esql.flyout.controlTypeOptionsOptions.label": "类型",
-    "esql.flyout.controlTypeOptionsOptions.placeholder": "选择控件类型",
     "esql.flyout.displayMultipleColsCallout.description": "您的查询当前正返回 {totalColumns} 列。选择列 {chooseColumnPopover} 或使用 {boldText}。",
     "esql.flyout.displayMultipleColsCallout.title": "您的查询必须返回单个列",
     "esql.flyout.displayNoValuesForControlCallout.title": "此查询未返回任何值。请编辑后再次运行。",

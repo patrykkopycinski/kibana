@@ -17,7 +17,7 @@ import {
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
-import { evaluateCondition } from './evaluate_conditions';
+import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
 import { useYamlFormSync } from './hooks/use_yaml_form_sync';
 import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../utils';

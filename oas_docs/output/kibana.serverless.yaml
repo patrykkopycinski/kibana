@@ -20747,6 +20747,8 @@ paths:
                       queryRule:
                         description: KQL query used to filter data from the provided index patterns
                         type: string
+                      range:
+                        $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
                       type:
                         $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
                     required:
@@ -101196,6 +101198,19 @@ components:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
           required:
             - criticality_level
+    Security_Entity_Analytics_API_DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      properties:
+        end:
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+          type: string
+        start:
+          description: Start of the lookback period (date math or ISO string, e.g. "now-10d")
+          type: string
+      required:
+        - start
+        - end
     Security_Entity_Analytics_API_EngineComponentResource:
       description: The type of Elasticsearch or Kibana resource backing an engine component.
       enum:
@@ -102000,8 +102015,6 @@ components:
           properties:
             managed:
               type: boolean
-            type:
-              $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
     Security_Entity_Analytics_API_MonitoringLabel:
       type: object
       properties:
@@ -102265,6 +102278,10 @@ components:
         queryRule:
           description: KQL query used to filter data from the provided index patterns
           type: string
+        range:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_DateRange'
+        type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntitySourceType'
     Security_Entity_Analytics_API_UserEntity:
       additionalProperties: false
       description: An entity record representing a user, stored in the Entity Store latest index.

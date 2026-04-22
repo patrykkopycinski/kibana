@@ -40603,7 +40603,6 @@
     "xpack.securitySolution.inspect.modal.somethingWentWrongDescription": "Désolé, un problème est survenu.",
     "xpack.securitySolution.inspectDescription": "Inspecter",
     "xpack.securitySolution.inspectPatternDifferent": "Cet élément possède un modèle d'indexation unique séparé du paramètre de vue de données.",
-    "xpack.securitySolution.integrations.createAutoImportCard.badge": "Nouveau",
     "xpack.securitySolution.integrations.createAutoImportCard.description": "Utilisez un processus piloté par l'IA pour créer l'intégration pas à pas, ou téléchargez un package .zip d'une intégration créée précédemment.",
     "xpack.securitySolution.integrations.createAutoImportCard.title": "Intégration personnalisée",
     "xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel": "ja3",

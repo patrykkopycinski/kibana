@@ -60681,6 +60681,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteOne:
+                summary: Delete a single note by id
+                value:
+                  noteId: 709f99c6-89b6-4953-9160-35945c8e174e
             schema:
               oneOf:
                 - nullable: true
@@ -60821,6 +60826,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                notesPage:
+                  summary: Paged notes for a timeline
+                  value:
+                    notes:
+                      - eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                        note: Escalated to tier-2 analyst
+                        noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                        timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        version: WzQ2LDFd
+                    totalCount: 1
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
           description: Notes and total count for the requested mode.
@@ -60852,6 +60868,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              addNote:
+                summary: Add a note on an event
+                value:
+                  note:
+                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    note: Escalated to tier-2 analyst
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -60878,6 +60902,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                persisted:
+                  summary: Persisted note wrapper
+                  value:
+                    note:
+                      eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                      note: Escalated to tier-2 analyst
+                      noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                      timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      version: WzQ2LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
           description: The persisted note, including `noteId` and `version`.
@@ -61977,6 +62011,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              pinEvent:
+                summary: Pin an event
+                value:
+                  eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -62002,9 +62042,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                pinnedSaved:
+                  summary: Pinned event saved object
+                  value:
+                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    pinnedEventId: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzQ2LDFe
+                unpinned:
+                  summary: Unpin response
+                  value:
+                    unpinned: true
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
-          description: Indicates the event was successfully pinned to or unpinned from the Timeline.
+          description: Indicates a successful call.
       summary: Pin/unpin an event
       tags:
         - Security Timeline API
@@ -75340,22 +75392,31 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteByIds:
+                summary: Delete timelines by saved object id
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+              deleteWithSearches:
+                summary: Delete Timelines and their linked saved searches
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                  searchIds:
+                    - 2c1b8f02-9ad6-4e33-8f6a-2c6b7d0a1f11
             schema:
               type: object
               properties:
                 savedObjectIds:
                   description: The list of IDs of the Timelines or Timeline templates to delete
-                  example:
-                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
                   maxItems: 100
                   type: array
                 searchIds:
                   description: Saved search IDs that should be deleted alongside the timelines
-                  example:
-                    - 23f3-43g34g322-e5g5hrh6h-45454
-                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
                   maxItems: 100
@@ -75366,7 +75427,16 @@ paths:
         required: true
       responses:
         '200':
-          description: Indicates the Timeline was successfully deleted.
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Success
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
+          description: Indicates a successful call.
       summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
@@ -75384,7 +75454,7 @@ paths:
         Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
       parameters:
-        - description: The `savedObjectId` of the template timeline to retrieve
+        - description: The `savedObjectId` of the Timeline template to retrieve.
           in: query
           name: template_timeline_id
           schema:
@@ -75398,9 +75468,21 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                timelineDetail:
+                  summary: Timeline detail
+                  value:
+                    description: User-reported suspicious email
+                    noteIds: []
+                    pinnedEventIds: []
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Phishing investigation
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates that the (template) Timeline was found and returned.
+          description: Indicates a successful call.
       summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
@@ -75420,6 +75502,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              patchTitle:
+                summary: Update title
+                value:
+                  timeline:
+                    title: Escalated case review
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  version: WzE0LDFd
             schema:
               type: object
               properties:
@@ -75446,17 +75536,32 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                patched:
+                  summary: Updated timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Escalated case review
+                    version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates that the Timeline was successfully updated.
+          description: Indicates a successful call.
         '405':
           content:
             application/json:
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405
               schema:
                 type: object
                 properties:
                   body:
-                    description: The error message
+                    description: The error message.
                     example: update timeline error
                     type: string
                   statusCode:
@@ -75482,6 +75587,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createDefault:
+                summary: Create a default timeline
+                value:
+                  timeline:
+                    status: active
+                    timelineType: default
+                    title: Malware containment
             schema:
               type: object
               properties:
@@ -75519,12 +75632,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                created:
+                  summary: Created timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Malware containment
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates the Timeline was successfully created.
+          description: Indicates a successful call.
         '405':
           content:
             application/json:
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405
               schema:
                 type: object
                 properties:
@@ -75543,11 +75671,11 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
   /api/timeline/_copy:
-    get:
+    post:
       description: |
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_copy</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_copy</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -75556,24 +75684,43 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              copyWithTitle:
+                summary: Copy with a new title
+                value:
+                  timeline:
+                    timelineType: default
+                    title: Copy of investigation
+                  timelineIdToCopy: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
                 timeline:
                   $ref: '#/components/schemas/Security_Timeline_API_SavedTimeline'
                 timelineIdToCopy:
+                  description: The `savedObjectId` of the timeline or template to duplicate.
                   type: string
               required:
                 - timeline
                 - timelineIdToCopy
+        description: Source timeline id to copy plus timeline fields for the new saved object.
         required: true
       responses:
         '200':
           content:
             application/json:
+              examples:
+                copied:
+                  summary: Newly saved timeline
+                  value:
+                    savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                    status: active
+                    timelineType: default
+                    title: Copy of investigation
+                    version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates that the timeline has been successfully copied.
+          description: Indicates a successful call.
       summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
@@ -75592,7 +75739,8 @@ paths:
         Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
-        - in: query
+        - description: Which draft to load (`default` investigation timeline or `template` timeline template).
+          in: query
           name: timelineType
           required: true
           schema:
@@ -75601,12 +75749,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                draftPayload:
+                  summary: Draft timeline payload
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: draft
+                    timelineType: default
+                    title: ''
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates that the draft Timeline was successfully retrieved.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
               schema:
                 type: object
                 properties:
@@ -75618,6 +75781,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409
               schema:
                 type: object
                 properties:
@@ -75647,6 +75816,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              defaultDraft:
+                summary: Create a default draft timeline
+                value:
+                  timelineType: default
             schema:
               type: object
               properties:
@@ -75660,12 +75834,29 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                draftResponse:
+                  summary: Draft after reset or creation
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: draft
+                    templateTimelineId: null
+                    templateTimelineVersion: null
+                    timelineType: default
+                    title: ''
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
               schema:
                 type: object
                 properties:
@@ -75677,6 +75868,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409
               schema:
                 type: object
                 properties:
@@ -75712,6 +75909,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              exportIds:
+                summary: Export by timeline ids
+                value:
+                  ids:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -75728,13 +75931,23 @@ paths:
         '200':
           content:
             application/ndjson:
+              examples:
+                ndjsonLine:
+                  summary: Single NDJSON line
+                  value: '{"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd","title":"Investigation","timelineType":"default"}'
               schema:
                 description: NDJSON of the exported Timelines
                 type: string
-          description: Indicates the Timelines were successfully exported.
+          description: Indicates a successful call.
         '400':
           content:
             application/ndjson:
+              examples:
+                badRequest:
+                  summary: Export error
+                  value:
+                    body: Export limit exceeded
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -75742,7 +75955,7 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded.
+          description: Bad Request response.
       summary: Export Timelines
       tags:
         - Security Timeline API
@@ -75763,6 +75976,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              favoriteDefault:
+                summary: Favorite a default timeline
+                value:
+                  templateTimelineId: null
+                  templateTimelineVersion: null
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  timelineType: default
             schema:
               type: object
               properties:
@@ -75789,12 +76010,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                favoriteResponse:
+                  summary: Favorite metadata updated
+                  value:
+                    favorite:
+                      - favoriteDate: 1741337636741
+                        userName: elastic
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    timelineType: default
+                    version: WzE2LDFd
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
-          description: Indicates the favorite status was successfully updated.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Forbidden
+                  value:
+                    body: Forbidden
+                    statusCode: 403
               schema:
                 type: object
                 properties:
@@ -75823,6 +76060,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              multipartPlaceholder:
+                summary: Request shape (file is a stream of NDJSON lines at runtime)
+                value:
+                  file: '{"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd"}\n'
+                  isImmutable: 'false'
             schema:
               type: object
               properties:
@@ -75841,12 +76084,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                importSummary:
+                  summary: Import summary
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 5
+                    timelines_installed: 3
+                    timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the import of Timelines was successful.
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  summary: Invalid import
+                  value:
+                    body: Invalid file extension
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -75857,10 +76115,16 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
+          description: Bad Request response.
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  summary: Saved objects client missing
+                  value:
+                    body: Unable to find saved object client
+                    statusCode: 404
               schema:
                 type: object
                 properties:
@@ -75871,10 +76135,16 @@ paths:
                   statusCode:
                     example: 404
                     type: number
-          description: Indicates that we were unable to locate the saved object client necessary to handle the import.
+          description: Not found response.
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Import conflict
+                  value:
+                    body: Could not import timelines
+                    statusCode: 409
               schema:
                 type: object
                 properties:
@@ -75906,6 +76176,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              emptyArrays:
+                summary: Installer payload shape
+                value:
+                  prepackagedTimelines: []
+                  timelinesToInstall: []
+                  timelinesToUpdate: []
             schema:
               type: object
               properties:
@@ -75934,12 +76211,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                installResult:
+                  summary: Install result counts
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 10
+                    timelines_installed: 8
+                    timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ImportTimelineResult'
-          description: Indicates the installation of prepackaged Timelines was successful.
+          description: Indicates a successful call.
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  summary: Server error
+                  value:
+                    body: Internal error
+                    statusCode: 500
               schema:
                 type: object
                 properties:
@@ -75956,6 +76248,14 @@ paths:
           name: product_name
   /api/timeline/resolve:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/resolve</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Resolve a Timeline or Timeline template, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object IDs have been remapped during upgrades or imports. Provide **either** `id` for default Timelines or `template_timeline_id` for templates.
       operationId: ResolveTimeline
       parameters:
         - description: The ID of the template timeline to resolve
@@ -75972,25 +76272,47 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                exactMatch:
+                  description: Timeline resolved without alias or conflict
+                  summary: Exact match outcome
+                  value:
+                    outcome: exactMatch
+                    timeline:
+                      savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      timelineType: default
+                      title: Investigation
               schema:
                 $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
-          description: The (template) Timeline has been found
+          description: Indicates a successful call.
         '400':
-          description: The request is missing parameters
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  summary: Bad request
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request response.
         '404':
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Not found
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
           description: The (template) Timeline was not found
-      summary: Get an existing saved Timeline or Timeline template
+      summary: Resolve a Timeline or Timeline template
       tags:
         - Security Timeline API
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/resolve</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/timelines:
     get:
       description: |-
@@ -76003,7 +76325,7 @@ paths:
         Get a list of all saved Timelines or Timeline templates.
       operationId: GetTimelines
       parameters:
-        - description: If true, only timelines that are marked as favorites by the user are returned.
+        - description: If `true`, only Timelines that the current user has marked as favorite are returned.
           in: query
           name: only_user_favorite
           schema:
@@ -76012,12 +76334,14 @@ paths:
               - 'false'
             nullable: true
             type: string
-        - in: query
+        - description: Restrict results to `default` investigation timelines or `template` timeline templates.
+          in: query
           name: timeline_type
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_TimelineType'
             nullable: true
-        - in: query
+        - description: Field used to sort the list (`title`, `description`, `updated`, or `created`).
+          in: query
           name: sort_field
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_SortFieldTimeline'
@@ -76047,7 +76371,8 @@ paths:
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
+          in: query
           name: status
           schema:
             $ref: '#/components/schemas/Security_Timeline_API_TimelineStatus'
@@ -76056,6 +76381,23 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                timelineList:
+                  summary: Example list response
+                  value:
+                    customTemplateTimelineCount: 0
+                    defaultTimelineCount: 1
+                    elasticTemplateTimelineCount: 0
+                    favoriteCount: 0
+                    templateTimelineCount: 0
+                    timeline:
+                      - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        status: active
+                        timelineType: default
+                        title: Phishing investigation
+                        updated: 1741344876825
+                        version: WzE0LDFd
+                    totalCount: 1
               schema:
                 type: object
                 properties:
@@ -76090,21 +76432,27 @@ paths:
                 required:
                   - timeline
                   - totalCount
-          description: Indicates that the (template) Timelines were found and returned.
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  summary: Error response body
+                  value:
+                    body: get timeline error
+                    statusCode: 400
               schema:
                 type: object
                 properties:
                   body:
-                    description: The error message
+                    description: The error message.
                     example: get timeline error
                     type: string
                   statusCode:
-                    example: 405
+                    example: 400
                     type: number
-          description: Bad request. The user supplied invalid data.
+          description: Bad Request response.
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API

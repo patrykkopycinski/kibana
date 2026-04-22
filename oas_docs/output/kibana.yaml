@@ -22844,6 +22844,14 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/delete</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -22857,6 +22865,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                DeleteMonitoringEngineResponse:
+                  summary: Engine deleted successfully
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
@@ -22871,19 +22884,26 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/engine/disable:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/delete</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/disable</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/engine/disable:
-    post:
+
+        Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
       operationId: DisableMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                DisableMonitoringEngineResponse:
+                  summary: Engine disabled successfully
+                  value:
+                    status: disabled
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
           description: Successful response
@@ -22893,19 +22913,26 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/engine/init:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/disable</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/init</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/engine/init:
-    post:
+
+        Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
       operationId: InitMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                InitMonitoringEngineResponse:
+                  summary: Engine initialized successfully
+                  value:
+                    status: started
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
           description: Successful response
@@ -22921,19 +22948,26 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/init</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/schedule_now</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/engine/schedule_now:
-    post:
+
+        Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ScheduleMonitoringEngineResponse:
+                  summary: Engine scheduled successfully
+                  value:
+                    success: true
               schema:
                 type: object
                 properties:
@@ -22957,19 +22991,29 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/schedule_now</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/health</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/privileges/health:
-    get:
+
+        Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
       operationId: PrivMonHealth
       responses:
         '200':
           content:
             application/json:
+              examples:
+                PrivMonHealthResponse:
+                  summary: Healthy privilege monitoring engine
+                  value:
+                    status: started
+                    users:
+                      current_count: 42
+                      max_allowed: 1000
               schema:
                 type: object
                 properties:
@@ -23004,12 +23048,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/health</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
       description: |-
@@ -23043,10 +23081,29 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users:
     post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       operationId: CreatePrivMonUser
       requestBody:
         content:
           application/json:
+            examples:
+              CreatePrivMonUserRequest:
+                summary: Create a monitored user
+                value:
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        source: api
+                        value: IT
+                  user:
+                    name: john.doe
             schema:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_UserName'
         required: true
@@ -23054,6 +23111,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CreatePrivMonUserResponse:
+                  summary: Created monitored user
+                  value:
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          source: api
+                          value: IT
+                    event:
+                      ingested: '2026-01-28T12:00:00.000Z'
+                    id: user-abc-123
+                    user:
+                      is_privileged: true
+                      name: john.doe
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
           description: User created successfully
@@ -23063,14 +23136,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/users/_csv:
-    post:
+
+        Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
@@ -23119,14 +23194,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/users/{id}:
+    delete:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/users/{id}:
-    delete:
+
+        Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
       parameters:
         - in: path
@@ -23138,6 +23215,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                DeletePrivMonUserResponse:
+                  summary: User deleted successfully
+                  value:
+                    acknowledged: true
+                    message: User deleted successfully
               schema:
                 type: object
                 properties:
@@ -23156,13 +23239,15 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    put:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    put:
+
+        Updates the details of an existing monitored privileged user by their document ID.
       operationId: UpdatePrivMonUser
       parameters:
         - in: path
@@ -23173,6 +23258,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              UpdatePrivMonUserRequest:
+                summary: Update a monitored user
+                value:
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        source: api
+                        value: Security
+                  user:
+                    is_privileged: true
+                    name: john.doe
             schema:
               $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserUpdateDoc'
         required: true
@@ -23180,6 +23277,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                UpdatePrivMonUserResponse:
+                  summary: Updated monitored user
+                  value:
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          source: api
+                          value: Security
+                    event:
+                      ingested: '2026-01-28T12:00:00.000Z'
+                    id: user-abc-123
+                    user:
+                      is_privileged: true
+                      name: john.doe
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
           description: User updated successfully
@@ -23189,14 +23302,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/monitoring/users/list:
+    get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/monitoring/users/list:
-    get:
+
+        Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       operationId: ListPrivMonUsers
       parameters:
         - description: KQL query to filter the list of monitored users
@@ -23209,6 +23324,34 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ListPrivMonUsersResponse:
+                  summary: List of monitored users
+                  value:
+                    - '@timestamp': '2026-01-28T12:00:00.000Z'
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            source: api
+                            value: IT
+                      event:
+                        ingested: '2026-01-28T12:00:00.000Z'
+                      id: user-abc-123
+                      user:
+                        is_privileged: true
+                        name: john.doe
+                    - '@timestamp': '2026-01-15T09:00:00.000Z'
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            source: csv
+                            value: Security
+                      event:
+                        ingested: '2026-01-15T09:00:00.000Z'
+                      id: user-def-456
+                      user:
+                        is_privileged: true
+                        name: jane.smith
               schema:
                 items:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
@@ -23220,19 +23363,26 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/privileged_user_monitoring/pad/install:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/install</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/privileged_user_monitoring/pad/install:
-    post:
+
+        Installs the privileged access detection integration package and sets up the associated ML modules required for the Entity Analytics privileged user monitoring experience.
       operationId: InstallPrivilegedAccessDetectionPackage
       responses:
         '200':
           content:
             application/json:
+              examples:
+                InstallPrivilegedAccessDetectionPackageResponse:
+                  summary: Package installed successfully
+                  value:
+                    message: Privileged access detection package installed successfully
               schema:
                 type: object
                 properties:
@@ -23247,19 +23397,34 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/install</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/status</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/privileged_user_monitoring/pad/status:
-    get:
+
+        Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
       operationId: GetPrivilegedAccessDetectionPackageStatus
       responses:
         '200':
           content:
             application/json:
+              examples:
+                GetPrivilegedAccessDetectionPackageStatusResponse:
+                  summary: Package fully installed and running
+                  value:
+                    jobs:
+                      - description: Detects high-risk login patterns
+                        job_id: pad-high-risk-login
+                        state: opened
+                      - description: Detects privilege escalation events
+                        job_id: pad-privilege-escalation
+                        state: opened
+                    ml_module_setup_status: complete
+                    package_installation_status: complete
               schema:
                 type: object
                 properties:
@@ -23304,14 +23469,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/watchlists:
+    post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/status</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/watchlists:
-    post:
+
+        Creates a new entity analytics watchlist with an optional set of entity sources. Watchlists apply a risk score modifier to matched entities.
       operationId: CreateWatchlist
       requestBody:
         content:
@@ -23425,14 +23592,16 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/entity_analytics/watchlists/{id}:
+    get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-  /api/entity_analytics/watchlists/{id}:
-    get:
+
+        Retrieves the details of an entity analytics watchlist by its unique identifier.
       operationId: GetWatchlist
       parameters:
         - description: Unique ID of the watchlist
@@ -23466,13 +23635,15 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+    put:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-    put:
+
+        Updates the name, description, risk modifier, or managed status of an existing entity analytics watchlist.
       operationId: UpdateWatchlist
       parameters:
         - description: The ID of the watchlist to update
@@ -23538,12 +23709,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/{id}</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_analytics/watchlists/{watchlist_id}/csv_upload:
     post:
       description: |
@@ -23853,6 +24018,14 @@ paths:
           name: product_name
   /api/entity_analytics/watchlists/list:
     get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/list</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a list of all entity analytics watchlists.
       operationId: ListWatchlists
       responses:
         '200':
@@ -23888,12 +24061,6 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/watchlists/list</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_store/enable:
     post:
       description: |-
@@ -64970,6 +65137,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CleanUpRiskEngineResponse:
+                  summary: Successful cleanup response
+                  value:
+                    cleanup_successful: true
               schema:
                 type: object
                 properties:
@@ -65008,6 +65180,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              ConfigureRiskEngineSavedObjectRequest:
+                summary: Configure the risk engine saved object
+                value:
+                  enable_reset_to_zero: false
+                  exclude_alert_statuses:
+                    - closed
+                  exclude_alert_tags:
+                    - low-priority
+                  filters:
+                    - entity_types:
+                        - host
+                        - user
+                      filter: 'host.name: *'
+                  range:
+                    end: now
+                    start: now-30d
             schema:
               type: object
               properties:
@@ -65052,6 +65241,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ConfigureRiskEngineSavedObjectResponse:
+                  summary: Successful configuration response
+                  value:
+                    risk_engine_saved_object_configured: true
               schema:
                 type: object
                 properties:
@@ -65094,6 +65288,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ScheduleRiskEngineNowResponse:
+                  summary: Successful schedule response
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskEngineScheduleNowResponse'
           description: Successful response

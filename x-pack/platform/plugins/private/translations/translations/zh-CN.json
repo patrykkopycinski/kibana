@@ -40742,7 +40742,6 @@
     "xpack.securitySolution.inspect.modal.somethingWentWrongDescription": "抱歉，出现问题。",
     "xpack.securitySolution.inspectDescription": "检查",
     "xpack.securitySolution.inspectPatternDifferent": "此元素具有与数据视图设置不同的唯一索引模式。",
-    "xpack.securitySolution.integrations.createAutoImportCard.badge": "新建",
     "xpack.securitySolution.integrations.createAutoImportCard.description": "利用 AI 赋能的流程逐步构建集成，或上传预构建的 .zip 集成软件包。",
     "xpack.securitySolution.integrations.createAutoImportCard.title": "自定义集成",
     "xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel": "ja3",

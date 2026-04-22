@@ -40742,7 +40742,6 @@
     "xpack.securitySolution.inspect.modal.somethingWentWrongDescription": "申し訳ございませんが、何か問題が発生しました。",
     "xpack.securitySolution.inspectDescription": "検査",
     "xpack.securitySolution.inspectPatternDifferent": "この要素には、データビュー設定とは別の固有のインデックスパターンがあります。",
-    "xpack.securitySolution.integrations.createAutoImportCard.badge": "新規",
     "xpack.securitySolution.integrations.createAutoImportCard.description": "AIを活用したプロセスで段階的に統合を構築するか、事前作成された.zipパッケージ統合をアップロードします。",
     "xpack.securitySolution.integrations.createAutoImportCard.title": "カスタム統合",
     "xpack.securitySolution.ja3.fingerprint.ja3.fingerprintLabel": "ja3",

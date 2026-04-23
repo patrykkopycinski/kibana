@@ -15,7 +15,7 @@ import {
   DEFAULT_GATE_THRESHOLDS,
 } from './evaluators';
 
-describe('Argus detection evaluators — pure math', () => {
+describe('ARGUS detection evaluators — pure math', () => {
   describe('computePrecision', () => {
     it('returns TP / (TP + FP)', () => {
       expect(computePrecision({ true_positives: 9, false_positives: 1 })).toBeCloseTo(0.9);

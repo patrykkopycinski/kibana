@@ -54,7 +54,7 @@ export const parseSkill = (raw: unknown, source: string): ArgusSkillDescriptor =
 };
 
 /**
- * Load every `*.json` under the given directory and parse it as an Argus
+ * Load every `*.json` under the given directory and parse it as an ARGUS
  * skill. Results are returned in sorted-by-id order so the projected
  * manifest is stable across processes.
  */

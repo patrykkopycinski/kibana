@@ -44,7 +44,7 @@ const adHocDv = (title) => ({
 });
 
 const DV_TRACE = adHocDv('.soc-reasoning-trace');
-const DV_RUNS = adHocDv('.soc-detection-eval-runs');
+const DV_RUNS = adHocDv('.soc-argus-eval-runs');
 const DV_CORPUS = adHocDv('.soc-eval-corpus-*');
 // Phase 3 data views.
 const DV_RECS = adHocDv('.soc-recommendations');
@@ -191,10 +191,10 @@ const banner = markdownPanel(
 
 const latestPrecision = esqlMetric({
   title: 'Latest eval — precision',
-  description: 'Most recent `.soc-detection-eval-runs` precision across all rules.',
+  description: 'Most recent `.soc-argus-eval-runs` precision across all rules.',
   dv: DV_RUNS,
   esql:
-    'FROM .soc-detection-eval-runs | SORT @timestamp DESC | LIMIT 20 ' +
+    'FROM .soc-argus-eval-runs | WHERE run_kind == "detection" | SORT @timestamp DESC | LIMIT 20 ' +
     '| STATS precision = AVG(scores.precision)',
   column: { id: 'precision', field: 'precision', type: 'number' },
   color: '#01B075',
@@ -202,10 +202,10 @@ const latestPrecision = esqlMetric({
 
 const latestRecall = esqlMetric({
   title: 'Latest eval — recall',
-  description: 'Most recent `.soc-detection-eval-runs` recall across all rules.',
+  description: 'Most recent `.soc-argus-eval-runs` recall across all rules.',
   dv: DV_RUNS,
   esql:
-    'FROM .soc-detection-eval-runs | SORT @timestamp DESC | LIMIT 20 ' +
+    'FROM .soc-argus-eval-runs | WHERE run_kind == "detection" | SORT @timestamp DESC | LIMIT 20 ' +
     '| STATS recall = AVG(scores.recall)',
   column: { id: 'recall', field: 'recall', type: 'number' },
   color: '#00BFB3',
@@ -216,7 +216,7 @@ const latestVariantCoverage = esqlMetric({
   description: 'Fraction of labelled positive variant axes fired by at least one rule.',
   dv: DV_RUNS,
   esql:
-    'FROM .soc-detection-eval-runs | SORT @timestamp DESC | LIMIT 20 ' +
+    'FROM .soc-argus-eval-runs | WHERE run_kind == "detection" | SORT @timestamp DESC | LIMIT 20 ' +
     '| STATS variant_coverage = AVG(scores.variant_coverage)',
   column: { id: 'variant_coverage', field: 'variant_coverage', type: 'number' },
   color: '#F583B7',
@@ -227,8 +227,8 @@ const passRate = esqlMetric({
   description: 'Share of the last 24h of eval runs that passed the gate.',
   dv: DV_RUNS,
   esql:
-    'FROM .soc-detection-eval-runs ' +
-    '| WHERE @timestamp > NOW() - 24 HOURS ' +
+    'FROM .soc-argus-eval-runs ' +
+    '| WHERE run_kind == "detection" AND @timestamp > NOW() - 24 HOURS ' +
     '| EVAL is_pass = CASE(gate_decision == "pass", 1.0, 0.0) ' +
     '| STATS pass_rate = AVG(is_pass)',
   column: { id: 'pass_rate', field: 'pass_rate', type: 'number' },
@@ -240,7 +240,7 @@ const evalRunsTable = esqlDatatable({
   description: 'One row per (rule, run). Read top-to-bottom to watch the gate evolve.',
   dv: DV_RUNS,
   esql:
-    'FROM .soc-detection-eval-runs | SORT @timestamp DESC | LIMIT 20 ' +
+    'FROM .soc-argus-eval-runs | WHERE run_kind == "detection" | SORT @timestamp DESC | LIMIT 20 ' +
     '| KEEP @timestamp, rule_id, gate_decision, scores.precision, scores.recall, scores.variant_coverage',
   columns: [
     { id: '@timestamp', field: '@timestamp', type: 'date' },

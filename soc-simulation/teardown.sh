@@ -113,6 +113,10 @@ if scope_active "indices"; then
     ".soc-evolution-log"
     ".soc-coverage-gaps"
     ".soc-audit-trail"
+    ".soc-argus-eval-runs"
+    ".soc-detection-eval-runs"
+    ".soc-reasoning-eval-runs"
+    ".soc-rule-backtester-runs"
   )
   for ds in "${DATA_STREAMS[@]}"; do
     echo "  Deleting data stream: ${ds}"

@@ -79,6 +79,6 @@ describe('buildMutationLineageFromDocs', () => {
     const result = buildMutationLineageFromDocs(HAPPY_PATH_STAGE_DOCS, subject);
     const evalNode = result.lineage!.nodes.find((n) => n.type === 'eval');
     expect(evalNode?.source_doc_id).toBe('eval-run-99');
-    expect(evalNode?.source_index).toBe('.soc-detection-eval-runs');
+    expect(evalNode?.source_index).toBe('.soc-argus-eval-runs');
   });
 });

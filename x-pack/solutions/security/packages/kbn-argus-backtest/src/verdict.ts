@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus R8 — pure TypeScript spec for the rule-backtester verdict
+ * ARGUS R8 — pure TypeScript spec for the rule-backtester verdict
  * classifier and the downstream mutation-intent status transition.
  *
  * The authoritative runtime implementation is Liquid inside

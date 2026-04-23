@@ -33,10 +33,10 @@ import { usePlaybookIndex } from '../../hooks';
 import type { ArgusHttp } from '../../hooks';
 
 /**
- * Argus playbook registry row as rendered in the console. In production the
+ * ARGUS playbook registry row as rendered in the console. In production the
  * panel fetches `/internal/security_solution/argus/playbooks_index` which
  * reads `.soc-workflow-registry` filtered by the `argus:playbook` tag and
- * merges the hardcoded Argus skill list. The local DEFAULT_PLAYBOOKS array
+ * merges the hardcoded ARGUS skill list. The local DEFAULT_PLAYBOOKS array
  * is used only as a fallback when the live route fails (cold-start cluster,
  * registry not seeded yet) and when the panel is rendered without an `http`
  * prop (Storybook / jest tests).
@@ -94,30 +94,11 @@ export interface PlaybooksPanelProps {
 
 const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
   {
-    id: 'soc-argus-playbook-coverage-gap-triage',
+    id: 'soc-argus-playbook-runner',
     kind: 'workflow',
-    name: 'Coverage gap triage',
+    name: 'ARGUS playbook runner',
     description:
-      'Score open coverage gaps and optionally file gap_analysis mutation intents for the top N. Use as a weekly hygiene pass.',
-    origin: 'gap_analysis',
-    user_intent: 'coverage_gap',
-  },
-  {
-    id: 'soc-argus-playbook-high-fp-tuning',
-    kind: 'workflow',
-    name: 'High FP rule tuning',
-    description:
-      'Scan recent outcomes for rules with a high false-positive ratio and file consolidation intents. Safe to run unattended.',
-    origin: 'consolidation',
-    user_intent: 'high_fp_tuning',
-  },
-  {
-    id: 'soc-argus-playbook-actor-escalation',
-    kind: 'workflow',
-    name: 'Actor escalation',
-    description:
-      'Correlate threat-actor techniques against recent telemetry, then open a case and queue backtests when a match is detected.',
-    user_intent: 'actor_escalation',
+      'Parameterized runner for coverage-gap-triage, datasource-gap, high-fp-tuning, and actor-escalation: ES query, threshold gate, optional mutation intents, audit row. Set workflow input playbook_id when executing.',
   },
   {
     id: 'soc-argus-exploit-to-detection',
@@ -187,7 +168,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     kind: 'workflow',
     name: 'Demo \u00b7 Polymorphic variant swarm',
     description:
-      'Scripted demo: emulate a polymorphic variant swarm and walk through Argus redundancy + consolidation handling.',
+      'Scripted demo: emulate a polymorphic variant swarm and walk through ARGUS redundancy + consolidation handling.',
   },
   {
     id: 'soc-deteng',
@@ -217,7 +198,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     name: 'Emulate actor',
     description:
       'Actor-focused coverage review. Correlates MITRE techniques against recent telemetry and optionally opens a case.',
-    canonical_of: 'soc-argus-playbook-actor-escalation',
+    canonical_of: 'soc-argus-playbook-runner',
     user_intent: 'actor_escalation',
   },
   {
@@ -233,7 +214,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     kind: 'skill',
     name: 'Assess CVE',
     description:
-      'Check whether a specific CVE is on Argus\u2019s radar, has coverage, and optionally trigger the Exploit\u2192Detection pipeline.',
+      'Check whether a specific CVE is on ARGUS\u2019s radar, has coverage, and optionally trigger the Exploit\u2192Detection pipeline.',
     canonical_of: 'soc-argus-exploit-to-detection',
     user_intent: 'new_cve',
   },
@@ -494,7 +475,7 @@ export const PlaybooksPanel: React.FC<PlaybooksPanelProps> = ({
             <h3>{'Playbooks'}</h3>
           </EuiTitle>
           <EuiText size="s" color="subdued">
-            {'Argus playbooks are Kibana-native workflows and Agent Builder skills tagged '}
+            {'ARGUS playbooks are Kibana-native workflows and Agent Builder skills tagged '}
             <code>{'argus:playbook'}</code>
             {'. Workflows open in Workflows Management; skills open in Agent Builder chat.'}
           </EuiText>

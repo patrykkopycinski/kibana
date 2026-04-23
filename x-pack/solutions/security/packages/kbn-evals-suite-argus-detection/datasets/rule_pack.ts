@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * A candidate detection rule evaluated by the Argus Detection Eval Vertical.
+ * A candidate detection rule evaluated by the ARGUS Detection Eval Vertical.
  *
  * We deliberately express each rule as a raw Elasticsearch query instead of a
  * Security Solution rule type. This keeps the evaluator:

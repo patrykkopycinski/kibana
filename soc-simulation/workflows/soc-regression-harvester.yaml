@@ -5,6 +5,12 @@ description: >
   .soc-regression-dataset. Every rejected or auto-closed-as-FP recommendation
   becomes a labelled regression case used by the regression gate before any
   autonomous mutation is allowed to land.
+
+consts:
+  outcomes_index: ".soc-outcomes"
+  recommendations_index: ".soc-recommendations"
+  regression_dataset_index: ".soc-regression-dataset"
+
 enabled: true
 
 triggers:
@@ -18,7 +24,7 @@ steps:
   - name: get_labelled_outcomes
     type: elasticsearch.search
     with:
-      index: ".soc-outcomes"
+      index: "{{ consts.outcomes_index }}"
       size: 100
       query:
         bool:
@@ -40,7 +46,7 @@ steps:
   - name: get_rejected_recs
     type: elasticsearch.search
     with:
-      index: ".soc-recommendations"
+      index: "{{ consts.recommendations_index }}"
       size: 100
       query:
         bool:
@@ -54,10 +60,9 @@ steps:
                 harvested_for_regression:
                   value: false
 
-  # ── Let the meta-agent turn outcomes into frozen regression cases ──
+  # ── Turn outcomes into frozen regression cases ──
   - name: harvest_cases
     type: ai.agent
-    agent-id: soc-meta-agent
     connector-id: opus
     with:
       message: >
@@ -98,13 +103,59 @@ steps:
           - alert_sample must be <= 20 fields.
 
         Output ONLY a JSON array of case objects.
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            case_id:
+              type: string
+            source_outcome_id:
+              type: string
+            source_triage_id:
+              type: string
+            rule_id:
+              type: string
+            rule_name:
+              type: string
+            alert_fingerprint:
+              type: string
+            alert_sample:
+              type: object
+              additionalProperties: true
+            expected_disposition:
+              type: string
+            expected_confidence:
+              type: number
+            expected_techniques:
+              type: array
+              items:
+                type: string
+            expected_next_step:
+              type: string
+            labels:
+              type: array
+              items:
+                type: string
+            label_source:
+              type: string
+            frozen:
+              type: boolean
+            scenario_tag:
+              type: string
+          required:
+            - case_id
+            - rule_id
+            - rule_name
+            - alert_fingerprint
+            - expected_disposition
     timeout: 240s
 
   # ── Persist to regression dataset ──
   - name: write_cases
     type: elasticsearch.index
     with:
-      index: .soc-regression-dataset
+      index: "{{ consts.regression_dataset_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         harvest_run_id: "{{ execution.id }}"

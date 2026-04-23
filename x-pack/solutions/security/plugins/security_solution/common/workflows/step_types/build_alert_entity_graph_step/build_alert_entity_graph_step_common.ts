@@ -61,7 +61,8 @@ export const buildAlertEntityGraphInputSchema = z.object({
     .number()
     .finite()
     .int()
-    .min(0)
+    .min(1)
+    .max(20)
     .optional()
     .default(3)
     .describe('Maximum recursion depth (number of expansion rounds). Default: 3'),

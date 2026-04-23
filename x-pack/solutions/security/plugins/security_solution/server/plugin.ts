@@ -21,6 +21,11 @@ import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
+import {
+  registerArgusAfterToolCallHook,
+  registerArgusBeforeAgentHook,
+  registerArgusGovernanceHook,
+} from './agent_builder/hooks';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
@@ -286,6 +291,22 @@ export class Plugin implements ISecuritySolutionPlugin {
       options: { endpointAppContextService },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
+    });
+
+    registerArgusGovernanceHook(agentBuilder, {
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      logger,
+    });
+    registerArgusBeforeAgentHook(agentBuilder, {
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      logger,
+    });
+    registerArgusAfterToolCallHook(agentBuilder, {
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      logger,
     });
   }
 
@@ -824,7 +845,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core
         .getStartServices()
         .then(async ([coreStart]) => {
-          await registerWorkflowSteps(workflowsExtensions, coreStart);
+          await registerWorkflowSteps(workflowsExtensions, coreStart, {
+            argusConsoleEnabled: config.experimentalFeatures.argusConsoleEnabled,
+          });
         })
         .catch((error) => {
           this.logger.error(

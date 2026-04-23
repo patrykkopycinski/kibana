@@ -169,12 +169,12 @@ export const registerMutationsRoute = ({ router, logger }: ArgusRoutesDeps) => {
 
           if (outcomesSettled.status === 'rejected') {
             logger.debug(
-              `Argus mutations route: outcomes query failed — ${String(outcomesSettled.reason)}`
+              `ARGUS mutations route: outcomes query failed — ${String(outcomesSettled.reason)}`
             );
           }
           if (blockedSettled.status === 'rejected') {
             logger.debug(
-              `Argus mutations route: blocked-intents query failed — ${String(
+              `ARGUS mutations route: blocked-intents query failed — ${String(
                 blockedSettled.reason
               )}`
             );
@@ -217,7 +217,7 @@ export const registerMutationsRoute = ({ router, logger }: ArgusRoutesDeps) => {
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus mutations route failed: ${error.message}`);
+          logger.error(`ARGUS mutations route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

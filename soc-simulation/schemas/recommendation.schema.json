@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://argus.local/schemas/recommendation.schema.json",
-  "title": "Argus Recommendation",
-  "description": "Envelope for any decision an Argus agent wants to surface or apply. Discriminated by `type`.",
+  "title": "ARGUS Recommendation",
+  "description": "Envelope for any decision an ARGUS agent wants to surface or apply. Discriminated by `type`.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -132,7 +132,7 @@
     },
     "autosoc_owned_target": {
       "type": "boolean",
-      "description": "True if the target artifact was originally created by Argus (registry owner=autosoc) — enables auto-apply without human approval. Note: the field name keeps the historical `autosoc_owned_*` prefix to preserve schema ABI with persisted recommendations."
+      "description": "True if the target artifact was originally created by ARGUS (registry owner=autosoc) — enables auto-apply without human approval. Note: the field name keeps the historical `autosoc_owned_*` prefix to preserve schema ABI with persisted recommendations."
     }
   },
   "allOf": [

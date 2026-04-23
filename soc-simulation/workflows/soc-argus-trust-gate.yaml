@@ -1,7 +1,7 @@
 version: '1'
-name: Argus Trust Gate (Phase 3)
+name: ARGUS Trust Gate (Phase 3)
 description: >
-  Argus Phase 3 — non-invasive trust policy gate.
+  ARGUS Phase 3 — non-invasive trust policy gate.
 
   Sits BETWEEN the @kbn/evals pass signal and the autonomous applier.
   For every recommendation that is `auto_apply_ready`, the gate:
@@ -80,7 +80,7 @@ steps:
             {%- assign _n = steps.find_actor_tier.output.hits.hits | size | default: 0 -%}
             {% if _n > 0 %}yes{% else %}no{% endif %}
 
-      # ── Door-class + blast-tier aware verdict (Argus R5 + R7) ───────
+      # ── Door-class + blast-tier aware verdict (ARGUS R5 + R7) ───────
       # SPEC: @kbn/argus-trust-policy (src/gate.ts::evaluateTrustGate).
       # Any change to the matrix below MUST be mirrored in the TS spec
       # or the `gate.spec_alignment.test.ts` drift detector will fail.
@@ -210,8 +210,8 @@ steps:
                 name: "argus.trust_gate.evaluate"
               agent:
                 id: "soc-argus-trust-gate"
-                name: "Argus Trust Gate"
-                description: "Non-invasive trust-tier + door-class policy gate for Argus recommendations"
+                name: "ARGUS Trust Gate"
+                description: "Non-invasive trust-tier + door-class policy gate for ARGUS recommendations"
 
   # ── Heartbeat ───────────────────────────────────────────────────────
   - name: heartbeat
@@ -228,4 +228,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus trust gate complete — gated={{ steps.fetch_candidates.output.hits.hits | size | default: 0 }} tick=argus-trust-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+      message: "ARGUS trust gate complete — gated={{ steps.fetch_candidates.output.hits.hits | size | default: 0 }} tick=argus-trust-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

@@ -38,7 +38,7 @@ export function argusToggleKillSwitchTool(
     id: ARGUS_TOGGLE_KILL_SWITCH_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Toggle the Argus autonomous-applier kill switch. Enables or disables every auto-apply ' +
+      'Toggle the ARGUS autonomous-applier kill switch. Enables or disables every auto-apply ' +
       'path (rule_create, rule_patch, response). Reason is mandatory for audit compliance.',
     schema: toggleKillSwitchSchema,
     tags: ['security', 'argus', 'argus:playbook', 'write', 'kill-switch'],

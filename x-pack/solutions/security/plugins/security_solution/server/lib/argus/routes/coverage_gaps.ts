@@ -76,7 +76,7 @@ export const registerCoverageGapsRoute = ({ router, logger }: ArgusRoutesDeps) =
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus coverage_gaps route failed: ${error.message}`);
+          logger.error(`ARGUS coverage_gaps route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

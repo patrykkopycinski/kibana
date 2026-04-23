@@ -2,9 +2,15 @@ version: '1'
 name: SOC Recommendation Applier
 description: >
   Picks up recommendations with approved status or approved sub-items and executes them
-  using the SOC Recommendation Applier Agent with self-management tools.
+  with deterministic Kibana/Elasticsearch operations per recommendation type.
   Includes a validation step that confirms approved items exist before execution.
   Runs every 5 minutes to process approved items from the review queue.
+
+consts:
+  recommendations_index: ".soc-recommendations"
+  evolution_log_index: ".soc-evolution-log"
+  audit_index: ".soc-audit-trail"
+
 enabled: true
 
 triggers:
@@ -17,7 +23,7 @@ steps:
   - name: get_approved_recs
     type: elasticsearch.search
     with:
-      index: ".soc-recommendations"
+      index: "{{ consts.recommendations_index }}"
       query:
         bool:
           must:
@@ -40,71 +46,108 @@ steps:
         - details
         - sub_items
         - confidence
+        - argus
 
   - name: log_check
     type: console
     with:
       message: "Applier: found {{ steps.get_approved_recs.output.hits.total.value }} approved recommendations"
 
-  # Early-exit when there are no approved recommendations. Runs only when
-  # total.value == 0 and ends the workflow. If alerts > 0, this step is skipped
-  # and the pipeline continues to apply_recommendations below.
+  - name: gate_has_recs
+    type: console
+    with:
+      message: >-
+        {% if steps.get_approved_recs.output.hits.total.value == 0 %}no{% else %}yes{% endif %}
+
+  # Early-exit when there are no approved recommendations.
   - name: log_nothing
     type: console
-    if: "steps.get_approved_recs.output.hits.total.value: 0"
+    if: "steps.gate_has_recs.output: no"
     with:
       message: "Applier: no approved recommendations to process"
     end: true
 
-  - name: apply_recommendations
-    type: ai.agent
-    agent-id: soc-rec-applier-agent
-    connector-id: opus
+  - name: dedupe_approved_hits
+    type: data.dedupe
+    if: "steps.gate_has_recs.output: yes"
+    items: "{{ steps.get_approved_recs.output.hits.hits }}"
     with:
-      message: >
-        You are the SOC Recommendation Applier. Execute ONLY the approved items below.
+      keys:
+        - "_id"
 
-        CANDIDATE RECOMMENDATIONS:
-        {{ steps.get_approved_recs.output.hits.hits | json }}
+  - name: apply_recommendations
+    type: foreach
+    if: "steps.gate_has_recs.output: yes"
+    foreach: "{{ steps.dedupe_approved_hits.output }}"
+    steps:
+      - name: rec
+        type: data.set
+        with:
+          id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+          summary: "{{ foreach.item._source.summary | default: foreach.item._source.title }}"
 
-        EXECUTION RULES:
-        1. Check each document's sub_items field:
-           - If sub_items exist: only execute sub-items where sub_items[N].status = "approved"
-           - If NO sub_items but parent status = "approved": execute everything
-           - If parent status = "pending" and no approved sub_items: SKIP entirely
-        2. If sub_items[N].status = "applied": SKIP (already done)
+      - name: gate_hitl_tier
+        type: console
+        with:
+          message: >-
+            {% assign t = foreach.item._source.details.approval_tier | default: foreach.item._source.argus.approval_tier | default: 'tier_1' %}{% if t == 'tier_2' %}yes{% elsif t == 'tier_3' %}yes{% else %}no{% endif %}
 
-        SELF-VALIDATION:
-        Before executing any action, validate:
-        - For rule operations: confirm the rule_id exists using manage_detection_rules
-        - For workflow deployment: validate_workflow BEFORE deploy_workflow
-        - For skill creation: verify tool_ids are valid
-        - For agent patches: verify target agent exists
-        If validation fails, mark the item as "failed" with the validation error and move on.
+      - name: await_approval
+        type: waitForInput
+        if: "steps.gate_hitl_tier.output: yes"
+        with:
+          message: "Recommendation {{ steps.rec.output.id }} requires approval: {{ steps.rec.output.summary }}"
+          timeout: 24h
 
-        FOR RULE TUNING RECOMMENDATIONS (type=rule_tuning):
-        - add_exception / update_exception: Use platform.core.manage_detection_rules with operation='patch'
-        - raise_threshold / lower_threshold: Use operation='patch' with the patch_fields
-        - enable / disable: Use operation='enable' or 'disable'
-        - create: Use operation='create' with enabled=false
+      - name: apply_detection_rule
+        type: kibana.request
+        if: "foreach.item._source.details.artifact_type: rule"
+        with:
+          method: POST
+          path: /api/detection_engine/rules
+          body: "{{ foreach.item._source.details.new_definition }}"
 
-        FOR AGENT EVOLUTION RECOMMENDATIONS (type=agent_evolution):
-        - create_workflow: Use platform.workflows.deploy_workflow
-        - create_skill: Use platform.core.manage_skills
-        - enrich_agent / refine_agent: Use platform.core.update_agent
-        - create_agent: Use platform.core.create_agent + deploy_workflow
+      - name: apply_rule_tuning
+        type: kibana.request
+        if: "foreach.item._source.type: rule_tuning"
+        with:
+          method: POST
+          path: /api/detection_engine/rules
+          body: "{{ foreach.item._source.details.new_definition }}"
 
-        IMPORTANT:
-        - Validate before executing. If validation fails, skip the item and report the error.
-        - If nothing needs to be done, respond: {"applied": [], "skipped": [...], "nothing_to_do": true}
-    timeout: 300s
+      - name: log_applied
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.evolution_log_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: soc-recommendation-applier
+            intent_rec_id: "{{ foreach.item._id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type | default: foreach.item._source.type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id | default: foreach.item._source.rec_id }}"
+            op: "{{ foreach.item._source.details.op | default: 'apply' }}"
+            result: applied
+            reason: Deterministic apply from approved recommendation
+
+      - name: mark_applied
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/{{ consts.recommendations_index }}/_update/{{ foreach.item._id }}"
+          body:
+            doc:
+              status: applied
+              applied_by: soc-recommendation-applier
+              applied_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
   - name: log_application
     type: elasticsearch.index
+    if: "steps.gate_has_recs.output: yes"
     with:
-      index: .soc-audit-trail
+      index: "{{ consts.audit_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_id: "soc-recommendation-applier"
         event_type: "recommendation_applied"
         source: "soc-recommendation-applier"
         details: "{{ steps.apply_recommendations.output | json }}"

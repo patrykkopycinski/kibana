@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# create-argus-issues.sh — create one Argus epic + five Phase 2 sub-issues on GitHub.
+# create-argus-issues.sh — create one ARGUS epic + five Phase 2 sub-issues on GitHub.
 #
 # Idempotent-ish: skips creating an issue whose exact title already exists (open or closed)
 # in the target repo. Re-running after closing an issue will *not* reopen it.
@@ -52,7 +52,7 @@ ensure_label() {
   fi
   # Create it. Tolerate failure (insufficient perms) and fall through.
   if gh label create "$wanted" --repo "$REPO" --color "ededed" \
-      --description "Argus-related tracking label" >/dev/null 2>&1; then
+      --description "ARGUS-related tracking label" >/dev/null 2>&1; then
     echo "$wanted"
   else
     echo "" # signal: skip this label
@@ -122,9 +122,9 @@ EPIC_BODY_FILE="$(mktemp -t argus-epic.XXXXXX.md)"
 trap 'rm -f "$EPIC_BODY_FILE"' EXIT
 
 cat > "$EPIC_BODY_FILE" <<'MD'
-# Argus — Mythos-Resilient Defender (Phase 2 Epic)
+# ARGUS — Mythos-Resilient Defender (Phase 2 Epic)
 
-Argus is a Mythos-resilient defender — a self-governing SOC built on the
+ARGUS is a Mythos-resilient defender — a self-governing SOC built on the
 Elastic Stack, designed to stay sound under frontier-capability adversaries.
 See the full design tree
 in-repo under `soc-simulation/docs/argus/`:
@@ -162,15 +162,15 @@ MD
 EPIC_LABEL_STR="$(resolve_labels "${EPIC_LABELS[@]}")"
 SUB_LABEL_STR="$(resolve_labels "${SUB_LABELS[@]}")"
 
-create_issue "Argus — Mythos-Resilient Defender (Phase 2 Epic)" "$EPIC_BODY_FILE" "$EPIC_LABEL_STR"
+create_issue "ARGUS — Mythos-Resilient Defender (Phase 2 Epic)" "$EPIC_BODY_FILE" "$EPIC_LABEL_STR"
 
 # Sub-issues, order matches the dependency graph in KICKOFF.md §2.
 declare -a SUB_ISSUES=(
-  "Argus M2.1 — Detection Eval Vertical|$DOCS_ROOT/issues/m2-1-detection-eval-vertical.md"
-  "Argus M2.2 — Exploit-to-Detection Synthesis|$DOCS_ROOT/issues/m2-2-exploit-to-detection.md"
-  "Argus M2.3 — Mythos-era Exploit Probability|$DOCS_ROOT/issues/m2-3-exploit-probability.md"
-  "Argus M2.4 — Frontier-Adversary Simulation|$DOCS_ROOT/issues/m2-4-frontier-simulation.md"
-  "Argus M2.5 — Reasoning-Trace Governance|$DOCS_ROOT/issues/m2-5-reasoning-trace-governance.md"
+  "ARGUS M2.1 — Detection Eval Vertical|$DOCS_ROOT/issues/m2-1-detection-eval-vertical.md"
+  "ARGUS M2.2 — Exploit-to-Detection Synthesis|$DOCS_ROOT/issues/m2-2-exploit-to-detection.md"
+  "ARGUS M2.3 — Mythos-era Exploit Probability|$DOCS_ROOT/issues/m2-3-exploit-probability.md"
+  "ARGUS M2.4 — Frontier-Adversary Simulation|$DOCS_ROOT/issues/m2-4-frontier-simulation.md"
+  "ARGUS M2.5 — Reasoning-Trace Governance|$DOCS_ROOT/issues/m2-5-reasoning-trace-governance.md"
 )
 
 for entry in "${SUB_ISSUES[@]}"; do

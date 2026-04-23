@@ -1,8 +1,8 @@
 # @kbn/argus-console-common
 
 Pure, isomorphic types, constants, and data-transformation builders shared
-between the Argus Console browser surface (`@kbn/argus-console`) and the
-Security Solution server routes that expose Argus's reasoning chain, mutation
+between the ARGUS Console browser surface (`@kbn/argus-console`) and the
+Security Solution server routes that expose ARGUS's reasoning chain, mutation
 lineage, governance pulse, coverage surfaces, playbooks, and decision graph.
 
 This package must remain **framework-free** so it can safely live on both the
@@ -14,7 +14,7 @@ a pure function over plain JSON documents.
 
 ### `src/types/`
 
-All Argus request / response contracts in a single place so the browser bundle
+All ARGUS request / response contracts in a single place so the browser bundle
 and the server route handlers can't drift:
 
 - **Reasoning & lineage** — `ReasoningChain`, `ReasoningStep`,
@@ -72,7 +72,7 @@ matching Security Solution server route. Builders present today:
   decision-graph, playbooks-index).
 - **Capabilities** — `ARGUS_CONSOLE_READ_UI_CAPABILITY`,
   `ARGUS_CONSOLE_ALL_UI_CAPABILITY`, `ARGUS_WRITE_API_CAPABILITY`.
-- **Index set** — `ARGUS_SOC_INDICES` with every `.soc-*` index the Argus
+- **Index set** — `ARGUS_SOC_INDICES` with every `.soc-*` index the ARGUS
   Console depends on, including `.soc-detection-corpus`, `.soc-threat-actors`,
   `.soc-threat-profiles`, `.soc-coverage-gaps`, `.soc-audit-trail`,
   `.soc-kill-switch`, `.soc-autonomy-decisions`, `.soc-attack-commands`,
@@ -83,11 +83,11 @@ matching Security Solution server route. Builders present today:
 
 ## Why the types live here (and not in a dedicated read-api adapter)
 
-The community-coverage-and-playbooks change keeps all Argus read contracts —
+The community-coverage-and-playbooks change keeps all ARGUS read contracts —
 including the new Tier-5 decision-graph shapes — in this package. The
 `@kbn/argus-read-api` adapter package + MCP/A2A switchover is a planned
 follow-up once the decision graph has bedded in; until then, **this package
-is the canonical source** for every Argus read contract.
+is the canonical source** for every ARGUS read contract.
 
 ## Sync note
 

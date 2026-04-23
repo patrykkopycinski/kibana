@@ -108,6 +108,7 @@ export type {
   ArgusSynthesisResponse,
   ArgusSynthesisWeights,
   ArgusSynthesisWindow,
+  ArgusVariantAxisName,
 } from './synthesis_proposals';
 
 export type {

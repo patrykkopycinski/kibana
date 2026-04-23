@@ -125,7 +125,8 @@ const findMutationIntent = async (
 const findByRuleId = async <T extends { readonly _source?: unknown }>(
   esClient: ElasticsearchClient,
   index: string,
-  ruleId: string | undefined
+  ruleId: string | undefined,
+  extraFilters: ReadonlyArray<Record<string, unknown>> = []
 ): Promise<T | undefined> => {
   if (!ruleId) return undefined;
   try {
@@ -134,7 +135,11 @@ const findByRuleId = async <T extends { readonly _source?: unknown }>(
       ignore_unavailable: true,
       size: 1,
       sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
-      query: { term: { rule_id: ruleId } },
+      query: {
+        bool: {
+          filter: [{ term: { rule_id: ruleId } }, ...extraFilters],
+        },
+      },
     });
     const hit = res.hits?.hits?.[0];
     if (!hit || !hit._id) return undefined;
@@ -237,7 +242,9 @@ export const registerE2dFlowRoute = ({ router, logger }: ArgusRoutesDeps) => {
             await Promise.all([
               findRecommendation(esClient, ruleId, recId),
               findMutationIntent(esClient, ruleId),
-              findByRuleId<E2dRawEvalRunDoc>(esClient, ARGUS_SOC_INDICES.detectionEvalRuns, ruleId),
+              findByRuleId<E2dRawEvalRunDoc>(esClient, ARGUS_SOC_INDICES.detectionEvalRuns, ruleId, [
+                { term: { run_kind: 'detection' } },
+              ]),
               findByRuleId<E2dRawBacktestDoc>(esClient, ARGUS_SOC_INDICES.backtestResults, ruleId),
               findByRuleId<E2dRawOutcomeDoc>(esClient, ARGUS_SOC_INDICES.outcomes, ruleId),
               countLiveHits(esClient, ruleId, windowStart),
@@ -258,7 +265,7 @@ export const registerE2dFlowRoute = ({ router, logger }: ArgusRoutesDeps) => {
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus e2d_flow route failed for "${cveQuery}": ${error.message}`);
+          logger.error(`ARGUS e2d_flow route failed for "${cveQuery}": ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

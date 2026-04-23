@@ -1,0 +1,45 @@
+{
+  "index_patterns": [".soc-detection-corpus"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "rule_id": { "type": "keyword" },
+        "draft_rule_id": { "type": "keyword" },
+        "name": { "type": "keyword" },
+        "title": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } } },
+        "description": { "type": "text" },
+        "type": { "type": "keyword" },
+        "severity": { "type": "keyword" },
+        "tags": { "type": "keyword" },
+        "threat": { "type": "object", "enabled": false },
+        "index_patterns": { "type": "keyword" },
+        "mitre_technique": { "type": "keyword" },
+        "mitre_techniques": {
+          "type": "nested",
+          "properties": {
+            "technique_id": { "type": "keyword" },
+            "technique_name": { "type": "keyword" },
+            "tactic": { "type": "keyword" }
+          }
+        },
+        "source": { "type": "keyword" },
+        "synced_at": { "type": "date" },
+        "advisory_id": { "type": "keyword" },
+        "cve_id": { "type": "keyword" },
+        "recommendation_id": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "ARGUS Tier 1 — normalized detection rule corpus (community ingest, live_sync from Kibana, ARGUS-authored drafts). Keys coverage workflows and MITRE heatmaps.",
+    "owner": "argus-coverage",
+    "schema_version": 1
+  }
+}

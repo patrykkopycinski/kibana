@@ -8,7 +8,7 @@
 import { securityTool } from '../constants';
 
 /**
- * Every Argus playbook-primitive tool is registered under the same prefix so
+ * Every ARGUS playbook-primitive tool is registered under the same prefix so
  * skills can discover them uniformly and the Agent Builder UI groups them
  * together. The ids are stable — they appear verbatim in skill content, in the
  * Agent Builder audit trail, and in the `argus:playbook` workflow step
@@ -29,13 +29,13 @@ export const ARGUS_LIST_ACTOR_COVERAGE_TOOL_ID = securityTool('argus.list_actor_
 export const ARGUS_GET_DECISION_GRAPH_TOOL_ID = securityTool('argus.get_decision_graph');
 
 /**
- * Canonical playbook tag. Every Argus playbook workflow carries this tag so
+ * Canonical playbook tag. Every ARGUS playbook workflow carries this tag so
  * the Playbooks console tab and the skill registry can discover them.
  */
 export const ARGUS_PLAYBOOK_TAG = 'argus:playbook' as const;
 
 /**
- * Canonical read tag. Read-only Argus tools (e.g. decision-graph, coverage
+ * Canonical read tag. Read-only ARGUS tools (e.g. decision-graph, coverage
  * summaries) carry this tag so skills and the console can discover them
  * separately from mutating playbook actions.
  */

@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus R14 — CISA Known Exploited Vulnerabilities (KEV) live-feed ingest.
+ * ARGUS R14 — CISA Known Exploited Vulnerabilities (KEV) live-feed ingest.
  *
  * CISA publishes the KEV catalog as a single JSON document at
  * https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
@@ -26,7 +26,7 @@
  *      can show the regulatory context without querying a second index.
  *
  * Out of scope here: ATT&CK technique mapping. CISA does not supply one, so
- * we leave `mitre_techniques` empty and rely on Argus's enrichment layer to
+ * we leave `mitre_techniques` empty and rely on ARGUS's enrichment layer to
  * fill it in — same behaviour as a human-authored advisory without a MITRE
  * block. A KEV with no technique falls to `pending_review` in the trust gate,
  * which is the intended safe default.
@@ -57,7 +57,7 @@ export interface CisaKevFeed {
 /**
  * Shape of the document we write into `.soc-cve-advisories`. Matches the index
  * template for soc-cve-advisories.json (dynamic: false). Everything else
- * (signals, mitre, variant_axes) is filled in by downstream Argus enrichment.
+ * (signals, mitre, variant_axes) is filled in by downstream ARGUS enrichment.
  */
 export interface KevAdvisoryDoc {
   '@timestamp': string;

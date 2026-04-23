@@ -1,11 +1,11 @@
 version: '1'
-name: Argus Demo 2 Runner — Polymorphic Variant Swarm
+name: ARGUS Demo 2 Runner — Polymorphic Variant Swarm
 description: >
-  End-to-end demo runner for Scenario 2 of the Argus demo storyboard
+  End-to-end demo runner for Scenario 2 of the ARGUS demo storyboard
   (soc-simulation/docs/argus/demo-storyboard.md):
 
     "The Mythos variant bank emits 30+ polymorphic variants of a
-     single technique. Existing rules catch some, miss others. Argus
+     single technique. Existing rules catch some, miss others. ARGUS
      labels the misses, synthesizes Pareto-efficient candidate rules,
      grades them with @kbn/evals-suite-argus-detection, and surfaces
      a per-axis gate verdict."
@@ -18,7 +18,7 @@ description: >
     1. Verifies the variant bank for the demo technique is actually
        present (> 10 documents).
     2. Verifies that the latest eval run for that technique has landed
-       in `.soc-detection-eval-runs`.
+       in `.soc-argus-eval-runs` (run_kind=detection).
     3. Invokes the M2.2 reconciler so any rule promotions produced by
        the eval sweep get reflected on the advisory.
     4. Emits a per-axis summary to `.soc-audit-trail` so the dashboard
@@ -41,7 +41,7 @@ triggers:
 consts:
   corpus_index: ".soc-eval-corpus-argus-corpus-mythos-2026-04"
   primitive_id: "T1003.001"
-  eval_runs_index: ".soc-detection-eval-runs"
+  eval_runs_index: ".soc-argus-eval-runs"
 
 steps:
   # ── 1. Precondition: variant bank populated for the demo primitive ──
@@ -86,6 +86,10 @@ steps:
         sort:
           - "@timestamp":
               order: desc
+        query:
+          bool:
+            filter:
+              - term: { run_kind: "detection" }
 
   - name: eval_run_gate
     type: console
@@ -132,9 +136,12 @@ steps:
       index: "{{ consts.eval_runs_index }}"
       size: 0
       query:
-        range:
-          "@timestamp":
-            gte: "now-1h"
+        bool:
+          filter:
+            - term: { run_kind: "detection" }
+            - range:
+                "@timestamp":
+                  gte: "now-1h"
       aggs:
         by_gate:
           terms:
@@ -165,4 +172,4 @@ steps:
     type: console
     with:
       message: >-
-        Argus demo-2 run_id=argus-demo-2-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }} variants={{ steps.count_variants_for_primitive.output.hits.total.value | default: 0 }} corpus={{ steps.corpus_gate.output }} eval={{ steps.eval_run_gate.output }}
+        ARGUS demo-2 run_id=argus-demo-2-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }} variants={{ steps.count_variants_for_primitive.output.hits.total.value | default: 0 }} corpus={{ steps.corpus_gate.output }} eval={{ steps.eval_run_gate.output }}

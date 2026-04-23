@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Argus Live End-to-End Demo Driver
+# ARGUS Live End-to-End Demo Driver
 #
-# Orchestrates the full Argus (Mythos-resilient defender) demo against a LIVE
+# Orchestrates the full ARGUS (Mythos-resilient defender) demo against a LIVE
 # Kibana + Elasticsearch cluster. For each target workflow this driver:
 #
 #   1. Resolves the workflow object id from its display name (lookup via
@@ -19,16 +19,16 @@
 #   bash soc-simulation/scripts/argus_live_demo.sh
 #
 # Environment overrides:
-#   KIBANA_URL (default http://localhost:15601)
-#   ES_URL     (default http://localhost:19200)
+#   KIBANA_URL (default http://localhost:${KIBANA_PORT:-15601})
+#   ES_URL     (default http://localhost:${ES_PORT:-19200})
 #   ES_USER    (default elastic)
 #   ES_PASS    (default changeme)
 #   RUN_LOG_DIR (default .soc-runtime-logs/argus-live-demo-<ts>)
 
 set -eu
 
-KIBANA_URL="${KIBANA_URL:-http://localhost:15601}"
-ES_URL="${ES_URL:-http://localhost:19200}"
+KIBANA_URL="${KIBANA_URL:-http://localhost:${KIBANA_PORT:-15601}}"
+ES_URL="${ES_URL:-http://localhost:${ES_PORT:-19200}}"
 ES_USER="${ES_USER:-elastic}"
 ES_PASS="${ES_PASS:-changeme}"
 AUTH=$(printf '%s:%s' "${ES_USER}" "${ES_PASS}" | base64)
@@ -37,7 +37,7 @@ TS=$(date +%Y%m%d-%H%M%S)
 RUN_LOG_DIR="${RUN_LOG_DIR:-.soc-runtime-logs/argus-live-demo-${TS}}"
 mkdir -p "${RUN_LOG_DIR}"
 
-echo "=== Argus Live Demo ==="
+echo "=== ARGUS Live Demo ==="
 echo "Kibana: ${KIBANA_URL}"
 echo "ES:     ${ES_URL}"
 echo "Log dir: ${RUN_LOG_DIR}"
@@ -145,19 +145,19 @@ PY
 }
 
 TARGETS=(
-  "SOC Argus — Arm Mythos-Class Preset"
-  "SOC Argus — Frontier Simulator (M2.4)"
-  "Argus Exploit-to-Detection Reconciler (M2.2)"
-  "SOC Detection Eval (Argus M2.1)"
-  "Argus Trust Tier Assessor (Phase 3)"
-  "Argus Reasoning Watchdog (Phase 3)"
-  "Argus Trust Gate (Phase 3)"
-  "Argus Demo 1 Runner — Same-day CVE → Detection"
-  "Argus Demo 2 Runner — Polymorphic Variant Swarm"
+  "SOC ARGUS — Arm Mythos-Class Preset"
+  "SOC ARGUS — Frontier Simulator (M2.4)"
+  "ARGUS Exploit-to-Detection Reconciler (M2.2)"
+  "SOC Detection Eval (ARGUS M2.1)"
+  "ARGUS Trust Tier Assessor (Phase 3)"
+  "ARGUS Reasoning Watchdog (Phase 3)"
+  "ARGUS Trust Gate (Phase 3)"
+  "ARGUS Demo 1 Runner — Same-day CVE → Detection"
+  "ARGUS Demo 2 Runner — Polymorphic Variant Swarm"
 )
 # NOTE: SOC Triage is deliberately NOT in this list. It depends on a live
 # Inference connector and is driven by the soc-alert-sweeper pipeline on
-# real alert input; triggering it empty from the Argus demo driver hangs
+# real alert input; triggering it empty from the ARGUS demo driver hangs
 # the AI agent step and is not representative of demo flow.
 
 for t in "${TARGETS[@]}"; do

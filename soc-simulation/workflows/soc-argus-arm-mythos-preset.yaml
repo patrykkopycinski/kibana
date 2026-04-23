@@ -1,7 +1,7 @@
 version: '1'
-name: SOC Argus — Arm Mythos-Class Preset
+name: SOC ARGUS — Arm Mythos-Class Preset
 description: >
-  Manual-only Argus Phase 1 deliverable. Arms the frontier-class adversary preset by
+  Manual-only ARGUS Phase 1 deliverable. Arms the frontier-class adversary preset by
   enqueueing a pending attack command with difficulty=6 so the existing
   soc-caldera-dispatcher picks up the level-6 mythos-class-frontier-profile and
   launches the corresponding Caldera operation.
@@ -11,15 +11,15 @@ description: >
       must be operator-armed for demos and adversarial eval runs — the whole point is
       that reaching L6 is a decision, not an accident.
     * Deterministic, non-LLM: just writes a command doc. The dispatcher, poller,
-      difficulty controller, and Argus Phase 3 trust gate already know how to react
+      difficulty controller, and ARGUS Phase 3 trust gate already know how to react
       to difficulty=6 via the seeded .soc-attack-profiles/level-6 profile.
     * Governance: every arm emits an .soc-audit-trail row so the event is recoverable
-      from the shift-handover and Argus governance layer.
+      from the shift-handover and ARGUS governance layer.
 
   Inputs: none — always arms the canonical level-6 profile seeded by setup.sh from
   soc-simulation/caldera_profiles/level6-mythos-class.json.
 
-  Related Argus artifacts:
+  Related ARGUS artifacts:
     * docs/argus/threat-model.html
     * docs/argus/mythos-preset-spec.md
     * docs/argus/issues/m2-4-frontier-simulation.md (Phase 2 — agentic extensions)
@@ -78,5 +78,5 @@ steps:
     type: console
     with:
       message: >-
-        Argus Mythos-class preset armed (difficulty={{ consts.difficulty }}, profile={{ consts.operation_profile }}).
+        ARGUS Mythos-class preset armed (difficulty={{ consts.difficulty }}, profile={{ consts.operation_profile }}).
         Dispatcher will claim the command within ~1 minute.

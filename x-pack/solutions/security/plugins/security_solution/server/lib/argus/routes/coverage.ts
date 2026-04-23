@@ -84,7 +84,7 @@ const registerCoverageSnapshotRoute = ({ router, logger }: ArgusRoutesDeps) => {
           return response.ok({ body: snapshot });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus coverage route failed: ${error.message}`);
+          logger.error(`ARGUS coverage route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -110,13 +110,13 @@ const registerNavigatorLayerRoute = ({ router, logger }: ArgusRoutesDeps) => {
             : null;
           const snapshot = await computeCoverageSnapshot(esClient, profile);
           const name = profile
-            ? `Argus coverage — ${profile.name}`
-            : 'Argus coverage — all techniques';
+            ? `ARGUS coverage — ${profile.name}`
+            : 'ARGUS coverage — all techniques';
           const layer = buildNavigatorLayer({ snapshot, name });
           return response.ok({ body: layer });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus navigator layer route failed: ${error.message}`);
+          logger.error(`ARGUS navigator layer route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -139,7 +139,7 @@ const registerThreatProfilesRoute = ({ router, logger }: ArgusRoutesDeps) => {
         return response.ok({ body: { profiles } });
       } catch (err) {
         const error = transformError(err);
-        logger.error(`Argus threat profiles route failed: ${error.message}`);
+        logger.error(`ARGUS threat profiles route failed: ${error.message}`);
         return siemResponse.error({ statusCode: error.statusCode, body: error.message });
       }
     });
@@ -166,7 +166,7 @@ const registerThreatProfileDetailRoute = ({ router, logger }: ArgusRoutesDeps) =
           return response.ok({ body: profile });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus threat profile detail route failed: ${error.message}`);
+          logger.error(`ARGUS threat profile detail route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -193,7 +193,7 @@ const registerThreatActorsRoute = ({ router, logger }: ArgusRoutesDeps) => {
           return response.ok({ body: { actors } });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus threat actors route failed: ${error.message}`);
+          logger.error(`ARGUS threat actors route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -221,7 +221,7 @@ const registerThreatActorDetailRoute = ({ router, logger }: ArgusRoutesDeps) => 
           return response.ok({ body: actor });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus threat actor detail route failed: ${error.message}`);
+          logger.error(`ARGUS threat actor detail route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -258,7 +258,7 @@ const registerThreatActorCoverageRoute = ({ router, logger }: ArgusRoutesDeps) =
           return response.ok({ body: actorCoverage });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus threat actor coverage route failed: ${error.message}`);
+          logger.error(`ARGUS threat actor coverage route failed: ${error.message}`);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
         }
       }
@@ -281,7 +281,7 @@ const registerRedundancySummaryRoute = ({ router, logger }: ArgusRoutesDeps) => 
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);
-        logger.error(`Argus redundancy summary route failed: ${error.message}`);
+        logger.error(`ARGUS redundancy summary route failed: ${error.message}`);
         return siemResponse.error({ statusCode: error.statusCode, body: error.message });
       }
     });
@@ -397,7 +397,7 @@ const fetchCorpusDocs = async (esClient: ElasticsearchClient): Promise<RawCorpus
 };
 
 const fetchAuthoredDocs = async (esClient: ElasticsearchClient): Promise<RawAuthoredDoc[]> => {
-  // Argus-authored rules live as accepted recommendations in .soc-recommendations
+  // ARGUS-authored rules live as accepted recommendations in .soc-recommendations
   // (source.kind = 'mutation_intent', outcome/applied). Keeping the query
   // simple — anything with a non-empty mitre technique list counts.
   const res = await esClient.search<Record<string, unknown>>({

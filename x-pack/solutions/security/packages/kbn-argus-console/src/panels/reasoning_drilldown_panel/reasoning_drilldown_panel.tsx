@@ -140,7 +140,7 @@ export const ReasoningDrilldownPanel: React.FC<ReasoningDrilldownPanelProps> = (
           body={
             <EuiText>
               {
-                'Open an alert flyout and click “Show Argus reasoning”, or pick an event from the activity feed.'
+                'Open an alert flyout and click “Show ARGUS reasoning”, or pick an event from the activity feed.'
               }
             </EuiText>
           }

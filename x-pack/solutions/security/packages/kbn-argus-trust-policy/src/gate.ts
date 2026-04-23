@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus R7 — pure TypeScript spec for the trust-gate verdict matrix.
+ * ARGUS R7 — pure TypeScript spec for the trust-gate verdict matrix.
  *
  * The authoritative runtime implementation is Liquid inside
  * `soc-simulation/workflows/soc-argus-trust-gate.yaml`. This module is the
@@ -18,7 +18,7 @@
  * This module is also importable from any future in-process gate (for
  * example the `@kbn/argus-mcp-server` policy bundle projector) so the MCP
  * and A2A surfaces enforce exactly the same matrix as the scheduled
- * YAML gate — Argus's governance invariant is "the same caller gets the
+ * YAML gate — ARGUS's governance invariant is "the same caller gets the
  * same answer no matter which transport they arrived on".
  */
 

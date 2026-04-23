@@ -3,7 +3,7 @@
 #
 # Enrols this container as an Elastic Agent against the host-side Kibana Fleet,
 # launches a Caldera sandcat implant alongside, and hands off to the standard
-# elastic-agent container runtime. Designed for the Argus demo only — relies on
+# elastic-agent container runtime. Designed for the ARGUS demo only — relies on
 # HTTP (no TLS) and the `elastic` super-user from the compose .env.
 set -euo pipefail
 

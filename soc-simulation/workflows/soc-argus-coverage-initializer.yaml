@@ -1,8 +1,8 @@
 version: '1'
-name: Argus Coverage Initializer
+name: ARGUS Coverage Initializer
 description: >
   Discovers installed Fleet integrations, maps them to relevant Elastic prebuilt detection rules,
-  and proposes enabling critical- and high-severity rules that are not yet tracked in the Argus
+  and proposes enabling critical- and high-severity rules that are not yet tracked in the ARGUS
   detection corpus. Writes pending recommendations to `.soc-recommendations`, materializes
   companion rows in `.soc-coverage-gaps`, and emits governance trace + audit heartbeat rows.
 
@@ -43,7 +43,7 @@ steps:
         kbn-xsrf: "true"
         elastic-api-version: "2023-10-31"
 
-  # ── c. Corpus rule IDs already tracked by Argus ───────────────────
+  # ── c. Corpus rule IDs already tracked by ARGUS ───────────────────
   - name: fetch_existing_corpus
     type: elasticsearch.search
     with:
@@ -56,11 +56,10 @@ steps:
   # ── d. LLM gap analysis (installed packages ∩ prebuilt rules) ─────
   - name: analyze_coverage_gaps
     type: ai.agent
-    agent-id: soc-deteng-agent
     connector-id: opus
     with:
       message: >
-        You are the Argus Coverage Initializer (Dex Sprint Coverage Initialization, PR #263250).
+        You are the ARGUS Coverage Initializer (Dex Sprint Coverage Initialization, PR #263250).
 
         Inputs:
 
@@ -85,12 +84,41 @@ steps:
 
         If there are no qualifying rules, return {"proposals":[]}.
         Every proposal must include all five fields. Use `related_integration` for the single best-matching integration id or package name.
+      schema:
+        type: object
+        properties:
+          proposals:
+            type: array
+            items:
+              type: object
+              properties:
+                rule_id:
+                  type: string
+                name:
+                  type: string
+                severity:
+                  type: string
+                  enum:
+                    - critical
+                    - high
+                related_integration:
+                  type: string
+                reason:
+                  type: string
+              required:
+                - rule_id
+                - name
+                - severity
+                - related_integration
+                - reason
+        required:
+          - proposals
     timeout: 120s
 
   # ── e. Materialize recommendations + coverage-gap rows ────────────
   - name: write_proposals
     type: foreach
-    foreach: "{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{% if _p.proposals %}{{ _p.proposals | json }}{% else %}[]{% endif %}"
+    foreach: "{% if steps.analyze_coverage_gaps.output.proposals %}{{ steps.analyze_coverage_gaps.output.proposals | json }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{% if _p.proposals %}{{ _p.proposals | json }}{% else %}[]{% endif %}{% endif %}"
     steps:
       - name: index_recommendation
         type: elasticsearch.index
@@ -143,14 +171,14 @@ steps:
       document:
         "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
         run_id: "coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
-        agent_id: "soc-deteng-agent"
+        agent_id: "default"
         step_index: 0
         step_type: "coverage_initialization"
         content: >-
-          Argus Coverage Initializer tick — {% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposed {{ _p.proposals | size | default: 0 }} prebuilt rule enablement recommendation(s) from Fleet integration / prebuilt-rule overlap analysis.
+          ARGUS Coverage Initializer tick — {% if steps.analyze_coverage_gaps.output.proposals %}proposed {{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposed {{ _p.proposals | size | default: 0 }}{% endif %} prebuilt rule enablement recommendation(s) from Fleet integration / prebuilt-rule overlap analysis.
         argus:
           agent:
-            id: "soc-deteng-agent"
+            id: "default"
             version: "argus-coverage-init"
           decision:
             kind: "prebuilt_rule_enablement"
@@ -169,7 +197,7 @@ steps:
         event_type: argus_coverage_initializer_tick
         source: "argus.coverage-initializer"
         tick_id: "coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
-        proposals_count: "{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{{ _p.proposals | size | default: 0 }}"
+        proposals_count: "{% if steps.analyze_coverage_gaps.output.proposals %}{{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{{ _p.proposals | size | default: 0 }}{% endif %}"
         corpus_hits: "{{ steps.fetch_existing_corpus.output.hits.total.value | default: 0 }}"
 
   # ── h. Console summary ────────────────────────────────────────────
@@ -177,4 +205,4 @@ steps:
     type: console
     with:
       message: >-
-        Argus Coverage Initializer complete — tick coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}, {% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposals={{ _p.proposals | size | default: 0 }}
+        ARGUS Coverage Initializer complete — tick coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}, {% if steps.analyze_coverage_gaps.output.proposals %}proposals={{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposals={{ _p.proposals | size | default: 0 }}{% endif %}

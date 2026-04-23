@@ -129,7 +129,7 @@ export const registerSynthesisProposalsRoute = ({ router, logger }: ArgusRoutesD
           return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus synthesis_proposals route failed: ${error.message}`);
+          logger.error(`ARGUS synthesis_proposals route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

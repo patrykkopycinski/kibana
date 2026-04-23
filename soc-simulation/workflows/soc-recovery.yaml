@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Recovery
 description: >
-  Dead-letter recovery + rollback MTTR instrumentation (Argus R6).
+  Dead-letter recovery + rollback MTTR instrumentation (ARGUS R6).
 
   Two responsibilities in one workflow:
 
@@ -9,7 +9,7 @@ description: >
        `.soc-dead-letter` flagged `failed` in the last hour and log them
        for manual review.
 
-    2. Rollback MTTR emission (Argus R6) — for every rec in
+    2. Rollback MTTR emission (ARGUS R6) — for every rec in
        `.soc-recommendations` whose status is `rolled_back` and which does
        not yet have a corresponding `.soc-outcomes` row, compute
        `rollback_mttr_ms = rolled_back_at - applied_at` and write an
@@ -63,7 +63,7 @@ steps:
         stalled_count: "{{ steps.find_stalled.output.hits.total.value }}"
         details: "Recovery scan complete. Stalled entries logged for review."
 
-  # ── 2. Rollback MTTR instrumentation (Argus R6) ────────────────────
+  # ── 2. Rollback MTTR instrumentation (ARGUS R6) ────────────────────
   # Find recs that rolled back recently. We only consider recs that have
   # both `applied_at` and a `rolled_back` status — this filters out
   # orphaned rollbacks from pre-apply rejections (which have no meaningful
@@ -144,7 +144,7 @@ steps:
   - name: log_mttr_done
     type: console
     with:
-      message: "Argus R6 MTTR scan: emitted={{ steps.find_rolled_back_recs.output.hits.hits | size | default: 0 }}"
+      message: "ARGUS R6 MTTR scan: emitted={{ steps.find_rolled_back_recs.output.hits.hits | size | default: 0 }}"
 
   - name: log_done
     type: console

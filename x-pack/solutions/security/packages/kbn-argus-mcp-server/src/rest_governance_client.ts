@@ -11,7 +11,7 @@ import type { GovernanceClient } from './types';
 
 /**
  * Config for a governance client that hits Elasticsearch directly to read
- * `.soc-reasoning-eval-runs` and `.soc-actor-trust-tiers`. Takes a
+ * `.soc-argus-eval-runs` and `.soc-actor-trust-tiers`. Takes a
  * fetch-compatible implementation so it can be swapped out in tests.
  */
 export interface RestGovernanceClientConfig {
@@ -54,7 +54,7 @@ const parseGate = (raw: string | undefined): GovernanceSnapshot['adversarial_gat
 };
 
 /**
- * Reads the latest `.soc-reasoning-eval-runs` doc for each suite_kind, then
+ * Reads the latest `.soc-argus-eval-runs` doc for each suite_kind, then
  * checks `.soc-actor-trust-tiers` for the principal's watchdog status.
  */
 export class RestGovernanceClient implements GovernanceClient {
@@ -91,7 +91,7 @@ export class RestGovernanceClient implements GovernanceClient {
       query: { term: { suite_kind: suiteKind } },
       sort: [{ '@timestamp': 'desc' }],
     };
-    return this.searchFirst<EvalRunSource>('.soc-reasoning-eval-runs', body);
+    return this.searchFirst<EvalRunSource>('.soc-argus-eval-runs', body);
   }
 
   private async latestTrustTier(principal: Principal): Promise<TrustTierSource | undefined> {

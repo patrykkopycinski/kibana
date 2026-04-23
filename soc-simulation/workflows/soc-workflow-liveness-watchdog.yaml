@@ -1,8 +1,12 @@
 version: '1'
 name: SOC Workflow Liveness Watchdog
 description: >
-  Checks heartbeat freshness for Argus/SOC workflow sources. Aggregates the latest
+  Checks heartbeat freshness for ARGUS/SOC workflow sources. Aggregates the latest
   audit-trail heartbeat per source over the last 24h. Logs a liveness summary every tick.
+
+consts:
+  audit_index: ".soc-audit-trail"
+
 enabled: true
 
 triggers:
@@ -15,7 +19,7 @@ steps:
   - name: heartbeat_agg
     type: elasticsearch.search
     with:
-      index: ".soc-audit-trail"
+      index: "{{ consts.audit_index }}"
       size: 0
       query:
         bool:
@@ -45,9 +49,10 @@ steps:
   - name: write_liveness_audit
     type: elasticsearch.index
     with:
-      index: .soc-audit-trail
+      index: "{{ consts.audit_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        workflow_id: "soc-workflow-liveness-watchdog"
         event_type: "workflow_liveness_check"
         source: "soc-workflow-liveness-watchdog"
         sources_observed: "{{ steps.heartbeat_agg.output.aggregations.by_source.buckets | size | default: 0 }}"
@@ -55,9 +60,10 @@ steps:
   - name: heartbeat
     type: elasticsearch.index
     with:
-      index: .soc-audit-trail
+      index: "{{ consts.audit_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_id: "soc-workflow-liveness-watchdog"
         event_type: workflow_liveness_watchdog_heartbeat
         source: "soc-workflow-liveness-watchdog"
 

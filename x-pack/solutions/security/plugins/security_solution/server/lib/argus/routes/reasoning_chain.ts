@@ -52,7 +52,7 @@ export const registerReasoningChainRoute = ({ router, logger }: ArgusRoutesDeps)
         } catch (err) {
           const error = transformError(err);
           logger.error(
-            `Argus reasoning_chain route failed for ${subject.kind}:${subject.id}: ${error.message}`
+            `ARGUS reasoning_chain route failed for ${subject.kind}:${subject.id}: ${error.message}`
           );
           return siemResponse.error({
             statusCode: error.statusCode,

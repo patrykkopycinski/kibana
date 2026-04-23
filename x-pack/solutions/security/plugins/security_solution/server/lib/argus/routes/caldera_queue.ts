@@ -73,7 +73,7 @@ export const registerCalderaQueueRoute = ({ router, logger }: ArgusRoutesDeps) =
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus caldera_queue route failed: ${error.message}`);
+          logger.error(`ARGUS caldera_queue route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -88,7 +88,7 @@ const warnIfNotMissing = (logger: Logger, context: string, err: unknown): void =
   // the ES side, so reaching this catch means something else failed (mapping
   // error, permissions, transport). Surface those instead of silently hiding.
   const message = err instanceof Error ? err.message : String(err);
-  logger.warn(`Argus caldera_queue ${context} failed (degraded response): ${message}`);
+  logger.warn(`ARGUS caldera_queue ${context} failed (degraded response): ${message}`);
 };
 
 const fetchCommandHits = async (

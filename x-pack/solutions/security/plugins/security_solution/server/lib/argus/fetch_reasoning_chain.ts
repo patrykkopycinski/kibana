@@ -61,10 +61,10 @@ const fetchSpansForRun = async (
 };
 
 /**
- * Canonical Argus reasoning-chain fetch used by both the internal HTTP route
+ * Canonical ARGUS reasoning-chain fetch used by both the internal HTTP route
  * and the Agent Builder `security.argus.explain_decision` skill. Keeping a
  * single source of truth preserves agent-native parity — any user who can open
- * the Argus Console panel sees exactly the same payload the agent reasons over.
+ * the ARGUS Console panel sees exactly the same payload the agent reasons over.
  */
 export const fetchReasoningChain = async (
   esClient: ElasticsearchClient,

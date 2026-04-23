@@ -1,18 +1,18 @@
 # @kbn/evals-suite-argus-reasoning
 
-Argus Reasoning Eval Vertical (R11) — trace-level LLM-as-judge scoring of
-`.soc-reasoning-trace` spans against Argus governance rubrics.
+ARGUS Reasoning Eval Vertical (R11) — trace-level LLM-as-judge scoring of
+`.soc-reasoning-trace` spans against ARGUS governance rubrics.
 
 **Owner:** `@elastic/security-detection-engine`
-**Milestone:** Argus R11 (post-demo backlog)
+**Milestone:** ARGUS R11 (post-demo backlog)
 **Companion suite:** `@kbn/evals-suite-argus-detection` (scores detection rules; R11 scores the reasoning that _produced_ those rules)
 
 ## What this suite does
 
 Given a window of reasoning spans recorded into `.soc-reasoning-trace` by
-Argus actors, the suite loads the spans, scores each one across four
+ARGUS actors, the suite loads the spans, scores each one across four
 dimensions, aggregates them, and persists a single run row into
-`.soc-reasoning-eval-runs`:
+`.soc-argus-eval-runs`:
 
 | Dimension   | What it asks                                                                   |
 | ----------- | ------------------------------------------------------------------------------ |
@@ -38,7 +38,7 @@ The gate decision (`pass` / `marginal` / `fail`) is consumed by the
 
 `src/adversarial/` adds a prompt-injection robustness sub-suite that
 rides on the same gate vocabulary (`pass` / `marginal` / `fail`) as the
-reasoning vertical and emits to the same `.soc-reasoning-eval-runs`
+reasoning vertical and emits to the same `.soc-argus-eval-runs`
 index (`suite_kind: 'adversarial'`).
 
 The corpus covers six OWASP LLM01 attack families — direct override,

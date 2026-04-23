@@ -1,14 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://argus.local/schemas/workflow_registry.schema.json",
-  "title": "Argus Workflow Registry Entry",
+  "title": "ARGUS Workflow Registry Entry",
   "description": "One document per canonical workflow, seeded from soc-simulation/workflows/_registry.json.",
   "type": "object",
   "additionalProperties": false,
   "required": ["workflow_id", "automation_level", "connectors", "summary", "owner", "last_seeded_at"],
   "properties": {
     "workflow_id":      { "type": "string", "pattern": "^[a-z0-9_-]+$" },
-    "automation_level": { "type": "string", "enum": ["fully_auto", "semi_auto", "human_in_the_loop"] },
+    "automation_level": {
+      "type": "string",
+      "enum": [
+        "fully_auto",
+        "semi_auto",
+        "human_in_the_loop",
+        "scheduled",
+        "event-driven"
+      ]
+    },
     "connectors": {
       "type": "array",
       "items": {
@@ -46,7 +55,7 @@
     "last_seeded_at": { "type": "string", "format": "date-time" },
     "tags": {
       "type": "array",
-      "description": "Free-form discovery tags. The Argus Playbooks tab discovers workflows by the `argus:playbook` tag; Phase-A onward of argus-community-coverage-and-playbooks relies on this for cross-surface parity.",
+      "description": "Free-form discovery tags. The ARGUS Playbooks tab discovers workflows by the `argus:playbook` tag; Phase-A onward of argus-community-coverage-and-playbooks relies on this for cross-surface parity.",
       "items": { "type": "string", "minLength": 1, "maxLength": 64 },
       "uniqueItems": true,
       "maxItems": 16

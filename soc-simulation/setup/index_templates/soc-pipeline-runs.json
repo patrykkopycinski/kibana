@@ -1,0 +1,45 @@
+{
+  "index_patterns": [".soc-pipeline-runs"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "event_type": { "type": "keyword" },
+        "window": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "pipeline": {
+          "properties": {
+            "runs_total": { "type": "long" },
+            "success_count": { "type": "long" },
+            "failure_count": { "type": "long" },
+            "by_outcome": {
+              "type": "text",
+              "fields": {
+                "keyword": { "type": "keyword", "ignore_above": 8192 }
+              }
+            }
+          }
+        },
+        "pipeline_id": { "type": "keyword" },
+        "workflow_id": { "type": "keyword" },
+        "execution_id": { "type": "keyword" },
+        "outcome": { "type": "keyword" },
+        "duration_ms": { "type": "long" },
+        "error_summary": { "type": "text" },
+        "labels": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Materialized SOC pipeline run telemetry from soc-pipeline-run-telemetry (event-log rollup rows). Legacy per-run flat fields retained for backward compatibility.",
+    "owner": "argus-ops",
+    "schema_version": 2
+  }
+}

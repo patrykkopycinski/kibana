@@ -46,7 +46,7 @@ export const registerArgusRoutes = (deps: ArgusRoutesDeps) => {
   registerMutationVerdictRoute(deps);
 
   // Tier 3 — live Playbooks index. Reads the workflow registry by tag and
-  // merges the hardcoded Argus skill list so the console tab shows the same
+  // merges the hardcoded ARGUS skill list so the console tab shows the same
   // set of playbooks operators see in Agent Builder.
   registerPlaybooksIndexRoute(deps);
 

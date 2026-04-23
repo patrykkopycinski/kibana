@@ -23,6 +23,10 @@ description: >
   This workflow is pure Elastic: kibana.request + foreach + elasticsearch.index.
   No Python, no sidecars. Triggered once at the end of setup.sh and on demand
   from the Workflows UI.
+
+consts:
+  artifact_registry_index: ".soc-artifact-registry"
+
 enabled: true
 
 triggers:
@@ -67,7 +71,7 @@ steps:
       - name: write_agent_row
         type: elasticsearch.update
         with:
-          index: .soc-artifact-registry
+          index: "{{ consts.artifact_registry_index }}"
           id: "agent:{{ foreach.item.id }}"
           doc_as_upsert: true
           doc:
@@ -91,7 +95,7 @@ steps:
       - name: write_skill_row
         type: elasticsearch.update
         with:
-          index: .soc-artifact-registry
+          index: "{{ consts.artifact_registry_index }}"
           id: "skill:{{ foreach.item.id }}"
           doc_as_upsert: true
           doc:
@@ -115,7 +119,7 @@ steps:
       - name: write_workflow_row
         type: elasticsearch.update
         with:
-          index: .soc-artifact-registry
+          index: "{{ consts.artifact_registry_index }}"
           id: "workflow:{{ foreach.item.id }}"
           doc_as_upsert: true
           doc:
@@ -143,7 +147,7 @@ steps:
       - name: write_rule_row
         type: elasticsearch.update
         with:
-          index: .soc-artifact-registry
+          index: "{{ consts.artifact_registry_index }}"
           id: "rule:{{ foreach.item.rule_id }}"
           doc_as_upsert: true
           doc:

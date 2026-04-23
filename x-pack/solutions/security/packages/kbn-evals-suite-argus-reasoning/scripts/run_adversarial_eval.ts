@@ -10,11 +10,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { evaluateAdversarial } from '../src/adversarial/evaluate_adversarial';
 
 /**
- * Standalone CLI for the Argus Adversarial Eval Vertical (R2).
+ * Standalone CLI for the ARGUS Adversarial Eval Vertical (R2).
  *
  * Mirrors `run_reasoning_eval.ts`. Runs the canned prompt-injection corpus
  * offline (no LLM connector required) and indexes a single
- * `argus-adversarial-vertical` row into `.soc-reasoning-eval-runs` so the
+ * `argus-adversarial-vertical` row into `.soc-argus-eval-runs` so the
  * trust-tier assessor picks up the gate decision on its next tick.
  *
  *   $ node scripts/run_adversarial_eval.js \
@@ -42,7 +42,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
     esUrl: process.env.ES_URL ?? 'http://localhost:9200',
     esUser: process.env.ES_USER ?? 'elastic',
     esPass: process.env.ES_PASS ?? 'changeme',
-    runsIndex: '.soc-reasoning-eval-runs',
+    runsIndex: '.soc-argus-eval-runs',
     suiteId: 'argus-adversarial-vertical',
     includeUnsafeBaselines: false,
   };
@@ -92,7 +92,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
             '  --es-url <url>                 Elasticsearch URL (default http://localhost:9200)',
             '  --es-user <user>               Elasticsearch user',
             '  --es-pass <pass>               Elasticsearch password',
-            '  --runs-index <index>           Destination runs index (default .soc-reasoning-eval-runs)',
+            '  --runs-index <index>           Destination runs index (default .soc-argus-eval-runs)',
             '  --suite-id <id>                Suite identifier (default argus-adversarial-vertical)',
             '  --case-ids <csv>               Comma-separated subset of corpus case ids to run',
             '  --include-unsafe-baselines     Include adv-99-* negative baselines (for debugging the judge)',

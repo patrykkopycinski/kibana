@@ -30,7 +30,7 @@ const getDecisionGraphSchema = z.object({
   root_kind: z
     .enum(ROOT_KINDS)
     .describe(
-      'Kind of subject to root the neighborhood on. Use `advisory` for CVEs, `rule` for detection rules, `actor` for threat actors, `reasoning` for a specific Argus run_id, etc.'
+      'Kind of subject to root the neighborhood on. Use `advisory` for CVEs, `rule` for detection rules, `actor` for threat actors, `reasoning` for a specific ARGUS run_id, etc.'
     ),
   root_id: z
     .string()
@@ -50,7 +50,7 @@ const getDecisionGraphSchema = z.object({
 
 /**
  * Read-only tool that returns the same decision-graph neighborhood the
- * Argus Console flyout/full-screen explorer render. Lets LLM skills reason
+ * ARGUS Console flyout/full-screen explorer render. Lets LLM skills reason
  * over the typed-edge graph (advisory -> intent -> outcome -> rule -> ...)
  * without having to hand-write Elasticsearch queries over `.soc-decision-graph`.
  */
@@ -62,9 +62,9 @@ export function argusGetDecisionGraphTool(
     id: ARGUS_GET_DECISION_GRAPH_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Fetch the Argus decision-graph neighborhood rooted at a given subject (advisory / rule / ' +
+      'Fetch the ARGUS decision-graph neighborhood rooted at a given subject (advisory / rule / ' +
       'actor / technique / reasoning run / outcome / audit / observation). Returns the same ' +
-      'node+edge payload rendered by the Argus Console flyout. Read-only. Results are capped ' +
+      'node+edge payload rendered by the ARGUS Console flyout. Read-only. Results are capped ' +
       'at 200 nodes and depth 3; `truncated: true` when the cap was hit.',
     schema: getDecisionGraphSchema,
     tags: ['security', 'argus', ARGUS_READ_TAG, 'decision-graph'],

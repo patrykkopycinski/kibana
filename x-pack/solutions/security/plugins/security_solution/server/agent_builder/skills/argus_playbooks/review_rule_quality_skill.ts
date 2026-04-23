@@ -13,7 +13,7 @@ import { ARGUS_REVIEW_RULE_QUALITY_SKILL_ID } from './constants';
 /**
  * Pure-read skill. Per the argus-playbook-primitives spec, this skill MUST NOT
  * invoke any workflow and MUST NOT write to any index. It only reads
- * `.soc-recommendations` and `.soc-backtest-results` via `platform.core.search`
+ * `.soc-recommendations` and `.soc-backtests` via `platform.core.search`
  * and returns a narrative.
  */
 export const argusReviewRuleQualitySkill = defineSkillType({
@@ -21,28 +21,28 @@ export const argusReviewRuleQualitySkill = defineSkillType({
   name: ARGUS_REVIEW_RULE_QUALITY_SKILL_ID,
   basePath: 'skills/security/argus/playbooks',
   description:
-    'Review the quality of a specific detection rule from the Argus perspective: recent ' +
-    'backtest metrics (true positives, false positives, windows), Argus governance decisions ' +
+    'Review the quality of a specific detection rule from the ARGUS perspective: recent ' +
+    'backtest metrics (true positives, false positives, windows), ARGUS governance decisions ' +
     '(applied, blocked, rolled back, and why), and the rule\'s trajectory over time. This is ' +
     'a read-only skill — it never writes. Use when the user asks "how good is rule X?", ' +
     '"should we keep rule X?", or "show me the quality history of this rule".',
-  content: `# Argus · Review Rule Quality
+  content: `# ARGUS · Review Rule Quality
 
 ## When to use this skill
 
-Use this skill when a user wants an Argus-lens review of a specific detection
+Use this skill when a user wants an ARGUS-lens review of a specific detection
 rule, without triggering any mutation. Typical prompts:
 
 - "Review the quality of rule \`rule-123\`."
 - "Should we keep this rule? Show me its quality history."
-- "Why did Argus block rule X? Tell me what the backtests say."
+- "Why did ARGUS block rule X? Tell me what the backtests say."
 
 ## Workflow (read-only)
 
 1. **Identify the rule.** Require a \`rule_id\`. If the user gives a rule
    *name*, refuse gracefully — ids are unambiguous, names are not.
 2. **Read recent backtests.** Use \`platform.core.search\` against
-   \`.soc-backtest-results\` filtered by \`rule_id\`, sorted by
+   \`.soc-backtests\` filtered by \`rule_id\`, sorted by
    \`@timestamp\` desc, size 10. Summarise TP/FP counts, windows, and any
    failure reasons.
 3. **Read recent governance decisions.** Use \`platform.core.search\` against

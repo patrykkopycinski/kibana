@@ -1,0 +1,26 @@
+{
+  "index_patterns": [".soc-argus-health"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "component": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "message": { "type": "text" },
+        "metrics": { "type": "object", "enabled": false }
+      }
+    }
+  },
+  "_meta": {
+    "description": "ARGUS component health heartbeats and probe results for console / watchdog surfaces.",
+    "owner": "argus-ops",
+    "schema_version": 1
+  }
+}

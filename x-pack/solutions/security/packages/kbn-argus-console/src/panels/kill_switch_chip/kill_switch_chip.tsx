@@ -114,7 +114,7 @@ export const KillSwitchChip: React.FC<KillSwitchChipProps> = ({
   };
 
   const tooltip = currentlyEnabled
-    ? 'Autonomy is ON. Argus can apply trusted-tier mutations without human review.'
+    ? 'Autonomy is ON. ARGUS can apply trusted-tier mutations without human review.'
     : `Autonomy is OFF. All mutations require human approval.${
         current.reason ? ` — ${current.reason}` : ''
       }`;
@@ -151,7 +151,7 @@ export const KillSwitchChip: React.FC<KillSwitchChipProps> = ({
         <EuiConfirmModal
           aria-labelledby={modalTitleId}
           titleProps={{ id: modalTitleId }}
-          title={currentlyEnabled ? 'Pause Argus autonomy?' : 'Resume Argus autonomy?'}
+          title={currentlyEnabled ? 'Pause ARGUS autonomy?' : 'Resume ARGUS autonomy?'}
           onCancel={() => setModalOpen(false)}
           onConfirm={onConfirmToggle}
           cancelButtonText="Cancel"

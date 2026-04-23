@@ -26,7 +26,7 @@ describe('argusExplainDecisionSkill', () => {
       expect(argusExplainDecisionSkill.id).toBe('argus-explain-decision');
       expect(argusExplainDecisionSkill.name).toBe('argus-explain-decision');
       expect(argusExplainDecisionSkill.basePath).toBe('skills/security/argus');
-      expect(argusExplainDecisionSkill.description).toContain('Argus');
+      expect(argusExplainDecisionSkill.description).toContain('ARGUS');
       expect(argusExplainDecisionSkill.description).toContain('reasoning chain');
     });
 
@@ -95,7 +95,7 @@ describe('argusExplainDecisionSkill', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(getData(result).message).toContain('No Argus reasoning trace found');
+      expect(getData(result).message).toContain('No ARGUS reasoning trace found');
       expect(getData(result).subject).toEqual({ kind: 'alert', id: 'alert-1' });
     });
 
@@ -106,7 +106,7 @@ describe('argusExplainDecisionSkill', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(getData(result).message).toContain('No Argus reasoning trace found');
+      expect(getData(result).message).toContain('No ARGUS reasoning trace found');
       expect(getData(result).subject).toEqual({ kind: 'run', id: 'run-xyz' });
     });
 
@@ -126,7 +126,7 @@ describe('argusExplainDecisionSkill', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.other);
-      expect(getData(result).message).toContain('Argus reasoning chain for alert:alert-1');
+      expect(getData(result).message).toContain('ARGUS reasoning chain for alert:alert-1');
       expect(getData(result).reasoningChain).toBeDefined();
     });
 
@@ -143,7 +143,7 @@ describe('argusExplainDecisionSkill', () => {
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.error);
-      expect(getData(result).message).toContain('Failed to fetch Argus reasoning chain');
+      expect(getData(result).message).toContain('Failed to fetch ARGUS reasoning chain');
       expect(getData(result).message).toContain('boom');
     });
   });

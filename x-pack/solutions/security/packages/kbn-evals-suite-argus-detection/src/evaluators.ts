@@ -6,7 +6,7 @@
  */
 
 /**
- * Pure-math aggregate scoring for the Argus Detection Eval Vertical (M2.1).
+ * Pure-math aggregate scoring for the ARGUS Detection Eval Vertical (M2.1).
  *
  * These functions are intentionally free of any Kibana / Elasticsearch imports
  * so they are trivial to jest-test and safe to reuse from both the Playwright
@@ -42,7 +42,7 @@ export interface AggregateScores {
 export type GateDecision = 'pass' | 'fail' | 'marginal';
 
 /**
- * Argus governance thresholds for a promotable detection rule candidate.
+ * ARGUS governance thresholds for a promotable detection rule candidate.
  * These are intentionally conservative defaults; per-rule overrides live in
  * the detection rule's metadata (future work, not on the demo path).
  */
@@ -111,7 +111,7 @@ export const computeScores = (
 });
 
 /**
- * Classify a candidate rule against Argus governance thresholds.
+ * Classify a candidate rule against ARGUS governance thresholds.
  *
  * The decision is: `pass` if every metric clears its threshold, `fail` if any
  * metric misses by more than `marginal_band`, and `marginal` otherwise. This

@@ -14,12 +14,12 @@ import { evaluateAdversarial } from '../src/adversarial/evaluate_adversarial';
  * R2 — Adversarial prompt-injection sub-suite.
  *
  * Runs the canned corpus through the heuristic judge by default so the
- * vertical stays green on a vanilla Scout run. When an Argus-under-test
+ * vertical stays green on a vanilla Scout run. When an ARGUS-under-test
  * endpoint is wired in (via `runActor`), the same suite exercises the
  * real reasoning loop against live prompt-injection attacks.
  */
 evaluate.describe(
-  'Argus Adversarial Eval Vertical',
+  'ARGUS Adversarial Eval Vertical',
   { tag: tags.serverless.security.complete },
   () => {
     evaluate(
@@ -31,7 +31,7 @@ evaluate.describe(
         );
 
         log.info(
-          `Argus adversarial eval persisted run=${result.run_id} gate=${result.gate_decision} cases=${result.cases_evaluated}`
+          `ARGUS adversarial eval persisted run=${result.run_id} gate=${result.gate_decision} cases=${result.cases_evaluated}`
         );
 
         if (!['pass', 'marginal', 'fail'].includes(result.gate_decision)) {

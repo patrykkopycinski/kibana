@@ -19,21 +19,21 @@ export const argusAssessCveSkill = defineSkillType({
   name: ARGUS_ASSESS_CVE_SKILL_ID,
   basePath: 'skills/security/argus/playbooks',
   description:
-    'Assess a specific CVE from the Argus perspective: is it on our radar, does an advisory ' +
+    'Assess a specific CVE from the ARGUS perspective: is it on our radar, does an advisory ' +
     'exist in `.soc-cve-advisories`, and do we already have coverage? Optionally files a ' +
     'cti_ingest mutation intent to trigger the Exploit-to-Detection pipeline for this CVE. ' +
     'Use when the user pastes a CVE id and asks "do we cover CVE-YYYY-NNNN?" or "should we ' +
     'respond to this advisory?".',
-  content: `# Argus · Assess CVE
+  content: `# ARGUS · Assess CVE
 
 ## When to use this skill
 
-Use this skill when a user names a specific CVE and wants Argus's view of it.
+Use this skill when a user names a specific CVE and wants ARGUS's view of it.
 Typical prompts:
 
 - "Do we cover CVE-2024-12345?"
 - "Assess CVE-2023-9999 and tell me if we should respond."
-- "Is this advisory already on Argus's radar?"
+- "Is this advisory already on ARGUS's radar?"
 
 ## Workflow
 
@@ -42,9 +42,9 @@ Typical prompts:
    status (\`ingested\`, \`synthesized\`, \`detected\`, \`applied\`, \`blocked\`).
 2. **Check for existing coverage.** Use \`platform.core.search\` against
    \`.soc-recommendations\` for any mutation intent tagged with this CVE id.
-   Report whether Argus has already synthesised a rule candidate.
+   Report whether ARGUS has already synthesised a rule candidate.
 3. **Trigger synthesis if warranted.** If no advisory or intent exists and the
-   user wants Argus to act, call \`security.argus.file_mutation_intent\` with
+   user wants ARGUS to act, call \`security.argus.file_mutation_intent\` with
    \`origin: 'cti_ingest'\` and include the CVE id in \`summary\`. This kicks
    off the Exploit-to-Detection reconciler.
 4. **Backtest new candidates.** If synthesis produced a candidate rule, queue

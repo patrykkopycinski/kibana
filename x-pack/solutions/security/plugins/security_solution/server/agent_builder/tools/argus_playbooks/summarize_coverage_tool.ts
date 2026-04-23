@@ -52,7 +52,7 @@ export function argusSummarizeCoverageTool(
     id: ARGUS_SUMMARIZE_COVERAGE_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Summarize Argus coverage gaps grouped by ATT&CK technique. Reads `.soc-coverage-gaps` and ' +
+      'Summarize ARGUS coverage gaps grouped by ATT&CK technique. Reads `.soc-coverage-gaps` and ' +
       'returns the top N gap rows, plus counts of rules per technique and an overall score.',
     schema: summarizeCoverageSchema,
     tags: ['security', 'argus', 'argus:playbook', 'read', 'coverage'],

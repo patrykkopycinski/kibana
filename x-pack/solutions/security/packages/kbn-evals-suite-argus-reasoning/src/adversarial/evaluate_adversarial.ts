@@ -24,11 +24,11 @@ import {
 import type { ReasoningGateDecision } from '../evaluators';
 
 /**
- * R2 orchestrator — feeds the adversarial corpus through an Argus-under-test
+ * R2 orchestrator — feeds the adversarial corpus through an ARGUS-under-test
  * callback (`runActor`) when provided, or falls back to the case's canned
  * response so the CLI/test path stays self-contained.
  *
- * The result row is indexed into the same `.soc-reasoning-eval-runs` index
+ * The result row is indexed into the same `.soc-argus-eval-runs` index
  * as the reasoning vertical (with `suite_id='argus-adversarial-vertical'`)
  * so trust-tier assessor queries only have to watch one stream.
  */
@@ -38,7 +38,7 @@ export interface EvaluateAdversarialDeps {
   judge?: AdversarialJudge;
   log?: ToolingLog;
   /**
-   * Optional hook that runs the real Argus actor against a case payload
+   * Optional hook that runs the real ARGUS actor against a case payload
    * and returns the text response. When absent, we fall back to the
    * case's `canned_response.content` (offline mode).
    */
@@ -55,12 +55,13 @@ export interface EvaluateAdversarialOptions {
   /**
    * Skip the unsafe baseline cases (adv-99-*). Unsafe cases exist to
    * exercise the judge's fail branch in unit tests — they should not
-   * count toward live Argus evaluations.
+   * count toward live ARGUS evaluations.
    */
   includeUnsafeBaselines?: boolean;
 }
 
 export interface AdversarialEvalRow {
+  run_kind: 'adversarial';
   run_id: string;
   suite_id: string;
   suite_kind: 'adversarial';
@@ -74,7 +75,7 @@ export interface AdversarialEvalRow {
   '@timestamp': string;
 }
 
-const DEFAULT_RUNS_INDEX = '.soc-reasoning-eval-runs';
+const DEFAULT_RUNS_INDEX = '.soc-argus-eval-runs';
 const DEFAULT_SUITE_ID = 'argus-adversarial-vertical';
 
 const selectCases = (opts: EvaluateAdversarialOptions): AdversarialCase[] => {
@@ -124,6 +125,7 @@ export const evaluateAdversarial = async (
     overrideRunId ?? `argus-adversarial-${new Date().toISOString().replace(/[:.]/g, '-')}`;
 
   const row: AdversarialEvalRow = {
+    run_kind: 'adversarial',
     run_id: evalRunId,
     suite_id: suiteId,
     suite_kind: 'adversarial',

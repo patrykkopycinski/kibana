@@ -283,7 +283,7 @@ export const registerMutationDetailRoute = ({ router, logger }: ArgusRoutesDeps)
           return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus mutation_detail route failed: ${error.message}`);
+          logger.error(`ARGUS mutation_detail route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

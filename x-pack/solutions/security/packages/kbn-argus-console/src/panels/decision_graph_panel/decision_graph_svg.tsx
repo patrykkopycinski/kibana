@@ -234,7 +234,7 @@ export const DecisionGraphSvg: React.FC<DecisionGraphSvgProps> = ({
       role="img"
       aria-label={i18n.translate(
         'securitySolutionPackages.argusConsole.decisionGraph.svgAriaLabel',
-        { defaultMessage: 'Argus decision graph' }
+        { defaultMessage: 'ARGUS decision graph' }
       )}
       viewBox={`0 0 ${viewBox.width} ${viewBox.height}`}
       width="100%"

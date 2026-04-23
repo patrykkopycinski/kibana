@@ -49,7 +49,7 @@ describe('computeToolAnnotations', () => {
   });
 
   it('idempotentHint stays true for known pure-read classifiers even if tool list is empty', () => {
-    const a = computeToolAnnotations('soc-architecture-review', []);
+    const a = computeToolAnnotations('soc-architecture-and-gaps', []);
     expect(a.idempotentHint).toBe(true);
   });
 });

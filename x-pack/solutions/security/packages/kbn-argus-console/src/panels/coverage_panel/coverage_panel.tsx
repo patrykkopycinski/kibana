@@ -77,21 +77,21 @@ const STATUS_STYLE: Record<
     border: '#2f9e44',
     iconType: 'checkInCircleFilled',
     iconColor: '#2f9e44',
-    label: 'Argus covers (community gap)',
+    label: 'ARGUS covers (community gap)',
   },
   shared: {
     bg: '#d0ebff',
     border: '#1971c2',
     iconType: 'checkInCircleFilled',
     iconColor: '#1971c2',
-    label: 'Argus + community cover',
+    label: 'ARGUS + community cover',
   },
   community_only: {
     bg: '#ffe3e3',
     border: '#e03131',
     iconType: 'alert',
     iconColor: '#c92a2a',
-    label: 'Community-only (Argus gap)',
+    label: 'Community-only (ARGUS gap)',
   },
   uncovered: {
     bg: '#f8f9fa',
@@ -255,11 +255,11 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ http }) => {
           </EuiTitle>
           <EuiText size="s" color="subdued">
             {
-              'Tactic × technique heatmap — Argus-authored detections vs the aggregated community corpus ('
+              'Tactic × technique heatmap — ARGUS-authored detections vs the aggregated community corpus ('
             }
             <code>{'.soc-detection-corpus'}</code>
             {
-              '). Positive cells mean Argus over-covers; negative cells are techniques the community hits that Argus is missing.'
+              '). Positive cells mean ARGUS over-covers; negative cells are techniques the community hits that ARGUS is missing.'
             }
           </EuiText>
         </EuiFlexItem>
@@ -329,7 +329,7 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ http }) => {
           <EuiFlexItem grow={false}>
             <EuiStat
               title={snapshotData.argus_authored_count}
-              description="Argus-authored"
+              description="ARGUS-authored"
               titleSize="s"
               titleColor="primary"
             />
@@ -353,7 +353,7 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ http }) => {
           <EuiFlexItem grow={false}>
             <EuiStat
               title={snapshotData.only_argus_count}
-              description="Argus-only"
+              description="ARGUS-only"
               titleSize="s"
               titleColor="success"
             />
@@ -463,7 +463,7 @@ export const CoveragePanel: React.FC<CoveragePanelProps> = ({ http }) => {
             <EuiFlexItem grow={false}>
               <EuiStat
                 title={actorCoverage.data.covered_by_argus}
-                description="Covered by Argus"
+                description="Covered by ARGUS"
                 titleSize="s"
                 titleColor="success"
               />
@@ -576,7 +576,7 @@ const RedundancyRow: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiStat
               title={data.rules_now_redundant.toLocaleString()}
-              description="Dominated Argus rules"
+              description="Dominated ARGUS rules"
               titleSize="xs"
             />
           </EuiFlexItem>
@@ -636,8 +636,8 @@ const TacticGroup: React.FC<{ readonly group: CellsByTactic }> = ({ group }) => 
 
 const CoverageLegend: React.FC = () => {
   const items: ReadonlyArray<{ readonly key: CoverageStatus; readonly label: string }> = [
-    { key: 'argus_only', label: 'Argus covers' },
-    { key: 'shared', label: 'Argus + community' },
+    { key: 'argus_only', label: 'ARGUS covers' },
+    { key: 'shared', label: 'ARGUS + community' },
     { key: 'community_only', label: 'Community-only gap' },
     { key: 'uncovered', label: 'No coverage' },
   ];
@@ -689,7 +689,7 @@ const TechniqueCell: React.FC<{
 }> = ({ cell, compact }) => {
   const status = classifyCell(cell);
   const style = STATUS_STYLE[status];
-  const tooltip = `${cell.technique_name} (${cell.technique_id}) · ${style.label} · Argus ${
+  const tooltip = `${cell.technique_name} (${cell.technique_id}) · ${style.label} · ARGUS ${
     cell.argus_authored
   } vs community ${cell.community_authored} · sources: ${
     cell.contributing_sources.length ? cell.contributing_sources.join(', ') : 'none'

@@ -15,7 +15,7 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { ARGUS_FILE_MUTATION_INTENT_TOOL_ID } from './constants';
 
 /**
- * Input contract for the Argus file_mutation_intent tool.
+ * Input contract for the ARGUS file_mutation_intent tool.
  *
  * All origins funnel through the envelope validator ingest pipeline, so we
  * keep the zod schema deliberately narrow — the tool is a thin, auditable
@@ -77,7 +77,7 @@ export function argusFileMutationIntentTool(
     id: ARGUS_FILE_MUTATION_INTENT_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'File a new Argus mutation intent into `.soc-recommendations`. Supported origins: ' +
+      'File a new ARGUS mutation intent into `.soc-recommendations`. Supported origins: ' +
       'gap_analysis, consolidation, cti_ingest, pattern_seed, manual. Writes an envelope-compliant ' +
       'document and returns the assigned `rec_id`. Set `dry_run: true` to validate without writing.',
     schema: fileMutationIntentSchema,

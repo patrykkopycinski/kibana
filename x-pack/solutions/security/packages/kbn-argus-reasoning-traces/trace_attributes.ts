@@ -6,9 +6,9 @@
  */
 
 /**
- * Argus M2.5 — Reasoning-trace governance attribute contract.
+ * ARGUS M2.5 — Reasoning-trace governance attribute contract.
  *
- * Every span emitted by an Argus agent MUST set these attributes so the
+ * Every span emitted by an ARGUS agent MUST set these attributes so the
  * governance layer can correlate reasoning steps back to the decision they
  * produced, the actor whose input triggered them, and the tool calls that
  * were exercised.
@@ -37,7 +37,7 @@ export type ArgusTraceAttrKey = keyof typeof ARGUS_TRACE_ATTR;
 export type ArgusTraceAttrName = (typeof ARGUS_TRACE_ATTR)[ArgusTraceAttrKey];
 
 /**
- * Subset of decision kinds that Argus agents emit. Used as a tagged union
+ * Subset of decision kinds that ARGUS agents emit. Used as a tagged union
  * so the governance dashboard can filter by kind without relying on a free
  * string.
  */
@@ -77,7 +77,7 @@ export type ArgusTrustTier =
 export type ArgusAttrValue = string | number | boolean | ReadonlyArray<string | number | boolean>;
 
 /**
- * Strongly-typed attribute bag for an Argus span. Every key is one of the
+ * Strongly-typed attribute bag for an ARGUS span. Every key is one of the
  * ARGUS_TRACE_ATTR values, and every key except `agentId` + `decisionKind`
  * is optional so partial spans (e.g. early thought events) remain valid.
  */

@@ -19,7 +19,7 @@ export interface UseE2dFlowArgs {
   readonly window: E2dFlowWindow;
   readonly enabled?: boolean;
   /**
-   * Optional silent refresh. Like the other Argus hooks, refreshes keep the
+   * Optional silent refresh. Like the other ARGUS hooks, refreshes keep the
    * previous data on-screen instead of flashing back to a loading state.
    */
   readonly refreshIntervalMs?: number;

@@ -1,6 +1,6 @@
-# Argus Variant Bank
+# ARGUS Variant Bank
 
-The on-disk variant bank that feeds the Argus **Frontier Simulator** (M2.4) and,
+The on-disk variant bank that feeds the ARGUS **Frontier Simulator** (M2.4) and,
 downstream, the Detection Eval Vertical (M2.1). Each variant is a single
 Mythos-era primitive rendered as a labelled ECS-ish document that the simulator
 indexes into `.soc-eval-corpus-<corpus_id>`.

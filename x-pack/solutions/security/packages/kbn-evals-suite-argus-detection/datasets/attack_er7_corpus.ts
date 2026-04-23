@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus R1 — ATT&CK Evaluations Round 7 labelled corpus.
+ * ARGUS R1 — ATT&CK Evaluations Round 7 labelled corpus.
  *
  * Sits alongside MYTHOS_CORPUS_2026_04 so the Detection Eval Vertical can grade
  * rules against a second, real-world kill-chain (T1190 Exploit Public-Facing

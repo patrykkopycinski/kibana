@@ -1,7 +1,7 @@
 version: '1'
-name: Argus Shadow Executor (R8)
+name: ARGUS Shadow Executor (R8)
 description: >
-  Argus R8 — shadow / dry-run execution of draft detection rules BEFORE
+  ARGUS R8 — shadow / dry-run execution of draft detection rules BEFORE
   the autonomous applier deploys them.
 
   For every recommendation whose trust-gate verdict is `allow` and which
@@ -11,7 +11,7 @@ description: >
        rule's raw Elasticsearch QueryDSL container).
     2. Runs that query against the configured historical index pattern
        over the last 7 days, counting total hits per hour.
-    3. Writes a row into `.soc-rule-backtester-runs` with the hit-rate
+    3. Writes a row into `.soc-argus-eval-runs` (run_kind=shadow_backtest) with the hit-rate
        estimate and a pass/fail `gate_decision`.
     4. If the shadow run fails (hit-rate far above the expected baseline
        or query errored), downgrades the rec to `pending_review` so the
@@ -39,7 +39,7 @@ triggers:
 
 consts:
   recs_index: ".soc-recommendations"
-  backtest_index: ".soc-rule-backtester-runs"
+  backtest_index: ".soc-argus-eval-runs"
   # Sources the shadow executor replays draft rules against. `logs-*`
   # covers ECS-shaped telemetry; the variant-bank live index gives the
   # demo an immediate corpus of mythos-style events.
@@ -68,59 +68,24 @@ steps:
     type: foreach
     foreach: "{{ steps.fetch_shadow_candidates.output.hits.hits }}"
     steps:
-      # Dynamic rule query injection is not supported for elasticsearch.request
-      # bodies in the workflow engine — delegate the historical replay to
-      # soc-deteng-agent, which can run the draft query via the platform search tool.
       - name: run_shadow_query
-        type: ai.agent
-        agent-id: soc-deteng-agent
-        connector-id: opus
+        type: security.shadowExecuteRule
         with:
-          message: >
-            You are the Argus Shadow Executor backtester.
-
-            1. Read the draft detection rule query below from
-               `details.new_definition.query` (Elasticsearch Query DSL).
-
-            2. Run it against index pattern `logs-*,.soc-eval-corpus-*` for the
-               time range `@timestamp` >= now-7d using the `search` tool
-               (track total hits; use a date_histogram with fixed_interval 1h on
-               `@timestamp` to estimate volume over the window).
-
-            3. Compute `total_hits` (approximate or exact as returned by search)
-               and `hits_per_hour` = total_hits / number_of_hours_with_data in the
-               window; if the histogram has no buckets, use 0 for hits_per_hour.
-
-            4. Set `verdict` to `pass` if hits_per_hour < 50, otherwise `fail`.
-
-            Respond with STRICT JSON only (no markdown, no prose):
-            {"total_hits": <number>, "hits_per_hour": <number>, "verdict": "pass" | "fail"}
-
-            Recommendation context (draft rule envelope excerpt):
-            {{ foreach.item._source.details.new_definition | json }}
-        timeout: 300s
+          rule_query: "{{ foreach.item._source.details.new_definition.query }}"
+          rule_type: "{{ foreach.item._source.details.new_definition.language | default: 'kql' }}"
+          index_patterns: ["logs-*", ".soc-eval-corpus-*"]
+          time_window: "24h"
+          max_hits_per_hour_threshold: 50
 
       - name: compute_shadow_verdict
         type: console
         with:
-          message: >-
-            {%- assign _s = steps.run_shadow_query.output.message | json_parse -%}
-            {%- assign v = _s.verdict | default: 'fail' -%}
-            {%- if v == 'pass' -%}pass
-            {%- else -%}fail
-            {%- endif -%}
+          message: "{{ steps.run_shadow_query.output.verdict }}"
 
       - name: compute_shadow_reason
         type: console
         with:
-          message: >-
-            {%- assign _s = steps.run_shadow_query.output.message | json_parse -%}
-            {%- assign th = _s.total_hits | default: 0 -%}
-            {%- assign hph = _s.hits_per_hour | default: 0 -%}
-            {%- assign v = _s.verdict | default: 'fail' -%}
-            {%- if v == 'pass' -%}hits_per_hour_ok:{{ hph }}/{{ consts.max_hits_per_hour }} total_hits={{ th }}
-            {%- else -%}hits_per_hour_above_cap:{{ hph }}/{{ consts.max_hits_per_hour }} total_hits={{ th }}
-            {%- endif -%}
+          message: "{{ steps.run_shadow_query.output.reason }}"
 
       - name: write_backtest_row
         type: elasticsearch.index
@@ -128,6 +93,7 @@ steps:
           index: "{{ consts.backtest_index }}"
           document:
             "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_kind: "shadow_backtest"
             run_id: "argus-shadow-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}-{{ foreach.item._id }}"
             rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
             advisory_id: "{{ foreach.item._source.advisory_id | default: 'unknown' }}"
@@ -138,9 +104,9 @@ steps:
               gte: "{{ consts.shadow_window }}"
               lte: "now"
             backtest:
-              total_docs: "{% assign _s = steps.run_shadow_query.output.message | json_parse %}{{ _s.total_hits | default: 0 }}"
-              positive_hits: "{% assign _s = steps.run_shadow_query.output.message | json_parse %}{{ _s.total_hits | default: 0 }}"
-              hit_rate_per_hour: "{% assign _s = steps.run_shadow_query.output.message | json_parse %}{{ _s.hits_per_hour | default: 0 }}"
+              total_docs: "{{ steps.run_shadow_query.output.total_hits | default: 0 }}"
+              positive_hits: "{{ steps.run_shadow_query.output.total_hits | default: 0 }}"
+              hit_rate_per_hour: "{{ steps.run_shadow_query.output.hits_per_hour | default: 0 }}"
             gate_decision: "{{ steps.compute_shadow_verdict.output }}"
             gate_reason: "{{ steps.compute_shadow_reason.output }}"
 
@@ -193,8 +159,8 @@ steps:
                 name: "argus.shadow_executor.backtest"
               agent:
                 id: "soc-argus-shadow-executor"
-                name: "Argus Shadow Executor"
-                description: "Dry-run backtester for draft detection rules (Argus R8)"
+                name: "ARGUS Shadow Executor"
+                description: "Dry-run backtester for draft detection rules (ARGUS R8)"
 
   - name: heartbeat
     type: elasticsearch.index
@@ -210,4 +176,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus shadow executor complete — candidates={{ steps.fetch_shadow_candidates.output.hits.hits | size | default: 0 }}"
+      message: "ARGUS shadow executor complete — candidates={{ steps.fetch_shadow_candidates.output.hits.hits | size | default: 0 }}"

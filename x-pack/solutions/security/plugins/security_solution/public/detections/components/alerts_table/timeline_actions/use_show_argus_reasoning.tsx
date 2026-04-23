@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 const SHOW_ARGUS_REASONING = i18n.translate(
   'xpack.securitySolution.argus.flyoutAction.showReasoningLabel',
-  { defaultMessage: 'Show Argus reasoning' }
+  { defaultMessage: 'Show ARGUS reasoning' }
 );
 
 interface UseShowArgusReasoningActionProps {
@@ -34,7 +34,7 @@ interface UseShowArgusReasoningActionProps {
 }
 
 /**
- * Returns context-menu items that deep-link from an alert flyout to the Argus
+ * Returns context-menu items that deep-link from an alert flyout to the ARGUS
  * Console, pre-populating the reasoning chain and mutation lineage panels with
  * the selected alert. Gated on the `argusConsoleEnabled` experimental flag.
  */

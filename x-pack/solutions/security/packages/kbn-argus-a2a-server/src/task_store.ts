@@ -21,7 +21,7 @@ export interface TaskStore {
 
 /**
  * Process-local store. Good enough for the MCP/A2A reference server shipped
- * with Argus, which is single-process; not safe to use in the HTTP transport
+ * with ARGUS, which is single-process; not safe to use in the HTTP transport
  * unless the transport is also single-process.
  */
 export class InMemoryTaskStore implements TaskStore {

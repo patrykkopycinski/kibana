@@ -22,7 +22,7 @@
     }
   },
   "_meta": {
-    "description": "Argus Phase 3 — per-CVE Mythos signal aggregates produced by `soc-argus-intel-mythos-aggregator`. The aggregator sums decayed, trust-weighted `.soc-intel-feed` rows per CVE over a 14-day window and caps the result at 1.0. The M2.3 exploit-probability path reads this index (keyed by `cve_id`) when computing `vulnerability.argus.exploit_context.mythos_signal` for an alert whose host did not produce Shadow-AI telemetry — it is the intel-feed-driven complement to the R13 Shadow-AI derivation in `@kbn/argus-exploit-probability`.",
+    "description": "ARGUS Phase 3 — per-CVE Mythos signal aggregates produced by `soc-argus-intel-mythos-aggregator`. The aggregator sums decayed, trust-weighted `.soc-intel-feed` rows per CVE over a 14-day window and caps the result at 1.0. The M2.3 exploit-probability path reads this index (keyed by `cve_id`) when computing `vulnerability.argus.exploit_context.mythos_signal` for an alert whose host did not produce Shadow-AI telemetry — it is the intel-feed-driven complement to the R13 Shadow-AI derivation in `@kbn/argus-exploit-probability`.",
     "owner": "argus-governance",
     "schema_version": 1
   }

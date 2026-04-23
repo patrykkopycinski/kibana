@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 
 import { GOVERNANCE_PULSE_ROUTE, type GovernancePulseBuildResult } from '@kbn/argus-console-common';
 
+import { mapArgusQueryToFetchState, useArgusQuery } from './use_argus_query';
 import type { ArgusHttp, FetchState } from './types';
 
 export interface GovernancePulseWindow {
@@ -47,67 +48,23 @@ export const useGovernancePulse = ({
   windowEnd,
   refreshIntervalMs,
 }: UseGovernancePulseArgs): FetchState<GovernancePulseBuildResult> => {
-  const [state, setState] = useState<FetchState<GovernancePulseBuildResult>>({
-    status: enabled ? 'loading' : 'idle',
-  });
-  const aborted = useRef(false);
-
-  useEffect(() => {
-    aborted.current = false;
-
-    if (!enabled) {
-      setState({ status: 'idle' });
-      return () => {
-        aborted.current = true;
-      };
-    }
-
+  const params = useMemo(() => {
     const query: Record<string, string> = {};
     if (windowStart) query.window_start = windowStart;
     if (windowEnd) query.window_end = windowEnd;
+    return query;
+  }, [windowStart, windowEnd]);
 
-    // Boolean latch so the first fetch shows the spinner but refreshes
-    // afterwards keep the last rendered data on screen.
-    let hasFirstResult = false;
-    setState({ status: 'loading' });
+  const query = useArgusQuery<Record<string, string>, GovernancePulseBuildResult>({
+    http,
+    enabled,
+    route: GOVERNANCE_PULSE_ROUTE,
+    method: 'GET',
+    params,
+    pollIntervalMs: refreshIntervalMs,
+    silentPolling: Boolean(refreshIntervalMs && refreshIntervalMs > 0),
+    transform: (raw) => raw as GovernancePulseBuildResult,
+  });
 
-    const runFetch = () => {
-      http
-        .fetch<GovernancePulseBuildResult>(GOVERNANCE_PULSE_ROUTE, {
-          method: 'GET',
-          version: '1',
-          query,
-        })
-        .then((data) => {
-          if (aborted.current) return;
-          hasFirstResult = true;
-          setState({ status: 'success', data });
-        })
-        .catch((err: unknown) => {
-          if (aborted.current) return;
-          const error = err instanceof Error ? err : new Error(String(err));
-          // Only surface errors on the first fetch; later polling errors
-          // are kept silent so a transient ES blip doesn't reset the panel.
-          if (!hasFirstResult) {
-            setState({ status: 'error', error });
-          }
-        });
-    };
-
-    runFetch();
-
-    if (!refreshIntervalMs || refreshIntervalMs <= 0) {
-      return () => {
-        aborted.current = true;
-      };
-    }
-
-    const handle = setInterval(runFetch, refreshIntervalMs);
-    return () => {
-      aborted.current = true;
-      clearInterval(handle);
-    };
-  }, [http, enabled, windowStart, windowEnd, refreshIntervalMs]);
-
-  return state;
+  return mapArgusQueryToFetchState(query);
 };

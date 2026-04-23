@@ -1,12 +1,18 @@
 version: '1'
 name: SOC Pipeline Run Telemetry Indexer (Event Log -> .soc-pipeline-runs)
 description: Deterministically materialize SOC pipeline run telemetry into .soc-pipeline-runs from .kibana-event-log-* so watchdog can compute pipeline_runs_1h and pipeline_by_status_1h.
+
+consts:
+  pipeline_runs_index: ".soc-pipeline-runs"
+
 enabled: true
+
 triggers:
   - type: scheduled
     with:
       every: 15m
   - type: manual
+
 steps:
   - name: count_soc_exec_events_last_15m
     type: elasticsearch.search
@@ -30,7 +36,7 @@ steps:
   - name: write_pipeline_run_telemetry
     type: elasticsearch.index
     with:
-      index: .soc-pipeline-runs
+      index: "{{ consts.pipeline_runs_index }}"
       id: "soc_pipeline_runs_{{ 'now' | date: '%Y%m%d%H%M' }}"
       refresh: "wait_for"
       document:

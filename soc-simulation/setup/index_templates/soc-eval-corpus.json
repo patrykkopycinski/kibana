@@ -120,7 +120,7 @@
     }
   },
   "_meta": {
-    "description": "Argus M2.4 — labelled Mythos-era corpus events emitted by the frontier simulator and hand-authored variant bank. One index per corpus_id (e.g. .soc-eval-corpus-argus-corpus-mythos-2026-04). Consumed by the @kbn/evals-suite-argus-detection replay client to grade candidate detection rules.",
+    "description": "ARGUS M2.4 — labelled Mythos-era corpus events emitted by the frontier simulator and hand-authored variant bank. One index per corpus_id (e.g. .soc-eval-corpus-argus-corpus-mythos-2026-04). Consumed by the @kbn/evals-suite-argus-detection replay client to grade candidate detection rules.",
     "owner": "argus-governance",
     "schema_version": 1
   }

@@ -11,7 +11,7 @@ import type { ReplayClient } from './replay_rule';
 import { createEsReplayClient } from './replay_rule';
 
 /**
- * Argus Detection Eval Vertical — Playwright fixture.
+ * ARGUS Detection Eval Vertical — Playwright fixture.
  *
  * Extends the base `@kbn/evals` fixture with a worker-scoped `replayClient`.
  * The replay client is constructed once per worker from Scout's `esClient`

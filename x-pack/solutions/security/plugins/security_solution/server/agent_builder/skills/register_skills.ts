@@ -79,15 +79,15 @@ export const registerSkills = async ({
       argusFindDatasourceGapsSkill,
       argusReviewRuleQualitySkill,
     ];
-    // Register each Argus skill independently so a single failure (e.g. a
+    // Register each ARGUS skill independently so a single failure (e.g. a
     // missing allow-list entry in `@kbn/agent-builder-server`) does not abort
-    // the remaining registrations and leave the Argus Console pointing at
+    // the remaining registrations and leave the ARGUS Console pointing at
     // skills that never made it into the library.
     for (const skill of argusSkills) {
       try {
         await agentBuilder.skills.register(skill);
       } catch (err) {
-        logger.error(`Failed to register Argus skill "${skill.id}": ${err.message}`);
+        logger.error(`Failed to register ARGUS skill "${skill.id}": ${err.message}`);
       }
     }
   }

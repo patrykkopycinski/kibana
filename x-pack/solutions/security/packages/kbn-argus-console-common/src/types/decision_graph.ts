@@ -7,7 +7,7 @@
 
 /**
  * The `.soc-decision-graph` index stores a typed edge per relation between
- * Argus subjects (advisories, intents, outcomes, rules, actors, techniques,
+ * ARGUS subjects (advisories, intents, outcomes, rules, actors, techniques,
  * reasoning chains, audit events). The Console flyout and the full-screen
  * Decision Graph explorer both consume this contract, and Agent Builder tools
  * query the same route programmatically.

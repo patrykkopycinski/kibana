@@ -19,16 +19,16 @@ export const argusAssessReadinessSkill = defineSkillType({
   name: ARGUS_ASSESS_READINESS_SKILL_ID,
   basePath: 'skills/security/argus/playbooks',
   description:
-    'Assess Argus detection readiness for a named threat profile (for example ransomware or ' +
+    'Assess ARGUS detection readiness for a named threat profile (for example ransomware or ' +
     'supply-chain). Summarises coverage gaps against the profile, highlights the top uncovered ' +
-    'techniques, and optionally files gap_analysis mutation intents so Argus can synthesise new ' +
+    'techniques, and optionally files gap_analysis mutation intents so ARGUS can synthesise new ' +
     'rules. Use when the user asks "are we ready for X?" or "how does our coverage look against ' +
     'profile Y?".',
-  content: `# Argus · Assess Readiness
+  content: `# ARGUS · Assess Readiness
 
 ## When to use this skill
 
-Use this skill when a user wants a quick, auditable read on how prepared Argus is
+Use this skill when a user wants a quick, auditable read on how prepared ARGUS is
 against a named threat profile. Typical prompts:
 
 - "Are we ready for ransomware?"
@@ -43,12 +43,12 @@ against a named threat profile. Typical prompts:
 2. **Narrate the gaps.** For each gap, mention the technique id, name,
    current confidence, and the reason the gap exists. Highlight whether any of
    the gaps map to rules that already exist but have degraded.
-3. **Offer to file intents.** If the user wants Argus to act, call
+3. **Offer to file intents.** If the user wants ARGUS to act, call
    \`security.argus.file_mutation_intent\` once per gap with
    \`origin: 'gap_analysis'\` and include the technique id in the \`summary\`.
    Use \`dry_run: true\` first so the user can preview the payload before
    committing.
-4. **Link back to the console.** End with a deep link to the Argus Playbooks
+4. **Link back to the console.** End with a deep link to the ARGUS Playbooks
    tab so the user can inspect the pending intents.
 
 ## Guardrails

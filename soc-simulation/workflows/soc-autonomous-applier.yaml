@@ -51,7 +51,7 @@ description: >
   The check uses Liquid `| split: '-' | first` so `auto-*`, `autosoc-*`, and
   any other head are correctly classified as non-canonical.
 
-  This workflow is the ONLY path by which Argus can mutate its own artifacts.
+  This workflow is the ONLY path by which ARGUS can mutate its own artifacts.
 enabled: true
 
 triggers:
@@ -66,6 +66,7 @@ consts:
   cooldown_seconds: 900
   loop_window_seconds: 86400
   loop_threshold: 3
+  workflow_id: soc-autonomous-applier
 
 steps:
   # ── 1. Kill-switch ───────────────────────────────────────────────────
@@ -141,7 +142,7 @@ steps:
           bool:
             filter:
               - term: {type: "mutation_intent"}
-              # Argus R8 — never fire an `auto_apply_ready` rec that has
+              # ARGUS R8 — never fire an `auto_apply_ready` rec that has
               # not already passed the shadow executor. `pending` and
               # `approved_by_human` bypass the shadow gate because they
               # are either non-rule-update intents or already have a
@@ -594,7 +595,6 @@ steps:
       # -- All gates passed -> invoke the applier agent -----------------
       - name: apply_with_agent
         type: ai.agent
-        agent-id: soc-autonomous-applier-agent
         connector-id: opus
         with:
           message: >
@@ -606,8 +606,34 @@ steps:
             recent_mutations_for_artifact = {{ steps.artifact_recent_count.output.hits.total.value | default: 0 }}
 
             Return the JSON result described in your instructions. Nothing else.
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              result:
+                type: string
+              artifact_id:
+                type: string
+              notes:
+                type: string
+            required:
+              - status
         timeout: 300s
         if: "steps.gate_all_pass.output: yes"
+        on_failure:
+          - name: log_apply_with_agent_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: apply_with_agent
+                step_name: apply_with_agent
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
       # Serialization barrier — force .soc-evolution-log to be searchable
       # before the next iteration's live gates query it. The applier
@@ -672,6 +698,19 @@ steps:
             applied_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             applied_exec_id: "{{ execution.id | default: 'unknown' }}"
         if: "steps.gate_all_pass.output: yes"
+        on_failure:
+          - name: log_close_applied_intent_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: close_applied_intent
+                step_name: close_applied_intent
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
       # ── Decision log: successful auto-apply ────────────────────────
       # Records every auto-apply attempt so the Autonomy Activity Feed

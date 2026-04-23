@@ -6,13 +6,13 @@
  */
 
 /**
- * Argus M2.5 — OTLP exporter shim.
+ * ARGUS M2.5 — OTLP exporter shim.
  *
  * Day-1 intent: expose a thin, dependency-free factory that higher layers
- * (the Security Solution server plugin or a standalone Argus governance
+ * (the Security Solution server plugin or a standalone ARGUS governance
  * service) can wire into their existing OpenTelemetry SDK. We deliberately
  * keep @opentelemetry/* out of this package's `dependsOn` so it can be
- * imported from any Argus layer without dragging the full SDK into the
+ * imported from any ARGUS layer without dragging the full SDK into the
  * browser bundle graph.
  *
  * The consumer passes in a `spanExporter` instance (e.g. a
@@ -61,7 +61,7 @@ const DEFAULT_SERVICE_NAME = 'argus-security-solution';
 
 /**
  * Normalises and validates an OTLP exporter configuration. Does NOT
- * instantiate an SDK — that lives in the consumer so Argus can be enabled
+ * instantiate an SDK — that lives in the consumer so ARGUS can be enabled
  * per-deployment without this package pinning an @opentelemetry version.
  *
  * Throws when the endpoint is missing or not an http(s) URL; callers should

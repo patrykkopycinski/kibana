@@ -132,7 +132,7 @@ interface CorpusHitSource {
   };
 }
 
-export const DETECTION_EVAL_RUNS_INDEX = '.soc-detection-eval-runs';
+export const DETECTION_EVAL_RUNS_INDEX = '.soc-argus-eval-runs';
 
 /**
  * Load labelled variants for a corpus, skipping re-emissions from the
@@ -199,6 +199,7 @@ export const loadCorpusLabels = async (
 
 export interface RuleEvaluationRow {
   '@timestamp': string;
+  run_kind: 'detection';
   run_id: string;
   suite_id: string;
   corpus_id: string;
@@ -275,6 +276,7 @@ export const aggregateRuleRun = ({
 
   return {
     '@timestamp': nowIso,
+    run_kind: 'detection',
     run_id: runId,
     suite_id: suiteId,
     corpus_id: corpusId,
@@ -335,9 +337,9 @@ const defaultCorpusIndex = (corpusId: string) => `.soc-eval-corpus-${corpusId}`;
 const defaultRunId = () => `argus-deteng-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 /**
- * Run the Argus Detection Eval Vertical end-to-end: load labelled corpus,
+ * Run the ARGUS Detection Eval Vertical end-to-end: load labelled corpus,
  * replay each rule, aggregate the math, persist one row per rule to
- * `.soc-detection-eval-runs`, and return the rows for in-process callers
+ * `.soc-argus-eval-runs` (run_kind=detection), and return the rows for in-process callers
  * (the Playwright spec uses them for expect() assertions).
  */
 export const createEvaluateDetectionRules = ({

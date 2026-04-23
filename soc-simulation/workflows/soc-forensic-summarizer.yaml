@@ -9,6 +9,13 @@ description: >
   This replaces the PM vision's "forensic post-investigation panel": the
   dashboard row reads this index directly, producing a consolidated view of
   every durable artifact captured for each investigation.
+
+consts:
+  workflow_id: soc-forensic-summarizer
+  forensic_summary_index: ".soc-forensic-summary"
+  hunt_findings_index: ".soc-hunt-findings"
+  audit_index: ".soc-audit-trail"
+
 enabled: true
 
 triggers:
@@ -27,7 +34,7 @@ steps:
   - name: existing_summaries
     type: elasticsearch.search
     with:
-      index: ".soc-forensic-summary"
+      index: "{{ consts.forensic_summary_index }}"
       size: 500
       _source: ["case_id"]
       query:
@@ -41,7 +48,7 @@ steps:
       - name: hunt_findings
         type: elasticsearch.search
         with:
-          index: ".soc-hunt-findings"
+          index: "{{ consts.hunt_findings_index }}"
           size: 100
           query:
             bool:
@@ -62,7 +69,6 @@ steps:
 
       - name: compose_summary
         type: ai.agent
-        agent-id: soc-triage-agent
         connector-id: opus
         with:
           message: >
@@ -83,8 +89,59 @@ steps:
               "exceptions_created":[ {"rule_id":"...","exception_id":"..."} ],
               "summary_markdown":  "<markdown string, <= 2000 chars>"
             }
+          schema:
+            type: object
+            properties:
+              verdict:
+                type: string
+                enum:
+                  - true_positive
+                  - false_positive
+                  - benign_true_positive
+                  - inconclusive
+              iocs:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              yara_rules:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              attribution:
+                type: object
+                additionalProperties: true
+              exceptions_created:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              summary_markdown:
+                type: string
+            required:
+              - verdict
+              - iocs
+              - yara_rules
+              - attribution
+              - exceptions_created
+              - summary_markdown
         timeout: 120s
         if: "steps.gate_needs_summary.output: yes"
+        on_failure:
+          - name: log_compose_summary_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: "/{{ consts.audit_index }}/_doc"
+              body:
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+                workflow_id: "{{ consts.workflow_id }}"
+                event_type: workflow_step_failure
+                source: "{{ consts.workflow_id }}"
+                step_id: compose_summary
+                step_name: compose_summary
+                error: "{{ error.message }}"
 
       # Compute-and-match: did compose_summary actually produce output?
       - name: gate_summary_produced
@@ -96,7 +153,7 @@ steps:
       - name: write_summary
         type: elasticsearch.index
         with:
-          index: .soc-forensic-summary
+          index: "{{ consts.forensic_summary_index }}"
           id: "{{ foreach.item.id }}"
           op_type: create
           document:

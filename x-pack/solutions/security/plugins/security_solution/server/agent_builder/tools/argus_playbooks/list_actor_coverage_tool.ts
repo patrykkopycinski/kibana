@@ -54,7 +54,7 @@ export function argusListActorCoverageTool(
     type: ToolType.builtin,
     description:
       'For a given threat-actor id, list every ATT&CK technique it is known to use along with ' +
-      'whether Argus and/or community corpora currently cover it. Used by actor-escalation and ' +
+      'whether ARGUS and/or community corpora currently cover it. Used by actor-escalation and ' +
       'purple-team skills to pinpoint which techniques lack detection.',
     schema: listActorCoverageSchema,
     tags: ['security', 'argus', 'argus:playbook', 'read', 'actor', 'coverage'],

@@ -14,6 +14,15 @@ description: >
   Both phases write recommendations into .soc-recommendations with distinct
   `source` values so the human reviewer and the soc-autonomous-applier can
   route them correctly.
+
+consts:
+  outcomes_index: ".soc-outcomes"
+  coverage_gaps_index: ".soc-coverage-gaps"
+  recommendations_index: ".soc-recommendations"
+  evolution_log_index: ".soc-evolution-log"
+  reasoning_trace_index: ".soc-reasoning-trace"
+  artifact_registry_index: ".soc-artifact-registry"
+
 enabled: true
 
 triggers:
@@ -21,6 +30,9 @@ triggers:
     with:
       every: 30m
   - type: manual
+
+consts:
+  workflow_id: soc-deteng
 
 steps:
   # ──────────────────────────────────────────────────────────────────────
@@ -30,7 +42,7 @@ steps:
   - name: get_recent_outcomes
     type: elasticsearch.search
     with:
-      index: ".soc-outcomes"
+      index: "{{ consts.outcomes_index }}"
       query:
         range:
           "@timestamp":
@@ -39,7 +51,7 @@ steps:
   - name: get_coverage_gaps
     type: elasticsearch.search
     with:
-      index: ".soc-coverage-gaps"
+      index: "{{ consts.coverage_gaps_index }}"
       query:
         range:
           "@timestamp":
@@ -48,12 +60,12 @@ steps:
   - name: get_rejected_recs
     type: elasticsearch.search
     with:
-      index: ".soc-recommendations"
+      index: "{{ consts.recommendations_index }}"
       query:
         bool:
           filter:
             - terms:
-                source: ["soc-deteng", "soc-deteng-agent", "soc-signal-quality-agent"]
+                source: ["soc-deteng", "default", "default"]
             - range:
                 "@timestamp":
                   gte: "now-7d"
@@ -75,11 +87,11 @@ steps:
   - name: get_open_redesign_flags
     type: elasticsearch.search
     with:
-      index: ".soc-evolution-log"
+      index: "{{ consts.evolution_log_index }}"
       query:
         bool:
           filter:
-            - term: {source: "soc-signal-quality-agent"}
+            - term: {source: "default"}
             - term: {event_type: "redesign_required"}
             - range:
                 "@timestamp":
@@ -90,122 +102,89 @@ steps:
         - rule_id
         - analysis_output
 
+  - name: fetch_rule_corpus
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recommendations_index }}"
+      size: 1
+      query:
+        bool:
+          filter:
+            - exists:
+                field: "details.new_definition.query"
+
   # ──────────────────────────────────────────────────────────────────────
-  # Phase 1 — Signal Quality Agent (tactical FP/TP tuning)
+  # Phase 1 — Signal quality backtest (deterministic volume / FP proxy)
   # ──────────────────────────────────────────────────────────────────────
 
   - name: analyze_signal_quality
-    type: ai.agent
-    agent-id: soc-signal-quality-agent
-    connector-id: opus
+    type: security.backtestRule
     with:
-      message: >
-        Tune existing detection rules using recent triage outcomes as ground truth.
-
-        Follow the tuning matrix in your instructions. DO NOT create new rules.
-        If a rule is structurally noisy, emit `redesign_required` and let the
-        Principal Detection Engineer rewrite it in Phase 2.
-
-        IMPORTANT — structured patch envelope is mandatory for rule updates:
-        every `intents[]` entry where `details.artifact_type="rule"` AND
-        `details.op="update"` MUST carry `details.patch` with fields
-        rule_id, action, patch_fields, current_values, impact_prediction —
-        see the Structured Patch Envelope section of your instructions.
-        Prose-only intents are dead-lettered at ingest. ALWAYS call
-        `platform.core.manage_detection_rules` with `operation='read'` (or
-        `find`) first so `current_values` reflects the live rule state —
-        the backtester and drift gate both depend on it.
-
-        Previously rejected recommendations (learn from these — do NOT repeat):
-        {{ steps.get_rejected_recs.output.hits.hits | json }}
-
-        Recent outcomes (last 6h):
-        {{ steps.get_recent_outcomes.output.hits.hits | json }}
-
-        Respond with JSON:
-        {
-          "findings": [ /* per-rule tuning observations */ ],
-          "summary":  "...",
-          "intents":  [ /* one mutation_intent per exception / threshold / disable.
-                           Envelope: {
-                             title, summary, confidence, track:"agentic",
-                             evidence[], expected_impact{},
-                             details: {
-                               artifact_type: "rule" | "exception",
-                               artifact_id: "auto-*",   // must be autosoc-owned
-                               op: "update" | "enable" | "disable",
-                               expected_ownership: "autosoc",
-                               reason: "<>=20 chars>",
-                               // For artifact_type="rule" AND op="update", patch MUST
-                               // be a structured rule_patch (see agent instructions).
-                               patch: { rule_id, action, patch_fields, current_values,
-                                        impact_prediction }
-                             }
-                           } */ ]
-        }
-    timeout: 300s
+      query: "{{ steps.fetch_rule_corpus.output.hits.hits.0._source.details.new_definition.query | default: steps.fetch_rule_corpus.output.hits.hits.0._source.query | default: steps.analyze_principal_deteng.output.query | default: '*' }}"
+      query_type: "{{ steps.fetch_rule_corpus.output.hits.hits.0._source.details.new_definition.language | default: steps.fetch_rule_corpus.output.hits.hits.0._source.language | default: 'kql' }}"
+      index_patterns: ["logs-*", ".alerts-security.alerts-*"]
+      time_window: "7d"
 
   - name: write_signal_quality_evolution_log
     type: elasticsearch.index
     with:
-      index: .soc-evolution-log
+      index: "{{ consts.evolution_log_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-        source: "soc-signal-quality-agent"
+        source: "default"
         event_type: "signal_quality_tuning"
         analysis_output: "{{ steps.analyze_signal_quality.output | json }}"
 
-  # Argus M2.5 — governance trace for Phase 1. Emits a span document with
+  # ARGUS M2.5 — governance trace for Phase 1. Emits a span document with
   # `argus.*` populated so that every detection-engineering decision is
-  # attributable to an agent+decision_kind. Confidence is a unit-interval
-  # representation of the agent's own self-reported confidence.
+  # attributable to an agent+decision_kind. Phase 1 uses a deterministic backtest step.
   - name: write_signal_quality_reasoning_trace
     type: elasticsearch.index
     with:
-      index: .soc-reasoning-trace
+      index: "{{ consts.reasoning_trace_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
         run_id: "deteng-signal-quality-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
-        agent_id: "soc-signal-quality-agent"
+        agent_id: "default"
         step_index: 0
         step_type: "run_summary"
-        content: "Signal Quality tuning cycle — {{ steps.analyze_signal_quality.output.intents | size | default: 0 }} intent(s) produced"
+        content: "Signal Quality backtest — verdict={{ steps.analyze_signal_quality.output.verdict | default: 'unknown' }} total_hits={{ steps.analyze_signal_quality.output.total_hits | default: 0 }}"
         argus:
           agent:
-            id: "soc-signal-quality-agent"
+            id: "default"
             version: "argus-m2.5"
           decision:
             kind: "rule_update"
             id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
-            confidence: "{{ steps.analyze_signal_quality.output.confidence | default: 75 | divided_by: 100.0 }}"
+            confidence: 1.0
           actor:
             trust_tier: "scoped"
         attributes:
-          argus.agent.id: "soc-signal-quality-agent"
+          argus.agent.id: "default"
           argus.agent.version: "argus-m2.5"
           argus.decision.kind: "rule_update"
           argus.decision.id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
-          argus.decision.confidence: "{{ steps.analyze_signal_quality.output.confidence | default: 75 | divided_by: 100.0 }}"
+          argus.decision.confidence: 1.0
           argus.actor.trust_tier: "scoped"
 
   - name: write_signal_quality_recommendation
     type: elasticsearch.index
     with:
-      index: .soc-recommendations
+      index: "{{ consts.recommendations_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         rec_id: "signal-quality-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
         type: "rule_tuning"
-        source: "soc-signal-quality-agent"
+        source: "default"
         source_doc_id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
         status: "pending"
         title: "Signal Quality tuning - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
-        summary: "{{ steps.analyze_signal_quality.output.message }}"
+        summary: "Backtest verdict={{ steps.analyze_signal_quality.output.verdict | default: 'unknown' }} hits_per_hour={{ steps.analyze_signal_quality.output.hits_per_hour | default: 0 }} estimated_fp_rate={{ steps.analyze_signal_quality.output.estimated_fp_rate | default: 0 }}"
         details: "{{ steps.analyze_signal_quality.output | json }}"
         reasoning: "Tactical FP/TP tuning based on .soc-outcomes"
         confidence: 75
         track: "agentic"
-        expected_impact: "{{ steps.analyze_signal_quality.output.expected_impact }}"
+        expected_impact: "{{ steps.analyze_signal_quality.output.expected_impact | default: empty }}"
         evidence: "{{ steps.analyze_signal_quality.output.evidence | default: [] }}"
 
   # ──────────────────────────────────────────────────────────────────────
@@ -214,7 +193,6 @@ steps:
 
   - name: analyze_principal_deteng
     type: ai.agent
-    agent-id: soc-deteng-agent
     connector-id: opus
     with:
       message: >
@@ -251,35 +229,67 @@ steps:
                            evidence[] (must cite coverage gap or redesign flag),
                            expected_impact{} with coverage_delta_pct or fp_reduction_pct */ ]
         }
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          summary:
+            type: string
+          intents:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        required:
+          - findings
+          - summary
+          - intents
     timeout: 300s
+    on_failure:
+      - name: log_analyze_principal_deteng_failure
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /.soc-audit-trail/_doc
+          body:
+            event_type: workflow_step_failure
+            workflow_id: "{{ consts.workflow_id }}"
+            step_id: analyze_principal_deteng
+            step_name: analyze_principal_deteng
+            error: "{{ error.message }}"
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
   - name: write_principal_evolution_log
     type: elasticsearch.index
     with:
-      index: .soc-evolution-log
+      index: "{{ consts.evolution_log_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-        source: "soc-deteng-agent"
+        source: "default"
         event_type: "principal_deteng_cycle"
         analysis_output: "{{ steps.analyze_principal_deteng.output | json }}"
 
-  # Argus M2.5 — governance trace for Phase 2. Separate span from Phase 1 so
+  # ARGUS M2.5 — governance trace for Phase 2. Separate span from Phase 1 so
   # the governance dashboard can distinguish tactical tuning from strategic
   # authoring when it slices by `argus.decision.kind`.
   - name: write_principal_reasoning_trace
     type: elasticsearch.index
     with:
-      index: .soc-reasoning-trace
+      index: "{{ consts.reasoning_trace_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
         run_id: "deteng-principal-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
-        agent_id: "soc-deteng-agent"
+        agent_id: "default"
         step_index: 0
         step_type: "run_summary"
         content: "Principal DetEng cycle — {{ steps.analyze_principal_deteng.output.intents | size | default: 0 }} intent(s) produced"
         argus:
           agent:
-            id: "soc-deteng-agent"
+            id: "default"
             version: "argus-m2.5"
           decision:
             kind: "rule_create"
@@ -288,7 +298,7 @@ steps:
           actor:
             trust_tier: "scoped"
         attributes:
-          argus.agent.id: "soc-deteng-agent"
+          argus.agent.id: "default"
           argus.agent.version: "argus-m2.5"
           argus.decision.kind: "rule_create"
           argus.decision.id: "{{ steps.write_principal_evolution_log.output._id }}"
@@ -298,16 +308,16 @@ steps:
   - name: write_principal_recommendation
     type: elasticsearch.index
     with:
-      index: .soc-recommendations
+      index: "{{ consts.recommendations_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         rec_id: "deteng-principal-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
         type: "rule_authoring"
-        source: "soc-deteng-agent"
+        source: "default"
         source_doc_id: "{{ steps.write_principal_evolution_log.output._id }}"
         status: "pending"
         title: "Principal DetEng cycle - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
-        summary: "{{ steps.analyze_principal_deteng.output.message }}"
+        summary: "{{ steps.analyze_principal_deteng.output.summary | default: steps.analyze_principal_deteng.output.message }}"
         details: "{{ steps.analyze_principal_deteng.output | json }}"
         reasoning: "Strategic rule authoring driven by coverage gaps + Signal Quality redesign flags"
         confidence: 75
@@ -337,13 +347,13 @@ steps:
       - name: write_intent
         type: elasticsearch.index
         with:
-          index: .soc-recommendations
+          index: "{{ consts.recommendations_index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             rec_id: "sq-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
             schema_version: 2
             type: "mutation_intent"
-            source: "soc-signal-quality-agent"
+            source: "default"
             source_doc_id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
             status: "pending"
             title: "{{ foreach.item.title }}"
@@ -371,13 +381,13 @@ steps:
       - name: write_principal_intent
         type: elasticsearch.index
         with:
-          index: .soc-recommendations
+          index: "{{ consts.recommendations_index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             rec_id: "deteng-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
             schema_version: 2
             type: "mutation_intent"
-            source: "soc-deteng-agent"
+            source: "default"
             source_doc_id: "{{ steps.write_principal_evolution_log.output._id }}"
             status: "pending"
             title: "{{ foreach.item.title }}"
@@ -393,7 +403,7 @@ steps:
       - name: seed_artifact_registry
         type: elasticsearch.index
         with:
-          index: .soc-artifact-registry
+          index: "{{ consts.artifact_registry_index }}"
           id: "{{ foreach.item.details.artifact_type | default: 'rule' }}-{{ foreach.item.details.artifact_id | default: foreach.index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"

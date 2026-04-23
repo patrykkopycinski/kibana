@@ -1,0 +1,183 @@
+version: '1'
+name: SOC ARGUS — Health Aggregator
+description: >
+  Every 5 minutes aggregates ARGUS subsystem signals (audit heartbeats, dead-letter depth,
+  eval gate decisions, trust tier distribution, recent pipeline metrics) into one
+  `.soc-argus-health` document with overall green/yellow/red status.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+  - type: manual
+
+consts:
+  audit_index: ".soc-audit-trail"
+  dlq_index: ".soc-dead-letter"
+  eval_index: ".soc-argus-eval-runs"
+  trust_index: ".soc-trust-scores"
+  metrics_index: ".soc-metrics"
+
+steps:
+  - name: query_workflow_heartbeats
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.audit_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-10m"
+            - term:
+                event_type: workflow_heartbeat
+      aggs:
+        by_source:
+          terms:
+            field: source.keyword
+            size: 100
+
+  - name: query_dead_letter_depth
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.dlq_index }}"
+      size: 0
+      track_total_hits: true
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+
+  - name: query_eval_by_gate
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.eval_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+            - term:
+                run_kind: detection
+      aggs:
+        by_gate:
+          terms:
+            field: gate_decision.keyword
+            size: 10
+            missing: unknown
+
+  - name: count_eval_pass
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.eval_index }}/_count"
+      body:
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-7d"
+              - term:
+                  run_kind: detection
+              - term:
+                  gate_decision: pass
+
+  - name: count_eval_total
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.eval_index }}/_count"
+      body:
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-7d"
+              - term:
+                  run_kind: detection
+
+  - name: query_trust_distribution
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.trust_index }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      aggs:
+        by_tier:
+          terms:
+            field: tier
+            size: 20
+            missing: unknown
+
+  - name: query_latest_metrics
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.metrics_index }}/_search"
+      body:
+        size: 1
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "now-24h"
+
+  - name: merge_health_inputs
+    type: data.set
+    with:
+      workflow_liveness: "{{ steps.query_workflow_heartbeats.output.aggregations | json }}"
+      dead_letter_depth: "{{ steps.query_dead_letter_depth.output.hits.total.value | default: 0 }}"
+      eval_aggs: "{{ steps.query_eval_by_gate.output.aggregations | json }}"
+      trust_tier_distribution: "{{ steps.query_trust_distribution.output.aggregations | json }}"
+      latest_metrics_source: "{{ steps.query_latest_metrics.output.hits.hits[0]._source | json }}"
+
+  - name: compute_eval_pass_rate_scalar
+    type: data.set
+    with:
+      eval_pass_rate: >-
+        {% assign p = steps.count_eval_pass.output.count | default: 0 %}{% assign t = steps.count_eval_total.output.count | default: 0 %}{% if t == 0 %}1.0{% else %}{{ p | times: 1.0 | divided_by: t }}{% endif %}
+
+  - name: compute_overall_status
+    type: console
+    with:
+      message: >-
+        {% assign dlq = steps.query_dead_letter_depth.output.hits.total.value | default: 0 %}{% assign p = steps.count_eval_pass.output.count | default: 0 %}{% assign t = steps.count_eval_total.output.count | default: 0 %}{% if t == 0 %}{% assign pr = 1 %}{% else %}{% assign pr = p | times: 100 | divided_by: t %}{% endif %}{% if dlq > 100 or pr < 85 %}red{% elsif dlq > 20 or pr < 95 %}yellow{% else %}green{% endif %}
+
+  - name: write_argus_health
+    type: elasticsearch.index
+    with:
+      index: .soc-argus-health
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        overall_status: "{{ steps.compute_overall_status.output }}"
+        workflow_liveness: "{{ steps.merge_health_inputs.output.workflow_liveness }}"
+        dead_letter_depth: "{{ steps.merge_health_inputs.output.dead_letter_depth }}"
+        eval_pass_rate: "{{ steps.compute_eval_pass_rate_scalar.output.eval_pass_rate }}"
+        trust_tier_distribution: "{{ steps.merge_health_inputs.output.trust_tier_distribution }}"
+        mttd_seconds: "{{ steps.query_latest_metrics.output.hits.hits[0]._source.mttd_seconds | default: 0 }}"
+        mttr_seconds: "{{ steps.query_latest_metrics.output.hits.hits[0]._source.mttr_seconds | default: 0 }}"
+        source: soc-argus-health-aggregator
+        metrics_snapshot: "{{ steps.merge_health_inputs.output.latest_metrics_source }}"
+
+  - name: audit_heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: workflow_heartbeat
+        source: soc-argus-health-aggregator
+        overall_status: "{{ steps.compute_overall_status.output }}"

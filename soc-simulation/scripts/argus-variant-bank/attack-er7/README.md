@@ -1,9 +1,9 @@
-# Argus variant bank — ATT&CK Evals Round 7 corpus (R1)
+# ARGUS variant bank — ATT&CK Evals Round 7 corpus (R1)
 
 This subtree seeds `.soc-eval-corpus-argus-corpus-attack-er7` with a
 labelled corpus derived from MITRE ATT&CK Evaluations Round 7. It sits
 alongside the original `argus-corpus-mythos-2026-04` corpus so the
-Argus Detection Eval Vertical can grade rules against **both**:
+ARGUS Detection Eval Vertical can grade rules against **both**:
 
 * `mythos-2026-04` — synthetic Mythos-era threat model
 * `attack-er7`     — real APT kill-chain from ATT&CK Evals R7

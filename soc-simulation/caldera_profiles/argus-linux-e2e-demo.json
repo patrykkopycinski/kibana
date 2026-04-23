@@ -3,7 +3,7 @@
   "name": "argus-linux-e2e-demo",
   "adversary_id": "argus-linux-e2e-demo",
   "group": "all-endpoints",
-  "description": "Argus Fleet/Caldera E2E demo profile. Runs a single Linux pipe-to-shell primitive (curl | sh) against the soc-endpoint-1 sandcat agent to trip the [Argus] Linux pipe-to-shell (T1059.004) rule via osquery_manager telemetry.",
+  "description": "ARGUS Fleet/Caldera E2E demo profile. Runs a single Linux pipe-to-shell primitive (curl | sh) against the soc-endpoint-1 sandcat agent to trip the [ARGUS] Linux pipe-to-shell (T1059.004) rule via osquery_manager telemetry.",
   "platform": "linux",
   "techniques": ["T1059.004"],
   "primitives": [

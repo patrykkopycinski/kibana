@@ -60,7 +60,7 @@ export const getSecurityV5BaseKibanaFeature = ({
         LISTS_API_SUMMARY,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
-        // Argus write surface (kill-switch toggle + mutation approve/reject).
+        // ARGUS write surface (kill-switch toggle + mutation approve/reject).
         // Attached to `all` only so `siem.show` users cannot drive autonomy.
         ARGUS_WRITE_API,
       ],

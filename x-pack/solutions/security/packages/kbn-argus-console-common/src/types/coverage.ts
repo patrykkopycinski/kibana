@@ -10,8 +10,8 @@
  *
  * Shape is deliberately flat and demo-ready. The heatmap renders one cell per
  * technique; the cell's signed score is `argus_authored − community_authored`,
- * so positive = Argus over-covers vs community, negative = community covers
- * ground Argus doesn't. Zero + `argus_authored === 0` + `community_authored
+ * so positive = ARGUS over-covers vs community, negative = community covers
+ * ground ARGUS doesn't. Zero + `argus_authored === 0` + `community_authored
  * === 0` renders as an untouched grey cell.
  */
 export interface ArgusCoverageCell {

@@ -1,7 +1,7 @@
 version: '1'
-name: SOC Argus — Frontier Simulator (M2.4)
+name: SOC ARGUS — Frontier Simulator (M2.4)
 description: >
-  Argus Frontier Simulator — emits labelled Mythos-era corpus events into
+  ARGUS Frontier Simulator — emits labelled Mythos-era corpus events into
   .soc-eval-corpus-<corpus_id> to simulate an adversary running live variants.
 
   The full labelled corpus is pre-seeded at setup time by setup.sh from
@@ -28,7 +28,7 @@ consts:
   # Emissions land in a sibling index so the read-from-the-corpus +
   # write-back-to-the-corpus loop does not trip Elasticsearch's
   # "reindex cannot write into an index it is reading from" guard. The
-  # Argus Detection Eval suite queries both indices via the
+  # ARGUS Detection Eval suite queries both indices via the
   # corpus_id tag so this twin stream is transparent to downstream consumers.
   emissions_index: ".soc-eval-corpus-argus-corpus-mythos-2026-04-live"
   emission_source: "soc-argus-frontier-simulator"

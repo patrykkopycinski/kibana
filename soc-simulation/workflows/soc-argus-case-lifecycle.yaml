@@ -1,0 +1,183 @@
+version: '1'
+name: SOC ARGUS — Case Lifecycle (Cases v2)
+description: >
+  Parameterized investigation case lifecycle: find or create a case, attach alerts with rule
+  context, tag, optional custom field stamp, conditional analyst assignment, and audit trail.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: alert_id
+    type: string
+    required: true
+    description: Detection alert _id to attach.
+  - name: alert_summary
+    type: string
+    required: false
+    default: ""
+    description: Short summary for case title.
+  - name: triage_tier
+    type: string
+    required: true
+    description: "Tier label (e.g. tier_2_investigate | tier_3_escalate)."
+  - name: triage_confidence
+    type: string
+    required: false
+    default: "unknown"
+  - name: technique
+    type: string
+    required: false
+    default: "unknown"
+  - name: mutation_id
+    type: string
+    required: false
+    default: ""
+  - name: rule_id
+    type: string
+    required: false
+    default: "unknown"
+  - name: rule_name
+    type: string
+    required: false
+    default: "Unknown Rule"
+  - name: assignee_uid
+    type: string
+    required: false
+    default: ""
+    description: When triage_tier is tier_2_investigate and set, assigns the case to this user uid.
+
+consts:
+  alert_index: ".alerts-security.alerts-default"
+  workflow_id: soc-argus-case-lifecycle
+
+steps:
+  - name: check_existing
+    type: cases.getCasesByAlertId
+    with:
+      alert_id: "{{ inputs.alert_id }}"
+      owner: "securitySolution"
+
+  - name: gate_case_exists
+    type: console
+    with:
+      message: "{% if steps.check_existing.output.cases.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: case_exists_branch
+    type: if
+    condition: "steps.gate_case_exists.output: yes"
+    steps:
+      - name: use_existing_case
+        type: data.set
+        with:
+          case_id: "{{ steps.check_existing.output.cases[0].id }}"
+    else:
+      - name: create_case
+        type: cases.createCase
+        with:
+          title: "[ARGUS] Investigation - {{ inputs.alert_summary | default: 'Alert' | truncate: 80 }}"
+          description: >-
+            Auto-created by ARGUS triage pipeline. Tier: {{ inputs.triage_tier }}.
+          severity: >-
+            {% if inputs.triage_tier == 'tier_3_escalate' %}critical{% else %}medium{% endif %}
+          tags:
+            - argus-auto
+            - "tier:{{ inputs.triage_tier }}"
+          owner: "securitySolution"
+          settings:
+            syncAlerts: true
+        on_failure:
+          - name: log_create_case_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: create_case
+                step_name: create_case
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+  - name: resolve_case_id
+    type: data.set
+    with:
+      case_id: "{{ steps.use_existing_case.output.case_id | default: steps.create_case.output.case.id }}"
+
+  - name: attach_alerts
+    type: cases.addAlerts
+    with:
+      case_id: "{{ steps.resolve_case_id.output.case_id }}"
+      alerts:
+        - alertId: "{{ inputs.alert_id }}"
+          index: "{{ consts.alert_index }}"
+          rule:
+            id: "{{ inputs.rule_id }}"
+            name: "{{ inputs.rule_name }}"
+    on_failure:
+      - name: log_attach_alerts_failure
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /.soc-audit-trail/_doc
+          body:
+            event_type: workflow_step_failure
+            workflow_id: "{{ consts.workflow_id }}"
+            step_id: attach_alerts
+            step_name: attach_alerts
+            error: "{{ error.message }}"
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+  - name: tag_case
+    type: cases.addTags
+    with:
+      case_id: "{{ steps.resolve_case_id.output.case_id }}"
+      tags:
+        - "technique:{{ inputs.technique }}"
+        - "confidence:{{ inputs.triage_confidence }}"
+        - "workflow:alert-sweeper"
+
+  - name: stamp_argus_meta
+    type: cases.setCustomField
+    if: "{{ inputs.mutation_id != '' }}"
+    with:
+      case_id: "{{ steps.resolve_case_id.output.case_id }}"
+      owner: "securitySolution"
+      field_name: "argus_mutation_id"
+      value: "{{ inputs.mutation_id }}"
+
+  - name: assign_analyst
+    type: cases.assignCase
+    if: "{{ inputs.triage_tier == 'tier_2_investigate' and inputs.assignee_uid != '' }}"
+    with:
+      case_id: "{{ steps.resolve_case_id.output.case_id }}"
+      assignees:
+        - uid: "{{ inputs.assignee_uid }}"
+
+  - name: audit_case_creation
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.soc-audit-trail/_doc
+      body:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: case_created
+        case_id: "{{ steps.resolve_case_id.output.case_id }}"
+        alert_id: "{{ inputs.alert_id }}"
+        triage_tier: "{{ inputs.triage_tier }}"
+        source: soc-argus-case-lifecycle
+    on_failure:
+      - name: log_audit_case_creation_failure
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /.soc-audit-trail/_doc
+          body:
+            event_type: workflow_step_failure
+            workflow_id: "{{ consts.workflow_id }}"
+            step_id: audit_case_creation
+            step_name: audit_case_creation
+            error: "{{ error.message }}"
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"

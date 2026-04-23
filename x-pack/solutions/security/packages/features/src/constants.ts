@@ -27,7 +27,7 @@ export const SECURITY_UI_CRUD = 'crud' as const;
 export const SECURITY_UI_CRUD_PRIVILEGE = `${SECURITY_FEATURE_ID_V5}.${SECURITY_UI_CRUD}` as const;
 
 /**
- * Argus Console UI capabilities. Surfaced as `capabilities[siemV5].argus_read`
+ * ARGUS Console UI capabilities. Surfaced as `capabilities[siemV5].argus_read`
  * and `capabilities[siemV5].argus_all` on the Kibana capabilities object. The
  * console uses them to decide whether to show the Kill-switch chip and the
  * Approve/Reject actions on the Mutations tab.
@@ -40,7 +40,7 @@ export const ARGUS_CONSOLE_UI_READ = 'argus_read' as const;
 export const ARGUS_CONSOLE_UI_ALL = 'argus_all' as const;
 
 /**
- * Server-side API privilege gating every Argus *write* route (kill-switch
+ * Server-side API privilege gating every ARGUS *write* route (kill-switch
  * toggle + mutation approve/reject). Attached to `privileges.all` only, so
  * `siem.show` users cannot drive autonomy or override the machine.
  *

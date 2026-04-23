@@ -132,7 +132,7 @@ export const registerRecentProposalsRoute = ({ router, logger }: ArgusRoutesDeps
           return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus recent_proposals route failed: ${error.message}`);
+          logger.error(`ARGUS recent_proposals route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

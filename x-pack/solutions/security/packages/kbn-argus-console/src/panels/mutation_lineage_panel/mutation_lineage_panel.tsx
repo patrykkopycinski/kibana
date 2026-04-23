@@ -166,7 +166,7 @@ export const MutationLineagePanel: React.FC<MutationLineagePanelProps> = ({
 /**
  * Shared node-details flyout. Nodes always carry a `source_index` /
  * `source_doc_id` because the builder populates them from the underlying
- * `.soc-mutation-intents` / `.soc-detection-eval-runs` / `.soc-outcomes`
+ * `.soc-mutation-intents` / `.soc-argus-eval-runs` / `.soc-outcomes`
  * documents, but we gracefully degrade to a summary-only view when a
  * synthetic node slips through without them.
  */

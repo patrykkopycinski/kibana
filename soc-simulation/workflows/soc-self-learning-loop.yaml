@@ -20,7 +20,7 @@ description: >
       avg_fp_reduction_predicted, residual_mean_abs.
 
   This workflow runs every 10m so the feedback arrives fast enough to
-  influence the next difficulty-controller pass and feed the Argus
+  influence the next difficulty-controller pass and feed the ARGUS
   Phase 3 trust trio (tier-assessor → reasoning-watchdog → trust-gate).
 
 enabled: true

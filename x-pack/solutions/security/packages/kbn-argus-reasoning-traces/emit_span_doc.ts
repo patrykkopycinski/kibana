@@ -8,7 +8,7 @@
 import { ARGUS_TRACE_ATTR, type ArgusDecisionKind, type ArgusTrustTier } from './trace_attributes';
 
 /**
- * Argus M2.5 — reasoning-trace document emitter.
+ * ARGUS M2.5 — reasoning-trace document emitter.
  *
  * The OTLP exporter path (see `otlp_exporter.ts`) remains the production
  * target for agents that already use the OpenTelemetry SDK. But the SOC
@@ -29,7 +29,7 @@ import { ARGUS_TRACE_ATTR, type ArgusDecisionKind, type ArgusTrustTier } from '.
 export interface EmitArgusSpanDocInput {
   /**
    * Workflow / agent run identifier. Stays flat at `run_id` for
-   * backward-compatibility with the pre-Argus `.soc-reasoning-trace` consumers.
+   * backward-compatibility with the pre-ARGUS `.soc-reasoning-trace` consumers.
    */
   runId: string;
 
@@ -57,7 +57,7 @@ export interface EmitArgusSpanDocInput {
   finalOutputRef?: string;
 
   /**
-   * Argus governance attributes. `agentId` + `decisionKind` are required;
+   * ARGUS governance attributes. `agentId` + `decisionKind` are required;
    * everything else is optional so partial "thought" steps are accepted.
    */
   argus: {

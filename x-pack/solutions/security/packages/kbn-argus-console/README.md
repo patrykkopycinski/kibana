@@ -1,13 +1,13 @@
 # @kbn/argus-console
 
-Shared-browser package that hosts the Argus Console — a demo-grade React
+Shared-browser package that hosts the ARGUS Console — a demo-grade React
 surface mounted inside Security Solution at `/app/security/argus`.
 
 ## Panels
 
 ### Read surfaces
 
-- **`PulsePanel`** — top-of-fold "is Argus working" summary, composed of
+- **`PulsePanel`** — top-of-fold "is ARGUS working" summary, composed of
   Lens embeddables that match the `soc-command-center` dashboard 1:1.
 - **`ActivityFeedPanel`** — chronological cross-layer event stream with
   filter chips and per-row deep-links to Discover / Reasoning / Alert.
@@ -72,7 +72,7 @@ capability.
 
 See `openspec/changes/argus-console-app-route/` for the full design
 and `soc-simulation/docs/argus/capability-and-gap-analysis.md` for the
-Phase-C "complete Argus story" scope.
+Phase-C "complete ARGUS story" scope.
 
 ## Audit trail
 

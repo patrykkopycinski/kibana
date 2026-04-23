@@ -115,7 +115,7 @@ export const registerE2dRecentCvesRoute = ({ router, logger }: ArgusRoutesDeps) 
                 if (typeof b.key === 'string') intentRuleIds.add(b.key);
               });
             } catch (aggErr) {
-              logger.debug(`Argus e2d_recent_cves: intents aggregation failed — ${String(aggErr)}`);
+              logger.debug(`ARGUS e2d_recent_cves: intents aggregation failed — ${String(aggErr)}`);
             }
           }
 
@@ -145,7 +145,7 @@ export const registerE2dRecentCvesRoute = ({ router, logger }: ArgusRoutesDeps) 
           return response.ok({ body });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus e2d_recent_cves route failed: ${error.message}`);
+          logger.error(`ARGUS e2d_recent_cves route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

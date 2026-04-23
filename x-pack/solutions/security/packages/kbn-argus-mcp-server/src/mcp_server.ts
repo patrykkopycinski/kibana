@@ -48,7 +48,7 @@ export const createArgusMcpServer = (options: ArgusMcpServerOptions): Server => 
         tools: {},
       },
       instructions:
-        'Argus — Elastic Autonomous SOC. Every tool call is governed by trust-tier, door-class, blast-radius, adversarial, and reasoning-watchdog gates. Outputs may return mutation_intent with status=pending_review when the caller or profile is not authorized to auto-apply.',
+        'ARGUS — Elastic Autonomous SOC. Every tool call is governed by trust-tier, door-class, blast-radius, adversarial, and reasoning-watchdog gates. Outputs may return mutation_intent with status=pending_review when the caller or profile is not authorized to auto-apply.',
     }
   );
 

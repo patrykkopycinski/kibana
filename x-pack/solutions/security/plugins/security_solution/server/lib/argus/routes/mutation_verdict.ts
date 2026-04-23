@@ -97,7 +97,7 @@ export const registerMutationVerdictRoute = (deps: ArgusRoutesDeps) => {
 
           const now = new Date().toISOString();
           const newStatus = STATUS_FOR_ACTION[action];
-          const reviewReason = reason ?? (action === 'approve' ? 'Approved via Argus Console' : '');
+          const reviewReason = reason ?? (action === 'approve' ? 'Approved via ARGUS Console' : '');
 
           await esClient.update({
             index: ARGUS_SOC_INDICES.recommendations,
@@ -140,7 +140,7 @@ export const registerMutationVerdictRoute = (deps: ArgusRoutesDeps) => {
           });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus mutation_verdict route failed: ${error.message}`);
+          logger.error(`ARGUS mutation_verdict route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -166,7 +166,7 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
 /**
  * Recommendations are indexed with an auto-generated ES `_id` that is NOT
  * the same as `mutation_intent_id`. The UI only knows the latter (it's what
- * the applier chains through the rest of the Argus pipeline), so we look
+ * the applier chains through the rest of the ARGUS pipeline), so we look
  * up by the business key and return both the `_id` (needed for `update`)
  * and the `_source` payload.
  */
@@ -212,7 +212,7 @@ const writeAuditEntry = async (
     // un-diagnosable. Log a warning so orphan verdicts are traceable.
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(
-      `Argus audit_trail write failed for ${entry.subject_kind}=${entry.subject_id}: ${message}`
+      `ARGUS audit_trail write failed for ${entry.subject_kind}=${entry.subject_id}: ${message}`
     );
   }
 };

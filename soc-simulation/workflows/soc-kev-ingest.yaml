@@ -1,7 +1,7 @@
 version: '1'
-name: Argus KEV Ingest
+name: ARGUS KEV Ingest
 description: >
-  Argus R14 — CISA Known Exploited Vulnerabilities (KEV) live-feed ingest.
+  ARGUS R14 — CISA Known Exploited Vulnerabilities (KEV) live-feed ingest.
 
   The actual HTTPS fetch of the CISA catalog happens out-of-band, in the
   `@kbn/argus-kev-ingest` CLI (run by an Elastic Agent cron or a Kibana
@@ -18,12 +18,12 @@ description: >
     2. Finds KEV advisories still in `status: "ingested"` (i.e. the
        Exploit-to-Detection reconciler hasn't picked them up yet) and
        logs them to `.soc-audit-trail` so operators can see a live
-       "CISA → Argus" funnel.
+       "CISA → ARGUS" funnel.
 
     3. Surfaces KEV advisories whose `kev.due_date` is within 72 h but
        still have no draft rule (`recommendation_id` missing). These are
        fed to the reconciler on its next tick, guaranteeing regulatory
-       deadlines drive Argus priorities.
+       deadlines drive ARGUS priorities.
 
   The reconciler (`soc-argus-exploit-to-detection`) consumes these
   advisories exactly like human-authored ones — R14 deliberately keeps

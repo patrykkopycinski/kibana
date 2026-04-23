@@ -29,7 +29,7 @@
     }
   },
   "_meta": {
-    "description": "Immutable pre-mutation snapshots for every autonomous change Argus makes. Enables one-command rollback. Uses permanent ILM.",
+    "description": "Immutable pre-mutation snapshots for every autonomous change ARGUS makes. Enables one-command rollback. Uses permanent ILM.",
     "owner": "argus-governance",
     "schema_version": 1
   }

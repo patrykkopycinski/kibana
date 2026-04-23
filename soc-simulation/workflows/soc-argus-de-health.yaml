@@ -1,0 +1,91 @@
+version: '1'
+name: SOC ARGUS — Detection Engine Health (native APIs)
+description: >
+  Calls native Detection Engine space health and per-rule execution results. Writes a focused
+  `.soc-argus-health` document (source=soc-argus-de-health) and audit rows. Downstream workflow
+  failures are still picked up by `soc-argus-self-healer` via `workflows.failed`.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 10m
+  - type: manual
+
+consts:
+  audit_index: ".soc-audit-trail"
+  health_index: ".soc-argus-health"
+  corpus_index: ".soc-detection-corpus"
+
+steps:
+  - name: space_health
+    type: kibana.request
+    with:
+      method: POST
+      path: /internal/detection_engine/health/_space
+      body:
+        interval:
+          type: last_day
+          granularity: hour
+        debug: false
+
+  - name: list_rule_ids
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.corpus_index }}"
+      size: 5
+      _source: ["rule_id", "name"]
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+
+  - name: gate_has_corpus_rules
+    type: console
+    with:
+      message: "{% if steps.list_rule_ids.output.hits.total.value > 0 %}yes{% else %}no{% endif %}"
+
+  - name: execution_results_primary
+    type: kibana.request
+    if: "steps.gate_has_corpus_rules.output: yes"
+    with:
+      method: POST
+      path: "/internal/detection_engine/rules/{{ steps.list_rule_ids.output.hits.hits[0]._source.rule_id }}/execution/results"
+      body: {}
+
+  - name: bundle_health
+    type: data.set
+    with:
+      space_health: "{{ steps.space_health.output | json }}"
+      primary_rule_id: "{{ steps.list_rule_ids.output.hits.hits[0]._source.rule_id | default: 'none' }}"
+      primary_execution: "{{ steps.execution_results_primary.output | json | default: 'null' }}"
+
+  - name: write_de_health_doc
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.health_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        overall_status: yellow
+        workflow_liveness: {}
+        dead_letter_depth: 0
+        eval_pass_rate: 0.0
+        trust_tier_distribution: {}
+        mttd_seconds: 0.0
+        mttr_seconds: 0.0
+        source: soc-argus-de-health
+        de_space_health: "{{ steps.bundle_health.output.space_health }}"
+        de_primary_rule_id: "{{ steps.bundle_health.output.primary_rule_id }}"
+        de_execution_sample: "{{ steps.bundle_health.output.primary_execution }}"
+
+  - name: audit_tick
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: de_health_native_tick
+        source: soc-argus-de-health
+        sampled_rule_id: "{{ steps.bundle_health.output.primary_rule_id }}"

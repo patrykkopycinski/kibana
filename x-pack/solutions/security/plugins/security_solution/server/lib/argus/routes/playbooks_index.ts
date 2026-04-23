@@ -57,7 +57,7 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
     name: 'Emulate actor',
     description:
       'Actor-focused coverage review. Correlates MITRE techniques against recent telemetry and optionally opens a case.',
-    canonical_of: 'soc-argus-playbook-actor-escalation',
+    canonical_of: 'soc-argus-playbook-runner',
     user_intent: 'actor_escalation',
   },
   {
@@ -73,7 +73,7 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
     kind: 'skill',
     name: 'Assess CVE',
     description:
-      'Check whether a specific CVE is on Argus’s radar, has coverage, and optionally trigger the Exploit→Detection pipeline.',
+      'Check whether a specific CVE is on ARGUS’s radar, has coverage, and optionally trigger the Exploit→Detection pipeline.',
     origin: 'cti_ingest',
     canonical_of: 'soc-argus-exploit-to-detection',
     user_intent: 'new_cve',
@@ -105,9 +105,7 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
  * list still works for workflows added after this map was last edited.
  */
 const WORKFLOW_DISPLAY_NAMES: Readonly<Record<string, string>> = {
-  'soc-argus-playbook-coverage-gap-triage': 'Coverage gap triage',
-  'soc-argus-playbook-high-fp-tuning': 'High FP rule tuning',
-  'soc-argus-playbook-actor-escalation': 'Actor escalation',
+  'soc-argus-playbook-runner': 'ARGUS playbook runner',
   'soc-argus-exploit-to-detection': 'Exploit → Detection reconciler',
   'soc-gap-analyzer': 'Gap analyzer',
   'soc-argus-drift-monitor': 'Drift monitor',
@@ -120,7 +118,6 @@ const WORKFLOW_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   'soc-deteng': 'Detection engineering',
   'soc-arch-reviewer': 'Architecture reviewer',
   'soc-kev-ingest': 'KEV advisory ingest',
-  'soc-argus-playbook-datasource-gap': 'Data-source gap triage',
 };
 
 /**
@@ -129,11 +126,8 @@ const WORKFLOW_DISPLAY_NAMES: Readonly<Record<string, string>> = {
  */
 const WORKFLOW_ORIGIN_BADGES: Readonly<Record<string, string>> = {
   'soc-argus-exploit-to-detection': 'cti_ingest',
-  'soc-argus-playbook-coverage-gap-triage': 'gap_analysis',
-  'soc-argus-playbook-high-fp-tuning': 'consolidation',
   'soc-gap-analyzer': 'gap_analysis',
   'soc-argus-redundancy-scanner': 'consolidation',
-  'soc-argus-playbook-datasource-gap': 'gap_analysis',
   'soc-kev-ingest': 'cti_ingest',
 };
 
@@ -145,13 +139,9 @@ const WORKFLOW_ORIGIN_BADGES: Readonly<Record<string, string>> = {
  */
 const WORKFLOW_USER_INTENTS: Readonly<Record<string, ArgusPlaybookUserIntent>> = {
   'soc-argus-exploit-to-detection': 'new_cve',
-  'soc-argus-playbook-coverage-gap-triage': 'coverage_gap',
   'soc-gap-analyzer': 'coverage_gap',
-  'soc-argus-playbook-high-fp-tuning': 'high_fp_tuning',
-  'soc-argus-playbook-actor-escalation': 'actor_escalation',
   'soc-argus-redundancy-scanner': 'redundancy_scan',
   'soc-argus-drift-monitor': 'drift_monitor',
-  'soc-argus-playbook-datasource-gap': 'datasource_gap',
 };
 
 interface RawWorkflowRegistryDoc {
@@ -164,7 +154,7 @@ interface RawWorkflowRegistryDoc {
    * Management storage index (typically `workflow-<uuid>`). Populated by
    * `soc-simulation/scripts/resolve_workflow_ids.sh` after workflows are
    * bulk-imported; absent until the resolver runs. Carried through to the
-   * Argus Playbooks tab so the "Run" action can deep-link to the correct
+   * ARGUS Playbooks tab so the "Run" action can deep-link to the correct
    * `/app/workflows/<id>` URL instead of the slug (which 404s).
    */
   kibana_workflow_id?: string;
@@ -244,7 +234,7 @@ export const registerPlaybooksIndexRoute = ({ router, logger }: ArgusRoutesDeps)
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);
-        logger.error(`Argus playbooks index route failed: ${error.message}`);
+        logger.error(`ARGUS playbooks index route failed: ${error.message}`);
         return siemResponse.error({ statusCode: error.statusCode, body: error.message });
       }
     });

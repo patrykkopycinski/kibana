@@ -351,7 +351,7 @@ const buildBacktest = (
   backtest: DetailRawBacktestDoc | undefined,
   ruleQueryAfter: string | null
 ): ArgusMutationDetailBacktest | null => {
-  // Prefer the authoritative `.soc-backtest-results` row when it exists;
+  // Prefer the authoritative `.soc-backtests` row when it exists;
   // fall back to the cached preview on the intent for blocked rows that
   // never got a real backtest run.
   if (backtest) {

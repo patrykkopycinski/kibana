@@ -6,7 +6,7 @@
  */
 
 /**
- * Raw shape of an Argus skill JSON (soc-simulation/skills/*.json). The
+ * Raw shape of an ARGUS skill JSON (soc-simulation/skills/*.json). The
  * manifest only reads `id`, `name`, `description`, `tool_ids` — the `content`
  * field (system prompt) is NEVER projected to external callers.
  */

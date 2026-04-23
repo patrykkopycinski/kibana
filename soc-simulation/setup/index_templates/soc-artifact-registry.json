@@ -34,7 +34,7 @@
     }
   },
   "_meta": {
-    "description": "Authoritative ownership & dependency registry for Argus-managed artifacts (agents, skills, workflows, rules, exceptions, cases). Doc _id is '<type>:<artifact_id>'.",
+    "description": "Authoritative ownership & dependency registry for ARGUS-managed artifacts (agents, skills, workflows, rules, exceptions, cases). Doc _id is '<type>:<artifact_id>'.",
     "owner": "argus-governance",
     "schema_version": 1
   }

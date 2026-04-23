@@ -6,7 +6,7 @@
  */
 
 /**
- * Corpus constants for the Argus Detection Eval Vertical.
+ * Corpus constants for the ARGUS Detection Eval Vertical.
  *
  * The canonical labelled events themselves live outside this package — under
  * `soc-simulation/scripts/argus-variant-bank/` — and are bulk-loaded into

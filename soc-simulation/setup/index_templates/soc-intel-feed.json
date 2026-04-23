@@ -32,7 +32,7 @@
     }
   },
   "_meta": {
-    "description": "Argus Phase 3 — abstract intel-feed contract. `.soc-intel-feed` is the downstream Mythos-era intel stream that `soc-argus-intel-mythos-aggregator` reads to compute `vulnerability.argus.exploit_context.mythos_signal`. Adapters (`argus_intel_adapter_generic`, future Glasswing adapter) normalise to this single shape. `signal_strength` is the adapter's best estimate of relevance to Mythos-class exploitation probability, in [0, 1]. `half_life_days` drives exponential decay at aggregation time. `source_trust` is the per-feed trust weight set at adapter config (Glasswing 0.9, generic 0.5). `raw` is an opaque forensics passthrough, never consumed by scoring logic.",
+    "description": "ARGUS Phase 3 — abstract intel-feed contract. `.soc-intel-feed` is the downstream Mythos-era intel stream that `soc-argus-intel-mythos-aggregator` reads to compute `vulnerability.argus.exploit_context.mythos_signal`. Adapters (`argus_intel_adapter_generic`, future Glasswing adapter) normalise to this single shape. `signal_strength` is the adapter's best estimate of relevance to Mythos-class exploitation probability, in [0, 1]. `half_life_days` drives exponential decay at aggregation time. `source_trust` is the per-feed trust weight set at adapter config (Glasswing 0.9, generic 0.5). `raw` is an opaque forensics passthrough, never consumed by scoring logic.",
     "owner": "argus-governance",
     "schema_version": 1
   }

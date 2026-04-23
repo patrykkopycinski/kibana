@@ -46,9 +46,8 @@ const OPEN_WORLD_TOOL_PATTERNS: readonly RegExp[] = Object.freeze([
 ]);
 
 const PURE_READ_CLASSIFIERS: readonly RegExp[] = Object.freeze([
-  /^soc-architecture-review$/,
+  /^soc-architecture-and-gaps$/,
   /^soc-health-check$/,
-  /^soc-capability-gap-analyzer$/,
   /^soc-difficulty-evaluation$/,
 ]);
 
@@ -60,7 +59,7 @@ const PURE_READ_CLASSIFIERS: readonly RegExp[] = Object.freeze([
  *   destructiveHint = tool_ids has a destructive pattern
  *   idempotentHint  = skill id is a known pure-read classifier OR
  *                     tool_ids has no write pattern (same-input-same-output
- *                     holds for read paths under Argus's current data model)
+ *                     holds for read paths under ARGUS's current data model)
  *   openWorldHint   = tool_ids hits any external-feed pattern
  */
 export const computeToolAnnotations = (

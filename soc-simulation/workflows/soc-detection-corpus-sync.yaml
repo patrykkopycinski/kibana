@@ -3,7 +3,7 @@ name: SOC Detection Corpus Sync
 description: >
   Bootstraps `.soc-detection-corpus` from live Kibana detection rules that are
   currently enabled. Each enabled rule is upserted as one corpus document
-  (`_id` == rule UUID) so Argus coverage surfaces stay aligned with the
+  (`_id` == rule UUID) so ARGUS coverage surfaces stay aligned with the
   detection engine without a separate ingest CLI.
 
   Runs hourly and on demand. Emits a heartbeat to `.soc-audit-trail`.

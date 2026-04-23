@@ -1,7 +1,7 @@
 version: '1'
-name: Argus Reasoning Watchdog (Phase 3)
+name: ARGUS Reasoning Watchdog (Phase 3)
 description: >
-  Argus R10 — reasoning-confidence dropout watchdog.
+  ARGUS R10 — reasoning-confidence dropout watchdog.
 
   The watchdog is the second-layer safety net against model regression.
   Where the trust-tier assessor looks at aggregate eval metrics and
@@ -34,7 +34,7 @@ description: >
       hallucination spike would be washed out before it ever tripped
       a threshold. The watchdog's 15m window catches it in one tick.
     - Splitting concerns means the assessor can remain a pure,
-      deterministic aggregator. The watchdog is the only Argus
+      deterministic aggregator. The watchdog is the only ARGUS
       component allowed to flip a tier based on short-term signal.
 
   Triggers:
@@ -222,7 +222,7 @@ steps:
                 name: "argus.reasoning_watchdog.evaluate"
               agent:
                 id: "soc-argus-reasoning-watchdog"
-                name: "Argus Reasoning Watchdog"
+                name: "ARGUS Reasoning Watchdog"
                 description: "Short-horizon confidence-dropout detector that freezes auto-apply when a producer's reasoning degrades"
 
   # ── Heartbeat ───────────────────────────────────────────────────────
@@ -240,4 +240,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus reasoning watchdog complete — actors={{ steps.discover_recent_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+      message: "ARGUS reasoning watchdog complete — actors={{ steps.discover_recent_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

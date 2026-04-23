@@ -1,9 +1,9 @@
 version: '1'
-name: Argus Playbook — Redundancy Scanner
+name: ARGUS Playbook — Redundancy Scanner
 description: >
   Scan `.soc-detection-corpus` for techniques covered by many overlapping
   rules (by default three or more independent source families). For each
-  redundant group, file a `consolidation` mutation intent for the Argus-
+  redundant group, file a `consolidation` mutation intent for the ARGUS-
   authored rule(s) in the group so reviewers can pick a dominant rule and
   retire the rest. Intents carry a Pareto `argus.synthesis` block with
   alternatives pulled from `.soc-detection-patterns`.

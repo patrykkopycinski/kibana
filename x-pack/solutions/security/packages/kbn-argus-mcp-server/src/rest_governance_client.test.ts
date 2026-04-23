@@ -84,7 +84,7 @@ describe('RestGovernanceClient', () => {
       watchdog_frozen: false,
     });
     expect(calls).toHaveLength(3);
-    expect(calls[0].url).toContain('.soc-reasoning-eval-runs');
+    expect(calls[0].url).toContain('.soc-argus-eval-runs');
     expect(calls[2].url).toContain('.soc-actor-trust-tiers');
   });
 

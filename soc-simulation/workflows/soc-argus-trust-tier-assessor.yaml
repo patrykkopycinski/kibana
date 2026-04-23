@@ -1,11 +1,11 @@
 version: '1'
-name: Argus Trust Tier Assessor (Phase 3)
+name: ARGUS Trust Tier Assessor (Phase 3)
 description: >
-  Argus Phase 3 — per-actor trust-tier assessor.
+  ARGUS Phase 3 — per-actor trust-tier assessor.
 
   For each agent/skill/tool that has produced at least one recommendation
   or eval run in the last 7 days, this workflow computes:
-    * eval_pass_rate (from .soc-detection-eval-runs where agent_id matches)
+    * eval_pass_rate (from .soc-argus-eval-runs run_kind=detection where agent_id matches)
     * avg_precision / avg_recall / avg_f1 / avg_robustness
     * reasoning_quality (from .soc-reasoning-trace argus.decision.confidence)
     * rejections_by_humans + rollbacks_triggered
@@ -51,11 +51,11 @@ triggers:
 
 consts:
   tiers_index: ".soc-actor-trust-tiers"
-  eval_runs_index: ".soc-detection-eval-runs"
+  eval_runs_index: ".soc-argus-eval-runs"
   traces_index: ".soc-reasoning-trace"
   audit_index: ".soc-audit-trail"
   outcomes_index: ".soc-outcomes"
-  reasoning_eval_index: ".soc-reasoning-eval-runs"
+  reasoning_eval_index: ".soc-argus-eval-runs"
   window: "now-7d"
   frontier_window: "now-7d"
 
@@ -99,7 +99,7 @@ steps:
   - name: bootstrap_actor_ids
     type: console
     with:
-      message: '["soc-deteng-agent","soc-signal-quality-agent","soc-triage-agent","soc-meta-agent","soc-autonomous-applier-agent","soc-rec-applier-agent"]'
+      message: '["default-security-assistant","workflow-engine","autonomous-applier","detection-engineer","triage-analyst","meta-planner"]'
 
   - name: bootstrap_default_tiers
     type: foreach
@@ -171,6 +171,7 @@ steps:
           query:
             bool:
               filter:
+                - term: { run_kind: "detection" }
                 - term: { agent_id: "{{ foreach.item.key }}" }
                 - range:
                     "@timestamp":
@@ -192,6 +193,7 @@ steps:
           query:
             bool:
               filter:
+                - term: { run_kind: "detection" }
                 - term: { agent_id: "{{ foreach.item.key }}" }
                 - term: { gate_decision: "pass" }
                 - range:
@@ -230,7 +232,7 @@ steps:
           aggregations:
             sim_runs: { value_count: { field: "tick_id.keyword" } }
 
-      # Real-world outcomes per actor (Argus G3). This is the feedback
+      # Real-world outcomes per actor (ARGUS G3). This is the feedback
       # signal that distinguishes actors that look good in eval from
       # actors that are actually good in production. A rule that was
       # rolled back by an operator or that produced a false-positive
@@ -286,7 +288,7 @@ steps:
                     "@timestamp":
                       gte: "{{ consts.window }}"
 
-      # Argus R6 — rollback MTTR aggregation.
+      # ARGUS R6 — rollback MTTR aggregation.
       # We use average + p50/p95 percentiles on `rollback_mttr_ms` so the
       # Autonomy Feed can show a distributional metric, not a single mean
       # that one slow rollback can skew. The assessor only publishes
@@ -313,9 +315,9 @@ steps:
                 field: "rollback_mttr_ms"
                 percents: [50, 95]
 
-      # Argus R11 — latest reasoning eval gate signal. The reasoning eval
+      # ARGUS R11 — latest reasoning eval gate signal. The reasoning eval
       # vertical lives in @kbn/evals-suite-argus-reasoning; it writes one
-      # row per run into .soc-reasoning-eval-runs with gate_decision in
+      # row per run into .soc-argus-eval-runs (reasoning|adversarial) with gate_decision in
       # {pass, marginal, fail} and a structured `aggregate` of evidence /
       # calibration / coherence / safety means. We pull the freshest row
       # in the window and use its gate as a cross-cutting veto: a `fail`
@@ -335,6 +337,8 @@ steps:
           query:
             bool:
               filter:
+                - terms:
+                    run_kind: ["reasoning", "adversarial"]
                 - range:
                     "@timestamp":
                       gte: "{{ consts.window }}"
@@ -455,4 +459,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus trust-tier assessor complete — actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-trust-tier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+      message: "ARGUS trust-tier assessor complete — actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-trust-tier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

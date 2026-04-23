@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus "Proposals" surface — exposes the Pareto-synthesis candidate set
+ * ARGUS "Proposals" surface — exposes the Pareto-synthesis candidate set
  * (chosen / frontier / dominated) that's already written to every
  * `.soc-recommendations` doc under `argus.synthesis`. The data model on
  * disk is owned by `@kbn/argus-exploit-to-detection` (see
@@ -55,7 +55,7 @@ export type ArgusVariantAxisName =
 /**
  * Predicted-performance profile. All fields live on `[0, 1]`. These are
  * the heuristic numbers emitted by `synthesize_pareto.ts`; the
- * authoritative numbers land later on `.soc-backtest-results`.
+ * authoritative numbers land later on `.soc-backtests`.
  */
 export interface ArgusSynthesisPredicted {
   readonly precision: number;

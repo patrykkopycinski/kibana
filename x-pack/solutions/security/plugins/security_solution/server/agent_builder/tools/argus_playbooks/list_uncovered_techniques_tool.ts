@@ -53,7 +53,7 @@ interface CorpusDoc {
 /**
  * Reads `.soc-coverage-gaps` for currently-open gaps and cross-references
  * `.soc-detection-corpus` to report whether each uncovered technique has
- * Argus-authored or community-authored rules. Pure read — no writes.
+ * ARGUS-authored or community-authored rules. Pure read — no writes.
  */
 export function argusListUncoveredTechniquesTool(
   core: SecuritySolutionPluginCoreSetupDependencies,
@@ -64,7 +64,7 @@ export function argusListUncoveredTechniquesTool(
     type: ToolType.builtin,
     description:
       'List ATT&CK techniques with open coverage gaps, optionally filtered by profile and/or ' +
-      'tactic. Returns per-technique counts of Argus-authored vs community-authored rules so ' +
+      'tactic. Returns per-technique counts of ARGUS-authored vs community-authored rules so ' +
       'skills can reason about whether a gap is genuine or redundantly covered elsewhere.',
     schema: listUncoveredTechniquesSchema,
     tags: ['security', 'argus', 'argus:playbook', 'read', 'coverage'],

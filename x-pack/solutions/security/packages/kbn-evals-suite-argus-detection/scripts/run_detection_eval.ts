@@ -12,7 +12,7 @@ import { createEvaluateDetectionRules } from '../src/evaluate_dataset';
 import { MYTHOS_CORPUS_2026_04 } from '../datasets/mythos_corpus_2026_04';
 
 /**
- * Standalone CLI for the Argus Detection Eval Vertical.
+ * Standalone CLI for the ARGUS Detection Eval Vertical.
  *
  * Why this exists: the Playwright-driven `@kbn/evals` suite requires a fully
  * configured Scout environment (Kibana + Elasticsearch + a connector) to run.
@@ -53,7 +53,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
     corpusId: MYTHOS_CORPUS_2026_04.id,
     corpusIndex: MYTHOS_CORPUS_2026_04.index,
     suiteId: 'argus-detection-vertical',
-    runsIndex: '.soc-detection-eval-runs',
+    runsIndex: '.soc-argus-eval-runs',
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -103,7 +103,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
             '  --corpus-id <id>         Corpus identifier (default: argus-corpus-mythos-2026-04)',
             '  --corpus-index <index>   Corpus index (default derived from --corpus-id)',
             '  --suite-id <id>          Suite identifier written to runs (default: argus-detection-vertical)',
-            '  --runs-index <index>     Runs index (default: .soc-detection-eval-runs)',
+            '  --runs-index <index>     Runs index (default: .soc-argus-eval-runs)',
           ].join('\n')
         );
         /* eslint-enable no-console */

@@ -1,6 +1,6 @@
 version: '1'
-name: Argus Rule Health Monitor
-description: Monitors applied Argus rules for high alert volume.
+name: ARGUS Rule Health Monitor
+description: Monitors applied ARGUS rules for high alert volume.
 enabled: true
 
 triggers:
@@ -139,4 +139,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus rule health monitor tick"
+      message: "ARGUS rule health monitor tick"

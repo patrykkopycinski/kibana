@@ -32,7 +32,8 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-ES_URL = os.environ.get("ES_URL", "http://localhost:19200")
+_ES_PORT = os.environ.get("ES_PORT", "19200")
+ES_URL = os.environ.get("ES_URL", f"http://localhost:{_ES_PORT}")
 ES_USER = os.environ.get("ES_USER", "elastic")
 ES_PASS = os.environ.get("ES_PASS", "changeme")
 
@@ -150,10 +151,7 @@ RULES = [
 # Author agents for mutation intents. `executor` is the applier agent; the author
 # trust tier determines whether the applier auto-applies or defers.
 AGENTS = {
-    "soc-signal-quality-agent": {"tier": "trusted", "trust_score": 0.94, "rollbacks_24h": 0},
-    "soc-deteng-agent": {"tier": "probationary", "trust_score": 0.78, "rollbacks_24h": 1},
-    "soc-meta-agent": {"tier": "observing", "trust_score": 0.62, "rollbacks_24h": 1},
-    "soc-triage-agent": {"tier": "probationary", "trust_score": 0.81, "rollbacks_24h": 0},
+    "default": {"tier": "probationary", "trust_score": 0.78, "rollbacks_24h": 1},
     "experimental-tuner-v3": {"tier": "quarantined", "trust_score": 0.35, "rollbacks_24h": 3},
 }
 
@@ -438,7 +436,7 @@ def gen_trusted_auto_apply(seq: int, hours_back: float) -> dict:
     ts_snapshot = ts0 + timedelta(minutes=3)
     ts_applied = ts0 + timedelta(minutes=4)
     patch = build_patch(rule, new_interval="10m", new_threshold=random.randint(10, 20))
-    source_agent = "soc-signal-quality-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     docs["rec_applied"] = build_mutation_intent(
@@ -538,7 +536,7 @@ def gen_probationary_backtest_then_apply(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-probationary-{seq:03d}"
     ts0 = hours_ago(hours_back)
     patch = build_patch(rule, new_interval="15m", new_threshold=random.randint(8, 15))
-    source_agent = "soc-deteng-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     ts_propose = ts0
@@ -619,7 +617,7 @@ def gen_rolled_back(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-rollback-{seq:03d}"
     ts0 = hours_ago(hours_back)
     patch = build_patch(rule, new_interval="20m", new_threshold=random.randint(20, 40))
-    source_agent = random.choice(["experimental-tuner-v3", "soc-meta-agent"])
+    source_agent = random.choice(["experimental-tuner-v3", "default"])
     agent_meta = AGENTS[source_agent]
     ts_backtest = ts0 + timedelta(minutes=3)
     ts_snapshot = ts0 + timedelta(minutes=5)
@@ -711,7 +709,7 @@ def gen_pending_backtest(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-pending-bt-{seq:03d}"
     ts0 = minutes_ago(hours_back * 60)
     patch = build_patch(rule, new_interval="12m", new_threshold=random.randint(8, 15))
-    source_agent = "soc-signal-quality-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     docs["rec"] = build_mutation_intent(
@@ -752,7 +750,7 @@ def gen_auto_apply_ready(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-ready-{seq:03d}"
     ts0 = minutes_ago(hours_back * 60)
     patch = build_patch(rule, new_interval="10m", new_threshold=random.randint(10, 18))
-    source_agent = "soc-signal-quality-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     docs["rec"] = build_mutation_intent(
@@ -850,7 +848,7 @@ def gen_rejected_drift(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-rejected-drift-{seq:03d}"
     ts0 = hours_ago(hours_back)
     patch = build_patch(rule, new_interval="8m", new_threshold=random.randint(8, 14))
-    source_agent = "soc-meta-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     docs["rec"] = build_mutation_intent(
@@ -951,7 +949,7 @@ def gen_applying_inflight(seq: int, hours_back: float) -> dict:
     rec_id = f"mi-applying-{seq:03d}"
     ts0 = minutes_ago(hours_back * 60)
     patch = build_patch(rule, new_interval="10m", new_threshold=random.randint(10, 16))
-    source_agent = "soc-signal-quality-agent"
+    source_agent = "default"
     agent_meta = AGENTS[source_agent]
     docs = {}
     docs["rec"] = build_mutation_intent(

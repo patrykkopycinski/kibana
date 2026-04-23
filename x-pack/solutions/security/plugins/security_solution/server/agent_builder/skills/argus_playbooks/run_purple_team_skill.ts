@@ -25,7 +25,7 @@ export const argusRunPurpleTeamSkill = defineSkillType({
     'summary, rule backtests, gap_analysis intent filing, and an optional case so the result is ' +
     'auditable. Use when the user wants a deeper, multi-step exercise than ' +
     'argus-assess-readiness provides, or asks to "run a purple team" or "do a joint exercise".',
-  content: `# Argus · Run Purple Team
+  content: `# ARGUS · Run Purple Team
 
 ## When to use this skill
 
@@ -62,7 +62,7 @@ just a readiness snapshot. Typical prompts:
   continue to file gap intents — a broken backtest corpus invalidates the
   exercise.
 - Link every filed intent in the closing summary so the user can inspect them
-  from the Argus Playbooks tab.`,
+  from the ARGUS Playbooks tab.`,
   getRegistryTools: () => [
     ARGUS_SUMMARIZE_COVERAGE_TOOL_ID,
     ARGUS_RUN_BACKTEST_TOOL_ID,

@@ -1,3 +1,3 @@
-{"id":"argus-reasoning-trace-dv","type":"index-pattern","attributes":{"title":".soc-reasoning-trace","timeFieldName":"@timestamp","name":"Argus Reasoning Trace"},"references":[]}
-{"id":"argus-detection-eval-runs-dv","type":"index-pattern","attributes":{"title":".soc-detection-eval-runs","timeFieldName":"@timestamp","name":"Argus Detection-Eval Runs"},"references":[]}
-{"id":"argus-eval-corpus-dv","type":"index-pattern","attributes":{"title":".soc-eval-corpus-*","timeFieldName":"@timestamp","name":"Argus Eval Corpus"},"references":[]}
+{"id":"argus-reasoning-trace-dv","type":"index-pattern","attributes":{"title":".soc-reasoning-trace","timeFieldName":"@timestamp","name":"ARGUS Reasoning Trace"},"references":[]}
+{"id":"argus-detection-eval-runs-dv","type":"index-pattern","attributes":{"title":".soc-argus-eval-runs","timeFieldName":"@timestamp","name":"ARGUS Eval Runs"},"references":[]}
+{"id":"argus-eval-corpus-dv","type":"index-pattern","attributes":{"title":".soc-eval-corpus-*","timeFieldName":"@timestamp","name":"ARGUS Eval Corpus"},"references":[]}

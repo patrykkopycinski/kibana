@@ -129,10 +129,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Register workflow steps
     if (workflowsExtensions) {
+      const argusConsoleEnabled = this.experimentalFeatures.argusConsoleEnabled;
       import('./workflows/step_types')
         .then(async ({ registerWorkflowSteps }) => {
           const [coreStart] = await core.getStartServices();
-          return registerWorkflowSteps(workflowsExtensions, coreStart);
+          return registerWorkflowSteps(workflowsExtensions, coreStart, { argusConsoleEnabled });
         })
         .catch((error) => {
           this.logger.error(

@@ -43,8 +43,8 @@ export interface ArgusAutonomyDecision {
    * `argus.*` ids that were never applied as Kibana rules). The UI uses
    * this to deep-link into the rule details page.
    *
-   * Populated for both `artifact_type: "rule"` (Argus-authored custom rules)
-   * and `artifact_type: "prebuilt_rule"` (Elastic prebuilt rules Argus
+   * Populated for both `artifact_type: "rule"` (ARGUS-authored custom rules)
+   * and `artifact_type: "prebuilt_rule"` (Elastic prebuilt rules ARGUS
    * autonomously enabled). The deep-link behaviour is identical — prebuilt
    * rules are still Kibana detection rules, just `immutable: true`.
    */

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Idempotently create-or-enable the Argus Linux pipe-to-shell demo rule.
+# Idempotently create-or-enable the ARGUS Linux pipe-to-shell demo rule.
 #
-# Reads the canonical rule body from detection_rules/rules.ndjson (the line
+# Reads the canonical rule body from detection_rules/rules-e2e.ndjson (the line
 # whose rule_id is "argus-linux-pipe-to-shell") and POSTs it to the detection
 # engine API. If the rule already exists (409), it is left in place and bulk-
 # enabled to guarantee it runs.
 set -euo pipefail
 
-KIBANA_URL="${KIBANA_URL:-http://localhost:15601}"
+KIBANA_URL="${KIBANA_URL:-http://localhost:${KIBANA_PORT:-15601}}"
 KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASS="${KIBANA_PASS:-${ELASTIC_PASSWORD:-changeme}}"
 RULE_ID="${RULE_ID:-argus-linux-pipe-to-shell}"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RULES_NDJSON="${HERE}/detection_rules/rules.ndjson"
+RULES_NDJSON="${HERE}/detection_rules/rules-e2e.ndjson"
 
 log() { printf '[install_argus_linux_rule] %s\n' "$*"; }
 

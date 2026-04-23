@@ -38,8 +38,8 @@ export function argusApproveRejectMutationTool(
     id: ARGUS_APPROVE_REJECT_MUTATION_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Approve or reject a pending Argus mutation intent. Writes a verdict outcome and an audit ' +
-      `row — functionally equivalent to the Approve/Reject buttons in the Argus Console. Uses the ` +
+      'Approve or reject a pending ARGUS mutation intent. Writes a verdict outcome and an audit ' +
+      `row — functionally equivalent to the Approve/Reject buttons in the ARGUS Console. Uses the ` +
       `${MUTATION_VERDICT_ROUTE} shape so writes land in the same audit surface.`,
     schema: approveRejectSchema,
     tags: ['security', 'argus', 'argus:playbook', 'write'],

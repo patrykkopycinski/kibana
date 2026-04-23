@@ -21,7 +21,7 @@ export interface ArgusMutationDetailGate {
 }
 
 /**
- * The upstream signal that caused Argus to propose the mutation in the
+ * The upstream signal that caused ARGUS to propose the mutation in the
  * first place. `type` is open-ended so the UI renders whatever category
  * the agent emitted; the common ones are:
  *   - `drift_detected`            — rule-efficacy drift on production
@@ -84,7 +84,7 @@ export interface ArgusEventSample {
  * Preview of the backtest that was (or would have been) run against the
  * candidate. For blocked rows this is the cached backtest the synthesis
  * step produced; for applied/rolled_back rows it's the authoritative
- * backtest from `.soc-backtest-results`.
+ * backtest from `.soc-backtests`.
  *
  * `query` / `window_*` / `*_samples` are populated when the backtest
  * doc carries that evidence (Tier 2 backtest docs). For legacy docs
@@ -138,7 +138,7 @@ export interface ArgusMutationDetailAdvisory {
  * the rule.
  *
  * The backend joins by `kibana.alert.argus.mutation_intent_id` (for
- * Argus-authored rules) or by rule UUID when that tag is absent.
+ * ARGUS-authored rules) or by rule UUID when that tag is absent.
  * `alerts_deep_link_url` is a pre-rendered link to the Alerts page
  * filtered by the same criteria so reviewers can drill into the raw
  * data.

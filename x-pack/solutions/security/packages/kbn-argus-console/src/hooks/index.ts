@@ -59,4 +59,11 @@ export {
   type UseArtifactDetailsArgs,
   type UseMutationLineageNodeDetailsArgs,
 } from './use_artifact_details';
+export {
+  useArgusQuery,
+  mapArgusQueryToFetchState,
+  type ArgusQueryStatus,
+  type UseArgusQueryOptions,
+  type UseArgusQueryResult,
+} from './use_argus_query';
 export type { ArgusHttp, FetchState } from './types';

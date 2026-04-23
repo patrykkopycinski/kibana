@@ -1,0 +1,26 @@
+{
+  "index_patterns": [".soc-threat-profiles"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "profile_id": { "type": "keyword" },
+        "name": { "type": "keyword" },
+        "description": { "type": "text" },
+        "technique_ids": { "type": "keyword" },
+        "actor_ids": { "type": "keyword" },
+        "origin": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Named MITRE technique bundles (builtin or user) for coverage gap analysis vs .soc-detection-corpus.",
+    "owner": "argus-coverage",
+    "schema_version": 1
+  }
+}

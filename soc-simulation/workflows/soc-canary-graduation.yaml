@@ -1,8 +1,15 @@
 version: '1'
 name: SOC Canary Graduation Controller
 description: >
-  Monitors rules deployed by Argus in canary mode (applied in last 48h). Counts
+  Monitors rules deployed by ARGUS in canary mode (applied in last 48h). Counts
   recent alert volume and logs graduation or rollback decisions for each candidate.
+
+consts:
+  outcomes_index: ".soc-outcomes"
+  autonomy_decisions_index: ".soc-autonomy-decisions"
+  reasoning_trace_index: ".soc-reasoning-trace"
+  audit_index: ".soc-audit-trail"
+
 enabled: true
 
 triggers:
@@ -15,7 +22,7 @@ steps:
   - name: fetch_canary_candidates
     type: elasticsearch.search
     with:
-      index: ".soc-outcomes"
+      index: "{{ consts.outcomes_index }}"
       size: 20
       query:
         bool:
@@ -58,7 +65,7 @@ steps:
       - name: emit_decision
         type: elasticsearch.index
         with:
-          index: .soc-autonomy-decisions
+          index: "{{ consts.autonomy_decisions_index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             action: "canary_check"
@@ -69,7 +76,7 @@ steps:
       - name: emit_trace
         type: elasticsearch.index
         with:
-          index: .soc-reasoning-trace
+          index: "{{ consts.reasoning_trace_index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             run_id: "canary-grad-{{ foreach.item._id }}"
@@ -80,9 +87,10 @@ steps:
   - name: heartbeat
     type: elasticsearch.index
     with:
-      index: .soc-audit-trail
+      index: "{{ consts.audit_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_id: "soc-canary-graduation"
         event_type: canary_graduation_heartbeat
         source: "soc-canary-graduation"
         candidates: "{{ steps.fetch_canary_candidates.output.hits.hits | size | default: 0 }}"

@@ -163,7 +163,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
         field: 'artifact_id',
         name: 'Artifact',
         render: (_value, row: ArgusAutonomyDecision) => {
-          // `rule` and `detection_rule` are both Argus-authored custom
+          // `rule` and `detection_rule` are both ARGUS-authored custom
           // detection rules — the former comes from older/synthesis paths
           // and the latter from the live update-rule action path. Treating
           // only `rule` as rule-like used to strand the 327+ live
@@ -184,7 +184,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
           const showSecondaryId = Boolean(row.kibana_rule_name);
 
           // When we have a Kibana rule UUID we can deep-link to the rule
-          // details page directly. When we don't (Argus emitted a logical
+          // details page directly. When we don't (ARGUS emitted a logical
           // artifact id that was never materialised as a Kibana rule) the
           // wrapper still gets called so it can route to the rules list —
           // but we flag the row so operators know what they'll see.
@@ -219,7 +219,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content="Argus autonomously enabled this Elastic prebuilt detection rule instead of synthesizing a new custom rule — the community-vetted candidate beat Argus's synthesized Pareto frontier on PR@k / false-positive cost."
+                      content="ARGUS autonomously enabled this Elastic prebuilt detection rule instead of synthesizing a new custom rule — the community-vetted candidate beat ARGUS's synthesized Pareto frontier on PR@k / false-positive cost."
                     >
                       <EuiBadge color="primary">{'prebuilt'}</EuiBadge>
                     </EuiToolTip>
@@ -252,7 +252,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content="Argus recorded this decision but no Kibana detection rule with this rule_id exists in this space. The apply step may not have materialised, or the rule was deleted."
+                      content="ARGUS recorded this decision but no Kibana detection rule with this rule_id exists in this space. The apply step may not have materialised, or the rule was deleted."
                     >
                       <EuiBadge color="hollow">{'not in Kibana'}</EuiBadge>
                     </EuiToolTip>
@@ -396,7 +396,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
-                  content="Argus keeps decisions indefinitely — flip to Last 7d to see the longer trail."
+                  content="ARGUS keeps decisions indefinitely — flip to Last 7d to see the longer trail."
                 >
                   <EuiText size="xs" color="subdued">
                     {'last 24h only'}

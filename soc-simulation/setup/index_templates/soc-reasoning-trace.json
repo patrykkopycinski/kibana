@@ -126,7 +126,7 @@
     }
   },
   "_meta": {
-    "description": "Reasoning traces for all SOC agent decisions. Backward-compatible with the pre-Argus flat shape; Argus agents additionally populate argus.* per the ARGUS_TRACE_ATTR contract so the governance layer can correlate decisions to actor / trust tier / injection surface. Aligned with OpenTelemetry GenAI semantic conventions v1.x (gen_ai.*) for cross-vendor trace ingestion.",
+    "description": "Reasoning traces for all SOC agent decisions. Backward-compatible with the pre-ARGUS flat shape; ARGUS agents additionally populate argus.* per the ARGUS_TRACE_ATTR contract so the governance layer can correlate decisions to actor / trust tier / injection surface. Aligned with OpenTelemetry GenAI semantic conventions v1.x (gen_ai.*) for cross-vendor trace ingestion.",
     "owner": "argus-governance",
     "schema_version": 3,
     "argus_decision_kinds": ["triage_verdict","rule_create","rule_patch","rule_deprecate","exception_create","case_close","response_action","eval_gate","trust_gate","reasoning_watchdog"],

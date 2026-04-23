@@ -29,7 +29,7 @@ import { fetchPostApplyObservation } from '../fetch_post_apply_observation';
 
 /**
  * Allow-list of source indices the route is willing to read. We restrict to
- * the curated `.soc-*` indices the Argus console owns plus the standard
+ * the curated `.soc-*` indices the ARGUS console owns plus the standard
  * Security Solution alerts index (used by telemetry-layer activity events).
  *
  * The list uses index patterns — `.alerts-security.alerts-*` catches both
@@ -115,7 +115,7 @@ export const registerArtifactDetailsRoute = ({ router, logger }: ArgusRoutesDeps
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus artifact_details route failed: ${error.message}`);
+          logger.error(`ARGUS artifact_details route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -214,7 +214,7 @@ const fetchRelated = async (
       mutationIntentId = await fetchMutationIntentIdForRule(esClient, ruleId);
     } catch (err) {
       logger.warn(
-        `Argus artifact_details: rule_id → mutation_intent_id lookup failed: ${
+        `ARGUS artifact_details: rule_id → mutation_intent_id lookup failed: ${
           err instanceof Error ? err.message : String(err)
         }`
       );
@@ -432,7 +432,7 @@ const fetchActor = async (
 /**
  * Lineage and autonomy flyouts surface the authoritative backtest row for a
  * mutation intent — the raw intent/outcome doc doesn't carry sample events
- * or window-level counters, so we enrich from `.soc-backtest-results`.
+ * or window-level counters, so we enrich from `.soc-backtests`.
  */
 const fetchBacktestRelated = async (
   esClient: ElasticsearchClient,

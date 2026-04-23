@@ -11,7 +11,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { evaluateReasoning } from '../src/evaluate_reasoning';
 
 evaluate.describe(
-  'Argus Reasoning Eval Vertical',
+  'ARGUS Reasoning Eval Vertical',
   { tag: tags.serverless.security.complete },
   () => {
     evaluate(
@@ -23,7 +23,7 @@ evaluate.describe(
         );
 
         log.info(
-          `Argus reasoning eval persisted run=${result.run_id} gate=${result.gate_decision} spans=${result.spans_evaluated}`
+          `ARGUS reasoning eval persisted run=${result.run_id} gate=${result.gate_decision} spans=${result.spans_evaluated}`
         );
 
         if (!['pass', 'marginal', 'fail'].includes(result.gate_decision)) {

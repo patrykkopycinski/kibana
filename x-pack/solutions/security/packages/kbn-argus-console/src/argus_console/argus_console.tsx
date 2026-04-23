@@ -18,7 +18,6 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import type {
@@ -92,7 +91,7 @@ export interface ArgusConsoleProps {
   readonly http: ArgusHttp;
   /**
    * When the console is opened directly from an alert flyout's
-   * "Show Argus reasoning" action the subject is pre-selected.
+   * "Show ARGUS reasoning" action the subject is pre-selected.
    */
   readonly initialReasoningSubject?: ReasoningChainSubject;
   readonly initialLineageSubject?: MutationLineageSubject;
@@ -115,31 +114,28 @@ export interface ArgusConsoleProps {
    */
   readonly onTabChange?: (tabId: ArgusConsoleTabId) => void;
   /**
-   * Initial filter pill on the Mutations tab. Only used when `initialTab ===
-   * 'mutations'`.
+   * Initial filter pill on the Applied mutations sub-view (`detection_pipeline`
+   * tab, pipeline stage `mutations`).
    */
   readonly initialMutationsFilter?: ArgusMutationFilter;
   /**
-   * Initial time window on the Mutations tab. Only used when `initialTab ===
-   * 'mutations'`.
+   * Initial time window on the Applied mutations sub-view (`detection_pipeline`
+   * tab, pipeline stage `mutations`).
    */
   readonly initialMutationsWindow?: ArgusMutationWindow;
   /**
-   * Pre-selected CVE on the Exploit -> Detection tab. Only used when
-   * `initialTab === 'e2d'`. Comes from the `?cve=...` URL param.
+   * Pre-selected CVE on the E2D flow sub-view (`detection_pipeline` tab,
+   * pipeline stage `flow`). Comes from the `?cve=...` URL param.
    */
   readonly initialE2dCve?: string;
   /**
-   * Initial live-hits window on the Exploit -> Detection tab.
+   * Initial live-hits window on the E2D flow sub-view (`detection_pipeline`,
+   * pipeline stage `flow`).
    */
   readonly initialE2dWindow?: E2dFlowWindow;
   /**
-   * Pre-selected CVE on the Proposals tab. Only used when `initialTab ===
-   * 'proposals'`. Comes from the `?cve=...` URL param.
-   */
-  readonly initialProposalsCve?: string;
-  /**
-   * Initial time window on the Proposals tab.
+   * Initial time window on the Proposals sub-view (`detection_pipeline` tab,
+   * pipeline stage `proposals`).
    */
   readonly initialProposalsWindow?: ArgusSynthesisWindow;
   /**
@@ -186,8 +182,9 @@ export interface ArgusConsoleProps {
   }) => void;
   /**
    * Pre-seed the Decision Graph explorer root. Typically set from URL
-   * params (`?panel=decision_graph&root=advisory:CVE-2024-27198`) or when
-   * the reasoning-drilldown flyout asks to escalate to full-screen.
+   * params on the Governance tab (`?tab=governance&root=advisory:CVE-2024-27198`
+   * or split `root_kind` / `root_id`) or when the reasoning-drilldown flyout
+   * asks to escalate to full-screen.
    */
   readonly initialDecisionGraphRoot?: {
     readonly kind: DecisionGraphNodeKind;
@@ -289,7 +286,6 @@ export const ArgusConsole: React.FC<ArgusConsoleProps> = ({
   initialMutationsWindow,
   initialE2dCve,
   initialE2dWindow,
-  initialProposalsCve,
   initialProposalsWindow,
   canArgusWrite = false,
   onWriteError,
@@ -307,7 +303,7 @@ export const ArgusConsole: React.FC<ArgusConsoleProps> = ({
   );
   const [activeTab, setActiveTabRaw] = useState<ArgusConsoleTabId>(initialTab);
   const [e2dCve, setE2dCve] = useState<string | undefined>(initialE2dCve);
-  const [proposalsCve, setProposalsCve] = useState<string | undefined>(initialProposalsCve);
+  const [proposalsCve, setProposalsCve] = useState<string | undefined>(undefined);
   const [decisionGraphRoot, setDecisionGraphRoot] = useState<
     { kind: DecisionGraphNodeKind; id: string } | undefined
   >(initialDecisionGraphRoot);
@@ -423,8 +419,8 @@ export const ArgusConsole: React.FC<ArgusConsoleProps> = ({
     <EuiPage data-test-subj="argusConsolePage" paddingSize="l">
       <EuiPageBody>
         <EuiPageHeader
-          pageTitle="Argus console"
-          description="Autonomous SOC detection engineering — is Argus working, and why did it do what it did?"
+          pageTitle="ARGUS console"
+          description="Autonomous SOC detection engineering — is ARGUS working, and why did it do what it did?"
           rightSideItems={[...rightSideItems]}
         />
 
@@ -559,17 +555,7 @@ export const ArgusConsole: React.FC<ArgusConsoleProps> = ({
 
             <EuiSpacer size="m" />
 
-            {coverageSubView === 'heatmap' && (
-              <>
-                <CoveragePanel http={http} />
-                <EuiSpacer size="l" />
-                <EuiTitle size="xs">
-                  <h4>{'Coverage gaps'}</h4>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <CoverageGapsPanel http={http} />
-              </>
-            )}
+            {coverageSubView === 'heatmap' && <CoveragePanel http={http} />}
 
             {coverageSubView === 'gaps' && <CoverageGapsPanel http={http} />}
 

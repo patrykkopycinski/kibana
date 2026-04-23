@@ -1,7 +1,7 @@
 version: '1'
-name: Argus Intel Adapter — Generic (Phase 3)
+name: ARGUS Intel Adapter — Generic (Phase 3)
 description: >
-  Argus Phase 3 — generic intel-feed adapter.
+  ARGUS Phase 3 — generic intel-feed adapter.
 
   The M2.3 exploit-probability formula reserves a `mythos_signal`
   contributor (weight 0.05) that returns 0.0 when the alert's host has
@@ -21,7 +21,7 @@ description: >
        live feed. Seed rows are idempotent — their `intel_id` is the
        document id.
     2. Every 1h, emit a single "placeholder" row per active feed so
-       the intel-feed freshness panel on the Argus Console has a
+       the intel-feed freshness panel on the ARGUS Console has a
        heartbeat. Feeds that ship real content replace this row
        with substantive intel.
     3. Emit an audit-trail tick so the operator can confirm the
@@ -158,4 +158,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus generic intel adapter complete — feed={{ consts.feed_id }} adapter={{ consts.adapter }} rows_upserted=4"
+      message: "ARGUS generic intel adapter complete — feed={{ consts.feed_id }} adapter={{ consts.adapter }} rows_upserted=4"

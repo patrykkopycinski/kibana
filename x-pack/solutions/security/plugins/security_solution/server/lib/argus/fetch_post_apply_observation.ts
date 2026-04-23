@@ -193,7 +193,7 @@ export const fetchPostApplyObservation = async ({
     };
   } catch (err) {
     logger.debug(
-      `Argus post-apply observation failed for ${mutationIntentId}: ${
+      `ARGUS post-apply observation failed for ${mutationIntentId}: ${
         err instanceof Error ? err.message : String(err)
       }`
     );

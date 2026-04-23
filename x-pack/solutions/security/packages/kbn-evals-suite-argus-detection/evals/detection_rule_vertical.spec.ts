@@ -15,7 +15,7 @@ import { ATTACK_ER7_CORPUS } from '../datasets/attack_er7_corpus';
 const CORPORA = [MYTHOS_CORPUS_2026_04, ATTACK_ER7_CORPUS] as const;
 
 evaluate.describe(
-  'Argus Detection Eval Vertical',
+  'ARGUS Detection Eval Vertical',
   { tag: tags.serverless.security.complete },
   () => {
     for (const corpus of CORPORA) {
@@ -34,12 +34,12 @@ evaluate.describe(
           });
 
           log.info(
-            `Argus detection eval [${corpus.id}] persisted run_id=${result.run_id} with ${result.rows.length} rule row(s)`
+            `ARGUS detection eval [${corpus.id}] persisted run_id=${result.run_id} with ${result.rows.length} rule row(s)`
           );
 
           if (result.rows.length === 0) {
             throw new Error(
-              `Argus detection eval vertical [${corpus.id}]: expected at least one rule evaluation row, got 0. ` +
+              `ARGUS detection eval vertical [${corpus.id}]: expected at least one rule evaluation row, got 0. ` +
                 'Did setup.sh seed the variant bank into .soc-eval-corpus-*?'
             );
           }

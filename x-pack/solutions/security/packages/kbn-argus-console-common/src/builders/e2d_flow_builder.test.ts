@@ -72,9 +72,10 @@ const MUTATION_INTENT: E2dRawMutationIntentDoc = {
 
 const EVAL_RUN: E2dRawEvalRunDoc = {
   _id: 'eval-1',
-  _index: '.soc-detection-eval-runs',
+  _index: '.soc-argus-eval-runs',
   _source: {
     '@timestamp': '2026-04-17T10:08:00.000Z',
+    run_kind: 'detection',
     rule_id: 'rule-acme',
     scores: {
       precision: 0.95,
@@ -89,7 +90,7 @@ const EVAL_RUN: E2dRawEvalRunDoc = {
 
 const BACKTEST: E2dRawBacktestDoc = {
   _id: 'bt-1',
-  _index: '.soc-backtest-results',
+  _index: '.soc-backtests',
   _source: {
     '@timestamp': '2026-04-17T10:09:00.000Z',
     windows_tested: 7,

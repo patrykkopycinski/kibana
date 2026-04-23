@@ -251,7 +251,7 @@ describe('createEvaluateDetectionRules', () => {
     expect(bulkArgs.operations).toHaveLength(2);
     expect(bulkArgs.operations[0]).toEqual({
       create: {
-        _index: '.soc-detection-eval-runs',
+        _index: '.soc-argus-eval-runs',
         _id: `run-test-${MYTHOS_DETECTION_RULES[0].rule_id}`,
       },
     });

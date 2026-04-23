@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 
 import {
   RECENT_PROPOSALS_ROUTE,
@@ -13,6 +13,7 @@ import {
   type ArgusSynthesisWindow,
 } from '@kbn/argus-console-common';
 
+import { mapArgusQueryToFetchState, useArgusQuery } from './use_argus_query';
 import type { ArgusHttp, FetchState } from './types';
 
 export interface UseRecentProposalsArgs {
@@ -34,62 +35,26 @@ export const useRecentProposals = ({
   enabled = true,
   refreshIntervalMs,
 }: UseRecentProposalsArgs): FetchState<ArgusSynthesisRecentResponse> => {
-  const [state, setState] = useState<FetchState<ArgusSynthesisRecentResponse>>({
-    status: enabled ? 'loading' : 'idle',
+  const params = useMemo(() => {
+    return {
+      window,
+      ...(typeof limit === 'number' ? { limit } : {}),
+    };
+  }, [window, limit]);
+
+  const query = useArgusQuery<
+    { window: ArgusSynthesisWindow; limit?: number },
+    ArgusSynthesisRecentResponse
+  >({
+    http,
+    enabled,
+    route: RECENT_PROPOSALS_ROUTE,
+    method: 'GET',
+    params,
+    pollIntervalMs: refreshIntervalMs,
+    silentPolling: Boolean(refreshIntervalMs && refreshIntervalMs > 0),
+    transform: (raw) => raw as ArgusSynthesisRecentResponse,
   });
-  const aborted = useRef(false);
 
-  useEffect(() => {
-    aborted.current = false;
-
-    if (!enabled) {
-      setState({ status: 'idle' });
-      return () => {
-        aborted.current = true;
-      };
-    }
-
-    let hasFirstResult = false;
-    setState({ status: 'loading' });
-
-    const runFetch = () => {
-      http
-        .fetch<ArgusSynthesisRecentResponse>(RECENT_PROPOSALS_ROUTE, {
-          method: 'GET',
-          version: '1',
-          query: {
-            window,
-            ...(typeof limit === 'number' ? { limit } : {}),
-          },
-        })
-        .then((data) => {
-          if (aborted.current) return;
-          hasFirstResult = true;
-          setState({ status: 'success', data });
-        })
-        .catch((err: unknown) => {
-          if (aborted.current) return;
-          const error = err instanceof Error ? err : new Error(String(err));
-          if (!hasFirstResult) {
-            setState({ status: 'error', error });
-          }
-        });
-    };
-
-    runFetch();
-
-    if (!refreshIntervalMs || refreshIntervalMs <= 0) {
-      return () => {
-        aborted.current = true;
-      };
-    }
-
-    const handle = setInterval(runFetch, refreshIntervalMs);
-    return () => {
-      aborted.current = true;
-      clearInterval(handle);
-    };
-  }, [http, window, limit, enabled, refreshIntervalMs]);
-
-  return state;
+  return mapArgusQueryToFetchState(query);
 };

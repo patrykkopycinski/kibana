@@ -218,7 +218,7 @@ export const CoverageGapsPanel: React.FC<CoverageGapsPanelProps> = ({
               <code>{'.soc-coverage-gaps'}</code>
               {' for the '}
               <strong>{window === '24h' ? 'last 24 hours' : 'last 7 days'}</strong>
-              {'. Either the gap-analyzer has not run yet, or Argus is hitting every technique.'}
+              {'. Either the gap-analyzer has not run yet, or ARGUS is hitting every technique.'}
             </EuiText>
           }
           data-test-subj="argusCoverageEmpty"

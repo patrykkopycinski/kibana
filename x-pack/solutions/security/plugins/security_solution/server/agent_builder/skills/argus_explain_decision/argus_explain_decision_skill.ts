@@ -17,9 +17,9 @@ import { buildDecisionGraph } from '../../../lib/argus/routes/decision_graph';
 const TOOL_ID = 'security.argus.explain_decision' as const;
 
 /**
- * Agent Builder skill that mirrors the Argus Console `ReasoningDrilldownPanel`.
+ * Agent Builder skill that mirrors the ARGUS Console `ReasoningDrilldownPanel`.
  * Any reasoning chain a human can inspect in the UI is also addressable by an
- * agent — this is the agent-native parity guarantee described in the Argus
+ * agent — this is the agent-native parity guarantee described in the ARGUS
  * design notes. The skill delegates to `fetchReasoningChain`, the same helper
  * the internal HTTP route calls, so UI and agent payloads never diverge.
  */
@@ -28,22 +28,22 @@ export const argusExplainDecisionSkill = defineSkillType({
   name: 'argus-explain-decision',
   basePath: 'skills/security/argus',
   description:
-    'Explain an Argus (Mythos-Resilient Defender) decision by returning the full reasoning chain ' +
+    'Explain an ARGUS (Mythos-Resilient Defender) decision by returning the full reasoning chain ' +
     'for an alert or reasoning run. Returns the ordered reasoning steps, the escalation verdict, ' +
     'trust tier, and any injection-surface flags the defender raised. Use when the user asks why ' +
-    'Argus escalated or suppressed an alert, or wants to inspect the thought process behind an ' +
+    'ARGUS escalated or suppressed an alert, or wants to inspect the thought process behind an ' +
     'autonomous SOC decision.',
-  content: `# Argus Explain Decision
+  content: `# ARGUS Explain Decision
 
 ## When to use this skill
 
-Use this skill whenever a user wants to understand **why** Argus reached a particular
+Use this skill whenever a user wants to understand **why** ARGUS reached a particular
 verdict on an alert or reasoning run. Typical prompts:
 
-- "Why did Argus escalate alert X?"
+- "Why did ARGUS escalate alert X?"
 - "Show me the reasoning chain for run Y."
-- "What injection surfaces did Argus flag on this alert?"
-- "What was Argus's trust tier for this decision?"
+- "What injection surfaces did ARGUS flag on this alert?"
+- "What was ARGUS's trust tier for this decision?"
 
 ## How to invoke
 
@@ -55,30 +55,30 @@ Call \`${TOOL_ID}\` with:
 
 ## What you get back
 
-A \`ReasoningChainBuildResult\` payload — the same shape the Argus Console renders:
+A \`ReasoningChainBuildResult\` payload — the same shape the ARGUS Console renders:
 
 - \`subject\` — echo of the input, so the caller can correlate.
 - When a trace is found:
   - \`run_id\`, \`verdict\` (\`escalate\` | \`suppress\` | \`inconclusive\`)
   - \`trust_tier\` (\`high\` | \`medium\` | \`low\`)
   - \`steps\` — ordered reasoning steps with prompts, tool calls, and rationales
-  - \`injection_surface_flags\` — any input channels Argus considered untrusted
+  - \`injection_surface_flags\` — any input channels ARGUS considered untrusted
 - When no trace is available: \`reason_code: 'no_trace'\` — explain to the user that
-  the alert was not produced by an Argus run, and suggest checking the rule that
+  the alert was not produced by an ARGUS run, and suggest checking the rule that
   generated it instead.
 
 ## Optional: decision-graph neighborhood
 
 Pass \`include_decision_graph: true\` (and optionally \`decision_graph_depth\`, default
 2, max 3) to also receive the typed-edge neighborhood rooted at the reasoning run —
-the same payload the Argus Console \"Decision graph\" flyout renders. This lets you
+the same payload the ARGUS Console \"Decision graph\" flyout renders. This lets you
 answer follow-up questions like \"what advisories, rules, and intents fed into this
 decision?\" in a single skill call, matching the agent-native parity guarantee.
 
 ## Best practices
 
 - Always pass the reasoning chain back to the user verbatim when they ask "why" —
-  Argus decisions must be auditable. Summaries are fine for long chains, but keep
+  ARGUS decisions must be auditable. Summaries are fine for long chains, but keep
   the verdict and trust tier exact.
 - When the chain is \`inconclusive\` or trust tier is \`low\`, highlight the specific
   steps that introduced doubt rather than restating the verdict.
@@ -92,15 +92,15 @@ decision?\" in a single skill call, matching the agent-native parity guarantee.
       id: TOOL_ID,
       type: ToolType.builtin,
       description:
-        'Fetch the Argus reasoning chain for an alert or reasoning run. Returns the ordered ' +
+        'Fetch the ARGUS reasoning chain for an alert or reasoning run. Returns the ordered ' +
         'steps, verdict, trust tier, and injection-surface flags the defender recorded. Use when ' +
-        'the user asks why Argus reached a decision.',
+        'the user asks why ARGUS reached a decision.',
       schema: z.object({
         subject_kind: z
           .enum(['alert', 'run'])
           .describe(
             'What `subject_id` refers to. Use `alert` when you have an alert `_id`, or `run` ' +
-              'when you already have an Argus reasoning `run_id`.'
+              'when you already have an ARGUS reasoning `run_id`.'
           ),
         subject_id: z
           .string()
@@ -112,7 +112,7 @@ decision?\" in a single skill call, matching the agent-native parity guarantee.
           .default(false)
           .describe(
             'When true, also fetch the decision-graph neighborhood rooted at the reasoning ' +
-              'run — the same payload the Argus Console flyout renders. Adds `decisionGraph` to ' +
+              'run — the same payload the ARGUS Console flyout renders. Adds `decisionGraph` to ' +
               'the response data.'
           ),
         decision_graph_depth: z
@@ -151,8 +151,8 @@ decision?\" in a single skill call, matching the agent-native parity guarantee.
                   type: ToolResultType.other,
                   data: {
                     message:
-                      'No Argus reasoning trace found for the requested subject. The alert may ' +
-                      'not have been produced by an Argus run.',
+                      'No ARGUS reasoning trace found for the requested subject. The alert may ' +
+                      'not have been produced by an ARGUS run.',
                     subject,
                   },
                 },
@@ -183,7 +183,7 @@ decision?\" in a single skill call, matching the agent-native parity guarantee.
               {
                 type: ToolResultType.other,
                 data: {
-                  message: `Argus reasoning chain for ${subject.kind}:${subject.id}${
+                  message: `ARGUS reasoning chain for ${subject.kind}:${subject.id}${
                     decisionGraph
                       ? ` (with decision graph, ${decisionGraph.nodes.length} nodes, ${decisionGraph.edges.length} edges)`
                       : ''
@@ -200,7 +200,7 @@ decision?\" in a single skill call, matching the agent-native parity guarantee.
               {
                 type: ToolResultType.error,
                 data: {
-                  message: `Failed to fetch Argus reasoning chain: ${
+                  message: `Failed to fetch ARGUS reasoning chain: ${
                     error instanceof Error ? error.message : String(error)
                   }`,
                 },

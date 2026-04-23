@@ -8,7 +8,7 @@
 import type { ArgusSkillDescriptor, GovernanceSnapshot, Principal } from '@kbn/argus-tool-manifest';
 
 /**
- * Single call to an Argus skill, normalized from an MCP tools/call payload
+ * Single call to an ARGUS skill, normalized from an MCP tools/call payload
  * (or an A2A tasks/send payload). The MCP server layer does the
  * namespace-stripping (argus.skill.<id> → <id>) before passing to the
  * dispatcher so the dispatcher itself is protocol-agnostic.

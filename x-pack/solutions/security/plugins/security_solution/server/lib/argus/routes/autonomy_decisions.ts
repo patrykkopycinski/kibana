@@ -105,7 +105,7 @@ export const registerAutonomyDecisionsRoute = ({ router, logger }: ArgusRoutesDe
           return response.ok({ body: enriched });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus autonomy_decisions route failed: ${error.message}`);
+          logger.error(`ARGUS autonomy_decisions route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -187,7 +187,7 @@ const enrichWithKibanaRuleIds = async ({
     resolution = await resolveRuleArtifactIds({ ruleArtifactIds, rulesClient, logger });
   } catch (err) {
     logger.warn(
-      `Argus autonomy_decisions: rule-id resolution failed, returning decisions without kibana_rule_id: ${
+      `ARGUS autonomy_decisions: rule-id resolution failed, returning decisions without kibana_rule_id: ${
         err instanceof Error ? err.message : String(err)
       }`
     );
@@ -213,7 +213,7 @@ const enrichWithKibanaRuleIds = async ({
  * Artifact types whose `artifact_id` identifies a Kibana detection rule and
  * should therefore resolve to a deep-link on the Autonomy panel:
  *
- * - `rule`           — Argus-authored custom rules. Live SOC workflows
+ * - `rule`           — ARGUS-authored custom rules. Live SOC workflows
  *                      (soc-post-apply-observer, soc-signal-quality-agent,
  *                      soc-deteng-agent, …) populate `artifact_id` with the
  *                      *Kibana saved-object UUID* when they update an
@@ -222,7 +222,7 @@ const enrichWithKibanaRuleIds = async ({
  *                      action path. Historically excluded from the rule-like
  *                      set which made 327+ live decisions render as plain
  *                      text with no link.
- * - `prebuilt_rule`  — Elastic prebuilt rules Argus autonomously enabled.
+ * - `prebuilt_rule`  — Elastic prebuilt rules ARGUS autonomously enabled.
  *                      `artifact_id` is the prebuilt package's logical
  *                      `rule_id` (a UUID assigned by the Elastic prebuilt
  *                      rules catalogue, not a saved-object id).
@@ -268,7 +268,7 @@ const resolveRuleArtifactIds = async ({
   //
   //   1. The detection rule's logical `rule_id` — prebuilt rules use this
   //      (the UUID assigned by the Elastic prebuilt rules catalogue), and
-  //      some Argus-authored custom rules also emit the logical id.
+  //      some ARGUS-authored custom rules also emit the logical id.
   //   2. The Kibana saved-object UUID (`alert.id`) — the live SOC update
   //      workflows (soc-post-apply-observer, soc-signal-quality-agent,
   //      soc-deteng-agent) write the SO UUID because they look the rule up
@@ -325,7 +325,7 @@ const resolveRuleArtifactIds = async ({
     for (const rule of soResult.data ?? []) indexRule(rule);
   } catch (err) {
     logger.warn(
-      `Argus autonomy_decisions: saved-object rule-id lookup failed: ${
+      `ARGUS autonomy_decisions: saved-object rule-id lookup failed: ${
         err instanceof Error ? err.message : String(err)
       }`
     );
@@ -350,7 +350,7 @@ const resolveRuleArtifactIds = async ({
     for (const rule of logicalResult.data ?? []) indexRule(rule);
   } catch (err) {
     logger.warn(
-      `Argus autonomy_decisions: logical rule-id lookup failed: ${
+      `ARGUS autonomy_decisions: logical rule-id lookup failed: ${
         err instanceof Error ? err.message : String(err)
       }`
     );

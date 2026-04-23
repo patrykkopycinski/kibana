@@ -1,11 +1,11 @@
-# Argus demo datasets
+# ARGUS demo datasets
 
 Single source of truth for the three demo scenarios described in
 `soc-simulation/docs/argus/demo-storyboard.md`.
 
 Each subdirectory holds the **minimum set of fixtures** needed to drive the
 scenario end-to-end against a live cluster. Wherever possible we reference the
-canonical data already baked into the Argus packages / variant bank rather
+canonical data already baked into the ARGUS packages / variant bank rather
 than duplicating it — duplication drifts.
 
 | Scenario | Pressure | Milestone(s) | Driver |

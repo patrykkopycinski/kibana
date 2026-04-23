@@ -1,26 +1,26 @@
 version: '1'
-name: SOC Detection Eval (Argus M2.1)
+name: SOC Detection Eval (ARGUS M2.1)
 description: >
-  Argus Detection Eval Vertical — POLLER for @kbn/evals results.
+  ARGUS Detection Eval Vertical — POLLER for @kbn/evals results.
 
   The actual evaluation (precision / recall / fp_rate / variant_coverage)
   runs inside the Playwright-driven `kbn-evals-suite-argus-detection`
   package. That suite writes one row per rule per run into
-  `.soc-detection-eval-runs` via the Elasticsearch bulk API. This workflow
+  `.soc-argus-eval-runs` (run_kind=detection) via the Elasticsearch bulk API. This workflow
   does NOT call a Kibana HTTP endpoint, and it does NOT score anything
   itself — that belongs in the suite, where the rule replay is
   deterministic, source-controlled, and test-covered.
 
   Responsibilities owned here:
 
-    * Poll `.soc-detection-eval-runs` for NEW results since the last tick.
+    * Poll `.soc-argus-eval-runs` for NEW detection-eval results since the last tick.
     * For each new row, reconcile the matching `.soc-recommendations`
       entry (if one exists) by updating `status` and `eval_gate_decision`
       based on the row's `gate_decision`. This closes the loop with the
       `soc-autonomous-applier` that reads `auto_apply_ready`.
     * Emit a heartbeat for the activity feed so demo operators can watch
       the eval cadence.
-    * Emit an Argus governance trace (argus.decision.kind=rule_eval) per
+    * Emit an ARGUS governance trace (argus.decision.kind=rule_eval) per
       tick so `.soc-reasoning-trace` contains the eval verdicts alongside
       the triage and deteng decisions.
 
@@ -42,7 +42,7 @@ triggers:
   - type: manual
 
 consts:
-  runs_index: ".soc-detection-eval-runs"
+  runs_index: ".soc-argus-eval-runs"
   recs_index: ".soc-recommendations"
   # 15m lookback — long enough to survive a missed tick, short enough to
   # stay bounded. Rows already reconciled are filtered out by the
@@ -66,6 +66,8 @@ steps:
         query:
           bool:
             filter:
+              - term:
+                  run_kind: "detection"
               - range:
                   "@timestamp":
                     gte: "{{ consts.poll_window }}"
@@ -86,7 +88,7 @@ steps:
       # Three lookup strategies are supported so this poller reconciles
       # every emission shape the demo can produce:
       #   * `source_recommendation_id` — emitted by the inline reconciler
-      #     in soc-argus-exploit-to-detection (Argus G1 closed loop).
+      #     in soc-argus-exploit-to-detection (ARGUS G1 closed loop).
       #   * `details.new_definition.rule_id` — rule_create recommendations
       #     from @kbn/argus-exploit-to-detection.
       #   * `details.patch.rule_id` — rule_patch recommendations from the
@@ -137,7 +139,7 @@ steps:
             reconciled_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             reconciled_tick: "deteval-tick-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
 
-      # Argus M2.5 — emit a governance span per reconciled eval run. The
+      # ARGUS M2.5 — emit a governance span per reconciled eval run. The
       # decision_kind="rule_eval" is the distinguishing signal that lets
       # the governance dashboard separate eval verdicts from triage and
       # deteng decisions when slicing by agent+decision_kind.
@@ -173,7 +175,7 @@ steps:
             # collector / Phoenix viewer can filter eval verdicts out from
             # raw LLM calls. The scoring itself is deterministic Playwright
             # replay (not an LLM call), so gen_ai.usage is intentionally
-            # omitted. gen_ai.operation.name carries the Argus-specific
+            # omitted. gen_ai.operation.name carries the ARGUS-specific
             # operation for downstream semantic grouping.
             gen_ai:
               system: "argus"
@@ -181,8 +183,8 @@ steps:
                 name: "argus.detection_eval.reconcile"
               agent:
                 id: "soc-detection-eval"
-                name: "Argus Detection Eval Reconciler"
-                description: "Polls .soc-detection-eval-runs and reconciles eval verdicts against .soc-recommendations"
+                name: "ARGUS Detection Eval Reconciler"
+                description: "Polls .soc-argus-eval-runs (detection) and reconciles eval verdicts against .soc-recommendations"
 
   # ── Heartbeat + tick summary ────────────────────────────────────────
   - name: heartbeat
@@ -199,4 +201,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus detection-eval poll complete — reconciled {{ steps.fetch_new_eval_runs.output.hits.hits | size | default: 0 }} new eval-run row(s) (tick deteval-tick-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }})"
+      message: "ARGUS detection-eval poll complete — reconciled {{ steps.fetch_new_eval_runs.output.hits.hits | size | default: 0 }} new eval-run row(s) (tick deteval-tick-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }})"

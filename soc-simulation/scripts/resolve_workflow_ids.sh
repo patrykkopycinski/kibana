@@ -22,7 +22,7 @@
 #   4. Upsert the matching id into the corresponding `.soc-workflow-registry`
 #      doc under `kibana_workflow_id`.
 #
-# The Argus Playbooks tab server route surfaces `kibana_workflow_id` on
+# The ARGUS Playbooks tab server route surfaces `kibana_workflow_id` on
 # every playbook entry; the page wrapper uses it to deep-link to
 # `/app/workflows/<kibana_workflow_id>` instead of the slug.
 #

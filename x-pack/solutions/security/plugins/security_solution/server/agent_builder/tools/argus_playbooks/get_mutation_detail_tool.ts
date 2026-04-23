@@ -45,7 +45,7 @@ export function argusGetMutationDetailTool(
     id: ARGUS_GET_MUTATION_DETAIL_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Fetch the full Argus mutation detail payload (intent + outcome + advisory + backtest + ' +
+      'Fetch the full ARGUS mutation detail payload (intent + outcome + advisory + backtest + ' +
       'synthesis summary) for a given mutation_intent_id. Read-only. Returns `reason_code: ' +
       '"not_found"` if neither an intent nor an outcome exists for the id.',
     schema: getMutationDetailSchema,

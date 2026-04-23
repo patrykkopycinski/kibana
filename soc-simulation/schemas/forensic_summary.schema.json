@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://argus.local/schemas/forensic_summary.schema.json",
-  "title": "Argus Case Forensic Summary",
+  "title": "ARGUS Case Forensic Summary",
   "description": "Durable snapshot of forensic artifacts captured at case close. One doc per case_id, created via op_type=create.",
   "type": "object",
   "additionalProperties": false,

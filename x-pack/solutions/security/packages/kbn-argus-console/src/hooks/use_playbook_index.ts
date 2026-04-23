@@ -22,7 +22,7 @@ export interface UsePlaybookIndexArgs {
 
 /**
  * Live Playbooks index. Reads the `.soc-workflow-registry` by tag on the
- * server and merges the hardcoded Argus skill list. Consumers should treat
+ * server and merges the hardcoded ARGUS skill list. Consumers should treat
  * an `error` state as "fall back to the static demo list" so a cold-start
  * cluster (no registry index yet) still renders the Playbooks tab.
  */

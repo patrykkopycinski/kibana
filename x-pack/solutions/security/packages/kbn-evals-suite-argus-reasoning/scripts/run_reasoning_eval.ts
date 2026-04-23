@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { evaluateReasoning } from '../src/evaluate_reasoning';
 
 /**
- * Standalone CLI for the Argus Reasoning Eval Vertical (R11).
+ * Standalone CLI for the ARGUS Reasoning Eval Vertical (R11).
  *
  * Mirrors `run_detection_eval.ts` — the Playwright suite runs this same
  * code path through the `@kbn/evals` fixture; this CLI exists so a demo or
@@ -44,7 +44,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
     esPass: process.env.ES_PASS ?? 'changeme',
     since: 'now-24h',
     traceIndex: '.soc-reasoning-trace',
-    runsIndex: '.soc-reasoning-eval-runs',
+    runsIndex: '.soc-argus-eval-runs',
     suiteId: 'argus-reasoning-vertical',
   };
 
@@ -98,7 +98,7 @@ const parseArgs = (argv: readonly string[]): CliOptions => {
             '  --since <time>           Relative time floor (default now-24h)',
             '  --run-id <id>            Filter to a single trace run_id',
             '  --trace-index <index>    Source trace index (default .soc-reasoning-trace)',
-            '  --runs-index <index>     Destination runs index (default .soc-reasoning-eval-runs)',
+            '  --runs-index <index>     Destination runs index (default .soc-argus-eval-runs)',
             '  --suite-id <id>          Suite identifier (default argus-reasoning-vertical)',
           ].join('\n')
         );

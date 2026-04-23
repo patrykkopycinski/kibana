@@ -6,11 +6,11 @@
  */
 
 /**
- * Canonical shape of the Argus governance-pulse payload surfaced in the
- * "Argus pulse" panel.
+ * Canonical shape of the ARGUS governance-pulse payload surfaced in the
+ * "ARGUS pulse" panel.
  *
- * The Pulse panel is the top-of-page "is Argus working right now?" strip from
- * the Argus Console design doc (soc-simulation/docs/argus/phase-3/argus-console.md).
+ * The Pulse panel is the top-of-page "is ARGUS working right now?" strip from
+ * the ARGUS Console design doc (soc-simulation/docs/argus/phase-3/argus-console.md).
  * It carries four widget groups:
  *
  *   1. `rollback_mttr` — governance recovery latency (pre-existing R6 signal)

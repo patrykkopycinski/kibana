@@ -1,0 +1,38 @@
+{
+  "index_patterns": [".soc-detection-patterns"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "pattern_id": { "type": "keyword" },
+        "technique_id": { "type": "keyword" },
+        "canonical_shape": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 2048 } } },
+        "source_counts": {
+          "properties": {
+            "sigma": { "type": "long" },
+            "splunk_escu": { "type": "long" },
+            "elastic": { "type": "long" },
+            "sublime": { "type": "long" },
+            "red_canary": { "type": "long" },
+            "kql_md": { "type": "long" },
+            "crowdstrike_cql": { "type": "long" }
+          }
+        },
+        "precision_hint": { "type": "double" },
+        "redundancy_groups": { "type": "object", "enabled": false },
+        "exemplars": { "type": "keyword" },
+        "computed_at": { "type": "date" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Canonical detection shapes per MITRE technique, mined from .soc-detection-corpus; seeds Pareto synthesis and redundancy grouping metadata.",
+    "owner": "argus-coverage",
+    "schema_version": 1
+  }
+}

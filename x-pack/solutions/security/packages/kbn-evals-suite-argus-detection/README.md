@@ -1,10 +1,10 @@
 # @kbn/evals-suite-argus-detection
 
-Argus Detection Eval Vertical — evaluation suite for Security Solution detection
+ARGUS Detection Eval Vertical — evaluation suite for Security Solution detection
 rules under the Mythos-era threat model.
 
 **Owner:** `@elastic/security-detection-engine`  
-**Milestone:** [security-team#16904 — Argus M2.1 Detection Eval Vertical][issue]  
+**Milestone:** [security-team#16904 — ARGUS M2.1 Detection Eval Vertical][issue]  
 **Spec:** `soc-simulation/docs/argus/issues/m2-1-detection-eval-vertical.md`  
 **Scaffold:** `soc-simulation/docs/argus/scaffolds/m2-1-detection-rule-evaluator.md`
 
@@ -24,8 +24,8 @@ events across four dimensions:
 
 The four evaluators feed into a gate decision (`pass` / `fail` / `marginal`)
 computed by the suite's `onEvaluationComplete` hook and persisted to
-`.soc-detection-eval-runs`. The `soc-detection-eval.yaml` workflow polls that
-index and propagates pass/fail signals to the Argus regression gate.
+`.soc-argus-eval-runs` with `run_kind=detection`. The `soc-detection-eval.yaml` workflow polls that
+index and propagates pass/fail signals to the ARGUS regression gate.
 
 ## Structure
 

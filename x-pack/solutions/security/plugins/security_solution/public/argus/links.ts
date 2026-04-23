@@ -13,7 +13,7 @@ import { ARGUS_PATH, SecurityPageName } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
 export const ARGUS = i18n.translate('xpack.securitySolution.argus.title', {
-  defaultMessage: 'Argus',
+  defaultMessage: 'ARGUS',
 });
 
 export const argusLinks: LinkItem = {
@@ -24,13 +24,13 @@ export const argusLinks: LinkItem = {
   capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.argus', {
-      defaultMessage: 'Argus console',
+      defaultMessage: 'ARGUS console',
     }),
     i18n.translate('xpack.securitySolution.appLinks.argusReasoning', {
-      defaultMessage: 'Argus reasoning drill-down',
+      defaultMessage: 'ARGUS reasoning drill-down',
     }),
     i18n.translate('xpack.securitySolution.appLinks.argusMutationLineage', {
-      defaultMessage: 'Argus mutation lineage',
+      defaultMessage: 'ARGUS mutation lineage',
     }),
   ],
 };

@@ -1,0 +1,36 @@
+{
+  "index_patterns": [".soc-argus-eval-runs"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "soc-audit-permanent",
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "run_kind": { "type": "keyword" },
+        "run_id": { "type": "keyword" },
+        "status": { "type": "keyword" },
+        "rule_id": { "type": "keyword" },
+        "rule_name": { "type": "keyword" },
+        "suite_id": { "type": "keyword" },
+        "suite_name": { "type": "keyword" },
+        "total_hits": { "type": "long" },
+        "hits_per_hour": { "type": "float" },
+        "verdict": { "type": "keyword" },
+        "fp_rate": { "type": "float" },
+        "duration_ms": { "type": "long" },
+        "error": { "type": "text" },
+        "query": { "type": "text" },
+        "query_type": { "type": "keyword" },
+        "index_patterns": { "type": "keyword" },
+        "time_window": { "type": "keyword" },
+        "source": { "type": "keyword" },
+        "details": { "type": "object", "enabled": false }
+      }
+    }
+  }
+}

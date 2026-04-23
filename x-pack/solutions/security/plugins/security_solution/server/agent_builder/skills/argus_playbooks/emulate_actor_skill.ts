@@ -25,11 +25,11 @@ export const argusEmulateActorSkill = defineSkillType({
     'recent telemetry, summarises which techniques would likely escape detection today, and ' +
     'optionally opens a case so an analyst can track the follow-up. Use when the user asks ' +
     '"how would we fare against actor X?" or "emulate this adversary".',
-  content: `# Argus · Emulate Actor
+  content: `# ARGUS · Emulate Actor
 
 ## When to use this skill
 
-Use this skill when a user names a threat actor and wants to know how Argus would
+Use this skill when a user names a threat actor and wants to know how ARGUS would
 respond if the actor were active today. Typical prompts:
 
 - "How would we fare against APT29?"
@@ -40,7 +40,7 @@ respond if the actor were active today. Typical prompts:
 
 1. **Fetch actor coverage.** Call \`security.argus.summarize_coverage\` with the
    actor's \`threat_profile_id\` (one profile per actor in the demo). This
-   returns the techniques the actor favours together with Argus's confidence
+   returns the techniques the actor favours together with ARGUS's confidence
    per technique.
 2. **Identify the highest-risk techniques.** Surface those with confidence
    below 0.5 first; these are the techniques most likely to escape detection.

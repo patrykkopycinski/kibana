@@ -15,10 +15,10 @@ description: >
     performance is *overwhelming* (det>=90% AND fp<=10%) -- at that point the
     system is clearly ready for harder adversaries regardless of whether
     trust telemetry is flowing. Every decision also emits a structured
-    `decision_reason` enum so Argus can surface *why* the controller chose
+    `decision_reason` enum so ARGUS can surface *why* the controller chose
     the level it did without parsing free-form `reasoning` text.
 
-    As of 2026-04: `soc-trust-scorer` is disabled in favour of the Argus
+    As of 2026-04: `soc-trust-scorer` is disabled in favour of the ARGUS
     Phase 3 trust trio (tier-assessor, reasoning-watchdog, trust-gate).
     The strong-signal bypass means this controller continues to work even
     with no `.soc-trust-scores` docs present.

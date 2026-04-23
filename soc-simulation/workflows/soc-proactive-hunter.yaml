@@ -6,6 +6,12 @@ description: >
   2. Run hypothesis-driven hunts for expected next-stage techniques
   3. Run anomaly detection queries for behavioral deviations
   4. Write findings to .soc-hunt-findings for dashboard and case creation
+
+consts:
+  triage_results_index: ".soc-triage-results"
+  hunt_findings_index: ".soc-hunt-findings"
+  audit_index: ".soc-audit-trail"
+
 enabled: true
 
 triggers:
@@ -14,12 +20,15 @@ triggers:
       every: 2h
   - type: manual
 
+consts:
+  workflow_id: soc-proactive-hunter
+
 steps:
   # ── Gather context for hunt planning ─────────────────────────────
   - name: get_recent_triage
     type: elasticsearch.search
     with:
-      index: ".soc-triage-results"
+      index: "{{ consts.triage_results_index }}"
       query:
         range:
           "@timestamp":
@@ -56,7 +65,7 @@ steps:
   - name: get_previous_hunts
     type: elasticsearch.search
     with:
-      index: ".soc-hunt-findings"
+      index: "{{ consts.hunt_findings_index }}"
       query:
         range:
           "@timestamp":
@@ -74,7 +83,6 @@ steps:
     steps:
       - name: run_hunt
         type: ai.agent
-        agent-id: soc-triage-agent
         connector-id: opus
         with:
           message: >
@@ -123,11 +131,55 @@ steps:
              "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
                "finding": "...", "entities_involved": [], "recommended_action": "..."}],
              "coverage_update": {"techniques_hunted": ["Txxxx"], "data_sources_used": []}}
+          schema:
+            type: object
+            properties:
+              hunt_id:
+                type: string
+              hunt_type:
+                type: string
+              hypotheses:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              anomaly_findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              coverage_update:
+                type: object
+                additionalProperties: true
+            required:
+              - hunt_id
+              - hunt_type
+              - hypotheses
+              - anomaly_findings
+              - findings
+              - coverage_update
         timeout: 600s
+        on_failure:
+          - name: log_run_hunt_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: run_hunt
+                step_name: run_hunt
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
     else:
       - name: run_anomaly_only
         type: ai.agent
-        agent-id: soc-triage-agent
         connector-id: opus
         with:
           message: >
@@ -151,7 +203,46 @@ steps:
              "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
                "finding": "...", "entities_involved": [], "recommended_action": "..."}],
              "coverage_update": {"data_sources_used": []}}
+          schema:
+            type: object
+            properties:
+              hunt_id:
+                type: string
+              hunt_type:
+                type: string
+              anomaly_findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              coverage_update:
+                type: object
+                additionalProperties: true
+            required:
+              - hunt_id
+              - hunt_type
+              - anomaly_findings
+              - findings
+              - coverage_update
         timeout: 300s
+        on_failure:
+          - name: log_run_anomaly_only_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: run_anomaly_only
+                step_name: run_anomaly_only
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
   # ── Write findings ───────────────────────────────────────────────
   # Only one of run_hunt / run_anomaly_only runs; the other is undefined.
@@ -159,19 +250,20 @@ steps:
   - name: write_findings
     type: elasticsearch.index
     with:
-      index: .soc-hunt-findings
+      index: "{{ consts.hunt_findings_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         source: "soc-proactive-hunter"
-        hunt_output: "{{ steps.run_hunt.output.message | default: steps.run_anomaly_only.output.message }}"
+        hunt_output: "{% if steps.run_hunt.output.message %}{{ steps.run_hunt.output.message }}{% elsif steps.run_anomaly_only.output.message %}{{ steps.run_anomaly_only.output.message }}{% elsif steps.run_hunt.output %}{{ steps.run_hunt.output | json }}{% else %}{{ steps.run_anomaly_only.output | json }}{% endif %}"
         status: "completed"
 
   - name: write_audit
     type: elasticsearch.index
     with:
-      index: .soc-audit-trail
+      index: "{{ consts.audit_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_id: "soc-proactive-hunter"
         event_type: "proactive_hunt"
         source: "soc-proactive-hunter"
         details: "Proactive threat hunt completed"

@@ -191,15 +191,15 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
           // drift tile empty" on a real cluster without shouting at users on
           // cold-start clusters where the index just doesn't exist yet.
           if (outcomesSettled.status === 'rejected') {
-            logger.debug(`Argus pulse outcomes query failed: ${String(outcomesSettled.reason)}`);
+            logger.debug(`ARGUS pulse outcomes query failed: ${String(outcomesSettled.reason)}`);
           }
           if (mutationSettled.status === 'rejected') {
             logger.debug(
-              `Argus pulse mutation-intents query failed: ${String(mutationSettled.reason)}`
+              `ARGUS pulse mutation-intents query failed: ${String(mutationSettled.reason)}`
             );
           }
           if (trustSettled.status === 'rejected') {
-            logger.debug(`Argus pulse trust-tier query failed: ${String(trustSettled.reason)}`);
+            logger.debug(`ARGUS pulse trust-tier query failed: ${String(trustSettled.reason)}`);
           }
 
           const result = buildGovernancePulse({
@@ -213,7 +213,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
           return response.ok({ body: result });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus governance_pulse route failed: ${error.message}`);
+          logger.error(`ARGUS governance_pulse route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

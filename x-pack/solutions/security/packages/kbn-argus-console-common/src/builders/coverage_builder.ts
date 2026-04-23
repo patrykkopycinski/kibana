@@ -206,7 +206,7 @@ export const buildNavigatorLayer = (args: {
 
   return {
     name,
-    description: `Argus coverage layer — generated ${snapshot.generated_at}`,
+    description: `ARGUS coverage layer — generated ${snapshot.generated_at}`,
     domain: 'enterprise-attack',
     versions: { attack: attackVersion, navigator: '4.9', layer: '4.5' },
     techniques,
@@ -222,7 +222,7 @@ const buildComment = (cell: ArgusCoverageCell): string => {
   const sources = cell.contributing_sources.length
     ? cell.contributing_sources.join(', ')
     : 'none';
-  return `Argus ${cell.argus_authored} · Community ${cell.community_authored} · Sources: ${sources}`;
+  return `ARGUS ${cell.argus_authored} · Community ${cell.community_authored} · Sources: ${sources}`;
 };
 
 const deltaToColor = (score: number): string => {

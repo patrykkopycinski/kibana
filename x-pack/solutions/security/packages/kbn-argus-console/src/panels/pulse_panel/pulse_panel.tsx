@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -41,12 +42,17 @@ export interface PulseMetric {
 
 export interface PulsePanelProps {
   /**
-   * Optional core HTTP client. When provided, the panel fetches live
-   * governance metrics and renders all four widget groups (MTTR, throughput,
-   * drift, tier mix). When omitted, the panel renders the static demo tile
-   * set (useful for Storybook, marketing screenshots, and offline demos).
+   * Optional core HTTP client. When provided (and `demoMode` is false), the panel
+   * fetches live governance metrics and renders all four widget groups (MTTR,
+   * throughput, drift, tier mix).
    */
   readonly http?: ArgusHttp;
+  /**
+   * When true, skips the governance-pulse request and renders the static
+   * `DEMO_PULSE` tile set (Storybook, marketing screenshots, offline demos).
+   * Never used as an error fallback — fetch failures surface a callout instead.
+   */
+  readonly demoMode?: boolean;
   /**
    * Override the metric tile set entirely. Bypasses the governance-pulse
    * fetch — mostly used by tests.
@@ -95,7 +101,7 @@ const mttrTile = (mttr: GovernancePulseMttr | null): PulseMetric => {
       tone: 'subdued',
       tooltip:
         'Median time between a mutation being applied and rolled back, measured ' +
-        'across .soc-outcomes. Instrumented by soc-recovery.yaml (Argus R6).',
+        'across .soc-outcomes. Instrumented by soc-recovery.yaml (ARGUS R6).',
     };
   }
 
@@ -264,6 +270,16 @@ const DEMO_PULSE: GovernancePulse = {
   tier_mix: { trusted: 6, probationary: 2, untrusted: 1, system: 3, total: 12 },
 };
 
+/** Placeholder while loading or when live data is unavailable (never masked as demo). */
+const EMPTY_PULSE_PLACEHOLDER: GovernancePulse = {
+  window_start: 'now-24h',
+  window_end: 'now',
+  rollback_mttr: null,
+  mutation_throughput: null,
+  drift: null,
+  tier_mix: null,
+};
+
 interface TileRowProps {
   readonly title: string;
   readonly subtitle?: string;
@@ -333,10 +349,17 @@ const TileRow: React.FC<TileRowProps> = ({ title, subtitle, metrics, isLoading, 
   </>
 );
 
-export const PulsePanel: React.FC<PulsePanelProps> = ({ http, metrics: metricsOverride, onMetricClick }) => {
+export const PulsePanel: React.FC<PulsePanelProps> = ({
+  http,
+  demoMode = false,
+  metrics: metricsOverride,
+  onMetricClick,
+}) => {
+  const useLiveFetch = Boolean(http) && !demoMode;
+
   const pulse = useGovernancePulse({
     http: http as ArgusHttp,
-    enabled: Boolean(http),
+    enabled: useLiveFetch,
     // Live-demo cadence: refresh widgets every 10s so throughput / MTTR /
     // drift counters keep moving between ticker emits. Cheap (single ES
     // round-trip) and cancelled on unmount.
@@ -344,12 +367,21 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({ http, metrics: metricsOv
   });
 
   const payload = useMemo<GovernancePulse>(() => {
-    if (pulse.status === 'success') return pulse.data;
-    return DEMO_PULSE;
-  }, [pulse]);
+    if (demoMode) {
+      return DEMO_PULSE;
+    }
+    if (pulse.status === 'success') {
+      return pulse.data;
+    }
+    if (pulse.status === 'error') {
+      return EMPTY_PULSE_PLACEHOLDER;
+    }
+    return EMPTY_PULSE_PLACEHOLDER;
+  }, [demoMode, pulse]);
 
-  const isLoading = Boolean(http) && pulse.status === 'loading';
-  const hasLiveData = pulse.status === 'success';
+  const isLoading = useLiveFetch && pulse.status === 'loading';
+  const fetchError = useLiveFetch && pulse.status === 'error' ? pulse.error : undefined;
+  const hasLiveData = useLiveFetch && pulse.status === 'success';
 
   // `metricsOverride` short-circuits everything — tests use it to pass a fixed
   // list into the panel without bothering with live fetches.
@@ -362,7 +394,7 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({ http, metrics: metricsOv
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{'Argus pulse'}</h3>
+            <h3>{'ARGUS pulse'}</h3>
           </EuiTitle>
           <EuiText size="s" color="subdued">
             {'Cross-layer health summary over '}
@@ -372,8 +404,12 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({ http, metrics: metricsOv
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={hasLiveData ? 'success' : 'hollow'}>
-            {hasLiveData ? 'live' : 'demo-grade'}
+          <EuiBadge
+            color={
+              fetchError ? 'danger' : demoMode ? 'hollow' : hasLiveData ? 'success' : 'hollow'
+            }
+          >
+            {fetchError ? 'unavailable' : demoMode ? 'demo' : hasLiveData ? 'live' : 'offline'}
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -382,6 +418,20 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({ http, metrics: metricsOv
         <>
           <EuiSpacer size="m" />
           <EuiProgress size="xs" color="primary" />
+        </>
+      ) : null}
+
+      {fetchError ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title="Could not load governance pulse"
+            color="danger"
+            iconType="error"
+            data-test-subj="argusPulsePanelFetchError"
+          >
+            {fetchError.message}
+          </EuiCallOut>
         </>
       ) : null}
 

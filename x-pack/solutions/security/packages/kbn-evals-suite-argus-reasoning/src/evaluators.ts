@@ -6,7 +6,7 @@
  */
 
 /**
- * Argus Reasoning Eval Vertical (R11) — aggregate scoring math.
+ * ARGUS Reasoning Eval Vertical (R11) — aggregate scoring math.
  *
  * Keep all pure-math evaluators in this module so they can be jest-tested
  * without any dependency on `@kbn/evals` or `@elastic/elasticsearch`. This

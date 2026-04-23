@@ -10,13 +10,13 @@ import { evaluateReasoning } from './evaluate_reasoning';
 import type { ReasoningSpan } from './load_trace';
 
 /**
- * Argus R11 — end-to-end integration test for `evaluateReasoning`.
+ * ARGUS R11 — end-to-end integration test for `evaluateReasoning`.
  *
  * The unit tests in `judge.test.ts` and `evaluators.test.ts` cover the
  * deterministic scoring math in isolation. This suite closes the loop by
  * proving the full wiring produces the row shape the trust-tier assessor
  * workflow (`soc-argus-trust-tier-assessor.yaml`) expects to read from
- * `.soc-reasoning-eval-runs`.
+ * `.soc-argus-eval-runs` (run_kind=reasoning).
  *
  * The trust-tier assessor fields under test here:
  *   - `gate_decision`          → drives the `rGate` tier branch
@@ -106,7 +106,7 @@ describe('evaluateReasoning — R11 integration', () => {
     expect(row.gate_decision).toBe('pass');
     expect(row.spans_evaluated).toBe(3);
     expect(indexed).toHaveLength(1);
-    expect(indexed[0].index).toBe('.soc-reasoning-eval-runs');
+    expect(indexed[0].index).toBe('.soc-argus-eval-runs');
 
     // Assessor contract: the fields the trust-tier assessor reads must exist.
     const doc = indexed[0].document as unknown as typeof row;
@@ -176,8 +176,8 @@ describe('evaluateReasoning — R11 integration', () => {
     const { client, indexed } = createFakeClient([makeSpan({})]);
     await evaluateReasoning(
       { esClient: client },
-      { runsIndex: '.soc-reasoning-eval-runs-v2', overrideRunId: 'r1' }
+      { runsIndex: '.soc-argus-eval-runs-alt', overrideRunId: 'r1' }
     );
-    expect(indexed[0].index).toBe('.soc-reasoning-eval-runs-v2');
+    expect(indexed[0].index).toBe('.soc-argus-eval-runs-alt');
   });
 });

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# One-command Argus Fleet/Caldera end-to-end verifier.
+# One-command ARGUS Fleet/Caldera end-to-end verifier.
 #
 # Spins up the compose stack, ensures a Linux endpoint is enrolled in Fleet and
 # running a Caldera sandcat agent, triggers one pipe-to-shell primitive, and
 # polls Elasticsearch for a detection alert with host.name=soc-endpoint-1.
 #
-# Designed for the Argus demo only. No TLS, basic auth via .env password,
-# assumes the host Kibana dev server is running on port 15601.
+# Designed for the ARGUS demo only. No TLS, basic auth via .env password,
+# assumes the host Kibana dev server is running (default port ${KIBANA_PORT:-15601}).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${HERE}"
 
-KIBANA_URL="${KIBANA_URL:-http://localhost:15601}"
-ES_URL="${ES_URL:-http://localhost:19200}"
+KIBANA_URL="${KIBANA_URL:-http://localhost:${KIBANA_PORT:-15601}}"
+ES_URL="${ES_URL:-http://localhost:${ES_PORT:-19200}}"
 KIBANA_USER="${KIBANA_USER:-elastic}"
 KIBANA_PASS="${KIBANA_PASS:-${ELASTIC_PASSWORD:-changeme}}"
 CALDERA_URL_EXT="${CALDERA_URL_EXT:-http://localhost:18888}"
@@ -60,7 +60,7 @@ curl_cal() {
 #############################################
 preflight() {
   log "preflight: checking host Kibana..."
-  curl -sf "${KIBANA_URL}/api/status" >/dev/null || fail "Kibana not reachable at ${KIBANA_URL}. Start the dev server from this worktree first (yarn start on 15601)."
+  curl -sf "${KIBANA_URL}/api/status" >/dev/null || fail "Kibana not reachable at ${KIBANA_URL}. Start the dev server from this worktree first (yarn start on ${KIBANA_PORT:-15601})."
   log "preflight: checking Elasticsearch..."
   curl -sf -u "${KIBANA_USER}:${KIBANA_PASS}" "${ES_URL}/_cluster/health" >/dev/null || fail "ES not reachable at ${ES_URL}. docker compose up -d elasticsearch."
   log "preflight: checking Fleet policy ${POLICY_ID}..."
@@ -100,7 +100,7 @@ ensure_integrations() {
 }
 
 install_rule() {
-  log "installing + enabling the Argus Linux rule..."
+  log "installing + enabling the ARGUS Linux rule..."
   env KIBANA_URL="${KIBANA_URL}" KIBANA_USER="${KIBANA_USER}" KIBANA_PASS="${KIBANA_PASS}" RULE_ID="${RULE_ID}" \
     bash "${HERE}/scripts/install_argus_linux_rule.sh"
 }
@@ -141,8 +141,8 @@ ensure_caldera_adversary() {
   ability_body="$(cat <<JSON
 {
   "ability_id": "${CALDERA_ABILITY_ID}",
-  "name": "Argus pipe-to-shell primitive",
-  "description": "Curl output piped to sh — trips the Argus Linux pipe-to-shell rule.",
+  "name": "ARGUS pipe-to-shell primitive",
+  "description": "Curl output piped to sh — trips the ARGUS Linux pipe-to-shell rule.",
   "tactic": "execution",
   "technique_id": "T1059.004",
   "technique_name": "Unix Shell",
@@ -162,8 +162,8 @@ JSON
   adversary_body="$(cat <<JSON
 {
   "adversary_id": "${CALDERA_ADVERSARY_ID}",
-  "name": "Argus Linux E2E demo",
-  "description": "Single-primitive adversary used by the Argus Fleet/Caldera E2E demo.",
+  "name": "ARGUS Linux E2E demo",
+  "description": "Single-primitive adversary used by the ARGUS Fleet/Caldera E2E demo.",
   "atomic_ordering": ["${CALDERA_ABILITY_ID}"]
 }
 JSON
@@ -246,7 +246,7 @@ print(d.get("id",""))')"
 
 inject_defend_telemetry() {
   # Write a well-formed Elastic Defend process event into the logs-endpoint
-  # data stream so the Argus rule can fire against real ES data. This models
+  # data stream so the ARGUS rule can fire against real ES data. This models
   # what Defend would emit on a full endpoint (container-hosted Defend can't
   # run eBPF/kernel hooks in this demo).
   local op_id="$1"
@@ -373,7 +373,7 @@ except Exception:
 
 emit_e2d_chain() {
   # Publish the CVE-ARGUS-E2E-LINUX Exploit → Detection chain into the
-  # `.soc-*` indices that drive the Argus console's E2D panel. Without
+  # `.soc-*` indices that drive the ARGUS console's E2D panel. Without
   # this, the panel's "Recent CVE advisories" list is fed purely by
   # `seed_argus_demo.sh`, which means the live E2E run never appears.
   #
@@ -382,8 +382,8 @@ emit_e2d_chain() {
   #   .soc-recommendations     — Pareto synthesis metadata (drives
   #                              exploit probability + synthesis stages)
   #   .soc-mutation-intents    — governance + intent stage
-  #   .soc-detection-eval-runs — eval stage scores
-  #   .soc-backtest-results    — backtest stage counts
+  #   .soc-argus-eval-runs — eval stage scores (run_kind=detection)
+  #   .soc-backtests    — backtest stage counts
   #   .soc-outcomes            — apply + governance trail
   #
   # `@timestamp` is set to now() on every doc so the advisory sorts to the
@@ -412,8 +412,8 @@ emit_e2d_chain() {
   "@timestamp": "${ts}",
   "advisory_id": "${advisory_id}",
   "cve_id": "CVE-ARGUS-E2E-LINUX",
-  "title": "Argus E2E — Linux pipe-to-shell downloader (live Caldera loop)",
-  "summary": "Live Caldera operation ${op_id:0:8} executed the pipe-to-shell primitive on ${ENDPOINT_HOSTNAME}; Argus synthesised and applied ${rule_id}, which produced a detection alert within the current demo window.",
+  "title": "ARGUS E2E — Linux pipe-to-shell downloader (live Caldera loop)",
+  "summary": "Live Caldera operation ${op_id:0:8} executed the pipe-to-shell primitive on ${ENDPOINT_HOSTNAME}; ARGUS synthesised and applied ${rule_id}, which produced a detection alert within the current demo window.",
   "severity": "high",
   "status": "detected",
   "source": "argus.e2e-live",
@@ -441,7 +441,7 @@ JSON
   "rec_id": "${rec_id}",
   "type": "rule_synthesis",
   "status": "done",
-  "title": "Pareto synthesis — Argus E2E Linux pipe-to-shell",
+  "title": "Pareto synthesis — ARGUS E2E Linux pipe-to-shell",
   "summary": "10 candidates generated, 4 on Pareto frontier. Chosen c-01 dominates on precision and fp_rate.",
   "rule_id": "${rule_id}",
   "advisory_id": "${advisory_id}",
@@ -508,7 +508,7 @@ JSON
   "draft_rule": {
     "rule_id": "${rule_id}",
     "rule_version": "1",
-    "name": "Argus \u2014 Linux pipe-to-shell downloader (T1059.004)",
+    "name": "ARGUS \u2014 Linux pipe-to-shell downloader (T1059.004)",
     "description": "Detects a curl/wget download piped directly into a POSIX shell (\`curl ... | sh\`, \`wget -qO- ... | bash\`). This is the invariant primitive behind most Linux drive-by droppers and the Caldera ability used in the E2E loop. Anchored on shell parent + piped child to keep FPs off legitimate package managers.",
     "severity": "high",
     "risk_score": 73,
@@ -536,7 +536,7 @@ JSON
     "artifact_id": "${rule_id}",
     "op": "create",
     "expected_ownership": "autosoc",
-    "reason": "Argus synthesised a detection for the pipe-to-shell primitive observed in Caldera op ${op_id:0:8}."
+    "reason": "ARGUS synthesised a detection for the pipe-to-shell primitive observed in Caldera op ${op_id:0:8}."
   }
 }
 JSON
@@ -550,6 +550,7 @@ JSON
   eval_body="$(cat <<JSON
 {
   "@timestamp": "${ts}",
+  "run_kind": "detection",
   "eval_run_id": "${eval_id}",
   "rule_id": "${rule_id}",
   "advisory_id": "${advisory_id}",
@@ -565,7 +566,7 @@ JSON
 }
 JSON
 )"
-  curl_es -X PUT "${ES_URL}/.soc-detection-eval-runs/_doc/${eval_id}?refresh=wait_for" \
+  curl_es -X PUT "${ES_URL}/.soc-argus-eval-runs/_doc/${eval_id}?refresh=wait_for" \
     -d "${eval_body}" >/dev/null \
     || log "WARNING: eval-run doc write failed (non-fatal)."
 
@@ -585,7 +586,7 @@ JSON
 }
 JSON
 )"
-  curl_es -X PUT "${ES_URL}/.soc-backtest-results/_doc/${backtest_id}?refresh=wait_for" \
+  curl_es -X PUT "${ES_URL}/.soc-backtests/_doc/${backtest_id}?refresh=wait_for" \
     -d "${backtest_body}" >/dev/null \
     || log "WARNING: backtest doc write failed (non-fatal)."
 
@@ -619,8 +620,8 @@ JSON
 }
 
 emit_repair_event() {
-  # Publish a live "Argus auto-repaired the rule language after a KQL parse
-  # failure" record so operators can see Argus self-heal a draft rule during
+  # Publish a live "ARGUS auto-repaired the rule language after a KQL parse
+  # failure" record so operators can see ARGUS self-heal a draft rule during
   # the demo. The event lights up three surfaces, all tied to ${RULE_ID}:
   #
   #   .soc-mutation-intents   — activity-feed "mutation" layer row +
@@ -631,7 +632,7 @@ emit_repair_event() {
   #                             that the repair was applied without rollback.
   #   .soc-detection-corpus   — rule-level corpus entry with a `repair_event`
   #                             sub-object, so the Coverage panel surfaces the
-  #                             auto-repair alongside Argus's authoring.
+  #                             auto-repair alongside ARGUS's authoring.
   #
   # Deterministic ids + `_delete_by_query` for the mutation_intent and outcome
   # make the emitter idempotent across re-runs; the corpus doc is upserted.
@@ -665,9 +666,9 @@ emit_repair_event() {
   "recommendation_id": "rec-synth-e2e-linux-pipe-to-shell",
   "status": "applied",
   "source": "argus.e2e-live",
-  "title": "Argus auto-repaired the rule language after a KQL parse failure",
-  "label": "Argus auto-repaired the rule language after a KQL parse failure",
-  "subtitle": "Initial KQL draft rejected by the rule engine; Argus retried with an EQL-equivalent that compiled cleanly and kept the alert-producing logic intact.",
+  "title": "ARGUS auto-repaired the rule language after a KQL parse failure",
+  "label": "ARGUS auto-repaired the rule language after a KQL parse failure",
+  "subtitle": "Initial KQL draft rejected by the rule engine; ARGUS retried with an EQL-equivalent that compiled cleanly and kept the alert-producing logic intact.",
   "stage": "repair",
   "governance_gate": {
     "status": "passed",
@@ -729,7 +730,7 @@ JSON
   # ---------- (3) corpus entry (per-rule provenance) ----------------------
   # `_id == rule_id` is the canonical key in .soc-detection-corpus (mirrors
   # how seed_argus_demo.sh writes canonical corpus entries). We upsert with
-  # PUT so the entry carries both Argus authoring AND the repair history.
+  # PUT so the entry carries both ARGUS authoring AND the repair history.
   local corpus_file
   corpus_file="$(mktemp -t argus_repair_corpus.XXXXXX.json)"
   cat > "${corpus_file}" <<JSON
@@ -737,7 +738,7 @@ JSON
   "@timestamp": "${ts}",
   "rule_id": "${RULE_ID}",
   "source": "argus",
-  "title": "[Argus] Linux pipe-to-shell (T1059.004)",
+  "title": "[ARGUS] Linux pipe-to-shell (T1059.004)",
   "mitre_technique": ["T1059.004", "T1190"],
   "advisory_id": "argus-adv-e2e-linux-pipe-to-shell",
   "cve_id": "CVE-ARGUS-E2E-LINUX",
@@ -745,8 +746,8 @@ JSON
   "repair_event": {
     "@timestamp": "${ts}",
     "trigger": "kql_parse_failure",
-    "label": "Argus auto-repaired the rule language after a KQL parse failure",
-    "subtitle": "KQL draft rejected by the rule engine; Argus retried with an EQL-equivalent and kept the rule firing.",
+    "label": "ARGUS auto-repaired the rule language after a KQL parse failure",
+    "subtitle": "KQL draft rejected by the rule engine; ARGUS retried with an EQL-equivalent and kept the rule firing.",
     "failed_language": "kuery",
     "repaired_language": "eql",
     "retry_count": 1,
@@ -767,8 +768,8 @@ JSON
 }
 
 emit_decision_graph_chain() {
-  # Publish a Caldera → Argus → Rule → Alert neighborhood into
-  # `.soc-decision-graph` so the Argus Decision Graph panel can render the
+  # Publish a Caldera → ARGUS → Rule → Alert neighborhood into
+  # `.soc-decision-graph` so the ARGUS Decision Graph panel can render the
   # full live chain rooted at the CVE (or the Caldera operation actor node).
   #
   # All edges are tagged `source=argus.e2e-live` so the function first clears
@@ -950,10 +951,10 @@ summary() {
   log "Fleet policy: ${POLICY_ID}"
   log "Rule:         ${RULE_ID}"
   log "Endpoint:     ${ENDPOINT_HOSTNAME}"
-  log "Argus app:    ${KIBANA_URL}/app/security/argus"
+  log "ARGUS app:    ${KIBANA_URL}/app/security/argus"
   log "E2D deep-link: ${KIBANA_URL}/app/security/argus?tab=e2d&cve=CVE-ARGUS-E2E-LINUX"
-  log "Decision chain root: CVE-ARGUS-E2E-LINUX (pick in Argus → Decision Graph)"
-  log "Auto-repair lineage: Argus console → Activity feed → 'Argus auto-repaired the rule language after a KQL parse failure' (rule=${RULE_ID})"
+  log "Decision chain root: CVE-ARGUS-E2E-LINUX (pick in ARGUS → Decision Graph)"
+  log "Auto-repair lineage: ARGUS console → Activity feed → 'ARGUS auto-repaired the rule language after a KQL parse failure' (rule=${RULE_ID})"
   log "Alerts app:   ${KIBANA_URL}/app/security/alerts"
 }
 
@@ -964,7 +965,7 @@ poll_for_workflow_artifacts() {
   log "polling for workflow-produced artifacts (max ${max_wait}s)..."
   log "  W1 (alert-to-hypothesis) should create a .soc-cve-advisories entry"
   log "  W2 (auto-synthesis) should synthesize a rule and file mutation intent"
-  log "  W3 (real-eval) should produce .soc-detection-eval-runs"
+  log "  W3 (real-eval) should produce .soc-argus-eval-runs"
 
   while [ "$elapsed" -lt "$max_wait" ]; do
     local adv_count
@@ -987,8 +988,9 @@ poll_for_workflow_artifacts() {
       log "  recommendations: ${rec_count}"
 
       local eval_count
-      eval_count="$(curl_es "${ES_URL}/.soc-detection-eval-runs/_count" -d '{
+      eval_count="$(curl_es "${ES_URL}/.soc-argus-eval-runs/_count" -d '{
         "query": {"bool": {"filter": [
+          {"term": {"run_kind": "detection"}},
           {"term": {"source": "argus.workflow.e2d-reconciler"}},
           {"range": {"@timestamp": {"gte": "now-15m"}}}
         ]}}

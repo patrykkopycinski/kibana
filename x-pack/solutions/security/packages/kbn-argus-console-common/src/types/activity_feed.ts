@@ -6,9 +6,9 @@
  */
 
 /**
- * The five Argus layers that the activity feed surfaces. Each event is
+ * The five ARGUS layers that the activity feed surfaces. Each event is
  * classified into exactly one layer so operators can filter the feed by
- * "which part of Argus did this come from".
+ * "which part of ARGUS did this come from".
  *
  *   - `telemetry`   — raw endpoint / source signals (e.g. process chains)
  *   - `detection`   — exploit probability, rule matches, threat scoring
@@ -61,7 +61,7 @@ export interface ActivityEvent {
   readonly source_doc_id?: string;
   /**
    * Pivot identifiers — when present, the UI surfaces click-through links
-   * into the other Argus panels (reasoning, lineage).
+   * into the other ARGUS panels (reasoning, lineage).
    */
   readonly alert_id?: string;
   readonly run_id?: string;

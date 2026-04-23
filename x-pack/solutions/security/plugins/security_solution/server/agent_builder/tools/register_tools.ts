@@ -60,8 +60,8 @@ export const registerTools = async (
 
   // Decision-graph tool is gated by the separate `argusDecisionGraphEnabled`
   // flag so the graph surface can be dark-launched independently of the Tier-1
-  // Argus Console. Still scoped to the Console flag too so we never expose it
-  // when Argus is entirely off.
+  // ARGUS Console. Still scoped to the Console flag too so we never expose it
+  // when ARGUS is entirely off.
   if (experimentalFeatures.argusConsoleEnabled && experimentalFeatures.argusDecisionGraphEnabled) {
     agentBuilder.tools.register(argusGetDecisionGraphTool(core, logger));
   }

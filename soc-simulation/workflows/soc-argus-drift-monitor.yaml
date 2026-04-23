@@ -1,7 +1,7 @@
 version: '1'
-name: Argus Drift Monitor (Phase 3)
+name: ARGUS Drift Monitor (Phase 3)
 description: >
-  Argus Phase 3 — eval-score and actor-trust drift monitor.
+  ARGUS Phase 3 — eval-score and actor-trust drift monitor.
 
   Mythos-era adversaries iterate. A rule that scored precision=0.92 /
   recall=0.86 at M2.1 time can quietly decay over weeks as the adversary
@@ -12,7 +12,7 @@ description: >
   drift events into `.soc-recommendations` so the existing eval cascade
   (M2.1) re-scores the target on the next tick.
 
-    1. rule drift   : EMA(scores.precision) on .soc-detection-eval-runs
+    1. rule drift   : EMA(scores.precision) on .soc-argus-eval-runs (run_kind=detection)
                       vs. the per-rule baseline (median of the 7 runs
                       immediately before the last run). A drop of >=0.08
                       absolute, or a softer >=0.04 drop coupled with
@@ -56,7 +56,7 @@ triggers:
   - type: manual
 
 consts:
-  eval_runs_index:    ".soc-detection-eval-runs"
+  eval_runs_index:    ".soc-argus-eval-runs"
   tiers_index:        ".soc-actor-trust-tiers"
   outcomes_index:     ".soc-outcomes"
   recs_index:         ".soc-recommendations"
@@ -83,6 +83,7 @@ steps:
       query:
         bool:
           filter:
+            - term: { run_kind: "detection" }
             - range:
                 "@timestamp":
                   gte: "{{ consts.eval_window }}"
@@ -117,6 +118,7 @@ steps:
           query:
             bool:
               filter:
+                - term: { run_kind: "detection" }
                 - term: { rule_id: "{{ foreach.item.key }}" }
                 - range:
                     "@timestamp":
@@ -136,6 +138,7 @@ steps:
           query:
             bool:
               filter:
+                - term: { run_kind: "detection" }
                 - term: { rule_id: "{{ foreach.item.key }}" }
                 - range:
                     "@timestamp":
@@ -209,7 +212,7 @@ steps:
             title: "Drift: rule {{ foreach.item.key }} requires re-evaluation"
             summary: >-
               Rule {{ foreach.item.key }} shows precision drift vs. its 30-day baseline.
-              Argus has filed a mutation_intent with status=eval_requested so the M2.1
+              ARGUS has filed a mutation_intent with status=eval_requested so the M2.1
               detection-eval cascade re-scores it against the current corpus on the
               next tick. If the re-eval passes, this drift event is closed as
               stale_signal. If it fails, the applier will downgrade trust and route
@@ -235,7 +238,7 @@ steps:
               coverage_delta_pct: 0
             evidence:
               - summary: "{{ steps.compute_rule_drift.output }}"
-                source_ref: "index=.soc-detection-eval-runs;rule_id={{ foreach.item.key }}"
+                source_ref: "index=.soc-argus-eval-runs;run_kind=detection;rule_id={{ foreach.item.key }}"
                 confidence: 0.8
             housekeeping: false
             argus:
@@ -357,7 +360,7 @@ steps:
             summary: >-
               Actor {{ foreach.item.key }} shows trust drift vs. its 7-day baseline
               (reasoning_quality or rollback_rate outside tolerated envelope).
-              Argus has filed a mutation_intent with status=eval_requested so the
+              ARGUS has filed a mutation_intent with status=eval_requested so the
               trust-tier assessor + reasoning-eval cascade re-score the actor on
               the next tick. A failing re-eval downgrades the tier.
             confidence: 75
@@ -415,4 +418,4 @@ steps:
   - name: log_done
     type: console
     with:
-      message: "Argus drift monitor complete — rules={{ steps.discover_rules.output.aggregations.rules.buckets | size | default: 0 }} actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-drift-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+      message: "ARGUS drift monitor complete — rules={{ steps.discover_rules.output.aggregations.rules.buckets | size | default: 0 }} actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-drift-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

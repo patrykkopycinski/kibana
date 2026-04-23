@@ -124,7 +124,7 @@ export const registerDecisionGraphRoute = ({ router, logger }: ArgusRoutesDeps) 
           return response.ok({ body: payload });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus decision_graph route failed: ${error.message}`);
+          logger.error(`ARGUS decision_graph route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,

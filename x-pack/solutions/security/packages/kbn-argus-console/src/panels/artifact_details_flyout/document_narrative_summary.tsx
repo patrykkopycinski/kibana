@@ -28,10 +28,10 @@ export interface DocumentNarrativeSummaryProps {
 }
 
 /**
- * Render the rich textual content of an Argus `.soc-*` document in a
+ * Render the rich textual content of an ARGUS `.soc-*` document in a
  * human-readable way.
  *
- * Most Argus panels persist their narrative payload as:
+ * Most ARGUS panels persist their narrative payload as:
  * - `summary` — agent prose, frequently wrapped in a ```json … ``` fence,
  * - `details` — the agent's full structured output passed through `| json`,
  * - `reasoning`, `expected_impact`, `evidence`, `recommended_action` — misc.
@@ -190,7 +190,7 @@ const buildSections = (raw: Readonly<Record<string, unknown>> | undefined): Pars
     if (content) sections.push(content);
   }
 
-  const metadata: Array<{ title: string; description: React.ReactNode }> = [];
+  const metadata: Array<{ title: string; description: string }> = [];
   for (const [key, value] of Object.entries(raw)) {
     if (seen.has(key)) continue;
     if (key === 'title' || key === 'subtitle') continue;
@@ -334,7 +334,7 @@ const expandNarrativeObject = (
     out.push({ heading, content: <StructuredPayload value={value} /> });
   }
 
-  const leftover: Array<{ title: string; description: React.ReactNode }> = [];
+  const leftover: Array<{ title: string; description: string }> = [];
   for (const [key, value] of Object.entries(obj)) {
     if (consumed.has(key)) continue;
     if (value === null || value === undefined || value === '') continue;

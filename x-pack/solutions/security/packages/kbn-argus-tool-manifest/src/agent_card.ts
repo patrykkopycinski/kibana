@@ -47,9 +47,9 @@ export const assembleAgentCard = (manifest: ProjectedManifest): A2aAgentCard => 
   return {
     schema_version: '0.2.0',
     agent_id: ARGUS_A2A_AGENT_ID,
-    name: 'Argus — Elastic Autonomous SOC',
+    name: 'ARGUS — Elastic Autonomous SOC',
     description:
-      'Elastic Security Argus: autonomous SOC skill surface. Every tool call is funneled through the same trust-tier, door-class, blast-radius, adversarial, and reasoning-watchdog gates that native Argus actors face.',
+      'Elastic Security ARGUS: autonomous SOC skill surface. Every tool call is funneled through the same trust-tier, door-class, blast-radius, adversarial, and reasoning-watchdog gates that native ARGUS actors face.',
     owner: {
       name: 'Elastic',
       url: 'https://www.elastic.co/security',

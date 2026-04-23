@@ -63,7 +63,8 @@ const toStageDoc = (hit: RawStageHit | undefined): StageDoc | undefined => {
 const findStageDoc = async (
   esClient: ElasticsearchClient,
   index: string,
-  mutationIntentId: string
+  mutationIntentId: string,
+  extraMust: ReadonlyArray<Record<string, unknown>> = []
 ): Promise<StageDoc | undefined> => {
   try {
     const res = await esClient.search<RawStageHit['_source']>({
@@ -76,7 +77,11 @@ const findStageDoc = async (
       // (e.g. `mut-intent-42` → `[mut, intent, 42]`). Several `.soc-*`
       // indices pre-exist with text+keyword-subfield mappings from older
       // pipelines, so a raw `term` query would silently miss.
-      query: { match_phrase: { mutation_intent_id: mutationIntentId } },
+      query: {
+        bool: {
+          must: [{ match_phrase: { mutation_intent_id: mutationIntentId } }, ...extraMust],
+        },
+      },
     });
     const hit = res.hits?.hits?.[0];
     return hit ? toStageDoc({ _id: hit._id, _index: hit._index, _source: hit._source }) : undefined;
@@ -371,7 +376,9 @@ const loadStageDocs = async (
     findAdvisoryStage(esClient, advisoryId, ruleId),
     findExploitProbabilityStage(esClient, mutationIntentId, advisoryId),
     findStageDoc(esClient, ARGUS_SOC_INDICES.mutationIntents, mutationIntentId),
-    findStageDoc(esClient, ARGUS_SOC_INDICES.detectionEvalRuns, mutationIntentId),
+    findStageDoc(esClient, ARGUS_SOC_INDICES.detectionEvalRuns, mutationIntentId, [
+      { term: { run_kind: 'detection' } },
+    ]),
     findStageDoc(esClient, ARGUS_SOC_INDICES.backtestResults, mutationIntentId),
     findStageDoc(esClient, ARGUS_SOC_INDICES.recommendations, mutationIntentId),
     findStageDoc(esClient, ARGUS_SOC_INDICES.outcomes, mutationIntentId),
@@ -436,7 +443,7 @@ export const registerMutationLineageRoute = ({ router, logger }: ArgusRoutesDeps
         } catch (err) {
           const error = transformError(err);
           logger.error(
-            `Argus mutation_lineage route failed for ${subject.kind}:${subject.id}: ${error.message}`
+            `ARGUS mutation_lineage route failed for ${subject.kind}:${subject.id}: ${error.message}`
           );
           return siemResponse.error({
             statusCode: error.statusCode,

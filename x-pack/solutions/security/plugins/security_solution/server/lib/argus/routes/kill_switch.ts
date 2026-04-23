@@ -51,7 +51,7 @@ export const registerKillSwitchRoutes = ({ router, logger }: ArgusRoutesDeps) =>
         return response.ok({ body: buildKillSwitchState({ source }) });
       } catch (err) {
         const error = transformError(err);
-        logger.error(`Argus kill_switch GET failed: ${error.message}`);
+        logger.error(`ARGUS kill_switch GET failed: ${error.message}`);
         return siemResponse.error({
           statusCode: error.statusCode,
           body: error.message,
@@ -131,7 +131,7 @@ export const registerKillSwitchRoutes = ({ router, logger }: ArgusRoutesDeps) =>
           });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus kill_switch POST failed: ${error.message}`);
+          logger.error(`ARGUS kill_switch POST failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -174,7 +174,7 @@ const writeAuditEntry = async (
     // Log a warning so orphan toggles are traceable.
     const message = err instanceof Error ? err.message : String(err);
     logger.warn(
-      `Argus audit_trail write failed for ${entry.subject_kind}=${entry.subject_id}: ${message}`
+      `ARGUS audit_trail write failed for ${entry.subject_kind}=${entry.subject_id}: ${message}`
     );
   }
 };

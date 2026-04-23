@@ -491,7 +491,7 @@ export const MutationsPanel: React.FC<MutationsPanelProps> = ({
               <strong>{FILTER_OPTIONS.find((f) => f.id === filter)?.label ?? filter}</strong>
               {' over the '}
               <strong>{window === '24h' ? 'last 24 hours' : 'last 7 days'}</strong>
-              {'. If this is unexpected, check that Argus agents are writing to '}
+              {'. If this is unexpected, check that ARGUS agents are writing to '}
               <code>{'.soc-outcomes'}</code>
               {' and '}
               <code>{'.soc-mutation-intents'}</code>

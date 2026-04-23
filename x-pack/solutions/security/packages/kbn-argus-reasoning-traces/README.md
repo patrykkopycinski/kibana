@@ -1,18 +1,18 @@
 # @kbn/argus-reasoning-traces
 
-Argus **M2.5 — Reasoning-trace governance** day-1 package.
+ARGUS **M2.5 — Reasoning-trace governance** day-1 package.
 
 Exports two dependency-free building blocks:
 
 1. `ARGUS_TRACE_ATTR` + typed `ArgusSpanAttributes` — the attribute contract
-   every Argus agent MUST set on its OpenTelemetry spans so the governance
+   every ARGUS agent MUST set on its OpenTelemetry spans so the governance
    layer can correlate reasoning, decisions, tool calls, and the actor whose
    input triggered them. Attribute names come from the scaffold at
    `soc-simulation/docs/argus/scaffolds/m2-5-trace-schema.md`.
 2. `describeArgusOtlpExporter` — validates and normalises an OTLP exporter
    configuration (endpoint, service name, resource attributes). The actual
    `@opentelemetry/*` SDK instantiation lives in the consumer so this package
-   stays dep-free and Argus can be toggled per-deployment without pinning an
+   stays dep-free and ARGUS can be toggled per-deployment without pinning an
    SDK version at the package level.
 
 ## Usage (consumer-side, Phase 2)
@@ -60,5 +60,5 @@ span.setAttributes({
 - `soc-simulation/docs/argus/scaffolds/m2-5-trace-schema.md` — the ES-side
   schema the OTLP spans are projected into via a collector pipeline.
 - `soc-simulation/schemas/reasoning_trace.schema.json` — the existing
-  Argus reasoning step schema; M2.5 spans land in the same index family
+  ARGUS reasoning step schema; M2.5 spans land in the same index family
   under `.soc-reasoning-traces-<date>`.

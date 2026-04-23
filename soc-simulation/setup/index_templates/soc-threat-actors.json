@@ -1,0 +1,28 @@
+{
+  "index_patterns": [".soc-threat-actors"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "actor_id": { "type": "keyword" },
+        "actor_name": { "type": "keyword" },
+        "aliases": { "type": "keyword" },
+        "techniques": { "type": "keyword" },
+        "software": { "type": "keyword" },
+        "first_seen": { "type": "date" },
+        "last_seen": { "type": "date" },
+        "references": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Curated threat-actor catalogue (MITRE group ids) with technique and software lists for ARGUS coverage and playbook tooling.",
+    "owner": "argus-coverage",
+    "schema_version": 1
+  }
+}

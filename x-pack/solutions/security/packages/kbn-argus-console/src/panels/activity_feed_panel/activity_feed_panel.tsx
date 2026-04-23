@@ -117,7 +117,7 @@ export const ActivityFeedPanel: React.FC<ActivityFeedPanelProps> = ({
         <h3>{'Activity feed'}</h3>
       </EuiTitle>
       <EuiText size="s" color="subdued">
-        {'Cross-layer stream of Argus events. Click a row to view full details.'}
+        {'Cross-layer stream of ARGUS events. Click a row to view full details.'}
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFilterGroup>

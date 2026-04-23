@@ -86,7 +86,7 @@ export const registerActivityFeedRoute = ({ router, logger }: ArgusRoutesDeps) =
           return response.ok({ body: feed });
         } catch (err) {
           const error = transformError(err);
-          logger.error(`Argus activity_feed route failed: ${error.message}`);
+          logger.error(`ARGUS activity_feed route failed: ${error.message}`);
           return siemResponse.error({
             statusCode: error.statusCode,
             body: error.message,
@@ -124,6 +124,7 @@ const parseJsonArrayParam = <T extends string>(value: string | undefined): reado
 interface LayerQueryConfig {
   readonly layer: ActivityLayer;
   readonly index: string;
+  readonly query?: Record<string, unknown>;
 }
 
 /**
@@ -133,7 +134,11 @@ interface LayerQueryConfig {
  */
 const LAYER_QUERIES: readonly LayerQueryConfig[] = [
   { layer: 'telemetry', index: ARGUS_SOC_INDICES.telemetrySignals },
-  { layer: 'detection', index: ARGUS_SOC_INDICES.detectionEvalRuns },
+  {
+    layer: 'detection',
+    index: ARGUS_SOC_INDICES.detectionEvalRuns,
+    query: { term: { run_kind: 'detection' } },
+  },
   { layer: 'mutation', index: ARGUS_SOC_INDICES.mutationIntents },
   { layer: 'response', index: ARGUS_SOC_INDICES.recommendations },
   { layer: 'response', index: ARGUS_SOC_INDICES.outcomes },
@@ -156,6 +161,7 @@ const fanOutActivityHits = async (
         index: q.index,
         ignore_unavailable: true,
         size: PER_LAYER_SIZE,
+        query: q.query ?? { match_all: {} },
         sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
         _source: true,
         track_total_hits: false,

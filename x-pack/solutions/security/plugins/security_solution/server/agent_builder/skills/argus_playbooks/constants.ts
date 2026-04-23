@@ -7,7 +7,7 @@
 
 /**
  * Canonical skill ids. These strings appear in audit trails, skill registry
- * listings, and the Argus Playbooks console tab — changing them is a
+ * listings, and the ARGUS Playbooks console tab — changing them is a
  * breaking change.
  */
 export const ARGUS_ASSESS_READINESS_SKILL_ID = 'argus-assess-readiness' as const;
@@ -18,7 +18,7 @@ export const ARGUS_FIND_DATASOURCE_GAPS_SKILL_ID = 'argus-find-datasource-gaps' 
 export const ARGUS_REVIEW_RULE_QUALITY_SKILL_ID = 'argus-review-rule-quality' as const;
 
 /**
- * Every Argus playbook skill carries this tag so the Playbooks console tab and
+ * Every ARGUS playbook skill carries this tag so the Playbooks console tab and
  * the skill registry can discover them uniformly.
  */
 export const ARGUS_PLAYBOOK_SKILL_TAG = 'argus:playbook' as const;

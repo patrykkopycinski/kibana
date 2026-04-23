@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://argus.local/schemas/skill_metrics.schema.json",
-  "title": "Argus Skill Metrics Rollup",
+  "title": "ARGUS Skill Metrics Rollup",
   "description": "Per-skill rollup of invocations, success rate, and ROI estimates. Upserted by soc-skill-metrics-roller.",
   "type": "object",
   "additionalProperties": false,

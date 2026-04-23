@@ -15,7 +15,7 @@ import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_build
 import { ARGUS_RUN_BACKTEST_TOOL_ID } from './constants';
 
 const runBacktestSchema = z.object({
-  rule_id: z.string().min(1).describe('Argus rule artifact id to backtest.'),
+  rule_id: z.string().min(1).describe('ARGUS rule artifact id to backtest.'),
   lookback: z
     .enum(['24h', '7d', '14d', '30d'])
     .default('14d')
@@ -27,9 +27,9 @@ const runBacktestSchema = z.object({
 });
 
 /**
- * Dispatches a backtest by writing a run request into `.soc-detection-eval-runs`.
- * The `soc-rule-backtester` workflow picks it up and files the result doc in
- * `.soc-backtest-results`. This keeps the tool non-blocking — playbooks can
+ * Dispatches a backtest by writing a run request into `.soc-argus-eval-runs`
+ * (run_kind=backtest_request). Shadow / backtest workflows consume the queue
+ * and file authoritative rows in `.soc-backtests`. This keeps the tool non-blocking — playbooks can
  * queue a backtest and continue without waiting on async ES work.
  */
 export function argusRunBacktestTool(
@@ -40,8 +40,8 @@ export function argusRunBacktestTool(
     id: ARGUS_RUN_BACKTEST_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Queue a backtest for an Argus rule against the historical telemetry corpus. Returns the ' +
-      'run_id; poll `.soc-backtest-results` or the console E2D panel to observe completion.',
+      'Queue a backtest for an ARGUS rule against the historical telemetry corpus. Returns the ' +
+      'run_id; poll `.soc-backtests` or the console E2D panel to observe completion.',
     schema: runBacktestSchema,
     tags: ['security', 'argus', 'argus:playbook', 'backtest'],
     availability: {
@@ -52,6 +52,7 @@ export function argusRunBacktestTool(
       const runId = `argus-bt-${Date.now().toString(36)}`;
       const doc = {
         '@timestamp': new Date().toISOString(),
+        run_kind: 'backtest_request',
         type: 'backtest_request',
         run_id: runId,
         rule_id: ruleId,

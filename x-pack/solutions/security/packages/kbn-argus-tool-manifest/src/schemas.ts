@@ -6,7 +6,7 @@
  */
 
 /**
- * Shared input/output schemas that every Argus skill is projected through
+ * Shared input/output schemas that every ARGUS skill is projected through
  * on the external surface. These are stored as JSON Schema fragments (not
  * zod) so the MCP SDK and any A2A client can consume them directly without
  * a runtime conversion.
@@ -26,7 +26,7 @@ export const ARGUS_SKILL_INPUT_SCHEMA: Readonly<Record<string, unknown>> = Objec
       minLength: 1,
       maxLength: 4000,
       description:
-        'Free-text description of what the caller wants the Argus skill to do. Always interpreted as untrusted input.',
+        'Free-text description of what the caller wants the ARGUS skill to do. Always interpreted as untrusted input.',
     },
     scope: {
       type: 'object',

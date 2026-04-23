@@ -7,7 +7,7 @@
 
 /**
  * Tag written on every workflow registry entry and Agent Builder skill that
- * the Argus Playbooks console tab should surface. The tag is authored in
+ * the ARGUS Playbooks console tab should surface. The tag is authored in
  * `soc-simulation/workflows/_registry.json` for workflows and hardcoded in
  * the skill registry for skills (skill definitions don't have a `tags` field
  * today, so the server-side route knows which skill ids belong here).
@@ -19,7 +19,7 @@ export type ArgusPlaybookKind = 'workflow' | 'skill';
 /**
  * Short machine-friendly tag that identifies the user-visible *intent* a
  * playbook serves, independent of whether the entry is a workflow or a
- * skill. Multiple entries can share the same `user_intent` — the Argus
+ * skill. Multiple entries can share the same `user_intent` — the ARGUS
  * Console Playbooks tab groups them so operators don't see near-duplicates
  * (e.g. `argus_assess_cve` skill + `soc-argus-exploit-to-detection`
  * workflow both serve `user_intent: 'new_cve'`).
@@ -72,7 +72,7 @@ export interface ArgusPlaybook {
   /**
    * Optional Kibana Workflows Management saved-object id (e.g.
    * `workflow-1169617b-d198-441c-a65a-56941e1f26ba`). When present the
-   * Argus Playbooks tab deep-links to `/app/workflows/<id>`. When absent
+   * ARGUS Playbooks tab deep-links to `/app/workflows/<id>`. When absent
    * the row falls back to `/app/workflows/?search=<name>` so the operator
    * still lands on a useful list. Skills never carry this field.
    *

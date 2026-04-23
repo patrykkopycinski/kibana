@@ -11,7 +11,7 @@ import { ingestKev } from '../ingest';
 import { DEFAULT_CISA_KEV_URL } from '../fetch_feed';
 
 /**
- * Argus R14 — Standalone CLI for CISA KEV feed ingest.
+ * ARGUS R14 — Standalone CLI for CISA KEV feed ingest.
  *
  * This sits next to the Playwright-less CLIs we shipped for the detection
  * and reasoning eval verticals, so an operator can pull the latest KEV

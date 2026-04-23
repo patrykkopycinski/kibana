@@ -33,7 +33,7 @@ describe('trust-gate YAML ↔ TS spec alignment', () => {
 
   it('YAML file exists and is readable', () => {
     expect(yaml.length).toBeGreaterThan(100);
-    expect(yaml).toContain('Argus Trust Gate');
+    expect(yaml).toContain('ARGUS Trust Gate');
   });
 
   it('YAML mentions every verdict the TS spec can emit', () => {
@@ -70,8 +70,8 @@ describe('trust-gate YAML ↔ TS spec alignment', () => {
       yaml.includes('@kbn/argus-trust-policy') ||
       yaml.includes('kbn-argus-trust-policy') ||
       yaml.includes('R7') ||
-      yaml.includes('Argus R7') ||
-      yaml.includes('Argus R5 + R7');
+      yaml.includes('ARGUS R7') ||
+      yaml.includes('ARGUS R5 + R7');
     expect(hasPointer).toBe(true);
   });
 });

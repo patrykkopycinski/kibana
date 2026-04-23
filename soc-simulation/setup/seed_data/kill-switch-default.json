@@ -6,7 +6,7 @@
     "@timestamp": "2026-04-16T00:00:00.000Z",
     "autonomy_enabled": true,
     "scope": "global",
-    "reason": "Default bootstrap value. Flip to false to halt all autonomous Argus mutations.",
+    "reason": "Default bootstrap value. Flip to false to halt all autonomous ARGUS mutations.",
     "set_by": "bootstrap",
     "previous_state": null
   }

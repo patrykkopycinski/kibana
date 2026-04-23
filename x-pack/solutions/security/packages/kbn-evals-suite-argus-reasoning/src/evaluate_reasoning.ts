@@ -29,7 +29,7 @@ export interface EvaluateReasoningOptions {
   runId?: string;
   /** Defaults to `.soc-reasoning-trace`. */
   traceIndex?: string;
-  /** Defaults to `.soc-reasoning-eval-runs`. */
+  /** Defaults to `.soc-argus-eval-runs`. */
   runsIndex?: string;
   /** Elasticsearch time floor (default `now-24h`). */
   since?: string;
@@ -42,6 +42,8 @@ export interface EvaluateReasoningOptions {
 }
 
 export interface ReasoningEvalRow {
+  run_kind: 'reasoning';
+  suite_kind: 'reasoning';
   run_id: string;
   suite_id: string;
   trace_run_id?: string;
@@ -54,7 +56,7 @@ export interface ReasoningEvalRow {
 }
 
 const DEFAULT_TRACE_INDEX = '.soc-reasoning-trace';
-const DEFAULT_RUNS_INDEX = '.soc-reasoning-eval-runs';
+const DEFAULT_RUNS_INDEX = '.soc-argus-eval-runs';
 
 export const evaluateReasoning = async (
   deps: EvaluateReasoningDeps,
@@ -87,6 +89,8 @@ export const evaluateReasoning = async (
     overrideRunId ?? `argus-reasoning-${new Date().toISOString().replace(/[:.]/g, '-')}`;
 
   const row: ReasoningEvalRow = {
+    run_kind: 'reasoning',
+    suite_kind: 'reasoning',
     run_id: evalRunId,
     suite_id: suiteId,
     trace_run_id: runId,

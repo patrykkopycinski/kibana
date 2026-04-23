@@ -20,11 +20,11 @@ export const argusFindDatasourceGapsSkill = defineSkillType({
   basePath: 'skills/security/argus/playbooks',
   description:
     'Surface detection gaps grouped by data source (endpoint, network, identity, cloud, etc.) ' +
-    'rather than by technique. Reports which sources Argus currently relies on for high-' +
+    'rather than by technique. Reports which sources ARGUS currently relies on for high-' +
     'confidence detections and which techniques would become blind if a given source went ' +
     'dark. Use when the user asks "which data sources are we missing?" or "what would we lose ' +
     'without EDR?".',
-  content: `# Argus · Find Datasource Gaps
+  content: `# ARGUS · Find Datasource Gaps
 
 ## When to use this skill
 
@@ -45,10 +45,10 @@ sources rather than on techniques. Typical prompts:
    number of techniques, average confidence, and top 3 techniques whose
    confidence would collapse if the source went dark.
 3. **Call out single-source dependencies.** Any technique whose coverage comes
-   from exactly one source is fragile — Argus's ability to detect that
+   from exactly one source is fragile — ARGUS's ability to detect that
    technique depends entirely on that source.
 4. **Offer to file intents.** Where single-source dependencies exist, the user
-   may request a \`gap_analysis\` intent asking Argus to look for an
+   may request a \`gap_analysis\` intent asking ARGUS to look for an
    alternative rule that uses a second source. Use
    \`security.argus.file_mutation_intent\` with \`origin: 'gap_analysis'\` and
    include the technique id and missing source in \`summary\`.

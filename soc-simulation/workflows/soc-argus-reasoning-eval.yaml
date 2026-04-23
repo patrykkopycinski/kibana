@@ -1,25 +1,26 @@
 version: '1'
-name: Argus Reasoning Eval Reconciler (R11)
+name: ARGUS Reasoning Eval Reconciler (R11)
 description: >
-  Argus R11 — reconciliation poller for the reasoning eval vertical.
+  ARGUS R11 — reconciliation poller for the reasoning eval vertical.
 
   The actual evaluation (evidence / calibration / coherence / safety) runs
   in the Playwright suite inside `@kbn/evals-suite-argus-reasoning`, OR in
   the standalone CLI `scripts/run_reasoning_eval.ts` that uses the built-in
-  heuristic judge. Both writers target `.soc-reasoning-eval-runs` via the
+  heuristic judge. Both writers target `.soc-argus-eval-runs` (run_kind
+  reasoning|adversarial) via the
   bulk API; this workflow does NOT call a Kibana HTTP endpoint and it does
   NOT score anything itself — that belongs to the TS package where the
   judge is unit-tested and the schema lives in code.
 
   Responsibilities owned here (parity with soc-detection-eval.yaml):
 
-    * Poll `.soc-reasoning-eval-runs` for NEW rows since the last tick.
+    * Poll `.soc-argus-eval-runs` for NEW reasoning/adversarial rows since the last tick.
     * Emit a fast-path quarantine signal into `.soc-audit-trail` when a
       row arrives with gate_decision=fail — this gives the demo operator
       a near-real-time visual without waiting for the hourly trust-tier
       assessor.
     * Emit a governance span into `.soc-reasoning-trace` per reconciled
-      row, with decision.kind=reasoning_eval, so the Argus governance
+      row, with decision.kind=reasoning_eval, so the ARGUS governance
       dashboard can surface eval verdicts alongside triage/deteng
       decisions when slicing by agent+decision_kind.
     * Emit a heartbeat for the activity feed so the cadence is visible.
@@ -42,7 +43,7 @@ triggers:
   - type: manual
 
 consts:
-  runs_index: ".soc-reasoning-eval-runs"
+  runs_index: ".soc-argus-eval-runs"
   audit_index: ".soc-audit-trail"
   traces_index: ".soc-reasoning-trace"
   # 15m lookback — long enough to survive a missed tick, short enough to
@@ -67,6 +68,8 @@ steps:
         query:
           bool:
             filter:
+              - terms:
+                  run_kind: ["reasoning", "adversarial"]
               - range:
                   "@timestamp":
                     gte: "{{ consts.poll_window }}"
@@ -111,7 +114,7 @@ steps:
               the R11 gate. Trust-tier assessor will quarantine the
               affected actor cohort on its next tick.
 
-      # Argus M2.5 — governance span per reconciled eval run. The
+      # ARGUS M2.5 — governance span per reconciled eval run. The
       # decision.kind=reasoning_eval signal is the distinguishing field
       # that lets the governance dashboard separate eval verdicts from
       # triage / deteng / rule_eval decisions when slicing by
@@ -163,9 +166,9 @@ steps:
                 name: "argus.reasoning_eval.reconcile"
               agent:
                 id: "soc-argus-reasoning-eval"
-                name: "Argus Reasoning Eval Reconciler"
+                name: "ARGUS Reasoning Eval Reconciler"
                 description: >-
-                  Polls .soc-reasoning-eval-runs and emits governance
+                  Polls .soc-argus-eval-runs (reasoning/adversarial) and emits governance
                   traces + fast-path quarantine hints for R11 reasoning
                   eval verdicts.
 
@@ -196,7 +199,7 @@ steps:
     type: console
     with:
       message: >-
-        Argus reasoning-eval poll complete — reconciled
+        ARGUS reasoning-eval poll complete — reconciled
         {{ steps.fetch_new_eval_runs.output.hits.hits | size | default: 0 }}
         new eval-run row(s)
         (tick reasoning-eval-tick-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }})

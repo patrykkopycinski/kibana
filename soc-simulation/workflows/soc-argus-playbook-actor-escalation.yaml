@@ -1,0 +1,58 @@
+version: '1'
+name: Argus Playbook — Threat Actor Escalation
+description: >
+  Argus playbook primitive: when a threat actor's known techniques show fresh
+  telemetry in `.soc-telemetry-signals`, open an investigation case anchored on
+  the actor and queue a backtest against the actor's technique set.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: actor_id
+    type: string
+    required: true
+  - name: telemetry_lookback
+    type: string
+    required: false
+    default: "now-2h"
+
+consts:
+  telemetry_index: ".soc-telemetry-signals"
+  actors_index: ".soc-threat-actors"
+
+steps:
+  - name: fetch_actor
+    type: elasticsearch.get
+    with:
+      index: "{{ consts.actors_index }}"
+      id: "{{ inputs.actor_id }}"
+    continueOnFailure: true
+
+  - name: fetch_recent_telemetry
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.telemetry_index }}"
+      size: 50
+      query:
+        bool:
+          filter:
+            - range: { "@timestamp": { gte: "{{ inputs.telemetry_lookback }}" } }
+
+  - name: log_escalation
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        kind: "playbook_dispatch"
+        playbook: "soc-argus-playbook-actor-escalation"
+        actor_id: "{{ inputs.actor_id }}"
+        recent_hits: "{{ steps.fetch_recent_telemetry.output.hits.total.value }}"
+
+outputs:
+  - name: actor
+    value: "{{ steps.fetch_actor.output }}"
+  - name: recent_hits
+    value: "{{ steps.fetch_recent_telemetry.output.hits.total.value }}"

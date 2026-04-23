@@ -1,0 +1,78 @@
+{
+  "index_patterns": [".soc-backtests"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "rec_id": { "type": "keyword" },
+        "rule_id": { "type": "keyword" },
+        "rule_type": { "type": "keyword" },
+        "action": { "type": "keyword" },
+        "op": { "type": "keyword" },
+        "window_start": { "type": "date" },
+        "window_end": { "type": "date" },
+        "window_days": { "type": "integer" },
+        "current_rule_snapshot": { "type": "object", "enabled": false },
+        "proposed_rule_snapshot": { "type": "object", "enabled": false },
+        "metrics": {
+          "properties": {
+            "before": {
+              "properties": {
+                "alert_count": { "type": "long" },
+                "distinct_hosts": { "type": "long" },
+                "distinct_users": { "type": "long" },
+                "alerts_per_day": { "type": "float" }
+              }
+            },
+            "after": {
+              "properties": {
+                "alert_count": { "type": "long" },
+                "distinct_hosts": { "type": "long" },
+                "distinct_users": { "type": "long" },
+                "alerts_per_day": { "type": "float" }
+              }
+            },
+            "delta": {
+              "properties": {
+                "alert_reduction_pct": { "type": "float" },
+                "net_alert_volume": { "type": "long" },
+                "fp_reduction_pct": { "type": "float" },
+                "tp_preservation_pct": { "type": "float" },
+                "removed_hits": { "type": "long" },
+                "added_hits": { "type": "long" },
+                "preserved_hits": { "type": "long" }
+              }
+            }
+          }
+        },
+        "tp_misses": {
+          "type": "nested",
+          "properties": {
+            "alert_id": { "type": "keyword" },
+            "host_name": { "type": "keyword" },
+            "triage_verdict": { "type": "keyword" },
+            "alerted_at": { "type": "date" }
+          }
+        },
+        "verdict": { "type": "keyword" },
+        "verdict_reason": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } } },
+        "computed_at": { "type": "date" },
+        "computed_by": { "type": "keyword" },
+        "compute_duration_ms": { "type": "long" },
+        "simulator_used": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Backtest projections for proposed mutations. Populated by soc-rule-backtester before the applier sees the mutation. Autonomous gate cascade reads `verdict` to decide auto-apply vs human review.",
+    "owner": "argus-governance",
+    "schema_version": 1,
+    "verdicts": ["projection_safe", "projection_concerning", "projection_unsafe", "projection_unknown"]
+  }
+}

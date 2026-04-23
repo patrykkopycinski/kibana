@@ -1,7 +1,7 @@
 version: '1'
 name: SOC Architecture Reviewer
 description: >
-  Scheduled architectural review of the AutoSOC mesh. Inventories all agents, skills,
+  Scheduled architectural review of the Argus mesh. Inventories all agents, skills,
   and workflows, gathers metrics, and uses the meta-agent with the architecture-review
   skill to identify consolidation opportunities and anti-patterns. Writes recommendations
   to .soc-recommendations for human review.
@@ -31,48 +31,39 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-7d"
-        size: 50
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 50
   - name: get_metrics
     type: elasticsearch.search
     with:
       index: ".soc-metrics"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-7d"
-        size: 100
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 100
   - name: get_recommendations
     type: elasticsearch.search
     with:
       index: ".soc-recommendations"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-7d"
-        size: 0
-        aggs:
-          by_source:
-            terms:
-              field: "source"
-              size: 20
-            aggs:
-              statuses:
-                terms:
-                  field: "status"
-                  size: 10
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 0
+      aggs:
+        by_source:
+          terms:
+            field: "source"
+            size: 20
+          aggs:
+            statuses:
+              terms:
+                field: "status"
+                size: 10
 
   - name: log_start
     type: console
@@ -86,7 +77,7 @@ steps:
     connector-id: opus
     with:
       message: >
-        Perform an architectural review of the AutoSOC mesh using your architecture-review skill.
+        Perform an architectural review of the Argus mesh using your architecture-review skill.
 
         Analyze the current inventory for consolidation opportunities, anti-patterns,
         and structural improvements.
@@ -105,7 +96,7 @@ steps:
         - soc-deteng-agent: Principal Detection Engineer — strategic rule authoring + coverage-gap closure + redesign of irredeemable rules
         - soc-signal-quality-agent: Tactical FP/TP tuning (exceptions, thresholds, last-resort disables)
         - soc-meta-agent: System evolution brain (skills for health-check, difficulty, arch-review)
-        - soc-autonomous-applier-agent: Governance-gated applier for autosoc-owned mutations
+        - soc-autonomous-applier-agent: Governance-gated applier for Argus-managed mutations (registry owner=autosoc)
         - soc-rec-applier-agent: Recommendation execution
         - Everything else: Deterministic workflows
 
@@ -150,13 +141,13 @@ steps:
         reasoning: "Periodic architectural review for consolidation opportunities"
         confidence: 70
         track: "agentic"
-        expected_impact: "{{ steps.review.output.expected_impact | default: {} }}"
+        expected_impact: "{{ steps.review.output.expected_impact }}"
         evidence: "{{ steps.review.output.evidence | default: [] }}"
 
   # ── Fan out concrete mutation intents (if any) ───────────────────
   - name: write_mutation_intents
     type: foreach
-    foreach: "{{ steps.review.output.intents | default: [] }}"
+    foreach: "{{ steps.review.output.intents }}"
     steps:
       - name: write_intent
         type: elasticsearch.index

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/capability_gap.schema.json",
+  "$id": "https://argus.local/schemas/capability_gap.schema.json",
   "title": "Capability Gap",
   "description": "Meta-agent finding: a SOC capability that is missing or underpowered. Proposes the artifact to create/modify to close the gap.",
   "type": "object",

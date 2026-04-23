@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/rule_creation.schema.json",
+  "$id": "https://argus.local/schemas/rule_creation.schema.json",
   "title": "Rule Creation",
   "description": "Proposal for a brand-new detection rule. Every new rule MUST be created DISABLED and run in shadow mode for at least one regression cycle before it can be enabled (even autonomously).",
   "type": "object",

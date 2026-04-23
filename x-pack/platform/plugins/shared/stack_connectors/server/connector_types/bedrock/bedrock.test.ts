@@ -1301,6 +1301,116 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     });
   });
 
+  describe('temperature gating for Anthropic reasoning models', () => {
+    const REASONING_MODEL = 'us.anthropic.claude-opus-4-7-20250514-v1:0';
+    const encodedReasoningModel = encodeURIComponent(REASONING_MODEL);
+    const reasoningConnector = new BedrockConnector({
+      configurationUtilities: actionsConfigMock.create(),
+      connector: { id: '1', type: CONNECTOR_ID },
+      config: {
+        apiUrl: DEFAULT_URL,
+        defaultModel: REASONING_MODEL,
+      },
+      secrets: { accessKey: '123', secret: 'secret' },
+      logger,
+      services: actionsMock.createServices(),
+    });
+
+    beforeEach(() => {
+      // @ts-ignore
+      reasoningConnector.request = mockRequest;
+    });
+
+    it('omits `temperature` from invokeAI body for Opus 4.7', async () => {
+      mockRequest.mockResolvedValue({
+        ...mockResponse,
+        data: { ...claude3Response },
+      });
+      await reasoningConnector.invokeAI(
+        { messages: DEFAULT_MESSAGES, temperature: 0 },
+        connectorUsageCollector
+      );
+      const [{ data }] = mockRequest.mock.calls[0];
+      const parsed = JSON.parse(data as string);
+      expect(parsed).not.toHaveProperty('temperature');
+    });
+
+    it('omits `temperature` from invokeStream body for Opus 4.7', async () => {
+      mockRequest.mockResolvedValue({
+        ...mockResponse,
+        data: createStreamMock().transform,
+      });
+      await reasoningConnector.invokeStream(
+        { messages: DEFAULT_MESSAGES, temperature: 0 },
+        connectorUsageCollector
+      );
+      const [{ data }] = mockRequest.mock.calls[0];
+      const parsed = JSON.parse(data as string);
+      expect(parsed).not.toHaveProperty('temperature');
+    });
+
+    it('omits `temperature` from invokeAIRaw body for Opus 4.7', async () => {
+      mockRequest.mockResolvedValue(mockResponse);
+      await reasoningConnector.invokeAIRaw(
+        { messages: DEFAULT_MESSAGES, temperature: 0 },
+        connectorUsageCollector
+      );
+      const [{ data }] = mockRequest.mock.calls[0];
+      const parsed = JSON.parse(data as string);
+      expect(parsed).not.toHaveProperty('temperature');
+    });
+
+    it('omits `inferenceConfig.temperature` on converse for Opus 4.7', async () => {
+      mockRequest.mockResolvedValue({
+        ...mockResponse,
+        data: {
+          output: { message: { role: 'assistant', content: [{ text: 'ok' }] } },
+          usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          stopReason: 'end_turn',
+        },
+      });
+      await reasoningConnector.converse(
+        {
+          messages: DEFAULT_MESSAGES.map((m) => ({
+            role: m.role as 'user',
+            content: [{ text: m.content }],
+          })),
+          temperature: 0,
+        },
+        connectorUsageCollector
+      );
+      const [{ data }] = mockRequest.mock.calls[0];
+      const parsed = JSON.parse(data as string);
+      expect(parsed.inferenceConfig).not.toHaveProperty('temperature');
+      expect(parsed).toMatchObject({
+        modelId: REASONING_MODEL,
+      });
+      expect(mockRequest.mock.calls[0][0].url).toBe(
+        `${DEFAULT_URL}/model/${encodedReasoningModel}/converse`
+      );
+    });
+
+    it('omits `inferenceConfig.temperature` on converseStream for Opus 4.7', async () => {
+      mockRequest.mockResolvedValue({
+        ...mockResponse,
+        data: createStreamMock().transform,
+      });
+      await reasoningConnector.converseStream(
+        {
+          messages: DEFAULT_MESSAGES.map((m) => ({
+            role: m.role as 'user',
+            content: [{ text: m.content }],
+          })),
+          temperature: 0,
+        },
+        connectorUsageCollector
+      );
+      const [{ data }] = mockRequest.mock.calls[0];
+      const parsed = JSON.parse(data as string);
+      expect(parsed.inferenceConfig).not.toHaveProperty('temperature');
+    });
+  });
+
   describe('Token dashboard', () => {
     const mockGenAi = initDashboard as jest.Mock;
     beforeEach(() => {

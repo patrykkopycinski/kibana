@@ -8,11 +8,44 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENV_FILE="${SCRIPT_DIR}/.env"
+
+# Argus-specific toggles. Default is "seed-all advisories, do NOT nuke
+# pre-existing recommendations" — the safe demo reset story. Operators
+# running a second live run who want a clean recommendation feed pass
+# --reset-recommendations explicitly.
+SEED_ADVISORIES="true"
+RESET_RECOMMENDATIONS="false"
+NO_DEMO_DATA="false"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --env) ENV_FILE="$2"; shift 2 ;;
+    --no-seed-advisories) SEED_ADVISORIES="false"; shift ;;
+    --no-demo-data) NO_DEMO_DATA="true"; SEED_ADVISORIES="false"; shift ;;
+    --reset-recommendations) RESET_RECOMMENDATIONS="true"; shift ;;
+    -h|--help)
+      cat <<USAGE
+Usage: ./setup.sh [--env <env-file>] [--no-seed-advisories] [--no-demo-data] [--reset-recommendations]
+
+  --env <env-file>            Load ES/Kibana creds from a dotenv file (default: ./.env)
+  --no-seed-advisories        Skip the Argus exploit-to-detection CLI seeding step.
+                              By default setup runs the CLI with --seed-all so the
+                              three demo advisories land in .soc-cve-advisories
+                              (status=ingested) and the reconciler picks them up.
+  --no-demo-data              Skip demo-only data: Argus variant bank bulk load, Caldera
+                              profile seeding, difficulty-state seed, and exploit-to-detection
+                              --seed-all (same as --no-seed-advisories for advisories).
+                              Index templates, agents, skills, workflows, registry, governance
+                              seeds (e.g. kill switch), and detection rules import still run.
+  --reset-recommendations     Delete every document in .soc-recommendations before
+                              seeding. Useful for clean-slate demos; do NOT run
+                              against a shared cluster with real recs.
+  -h, --help                  Show this message.
+USAGE
+      exit 0
+      ;;
     *) echo "Unknown arg: $1"; exit 1 ;;
   esac
 done
@@ -31,6 +64,11 @@ echo "=== SOC Simulation Setup ==="
 echo "ES:     $ES_URL"
 echo "Kibana: $KIBANA_URL"
 echo ""
+
+if [[ "${NO_DEMO_DATA}" == "true" ]]; then
+  echo "--- Demo data disabled (--no-demo-data): skipping Argus variant bank, Caldera adversary profiles, difficulty-state seed, and exploit-to-detection advisory seed-all ---"
+  echo ""
+fi
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -153,6 +191,30 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# 1b. Ingest pipelines
+#
+# Ingest pipelines MUST be deployed before index templates, because a template
+# that declares `default_pipeline` is rejected at PUT time if the pipeline does
+# not yet exist on the cluster.
+# ---------------------------------------------------------------------------
+
+PIPELINES_DIR="${SCRIPT_DIR}/setup/ingest_pipelines"
+if [[ -d "$PIPELINES_DIR" ]]; then
+  echo "--- Deploying ingest pipelines ---"
+  for pipe_file in "${PIPELINES_DIR}"/*.json; do
+    [[ -f "$pipe_file" ]] || continue
+    pipe_name="$(basename "${pipe_file}" .json)"
+    echo "  PUT _ingest/pipeline/${pipe_name}"
+    es_curl PUT "/_ingest/pipeline/${pipe_name}" --data-binary "@${pipe_file}" > /dev/null
+  done
+  echo "  Done."
+else
+  echo "--- Ingest pipelines: directory not found, skipping ---"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # 2. Index templates
 # ---------------------------------------------------------------------------
 
@@ -258,7 +320,13 @@ if [[ -d "$SEED_DIR" ]]; then
   echo "--- Seeding data ---"
   for seed_file in "${SEED_DIR}"/*.json; do
     [[ -f "$seed_file" ]] || continue
-    echo "  Seeding from $(basename "${seed_file}")"
+    seed_basename="$(basename "${seed_file}")"
+    if [[ "${NO_DEMO_DATA}" == "true" && "${seed_basename}" == "difficulty-state-initial.json" ]]; then
+      echo "  Skipping ${seed_basename} (--no-demo-data)"
+      continue
+    fi
+
+    echo "  Seeding from ${seed_basename}"
 
     # Parse index and body out of the seed file
     seed_index=$(python3 -c "
@@ -320,7 +388,7 @@ echo ""
 # ---------------------------------------------------------------------------
 
 PROFILES_DIR="${SCRIPT_DIR}/caldera_profiles"
-if [[ -d "$PROFILES_DIR" ]]; then
+if [[ -d "$PROFILES_DIR" && "${NO_DEMO_DATA}" != "true" ]]; then
   echo "--- Seeding Caldera adversary profiles into .soc-attack-profiles ---"
   profile_count=0
   for profile_file in "${PROFILES_DIR}"/*.json; do
@@ -363,8 +431,142 @@ print(json.dumps(d))
   else
     echo "  Done (${profile_count} profile(s))."
   fi
+elif [[ -d "$PROFILES_DIR" && "${NO_DEMO_DATA}" == "true" ]]; then
+  echo "--- Skipping Caldera adversary profiles (--no-demo-data) ---"
 else
   echo "--- Caldera profiles: directory not found, skipping ---"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# 4c. Argus variant bank (M2.4)
+#     Bulk-load the labelled Mythos-era corpus from
+#     soc-simulation/scripts/argus-variant-bank/ into .soc-eval-corpus-<corpus_id>.
+#     Each .ndjson file contains one document per line; docs carry an _argus.corpus_id
+#     which determines the target index. Re-running is idempotent at the variant
+#     level because we use op_type=create with _id = <primitive>-<axis>-<index>.
+# ---------------------------------------------------------------------------
+
+BANK_DIR="${SCRIPT_DIR}/scripts/argus-variant-bank"
+if [[ -d "$BANK_DIR" && "${NO_DEMO_DATA}" != "true" ]]; then
+  echo "--- Seeding Argus variant bank into .soc-eval-corpus-* ---"
+  variant_count=0
+
+  # Build a single big NDJSON bulk body across all axis files + negatives.
+  bulk_body="$(python3 - "${BANK_DIR}" <<'PY'
+import glob, json, os, sys
+root = sys.argv[1]
+out_lines = []
+patterns = [
+    os.path.join(root, "*", "axis-*.ndjson"),
+    # Argus R1 — corpora organised into named subtrees
+    # (e.g. attack-er7/T1190/axis-*.ndjson). Each subtree has its own
+    # corpus_id stamped on every doc so they land in separate indices.
+    os.path.join(root, "*", "*", "axis-*.ndjson"),
+    os.path.join(root, "_negatives", "*.ndjson"),
+    os.path.join(root, "*", "_negatives", "*.ndjson"),
+]
+for pat in patterns:
+    for path in sorted(glob.glob(pat)):
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                doc = json.loads(line)
+                argus = doc.get("_argus", {})
+                corpus_id = argus.get("corpus_id")
+                primitive = argus.get("primitive_id", "unknown")
+                axis = argus.get("variant_axis", "unknown")
+                idx = argus.get("variant_index", 0)
+                if not corpus_id:
+                    continue
+                target_index = f".soc-eval-corpus-{corpus_id}"
+                doc_id = f"{primitive}-{axis}-{idx}"
+                header = {"index": {"_index": target_index, "_id": doc_id}}
+                out_lines.append(json.dumps(header))
+                out_lines.append(json.dumps(doc))
+print("\n".join(out_lines) + ("\n" if out_lines else ""))
+PY
+  )"
+
+  variant_count=$(printf '%s\n' "$bulk_body" | grep -c '^{"index"' || true)
+
+  if [[ $variant_count -gt 0 ]]; then
+    echo "  Bulk-loading ${variant_count} variant(s)..."
+    # ES bulk API requires the body to terminate with a newline. Bash command
+    # substitution ($(...)) strips trailing newlines from $bulk_body, so we
+    # append one explicitly here; otherwise ES returns 400.
+    printf '%s\n' "$bulk_body" | curl -sf -u "${ES_USER}:${ES_PASS}" \
+      -X POST \
+      -H "Content-Type: application/x-ndjson" \
+      "${ES_URL}/_bulk?refresh=wait_for" \
+      --data-binary @- > /dev/null
+    echo "  Done (${variant_count} variant(s))."
+  else
+    echo "  No variants found in bank."
+  fi
+elif [[ -d "$BANK_DIR" && "${NO_DEMO_DATA}" == "true" ]]; then
+  echo "--- Skipping Argus variant bank (--no-demo-data) ---"
+else
+  echo "--- Argus variant bank: directory not found, skipping ---"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# 4d. Argus recommendation reset (opt-in via --reset-recommendations)
+#     Clears pre-existing recommendations so a live demo starts from a clean
+#     feed. The `.soc-recommendations` template stays in place — only the
+#     documents are deleted.
+# ---------------------------------------------------------------------------
+
+if [[ "${RESET_RECOMMENDATIONS}" == "true" ]]; then
+  echo "--- Resetting .soc-recommendations + .soc-cve-advisories (fresh demo state) ---"
+  for idx in ".soc-recommendations" ".soc-cve-advisories" ".soc-detection-eval-runs"; do
+    deleted=$(es_curl POST "/${idx}/_delete_by_query?conflicts=proceed&refresh=true" \
+      --data-binary '{"query":{"match_all":{}}}' \
+      2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deleted", 0))' \
+      2>/dev/null || echo 0)
+    echo "  ${idx}: deleted ${deleted} doc(s)"
+  done
+else
+  echo "--- Skipping recommendation reset (pass --reset-recommendations to enable) ---"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# 4e. Argus exploit-to-detection seeding (M2.2)
+#     Runs the CLI with --seed-all so every ARGUS_DEMO_ADVISORIES entry lands
+#     in `.soc-cve-advisories` with status=ingested + a filed recommendation
+#     + a labelled corpus. The reconciler workflow promotes them on its next
+#     3m tick.
+# ---------------------------------------------------------------------------
+
+if [[ "${SEED_ADVISORIES}" == "true" ]]; then
+  E2D_CLI_JS="${REPO_ROOT}/x-pack/solutions/security/packages/kbn-argus-exploit-to-detection/scripts/run_exploit_to_detection.js"
+  if [[ -f "${E2D_CLI_JS}" ]]; then
+    echo "--- Seeding Argus demo advisories via exploit-to-detection CLI ---"
+    if ES_URL="${ES_URL}" ES_USER="${ES_USER}" ES_PASS="${ES_PASS}" \
+        node "${E2D_CLI_JS}" \
+          --es-url "${ES_URL}" \
+          --es-user "${ES_USER}" \
+          --es-pass "${ES_PASS}" \
+          --seed-all; then
+      echo "  Argus advisories seeded successfully."
+    else
+      echo "  WARN: exploit-to-detection CLI failed — demo will be missing advisories."
+      echo "  You can re-run manually:"
+      echo "    node ${E2D_CLI_JS} --seed-all"
+    fi
+  else
+    echo "--- Argus exploit-to-detection CLI not found at ${E2D_CLI_JS} ---"
+    echo "    Run 'yarn kbn bootstrap' to build it, then re-run setup.sh."
+  fi
+else
+  echo "--- Skipping Argus advisory seeding (--no-seed-advisories set) ---"
 fi
 
 echo ""
@@ -544,6 +746,7 @@ for w in data["workflows"]:
         "summary":          w["summary"],
         "owner":             w.get("owner", "canonical"),
         "model_tier":       w.get("model_tier", "none"),
+        "tags":             w.get("tags", []),
         "last_seeded_at":   ts,
     }
     print(f"{w['workflow_id']}\t{json.dumps(body)}")
@@ -553,12 +756,22 @@ PYEOF
   while IFS=$'\t' read -r wf_id wf_body; do
     [[ -z "$wf_id" ]] && continue
     declared_ids+=("$wf_id")
+    # Use `_update` with `doc` + `upsert` so we merge rather than replace.
+    # This preserves derived fields written after setup.sh (notably
+    # `kibana_workflow_id`, populated by resolve_workflow_ids.sh once the
+    # Workflows Management bulk import has finished assigning saved-object
+    # ids) across subsequent reseeds.
+    update_body=$(python3 -c '
+import json, sys
+body = json.loads(sys.argv[1])
+print(json.dumps({"doc": body, "upsert": body}))
+' "${wf_body}")
     http_code=$(curl -s -o /dev/null -w "%{http_code}" \
       -u "${ES_USER}:${ES_PASS}" \
-      -X PUT \
+      -X POST \
       -H "Content-Type: application/json" \
-      "${ES_URL}/.soc-workflow-registry/_doc/${wf_id}" \
-      --data "${wf_body}")
+      "${ES_URL}/.soc-workflow-registry/_update/${wf_id}" \
+      --data "${update_body}")
     if [[ "$http_code" != "200" && "$http_code" != "201" ]]; then
       echo "  WARN: HTTP ${http_code} seeding registry doc ${wf_id}" >&2
     fi
@@ -576,6 +789,19 @@ print(json.dumps({"query":{"bool":{"must_not":[{"terms":{"workflow_id":ids}}]}}}
     "${ES_URL}/.soc-workflow-registry/_delete_by_query?refresh=true&conflicts=proceed" \
     --data "${stale_query}" || true
   echo "  Seeded ${#declared_ids[@]} workflow(s) into .soc-workflow-registry."
+
+  # Resolve Kibana saved-object ids for the Workflows Management bulk
+  # import we just ran above. This is what makes the Argus Playbooks
+  # "Run" action deep-link to the correct /app/workflows/<id> URL instead
+  # of the slug (which 404s the detail page because the Workflows app
+  # keys documents by a random `workflow-<uuid>` id). Fails soft: a miss
+  # just leaves `kibana_workflow_id` unset and the UI falls back to the
+  # search-filtered list.
+  if [[ -f "${SCRIPT_DIR}/scripts/resolve_workflow_ids.sh" ]]; then
+    ES_URL="${ES_URL}" ES_USER="${ES_USER}" ES_PASS="${ES_PASS}" \
+      bash "${SCRIPT_DIR}/scripts/resolve_workflow_ids.sh" || \
+      echo "  WARN: resolve_workflow_ids.sh failed; Playbooks links will fall back to ?search=" >&2
+  fi
 fi
 
 echo ""

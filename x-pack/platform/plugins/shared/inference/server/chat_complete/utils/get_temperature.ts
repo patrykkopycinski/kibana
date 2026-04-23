@@ -9,6 +9,24 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
 
+// Anthropic Claude models that reject the `temperature` parameter (4.6+
+// extended-thinking / reasoning variants).
+// Matches on any segment containing these substrings so that provider-prefixed names like
+// `us.anthropic.claude-opus-4-7` or `claude-opus-4-7-thinking` are handled.
+// Keep this list in sync with
+// `x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/utils.ts`.
+const ANTHROPIC_MODELS_WITHOUT_TEMPERATURE = [
+  'opus-4-6',
+  'opus-4-7',
+  'opus-4-8',
+  'claude-opus-4-6',
+  'claude-opus-4-7',
+  'claude-opus-4-8',
+  'claude-4-6',
+  'claude-4-7',
+  'claude-4-8',
+];
+
 export const getTemperatureIfValid = (
   temperature?: number,
   { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
@@ -44,6 +62,19 @@ export const getTemperatureIfValid = (
     if (shouldExcludeTemperature) {
       // Some models reject non-default temperature values (or reject the param entirely). Let the
       // provider default apply by omitting the parameter.
+      return {};
+    }
+  }
+
+  // Anthropic Claude models delivered via Bedrock or Inference-gateway ("opus-4-7" and newer) reject
+  // `temperature`. Match on substring because names may be prefixed (e.g. `us.anthropic.claude-opus-4-7`).
+  if (
+    (connector?.type === InferenceConnectorType.Bedrock ||
+      connector?.type === InferenceConnectorType.Inference) &&
+    model
+  ) {
+    const normalizedModel = model.toLowerCase();
+    if (ANTHROPIC_MODELS_WITHOUT_TEMPERATURE.some((m) => normalizedModel.includes(m))) {
       return {};
     }
   }

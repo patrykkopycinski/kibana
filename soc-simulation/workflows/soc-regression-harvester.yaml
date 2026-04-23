@@ -19,44 +19,40 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        size: 100
-        sort:
-          - "@timestamp": "desc"
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-2h"
-              - terms:
-                  disposition:
-                    - "true_positive_high"
-                    - "true_positive_low"
-                    - "benign_positive"
-                    - "auto_closed_fp"
-              - term:
-                  harvested_for_regression: false
+      size: 100
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-2h"
+            - terms:
+                disposition:
+                  - "true_positive_high"
+                  - "true_positive_low"
+                  - "benign_positive"
+                  - "auto_closed_fp"
+            - term:
+                harvested_for_regression:
+                  value: false
 
   # ── Gather rejected recommendations — these are explicit negative training signals ──
   - name: get_rejected_recs
     type: elasticsearch.search
     with:
       index: ".soc-recommendations"
-      body:
-        size: 100
-        sort:
-          - "@timestamp": "desc"
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-2h"
-              - term:
-                  status: "rejected"
-              - term:
-                  harvested_for_regression: false
+      size: 100
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-2h"
+            - term:
+                status: "rejected"
+            - term:
+                harvested_for_regression:
+                  value: false
 
   # ── Let the meta-agent turn outcomes into frozen regression cases ──
   - name: harvest_cases

@@ -9,6 +9,15 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import { argusExplainDecisionSkill } from './argus_explain_decision';
+import {
+  argusAssessCveSkill,
+  argusAssessReadinessSkill,
+  argusEmulateActorSkill,
+  argusFindDatasourceGapsSkill,
+  argusReviewRuleQualitySkill,
+  argusRunPurpleTeamSkill,
+} from './argus_playbooks';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
@@ -59,4 +68,27 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(alertAnalysisSkill);
+
+  if (experimentalFeatures.argusConsoleEnabled) {
+    const argusSkills = [
+      argusExplainDecisionSkill,
+      argusAssessReadinessSkill,
+      argusEmulateActorSkill,
+      argusRunPurpleTeamSkill,
+      argusAssessCveSkill,
+      argusFindDatasourceGapsSkill,
+      argusReviewRuleQualitySkill,
+    ];
+    // Register each Argus skill independently so a single failure (e.g. a
+    // missing allow-list entry in `@kbn/agent-builder-server`) does not abort
+    // the remaining registrations and leave the Argus Console pointing at
+    // skills that never made it into the library.
+    for (const skill of argusSkills) {
+      try {
+        await agentBuilder.skills.register(skill);
+      } catch (err) {
+        logger.error(`Failed to register Argus skill "${skill.id}": ${err.message}`);
+      }
+    }
+  }
 };

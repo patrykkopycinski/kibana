@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/rule_patch.schema.json",
+  "$id": "https://argus.local/schemas/rule_patch.schema.json",
   "title": "Rule Patch",
   "description": "Incremental change to an existing detection rule. Must emit `patch_fields` — the exact fields to write — and the `current_values` the agent read, so the applier can detect drift.",
   "type": "object",

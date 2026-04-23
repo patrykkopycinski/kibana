@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1680">
+<title>ARGUS — One slide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #080D1A;
+    --surface: #10192E;
+    --surface2: #17223E;
+    --border: #253553;
+    --argus: #00E5FF;
+    --accent2: #7C4DFF;
+    --mythos: #FF3366;
+    --green: #00E676;
+    --blue: #409CFF;
+    --amber: #FFD740;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    min-height: 100%;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78em;
+    color: var(--argus);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  .slide {
+    width: 100vw;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    padding: 36px 56px 28px;
+    gap: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 12% 18%, rgba(0, 229, 255, 0.09), transparent 40%),
+      radial-gradient(circle at 88% 88%, rgba(124, 77, 255, 0.09), transparent 45%);
+    pointer-events: none;
+  }
+
+  /* ── Header ────────────────────────────────────── */
+  .header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 28px;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  .mark {
+    width: 60px; height: 60px; border-radius: 14px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px; font-weight: 800;
+    color: var(--bg);
+    box-shadow: 0 10px 30px rgba(0, 229, 255, 0.25);
+  }
+
+  .title h1 {
+    font-size: 34px; font-weight: 900; letter-spacing: -0.6px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .title .expanded {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1.3px;
+    margin-top: 4px;
+  }
+  .title .expanded strong { color: var(--argus); }
+
+  .tagline { text-align: right; max-width: 420px; }
+  .tagline .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: var(--mythos); margin-bottom: 4px;
+  }
+  .tagline .line { font-size: 14px; font-weight: 500; color: var(--text2); }
+
+  /* ── Narrative body ───────────────────────────── */
+  .body {
+    display: grid;
+    grid-template-columns: 1.05fr 1.35fr 1fr;
+    gap: 24px;
+    position: relative;
+    z-index: 1;
+    min-height: 0;
+  }
+
+  .card {
+    background: linear-gradient(180deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .card h2 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  .headline {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .problem .headline em  { color: var(--mythos); font-style: normal; font-weight: 800; }
+  .solution .headline em { color: var(--argus);  font-style: normal; font-weight: 800; }
+  .proof .headline em    { color: var(--green);  font-style: normal; font-weight: 800; }
+
+  /* Problem */
+  .pressures { display: grid; gap: 7px; margin-top: 2px; }
+  .pressure {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 8px 10px;
+    background: rgba(255, 51, 102, 0.06);
+    border-left: 2px solid var(--mythos);
+    border-radius: 6px;
+  }
+  .pressure .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 800; color: var(--mythos);
+  }
+  .pressure .label { font-size: 12.5px; color: var(--text); font-weight: 600; }
+  .pressure .label span {
+    display: block; font-size: 11px; font-weight: 400;
+    color: var(--text3); margin-top: 1px; line-height: 1.4;
+  }
+  .problem-stat {
+    margin-top: 4px;
+    padding: 10px 12px;
+    border: 1px dashed rgba(255, 51, 102, 0.35);
+    border-radius: 7px;
+    font-size: 11.5px; color: var(--text2);
+    line-height: 1.5;
+  }
+  .problem-stat strong { color: var(--mythos); }
+  .problem-stat .kbd { font-family: 'JetBrains Mono', monospace; color: var(--text); font-size: 11px; }
+
+  /* Solution */
+  .loop {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 6px 8px;
+    text-align: center;
+    position: relative;
+  }
+  .stage .step { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: 1px; }
+  .stage .name { font-size: 11.5px; font-weight: 700; color: var(--argus); margin-top: 2px; line-height: 1.2; }
+  .stage:not(:last-child)::after {
+    content: '›';
+    position: absolute;
+    right: -6px; top: 50%;
+    transform: translateY(-55%);
+    color: var(--accent2);
+    font-weight: 800; font-size: 14px;
+    z-index: 2;
+  }
+
+  .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 4px; }
+  .pillar {
+    background: rgba(0, 229, 255, 0.04);
+    border: 1px solid rgba(0, 229, 255, 0.18);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .pillar .name { font-size: 11.5px; font-weight: 700; color: var(--argus); letter-spacing: 0.4px; }
+  .pillar .desc { font-size: 11px; color: var(--text2); margin-top: 3px; line-height: 1.45; }
+  .pillar .paths { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text3); margin-top: 4px; letter-spacing: 0.3px; }
+
+  .foundation {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text3);
+    padding-top: 9px;
+    border-top: 1px dashed var(--border);
+    letter-spacing: 0.4px;
+    line-height: 1.6;
+  }
+  .foundation strong { color: var(--text); font-weight: 600; }
+
+  /* Proof */
+  .guarantees { display: grid; gap: 8px; margin-top: 2px; }
+  .guarantee {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: 10px;
+    align-items: start;
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .guarantee .check { color: var(--green); font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .guarantee span { display: block; font-size: 11px; font-weight: 400; color: var(--text3); margin-top: 2px; line-height: 1.4; }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+    padding: 10px;
+    border: 1px solid rgba(0, 230, 118, 0.25);
+    background: rgba(0, 230, 118, 0.05);
+    border-radius: 8px;
+  }
+  .metric { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text2); display: flex; justify-content: space-between; gap: 6px; }
+  .metric .k { color: var(--text3); letter-spacing: 0.3px; }
+  .metric .v { color: var(--green); font-weight: 700; }
+
+  .killswitch {
+    margin-top: 2px;
+    padding: 10px 12px;
+    background: rgba(255, 82, 82, 0.08);
+    border: 1px solid rgba(255, 82, 82, 0.35);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .killswitch strong { color: var(--mythos); }
+
+  /* ── Ship-it band ─────────────────────────────── */
+  .shipit {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(180deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 22px 20px;
+  }
+  .shipit-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    gap: 18px;
+  }
+  .shipit-head h2 {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .shipit-head .hint {
+    font-size: 11.5px;
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .shipit-head .hint strong { color: var(--argus); font-weight: 700; }
+
+  .ladder {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    align-items: stretch;
+    position: relative;
+  }
+  .ladder::before {
+    content: '';
+    position: absolute;
+    left: 8px; right: 8px; top: 18px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green) 0%, var(--argus) 20%, var(--accent2) 40%, var(--blue) 60%, var(--amber) 80%, var(--mythos) 100%);
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .mod {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--argus);
+    border-radius: 10px;
+    padding: 10px 11px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .mod.m1 { border-top-color: var(--green); }
+  .mod.m2 { border-top-color: var(--argus); }
+  .mod.m3 { border-top-color: var(--accent2); }
+  .mod.m4 { border-top-color: var(--blue); }
+  .mod.m5 { border-top-color: var(--amber); }
+  .mod.m6 { border-top-color: var(--amber); }
+  .mod.m7 { border-top-color: var(--mythos); }
+
+  .mod-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mod-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 800;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+  .mod.m1 .mod-num { color: var(--green);  border-color: rgba(0,230,118,0.4); }
+  .mod.m2 .mod-num { color: var(--argus);  border-color: rgba(0,229,255,0.4); }
+  .mod.m3 .mod-num { color: var(--accent2);border-color: rgba(124,77,255,0.4); }
+  .mod.m4 .mod-num { color: var(--blue);   border-color: rgba(64,156,255,0.4); }
+  .mod.m5 .mod-num,
+  .mod.m6 .mod-num { color: var(--amber);  border-color: rgba(255,215,64,0.4); }
+  .mod.m7 .mod-num { color: var(--mythos); border-color: rgba(255,51,102,0.4); }
+
+  .mod-size {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text3);
+  }
+  .mod.m1 .mod-size { color: var(--green);  border-color: rgba(0,230,118,0.35);  background: rgba(0,230,118,0.08); }
+  .mod.m2 .mod-size,
+  .mod.m3 .mod-size { color: var(--argus);  border-color: rgba(0,229,255,0.35);  background: rgba(0,229,255,0.06); }
+  .mod.m4 .mod-size { color: var(--blue);   border-color: rgba(64,156,255,0.35); background: rgba(64,156,255,0.06); }
+  .mod.m5 .mod-size,
+  .mod.m6 .mod-size { color: var(--amber);  border-color: rgba(255,215,64,0.35); background: rgba(255,215,64,0.06); }
+  .mod.m7 .mod-size { color: var(--mythos); border-color: rgba(255,51,102,0.35); background: rgba(255,51,102,0.08); }
+
+  .mod-name { font-size: 12.5px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .mod-sub  { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--text3); letter-spacing: 0.2px; line-height: 1.3; }
+  .mod-value { font-size: 10.5px; color: var(--text2); line-height: 1.45; margin-top: 2px; }
+  .mod-value strong { color: var(--text); font-weight: 600; }
+
+  .mod-blast {
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+    align-self: flex-start;
+    border: 1px solid var(--border);
+  }
+  .mod-blast.none   { color: var(--green);  background: rgba(0,230,118,0.1);  border-color: rgba(0,230,118,0.3); }
+  .mod-blast.read   { color: var(--argus);  background: rgba(0,229,255,0.1);  border-color: rgba(0,229,255,0.3); }
+  .mod-blast.advise { color: var(--blue);   background: rgba(64,156,255,0.1); border-color: rgba(64,156,255,0.3); }
+  .mod-blast.write  { color: var(--amber);  background: rgba(255,215,64,0.1); border-color: rgba(255,215,64,0.3); }
+  .mod-blast.auto   { color: var(--mythos); background: rgba(255,51,102,0.1); border-color: rgba(255,51,102,0.3); }
+
+  .shipit-foot {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .shipit-note {
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.5;
+    border: 1px solid var(--border);
+  }
+  .shipit-note.start  { border-left: 3px solid var(--green);  background: rgba(0,230,118,0.04); }
+  .shipit-note.cut    { border-left: 3px solid var(--mythos); background: rgba(255,51,102,0.04); }
+  .shipit-note .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+    margin-right: 6px;
+  }
+  .shipit-note.start .lbl { color: var(--green); }
+  .shipit-note.cut   .lbl { color: var(--mythos); }
+  .shipit-note strong { color: var(--text); font-weight: 600; }
+
+  /* ── Footer ───────────────────────────────────── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.6px;
+    position: relative;
+    z-index: 1;
+  }
+  .footer .left strong { color: var(--argus); font-weight: 700; }
+  .footer .right strong { color: var(--amber); font-weight: 700; }
+</style>
+</head>
+<body>
+  <section class="slide">
+    <header class="header">
+      <div class="mark">A</div>
+      <div class="title">
+        <h1>ARGUS — the Mythos-resilient defender</h1>
+        <div class="expanded">
+          <strong>A</strong>utonomous · <strong>R</strong>esilient · <strong>G</strong>uardian for · <strong>U</strong>nified · <strong>S</strong>ecurity
+        </div>
+      </div>
+      <div class="tagline">
+        <div class="eyebrow">THE BET</div>
+        <div class="line">A self-governing SOC, built on the Elastic Stack, that stays sound when the adversary gets AI.</div>
+      </div>
+    </header>
+
+    <div class="body">
+      <!-- WHY -->
+      <section class="card problem">
+        <h2>Why · the Mythos-era adversary</h2>
+        <div class="headline">Frontier capability compresses the SOC's safety margin to <em>zero</em>.</div>
+        <div class="pressures">
+          <div class="pressure">
+            <div class="tag">P1</div>
+            <div class="label">Dwell → detection collapses
+              <span>Time-to-exploit shrinks below time-to-rule. Patch windows no longer protect.</span>
+            </div>
+          </div>
+          <div class="pressure">
+            <div class="tag">P2</div>
+            <div class="label">Behavioural variant explosion
+              <span>LLM-authored variants age out signature rules the moment they ship.</span>
+            </div>
+          </div>
+          <div class="pressure">
+            <div class="tag">P3</div>
+            <div class="label">Agentic reasoning in the attack loop
+              <span>The adversary plans, pivots, and retries faster than humans can triage.</span>
+            </div>
+          </div>
+          <div class="pressure">
+            <div class="tag">P4</div>
+            <div class="label">Capability asymmetry
+              <span>Attacker AI vs. analyst keyboard — the defender loses by default.</span>
+            </div>
+          </div>
+        </div>
+        <div class="problem-stat">
+          Industry baseline: <strong>median disclosure-to-exploit &lt; 7 days</strong>, median rule-authoring <strong>&gt; 30 days</strong>. The gap is the adversary's free option. Every month Argus isn't shipped, that option stays open.
+        </div>
+      </section>
+
+      <!-- WHAT -->
+      <section class="card solution">
+        <h2>What · Argus closes the loop</h2>
+        <div class="headline">Every alert becomes a <em>governed mutation</em> — proposed, evaluated, backtested, canaried, observed.</div>
+
+        <div class="loop" aria-label="Argus closed loop">
+          <div class="stage"><div class="step">01</div><div class="name">CVE /<br>advisory</div></div>
+          <div class="stage"><div class="step">02</div><div class="name">Synthesis<br>(Pareto)</div></div>
+          <div class="stage"><div class="step">03</div><div class="name">Eval</div></div>
+          <div class="stage"><div class="step">04</div><div class="name">Backtest</div></div>
+          <div class="stage"><div class="step">05</div><div class="name">Canary<br>apply</div></div>
+          <div class="stage"><div class="step">06</div><div class="name">Observe<br>+ learn</div></div>
+          <div class="stage"><div class="step">07</div><div class="name">Rollback<br>if drift</div></div>
+        </div>
+
+        <div class="pillars">
+          <div class="pillar">
+            <div class="name">Reasoning trace</div>
+            <div class="desc">Every apply / defer / reject / rollback carries a typed, replayable OTEL-GenAI trace.</div>
+            <div class="paths">.soc-reasoning-traces · watchdog evaluators</div>
+          </div>
+          <div class="pillar">
+            <div class="name">Decision graph</div>
+            <div class="desc">Advisory → intent → outcome → rule → actor → technique — one navigable graph.</div>
+            <div class="paths">kbn-argus-console · argus_decision_graph</div>
+          </div>
+          <div class="pillar">
+            <div class="name">Autonomy gates</div>
+            <div class="desc">Trust tiers × blast radius × one-way/two-way doors × backtest evidence decide what ships unattended.</div>
+            <div class="paths">@kbn/argus-trust-policy · @kbn/argus-backtest</div>
+          </div>
+          <div class="pillar">
+            <div class="name">Agent-native playbooks</div>
+            <div class="desc">Kibana Workflows + Agent Builder skills — operators and agents share one runway, same audit trail.</div>
+            <div class="paths">argus:playbook · Agent Builder skill manifest</div>
+          </div>
+        </div>
+
+        <div class="foundation">
+          Built on <strong>Elasticsearch · Kibana · Elastic Agent · Workflows · Agent Builder · @kbn/evals · Task Manager</strong>. Caldera ships test telemetry only — never the control plane.
+        </div>
+      </section>
+
+      <!-- SO WHAT -->
+      <section class="card proof">
+        <h2>So what · the guarantee</h2>
+        <div class="headline">A SOC that moves at <em>machine speed</em> without losing human accountability.</div>
+        <div class="guarantees">
+          <div class="guarantee">
+            <div class="check">✓</div>
+            <div class="label">Detection before disclosure
+              <span>Exploit-to-detection synthesis ships candidate rules inside the patch window.</span>
+            </div>
+          </div>
+          <div class="guarantee">
+            <div class="check">✓</div>
+            <div class="label">Every mutation is auditable
+              <span>Typed lineage from alert → rule change, forever queryable in <code>.soc-*</code>.</span>
+            </div>
+          </div>
+          <div class="guarantee">
+            <div class="check">✓</div>
+            <div class="label">Coverage you can see
+              <span>MITRE gaps, actor coverage, and corpus heatmaps on one console.</span>
+            </div>
+          </div>
+          <div class="guarantee">
+            <div class="check">✓</div>
+            <div class="label">Drift triggers rollback
+              <span>Post-apply observations feed the next decision — no silent decay.</span>
+            </div>
+          </div>
+        </div>
+        <div class="metrics" aria-label="Demo scorecard">
+          <div class="metric"><span class="k">T2D new CVE</span><span class="v">&lt; 15 min</span></div>
+          <div class="metric"><span class="k">Mutation-robust</span><span class="v">&gt; 0.75</span></div>
+          <div class="metric"><span class="k">FPR on benign</span><span class="v">&lt; 0.02</span></div>
+          <div class="metric"><span class="k">Trust-gate pass</span><span class="v">0.60 – 0.85</span></div>
+          <div class="metric"><span class="k">Trace complete</span><span class="v">1.00</span></div>
+          <div class="metric"><span class="k">Workflows live</span><span class="v">16 · 0 failed</span></div>
+        </div>
+        <div class="killswitch">
+          <strong>Kill-switch always on.</strong> Mythos-class (L6) autonomy is a one-way door — operator-armed, audit-logged, reversible.
+        </div>
+      </section>
+    </div>
+
+    <!-- SHIP IT BAND -->
+    <section class="shipit">
+      <div class="shipit-head">
+        <h2>Ship it · independent modules, monotonic blast radius</h2>
+        <div class="hint">Each module ships alone and returns value alone. <strong>Start with M1 (Skills + Workflows)</strong>. Tiers above unlock closed-loop autonomy; tiers below already pay rent.</div>
+      </div>
+      <div class="ladder">
+        <div class="mod m1">
+          <div class="mod-head"><span class="mod-num">1</span><span class="mod-size">XS</span></div>
+          <div class="mod-name">Skills &amp; Workflows</div>
+          <div class="mod-sub">Agent Builder · Kibana Workflows</div>
+          <div class="mod-value"><strong>Triage ↓ 30%.</strong> Ships on stock Kibana — no new indices, no new plugins.</div>
+          <span class="mod-blast none">no writes</span>
+        </div>
+        <div class="mod m2">
+          <div class="mod-head"><span class="mod-num">2</span><span class="mod-size">S</span></div>
+          <div class="mod-name">Coverage data plane</div>
+          <div class="mod-sub">.soc-detection-corpus · heatmaps</div>
+          <div class="mod-value"><strong>MITRE gaps answered in &lt;10s.</strong> Every detection becomes a measurable inventory item.</div>
+          <span class="mod-blast read">read-only</span>
+        </div>
+        <div class="mod m3">
+          <div class="mod-head"><span class="mod-num">3</span><span class="mod-size">S</span></div>
+          <div class="mod-name">Detection-Eval</div>
+          <div class="mod-sub">@kbn/evals · ER7 corpus</div>
+          <div class="mod-value"><strong>CI quality gate.</strong> Human or LLM authors get P/R + mutation-robustness before merge.</div>
+          <span class="mod-blast read">metrics</span>
+        </div>
+        <div class="mod m4">
+          <div class="mod-head"><span class="mod-num">4</span><span class="mod-size">M</span></div>
+          <div class="mod-name">Proposals</div>
+          <div class="mod-sub">synthesize_pareto · .soc-recommendations</div>
+          <div class="mod-value"><strong>First candidate in &lt;15 min.</strong> Writes <em>proposals only</em>. Humans apply.</div>
+          <span class="mod-blast advise">advisory</span>
+        </div>
+        <div class="mod m5">
+          <div class="mod-head"><span class="mod-num">5</span><span class="mod-size">M</span></div>
+          <div class="mod-name">Reasoning trace</div>
+          <div class="mod-sub">OTEL-GenAI · decision graph · lineage</div>
+          <div class="mod-value"><strong>"Why was this rule shipped?" in 1 click.</strong> Compliance spine even without autonomy.</div>
+          <span class="mod-blast read">audit</span>
+        </div>
+        <div class="mod m6">
+          <div class="mod-head"><span class="mod-num">6</span><span class="mod-size">L</span></div>
+          <div class="mod-name">Backtest + Canary</div>
+          <div class="mod-sub">trust-policy · shadow-exec · kill-switch</div>
+          <div class="mod-value"><strong>Safe-rollout harness.</strong> Every human-approved rule ships with evidence + 24h canary.</div>
+          <span class="mod-blast write">gated writes</span>
+        </div>
+        <div class="mod m7">
+          <div class="mod-head"><span class="mod-num">7</span><span class="mod-size">XL</span></div>
+          <div class="mod-name">Closed-loop autonomy</div>
+          <div class="mod-sub">apply / defer / reject / rollback</div>
+          <div class="mod-value"><strong>Machine-speed SOC.</strong> Operator-armed L6. Opt-in per tenant after M5/M6 evidence accumulates.</div>
+          <span class="mod-blast auto">autonomous</span>
+        </div>
+      </div>
+      <div class="shipit-foot">
+        <div class="shipit-note start">
+          <span class="lbl">Start</span>
+          <strong>M1 is a free Agent Builder expansion pack</strong> — top-of-funnel, zero schema churn. M2–M3 anchor the Detection Engineering SKU (measurability). M4 is the upsell (rule-authoring accelerator). M5 attaches compliance. M6 gates the autonomous-SOC SKU. M7 priced on L6 arm-days.
+        </div>
+        <div class="shipit-note cut">
+          <span class="lbl">Cut-line</span>
+          Any customer <strong>can stop at any tier</strong> and still have a coherent product. Stop at M3 → measurable detection workbench. Stop at M5 → auditable LLM-assisted authoring. Stop at M6 → safe-rollout harness. M7 is opt-in per tenant, blast-radius, and door-class — never forced.
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="left">Demo: <strong>/app/security/argus</strong> · seed: <code>soc-simulation/scripts/seed_argus_demo.sh</code></div>
+      <div class="right">Phase C · ships on <strong>Elastic Stack</strong></div>
+    </footer>
+  </section>
+</body>
+</html>

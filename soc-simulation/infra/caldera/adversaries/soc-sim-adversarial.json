@@ -1,0 +1,11 @@
+{
+  "adversary_id": "soc-sim-adversarial",
+  "name": "SOC Sim \u2014 Adversarial",
+  "description": "Hardest tier \u2014 credential dump + persistence + stage + exfil.",
+  "atomic_ordering": [
+    "af30d8506a8aba7a022b687261d22541",
+    "0cd686c7-8d70-434e-a20c-2fc58f51a51a",
+    "6469befa-748a-4b9c-a96d-f191fde47d89",
+    "ea713bc4-63f0-491c-9a6f-0b01d560b87e"
+  ]
+}

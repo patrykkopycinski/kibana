@@ -30,8 +30,8 @@
     }
   },
   "_meta": {
-    "description": "Immutable regression test cases captured from TP/FP triage outcomes. Used as the gate for autonomous agent/rule mutations. 'frozen=true' means the case is locked for regression use and must never be mutated by AutoSOC.",
-    "owner": "autosoc-governance",
+    "description": "Immutable regression test cases captured from TP/FP triage outcomes. Used as the gate for autonomous agent/rule mutations. 'frozen=true' means the case is locked for regression use and must never be mutated by Argus.",
+    "owner": "argus-governance",
     "schema_version": 1
   }
 }

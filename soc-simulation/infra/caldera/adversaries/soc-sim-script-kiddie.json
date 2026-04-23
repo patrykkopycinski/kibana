@@ -1,0 +1,10 @@
+{
+  "adversary_id": "soc-sim-script-kiddie",
+  "name": "SOC Sim \u2014 Script Kiddie",
+  "description": "Noisy, low-sophistication attacker. Covered techniques.",
+  "atomic_ordering": [
+    "bd527b63-9f9e-46e0-9816-b8434d2b8989",
+    "9eaa8755acee93ec312e4e496df0d9a1",
+    "4a70dfb4042d65c60991ba3100e5d485"
+  ]
+}

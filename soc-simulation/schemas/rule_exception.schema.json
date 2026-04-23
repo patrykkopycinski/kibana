@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/rule_exception.schema.json",
+  "$id": "https://argus.local/schemas/rule_exception.schema.json",
   "title": "Rule Exception",
   "description": "Add / update / delete an entry on a detection rule's exception list. Authored by the Signal Quality agent (not the Principal DetEng agent).",
   "type": "object",

@@ -37,7 +37,7 @@
   },
   "_meta": {
     "description": "Append-only audit trail for every self-governance / evolution decision. Governance gates in soc-autonomous-applier aggregate on `source`, `result`, `artifact_id`, `artifact_type` — these MUST remain top-level `keyword` fields.",
-    "owner": "autosoc-governance",
+    "owner": "argus-governance",
     "schema_version": 2
   }
 }

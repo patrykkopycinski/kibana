@@ -1,0 +1,171 @@
+version: '1'
+name: SOC Self-Learning Loop
+description: >
+  Closes the self-learning loop. Compares what the backtester PREDICTED
+  against what the observer OBSERVED, and writes regression-test rows
+  to `.soc-regression-dataset`, `.soc-regression-runs`, and `.soc-metrics`.
+
+  The dataset accumulates (prediction, reality) pairs that can be used to:
+    1. Calibrate backtester verdict thresholds (are we too optimistic?)
+    2. Flag agents whose proposals consistently regress (feeds trust scorer)
+    3. Surface "prediction accuracy" as a first-class KPI in the dashboard
+
+  Three outputs per tick:
+    * .soc-regression-dataset  - one row per (recommendation, backtest, observation)
+      with the prediction, actual outcome, and residual. This is the training
+      corpus for future self-improvement.
+    * .soc-regression-runs     - one row per tick summarizing accuracy metrics.
+    * .soc-metrics             - aggregated KPIs the dashboard and watchdog
+      poll: backtest_accuracy_pct, avg_fp_reduction_realized,
+      avg_fp_reduction_predicted, residual_mean_abs.
+
+  This workflow runs every 10m so the feedback arrives fast enough to
+  influence the next difficulty-controller pass and feed the Argus
+  Phase 3 trust trio (tier-assessor → reasoning-watchdog → trust-gate).
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 10m
+  - type: manual
+
+consts:
+  lookback: "now-24h"
+
+steps:
+  # ── 1. Backtests + their final decisions ─────────────────────────────
+  # NOTE: uses elasticsearch.request (not .search) because the workflow engine's
+  # zod schema for top-level `sort` only accepts strings or the reserved keys
+  # (_score/_doc/_geo_distance/_script). Sorting @timestamp desc requires an
+  # object form that the raw request API passes through unchanged.
+  - name: recent_backtests
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.soc-backtests/_search
+      body:
+        size: 100
+        query:
+          range:
+            "@timestamp":
+              gte: "{{ consts.lookback }}"
+        sort:
+          - "@timestamp":
+              order: desc
+  # ── 2. Autonomy decisions for the same window ────────────────────────
+  # NOTE: uses elasticsearch.request — see recent_backtests above for rationale.
+  - name: recent_decisions
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.soc-autonomy-decisions/_search
+      body:
+        size: 500
+        query:
+          bool:
+            filter:
+              - range:
+                  "@timestamp":
+                    gte: "{{ consts.lookback }}"
+              - terms:
+                  source_workflow: ["soc-autonomous-applier", "soc-post-apply-observer"]
+        sort:
+          - "@timestamp":
+              order: desc
+  # ── 3. Recommendations final status ─────────────────────────────────
+  - name: recent_recs
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: 200
+      query:
+        bool:
+          filter:
+            - term: { type: "mutation_intent" }
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.lookback }}"
+
+  # ── 4. One regression-dataset row per backtest ──────────────────────
+  - name: write_dataset
+    type: foreach
+    foreach: "{{ steps.recent_backtests.output.hits.hits }}"
+    steps:
+      - name: write_row
+        type: elasticsearch.index
+        with:
+          index: .soc-regression-dataset
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            sample_id: "{{ foreach.item._source.rec_id }}"
+            rule_id: "{{ foreach.item._source.rule_id }}"
+            action: "{{ foreach.item._source.action }}"
+            predicted:
+              verdict: "{{ foreach.item._source.verdict }}"
+              fp_reduction_pct: "{{ foreach.item._source.metrics.delta.alert_reduction_pct | default: 0 }}"
+              alerts_per_day_before: "{{ foreach.item._source.metrics.before.alerts_per_day | default: 0 }}"
+              alerts_per_day_after: "{{ foreach.item._source.metrics.after.alert_count | default: 0 }}"
+              simulator: "{{ foreach.item._source.simulator_used | default: 'deterministic_v1' }}"
+            observed:
+              applied: "{% assign _applied = false %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.rec_id == foreach.item._source.rec_id and d._source.op == 'apply' and d._source.final_status == 'applied' %}{% assign _applied = true %}{% endif %}{% endfor %}{{ _applied }}"
+              rolled_back: "{% assign _rb = false %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.rec_id == foreach.item._source.rec_id and d._source.final_status == 'regression_detected' %}{% assign _rb = true %}{% endif %}{% endfor %}{{ _rb }}"
+              final_rec_status: "{% assign _st = 'unknown' %}{% for r in steps.recent_recs.output.hits.hits %}{% if r._source.rec_id == foreach.item._source.rec_id %}{% assign _st = r._source.status %}{% endif %}{% endfor %}{{ _st }}"
+            residual:
+              prediction_matched_reality: "{% assign _predicted_safe = false %}{% if foreach.item._source.verdict == 'projection_safe' %}{% assign _predicted_safe = true %}{% endif %}{% assign _was_clean = true %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.rec_id == foreach.item._source.rec_id and d._source.final_status == 'regression_detected' %}{% assign _was_clean = false %}{% endif %}{% endfor %}{% if _predicted_safe == _was_clean %}true{% else %}false{% endif %}"
+            source: "soc-self-learning-loop"
+            dataset_version: "v1"
+
+  # ── 5. One regression-runs row per tick ──────────────────────────────
+  - name: write_run_summary
+    type: elasticsearch.index
+    with:
+      index: .soc-regression-runs
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        window: "{{ consts.lookback }}"
+        backtests_total: "{{ steps.recent_backtests.output.hits.total.value | default: 0 }}"
+        decisions_total: "{{ steps.recent_decisions.output.hits.total.value | default: 0 }}"
+        recs_total: "{{ steps.recent_recs.output.hits.total.value | default: 0 }}"
+        safe_predictions: "{% assign _n = 0 %}{% for b in steps.recent_backtests.output.hits.hits %}{% if b._source.verdict == 'projection_safe' %}{% assign _n = _n | plus: 1 %}{% endif %}{% endfor %}{{ _n }}"
+        concerning_predictions: "{% assign _n = 0 %}{% for b in steps.recent_backtests.output.hits.hits %}{% if b._source.verdict == 'projection_concerning' %}{% assign _n = _n | plus: 1 %}{% endif %}{% endfor %}{{ _n }}"
+        observed_regressions: "{% assign _n = 0 %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.final_status == 'regression_detected' %}{% assign _n = _n | plus: 1 %}{% endif %}{% endfor %}{{ _n }}"
+        observed_applies: "{% assign _n = 0 %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.op == 'apply' and d._source.final_status == 'applied' %}{% assign _n = _n | plus: 1 %}{% endif %}{% endfor %}{{ _n }}"
+        source: "soc-self-learning-loop"
+
+  # ── 6. One KPI row in .soc-metrics ──────────────────────────────────
+  - name: write_kpi
+    type: elasticsearch.index
+    with:
+      index: .soc-metrics
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        metric_family: "self_learning"
+        window: "{{ consts.lookback }}"
+        values:
+          backtests_total: "{{ steps.recent_backtests.output.hits.total.value | default: 0 }}"
+          decisions_total: "{{ steps.recent_decisions.output.hits.total.value | default: 0 }}"
+          avg_fp_reduction_predicted_pct: "{% assign _sum = 0 %}{% assign _n = 0 %}{% for b in steps.recent_backtests.output.hits.hits %}{% assign _v = b._source.metrics.delta.alert_reduction_pct | default: 0 %}{% assign _sum = _sum | plus: _v %}{% assign _n = _n | plus: 1 %}{% endfor %}{% if _n == 0 %}0{% else %}{{ _sum | divided_by: _n }}{% endif %}"
+          regression_rate_pct: "{% assign _r = 0 %}{% assign _t = 0 %}{% for d in steps.recent_decisions.output.hits.hits %}{% if d._source.source_workflow == 'soc-post-apply-observer' %}{% assign _t = _t | plus: 1 %}{% if d._source.final_status == 'regression_detected' %}{% assign _r = _r | plus: 1 %}{% endif %}{% endif %}{% endfor %}{% if _t == 0 %}0{% else %}{% assign _x = _r | times: 100 %}{{ _x | divided_by: _t }}{% endif %}"
+          auto_apply_rate_pct: "{% assign _aa = 0 %}{% assign _t = 0 %}{% for d in steps.recent_decisions.output.hits.hits %}{% assign _t = _t | plus: 1 %}{% if d._source.auto_applied == true %}{% assign _aa = _aa | plus: 1 %}{% endif %}{% endfor %}{% if _t == 0 %}0{% else %}{% assign _x = _aa | times: 100 %}{{ _x | divided_by: _t }}{% endif %}"
+        source: "soc-self-learning-loop"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: self_learning_heartbeat
+        source: "soc-self-learning-loop"
+        backtests: "{{ steps.recent_backtests.output.hits.total.value | default: 0 }}"
+        decisions: "{{ steps.recent_decisions.output.hits.total.value | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Self-learning loop tick complete: {{ steps.recent_backtests.output.hits.total.value | default: 0 }} backtests x {{ steps.recent_decisions.output.hits.total.value | default: 0 }} decisions"

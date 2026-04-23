@@ -13,7 +13,15 @@
         "@timestamp": { "type": "date" },
         "technique_id": { "type": "keyword" },
         "occurrences": { "type": "integer" },
-        "avg_confidence": { "type": "float" }
+        "avg_confidence": { "type": "float" },
+        "status": { "type": "keyword" },
+        "severity": { "type": "keyword" },
+        "confidence": { "type": "float" },
+        "source": { "type": "keyword" },
+        "source_doc_id": { "type": "keyword" },
+        "note": { "type": "text" },
+        "data_sources": { "type": "keyword" },
+        "tactic_id": { "type": "keyword" }
       }
     }
   }

@@ -4843,6 +4843,50 @@
   version "0.0.0"
   uid ""
 
+"@kbn/argus-a2a-server@link:x-pack/solutions/security/packages/kbn-argus-a2a-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-backtest@link:x-pack/solutions/security/packages/kbn-argus-backtest":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-console-common@link:x-pack/solutions/security/packages/kbn-argus-console-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-console@link:x-pack/solutions/security/packages/kbn-argus-console":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-exploit-probability@link:x-pack/solutions/security/packages/kbn-argus-exploit-probability":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-exploit-to-detection@link:x-pack/solutions/security/packages/kbn-argus-exploit-to-detection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-kev-ingest@link:x-pack/solutions/security/packages/kbn-argus-kev-ingest":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-mcp-server@link:x-pack/solutions/security/packages/kbn-argus-mcp-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-reasoning-traces@link:x-pack/solutions/security/packages/kbn-argus-reasoning-traces":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-tool-manifest@link:x-pack/solutions/security/packages/kbn-argus-tool-manifest":
+  version "0.0.0"
+  uid ""
+
+"@kbn/argus-trust-policy@link:x-pack/solutions/security/packages/kbn-argus-trust-policy":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-data-views-schema@link:src/platform/packages/shared/as-code/data-views-schema":
   version "0.0.0"
   uid ""
@@ -6872,6 +6916,10 @@
   uid ""
 
 "@kbn/evals-suite-agent-builder@link:x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-argus-detection@link:x-pack/solutions/security/packages/kbn-evals-suite-argus-detection":
   version "0.0.0"
   uid ""
 

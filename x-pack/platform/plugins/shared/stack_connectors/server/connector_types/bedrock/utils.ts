@@ -9,6 +9,40 @@ import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/connector-schemas/bedrock';
 import type { BedrockMessage, BedrockToolChoice } from '@kbn/connector-schemas/bedrock';
 
+/**
+ * Model-id substrings for Anthropic Claude variants that REJECT the
+ * `temperature` parameter at the Bedrock API (e.g. the Opus 4.6/4.7/4.8
+ * "extended-thinking" / reasoning models). Matched via `includes()` so
+ * provider-prefixed IDs like `us.anthropic.claude-opus-4-7-20250514-v1:0`
+ * and `anthropic.claude-opus-4-6:0` are both handled.
+ *
+ * Keep this list in sync with
+ * `x-pack/platform/plugins/shared/inference/server/chat_complete/utils/get_temperature.ts`.
+ */
+const ANTHROPIC_MODELS_WITHOUT_TEMPERATURE = [
+  'opus-4-6',
+  'opus-4-7',
+  'opus-4-8',
+  'claude-4-6',
+  'claude-4-7',
+  'claude-4-8',
+  'claude-opus-4-6',
+  'claude-opus-4-7',
+  'claude-opus-4-8',
+];
+
+/**
+ * Returns true when the given Bedrock model id / name indicates an
+ * Anthropic Claude reasoning variant that rejects the `temperature`
+ * parameter. Matching is case-insensitive and substring-based so it
+ * tolerates region prefixes and versioned IDs.
+ */
+export const modelRejectsTemperature = (model?: string | null): boolean => {
+  if (!model) return false;
+  const normalized = model.toLowerCase();
+  return ANTHROPIC_MODELS_WITHOUT_TEMPERATURE.some((m) => normalized.includes(m));
+};
+
 export const formatBedrockBody = ({
   messages,
   stopSequences,
@@ -17,6 +51,7 @@ export const formatBedrockBody = ({
   maxTokens = DEFAULT_TOKEN_LIMIT,
   tools,
   toolChoice,
+  model,
 }: {
   messages: BedrockMessage[];
   stopSequences?: string[];
@@ -26,15 +61,26 @@ export const formatBedrockBody = ({
   system?: string;
   tools?: Array<{ name: string; description: string }>;
   toolChoice?: BedrockToolChoice;
-}) => ({
-  anthropic_version: 'bedrock-2023-05-31',
-  ...ensureMessageFormat(messages, system),
-  max_tokens: maxTokens,
-  stop_sequences: stopSequences,
-  temperature,
-  tools,
-  tool_choice: toolChoice,
-});
+  // optional model id — when supplied, we strip `temperature` from the
+  // payload for reasoning models that reject it (Opus 4.6/4.7/4.8, etc.).
+  model?: string;
+}) => {
+  const body: Record<string, unknown> = {
+    anthropic_version: 'bedrock-2023-05-31',
+    ...ensureMessageFormat(messages, system),
+    max_tokens: maxTokens,
+    stop_sequences: stopSequences,
+    tools,
+    tool_choice: toolChoice,
+  };
+  // Reasoning models (Opus 4.6+/4.7+/4.8+) reject `temperature` entirely;
+  // the provider default applies when the field is omitted. For every
+  // other model we keep the legacy default of 0 for backwards compat.
+  if (!modelRejectsTemperature(model)) {
+    body.temperature = temperature;
+  }
+  return body;
+};
 
 interface FormattedBedrockMessage {
   role: string;

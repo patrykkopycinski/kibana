@@ -12,10 +12,15 @@
         "@timestamp": { "type": "date" },
         "source": { "type": "keyword" },
         "correlation_id": { "type": "keyword" },
-        "error": { "type": "text" },
+        "error": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 2048 } } },
         "retry_count": { "type": "integer" },
         "alert_ids": { "type": "keyword" },
-        "last_retry_at": { "type": "date" }
+        "last_retry_at": { "type": "date" },
+        "rec_id": { "type": "keyword" },
+        "original_type": { "type": "keyword" },
+        "validation_errors": { "type": "keyword" },
+        "original_doc": { "type": "object", "enabled": false },
+        "_pipeline_failure": { "type": "text" }
       }
     }
   }

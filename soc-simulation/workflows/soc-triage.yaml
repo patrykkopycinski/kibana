@@ -11,10 +11,6 @@ triggers:
   - type: manual
   - type: alert
 
-consts:
-  run_id: "triage-{{ workflow.run_id | default: 'run' }}-{{ 'now' | date: '%s%3N' }}"
-  now_iso: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
-
 steps:
   - name: log_alert
     type: console
@@ -61,29 +57,33 @@ steps:
 
   # Flatten the triage output at the top of the doc so dashboards and
   # aggregations don't have to reach into triage_output.* to get the verdict.
+  # NOTE: Kibana's ai.agent step returns `{ message: "<raw-JSON-string>" }`; the
+  # fields below live inside that string, not on `.output` directly. Every
+  # reference uses `{% assign parsed = ... | json_parse %}` so the flat fields
+  # are populated correctly instead of silently falling back to defaults.
   - name: write_triage_result
     type: elasticsearch.index
     with:
       index: .soc-triage-results
       document:
-        "@timestamp": "{{ consts.now_iso }}"
-        run_id: "{{ consts.run_id }}"
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
         source: "soc-triage"
         stage: "unified_triage"
         pipeline: "soc-triage"
         alert_id: "{{ event.id | default: event._id | default: 'unknown' }}"
         rule_id: "{{ event['kibana.alert.rule.uuid'] | default: event.rule.id | default: null }}"
         rule_name: "{{ event['kibana.alert.rule.name'] | default: event.rule.name | default: null }}"
-        classification: "{{ steps.triage.output.classification | default: 'SUSPICIOUS' }}"
-        confidence: "{{ steps.triage.output.confidence | default: 0 }}"
-        disposition: "{{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }}"
-        threat_category: "{{ steps.triage.output.threat_category | default: 'unknown' }}"
-        kill_chain_stage: "{{ steps.triage.output.kill_chain_stage | default: 'unknown' }}"
-        recommended_action: "{{ steps.triage.output.recommended_action | default: null }}"
-        reasoning: "{{ steps.triage.output.reasoning | default: null }}"
-        business_impact: "{{ steps.triage.output.business_impact | default: empty }}"
-        evidence: "{{ steps.triage.output.evidence | default: empty }}"
-        triage_output: "{{ steps.triage.output | json }}"
+        classification: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.classification | default: 'SUSPICIOUS' }}"
+        confidence: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.confidence | default: 0 }}"
+        disposition: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.disposition | default: 'INCONCLUSIVE' }}"
+        threat_category: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.threat_category | default: 'unknown' }}"
+        kill_chain_stage: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.kill_chain_stage | default: 'unknown' }}"
+        recommended_action: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.recommended_action | default: null }}"
+        reasoning: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.reasoning | default: null }}"
+        business_impact: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.business_impact | default: empty }}"
+        evidence: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.evidence | default: empty }}"
+        triage_output: "{{ steps.triage.output.message | json_parse | json }}"
 
   # Outcomes are the single source of truth for SLO/rollup dashboards. The
   # `disposition` on this doc is the agent's disposition — never "triaged".
@@ -92,37 +92,62 @@ steps:
     with:
       index: .soc-outcomes
       document:
-        "@timestamp": "{{ consts.now_iso }}"
-        correlation_id: "{{ consts.run_id }}"
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        correlation_id: "triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
         pipeline: "soc-triage"
         stage: "unified_triage"
         agents_involved: ["soc-triage-agent"]
-        classification: "{{ steps.triage.output.classification | default: 'SUSPICIOUS' }}"
-        confidence: "{{ steps.triage.output.confidence | default: 0 }}"
-        disposition: "{{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }}"
-        threat_category: "{{ steps.triage.output.threat_category | default: 'unknown' }}"
-        kill_chain_stage: "{{ steps.triage.output.kill_chain_stage | default: 'unknown' }}"
+        classification: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.classification | default: 'SUSPICIOUS' }}"
+        confidence: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.confidence | default: 0 }}"
+        disposition: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.disposition | default: 'INCONCLUSIVE' }}"
+        threat_category: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.threat_category | default: 'unknown' }}"
+        kill_chain_stage: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.kill_chain_stage | default: 'unknown' }}"
         triage_result_ref: "{{ steps.write_triage_result.output._id | default: null }}"
 
+  # Argus M2.5 — reasoning-trace governance. The `argus.*` block is the
+  # standardised contract produced by `emitArgusSpanDoc` in
+  # @kbn/argus-reasoning-traces; both the flat and nested views are populated
+  # so governance dashboards can query by either shape. Confidence is
+  # normalised from the 0-100 triage output onto the unit interval.
   - name: write_reasoning_trace
     type: elasticsearch.index
     with:
       index: .soc-reasoning-trace
       document:
-        "@timestamp": "{{ consts.now_iso }}"
-        run_id: "{{ consts.run_id }}"
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
         agent_id: "soc-triage-agent"
         step_index: 0
         step_type: "run_summary"
-        content: "Triage run for alert {{ event.id | default: 'unknown' }} → disposition={{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }} confidence={{ steps.triage.output.confidence | default: 0 }}"
+        content: "Triage run for alert {{ event.id | default: 'unknown' }} → {% assign _pt = steps.triage.output.message | json_parse %}disposition={{ _pt.disposition | default: 'INCONCLUSIVE' }} confidence={{ _pt.confidence | default: 0 }}"
         run_summary:
           total_steps: 1
           tool_call_count: 0
           total_duration_ms: null
           final_status: "completed"
           final_output_ref: "{{ steps.write_triage_result.output._id | default: null }}"
+        argus:
+          agent:
+            id: "soc-triage-agent"
+            version: "argus-m2.5"
+          decision:
+            kind: "triage_verdict"
+            id: "triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            confidence: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.confidence | default: 0 | divided_by: 100.0 }}"
+          actor:
+            trust_tier: "scoped"
+          correlation:
+            alert_id: "{{ event.id | default: event._id | default: 'unknown' }}"
+        attributes:
+          argus.agent.id: "soc-triage-agent"
+          argus.agent.version: "argus-m2.5"
+          argus.decision.kind: "triage_verdict"
+          argus.decision.id: "triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+          argus.decision.confidence: "{% assign _pt = steps.triage.output.message | json_parse %}{{ _pt.confidence | default: 0 | divided_by: 100.0 }}"
+          argus.actor.trust_tier: "scoped"
+          argus.correlation.alert_id: "{{ event.id | default: event._id | default: 'unknown' }}"
 
   - name: log_result
     type: console
     with:
-      message: "SOC Triage complete → disposition={{ steps.triage.output.disposition | default: 'INCONCLUSIVE' }} confidence={{ steps.triage.output.confidence | default: 0 }} run_id={{ consts.run_id }}"
+      message: "SOC Triage complete → {% assign _pt = steps.triage.output.message | json_parse %}disposition={{ _pt.disposition | default: 'INCONCLUSIVE' }} confidence={{ _pt.confidence | default: 0 }} run_id=triage-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

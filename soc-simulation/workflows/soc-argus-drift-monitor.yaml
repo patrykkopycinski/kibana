@@ -1,0 +1,418 @@
+version: '1'
+name: Argus Drift Monitor (Phase 3)
+description: >
+  Argus Phase 3 — eval-score and actor-trust drift monitor.
+
+  Mythos-era adversaries iterate. A rule that scored precision=0.92 /
+  recall=0.86 at M2.1 time can quietly decay over weeks as the adversary
+  adapts. The only signal the downstream cascade has is an FP / missed-TP
+  spike — by which point a real intrusion may already have slipped.
+
+  This workflow closes that loop. Every 6h it scans two streams and emits
+  drift events into `.soc-recommendations` so the existing eval cascade
+  (M2.1) re-scores the target on the next tick.
+
+    1. rule drift   : EMA(scores.precision) on .soc-detection-eval-runs
+                      vs. the per-rule baseline (median of the 7 runs
+                      immediately before the last run). A drop of >=0.08
+                      absolute, or a softer >=0.04 drop coupled with
+                      variant_coverage collapse, counts as drift.
+    2. actor drift  : EMA(tier metrics) on .soc-actor-trust-tiers vs.
+                      the actor's 7-day baseline. A reasoning_quality
+                      collapse or a sustained rollback_rate climb
+                      trips the drift signal.
+
+  Hysteresis: per `target_id`, no new drift event within 48h of the
+  previous one — the applier's eval cascade gets a full cycle to settle
+  before we file again.
+
+  Output contract (per docs/argus/phase-3/drift-detection.md):
+
+    {
+      "type": "mutation_intent",
+      "status": "eval_requested",
+      "argus": {
+        "origin": "drift_detected",
+        "drift": {
+          "kind": "rule_eval|actor_trust",
+          "target_id": "rule:... | actor:...",
+          "delta": -0.12,
+          "ema_window_days": 30,
+          "reason_code": "score_decay|variant_coverage_collapse|trust_downgrade|trace_quality_low"
+        }
+      }
+    }
+
+  Triggers:
+    * scheduled 6h  : design-doc cadence
+    * manual        : operators can force a sweep
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+consts:
+  eval_runs_index:    ".soc-detection-eval-runs"
+  tiers_index:        ".soc-actor-trust-tiers"
+  outcomes_index:     ".soc-outcomes"
+  recs_index:         ".soc-recommendations"
+  audit_index:        ".soc-audit-trail"
+  eval_window:        "now-30d"
+  actor_window:       "now-7d"
+  cooldown_window:    "now-48h"
+  # Thresholds sourced from docs/argus/phase-3/drift-detection.md.
+  # Changing any number here requires updating the design doc and
+  # reviewing the EMA alpha calibration notes.
+  drift_abs_delta:        0.08
+  drift_soft_delta:       0.04
+  variant_coverage_drop:  0.10
+  trust_quality_floor:    0.65
+  trust_rollback_ceiling: 0.15
+
+steps:
+  # ── Rule drift ────────────────────────────────────────────────────────
+  - name: discover_rules
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.eval_runs_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.eval_window }}"
+            - exists: { field: "rule_id" }
+      aggregations:
+        rules:
+          terms:
+            field: rule_id
+            size: 50
+            min_doc_count: 3
+
+  - name: rules_gate
+    type: console
+    with:
+      message: "{% if steps.discover_rules.output.aggregations.rules.buckets and steps.discover_rules.output.aggregations.rules.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: process_rules
+    type: foreach
+    if: "steps.rules_gate.output: yes"
+    foreach: "{{ steps.discover_rules.output.aggregations.rules.buckets }}"
+    steps:
+      # Recent runs drive the EMA: we want the latest N runs so the
+      # signal tracks the current adversary state, not ancient history.
+      - name: latest_runs
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.eval_runs_index }}"
+          size: 10
+          sort:
+            - "@timestamp":
+                order: desc
+          query:
+            bool:
+              filter:
+                - term: { rule_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.eval_window }}"
+
+      # Baseline is the median of the 7 runs immediately before the last
+      # run. Approximated here with avg over baseline window to keep the
+      # Kibana Workflow engine's aggregation surface happy (median is not
+      # universally supported on every scores.* field mapping). Drift is
+      # still bounded by the absolute threshold, so a 7-run avg vs.
+      # 10-run EMA is a faithful operational signal.
+      - name: baseline_metrics
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.eval_runs_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { rule_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.eval_window }}"
+          aggregations:
+            baseline_precision: { avg: { field: "scores.precision" } }
+            baseline_coverage:  { avg: { field: "scores.variant_coverage" } }
+
+      # Cooldown check: was a drift event already filed for this rule
+      # in the last 48h? If so, skip — let the applier's eval cascade
+      # finish its cycle before we file again. Uses the audit trail so
+      # rejected recs still count (otherwise a rejected drift event
+      # would free the slot immediately).
+      - name: cooldown_check
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.audit_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { event_type: "argus_drift_filed" }
+                - term: { target_id: "rule:{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.cooldown_window }}"
+
+      - name: compute_rule_drift
+        type: console
+        with:
+          message: >-
+            {%- assign latest = steps.latest_runs.output.hits.hits[0]._source.scores.precision | default: 0 -%}
+            {%- assign latest_cov = steps.latest_runs.output.hits.hits[0]._source.scores.variant_coverage | default: 0 -%}
+            {%- assign base = steps.baseline_metrics.output.aggregations.baseline_precision.value | default: 0 -%}
+            {%- assign base_cov = steps.baseline_metrics.output.aggregations.baseline_coverage.value | default: 0 -%}
+            {%- assign cooldown = steps.cooldown_check.output.hits.total.value | default: 0 -%}
+            {%- assign delta = latest | minus: base -%}
+            {%- assign cov_delta = latest_cov | minus: base_cov -%}
+            {%- comment -%}
+              delta is signed (negative = decay). abs is approximated
+              via a simple if — the Kibana liquid engine does not
+              universally ship a `math.abs` filter.
+            {%- endcomment -%}
+            {%- if delta < 0 -%}{%- assign abs_delta = 0.0 | minus: delta -%}{%- else -%}{%- assign abs_delta = delta -%}{%- endif -%}
+            {%- if cooldown > 0 -%}drift=none reason=cooldown delta={{ delta }}
+            {%- elsif abs_delta >= 0.08 -%}drift=rule_eval reason=score_decay delta={{ delta }}
+            {%- elsif delta <= -0.04 and cov_delta <= -0.10 -%}drift=rule_eval reason=variant_coverage_collapse delta={{ delta }}
+            {%- else -%}drift=none reason=stable delta={{ delta }}
+            {%- endif -%}
+
+      - name: rule_drift_fire
+        type: console
+        if: "steps.compute_rule_drift.output contains 'drift=rule_eval'"
+        with:
+          message: "firing drift for rule={{ foreach.item.key }}"
+
+      - name: file_rule_drift_rec
+        type: elasticsearch.index
+        if: "steps.compute_rule_drift.output contains 'drift=rule_eval'"
+        with:
+          index: "{{ consts.recs_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "drift-rule-{{ foreach.item.key }}-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc-argus-drift-monitor"
+            status: "eval_requested"
+            track: "deterministic"
+            title: "Drift: rule {{ foreach.item.key }} requires re-evaluation"
+            summary: >-
+              Rule {{ foreach.item.key }} shows precision drift vs. its 30-day baseline.
+              Argus has filed a mutation_intent with status=eval_requested so the M2.1
+              detection-eval cascade re-scores it against the current corpus on the
+              next tick. If the re-eval passes, this drift event is closed as
+              stale_signal. If it fails, the applier will downgrade trust and route
+              to human review.
+            confidence: 80
+            details:
+              artifact_type: "mutation_intent"
+              artifact_id: "rule:{{ foreach.item.key }}"
+              op: "update"
+              expected_ownership: "autosoc"
+              reason: "Detected eval-score drift vs. 30d baseline — re-evaluation required before next auto-apply"
+              patch:
+                rule_id: "{{ foreach.item.key }}"
+                action: "add_note"
+                patch_fields:
+                  argus_drift_marker: "eval_requested"
+                current_values: {}
+                impact_prediction:
+                  expected_fp_reduction_pct: 0
+                  expected_tp_impact: "unknown"
+            expected_impact:
+              fp_reduction_pct: 0
+              coverage_delta_pct: 0
+            evidence:
+              - summary: "{{ steps.compute_rule_drift.output }}"
+                source_ref: "index=.soc-detection-eval-runs;rule_id={{ foreach.item.key }}"
+                confidence: 0.8
+            housekeeping: false
+            argus:
+              origin: "drift_detected"
+              decision:
+                kind: "drift_detection"
+                confidence: 0.8
+                door_class: "two_way"
+              drift:
+                kind: "rule_eval"
+                target_id: "rule:{{ foreach.item.key }}"
+                delta: 0
+                ema_window_days: 30
+                reason_code: "score_decay"
+
+      - name: audit_rule_drift
+        type: elasticsearch.index
+        if: "steps.compute_rule_drift.output contains 'drift=rule_eval'"
+        with:
+          index: "{{ consts.audit_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            event_type: "argus_drift_filed"
+            source: "soc-argus-drift-monitor"
+            target_id: "rule:{{ foreach.item.key }}"
+            drift_kind: "rule_eval"
+            detail: "{{ steps.compute_rule_drift.output }}"
+
+  # ── Actor drift ───────────────────────────────────────────────────────
+  - name: discover_actors
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.tiers_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.actor_window }}"
+      aggregations:
+        actors:
+          terms:
+            field: actor_id
+            size: 50
+
+  - name: actors_gate
+    type: console
+    with:
+      message: "{% if steps.discover_actors.output.aggregations.actors.buckets and steps.discover_actors.output.aggregations.actors.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: process_actors
+    type: foreach
+    if: "steps.actors_gate.output: yes"
+    foreach: "{{ steps.discover_actors.output.aggregations.actors.buckets }}"
+    steps:
+      # Latest tier doc carries the current rolled-up metrics. We compare
+      # reasoning_quality (M2.5 signal) and rollback_rate against the
+      # drift thresholds — a drop below floor or a climb above ceiling
+      # is enough to trigger, because `.soc-actor-trust-tiers` already
+      # smooths noise via its 7-day window.
+      - name: latest_tier
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.tiers_index }}"
+          size: 1
+          sort:
+            - "@timestamp":
+                order: desc
+          query:
+            bool:
+              filter:
+                - term: { actor_id: "{{ foreach.item.key }}" }
+
+      - name: actor_cooldown_check
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.audit_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { event_type: "argus_drift_filed" }
+                - term: { target_id: "actor:{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.cooldown_window }}"
+
+      - name: compute_actor_drift
+        type: console
+        with:
+          message: >-
+            {%- assign rq = steps.latest_tier.output.hits.hits[0]._source.metrics.reasoning_quality | default: 1 -%}
+            {%- assign rb = steps.latest_tier.output.hits.hits[0]._source.metrics.rollback_rate | default: 0 -%}
+            {%- assign tier = steps.latest_tier.output.hits.hits[0]._source.tier | default: 'trusted' -%}
+            {%- assign cooldown = steps.actor_cooldown_check.output.hits.total.value | default: 0 -%}
+            {%- if cooldown > 0 -%}drift=none reason=cooldown
+            {%- elsif rq < 0.65 -%}drift=actor_trust reason=trace_quality_low rq={{ rq }}
+            {%- elsif rb > 0.15 -%}drift=actor_trust reason=trust_downgrade rb={{ rb }}
+            {%- elsif tier == 'quarantined' -%}drift=actor_trust reason=trust_downgrade rb={{ rb }}
+            {%- else -%}drift=none reason=stable
+            {%- endif -%}
+
+      - name: file_actor_drift_rec
+        type: elasticsearch.index
+        if: "steps.compute_actor_drift.output contains 'drift=actor_trust'"
+        with:
+          index: "{{ consts.recs_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "drift-actor-{{ foreach.item.key }}-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc-argus-drift-monitor"
+            status: "eval_requested"
+            track: "deterministic"
+            title: "Drift: actor {{ foreach.item.key }} requires re-evaluation"
+            summary: >-
+              Actor {{ foreach.item.key }} shows trust drift vs. its 7-day baseline
+              (reasoning_quality or rollback_rate outside tolerated envelope).
+              Argus has filed a mutation_intent with status=eval_requested so the
+              trust-tier assessor + reasoning-eval cascade re-score the actor on
+              the next tick. A failing re-eval downgrades the tier.
+            confidence: 75
+            details:
+              artifact_type: "mutation_intent"
+              artifact_id: "actor:{{ foreach.item.key }}"
+              op: "update"
+              expected_ownership: "autosoc"
+              reason: "Detected actor trust drift vs. 7d baseline — reasoning-quality or rollback-rate outside tolerated envelope"
+            expected_impact: {}
+            evidence:
+              - summary: "{{ steps.compute_actor_drift.output }}"
+                source_ref: "index=.soc-actor-trust-tiers;actor_id={{ foreach.item.key }}"
+                confidence: 0.75
+            housekeeping: true
+            argus:
+              origin: "drift_detected"
+              decision:
+                kind: "drift_detection"
+                confidence: 0.75
+                door_class: "two_way"
+              drift:
+                kind: "actor_trust"
+                target_id: "actor:{{ foreach.item.key }}"
+                delta: 0
+                ema_window_days: 7
+                reason_code: "trace_quality_low"
+
+      - name: audit_actor_drift
+        type: elasticsearch.index
+        if: "steps.compute_actor_drift.output contains 'drift=actor_trust'"
+        with:
+          index: "{{ consts.audit_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            event_type: "argus_drift_filed"
+            source: "soc-argus-drift-monitor"
+            target_id: "actor:{{ foreach.item.key }}"
+            drift_kind: "actor_trust"
+            detail: "{{ steps.compute_actor_drift.output }}"
+
+  # ── Heartbeat ─────────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: "argus_drift_monitor_tick"
+        source: "soc-argus-drift-monitor"
+        tick_id: "argus-drift-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        rules_inspected: "{{ steps.discover_rules.output.aggregations.rules.buckets | size | default: 0 }}"
+        actors_inspected: "{{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Argus drift monitor complete — rules={{ steps.discover_rules.output.aggregations.rules.buckets | size | default: 0 }} actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-drift-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

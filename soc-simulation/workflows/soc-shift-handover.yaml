@@ -23,85 +23,76 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-{{ consts.window_hours }}h"
-        aggs:
-          by_result:
-            terms:
-              field: "result"
-              size: 20
-          by_source:
-            terms:
-              field: "source"
-              size: 20
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+      aggs:
+        by_result:
+          terms:
+            field: "result"
+            size: 20
+        by_source:
+          terms:
+            field: "source"
+            size: 20
 
   - name: cases_opened_count
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-{{ consts.window_hours }}h"
-              - term: { disposition: "case_created" }
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - term: {disposition: "case_created"}
 
   - name: cases_closed_count
     type: elasticsearch.search
     with:
       index: ".soc-forensic-summary"
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - range:
-                  closed_at:
-                    gte: "now-{{ consts.window_hours }}h"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                closed_at:
+                  gte: "now-{{ consts.window_hours }}h"
 
   - name: kill_switch_events_count
     type: elasticsearch.search
     with:
       index: ".soc-audit-trail"
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - range:
-                  "@timestamp":
-                    gte: "now-{{ consts.window_hours }}h"
-              - term: { event_type: "autonomous_applier_abort" }
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - term: {event_type: "autonomous_applier_abort"}
 
   # ─── Top highlights for the narrative ──────────────────────────────
   - name: top_mutations
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        size: 10
-        query:
-          bool:
-            filter:
-              - term:  { source: "soc-autonomous-applier" }
-              - range:
-                  "@timestamp":
-                    gte: "now-{{ consts.window_hours }}h"
-              - terms:
-                  result: ["applied", "blocked_canonical", "blocked_loop", "blocked_cooldown", "blocked_budget", "validation_failed", "failure"]
-        sort:
-          - "@timestamp": desc
-
-  # ─── Agentic narrative ─────────────────────────────────────────────
+      size: 10
+      query:
+        bool:
+          filter:
+            - term: {source: "soc-autonomous-applier"}
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - terms:
+                result: ["applied", "blocked_canonical", "blocked_loop", "blocked_cooldown", "blocked_budget", "validation_failed", "failure"]
   - name: compose_narrative
     type: ai.agent
     agent-id: soc-meta-agent

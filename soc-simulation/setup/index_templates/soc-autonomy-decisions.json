@@ -1,0 +1,47 @@
+{
+  "index_patterns": [".soc-autonomy-decisions"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "rec_id": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "op": { "type": "keyword" },
+        "action": { "type": "keyword" },
+        "source_agent": { "type": "keyword" },
+        "source_workflow": { "type": "keyword" },
+        "gates_evaluated": { "type": "keyword" },
+        "gates_passed": { "type": "keyword" },
+        "first_failing_gate": { "type": "keyword" },
+        "final_status": { "type": "keyword" },
+        "auto_applied": { "type": "boolean" },
+        "required_human": { "type": "boolean" },
+        "review_reason": { "type": "keyword" },
+        "trust_tier": { "type": "keyword" },
+        "trust_score": { "type": "float" },
+        "trust_n": { "type": "integer" },
+        "backtest_verdict": { "type": "keyword" },
+        "backtest_ref": { "type": "keyword" },
+        "confidence": { "type": "integer" },
+        "decision_duration_ms": { "type": "long" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "One row per autonomy gate decision. Backs the Autonomy Activity Feed KPI panel: of N decisions today, M were auto-applied without human. Never mutated — append-only.",
+    "owner": "argus-governance",
+    "schema_version": 1,
+    "kpi_aggregations": {
+      "auto_apply_rate": "count(auto_applied:true) / count(*)",
+      "exception_rate": "count(required_human:true) / count(*)"
+    }
+  }
+}

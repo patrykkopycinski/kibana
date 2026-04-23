@@ -18,46 +18,40 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-recommendations"
-      body:
-        query:
-          bool:
-            must:
-              - terms:
-                  status:
-                    - approved
-            must_not:
-              - term:
-                  status: applied
-              - term:
-                  status: failed
-        size: 3
-        sort:
-          - "@timestamp": asc
-        _source:
-          - rec_id
-          - type
-          - source
-          - status
-          - title
-          - summary
-          - details
-          - sub_items
-          - confidence
+      query:
+        bool:
+          must:
+            - terms:
+                status:
+                  - approved
+          must_not:
+            - term:
+                status: applied
+            - term:
+                status: failed
+      size: 3
+      _source:
+        - rec_id
+        - type
+        - source
+        - status
+        - title
+        - summary
+        - details
+        - sub_items
+        - confidence
 
   - name: log_check
     type: console
     with:
       message: "Applier: found {{ steps.get_approved_recs.output.hits.total.value }} approved recommendations"
 
-  - name: check_has_approved
-    type: condition
-    with:
-      condition: "{{ steps.get_approved_recs.output.hits.total.value }} > 0"
-      if_true: apply_recommendations
-      if_false: log_nothing
-
+  # Early-exit when there are no approved recommendations. Runs only when
+  # total.value == 0 and ends the workflow. If alerts > 0, this step is skipped
+  # and the pipeline continues to apply_recommendations below.
   - name: log_nothing
     type: console
+    if: "steps.get_approved_recs.output.hits.total.value: 0"
     with:
       message: "Applier: no approved recommendations to process"
     end: true

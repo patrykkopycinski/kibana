@@ -1,13 +1,18 @@
-# Argus — Mythos-Resilient AutoSOC
+# Argus — spec tree
 
-Argus is the evolution of the AutoSOC story for the Mythos era: a defender that
-stays sound when a frontier-capability adversary compresses dwell-to-detection
-(P1), explodes behavioural variants (P2), brings agentic reasoning into the
-attack loop (P3), and operates with capability asymmetry (P4).
+**ARGUS** — **A**utonomous · **R**esilient · **G**uardian for · **U**nified · **S**ecurity.
 
-This directory is the **authoritative Argus spec tree**. Everything here is
-either a design artifact that ships alongside code in `soc-simulation/` and the
-Security Solution plugin, or a demo aid.
+Argus is a Mythos-resilient defender: a self-governing Security Operations
+Center built on the Elastic Stack, designed to stay sound when a
+frontier-capability adversary compresses dwell-to-detection (P1), explodes
+behavioural variants (P2), brings agentic reasoning into the attack loop
+(P3), and operates with capability asymmetry (P4).
+
+For the product-level introduction, read the repo root
+[`README.md`](../../README.md). This directory is the **authoritative Argus
+spec tree** — everything here is either a design artifact that ships
+alongside code in `soc-simulation/` and the Security Solution plugin, or a
+demo aid.
 
 ## Entry points
 
@@ -16,8 +21,11 @@ Security Solution plugin, or a demo aid.
 | [`KICKOFF.md`](./KICKOFF.md) | **Implementers start here.** Dependency graph, staffing plan, Day-1 checklists, DoR/DoD, issue-creation helper. |
 | [`threat-model.html`](./threat-model.html) | Mythos-era threat landscape, Argus design principles, 5-layer architecture, 24-week roadmap. Start here if you're new to the story. |
 | [`architecture.html`](./architecture.html) | Visual one-pager of the 5 layers + pressures → absorbers map. Good for slide decks. |
+| [`data-flow-deck.html`](./data-flow-deck.html) | 12-slide data-flow walkthrough — how documents hop between `.soc-*` indices at each step (Sense → Hypothesize → Validate → Act → Govern), with the OTLP reasoning trace as the spine. Keyboard-navigable (`← → Space M P`). |
 | [`capability-map.md`](./capability-map.md) | Existing Elastic PRs/issues + Argus deltas, mapped to layers and pressures. Gap analysis. |
+| [`demo-runbook-5min.md`](./demo-runbook-5min.md) | **Field demo / exec flyover.** Single-URL, single-operator 5-minute script for the `/app/security/argus` app route. Start here for the PR. |
 | [`demo-storyboard.md`](./demo-storyboard.md) | Three scripted demo scenarios (P1, P2, P3), 20 minutes. |
+| [`demo-runbook.md`](./demo-runbook.md) | Full 20-minute demo runbook (Mythos preset, drift, trust tiers, kill-switch). |
 | [`mythos-preset-spec.md`](./mythos-preset-spec.md) | Contract for the Mythos-class (level-6) adversary preset. |
 
 ## Phase 2 — Milestone detail
@@ -60,12 +68,58 @@ truth.
 
 - **First-time reviewer / new team member:** `threat-model.html` →
   `architecture.html` → `capability-map.md`.
-- **Demo operator:** `demo-storyboard.md` → `mythos-preset-spec.md` →
+- **PR reviewer / 5-minute demo:** `demo-runbook-5min.md` →
+  `../../scripts/seed_argus_demo.sh` → `/app/security/argus`.
+- **Demo operator (full session):** `demo-storyboard.md` →
+  `demo-runbook.md` → `mythos-preset-spec.md` →
   `../../workflows/soc-argus-arm-mythos-preset.yaml`.
 - **Implementer on a specific milestone:** `issues/m2-X-*.md` →
   `scaffolds/m2-X-*.md` → the relevant plugin code paths referenced in those
   docs.
 - **Architect reviewing Phase 3 commitments:** everything under `phase-3/`.
+
+## Current PR scope — community coverage + playbooks + decision graph
+
+The in-flight change (`openspec/changes/argus-community-coverage-and-playbooks`)
+lands the stack-native breadth layer on top of the Phase-C Argus Console.
+Concretely, what the current worktree ships:
+
+- **Tier 1 — Coverage data plane**: `.soc-detection-corpus`,
+  `.soc-threat-actors`, `.soc-threat-profiles`, `.soc-coverage-gaps`.
+  Seeded by `scripts/argus_seed_coverage.js` + `soc-simulation/scripts/
+  seed_argus_demo.sh` (the latter now invokes the former and adds open
+  coverage-gap rows across 5 data sources).
+- **Tier 2 — Pattern-seeded Pareto synthesis**: `argus.procedure_clusters[]`
+  on `.soc-recommendations`, redundancy scanner workflow, pattern-seeded
+  candidate generator.
+- **Tier 3 — Agent-native playbooks**: new Agent Builder tools
+  (`list_uncovered_techniques`, `export_navigator_layer`,
+  `get_mutation_detail`, `list_actor_coverage`) + new workflow
+  `soc-argus-playbook-datasource-gap.yaml`. Canonical playbooks
+  (`exploit-to-detection`, `coverage-gap-triage`, `high-fp-tuning`) are
+  retro-tagged `argus:playbook` and grouped by `user_intent` in the Console
+  Playbooks tab.
+- **Tier 4 — QoL hooks**: shared types + route constants for autocomplete +
+  quality-score history (route handlers land incrementally).
+- **Tier 5 — Decision graph**: request/response types in
+  `@kbn/argus-console-common`; `.soc-decision-graph` index template +
+  demo seeder (`scripts/argus_seed_decision_graph.js`); read route
+  `GET /internal/security_solution/argus/decision_graph` behind
+  `argusDecisionGraphEnabled`; Console flyout (per-reasoning-step
+  "Show decision graph") using a custom radial SVG renderer; full-screen
+  Decision Graph tab (root picker, depth, node-kind chips, edge-strength
+  filter, JSON export, click-to-reroot); agent-builder tool
+  `argus.get_decision_graph`. URL round-trip: `?tab=decision_graph&root_kind=&root_id=`.
+
+Non-goals for this PR (explicit scope cuts):
+
+- `@kbn/argus-read-api` adapter package + MCP/A2A switchover.
+- MCP transport wrappers for the new read routes.
+- Executive-briefing Lens dashboard.
+- Scheduled decision-graph builder workflow (edges are seeded at
+  demo-setup time by `argus_seed_decision_graph.js`).
+- Decision-graph pathfinding, SVG export, and filter/path URL
+  round-trip (explorer ships with root + depth URL state only).
 
 ## Invariants
 

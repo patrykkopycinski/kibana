@@ -1,0 +1,66 @@
+{
+  "description": "Argus Phase 3 demo seed intel. These rows are ingested by `soc-argus-intel-adapter-generic` on first tick so the demo has non-zero `mythos_signal` without requiring a live TAXII/Glasswing feed. Remove from production by clearing the seed flag in the adapter workflow.",
+  "feed_id": "argus-demo-feed",
+  "source_trust": 0.6,
+  "items": [
+    {
+      "intel_id": "seed-cve-2025-m1001-actor",
+      "kind": "actor_capability",
+      "summary": "Mythos-aligned adversary cluster APT-MYTHOS-01 demonstrated in-the-wild exploitation chain for CVE-2025-M1001, the LSASS variant credential dumper seeded in the demo corpus.",
+      "reference": {
+        "cve": "CVE-2025-M1001",
+        "technique_ids": ["T1003.001"],
+        "actor_ids": ["apt-mythos-aligned-01"]
+      },
+      "signal_strength": 0.9,
+      "half_life_days": 14,
+      "raw": {
+        "source": "demo-seed",
+        "notes": "Pre-seeded so `mythos_signal` for CVE-2025-M1001 is non-zero during demo scenarios."
+      }
+    },
+    {
+      "intel_id": "seed-cve-2025-m1001-exploit",
+      "kind": "exploit_availability",
+      "summary": "Weaponised PoC for CVE-2025-M1001 posted to a Mythos-adjacent paste site. Mutation axes cover both unsigned-loader and DPAPI bypass variants.",
+      "reference": {
+        "cve": "CVE-2025-M1001",
+        "technique_ids": ["T1003.001", "T1134.001"]
+      },
+      "signal_strength": 0.75,
+      "half_life_days": 10,
+      "raw": {
+        "source": "demo-seed"
+      }
+    },
+    {
+      "intel_id": "seed-cve-2025-m1002-campaign",
+      "kind": "campaign",
+      "summary": "Coordinated campaign targeting critical-infra tenants with C2 beaconing consistent with CVE-2025-M1002. Observed on three distinct tenants within 72h.",
+      "reference": {
+        "cve": "CVE-2025-M1002",
+        "technique_ids": ["T1071.001"],
+        "actor_ids": ["apt-mythos-aligned-02"]
+      },
+      "signal_strength": 0.8,
+      "half_life_days": 14,
+      "raw": {
+        "source": "demo-seed"
+      }
+    },
+    {
+      "intel_id": "seed-cve-2025-m1003-ransomware",
+      "kind": "exploit_availability",
+      "summary": "CVE-2025-M1003 chained with ransomware delivery across multiple victims. Intel feeds converging on a single Mythos-tier actor cluster.",
+      "reference": {
+        "cve": "CVE-2025-M1003",
+        "technique_ids": ["T1486", "T1204.002"]
+      },
+      "signal_strength": 0.95,
+      "half_life_days": 21,
+      "raw": {
+        "source": "demo-seed"
+      }
+    }
+  ]
+}

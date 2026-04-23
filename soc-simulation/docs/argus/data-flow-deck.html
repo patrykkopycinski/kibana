@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGUS — Data Flow Deck</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #080D1A;
+    --surface: #10192E;
+    --surface2: #17223E;
+    --surface3: #1E2C4F;
+    --border: #253553;
+    --border2: #2f3f64;
+    --argus: #00E5FF;
+    --accent2: #7C4DFF;
+    --mythos: #FF3366;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: var(--surface2);
+    padding: 1px 6px; border-radius: 3px; color: var(--argus); border: 1px solid var(--border); }
+
+  /* Deck chrome */
+  .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+  .progress { position: fixed; top: 0; left: 0; height: 3px;
+    background: linear-gradient(90deg, var(--argus), var(--accent2));
+    width: 0%; z-index: 100; transition: width 200ms ease-out;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
+  .counter { position: fixed; bottom: 18px; right: 22px; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text3); letter-spacing: 1.2px; z-index: 50;
+    background: rgba(16, 25, 46, 0.6); padding: 5px 10px; border-radius: 5px;
+    border: 1px solid var(--border); backdrop-filter: blur(8px); }
+  .counter .cur { color: var(--argus); font-weight: 700; }
+  .hint { position: fixed; bottom: 18px; left: 22px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--text3); letter-spacing: 1px; z-index: 50; opacity: 0.75; }
+  .hint kbd { background: var(--surface2); border: 1px solid var(--border); border-radius: 3px;
+    padding: 1px 6px; margin: 0 2px; font-size: 10px; color: var(--text2); }
+  .nav-btn { position: fixed; top: 50%; transform: translateY(-50%); width: 40px; height: 60px;
+    background: rgba(16, 25, 46, 0.4); border: 1px solid var(--border); color: var(--text2);
+    cursor: pointer; z-index: 50; font-size: 18px; border-radius: 8px;
+    transition: all 150ms ease; backdrop-filter: blur(8px); }
+  .nav-btn:hover { background: var(--surface2); color: var(--argus); border-color: var(--argus); }
+  .nav-btn.prev { left: 12px; } .nav-btn.next { right: 12px; }
+
+  .slide { position: absolute; inset: 0; padding: 42px 56px 48px; overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+    transition: opacity 240ms ease; }
+  .slide.active { opacity: 1; pointer-events: auto; }
+  .slide::-webkit-scrollbar { width: 8px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .slide-top { display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: 12px; margin-bottom: 22px; border-bottom: 1px solid var(--border); }
+  .slide-kicker { font-size: 10.5px; color: var(--text3); letter-spacing: 2px; text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .slide-kicker .kicker-accent { color: var(--argus); }
+  .slide-brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 26px; height: 26px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800; color: var(--bg); }
+  .brand-txt { font-size: 11px; color: var(--text2); letter-spacing: 1.5px;
+    text-transform: uppercase; font-weight: 700; }
+
+  h1.slide-title { font-size: 36px; font-weight: 800; letter-spacing: -0.6px;
+    margin-bottom: 6px; color: var(--text); }
+  .slide-sub { font-size: 14px; color: var(--text2); margin-bottom: 20px; max-width: 1100px; }
+
+  .section-title { font-size: 10.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Cover */
+  .slide.cover { justify-content: center; align-items: center; text-align: center; padding: 60px; }
+  .slide.cover .slide-top { border: none; margin-bottom: 0; padding: 0; width: 100%; }
+  .cover-mark { width: 110px; height: 110px; border-radius: 24px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 50px; font-weight: 900; color: var(--bg);
+    margin: 0 auto 30px;
+    box-shadow: 0 20px 60px rgba(0, 229, 255, 0.25), 0 0 120px rgba(124, 77, 255, 0.15); }
+  .cover h1.slide-title { font-size: 76px; letter-spacing: -1.5px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+  .cover-tag { font-size: 20px; color: var(--text2); font-weight: 300; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .cover-acronym { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text3);
+    letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px; }
+  .cover-acronym strong { color: var(--argus); font-weight: 700; }
+  .cover-body { font-size: 15px; color: var(--text3); max-width: 700px; margin: 0 auto 34px; line-height: 1.7; }
+  .cover-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3);
+    letter-spacing: 2px; text-transform: uppercase; display: flex; gap: 24px; justify-content: center; }
+  .cover-meta span strong { color: var(--argus); }
+
+  /* Divider */
+  .slide.divider { justify-content: center; align-items: flex-start; padding: 0 120px; }
+  .divider-num { font-family: 'JetBrains Mono', monospace; font-size: 64px; font-weight: 800;
+    color: var(--surface3); line-height: 1; margin-bottom: 8px; }
+  .divider-label { font-size: 11px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 18px; }
+  .divider h1 { font-size: 56px; font-weight: 800; letter-spacing: -1.2px; color: var(--text);
+    margin-bottom: 16px; max-width: 1000px; line-height: 1.1; }
+  .divider p { font-size: 18px; color: var(--text2); max-width: 820px; line-height: 1.5; }
+
+  /* Generic */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px; position: relative; }
+  .card.accent-cyan   { border-left: 3px solid var(--argus); }
+  .card.accent-purple { border-left: 3px solid var(--accent2); }
+  .card.accent-mythos { border-left: 3px solid var(--mythos); }
+  .card.accent-green  { border-left: 3px solid var(--green); }
+  .card.accent-amber  { border-left: 3px solid var(--amber); }
+  .card.accent-blue   { border-left: 3px solid var(--blue); }
+  .card-label { font-size: 9.5px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--argus); margin-bottom: 8px; }
+  .card.accent-mythos .card-label { color: var(--mythos); }
+  .card.accent-purple .card-label { color: var(--accent2); }
+  .card.accent-green  .card-label { color: var(--green); }
+  .card.accent-amber  .card-label { color: var(--amber); }
+  .card.accent-blue   .card-label { color: var(--blue); }
+  .card h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+    letter-spacing: -0.1px; }
+  .card p { font-size: 12.5px; color: var(--text2); line-height: 1.55; margin-bottom: 6px; }
+  .card p:last-child { margin-bottom: 0; }
+  .card p strong { color: var(--text); font-weight: 600; }
+  .card p em { color: var(--argus); font-style: normal; font-weight: 600; }
+  .card ul { list-style: none; padding: 0; margin: 6px 0 0 0; }
+  .card ul li { font-size: 12.5px; color: var(--text2); line-height: 1.55;
+    padding: 3px 0 3px 16px; position: relative; }
+  .card ul li::before { content: '▸'; position: absolute; left: 0;
+    color: var(--argus); font-size: 11px; top: 4px; }
+  .card ul li strong { color: var(--text); font-weight: 600; }
+
+  /* Tables */
+  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  table.data th { text-align: left; padding: 9px 12px; background: var(--surface2); color: var(--text);
+    font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    border-bottom: 1px solid var(--border2); }
+  table.data td { padding: 9px 12px; border-bottom: 1px solid rgba(37, 53, 83, 0.4);
+    color: var(--text2); vertical-align: top; }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td strong { color: var(--text); font-weight: 600; }
+  table.data td code { font-size: 11px; }
+
+  /* Code */
+  pre.code { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px;
+    color: var(--text); line-height: 1.55; overflow-x: auto; margin: 8px 0; white-space: pre; }
+  pre.code .k { color: var(--argus); font-weight: 600; }
+  pre.code .s { color: var(--green); }
+  pre.code .n { color: var(--amber); }
+  pre.code .c { color: var(--text3); font-style: italic; }
+  pre.code .p { color: var(--accent2); font-weight: 600; }
+
+  /* Big diagram card */
+  .diagram-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px; margin-bottom: 14px; }
+  .diagram-card svg { width: 100%; height: auto; display: block; }
+
+  /* Pill */
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    background: rgba(0, 229, 255, 0.1); color: var(--argus); border: 1px solid rgba(0, 229, 255, 0.3); }
+  .pill.mythos { background: rgba(255, 51, 102, 0.1); color: var(--mythos); border-color: rgba(255, 51, 102, 0.3); }
+  .pill.green  { background: rgba(0, 230, 118, 0.1); color: var(--green); border-color: rgba(0, 230, 118, 0.3); }
+  .pill.amber  { background: rgba(255, 215, 64, 0.1); color: var(--amber); border-color: rgba(255, 215, 64, 0.3); }
+  .pill.purple { background: rgba(124, 77, 255, 0.1); color: var(--accent2); border-color: rgba(124, 77, 255, 0.3); }
+  .pill.blue   { background: rgba(68, 138, 255, 0.1); color: var(--blue); border-color: rgba(68, 138, 255, 0.3); }
+
+  /* Menu */
+  .menu-btn { position: fixed; top: 16px; right: 20px; background: rgba(16, 25, 46, 0.6);
+    border: 1px solid var(--border); color: var(--text2); width: 32px; height: 32px;
+    border-radius: 6px; cursor: pointer; z-index: 60; font-size: 14px;
+    backdrop-filter: blur(8px); }
+  .menu-btn:hover { color: var(--argus); border-color: var(--argus); }
+  .menu-overlay { position: fixed; inset: 0; background: rgba(8, 13, 26, 0.94);
+    backdrop-filter: blur(14px); z-index: 200; display: none; padding: 40px 60px; overflow-y: auto; }
+  .menu-overlay.open { display: block; }
+  .menu-overlay h2 { font-size: 20px; font-weight: 800; color: var(--argus);
+    margin-bottom: 18px; letter-spacing: -0.3px; }
+  .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 960px; }
+  .menu-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 16px; cursor: pointer; transition: all 150ms ease;
+    display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: 14px; }
+  .menu-item:hover { border-color: var(--argus); background: var(--surface2); }
+  .menu-num { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--text3); }
+  .menu-item:hover .menu-num { color: var(--argus); }
+  .menu-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .menu-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .menu-close { position: fixed; top: 16px; right: 20px; background: rgba(16, 25, 46, 0.6);
+    border: 1px solid var(--border); color: var(--text2); width: 32px; height: 32px;
+    border-radius: 6px; cursor: pointer; z-index: 210; font-size: 14px; }
+  .menu-close:hover { color: var(--mythos); border-color: var(--mythos); }
+
+  /* Data-flow specific */
+  .flow-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .flow-row { display: grid; grid-template-columns: 180px 1fr 180px; gap: 14px;
+    align-items: stretch; }
+  .flow-producer, .flow-consumer {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; display: flex; flex-direction: column; justify-content: center; }
+  .flow-producer .who, .flow-consumer .who { font-size: 13px; font-weight: 600; color: var(--text); }
+  .flow-producer .what, .flow-consumer .what {
+    font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.4px; margin-top: 2px; }
+  .flow-arrow { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 14px; display: flex; flex-direction: column; justify-content: center;
+    position: relative; }
+  .flow-arrow::before {
+    content: ''; position: absolute; left: -9px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+    border-right: 8px solid var(--border); }
+  .flow-arrow::after {
+    content: ''; position: absolute; right: -9px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0; border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+    border-left: 8px solid var(--argus); }
+  .flow-arrow .payload {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--argus); font-weight: 600; }
+  .flow-arrow .payload-sub {
+    font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .flow-arrow.act::after { border-left-color: var(--green); }
+  .flow-arrow.act .payload { color: var(--green); }
+  .flow-arrow.gov::after { border-left-color: var(--amber); }
+  .flow-arrow.gov .payload { color: var(--amber); }
+  .flow-arrow.hyp::after { border-left-color: var(--accent2); }
+  .flow-arrow.hyp .payload { color: var(--accent2); }
+  .flow-arrow.sense::after { border-left-color: var(--blue); }
+  .flow-arrow.sense .payload { color: var(--blue); }
+
+  /* Print */
+  @media print {
+    html, body { overflow: visible; height: auto; background: white; color: black; }
+    .slide { opacity: 1; position: relative; page-break-after: always;
+      min-height: 100vh; padding: 32px 42px; }
+    .nav-btn, .progress, .counter, .hint, .menu-btn { display: none; }
+    .card, .diagram-card { break-inside: avoid; }
+    .cover h1.slide-title { -webkit-text-fill-color: #00BCD4; background: none; }
+    .cover-mark { background: #00BCD4; color: white; box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<button class="nav-btn prev" onclick="prev()" aria-label="Previous slide">◂</button>
+<button class="nav-btn next" onclick="next()" aria-label="Next slide">▸</button>
+<button class="menu-btn" onclick="toggleMenu()" aria-label="Slide index">☰</button>
+<div class="counter"><span class="cur" id="cur">01</span> / <span id="total">12</span></div>
+<div class="hint"><kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> · <kbd>M</kbd> menu · <kbd>P</kbd> print</div>
+
+<div class="menu-overlay" id="menu">
+  <button class="menu-close" onclick="toggleMenu()" aria-label="Close menu">✕</button>
+  <h2>Slide index</h2>
+  <div class="menu-grid" id="menu-grid"></div>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ═════ SLIDE 01 · COVER ═════ -->
+  <section class="slide cover active" data-title="Cover" data-sub="Where data goes, stage by stage">
+    <div class="cover-mark">A</div>
+    <h1 class="slide-title">Data Flow</h1>
+    <div class="cover-tag">How data moves between Argus steps</div>
+    <div class="cover-acronym">
+      <strong>A</strong>utonomous · <strong>R</strong>esilient · <strong>G</strong>uardian for ·
+      <strong>U</strong>nified · <strong>S</strong>ecurity
+    </div>
+    <div class="cover-body">
+      Argus is not a pipeline; it's a <strong>closed loop</strong> over Elasticsearch.
+      Every step reads from and writes to <code>.soc-*</code> indices, stamps an OTLP
+      reasoning trace, and hands the next agent a document — never a function call.
+      This deck walks the data layer by layer: <em>Sense → Hypothesize → Validate
+      → Act → Govern</em>, and the feedback path that closes the loop.
+    </div>
+    <div class="cover-meta">
+      <span><strong>Companion</strong> · architecture.html</span>
+      <span><strong>Deck</strong> · v1</span>
+      <span><strong>Elastic Security</strong> · Internal</span>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 02 · SUBSTRATE ═════ -->
+  <section class="slide" data-title="The substrate" data-sub=".soc-* indices + OTLP trace">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">02</span> · SUBSTRATE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Everything flows through Elasticsearch</h1>
+    <p class="slide-sub">
+      No message bus, no RPC fabric. Every step's output is a document in a
+      dedicated index, and every step's input is a query. The trace graph and
+      audit trail fall out of this choice for free.
+    </p>
+
+    <div class="section-title">The 17 indices, grouped by layer</div>
+    <div class="grid-3">
+      <div class="card accent-blue">
+        <div class="card-label">01 · Sense</div>
+        <ul>
+          <li><code>logs-endpoint.events.*</code> <span class="pill blue">ECS</span></li>
+          <li><code>.alerts-security.alerts-*</code></li>
+          <li><code>.soc-telemetry-signals</code></li>
+          <li><code>.soc-cve-advisories</code></li>
+          <li><code>logs-argus_eval.scenarios-*</code></li>
+          <li><code>.soc-reasoning-trace</code> <span class="pill blue">OTLP</span></li>
+        </ul>
+      </div>
+      <div class="card accent-purple">
+        <div class="card-label">02 · Hypothesize</div>
+        <ul>
+          <li><code>.soc-recommendations</code></li>
+          <li><code>.soc-mutation-intents</code></li>
+          <li><code>.soc-detection-corpus</code></li>
+          <li><code>.soc-coverage-gaps</code></li>
+          <li><code>.soc-detection-patterns</code></li>
+          <li><code>.soc-threat-profiles</code> / <code>.soc-threat-actors</code></li>
+        </ul>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">03 · Validate</div>
+        <ul>
+          <li><code>.soc-detection-eval-runs</code></li>
+          <li><code>.soc-backtest-results</code></li>
+          <li><code>.soc-quality-score-history</code></li>
+          <li>Gate write-back on <code>.soc-mutation-intents</code></li>
+          <li>Trust on <code>.soc-actor-trust-tiers</code></li>
+        </ul>
+      </div>
+      <div class="card accent-green">
+        <div class="card-label">04 · Act</div>
+        <ul>
+          <li><code>.soc-autonomy-decisions</code></li>
+          <li>Kibana rules API (apply)</li>
+          <li><code>.alerts-security.alerts-*</code> (live hits)</li>
+          <li><code>.soc-outcomes</code></li>
+          <li><code>.soc-attack-commands</code> (Caldera reply)</li>
+        </ul>
+      </div>
+      <div class="card accent-amber">
+        <div class="card-label">05 · Govern</div>
+        <ul>
+          <li><code>.soc-actor-trust-tiers</code></li>
+          <li><code>.soc-kill-switch</code></li>
+          <li><code>.soc-audit-trail</code></li>
+          <li><code>.soc-decision-graph</code></li>
+          <li><code>.soc-difficulty-state</code></li>
+        </ul>
+      </div>
+      <div class="card accent-mythos">
+        <div class="card-label">Δ · Reasoning</div>
+        <p><strong>Every</strong> agent step emits an OTLP span with
+        <code>trace_id</code> + <code>span_id</code>. Spans land in
+        <code>.soc-reasoning-trace</code> and are joined into the
+        <code>.soc-decision-graph</code> nightly — that's what the Console
+        renders on the <em>Decision Graph</em> tab.</p>
+        <p style="margin-top:8px"><strong>Invariant:</strong> no `trace_id` → no apply.
+        Post-apply observer refuses to ack an ungovernable change.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 03 · END-TO-END DIAGRAM ═════ -->
+  <section class="slide" data-title="End-to-end map" data-sub="Where each document hops">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">03</span> · END-TO-END MAP</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">One CVE, end to end</h1>
+    <p class="slide-sub">
+      Trace a single advisory through every `.soc-*` index it touches. Solid
+      arrows are <em>forward</em> flow (new docs); dashed arrows are
+      <em>feedback</em> (trust, corpus, drift).
+    </p>
+
+    <div class="diagram-card">
+<svg viewBox="0 0 1280 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Argus end-to-end data flow">
+  <defs>
+    <marker id="df-cyan" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#00E5FF"/></marker>
+    <marker id="df-purple" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#7C4DFF"/></marker>
+    <marker id="df-green" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#00E676"/></marker>
+    <marker id="df-amber" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#FFD740"/></marker>
+    <marker id="df-blue" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#448AFF"/></marker>
+    <marker id="df-mythos" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 Z" fill="#FF3366"/></marker>
+  </defs>
+
+  <!-- Adversary -->
+  <rect x="18" y="40" width="150" height="80" rx="10" fill="#17223E" stroke="#FF3366" stroke-dasharray="4,4"/>
+  <text x="93" y="66" text-anchor="middle" fill="#FF3366" font-size="10" font-weight="800" letter-spacing="1.5">ADVERSARY</text>
+  <text x="93" y="88" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="700">Caldera / Mythos</text>
+  <text x="93" y="105" text-anchor="middle" fill="#8DA0BE" font-size="9">test telemetry only</text>
+
+  <!-- SENSE -->
+  <rect x="200" y="40" width="200" height="440" rx="10" fill="rgba(68,138,255,0.06)" stroke="#448AFF"/>
+  <text x="300" y="66" text-anchor="middle" fill="#448AFF" font-size="10" font-weight="800" letter-spacing="1.5">01 · SENSE</text>
+
+  <rect x="215" y="86" width="170" height="60" rx="7" fill="#17223E" stroke="#448AFF"/>
+  <text x="300" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Elastic Agent</text>
+  <text x="300" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">endpoint · fleet · osquery</text>
+  <text x="300" y="132" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.alerts-security.*</text>
+
+  <rect x="215" y="158" width="170" height="50" rx="7" fill="#17223E" stroke="#448AFF"/>
+  <text x="300" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Telemetry ticker</text>
+  <text x="300" y="193" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-telemetry-signals</text>
+
+  <rect x="215" y="220" width="170" height="50" rx="7" fill="#17223E" stroke="#448AFF"/>
+  <text x="300" y="238" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Advisory ingest</text>
+  <text x="300" y="255" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-cve-advisories</text>
+
+  <rect x="215" y="282" width="170" height="50" rx="7" fill="#17223E" stroke="#448AFF"/>
+  <text x="300" y="300" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Eval scenarios</text>
+  <text x="300" y="317" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">logs-argus_eval.*</text>
+
+  <rect x="215" y="344" width="170" height="50" rx="7" fill="#17223E" stroke="#448AFF"/>
+  <text x="300" y="362" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Corpus + profiles</text>
+  <text x="300" y="379" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-detection-corpus</text>
+
+  <rect x="215" y="406" width="170" height="50" rx="7" fill="#17223E" stroke="#FF3366"/>
+  <text x="300" y="424" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Reasoning traces</text>
+  <text x="300" y="441" text-anchor="middle" fill="#FF3366" font-size="9" font-family="JetBrains Mono,monospace">.soc-reasoning-trace</text>
+
+  <!-- HYPOTHESIZE -->
+  <rect x="430" y="40" width="210" height="440" rx="10" fill="rgba(124,77,255,0.06)" stroke="#7C4DFF"/>
+  <text x="535" y="66" text-anchor="middle" fill="#7C4DFF" font-size="10" font-weight="800" letter-spacing="1.5">02 · HYPOTHESIZE</text>
+
+  <rect x="445" y="86" width="180" height="60" rx="7" fill="#17223E" stroke="#7C4DFF"/>
+  <text x="535" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Triage agent</text>
+  <text x="535" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-triage-agent</text>
+  <text x="535" y="132" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">per_alert_verdict →</text>
+
+  <rect x="445" y="158" width="180" height="60" rx="7" fill="#17223E" stroke="#7C4DFF"/>
+  <text x="535" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">DetEng agent</text>
+  <text x="535" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-deteng-agent</text>
+  <text x="535" y="204" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">draft_rule, query,</text>
+  <text x="535" y="215" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">justification</text>
+
+  <rect x="445" y="230" width="180" height="60" rx="7" fill="#17223E" stroke="#7C4DFF"/>
+  <text x="535" y="248" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Hunter + Gap</text>
+  <text x="535" y="262" text-anchor="middle" fill="#8DA0BE" font-size="9">hunter · gap-analyzer</text>
+  <text x="535" y="276" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">coverage_gap proposal</text>
+
+  <rect x="445" y="302" width="180" height="90" rx="7" fill="#1E2C4F" stroke="#7C4DFF" stroke-width="1.4"/>
+  <text x="535" y="322" text-anchor="middle" fill="#E8EDF5" font-size="12" font-weight="800">Pareto synthesis</text>
+  <text x="535" y="340" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-meta-agent</text>
+  <text x="535" y="357" text-anchor="middle" fill="#00E5FF" font-size="9.5" font-family="JetBrains Mono,monospace">writes</text>
+  <text x="535" y="372" text-anchor="middle" fill="#00E5FF" font-size="9.5" font-family="JetBrains Mono,monospace">.soc-recommendations</text>
+  <text x="535" y="385" text-anchor="middle" fill="#00E5FF" font-size="9.5" font-family="JetBrains Mono,monospace">.soc-mutation-intents</text>
+
+  <rect x="445" y="406" width="180" height="50" rx="7" fill="#17223E" stroke="#7C4DFF"/>
+  <text x="535" y="424" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Pattern miner</text>
+  <text x="535" y="441" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">.soc-detection-patterns</text>
+
+  <!-- VALIDATE -->
+  <rect x="670" y="40" width="210" height="260" rx="10" fill="rgba(0,229,255,0.06)" stroke="#00E5FF"/>
+  <text x="775" y="66" text-anchor="middle" fill="#00E5FF" font-size="10" font-weight="800" letter-spacing="1.5">03 · VALIDATE</text>
+
+  <rect x="685" y="86" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
+  <text x="775" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Backtester</text>
+  <text x="775" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-rule-backtester</text>
+  <text x="775" y="132" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-backtest-results</text>
+
+  <rect x="685" y="158" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
+  <text x="775" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">@kbn/evals</text>
+  <text x="775" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">detection-eval vertical</text>
+  <text x="775" y="205" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-detection-eval-runs</text>
+
+  <rect x="685" y="230" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
+  <text x="775" y="248" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Regression gate</text>
+  <text x="775" y="262" text-anchor="middle" fill="#8DA0BE" font-size="9">gate_decision · trust</text>
+  <text x="775" y="277" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">write-back to intent</text>
+
+  <!-- ACT -->
+  <rect x="670" y="312" width="210" height="168" rx="10" fill="rgba(0,230,118,0.06)" stroke="#00E676"/>
+  <text x="775" y="334" text-anchor="middle" fill="#00E676" font-size="10" font-weight="800" letter-spacing="1.5">04 · ACT</text>
+
+  <rect x="685" y="348" width="180" height="50" rx="7" fill="#17223E" stroke="#00E676"/>
+  <text x="775" y="366" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Autonomous applier</text>
+  <text x="775" y="383" text-anchor="middle" fill="#00E676" font-size="9" font-family="JetBrains Mono,monospace">.soc-autonomy-decisions</text>
+
+  <rect x="685" y="408" width="180" height="60" rx="7" fill="#17223E" stroke="#00E676"/>
+  <text x="775" y="426" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Post-apply observer</text>
+  <text x="775" y="440" text-anchor="middle" fill="#8DA0BE" font-size="9">watch live alerts</text>
+  <text x="775" y="455" text-anchor="middle" fill="#00E676" font-size="9" font-family="JetBrains Mono,monospace">.soc-outcomes</text>
+
+  <!-- GOVERN -->
+  <rect x="910" y="40" width="220" height="440" rx="10" fill="rgba(255,215,64,0.06)" stroke="#FFD740"/>
+  <text x="1020" y="66" text-anchor="middle" fill="#FFD740" font-size="10" font-weight="800" letter-spacing="1.5">05 · GOVERN</text>
+
+  <rect x="925" y="86" width="190" height="60" rx="7" fill="#17223E" stroke="#FFD740"/>
+  <text x="1020" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Trust scorer</text>
+  <text x="1020" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">per-artifact · per-actor</text>
+  <text x="1020" y="132" text-anchor="middle" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">.soc-actor-trust-tiers</text>
+
+  <rect x="925" y="158" width="190" height="60" rx="7" fill="#17223E" stroke="#FFD740"/>
+  <text x="1020" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Watchdog · kill-switch</text>
+  <text x="1020" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">15-min tick</text>
+  <text x="1020" y="205" text-anchor="middle" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">.soc-kill-switch</text>
+
+  <rect x="925" y="230" width="190" height="60" rx="7" fill="#17223E" stroke="#FFD740"/>
+  <text x="1020" y="248" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Self-learning loop</text>
+  <text x="1020" y="262" text-anchor="middle" fill="#8DA0BE" font-size="9">calibrates thresholds</text>
+  <text x="1020" y="277" text-anchor="middle" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">score history · drift</text>
+
+  <rect x="925" y="302" width="190" height="60" rx="7" fill="#17223E" stroke="#FFD740"/>
+  <text x="1020" y="320" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Decision graph</text>
+  <text x="1020" y="335" text-anchor="middle" fill="#8DA0BE" font-size="9">joins trace + lineage</text>
+  <text x="1020" y="350" text-anchor="middle" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">.soc-decision-graph</text>
+
+  <rect x="925" y="374" width="190" height="50" rx="7" fill="#17223E" stroke="#FFD740"/>
+  <text x="1020" y="392" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Audit trail</text>
+  <text x="1020" y="409" text-anchor="middle" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">.soc-audit-trail</text>
+
+  <rect x="925" y="430" width="190" height="40" rx="7" fill="#1E2C4F" stroke="#00E5FF" stroke-width="1.4"/>
+  <text x="1020" y="455" text-anchor="middle" fill="#00E5FF" font-size="11" font-weight="800">Argus Console UI</text>
+
+  <!-- Arrows, forward (solid) -->
+  <line x1="168" y1="80" x2="215" y2="116" stroke="#FF3366" stroke-width="1.5" marker-end="url(#df-mythos)"/>
+  <line x1="385" y1="116" x2="445" y2="116" stroke="#448AFF" stroke-width="1.5" marker-end="url(#df-blue)"/>
+  <line x1="385" y1="183" x2="445" y2="183" stroke="#448AFF" stroke-width="1.5" marker-end="url(#df-blue)"/>
+  <line x1="385" y1="245" x2="445" y2="245" stroke="#448AFF" stroke-width="1.5" marker-end="url(#df-blue)"/>
+  <line x1="385" y1="307" x2="445" y2="347" stroke="#448AFF" stroke-width="1.2" marker-end="url(#df-blue)"/>
+  <line x1="385" y1="369" x2="445" y2="347" stroke="#448AFF" stroke-width="1.2" marker-end="url(#df-blue)"/>
+
+  <line x1="625" y1="347" x2="685" y2="116" stroke="#7C4DFF" stroke-width="1.5" marker-end="url(#df-purple)"/>
+  <line x1="625" y1="347" x2="685" y2="188" stroke="#7C4DFF" stroke-width="1.5" marker-end="url(#df-purple)"/>
+  <line x1="625" y1="347" x2="685" y2="260" stroke="#7C4DFF" stroke-width="1.5" marker-end="url(#df-purple)"/>
+
+  <line x1="775" y1="290" x2="775" y2="312" stroke="#00E5FF" stroke-width="1.5" marker-end="url(#df-cyan)"/>
+  <line x1="775" y1="398" x2="775" y2="408" stroke="#00E676" stroke-width="1.5" marker-end="url(#df-green)"/>
+
+  <line x1="865" y1="116" x2="925" y2="116" stroke="#FFD740" stroke-width="1.3" marker-end="url(#df-amber)"/>
+  <line x1="865" y1="188" x2="925" y2="188" stroke="#FFD740" stroke-width="1.3" marker-end="url(#df-amber)"/>
+  <line x1="865" y1="260" x2="925" y2="260" stroke="#FFD740" stroke-width="1.3" marker-end="url(#df-amber)"/>
+  <line x1="865" y1="373" x2="925" y2="320" stroke="#FFD740" stroke-width="1.3" marker-end="url(#df-amber)"/>
+  <line x1="865" y1="438" x2="925" y2="399" stroke="#FFD740" stroke-width="1.3" marker-end="url(#df-amber)"/>
+
+  <!-- Feedback arrows (dashed) -->
+  <path d="M 1020 230 Q 1200 230 1200 120 Q 1200 40 600 40 L 535 80" fill="none"
+        stroke="#FFD740" stroke-dasharray="4,4" stroke-width="1.2" marker-end="url(#df-amber)"/>
+  <text x="1195" y="70" text-anchor="end" fill="#FFD740" font-size="9" font-family="JetBrains Mono,monospace">trust + calibration</text>
+
+  <path d="M 775 410 Q 640 500 500 500 Q 300 500 300 450 L 300 420" fill="none"
+        stroke="#00E676" stroke-dasharray="4,4" stroke-width="1.2" marker-end="url(#df-green)"/>
+  <text x="460" y="515" text-anchor="middle" fill="#00E676" font-size="9" font-family="JetBrains Mono,monospace">post-apply observation → reasoning trace</text>
+
+  <!-- Reasoning trace strap -->
+  <rect x="200" y="492" width="915" height="20" rx="4" fill="rgba(255,51,102,0.10)" stroke="#FF3366" stroke-dasharray="3,3"/>
+  <text x="657" y="506" text-anchor="middle" fill="#FF3366" font-size="9.5" font-family="JetBrains Mono,monospace" letter-spacing="1">
+    Every rectangle emits OTLP spans → .soc-reasoning-trace (trace_id propagates through every stage)
+  </text>
+</svg>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 04 · STEP 1 SENSE ═════ -->
+  <section class="slide" data-title="Step 1 · Sense" data-sub="Producer → payload → consumer">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">04</span> · SENSE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Step 1 · Sense</h1>
+    <p class="slide-sub">
+      Ground truth enters the loop from five sources. Each writes a <strong>typed
+      document</strong> to a dedicated index — no direct handoff to agents.
+    </p>
+
+    <div class="flow-wrap">
+      <div class="flow-row">
+        <div class="flow-producer">
+          <div class="who">Elastic Agent</div><div class="what">endpoint · fleet · osquery</div>
+        </div>
+        <div class="flow-arrow sense">
+          <div class="payload">ECS alert document</div>
+          <div class="payload-sub">
+            writes <code>.alerts-security.alerts-*</code> ·
+            fields: <code>kibana.alert.uuid</code>, <code>rule.id</code>,
+            <code>host.name</code>, <code>process.*</code>, <code>@timestamp</code>.
+          </div>
+        </div>
+        <div class="flow-consumer">
+          <div class="who">soc-triage-agent</div><div class="what">per_alert_verdict sweep, 5 min</div>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer">
+          <div class="who">Advisory ingest</div><div class="what">NVD · KEV · EPSS · vendor</div>
+        </div>
+        <div class="flow-arrow sense">
+          <div class="payload">CVE advisory</div>
+          <div class="payload-sub">
+            writes <code>.soc-cve-advisories</code> ·
+            fields: <code>cve_id</code>, <code>severity</code>, <code>kev</code>,
+            <code>mitre_techniques[]</code>, <code>published_at</code>.
+          </div>
+        </div>
+        <div class="flow-consumer">
+          <div class="who">soc-deteng-agent</div><div class="what">exploit probability + synthesis</div>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer">
+          <div class="who">Telemetry ticker</div><div class="what">Caldera / demo synthetic</div>
+        </div>
+        <div class="flow-arrow sense">
+          <div class="payload">Normalised signal</div>
+          <div class="payload-sub">
+            writes <code>.soc-telemetry-signals</code> ·
+            fields: <code>summary</code>, <code>pressure</code>,
+            <code>process.name</code>, <code>alert_id</code>.
+          </div>
+        </div>
+        <div class="flow-consumer">
+          <div class="who">Activity feed + hunter</div><div class="what">Console · soc-proactive-hunter</div>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer">
+          <div class="who">Eval scenarios</div><div class="what">Caldera runs · @kbn/evals</div>
+        </div>
+        <div class="flow-arrow sense">
+          <div class="payload">Mutation scenario</div>
+          <div class="payload-sub">
+            writes <code>logs-argus_eval.scenarios-*</code> ·
+            consumed by the <strong>detection-eval vertical</strong> as gold
+            labels for recall / variant-coverage scoring.
+          </div>
+        </div>
+        <div class="flow-consumer">
+          <div class="who">@kbn/evals harness</div><div class="what">rule preview API</div>
+        </div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer">
+          <div class="who">Every Agent Builder step</div><div class="what">tool calls · LLM spans</div>
+        </div>
+        <div class="flow-arrow" style="border-color: var(--mythos);">
+          <div class="payload" style="color:var(--mythos)">OTLP span</div>
+          <div class="payload-sub">
+            writes <code>.soc-reasoning-trace</code> ·
+            fields: <code>trace_id</code>, <code>span_id</code>,
+            <code>parent_span_id</code>, <code>agent</code>, <code>tool</code>,
+            <code>input</code>, <code>output</code>, <code>duration_ms</code>.
+          </div>
+        </div>
+        <div class="flow-consumer">
+          <div class="who">Decision graph builder</div><div class="what">joins with lineage nightly</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 05 · STEP 2 HYPOTHESIZE ═════ -->
+  <section class="slide" data-title="Step 2 · Hypothesize" data-sub="agents → mutation intents">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">05</span> · HYPOTHESIZE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Step 2 · Hypothesize</h1>
+    <p class="slide-sub">
+      Planner-class agents read the sense layer and write <strong>two artifacts</strong>:
+      a <em>recommendation</em> (what to do) and a <em>mutation intent</em> (the
+      draft rule itself, with justification).
+    </p>
+
+    <div class="grid-2">
+      <div class="card accent-purple">
+        <div class="card-label">input → processing</div>
+        <h3>What each agent reads</h3>
+        <ul>
+          <li><strong>Triage</strong> · ECS alerts + <code>.soc-telemetry-signals</code> → classification + disposition</li>
+          <li><strong>DetEng</strong> · <code>.soc-cve-advisories</code> + corpus + patterns → rule draft</li>
+          <li><strong>Hunter</strong> · endpoint events + corpus → hunt query + gap</li>
+          <li><strong>Gap analyzer</strong> · <code>.soc-threat-profiles</code> × corpus → <code>.soc-coverage-gaps</code></li>
+          <li><strong>Meta agent</strong> · hunter + gap + DetEng → <strong>Pareto candidates</strong></li>
+        </ul>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">output → next stage</div>
+        <h3>What each agent writes</h3>
+        <p>Two documents travel forward together, joined by <code>mutation_intent_id</code>:</p>
+        <ul>
+          <li><code>.soc-recommendations</code> — <em>proposal</em>, confidence, frontier/dominated flag, procedure clusters</li>
+          <li><code>.soc-mutation-intents</code> — <em>draft rule</em>, query, severity, MITRE, justification</li>
+        </ul>
+        <p style="margin-top:8px">Both carry the same <code>trace_id</code>, so any downstream viewer (flyout, decision graph) can resolve the full reasoning chain.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px">
+      <div class="section-title">Canonical mutation-intent payload</div>
+      <pre class="code">{
+  <span class="k">"@timestamp"</span>: <span class="s">"2026-04-22T13:29:09.200Z"</span>,
+  <span class="k">"mutation_intent_id"</span>: <span class="s">"mut-e2d-dnsc2"</span>,
+  <span class="k">"trace_id"</span>: <span class="s">"5b1e...a7"</span>,                                 <span class="c">// joins .soc-reasoning-trace</span>
+  <span class="k">"status"</span>: <span class="s">"queued_for_eval"</span>,
+  <span class="k">"actor"</span>: { <span class="k">"id"</span>: <span class="s">"soc-deteng-agent"</span>, <span class="k">"trust_tier"</span>: <span class="s">"probationary"</span> },
+  <span class="k">"draft_rule"</span>: {
+    <span class="k">"rule_id"</span>: <span class="s">"argus.command-and-control.t1071_004.argus-adv-dns-c2-2026-04"</span>,
+    <span class="k">"severity"</span>: <span class="s">"medium"</span>,
+    <span class="k">"language"</span>: <span class="s">"kuery"</span>,
+    <span class="k">"query"</span>:    <span class="s">"event.dataset:\"dns\" and dns.question.type:(\"TXT\" or \"NULL\") ..."</span>,
+    <span class="k">"mitre"</span>:    [{ <span class="k">"technique_id"</span>: <span class="s">"T1071.004"</span>, <span class="k">"tactic"</span>: <span class="s">"command-and-control"</span> }],
+    <span class="k">"justification"</span>: { <span class="k">"observable_signals"</span>: [<span class="s">"dns_txt"</span>, <span class="s">"non_rfc1918_resolver"</span>] }
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 06 · STEP 3 VALIDATE ═════ -->
+  <section class="slide" data-title="Step 3 · Validate" data-sub="gate before anything ships">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">06</span> · VALIDATE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Step 3 · Validate</h1>
+    <p class="slide-sub">
+      A mutation intent can't reach Act until three validators write <strong>gate
+      decisions</strong> back onto it. Failed gates stay in the index — they are
+      the most important data in the loop (negative evidence).
+    </p>
+
+    <div class="grid-3">
+      <div class="card accent-cyan">
+        <div class="card-label">03a · BACKTEST</div>
+        <h3>Replay against history</h3>
+        <p>Reads the draft query from the intent, executes it against
+        <code>.alerts-security.*</code> over the last 30 d.</p>
+        <p><strong>Writes</strong> <code>.soc-backtest-results</code> with
+        <code>windows_tested</code>, <code>true_positives</code>,
+        <code>false_positives</code>, <code>gate_decision</code>.</p>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">03b · EVAL</div>
+        <h3>@kbn/evals vertical</h3>
+        <p>Runs the rule against <code>logs-argus_eval.scenarios-*</code> —
+        Caldera + synthesized mutation scenarios — via the rule preview API.</p>
+        <p><strong>Writes</strong> <code>.soc-detection-eval-runs</code> with
+        <code>scores.precision</code>, <code>scores.recall</code>,
+        <code>variant_coverage</code>, <code>mutation_robust</code>.</p>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">03c · GATE + TRUST</div>
+        <h3>Regression + trust scorer</h3>
+        <p>Regression gate re-runs the existing live rules against the draft's
+        corpus — blocks if any existing rule regresses.</p>
+        <p>Trust scorer averages actor-level success rate and stamps
+        <code>actor.trust_tier</code> back onto the intent.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px">
+      <div class="section-title">Write-back: the gate decision lands on the intent</div>
+      <pre class="code"><span class="c">// POST .soc-mutation-intents/_update/mut-e2d-dnsc2</span>
+{
+  <span class="k">"doc"</span>: {
+    <span class="k">"governance_gate"</span>: {
+      <span class="k">"status"</span>: <span class="s">"pass"</span>,              <span class="c">// or "block" — this is what the applier reads</span>
+      <span class="k">"reason"</span>: <span class="s">"precision 0.94, recall 0.82, 2 FP in 30d"</span>,
+      <span class="k">"eval_run_id"</span>: <span class="s">"eval-mut-e2d-dnsc2-0"</span>,
+      <span class="k">"backtest_id"</span>: <span class="s">"bt-mut-e2d-dnsc2-0"</span>
+    },
+    <span class="k">"status"</span>: <span class="s">"gated_pass"</span>,
+    <span class="k">"actor"</span>: { <span class="k">"trust_tier"</span>: <span class="s">"probationary"</span> }  <span class="c">// stays probationary until post-apply observer confirms</span>
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 07 · STEP 4 ACT ═════ -->
+  <section class="slide" data-title="Step 4 · Act" data-sub="snapshot → apply → observe">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">07</span> · ACT</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Step 4 · Act</h1>
+    <p class="slide-sub">
+      The only layer that mutates a real Kibana object. Every apply is wrapped
+      in a snapshot, an autonomy-decision record, and a post-apply observer
+      that can reverse it within 60 s.
+    </p>
+
+    <div class="flow-wrap">
+      <div class="flow-row">
+        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">reads gated intent</div></div>
+        <div class="flow-arrow act">
+          <div class="payload">1 · Snapshot</div>
+          <div class="payload-sub">
+            <code>GET /api/detection_engine/rules/_find?rule_id=...</code> →
+            captured verbatim into <code>.soc-autonomy-decisions</code> as
+            <code>pre_state</code>. Required for rollback.
+          </div>
+        </div>
+        <div class="flow-consumer"><div class="who">Kibana rules API</div><div class="what">read-only at this stage</div></div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">consulted kill-switch</div></div>
+        <div class="flow-arrow act">
+          <div class="payload">2 · Autonomy decision</div>
+          <div class="payload-sub">
+            writes <code>.soc-autonomy-decisions</code> ·
+            fields: <code>op</code>, <code>rule_id</code>, <code>confidence</code>,
+            <code>trust_tier</code>, <code>pre_state</code>, <code>trace_id</code>,
+            <code>decided_at</code>.
+          </div>
+        </div>
+        <div class="flow-consumer"><div class="who">Console · audit trail</div><div class="what">permanent record</div></div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">only if kill-switch = off</div></div>
+        <div class="flow-arrow act">
+          <div class="payload">3 · Apply</div>
+          <div class="payload-sub">
+            <code>PUT /api/detection_engine/rules</code> with the
+            <code>draft_rule</code> body. Succeeds → rule live, starts
+            producing <code>.alerts-security.alerts-*</code> hits.
+          </div>
+        </div>
+        <div class="flow-consumer"><div class="who">Kibana detection engine</div><div class="what">live production scope</div></div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer"><div class="who">soc-post-apply-observer</div><div class="what">60s–10m window</div></div>
+        <div class="flow-arrow act">
+          <div class="payload">4 · Observe</div>
+          <div class="payload-sub">
+            watches <code>.alerts-security.alerts-*</code> for hits on the new
+            rule; writes <code>.soc-outcomes</code> with <code>rolled_back</code>,
+            <code>applied_at</code>, <code>rollback_mttr_ms</code>, verdict.
+          </div>
+        </div>
+        <div class="flow-consumer"><div class="who">Trust scorer · UI</div><div class="what">feeds the feedback loop</div></div>
+      </div>
+
+      <div class="flow-row">
+        <div class="flow-producer"><div class="who">soc-post-apply-observer</div><div class="what">if FP burst &gt; threshold</div></div>
+        <div class="flow-arrow" style="border-color: var(--mythos);">
+          <div class="payload" style="color:var(--mythos)">5 · Rollback</div>
+          <div class="payload-sub">
+            restores <code>pre_state</code> via Kibana API, writes
+            <code>rolled_back: true</code> to the existing
+            <code>.soc-outcomes</code> doc, pushes trust tier down.
+          </div>
+        </div>
+        <div class="flow-consumer"><div class="who">Kibana rules API</div><div class="what">reverse of step 3</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 08 · STEP 5 GOVERN ═════ -->
+  <section class="slide" data-title="Step 5 · Govern" data-sub="feedback that closes the loop">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">08</span> · GOVERN</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Step 5 · Govern &amp; Feedback</h1>
+    <p class="slide-sub">
+      Governance isn't a gate <em>before</em> an action — it reads the
+      outcomes layer continuously and writes back signals that reshape the
+      <strong>next</strong> hypothesis.
+    </p>
+
+    <div class="grid-2">
+      <div class="card accent-amber">
+        <div class="card-label">Outcomes → signals</div>
+        <h3>What gets read</h3>
+        <ul>
+          <li><code>.soc-outcomes</code> — per-rule TP/FP, rollback events</li>
+          <li><code>.soc-reasoning-trace</code> — per-decision latency and tool use</li>
+          <li><code>.soc-autonomy-decisions</code> — volume, confidence spread</li>
+          <li><code>.soc-backtest-results</code> + <code>.soc-detection-eval-runs</code> — trending quality</li>
+        </ul>
+      </div>
+      <div class="card accent-amber">
+        <div class="card-label">Signals → write-back</div>
+        <h3>What governance writes</h3>
+        <ul>
+          <li><code>.soc-actor-trust-tiers</code> — per-agent trust (blocks apply)</li>
+          <li><code>.soc-quality-score-history</code> — per-rule trajectory</li>
+          <li><code>.soc-kill-switch</code> — global halt when budgets tripped</li>
+          <li><code>.soc-audit-trail</code> — every console-originated op</li>
+          <li><code>.soc-decision-graph</code> — joined trace + lineage</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 16px">How the loop closes</div>
+    <div class="grid-3">
+      <div class="card accent-green">
+        <div class="card-label">rising tier</div>
+        <h3>Trust up → broader scope</h3>
+        <p>An agent whose intents pass post-apply observation cleanly for
+        <em>N</em> applies is promoted from <code>probationary</code> to
+        <code>trusted</code>. The applier starts accepting its intents at
+        lower confidence thresholds.</p>
+      </div>
+      <div class="card accent-mythos">
+        <div class="card-label">falling tier</div>
+        <h3>FP spike → cooldown</h3>
+        <p>A rolled-back outcome bumps the actor's tier down, widens the
+        regression window for its next intent, and forces human approval.
+        Same document trail, different edge weights.</p>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">Corpus update</div>
+        <h3>Good intents → corpus</h3>
+        <p>Outcomes with <code>rolled_back: false</code> and high variant
+        coverage are promoted into <code>.soc-detection-corpus</code>, so the
+        next DetEng agent sees them as patterns to generalise, not one-offs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 09 · REASONING TRACE ═════ -->
+  <section class="slide" data-title="Trace" data-sub="OTLP spine">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">09</span> · TRACE · OTLP SPINE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">The trace is the audit log</h1>
+    <p class="slide-sub">
+      Every step emits OTLP spans. A single <code>trace_id</code> binds every
+      document on the path — so the Console can reconstruct <em>why</em> any
+      rule exists, back to the first telemetry event.
+    </p>
+
+    <div class="grid-2">
+      <div class="card accent-mythos">
+        <div class="card-label">Span schema</div>
+        <h3>One row per agent / tool call</h3>
+        <pre class="code">{
+  <span class="k">"@timestamp"</span>: <span class="s">"2026-04-22T13:29:09.200Z"</span>,
+  <span class="k">"trace_id"</span>: <span class="s">"5b1e...a7"</span>,
+  <span class="k">"span_id"</span>: <span class="s">"3c09"</span>,
+  <span class="k">"parent_span_id"</span>: <span class="s">"0c4a"</span>,
+  <span class="k">"agent"</span>: <span class="s">"soc-deteng-agent"</span>,
+  <span class="k">"tool"</span>: <span class="s">"rule_preview"</span>,
+  <span class="k">"input"</span>: { <span class="k">"query"</span>: <span class="s">"event.dataset:dns..."</span> },
+  <span class="k">"output"</span>: { <span class="k">"precision"</span>: <span class="n">0.94</span>, <span class="k">"recall"</span>: <span class="n">0.82</span> },
+  <span class="k">"duration_ms"</span>: <span class="n">412</span>
+}</pre>
+      </div>
+      <div class="card accent-cyan">
+        <div class="card-label">Joining the graph</div>
+        <h3>Every doc carries trace_id</h3>
+        <p>Because <code>trace_id</code> is stamped on every hop
+        (<code>.soc-recommendations</code>, <code>.soc-mutation-intents</code>,
+        <code>.soc-detection-eval-runs</code>, <code>.soc-outcomes</code>,
+        <code>.soc-autonomy-decisions</code>), a single ES join reconstructs
+        the graph.</p>
+        <p><strong>Decision-graph builder</strong> reads all five indices,
+        emits typed nodes/edges to <code>.soc-decision-graph</code>, and the
+        Console's <em>Decision Graph</em> tab renders it directly.</p>
+        <p style="margin-top:8px"><span class="pill mythos">Invariant</span>
+        A stage with no span can't write a doc. Any orphan triggers an
+        <code>audit_trail</code> entry and blocks further progress for that
+        <code>mutation_intent_id</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 10 · PRODUCER/CONSUMER TABLE ═════ -->
+  <section class="slide" data-title="Reference" data-sub="producer → index → consumer">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">10</span> · REFERENCE</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Producer / Index / Consumer matrix</h1>
+    <p class="slide-sub">
+      The canonical map of who writes what and who reads it. Use this when
+      wiring a new agent — if your tool needs data not listed, create a new
+      index rather than overloading an existing one.
+    </p>
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th style="width: 22%">Index</th>
+          <th style="width: 24%">Producer</th>
+          <th style="width: 24%">Consumer</th>
+          <th>Key fields</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><code>.alerts-security.alerts-*</code></td><td>Elastic Agent · Detection engine</td><td>Triage · observer</td><td><code>kibana.alert.uuid</code>, <code>rule.id</code>, <code>host.name</code></td></tr>
+        <tr><td><code>.soc-telemetry-signals</code></td><td>Caldera ticker · demo seed</td><td>Activity feed · hunter</td><td><code>summary</code>, <code>pressure</code>, <code>process.name</code></td></tr>
+        <tr><td><code>.soc-cve-advisories</code></td><td>Advisory ingest pipeline</td><td>DetEng · E2D builder</td><td><code>cve_id</code>, <code>severity</code>, <code>kev</code>, <code>mitre_techniques</code></td></tr>
+        <tr><td><code>.soc-recommendations</code></td><td>Meta + DetEng agents</td><td>Pareto UI · applier</td><td><code>rec_id</code>, <code>status</code>, <code>confidence</code>, <code>procedure_clusters</code></td></tr>
+        <tr><td><code>.soc-mutation-intents</code></td><td>Meta + DetEng agents</td><td>Validators · applier</td><td><code>mutation_intent_id</code>, <code>draft_rule</code>, <code>governance_gate</code>, <code>trace_id</code></td></tr>
+        <tr><td><code>.soc-detection-eval-runs</code></td><td>@kbn/evals vertical</td><td>Gate · trust scorer</td><td><code>scores.*</code>, <code>gate_decision</code>, <code>gate_reason</code></td></tr>
+        <tr><td><code>.soc-backtest-results</code></td><td>soc-rule-backtester</td><td>Gate · applier</td><td><code>windows_tested</code>, <code>true_positives</code>, <code>false_positives</code></td></tr>
+        <tr><td><code>.soc-autonomy-decisions</code></td><td>soc-autonomous-applier</td><td>Audit · observer</td><td><code>op</code>, <code>pre_state</code>, <code>trust_tier</code>, <code>trace_id</code></td></tr>
+        <tr><td><code>.soc-outcomes</code></td><td>Post-apply observer · sweeper</td><td>Trust · console · corpus</td><td><code>rolled_back</code>, <code>applied_at</code>, <code>rollback_mttr_ms</code></td></tr>
+        <tr><td><code>.soc-reasoning-trace</code></td><td>Every agent step (OTLP)</td><td>Decision graph · flyout</td><td><code>trace_id</code>, <code>span_id</code>, <code>parent_span_id</code>, <code>tool</code></td></tr>
+        <tr><td><code>.soc-decision-graph</code></td><td>Graph builder</td><td>Console decision-graph tab</td><td><code>nodes[]</code>, <code>edges[]</code>, <code>root_kind</code></td></tr>
+        <tr><td><code>.soc-actor-trust-tiers</code></td><td>soc-trust-scorer</td><td>Applier · audit</td><td><code>actor_id</code>, <code>tier</code>, <code>reason</code></td></tr>
+        <tr><td><code>.soc-kill-switch</code></td><td>soc-watchdog</td><td>Applier · recovery</td><td><code>enabled</code>, <code>tripped_at</code>, <code>reason</code></td></tr>
+        <tr><td><code>.soc-audit-trail</code></td><td>Every console write · applier</td><td>Compliance · history</td><td><code>actor</code>, <code>op</code>, <code>target</code>, <code>before/after</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═════ SLIDE 11 · INVARIANTS ═════ -->
+  <section class="slide" data-title="Invariants" data-sub="rules the data layer enforces">
+    <div class="slide-top">
+      <div class="slide-kicker"><span class="kicker-accent">11</span> · INVARIANTS</div>
+      <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS · DATA FLOW</div></div>
+    </div>
+    <h1 class="slide-title">Four invariants the loop enforces</h1>
+    <p class="slide-sub">
+      The data layer doesn't just <em>record</em> what happened — it makes
+      certain outcomes impossible to reach.
+    </p>
+
+    <div class="grid-2">
+      <div class="card accent-mythos">
+        <div class="card-label">I1 · No apply without a span</div>
+        <h3>Trace binds every hop</h3>
+        <p>Applier refuses any intent whose most recent span is older than the
+        governance gate's <code>decided_at</code>. Lost the trace → blocked.</p>
+      </div>
+      <div class="card accent-mythos">
+        <div class="card-label">I2 · No evidence-free gate</div>
+        <h3>Backtest + eval both required</h3>
+        <p>The applier reads <code>governance_gate.eval_run_id</code> and
+        <code>backtest_id</code> before acting. Either missing → rejected with
+        <code>reason: "insufficient-evidence"</code>.</p>
+      </div>
+      <div class="card accent-mythos">
+        <div class="card-label">I3 · Every apply is reversible</div>
+        <h3>Pre-state snapshot is mandatory</h3>
+        <p><code>.soc-autonomy-decisions</code> rejects docs without
+        <code>pre_state</code>. Observer uses it as the rollback target
+        verbatim — no state reconstruction at recovery time.</p>
+      </div>
+      <div class="card accent-mythos">
+        <div class="card-label">I4 · Kill-switch overrides everything</div>
+        <h3>Singleton read on every apply</h3>
+        <p>Applier reads <code>.soc-kill-switch/_doc/global</code> before
+        every rule write. If <code>enabled: true</code>, every op becomes a
+        no-op that still writes an <code>audit_trail</code> row.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 18px" class="card accent-cyan">
+      <div class="card-label">the payoff</div>
+      <h3>Why this shape?</h3>
+      <p>
+        Every invariant above is a <strong>query</strong>, not a code path.
+        Governance, audit, and rollback fall out of the index contract — they
+        aren't middleware that can be bypassed. Drop a new agent into Agent
+        Builder, point it at the same indices with the same spans, and the
+        loop absorbs it without changing a single line of the applier or
+        observer.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═════ SLIDE 12 · CLOSING ═════ -->
+  <section class="slide cover" data-title="Takeaway" data-sub="closing">
+    <div class="cover-mark">A</div>
+    <h1 class="slide-title" style="font-size: 56px">Documents, not RPCs.</h1>
+    <div class="cover-tag">The pipeline <em style="color:var(--argus); font-style:normal">is</em> the index set.</div>
+    <div class="cover-body">
+      Swap any agent for a better one; add a validator; pause the applier;
+      replay yesterday's decisions against today's corpus — none of it breaks
+      the contract, because the contract is a dozen Elasticsearch indices
+      joined by <code>trace_id</code>.
+      <br><br>
+      <strong>That</strong> is what makes Argus composable, auditable, and
+      resilient against a frontier adversary.
+    </div>
+    <div class="cover-meta">
+      <span><strong>See also</strong> · architecture.html</span>
+      <span><strong>Code</strong> · <code>ARGUS_SOC_INDICES</code></span>
+      <span><strong>Deck</strong> · v1</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let idx = 0;
+
+  const totalEl = document.getElementById('total');
+  const curEl = document.getElementById('cur');
+  const progEl = document.getElementById('progress');
+  const menuEl = document.getElementById('menu');
+  const menuGrid = document.getElementById('menu-grid');
+
+  totalEl.textContent = String(total).padStart(2, '0');
+
+  slides.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'menu-item';
+    const title = s.dataset.title || `Slide ${i + 1}`;
+    const sub = s.dataset.sub || '';
+    item.innerHTML = `<div class="menu-num">${String(i + 1).padStart(2, '0')}</div>
+      <div><div class="menu-title">${title}</div><div class="menu-sub">${sub}</div></div>`;
+    item.addEventListener('click', () => { go(i); toggleMenu(); });
+    menuGrid.appendChild(item);
+  });
+
+  function go(n) {
+    if (n < 0 || n >= total) return;
+    slides[idx].classList.remove('active');
+    idx = n;
+    slides[idx].classList.add('active');
+    slides[idx].scrollTop = 0;
+    curEl.textContent = String(idx + 1).padStart(2, '0');
+    progEl.style.width = ((idx + 1) / total * 100) + '%';
+    const url = new URL(window.location.href);
+    url.hash = String(idx + 1);
+    history.replaceState(null, '', url.toString());
+  }
+  function next() { go(Math.min(idx + 1, total - 1)); }
+  function prev() { go(Math.max(idx - 1, 0)); }
+  function toggleMenu() { menuEl.classList.toggle('open'); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { next(); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { prev(); e.preventDefault(); }
+    else if (e.key === 'Home') { go(0); e.preventDefault(); }
+    else if (e.key === 'End') { go(total - 1); e.preventDefault(); }
+    else if (e.key.toLowerCase() === 'm') { toggleMenu(); e.preventDefault(); }
+    else if (e.key.toLowerCase() === 'p') { window.print(); e.preventDefault(); }
+    else if (e.key === 'Escape' && menuEl.classList.contains('open')) { toggleMenu(); }
+  });
+
+  const initial = parseInt((window.location.hash || '#1').slice(1), 10);
+  if (!Number.isNaN(initial) && initial > 0 && initial <= total) go(initial - 1);
+  else go(0);
+</script>
+
+</body>
+</html>

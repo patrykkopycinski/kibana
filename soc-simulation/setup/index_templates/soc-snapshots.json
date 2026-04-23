@@ -29,8 +29,8 @@
     }
   },
   "_meta": {
-    "description": "Immutable pre-mutation snapshots for every autonomous change AutoSOC makes. Enables one-command rollback. Uses permanent ILM.",
-    "owner": "autosoc-governance",
+    "description": "Immutable pre-mutation snapshots for every autonomous change Argus makes. Enables one-command rollback. Uses permanent ILM.",
+    "owner": "argus-governance",
     "schema_version": 1
   }
 }

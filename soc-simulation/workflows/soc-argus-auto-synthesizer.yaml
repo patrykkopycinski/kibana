@@ -1,0 +1,155 @@
+version: '1'
+name: Argus Auto-Synthesizer (W2)
+description: >
+  E2E gap closure — auto-triggered rule synthesis for unsynthesized advisories.
+
+  Polls `.soc-cve-advisories` for entries with status=ingested that do NOT have
+  a draft_rule_id (i.e. the CLI synthesis has not run). For each, invokes the
+  soc-deteng-agent via ai.agent to synthesize a detection rule and file a
+  mutation intent. Annotates the advisory with the resulting synthesis metadata.
+
+  This replaces the manual CLI step that previously required
+  `scripts/run_exploit_to_detection.ts` to be run by hand.
+
+  The downstream E2D reconciler then promotes these advisories to detected and
+  runs eval scoring.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 3m
+  - type: manual
+
+consts:
+  advisories_index: ".soc-cve-advisories"
+
+steps:
+  - name: fetch_unsynthesized
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: 5
+      query:
+        bool:
+          filter:
+            - term: { status: "ingested" }
+          must_not:
+            - exists: { field: "draft_rule_id" }
+
+  - name: gate_has_unsynthesized
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.fetch_unsynthesized.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: synthesize_each
+    type: foreach
+    if: "steps.gate_has_unsynthesized.output: yes"
+    foreach: "{{ steps.fetch_unsynthesized.output.hits.hits }}"
+    steps:
+      - name: synthesize_via_agent
+        type: ai.agent
+        agent-id: soc-deteng-agent
+        connector-id: opus
+        with:
+          message: >
+            You are the Argus Exploit-to-Detection synthesizer. Analyze the following advisory
+            and synthesize a detection rule for it.
+
+            ADVISORY JSON:
+            {{ foreach.item._source | json }}
+
+            ADVISORY ES ID: {{ foreach.item._id }}
+
+            Instructions:
+            1. Read the advisory's title, summary, severity, and mitre_techniques.
+            2. Use the `security.argus.file_mutation_intent` tool to file a mutation intent
+               with origin "synthesis" and include a draft rule that detects the described
+               threat behavior. The rule should target the relevant ECS data streams
+               (logs-endpoint.events.process-*, logs-endpoint.events.file-*, etc.).
+            3. After filing, respond with a summary of what you created.
+
+            If you cannot synthesize a meaningful rule, explain why.
+        timeout: 120s
+
+      - name: annotate_advisory
+        type: elasticsearch.update
+        with:
+          index: "{{ consts.advisories_index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            synthesized_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            synthesized_by: "soc-deteng-agent"
+
+      - name: seed_artifact_registry
+        type: elasticsearch.index
+        with:
+          index: .soc-artifact-registry
+          id: "rule-auto-synthesis-{{ foreach.item._id }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            artifact_id: "auto-synthesis-{{ foreach.item._id }}"
+            type: "rule"
+            owner: "autosoc"
+            created_by: "soc-argus-auto-synthesizer"
+            created_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+      - name: emit_trace
+        type: elasticsearch.index
+        with:
+          index: .soc-reasoning-trace
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "argus-auto-synth-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}-{{ foreach.item._id }}"
+            agent_id: "soc-deteng-agent"
+            step_index: 0
+            step_type: "run_summary"
+            content: "Auto-synthesis: advisory {{ foreach.item._id }} processed by soc-deteng-agent"
+            argus:
+              agent:
+                id: "soc-deteng-agent"
+                version: "argus-e2e-auto-synth"
+              decision:
+                kind: "auto_synthesis"
+                id: "{{ foreach.item._id }}"
+                confidence: 0.80
+            gen_ai:
+              system: "argus"
+              operation:
+                name: "argus.exploit_to_detection.auto_synthesize"
+              agent:
+                id: "soc-deteng-agent"
+                name: "Argus Detection Engineering Agent"
+                description: "Auto-triggered rule synthesis for unsynthesized advisories"
+
+      - name: emit_graph_edge
+        type: elasticsearch.index
+        with:
+          index: .soc-decision-graph
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            from_type: "advisory"
+            from_id: "{{ foreach.item._id }}"
+            to_type: "rule"
+            to_id: "auto-synthesis-{{ foreach.item._id }}"
+            edge_label: "auto_synthesized"
+            source: "soc-argus-auto-synthesizer"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_auto_synthesizer_tick
+        source: "soc-argus-auto-synthesizer"
+        tick_id: "argus-synth-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        candidates: "{{ steps.fetch_unsynthesized.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Argus auto-synthesizer tick — candidates={{ steps.fetch_unsynthesized.output.hits.hits | size | default: 0 }}"

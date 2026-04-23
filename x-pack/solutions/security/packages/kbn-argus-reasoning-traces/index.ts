@@ -20,3 +20,10 @@ export {
   type ArgusOtlpExporterConfig,
   type ArgusOtlpExporterDescriptor,
 } from './otlp_exporter';
+
+export {
+  ARGUS_REASONING_TRACE_INDEX,
+  emitArgusSpanDoc,
+  type ArgusSpanDoc,
+  type EmitArgusSpanDocInput,
+} from './emit_span_doc';

@@ -1,0 +1,17 @@
+{
+  "tick_id": "argus-trust-gate-manual-20260419175645",
+  "gated": [
+    {
+      "id": "fPvipp0BHolJD3Ch50Mp",
+      "actor": "argus.exploit_to_detection",
+      "tier": "frontier",
+      "verdict": "allow"
+    },
+    {
+      "id": "ffvipp0BHolJD3Ch50NZ",
+      "actor": "soc-experimental-agent",
+      "tier": "probationary",
+      "verdict": "pending_review"
+    }
+  ]
+}

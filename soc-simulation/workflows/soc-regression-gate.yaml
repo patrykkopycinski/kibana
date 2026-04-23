@@ -34,15 +34,13 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-regression-dataset"
-      body:
-        size: 500
-        sort:
-          - "@timestamp": "desc"
-        query:
-          bool:
-            filter:
-              - term:
-                  frozen: true
+      size: 500
+      query:
+        bool:
+          filter:
+            - term:
+                frozen:
+                  value: true
 
   # ── Replay: per case, have the candidate rule/agent produce a verdict,
   #     compare to expected_disposition and collect pass/fail counts. The

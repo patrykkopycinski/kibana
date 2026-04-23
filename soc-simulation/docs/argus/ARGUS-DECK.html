@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGUS — The Mythos-Resilient Defender</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #080D1A;
+    --surface: #10192E;
+    --surface2: #17223E;
+    --surface3: #1E2C4F;
+    --border: #253553;
+    --border2: #2f3f64;
+    --argus: #00E5FF;
+    --accent2: #7C4DFF;
+    --mythos: #FF3366;
+    --green: #00E676;
+    --amber: #FFD740;
+    --red: #FF5252;
+    --pink: #F06292;
+    --blue: #448AFF;
+    --text: #E8EDF5;
+    --text2: #8DA0BE;
+    --text3: #5A7198;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85em;
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--argus);
+    border: 1px solid var(--border);
+  }
+
+  /* ═════ Deck chrome ═════ */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--argus), var(--accent2));
+    width: 0%;
+    z-index: 100;
+    transition: width 200ms ease-out;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  }
+
+  .counter {
+    position: fixed;
+    bottom: 18px; right: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1.2px;
+    z-index: 50;
+    background: rgba(16, 25, 46, 0.6);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .counter .cur { color: var(--argus); font-weight: 700; }
+
+  .hint {
+    position: fixed;
+    bottom: 18px; left: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    z-index: 50;
+    opacity: 0.75;
+  }
+  .hint kbd {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    margin: 0 2px;
+    font-size: 10px;
+    color: var(--text2);
+  }
+
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px; height: 60px;
+    background: rgba(16, 25, 46, 0.4);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    cursor: pointer;
+    z-index: 50;
+    font-size: 18px;
+    border-radius: 8px;
+    transition: all 150ms ease;
+    backdrop-filter: blur(8px);
+  }
+  .nav-btn:hover { background: var(--surface2); color: var(--argus); border-color: var(--argus); }
+  .nav-btn.prev { left: 12px; }
+  .nav-btn.next { right: 12px; }
+
+  /* ═════ Slides ═════ */
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 42px 56px 48px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .slide::-webkit-scrollbar { width: 8px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* slide top bar */
+  .slide-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide-kicker {
+    font-size: 10.5px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+  .slide-kicker .kicker-accent { color: var(--argus); }
+  .slide-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 800; color: var(--bg);
+  }
+  .brand-txt {
+    font-size: 11px;
+    color: var(--text2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* slide heading */
+  h1.slide-title {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .slide-sub {
+    font-size: 15px;
+    color: var(--text2);
+    margin-bottom: 24px;
+    max-width: 900px;
+  }
+
+  /* section title (used multiple places) */
+  .section-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ═════ COVER slides ═════ */
+  .slide.cover {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px;
+  }
+  .slide.cover .slide-top { border: none; margin-bottom: 0; padding: 0; width: 100%; }
+  .cover-mark {
+    width: 120px; height: 120px;
+    border-radius: 26px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 56px; font-weight: 900; color: var(--bg);
+    margin: 0 auto 36px;
+    box-shadow: 0 20px 60px rgba(0, 229, 255, 0.25), 0 0 120px rgba(124, 77, 255, 0.15);
+  }
+  .cover h1.slide-title {
+    font-size: 96px;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, var(--argus), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .cover-tag {
+    font-size: 22px;
+    color: var(--text2);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+  .cover-acronym {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .cover-acronym strong { color: var(--argus); font-weight: 700; }
+  .cover-body {
+    font-size: 15px;
+    color: var(--text3);
+    max-width: 680px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+  .cover-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+  }
+  .cover-meta span strong { color: var(--argus); }
+
+  /* ═════ DIVIDER slides ═════ */
+  .slide.divider {
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0 120px;
+  }
+  .divider-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px;
+    font-weight: 800;
+    color: var(--surface3);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .divider-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 18px;
+  }
+  .divider h1 {
+    font-size: 68px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--text);
+    margin-bottom: 16px;
+    max-width: 1000px;
+    line-height: 1.08;
+  }
+  .divider p {
+    font-size: 20px;
+    color: var(--text2);
+    max-width: 800px;
+    line-height: 1.5;
+  }
+
+  /* ═════ Generic content containers ═════ */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    position: relative;
+  }
+  .card.accent-cyan   { border-left: 3px solid var(--argus); }
+  .card.accent-purple { border-left: 3px solid var(--accent2); }
+  .card.accent-mythos { border-left: 3px solid var(--mythos); }
+  .card.accent-green  { border-left: 3px solid var(--green); }
+  .card.accent-amber  { border-left: 3px solid var(--amber); }
+  .card.accent-blue   { border-left: 3px solid var(--blue); }
+
+  .card-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--argus);
+    margin-bottom: 10px;
+  }
+  .card.accent-mythos .card-label { color: var(--mythos); }
+  .card.accent-purple .card-label { color: var(--accent2); }
+  .card.accent-green  .card-label { color: var(--green); }
+  .card.accent-amber  .card-label { color: var(--amber); }
+  .card.accent-blue   .card-label { color: var(--blue); }
+
+  .card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+  .card p {
+    font-size: 13.5px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+  .card p strong { color: var(--text); font-weight: 600; }
+  .card p em { color: var(--argus); font-style: normal; font-weight: 600; }
+
+  .card ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+  }
+  .card ul li {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+    padding: 4px 0 4px 18px;
+    position: relative;
+  }
+  .card ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--argus);
+    font-size: 11px;
+    top: 5px;
+  }
+  .card ul li strong { color: var(--text); font-weight: 600; }
+
+  .mini-label {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+
+  /* ═════ Tables ═════ */
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.data th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border2);
+  }
+  table.data td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(37, 53, 83, 0.4);
+    color: var(--text2);
+    vertical-align: top;
+  }
+  table.data tr:last-child td { border-bottom: none; }
+  table.data td strong { color: var(--text); font-weight: 600; }
+  table.data td code { font-size: 11.5px; }
+  table.data tr:hover td { background: rgba(23, 34, 62, 0.3); }
+
+  /* ═════ Key-value / metric rows ═════ */
+  .kv-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(37, 53, 83, 0.4);
+    font-size: 13px;
+  }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 700;
+    letter-spacing: 1px;
+    min-width: 50px;
+  }
+  .kv-val { color: var(--text); font-weight: 500; }
+  .kv-val strong { color: var(--argus); font-weight: 700; }
+  .kv-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--argus);
+    font-weight: 700;
+  }
+
+  /* ═════ Code blocks ═════ */
+  pre.code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.55;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+  pre.code .k { color: var(--argus); font-weight: 600; }
+  pre.code .s { color: var(--green); }
+  pre.code .n { color: var(--amber); }
+  pre.code .c { color: var(--text3); font-style: italic; }
+  pre.code .p { color: var(--accent2); font-weight: 600; }
+
+  /* ═════ Big stat blocks ═════ */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-top: 3px solid var(--argus);
+  }
+  .stat.purple { border-top-color: var(--accent2); }
+  .stat.green  { border-top-color: var(--green); }
+  .stat.amber  { border-top-color: var(--amber); }
+  .stat.mythos { border-top-color: var(--mythos); }
+  .stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--argus);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat.purple .stat-val { color: var(--accent2); }
+  .stat.green .stat-val  { color: var(--green); }
+  .stat.amber .stat-val  { color: var(--amber); }
+  .stat.mythos .stat-val { color: var(--mythos); }
+  .stat-lbl {
+    font-size: 10.5px;
+    color: var(--text3);
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* ═════ Pill / badge ═════ */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(0, 229, 255, 0.1);
+    color: var(--argus);
+    border: 1px solid rgba(0, 229, 255, 0.3);
+  }
+  .pill.mythos { background: rgba(255, 51, 102, 0.1); color: var(--mythos); border-color: rgba(255, 51, 102, 0.3); }
+  .pill.green  { background: rgba(0, 230, 118, 0.1); color: var(--green); border-color: rgba(0, 230, 118, 0.3); }
+  .pill.amber  { background: rgba(255, 215, 64, 0.1); color: var(--amber); border-color: rgba(255, 215, 64, 0.3); }
+  .pill.purple { background: rgba(124, 77, 255, 0.1); color: var(--accent2); border-color: rgba(124, 77, 255, 0.3); }
+
+  /* ═════ Five-layer card on overview slide ═════ */
+  .layer-stack { display: flex; flex-direction: column; gap: 10px; }
+  .layer-item {
+    display: grid;
+    grid-template-columns: 34px 1fr 200px;
+    gap: 18px;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--argus);
+  }
+  .layer-item.l1 { border-left-color: var(--blue); }
+  .layer-item.l2 { border-left-color: var(--accent2); }
+  .layer-item.l3 { border-left-color: var(--argus); }
+  .layer-item.l4 { border-left-color: var(--green); }
+  .layer-item.l5 { border-left-color: var(--amber); }
+  .layer-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--argus);
+  }
+  .layer-item.l1 .layer-num { color: var(--blue); }
+  .layer-item.l2 .layer-num { color: var(--accent2); }
+  .layer-item.l3 .layer-num { color: var(--argus); }
+  .layer-item.l4 .layer-num { color: var(--green); }
+  .layer-item.l5 .layer-num { color: var(--amber); }
+  .layer-body h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .layer-body p { font-size: 12.5px; color: var(--text2); margin: 0; }
+  .layer-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text3);
+    text-align: right;
+    letter-spacing: 0.5px;
+  }
+
+  /* ═════ Split layout (for module deep dives) ═════ */
+  .split {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    flex: 1;
+    align-content: start;
+  }
+  .split-full { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ═════ Menu overlay ═════ */
+  .menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 13, 26, 0.94);
+    backdrop-filter: blur(14px);
+    z-index: 200;
+    display: none;
+    padding: 40px 60px;
+    overflow-y: auto;
+  }
+  .menu-overlay.open { display: block; }
+  .menu-overlay h2 {
+    font-size: 24px;
+    color: var(--argus);
+    margin-bottom: 22px;
+    font-weight: 800;
+  }
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .menu-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 120ms ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .menu-item:hover {
+    background: var(--surface2);
+    border-color: var(--argus);
+    transform: translateX(4px);
+  }
+  .menu-item .mi-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 700;
+    min-width: 24px;
+  }
+  .menu-item.active { border-color: var(--argus); background: var(--surface2); }
+  .menu-item.active .mi-num { color: var(--argus); }
+  .menu-item .mi-title { font-size: 13px; color: var(--text); }
+
+  /* ═════ Q&A specific ═════ */
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--accent2);
+  }
+  .qa-q {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--argus);
+    margin-bottom: 6px;
+  }
+  .qa-q::before { content: 'Q: '; color: var(--accent2); font-weight: 800; }
+  .qa-a {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .qa-a::before { content: 'A: '; color: var(--green); font-weight: 800; }
+
+  /* ═════ Flow diagram helper ═════ */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    flex-wrap: wrap;
+  }
+  .flow .node {
+    background: var(--surface3);
+    border: 1px solid var(--argus);
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: var(--argus);
+    font-weight: 600;
+  }
+  .flow .arrow { color: var(--text3); font-size: 16px; }
+
+  /* ship-it module ladder */
+  .ship-ladder {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .ship-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 1.1fr 1fr 110px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--argus);
+    border-radius: 8px;
+    background: var(--bg2);
+    font-size: 13px;
+  }
+  .ship-row.m1 { border-left-color: var(--green); }
+  .ship-row.m2 { border-left-color: var(--argus); }
+  .ship-row.m3 { border-left-color: var(--accent2); }
+  .ship-row.m4 { border-left-color: var(--blue); }
+  .ship-row.m5 { border-left-color: var(--amber); }
+  .ship-row.m6 { border-left-color: var(--amber); }
+  .ship-row.m7 { border-left-color: var(--mythos); }
+  .ship-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 700;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: var(--text1);
+  }
+  .ship-row.m1 .ship-num { color: var(--green); border-color: rgba(0,230,118,0.4); }
+  .ship-row.m2 .ship-num { color: var(--argus); border-color: rgba(0,229,255,0.4); }
+  .ship-row.m3 .ship-num { color: var(--accent2); border-color: rgba(124,77,255,0.4); }
+  .ship-row.m4 .ship-num { color: var(--blue); border-color: rgba(64,156,255,0.4); }
+  .ship-row.m5 .ship-num,
+  .ship-row.m6 .ship-num { color: var(--amber); border-color: rgba(255,215,64,0.4); }
+  .ship-row.m7 .ship-num { color: var(--mythos); border-color: rgba(255,51,102,0.4); }
+  .ship-name { font-weight: 600; color: var(--text1); }
+  .ship-name code { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; font-weight: 400; }
+  .ship-value { color: var(--text2); font-size: 12px; line-height: 1.45; }
+  .ship-dep { color: var(--text3); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+  .ship-blast {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 10px; border-radius: 10px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .ship-blast.none   { background: rgba(0,230,118,0.12);  color: var(--green);  border-color: rgba(0,230,118,0.3); }
+  .ship-blast.read   { background: rgba(0,229,255,0.12);  color: var(--argus);  border-color: rgba(0,229,255,0.3); }
+  .ship-blast.advise { background: rgba(64,156,255,0.12); color: var(--blue);   border-color: rgba(64,156,255,0.3); }
+  .ship-blast.write  { background: rgba(255,215,64,0.12); color: var(--amber);  border-color: rgba(255,215,64,0.3); }
+  .ship-blast.auto   { background: rgba(255,51,102,0.12); color: var(--mythos); border-color: rgba(255,51,102,0.3); }
+
+  /* ship-it per-module detail */
+  .ship-detail {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .ship-detail-row {
+    display: grid;
+    grid-template-columns: 44px 1.15fr 2.0fr 1.1fr 68px 140px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--argus);
+    border-radius: 8px;
+    background: var(--bg2);
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .ship-detail-row.m1 { border-left-color: var(--green); }
+  .ship-detail-row.m2 { border-left-color: var(--argus); }
+  .ship-detail-row.m3 { border-left-color: var(--accent2); }
+  .ship-detail-row.m4 { border-left-color: var(--blue); }
+  .ship-detail-row.m5 { border-left-color: var(--amber); }
+  .ship-detail-row.m6 { border-left-color: var(--amber); }
+  .ship-detail-row.m7 { border-left-color: var(--mythos); }
+  .ship-detail-row .ship-num { width: 32px; height: 32px; }
+  .ship-detail-col { display: flex; flex-direction: column; gap: 3px; }
+  .ship-detail-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text3);
+  }
+  .ship-detail-body { color: var(--text1); font-size: 12px; }
+  .ship-detail-body code { font-size: 11px; color: var(--text2); }
+  .ship-detail-body.muted { color: var(--text2); }
+  .ship-tshirt {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 4px 0; min-width: 48px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    border: 1px solid var(--border);
+  }
+  .ship-tshirt.xs { color: var(--green);  border-color: rgba(0,230,118,0.3);  background: rgba(0,230,118,0.08); }
+  .ship-tshirt.s  { color: var(--argus);  border-color: rgba(0,229,255,0.3);  background: rgba(0,229,255,0.08); }
+  .ship-tshirt.m  { color: var(--blue);   border-color: rgba(64,156,255,0.3); background: rgba(64,156,255,0.08); }
+  .ship-tshirt.l  { color: var(--amber);  border-color: rgba(255,215,64,0.3); background: rgba(255,215,64,0.08); }
+  .ship-tshirt.xl { color: var(--mythos); border-color: rgba(255,51,102,0.3); background: rgba(255,51,102,0.08); }
+
+  /* print styles */
+  @media print {
+    html, body { overflow: visible; height: auto; background: white; color: black; }
+    .slide { position: relative; opacity: 1; pointer-events: auto; page-break-after: always; min-height: 100vh; }
+    .progress, .counter, .hint, .nav-btn, .menu-overlay { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<button class="nav-btn prev" id="navPrev" aria-label="Previous">◀</button>
+<button class="nav-btn next" id="navNext" aria-label="Next">▶</button>
+<div class="counter"><span class="cur" id="curSlide">1</span> / <span id="totSlide">1</span></div>
+<div class="hint"><kbd>←</kbd><kbd>→</kbd> navigate · <kbd>M</kbd> menu · <kbd>F</kbd> fullscreen · <kbd>?</kbd> help</div>
+
+<div class="menu-overlay" id="menu">
+  <h2>Contents</h2>
+  <div class="menu-grid" id="menuGrid"></div>
+</div>
+
+<div class="deck">
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     COVER / INTRO
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- SLIDE 1 · Cover -->
+<section class="slide cover active" data-title="Cover">
+  <div class="cover-mark">A</div>
+  <h1 class="slide-title">ARGUS</h1>
+  <div class="cover-tag">The Mythos-Resilient Defender</div>
+  <div class="cover-acronym"><strong>A</strong>utonomous · <strong>R</strong>esilient · <strong>G</strong>uardian for · <strong>U</strong>nified · <strong>S</strong>ecurity</div>
+  <div class="cover-body">
+    Autonomous detection, eval-gated response, and self-adapting governance —
+    a security surface built for an adversary that mutates faster than any
+    human analyst can keep up.
+  </div>
+  <div class="cover-meta">
+    <span><strong>FEATURE-COMPLETE</strong> · Demo Build</span>
+    <span><strong>2026-04-17</strong></span>
+    <span><strong>Elastic Security</strong> · Internal</span>
+  </div>
+</section>
+
+<!-- SLIDE 2 · Why Argus -->
+<section class="slide" data-title="Why Argus">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">WHY</span> · The problem Argus is built for</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">The threat model is shifting.</h1>
+  <div class="slide-sub">
+    Anthropic's "Mythos era" adversary is <em>not</em> a scaled-up human attacker.
+    It's a frontier-capability reasoner operating at machine speed.
+  </div>
+
+  <div class="grid-4">
+    <div class="card accent-mythos">
+      <div class="card-label">P1 · Time compression</div>
+      <p>0-day exploit lifecycle collapses from <strong>months to hours</strong>. SOCs that measure MTTR in days lose.</p>
+    </div>
+    <div class="card accent-mythos">
+      <div class="card-label">P2 · Variant explosion</div>
+      <p><strong>N polymorphs per CVE</strong>. Static detections decay silently — the SOC finds out via an intrusion, not a metric.</p>
+    </div>
+    <div class="card accent-mythos">
+      <div class="card-label">P3 · Agentic chain</div>
+      <p>Goal-directed, multi-step, tool-using. Not an exploit — a <strong>plan</strong>, executed autonomously.</p>
+    </div>
+    <div class="card accent-mythos">
+      <div class="card-label">P4 · Capability asymmetry</div>
+      <p>Frontier reasoner vs. fixed-function SOC. The defender runs out of hours before the attacker runs out of ideas.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px;">
+    <div class="section-title">The static-rule problem</div>
+    <div class="card accent-amber">
+      <p style="font-size: 15px;">
+        A detection rule that scored <code>precision=0.92, recall=0.86</code> at M2.1
+        deploy time can quietly drift to <code>precision=0.61</code> in four weeks
+        as the adversary adapts.
+      </p>
+      <p style="font-size: 15px; margin-top: 8px;">
+        <strong>Argus is the answer:</strong> a detection &amp; response surface that
+        <em>adapts on its own, under governance</em>, at the same clock speed as the
+        adversary.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3 · Single story -->
+<section class="slide" data-title="The single story">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">IDEA</span> · One product, one story</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Argus is one story, not a toolbox.</h1>
+  <div class="slide-sub">
+    Every module exists to keep detection ahead of the adversary's mutation budget —
+    a single feedback loop from ground truth to governed action to adaptive learning.
+  </div>
+
+  <div style="display: flex; justify-content: center; margin: 16px 0 28px;">
+    <svg viewBox="0 0 1100 260" style="width: 100%; max-width: 1100px; height: auto;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arc" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#00E5FF"/></marker>
+        <linearGradient id="glow1" x1="0" x2="1"><stop offset="0" stop-color="#00E5FF" stop-opacity="0.15"/><stop offset="1" stop-color="#7C4DFF" stop-opacity="0.15"/></linearGradient>
+      </defs>
+      <!-- Adversary box -->
+      <rect x="20" y="110" width="160" height="60" rx="12" fill="#17223E" stroke="#FF3366" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <text x="100" y="138" text-anchor="middle" fill="#FF3366" font-size="11" font-weight="800" letter-spacing="1.5" font-family="Inter">MYTHOS ADVERSARY</text>
+      <text x="100" y="156" text-anchor="middle" fill="#8DA0BE" font-size="10" font-family="Inter">frontier-capability</text>
+      <!-- Arrow in -->
+      <line x1="185" y1="140" x2="220" y2="140" stroke="#FF3366" stroke-width="1.8" marker-end="url(#arc)"/>
+      <!-- Argus box -->
+      <rect x="225" y="30" width="700" height="220" rx="18" fill="url(#glow1)" stroke="#00E5FF" stroke-width="1.5"/>
+      <text x="575" y="62" text-anchor="middle" fill="#00E5FF" font-size="13" font-weight="800" letter-spacing="2.2" font-family="Inter">ARGUS — FIVE COOPERATING LAYERS</text>
+
+      <!-- Pipeline nodes -->
+      <rect x="250" y="90" width="120" height="50" rx="8" fill="#10192E" stroke="#448AFF"/>
+      <text x="310" y="114" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">SENSING</text>
+      <text x="310" y="130" text-anchor="middle" fill="#8DA0BE" font-size="9">intel + Shadow-AI</text>
+
+      <rect x="390" y="90" width="120" height="50" rx="8" fill="#10192E" stroke="#7C4DFF"/>
+      <text x="450" y="114" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">SCORING</text>
+      <text x="450" y="130" text-anchor="middle" fill="#8DA0BE" font-size="9">exploit probability</text>
+
+      <rect x="530" y="90" width="120" height="50" rx="8" fill="#10192E" stroke="#00E5FF"/>
+      <text x="590" y="114" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">SYNTHESIS</text>
+      <text x="590" y="130" text-anchor="middle" fill="#8DA0BE" font-size="9">rules + variants</text>
+
+      <rect x="670" y="90" width="120" height="50" rx="8" fill="#10192E" stroke="#00E676"/>
+      <text x="730" y="114" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">GATED ACT</text>
+      <text x="730" y="130" text-anchor="middle" fill="#8DA0BE" font-size="9">trust + backtest</text>
+
+      <rect x="810" y="90" width="100" height="50" rx="8" fill="#10192E" stroke="#FFD740"/>
+      <text x="860" y="114" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">ADAPT</text>
+      <text x="860" y="130" text-anchor="middle" fill="#8DA0BE" font-size="9">drift + learn</text>
+
+      <!-- Inner arrows -->
+      <line x1="370" y1="115" x2="390" y2="115" stroke="#00E5FF" stroke-width="1.4" marker-end="url(#arc)"/>
+      <line x1="510" y1="115" x2="530" y2="115" stroke="#00E5FF" stroke-width="1.4" marker-end="url(#arc)"/>
+      <line x1="650" y1="115" x2="670" y2="115" stroke="#00E5FF" stroke-width="1.4" marker-end="url(#arc)"/>
+      <line x1="790" y1="115" x2="810" y2="115" stroke="#00E5FF" stroke-width="1.4" marker-end="url(#arc)"/>
+
+      <!-- Feedback arc: ADAPT -> SENSING -->
+      <path d="M 860 160 Q 860 220 575 220 Q 310 220 310 160" fill="none" stroke="#FFD740" stroke-width="1.4" stroke-dasharray="5,5" marker-end="url(#arc)"/>
+      <text x="575" y="240" text-anchor="middle" fill="#FFD740" font-size="10" font-family="JetBrains Mono" letter-spacing="1">feedback · self-adapting</text>
+
+      <!-- Arrow out -->
+      <line x1="930" y1="140" x2="970" y2="140" stroke="#00E676" stroke-width="1.8" marker-end="url(#arc)"/>
+      <!-- Outcome -->
+      <rect x="975" y="110" width="115" height="60" rx="12" fill="#17223E" stroke="#00E676" stroke-width="1.5"/>
+      <text x="1032" y="136" text-anchor="middle" fill="#00E676" font-size="10.5" font-weight="800" letter-spacing="1" font-family="Inter">DETECTION</text>
+      <text x="1032" y="152" text-anchor="middle" fill="#E8EDF5" font-size="10" font-family="Inter">ahead of the clock</text>
+    </svg>
+  </div>
+
+  <div class="grid-3">
+    <div class="card accent-cyan">
+      <div class="card-label">Principle 1</div>
+      <h3>Everything durable is an ES document.</h3>
+      <p>No hidden state. Every decision is a doc a human can audit, grep, and replay.</p>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-label">Principle 2</div>
+      <h3>One envelope, one DLQ.</h3>
+      <p>Every autonomous action is a <code>mutation_intent</code> in <code>.soc-recommendations</code>. Malformed docs go to <code>.soc-dead-letter</code>.</p>
+    </div>
+    <div class="card accent-green">
+      <div class="card-label">Principle 3</div>
+      <h3>No LLM on a hot path ungated.</h3>
+      <p>Scoring, trust, drift — deterministic. LLMs do synthesis + triage; both are eval-graded before they ship.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART I · ARCHITECTURE
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Five layers overview -->
+<section class="slide" data-title="Five layers">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ARCHITECTURE</span> · Five cooperating layers</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">The five layers, one line each.</h1>
+  <div class="slide-sub">
+    Each layer has a single responsibility, a durable index surface, and a
+    workflow that reconciles against it.
+  </div>
+
+  <div class="layer-stack">
+    <div class="layer-item l1">
+      <div class="layer-num">01</div>
+      <div class="layer-body">
+        <h4>Sensing — ground truth at machine speed</h4>
+        <p>Intel feed (Glasswing / STIX-TAXII), Shadow-AI telemetry, reasoning traces, Argus eval scenarios.</p>
+      </div>
+      <div class="layer-key">.soc-intel-feed<br>.soc-reasoning-trace</div>
+    </div>
+    <div class="layer-item l2">
+      <div class="layer-num">02</div>
+      <div class="layer-body">
+        <h4>Hypothesis — planner agents reason over telemetry</h4>
+        <p>Triage, DetEng, Hunter, XDR correlator, Meta, Gap-analyzer agents. Every output is a <code>mutation_intent</code>.</p>
+      </div>
+      <div class="layer-key">.soc-recommendations</div>
+    </div>
+    <div class="layer-item l3">
+      <div class="layer-num">03</div>
+      <div class="layer-body">
+        <h4>Validation — no mutation ships unscored</h4>
+        <p>Backtester, regression gate, Detection-Eval vertical, mutation-robustness scorer, trust scorer.</p>
+      </div>
+      <div class="layer-key">.soc-detection-eval-runs</div>
+    </div>
+    <div class="layer-item l4">
+      <div class="layer-num">04</div>
+      <div class="layer-body">
+        <h4>Action — gated autonomous execution, reversible</h4>
+        <p>Autonomous applier, post-apply observer, response, containment playbook, recovery.</p>
+      </div>
+      <div class="layer-key">.soc-outcomes · .soc-post-apply-observations</div>
+    </div>
+    <div class="layer-item l5">
+      <div class="layer-num">05</div>
+      <div class="layer-body">
+        <h4>Governance — every decision auditable, every trace resolvable</h4>
+        <p>Watchdog, autonomy decisions, self-learning loop, shift handover, Argus Console.</p>
+      </div>
+      <div class="layer-key">.soc-audit-trail · .soc-actor-trust-tiers</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 6 · Architecture diagram -->
+<section class="slide" data-title="Architecture diagram">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ARCHITECTURE</span> · The one-frame view</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Adversary in, governed action out.</h1>
+  <div class="slide-sub">Full data flow, all five layers, with the Phase-3 feedback loop from governance back to hypothesis.</div>
+
+  <div class="card" style="padding: 18px;">
+    <svg viewBox="0 0 1240 620" style="width: 100%; height: auto;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="a6-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00E5FF" stroke-width="1.4"/></marker>
+        <marker id="a6-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#00E676" stroke-width="1.4"/></marker>
+        <marker id="a6-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FFD740" stroke-width="1.4"/></marker>
+        <marker id="a6-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#FF3366" stroke-width="1.4"/></marker>
+        <linearGradient id="a6-l1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#448AFF" stop-opacity="0.12"/><stop offset="1" stop-color="#448AFF" stop-opacity="0.02"/></linearGradient>
+        <linearGradient id="a6-l2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7C4DFF" stop-opacity="0.12"/><stop offset="1" stop-color="#7C4DFF" stop-opacity="0.02"/></linearGradient>
+        <linearGradient id="a6-l3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00E5FF" stop-opacity="0.12"/><stop offset="1" stop-color="#00E5FF" stop-opacity="0.02"/></linearGradient>
+        <linearGradient id="a6-l4" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#00E676" stop-opacity="0.12"/><stop offset="1" stop-color="#00E676" stop-opacity="0.02"/></linearGradient>
+        <linearGradient id="a6-l5" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFD740" stop-opacity="0.12"/><stop offset="1" stop-color="#FFD740" stop-opacity="0.02"/></linearGradient>
+      </defs>
+
+      <!-- Adversary -->
+      <rect x="22" y="30" width="150" height="560" rx="12" fill="#17223E" stroke="#FF3366" stroke-width="1.2" stroke-dasharray="4,4"/>
+      <text x="97" y="58" text-anchor="middle" fill="#FF3366" font-size="10" font-weight="800" letter-spacing="1.5" font-family="Inter">ADVERSARY</text>
+      <text x="97" y="78" text-anchor="middle" fill="#E8EDF5" font-size="14" font-weight="800" font-family="Inter">Mythos-class</text>
+      <text x="97" y="94" text-anchor="middle" fill="#8DA0BE" font-size="10" font-family="Inter">frontier agent</text>
+      <rect x="42" y="120" width="110" height="38" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+      <text x="97" y="138" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">0-day discovery</text>
+      <text x="97" y="151" text-anchor="middle" fill="#8DA0BE" font-size="8">hours, not months</text>
+      <rect x="42" y="170" width="110" height="38" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+      <text x="97" y="188" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Variant explosion</text>
+      <text x="97" y="201" text-anchor="middle" fill="#8DA0BE" font-size="8">N polymorphs</text>
+      <rect x="42" y="220" width="110" height="38" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+      <text x="97" y="238" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Agentic chain</text>
+      <text x="97" y="251" text-anchor="middle" fill="#8DA0BE" font-size="8">goal-directed</text>
+      <rect x="42" y="270" width="110" height="38" rx="7" fill="#1E2C4F" stroke="#FF3366" stroke-width="0.8"/>
+      <text x="97" y="288" text-anchor="middle" fill="#E8EDF5" font-size="10" font-weight="600">Planner reasoning</text>
+      <text x="97" y="301" text-anchor="middle" fill="#8DA0BE" font-size="8">asymmetric</text>
+      <text x="97" y="560" text-anchor="middle" fill="#5A7198" font-size="9" font-family="JetBrains Mono">Caldera · sandboxed</text>
+      <text x="97" y="574" text-anchor="middle" fill="#5A7198" font-size="9" font-family="JetBrains Mono">telemetry only</text>
+      <line x1="172" y1="170" x2="215" y2="170" stroke="#FF3366" stroke-width="1.5" marker-end="url(#a6-red)"/>
+
+      <!-- LAYER 1 · SENSING -->
+      <rect x="215" y="50" width="1005" height="96" rx="10" fill="url(#a6-l1)" stroke="#448AFF" stroke-width="1.2"/>
+      <text x="232" y="74" fill="#448AFF" font-size="10" font-weight="800" letter-spacing="1.5">01 · SENSING</text>
+      <text x="232" y="90" fill="#8DA0BE" font-size="10">Ground truth at machine speed</text>
+
+      <rect x="380" y="62" width="140" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+      <text x="450" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Elastic Agent</text>
+      <text x="450" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">Endpoint · Fleet</text>
+      <text x="450" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">logs-* · alerts-*</text>
+
+      <rect x="535" y="62" width="135" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+      <text x="602" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Shadow-AI Pack</text>
+      <text x="602" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">integrations#18123</text>
+      <text x="602" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">host-side signal</text>
+
+      <rect x="685" y="62" width="135" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+      <text x="752" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Intel Feed</text>
+      <text x="752" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">Glasswing/TAXII</text>
+      <text x="752" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">.soc-intel-feed</text>
+
+      <rect x="835" y="62" width="140" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+      <text x="905" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Reasoning Traces</text>
+      <text x="905" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">OTEL-GenAI 1.x</text>
+      <text x="905" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">.soc-reasoning-trace</text>
+
+      <rect x="990" y="62" width="215" height="66" rx="8" fill="#17223E" stroke="#448AFF" stroke-width="0.9"/>
+      <text x="1098" y="82" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Eval Scenarios + KEV</text>
+      <text x="1098" y="98" text-anchor="middle" fill="#8DA0BE" font-size="9">variant banks · CISA KEV live</text>
+      <text x="1098" y="114" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">.soc-eval-corpus-* · .soc-cve-advisories</text>
+
+      <!-- LAYER 2 · HYPOTHESIS -->
+      <rect x="215" y="158" width="1005" height="96" rx="10" fill="url(#a6-l2)" stroke="#7C4DFF" stroke-width="1.2"/>
+      <text x="232" y="182" fill="#7C4DFF" font-size="10" font-weight="800" letter-spacing="1.5">02 · HYPOTHESIS</text>
+      <text x="232" y="198" fill="#8DA0BE" font-size="10">Planner agents · emit mutation_intent</text>
+
+      <rect x="380" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="437" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Triage</text>
+      <text x="437" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-triage</text>
+      <text x="437" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">5m sweep</text>
+
+      <rect x="510" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="567" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">DetEng</text>
+      <text x="567" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">exploit→det</text>
+      <text x="567" y="220" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">M2.2</text>
+
+      <rect x="640" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="697" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Hunter</text>
+      <text x="697" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">proactive</text>
+      <text x="697" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">2h cadence</text>
+
+      <rect x="770" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="827" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">XDR Correlate</text>
+      <text x="827" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">ES|QL chains</text>
+      <text x="827" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">attack graphs</text>
+
+      <rect x="900" y="170" width="130" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="965" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Meta</text>
+      <text x="965" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-meta</text>
+      <text x="965" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">mutation_intent</text>
+
+      <rect x="1045" y="170" width="160" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
+      <text x="1125" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Exploit Probability</text>
+      <text x="1125" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">TS ⇔ Painless</text>
+      <text x="1125" y="220" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">M2.3</text>
+
+      <!-- LAYER 3 · VALIDATION -->
+      <rect x="215" y="266" width="1005" height="96" rx="10" fill="url(#a6-l3)" stroke="#00E5FF" stroke-width="1.2"/>
+      <text x="232" y="290" fill="#00E5FF" font-size="10" font-weight="800" letter-spacing="1.5">03 · VALIDATION</text>
+      <text x="232" y="306" fill="#8DA0BE" font-size="10">No mutation ships unscored</text>
+
+      <rect x="380" y="278" width="135" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+      <text x="447" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Backtester</text>
+      <text x="447" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">shadow exec</text>
+      <text x="447" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">24 tests</text>
+
+      <rect x="530" y="278" width="135" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+      <text x="597" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Regression Gate</text>
+      <text x="597" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">replay · block</text>
+      <text x="597" y="330" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">historical</text>
+
+      <rect x="680" y="278" width="170" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+      <text x="765" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Detection-Eval Vertical</text>
+      <text x="765" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">rules × variants → gate</text>
+      <text x="765" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">M2.1</text>
+
+      <rect x="865" y="278" width="170" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+      <text x="950" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Reasoning-Trace Evals</text>
+      <text x="950" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">evidence·calib·coherence</text>
+      <text x="950" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">25 tests</text>
+
+      <rect x="1050" y="278" width="155" height="66" rx="8" fill="#17223E" stroke="#00E5FF" stroke-width="0.9"/>
+      <text x="1127" y="298" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Trust-Policy Matrix</text>
+      <text x="1127" y="314" text-anchor="middle" fill="#8DA0BE" font-size="9">tier × blast × door</text>
+      <text x="1127" y="330" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">27 tests</text>
+
+      <!-- LAYER 4 · ACTION -->
+      <rect x="215" y="374" width="1005" height="96" rx="10" fill="url(#a6-l4)" stroke="#00E676" stroke-width="1.2"/>
+      <text x="232" y="398" fill="#00E676" font-size="10" font-weight="800" letter-spacing="1.5">04 · ACTION</text>
+      <text x="232" y="414" fill="#8DA0BE" font-size="10">Gated autonomous execution · reversible</text>
+
+      <rect x="380" y="386" width="145" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+      <text x="452" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Trust Gate</text>
+      <text x="452" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">non-invasive downgrade</text>
+      <text x="452" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">one-way → review</text>
+
+      <rect x="540" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+      <text x="615" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Autonomous Applier</text>
+      <text x="615" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">snapshot + ownership</text>
+      <text x="615" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">budget + cooldown</text>
+
+      <rect x="705" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+      <text x="780" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Post-Apply Observer</text>
+      <text x="780" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">rollback watchdog</text>
+      <text x="780" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">.soc-outcomes</text>
+
+      <rect x="870" y="386" width="150" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+      <text x="945" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Response</text>
+      <text x="945" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">isolation · disable</text>
+      <text x="945" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">tiered T0–T3</text>
+
+      <rect x="1035" y="386" width="170" height="66" rx="8" fill="#17223E" stroke="#00E676" stroke-width="0.9"/>
+      <text x="1120" y="406" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Recovery</text>
+      <text x="1120" y="422" text-anchor="middle" fill="#8DA0BE" font-size="9">snapshot restore</text>
+      <text x="1120" y="438" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">MTTR</text>
+
+      <!-- LAYER 5 · GOVERNANCE -->
+      <rect x="215" y="482" width="1005" height="96" rx="10" fill="url(#a6-l5)" stroke="#FFD740" stroke-width="1.2"/>
+      <text x="232" y="506" fill="#FFD740" font-size="10" font-weight="800" letter-spacing="1.5">05 · GOVERNANCE</text>
+      <text x="232" y="522" fill="#8DA0BE" font-size="10">Every decision auditable · every trace resolvable</text>
+
+      <rect x="380" y="494" width="135" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+      <text x="447" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Trust-Tier Assessor</text>
+      <text x="447" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">hourly</text>
+      <text x="447" y="546" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">outcome signals</text>
+
+      <rect x="530" y="494" width="150" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+      <text x="605" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Reasoning Watchdog</text>
+      <text x="605" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">5m confidence</text>
+      <text x="605" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">watchdog</text>
+
+      <rect x="695" y="494" width="150" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+      <text x="770" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Drift Monitor</text>
+      <text x="770" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">rolling avg · 6h</text>
+      <text x="770" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">Phase 3</text>
+
+      <rect x="860" y="494" width="150" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+      <text x="935" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Playbook Learner</text>
+      <text x="935" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">remap on outcome</text>
+      <text x="935" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">Phase 3</text>
+
+      <rect x="1025" y="494" width="180" height="66" rx="8" fill="#17223E" stroke="#FFD740" stroke-width="0.9"/>
+      <text x="1115" y="514" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Argus Console</text>
+      <text x="1115" y="530" text-anchor="middle" fill="#8DA0BE" font-size="9">pulse · lineage · drill</text>
+      <text x="1115" y="546" text-anchor="middle" fill="#FF3366" font-size="8" font-family="JetBrains Mono">Phase 3 panels</text>
+
+      <!-- vertical flow arrows -->
+      <line x1="750" y1="146" x2="750" y2="158" stroke="#00E5FF" stroke-width="1.5" marker-end="url(#a6-cyan)"/>
+      <line x1="750" y1="254" x2="750" y2="266" stroke="#00E5FF" stroke-width="1.5" marker-end="url(#a6-cyan)"/>
+      <line x1="750" y1="362" x2="750" y2="374" stroke="#00E676" stroke-width="1.5" marker-end="url(#a6-green)"/>
+      <line x1="750" y1="470" x2="750" y2="482" stroke="#FFD740" stroke-width="1.5" marker-end="url(#a6-amber)"/>
+
+      <!-- Phase 3 feedback -->
+      <path d="M 1215 530 Q 1245 530 1245 400 Q 1245 200 1225 200 L 1205 200" fill="none" stroke="#FFD740" stroke-width="1.2" stroke-dasharray="4,4" marker-end="url(#a6-amber)"/>
+      <text x="1244" y="400" text-anchor="end" fill="#FFD740" font-size="8" font-family="JetBrains Mono" letter-spacing="1" transform="rotate(-90 1244 400)">drift · remap · re-eval</text>
+
+      <text x="720" y="608" text-anchor="middle" fill="#5A7198" font-size="9.5" font-family="JetBrains Mono" letter-spacing="1">
+        Shared substrate: Elasticsearch · .soc-* indices · OTLP traces · Agent Builder · Workflows · Task Manager
+      </text>
+    </svg>
+  </div>
+</section>
+
+<!-- SLIDE 7 · Data + code surface -->
+<section class="slide" data-title="Data & code surface">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">SURFACE</span> · What exists on disk today</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">The data &amp; code surface.</h1>
+  <div class="slide-sub">Every `.soc-*` index has a JSON schema. Every Argus workflow writes a heartbeat. Nothing lives off-ledger.</div>
+
+  <div class="grid-2">
+    <div>
+      <div class="section-title">Elasticsearch indices</div>
+      <div class="card" style="padding: 14px 18px;">
+        <div class="kv-row"><span class="kv-key">M2.2</span><span class="kv-val"><code>.soc-cve-advisories</code></span><span class="kv-tag">inbox</span></div>
+        <div class="kv-row"><span class="kv-key">spine</span><span class="kv-val"><code>.soc-recommendations</code></span><span class="kv-tag">259 recs</span></div>
+        <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val"><code>.soc-detection-eval-runs</code></span><span class="kv-tag">per-gate</span></div>
+        <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val"><code>.soc-eval-corpus-argus-corpus-*</code></span><span class="kv-tag">30+ variants</span></div>
+        <div class="kv-row"><span class="kv-key">M2.5</span><span class="kv-val"><code>.soc-reasoning-trace</code></span><span class="kv-tag">OTEL-GenAI</span></div>
+        <div class="kv-row"><span class="kv-key">govern</span><span class="kv-val"><code>.soc-actor-trust-tiers</code></span><span class="kv-tag">live</span></div>
+        <div class="kv-row"><span class="kv-key">govern</span><span class="kv-val"><code>.soc-outcomes</code> · <code>.soc-post-apply-observations</code></span><span class="kv-tag">truth</span></div>
+        <div class="kv-row"><span class="kv-key">M2.3</span><span class="kv-val"><code>.soc-argus-vuln-demo</code></span><span class="kv-tag">enriched</span></div>
+        <div class="kv-row"><span class="kv-key">P3</span><span class="kv-val"><code>.soc-intel-feed</code></span><span class="kv-tag">Glasswing</span></div>
+        <div class="kv-row"><span class="kv-key">P3</span><span class="kv-val"><code>.soc-intel-mythos-signals</code></span><span class="kv-tag">per-CVE</span></div>
+        <div class="kv-row"><span class="kv-key">audit</span><span class="kv-val"><code>.soc-audit-trail</code></span><span class="kv-tag">17k+</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Kibana packages</div>
+      <div class="card" style="padding: 14px 18px;">
+        <div class="kv-row"><span class="kv-key">core</span><span class="kv-val"><code>@kbn/argus-exploit-probability</code></span><span class="kv-tag">TS⇔Painless</span></div>
+        <div class="kv-row"><span class="kv-key">core</span><span class="kv-val"><code>@kbn/argus-exploit-to-detection</code></span><span class="kv-tag">synth</span></div>
+        <div class="kv-row"><span class="kv-key">core</span><span class="kv-val"><code>@kbn/argus-reasoning-traces</code></span><span class="kv-tag">span shape</span></div>
+        <div class="kv-row"><span class="kv-key">gov</span><span class="kv-val"><code>@kbn/argus-trust-policy</code></span><span class="kv-tag">27 tests</span></div>
+        <div class="kv-row"><span class="kv-key">gov</span><span class="kv-val"><code>@kbn/argus-backtest</code></span><span class="kv-tag">24 tests</span></div>
+        <div class="kv-row"><span class="kv-key">feed</span><span class="kv-val"><code>@kbn/argus-kev-ingest</code></span><span class="kv-tag">daily</span></div>
+        <div class="kv-row"><span class="kv-key">agent</span><span class="kv-val"><code>@kbn/argus-tool-manifest</code></span><span class="kv-tag">27 tests</span></div>
+        <div class="kv-row"><span class="kv-key">agent</span><span class="kv-val"><code>@kbn/argus-mcp-server</code></span><span class="kv-tag">16 tests</span></div>
+        <div class="kv-row"><span class="kv-key">agent</span><span class="kv-val"><code>@kbn/argus-a2a-server</code></span><span class="kv-tag">20 tests</span></div>
+        <div class="kv-row"><span class="kv-key">eval</span><span class="kv-val"><code>@kbn/evals-suite-argus-detection</code></span><span class="kv-tag">M2.1 + adv</span></div>
+        <div class="kv-row"><span class="kv-key">eval</span><span class="kv-val"><code>@kbn/evals-suite-argus-reasoning</code></span><span class="kv-tag">25 tests</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="section-title">Workflows</div>
+    <div class="card" style="padding: 14px 18px;">
+      <p style="font-size: 13px;">
+        <strong>16 Argus-owned workflows</strong> in <code>soc-simulation/workflows/</code>:
+        reconcilers, gates, applier, backtester, watchdogs, simulators, intel adapters, and Phase-3 learners.
+        Every workflow emits to <code>.soc-audit-trail</code> — if you don't see a heartbeat, it isn't running.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART II · MODULE DEEP DIVES
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- M2.1 Detection-Eval Vertical -->
+<section class="slide" data-title="M2.1 · Detection-Eval">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">M2.1</span> · Detection-Eval Vertical</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">The gate that says &ldquo;ship it&rdquo;.</h1>
+  <div class="slide-sub">The truth surface every downstream autonomous action is conditioned on.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Flow</div>
+      <pre class="code"><span class="c">// Per candidate rule, for each variant in the labelled bank:</span>
+<span class="k">for</span> variant <span class="k">of</span> bank {
+  hits = runRulePreview(rule, variant)
+  score(rule, variant, hits) <span class="c">// pos/neg · per-axis</span>
+}
+
+aggregate → {
+  <span class="p">precision</span>: 0.92,
+  <span class="p">recall</span>: 0.86,
+  <span class="p">fp_rate</span>: 0.01,
+  <span class="p">variant_coverage</span>: 0.78,
+  <span class="p">gate_decision</span>: <span class="s">"pass"</span> | <span class="s">"marginal"</span> | <span class="s">"fail"</span>
+}
+
+<span class="c">// → .soc-detection-eval-runs keyed by (rule_id, snapshot_id)</span></pre>
+
+      <div style="margin-top: 14px;">
+        <div class="section-title">Artifacts</div>
+        <div class="card" style="padding: 12px 16px;">
+          <div class="kv-row"><span class="kv-key">pkg</span><span class="kv-val"><code>@kbn/evals-suite-argus-detection</code></span><span class="kv-tag">+adv sub-suite</span></div>
+          <div class="kv-row"><span class="kv-key">wf</span><span class="kv-val"><code>soc-detection-eval.yaml</code></span><span class="kv-tag">2m poll</span></div>
+          <div class="kv-row"><span class="kv-key">cli</span><span class="kv-val"><code>run_detection_eval.js</code></span><span class="kv-tag">laptop-grade</span></div>
+          <div class="kv-row"><span class="kv-key">bank</span><span class="kv-val"><code>scripts/argus-variant-bank/</code></span><span class="kv-tag">30+ + ER7</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Why it matters</div>
+      <div class="card accent-cyan">
+        <p style="font-size: 15px;">
+          Without M2.1, every downstream autonomous action is
+          <strong>guessing</strong>. M2.1 is the <em>ground truth</em> surface that
+          every trust tier, drift detector, and backtest verdict is anchored to.
+        </p>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="card accent-mythos">
+          <div class="card-label">Adversarial corpus</div>
+          <h3>Prompt-injection sub-suite</h3>
+          <p>Replays DevSeeker/Puppeteer-style hijack corpora against the deteng skill. Hallucinated rules fail the gate — and feed the watchdog to mark the actor's confidence down.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="card accent-purple">
+          <div class="card-label">External corpus</div>
+          <h3>ATT&amp;CK ER7 import</h3>
+          <p>Argus is scored against a bank it <strong>didn't author</strong>. Adversary can't game the eval.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10 · M2.2 Exploit-to-Detection -->
+<section class="slide" data-title="M2.2 · Exploit-to-Detection">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">M2.2</span> · Exploit-to-Detection Synthesis</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">CVE advisory → shippable rule, in one tick.</h1>
+  <div class="slide-sub">The reconciler closes the loop from advisory to <code>auto_apply_ready</code> within a single poll cycle.</div>
+
+  <div style="margin-bottom: 18px;">
+    <div class="flow">
+      <span class="node">CVE advisory</span>
+      <span class="arrow">→</span>
+      <span class="node">synthesize.ts</span>
+      <span class="arrow">→</span>
+      <span class="node">variants.ts</span>
+      <span class="arrow">→</span>
+      <span class="node">buildMutationIntent</span>
+      <span class="arrow">→</span>
+      <span class="node" style="border-color: var(--accent2); color: var(--accent2);">.soc-recommendations (pending)</span>
+      <span class="arrow">→</span>
+      <span class="node" style="border-color: var(--green); color: var(--green);">M2.1 gate</span>
+      <span class="arrow">→</span>
+      <span class="node" style="border-color: var(--green); color: var(--green);">auto_apply_ready</span>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card accent-cyan">
+      <div class="card-label">Package</div>
+      <h3><code>@kbn/argus-exploit-to-detection</code></h3>
+      <ul>
+        <li><code>buildMutationIntent(advisory)</code></li>
+        <li><code>synthesizeRule(advisory)</code> — KQL / ES|QL draft</li>
+        <li><code>generateVariants(advisory)</code> — axis-aware labelled bank</li>
+        <li><code>ARGUS_DEMO_ADVISORIES</code> — 4 seeded fixtures</li>
+      </ul>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-label">Reconciler</div>
+      <h3><code>soc-argus-exploit-to-detection.yaml</code></h3>
+      <p>Promotes advisories, counts positives/negatives in the labelled corpus, writes a synthetic <code>.soc-detection-eval-runs</code> row. Existing M2.1 poller flips the rec to <code>auto_apply_ready</code> within 2m.</p>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-label">Coverage</div>
+      <h3>Four seeded techniques</h3>
+      <ul>
+        <li><strong>T1003.001</strong> · lsass credential dumping</li>
+        <li><strong>T1059.001</strong> · PowerShell execution</li>
+        <li><strong>T1071.004</strong> · DNS C2</li>
+        <li><strong>T1562.001</strong> · Defender disable</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="split" style="margin-top: 18px;">
+    <div>
+      <div class="section-title">Example · T1003.001 — lsass credential dumping</div>
+      <pre class="code" style="font-size: 11.5px; line-height: 1.45;"><span class="c">// 1. advisory lands in .soc-cve-advisories</span>
+{
+  <span class="p">"cve_id"</span>: <span class="s">"CVE-2025-23142"</span>,
+  <span class="p">"title"</span>: <span class="s">"Frontier loader → lsass via PS reflection"</span>,
+  <span class="p">"cvss_base"</span>: <span class="n">8.8</span>, <span class="p">"kev"</span>: <span class="k">true</span>, <span class="p">"epss"</span>: <span class="n">0.67</span>,
+  <span class="p">"technique_ids"</span>: [<span class="s">"T1003.001"</span>, <span class="s">"T1059.001"</span>]
+}
+
+<span class="c">// 2. synthesizeRule(advisory) → ES|QL draft</span>
+FROM logs-endpoint.events.*
+| WHERE process.name == <span class="s">"powershell.exe"</span>
+  AND process.command_line LIKE <span class="s">"*ReadProcessMemory*"</span>
+  AND process.parent.name NOT IN (<span class="s">"explorer.exe"</span>)
+
+<span class="c">// 3. generateVariants(advisory) → labelled bank (8)</span>
++ T1003.001 / loader=rundll  / delivery=lnk
++ T1003.001 / loader=ps      / delivery=wsf / stealth=amsi-bypass
+− T1003.001 / NEGATIVE · approved-admin-script
+
+<span class="c">// 4. buildMutationIntent → .soc-recommendations</span>
+origin:     exploit_to_detection   status:     pending → <span class="k">auto_apply_ready</span>  <span class="c">// via M2.1 on next tick</span>
+door_class: two_way                blast_tier: narrow</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Closed-loop synthesis</div>
+      <div class="card accent-amber">
+        <div class="card-label">how it runs</div>
+        <p style="font-size: 13px;">
+          The reconciler emits an inline eval-runs row per promotion and drafts
+          flip <code>pending → auto_apply_ready</code> within a single tick.
+          Synthesis is end-to-end autonomous — no Playwright replay, no manual
+          kick required.
+        </p>
+      </div>
+
+      <div class="card accent-blue" style="margin-top: 12px;">
+        <div class="card-label">What the demo shows</div>
+        <p style="font-size: 13px;">
+          Seed the advisory above → within ~2 min the rec lands in the Console
+          "Applied this hour" panel with a <code>two_way / narrow</code> badge and a
+          backtest verdict of <code>safe</code>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11 · M2.3 Exploit Probability -->
+<section class="slide" data-title="M2.3 · Exploit Probability">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">M2.3</span> · Mythos-era Exploit Probability</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Deterministic scoring, TS ⇔ Painless parity.</h1>
+  <div class="slide-sub">One function, two implementations, identical to 6 decimal places. No LLM, no drift.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Scoring contributors (v1.0.0)</div>
+      <table class="data">
+        <thead>
+          <tr><th>Signal</th><th>Weight</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>CVSS base</strong></td><td><code>0.25</code></td><td>advisory</td></tr>
+          <tr><td><strong>EPSS</strong></td><td><code>0.20</code></td><td>advisory</td></tr>
+          <tr><td><strong>KEV</strong></td><td><code>0.15</code></td><td>CISA live feed</td></tr>
+          <tr><td><strong>Asset exposure</strong></td><td><code>0.15</code></td><td>host inventory</td></tr>
+          <tr><td><strong>Mythos signal</strong></td><td><code>0.05</code></td><td>Shadow-AI <strong>+</strong> intel feed</td></tr>
+          <tr><td>... additional contributors</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 16px;">
+        <div class="section-title">Parity guarantee</div>
+        <div class="card accent-green" style="padding: 12px 16px;">
+          <p><strong>TS implementation</strong> and <strong>Painless ingest pipeline</strong> produce the same score to <code>6dp</code>. Locked by <code>proof/m23-ts-parity.log</code>. Any weight change regenerates both sides.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Two-sided Mythos input</div>
+      <div class="card accent-mythos">
+        <div class="card-label">Host-side signal</div>
+        <h3>Shadow-AI telemetry</h3>
+        <p>Hosts running AI tooling stamp <code>host.argus.shadow_ai.*</code>. An AI-tool presence raises Mythos signal even for CVEs without published intel.</p>
+      </div>
+
+      <div class="card accent-purple" style="margin-top: 12px;">
+        <div class="card-label">CVE-side · Phase 3</div>
+        <h3>Intel-feed aggregate</h3>
+        <p><code>.soc-intel-mythos-signals.mythos_signal</code> — 14-day, trust-weighted, bounded <code>[0, 1]</code> sum of <code>.soc-intel-feed</code> rows. Updated every 30 min.</p>
+      </div>
+
+      <div class="card accent-cyan" style="margin-top: 12px;">
+        <div class="card-label">Why both?</div>
+        <p>Either signal source can independently raise exploit likelihood. Weighted at <code>0.05</code>, neither can dominate — <em>adversary-seeded intel cannot flip the verdict on its own</em>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · worked score for CVE-2025-23142 (lsass)</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// inputs (host-aware, tenant=acme)</span>
+cvss_base = <span class="n">0.88</span>    epss = <span class="n">0.67</span>    kev = <span class="k">true</span>    asset_exposure = <span class="n">0.90</span>
+shadow_ai_presence = <span class="n">0.35</span>    intel_feed_aggregate = <span class="n">0.48</span>    <span class="c">// → mythos_signal = max = 0.48</span>
+
+<span class="c">// scoreExploitProbability(v1.0.0) — contributor × weight</span>
+cvss_base        <span class="n">0.88</span> × <span class="n">0.25</span>  = <span class="n">0.2200</span>
+epss             <span class="n">0.67</span> × <span class="n">0.20</span>  = <span class="n">0.1340</span>
+kev              <span class="n">1.00</span> × <span class="n">0.15</span>  = <span class="n">0.1500</span>
+asset_exposure   <span class="n">0.90</span> × <span class="n">0.15</span>  = <span class="n">0.1350</span>
+mythos_signal    <span class="n">0.48</span> × <span class="n">0.05</span>  = <span class="n">0.0240</span>
+... remaining contributors         = <span class="n">0.0590</span>
+                                   ─────────
+<span class="k">exploit_probability</span>                = <span class="n">0.722000</span>
+
+<span class="c">// parity check (locked by proof/m23-ts-parity.log)</span>
+TS scoreExploitProbability()       = <span class="n">0.722000</span>
+Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ identical to 6dp</pre>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12 · M2.4 Frontier Simulator -->
+<section class="slide" data-title="M2.4 · Frontier Simulator">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">M2.4</span> · Frontier-Adversary Simulation</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Real adversarial inputs for the eval gate.</h1>
+  <div class="slide-sub">Argus doesn't grade itself against fixtures. The simulator <em>permutes axes</em> to mimic how a Mythos adversary iterates.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Two-workflow handshake</div>
+      <div class="card accent-purple">
+        <div class="card-label">Step 1 · Arm preset</div>
+        <h3><code>soc-argus-arm-mythos-preset.yaml</code></h3>
+        <p>Operator (or automation) arms a difficulty level + technique. Indexes a pending <code>attack-command</code>.</p>
+      </div>
+
+      <div class="card accent-green" style="margin-top: 14px;">
+        <div class="card-label">Step 2 · Emit variant</div>
+        <h3><code>soc-argus-frontier-simulator.yaml</code></h3>
+        <p>When preset is armed, emits a polymorphic variant into <code>.soc-eval-corpus-*</code> via <code>_reindex</code> + inline Painless, preserving nested ECS.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Why polymorphism matters</div>
+      <div class="card accent-mythos">
+        <p style="font-size: 15px;">
+          The simulator <strong>doesn't replay fixtures</strong>. It permutes four axes
+          — <em>loader</em>, <em>delivery</em>, <em>privilege</em>, <em>stealth</em> —
+          to mimic how a real Mythos adversary iterates per tenant, per host, per hour.
+        </p>
+        <p style="font-size: 15px; margin-top: 10px;">
+          The variant bank grows organically. M2.1 keeps a coverage map, so if the
+          simulator starts emitting on an axis the current rule doesn't cover,
+          the coverage number drops — and drift monitor sees it.
+        </p>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="mini-label">Live-runtime proof</div>
+        <div class="card" style="padding: 12px 16px;">
+          <p style="font-size: 12.5px;">
+            <code>proof/demo-validation-2026-04-19-live.md</code> §2.1 + §2.2 —
+            preset armed at <strong>level-6</strong>, simulator emitted to
+            <code>.soc-eval-corpus-argus-corpus-mythos-2026-04-live</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 13 · M2.5 Reasoning Traces -->
+<section class="slide" data-title="M2.5 · Reasoning Traces">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">M2.5</span> · Reasoning-Trace Governance</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Every Argus decision is an OTEL-GenAI span.</h1>
+  <div class="slide-sub">Auditable, graded, and watch-doggable — portable across any OTEL-compliant viewer (Phoenix, Langfuse, …).</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title"><code>.soc-reasoning-trace</code> shape</div>
+      <pre class="code">{
+  <span class="p">"gen_ai"</span>: {
+    <span class="p">"system"</span>: <span class="s">"argus"</span>,
+    <span class="p">"operation"</span>: <span class="s">"triage"</span>,
+    <span class="p">"agent"</span>: <span class="s">"soc-deteng"</span>,
+    <span class="p">"request"</span>: { ... },
+    <span class="p">"response"</span>: { ... },
+    <span class="p">"usage"</span>: { ... },
+    <span class="p">"tool"</span>: { ... }
+  },
+  <span class="p">"argus"</span>: {
+    <span class="p">"decision"</span>: {
+      <span class="p">"kind"</span>: <span class="s">"rule_create"</span>,
+      <span class="p">"confidence"</span>: <span class="n">0.81</span>,
+      <span class="p">"door_class"</span>: <span class="s">"two_way"</span>,
+      <span class="p">"tier_at_decision"</span>: <span class="s">"frontier"</span>
+    }
+  }
+}</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Three enforcement loops on top</div>
+      <div class="card accent-cyan">
+        <div class="card-label">Trace-level evals</div>
+        <h3><code>@kbn/evals-suite-argus-reasoning</code></h3>
+        <p>Scores spans across <em>evidence · calibration · coherence · safety</em>. Aggregates (mean, p5) → <code>gate_decision</code> into <code>.soc-reasoning-eval-runs</code>.</p>
+      </div>
+
+      <div class="card accent-mythos" style="margin-top: 12px;">
+        <div class="card-label">Reasoning watchdog</div>
+        <h3><code>soc-argus-reasoning-watchdog.yaml</code></h3>
+        <p>Every 5m, computes 15-min mean confidence per actor vs 24h baseline. Trigger: <code>short &lt; 0.5</code> or <code>(baseline − short) &gt; 0.2</code> → tier=<code>quarantined</code>.</p>
+      </div>
+
+      <div class="card accent-amber" style="margin-top: 12px;">
+        <div class="card-label">Hourly · Trust-tier assessor</div>
+        <h3><code>soc-argus-trust-tier-assessor.yaml</code></h3>
+        <p>Aggregates eval + outcome (rollback_rate, fp_ratio) + reasoning signals. <strong>Hard-quarantines</strong> any actor above 20% on either outcome signal.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14 · Trust Policy -->
+<section class="slide" data-title="Trust policy matrix">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">GOVERNANCE</span> · Trust-policy matrix</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Tier × blast-radius × door-class.</h1>
+  <div class="slide-sub">The matrix that decides who can auto-apply what. Spec: <code>@kbn/argus-trust-policy</code> · 27 tests incl. 160-combo exhaustive matrix + YAML⇔TS drift detector.</div>
+
+  <div class="grid-3" style="margin-bottom: 20px;">
+    <div class="card accent-purple">
+      <div class="card-label">Input 1</div>
+      <h3>Actor trust tier</h3>
+      <ul>
+        <li><strong>frontier</strong> — full auto-apply</li>
+        <li><strong>probationary</strong> — narrow blast only</li>
+        <li><strong>quarantined</strong> — review required</li>
+        <li><strong>unproven</strong> — new actor, caps at narrow</li>
+      </ul>
+    </div>
+
+    <div class="card accent-amber">
+      <div class="card-label">Input 2</div>
+      <h3>Blast radius</h3>
+      <ul>
+        <li><strong>narrow</strong> — single rule, 1 tenant</li>
+        <li><strong>wide</strong> — multi-tenant, 1 host class</li>
+        <li><strong>global</strong> — platform-wide</li>
+      </ul>
+      <p style="margin-top: 8px;">Computed from <code>expected_impact.hosts / tenants / rules</code>.</p>
+    </div>
+
+    <div class="card accent-mythos">
+      <div class="card-label">Input 3</div>
+      <h3>Door class</h3>
+      <ul>
+        <li><strong>two_way</strong> — reversible (rule_create default)</li>
+        <li><strong>one_way</strong> — irreversible in practice (kill-switch, tenant isolation)</li>
+      </ul>
+      <p style="margin-top: 8px;"><em>One-way doors always route to review</em> regardless of tier.</p>
+    </div>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Decision</div>
+      <pre class="code"><span class="k">if</span> door_class == <span class="s">"one_way"</span>:
+    pending_review   <span class="c">// irreversible</span>
+<span class="k">elif</span> tier == <span class="s">"quarantined"</span>:
+    pending_review   <span class="c">// frozen actor</span>
+<span class="k">elif</span> blast_tier &gt; tier_cap:
+    pending_review   <span class="c">// over budget</span>
+<span class="k">else</span>:
+    auto_apply_ready <span class="c">// through the gate</span></pre>
+    </div>
+
+    <div>
+      <div class="section-title">Example · four decisions the gate actually makes</div>
+      <table class="data">
+        <thead>
+          <tr><th>tier</th><th>blast</th><th>door</th><th>→ status</th><th>why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>frontier</strong></td><td>narrow</td><td>two_way</td>
+            <td><code style="color: var(--green);">auto_apply_ready</code></td>
+            <td>within budget</td>
+          </tr>
+          <tr>
+            <td><strong>frontier</strong></td><td>narrow</td><td>one_way</td>
+            <td><code style="color: var(--amber);">pending_review</code></td>
+            <td>door rule</td>
+          </tr>
+          <tr>
+            <td><strong>probationary</strong></td><td>wide</td><td>two_way</td>
+            <td><code style="color: var(--amber);">pending_review</code></td>
+            <td>over blast cap</td>
+          </tr>
+          <tr>
+            <td><strong>quarantined</strong></td><td>narrow</td><td>two_way</td>
+            <td><code style="color: var(--amber);">pending_review</code></td>
+            <td>tier frozen</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size: 12px; color: var(--text3); margin-top: 8px;">
+        Full 160-combo matrix locked in <code>@kbn/argus-trust-policy</code> tests.
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="card accent-cyan">
+      <div class="card-label">Enforcement</div>
+      <p style="font-size: 14px;">
+        <code>soc-argus-trust-gate.yaml</code> is <strong>non-invasive</strong> —
+        it <em>downgrades</em> a recommendation's status, it never edits the mutation body.
+        The actor still authored the intent; the gate just caps what the actor is
+        allowed to apply autonomously.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 15 · Backtest -->
+<section class="slide" data-title="Backtest · Shadow execution">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">GOVERNANCE</span> · Shadow execution</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">No auto-apply lands without a verdict.</h1>
+  <div class="slide-sub">Spec: <code>@kbn/argus-backtest</code> · 24 tests · YAML⇔TS drift detector across applier + backtester.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Flow</div>
+      <pre class="code">auto_apply_ready rec
+      │
+      ▼
+<span class="p">soc-autonomous-applier.yaml</span>
+      │  <span class="c">// defers every auto_apply</span>
+      ▼
+<span class="p">soc-rule-backtester.yaml</span>
+      │  <span class="c">// projects rule-hit delta</span>
+      │  <span class="c">// against historical traffic</span>
+      ▼
+verdict ∈ {<span class="s">safe</span>, <span class="s">noisy</span>, <span class="s">silent</span>, <span class="s">dangerous</span>}
+      │
+      ▼
+flipIntentStatus → .soc-mutation-intents
+      │
+      ▼
+<span class="k">only</span> <span class="s">"safe"</span> <span class="k">actually</span> applies</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Verdict rubric</div>
+      <div class="card accent-green">
+        <div class="card-label">safe</div>
+        <p>Projected hits land cleanly on known-bad. Applier proceeds.</p>
+      </div>
+      <div class="card accent-amber" style="margin-top: 10px;">
+        <div class="card-label">noisy</div>
+        <p>High FP signature against historical traffic → <strong>block</strong>, re-route to synthesis for tightening.</p>
+      </div>
+      <div class="card accent-purple" style="margin-top: 10px;">
+        <div class="card-label">silent</div>
+        <p>Rule never fired in 7d of traffic → <strong>block</strong>, advisory gets re-evaluated (does the TTP still exist?).</p>
+      </div>
+      <div class="card accent-mythos" style="margin-top: 10px;">
+        <div class="card-label">dangerous</div>
+        <p>Projected hits on core infra or high-priv services → <strong>block</strong>, escalate to human review.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · a <code>noisy</code> verdict in the wild</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// backtest row written to .soc-backtest-results</span>
+rule_id:         <span class="s">"mythos.cred-dumping.lsass.v2"</span>
+replayed_over:   <span class="s">"logs-endpoint.events.* · last 7d"</span>
+projected_hits:  <span class="n">342</span>
+  · high-priv infra hosts         <span class="n">2</span>
+  · dev / sandbox hosts         <span class="n">318</span>
+  · matches <span class="s">"approved-admin-*"</span> signature  <span class="n">218</span>   <span class="c">// → false-positive cluster</span>
+
+<span class="k">verdict</span>:       <span class="s">"noisy"</span>
+reason:        <span class="s">"218 / 342 = 64% match a known benign admin loop"</span>
+action:        block · re-route to <span class="s">"exploit_to_detection"</span> with
+               tighten_hint: { exclude: [<span class="s">"approved-admin-*"</span>] }
+<span class="k">applier</span>:       <span class="k">did not apply</span>   <span class="c">// status flipped to "pending_review"</span></pre>
+    </div>
+  </div>
+</section>
+
+<!--
+  NOTE: Fleet/Caldera E2E demo (Argus plan: argus_fleet_caldera_e2e).
+  The canary story below is backed by a real one-command demo that
+  enrolls a Linux endpoint (Elastic Agent + Caldera sandcat) in Fleet,
+  runs the pipe-to-shell primitive, and surfaces a live alert in the
+  Argus UI. Drive it with:
+
+      ./soc-simulation/scripts/run_e2e_demo.sh
+
+  Expected evidence once the loop completes:
+    - Fleet agent soc-endpoint-1 (online) on policy soc-endpoint-policy
+    - Caldera agent in group "all-endpoints" with recent check-in
+    - .soc-attack-commands: caldera_state=finished, techniques_executed set
+    - .alerts-security.alerts-default: rule_id=argus-linux-pipe-to-shell
+      AND host.name=soc-endpoint-1
+
+  Consider adding a dedicated "Live E2E loop" slide between
+  Autonomy decisions and Canary rollout in a future deck pass.
+-->
+
+<!-- Canary rollout -->
+<section class="slide" data-title="Canary rollout">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">GOVERNANCE</span> · Canary &amp; rollback</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Every auto-apply is a canary, not a cutover.</h1>
+  <div class="slide-sub">Spec: <code>soc-post-apply-observer.yaml</code> · 2-min tick · regression gate = (spike ∨ silence) ∧ tp_drop · rollback rides the same applier path as any other mutation.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">What a canary is today</div>
+      <pre class="code">applier apply rule
+      │   <span class="c">// writes `.soc-snapshots` doc</span>
+      │   <span class="c">// with `before` state + parent_rec_id</span>
+      ▼
+<span class="k">observation window</span>  =  <span class="n">15m</span>
+baseline window         =  <span class="n">60m</span> pre-apply
+cooldown between ticks  =  <span class="n">5m</span>
+      │
+      ▼
+<span class="p">soc-post-apply-observer</span> · every <span class="n">2m</span>
+  • <span class="s">spike</span>     post &gt; <span class="n">3×</span> pre
+  • <span class="s">silence</span>   post == <span class="n">0</span> &amp;&amp; pre &gt; <span class="n">0</span>
+  • <span class="s">tp_drop</span>   pre_tp &gt; <span class="n">0</span> &amp;&amp; post_tp == <span class="n">0</span>
+      │
+      ▼
+regression = (spike ∨ silence) ∧ tp_drop
+      │
+      ├── <span class="s">clean</span>          → snapshot closed · rec stays <span class="s">applied</span>
+      ├── <span class="s">inconclusive</span>   → empty baseline · keep observing
+      └── <span class="s">regression</span>     → emit <span class="s">rollback_mutation_intent</span>
+                           applier reverts to <span class="p">before</span>
+                           parent rec flips to <span class="s">rolled_back</span></pre>
+
+      <div style="margin-top: 12px;">
+        <div class="section-title">Why this is already strong</div>
+        <div class="card accent-green">
+          <ul>
+            <li><strong>One applier path</strong> — rollback is just another <code>mutation_intent</code>, so the audit story is uniform.</li>
+            <li><strong>No false regressions</strong> — requires <em>both</em> a volume anomaly and a TP collapse; empty baselines degrade to <code>inconclusive</code>.</li>
+            <li><strong>Closed loop on disk</strong> — every tick writes to <code>.soc-post-apply-observations</code> + <code>.soc-autonomy-decisions</code>; dashboards reconstruct the decision.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">To go production-ready</div>
+
+      <div class="card accent-amber">
+        <div class="card-label">1 · Staged fleet rollout</div>
+        <p>Today every apply goes to 100 % of hosts at once. Production needs <strong>1 % → 10 % → 50 % → 100 %</strong> stages with a gate evaluation between each, using Agent tag / space / tier selectors. Abort on first stage that regresses — the blast radius stays bounded to the smallest cohort.</p>
+      </div>
+
+      <div class="card accent-cyan" style="margin-top: 10px;">
+        <div class="card-label">2 · Statistical significance gating</div>
+        <p>The 15-min window is time-bounded, not sample-bounded. Promote when <code>N ≥ 30</code> matched events <em>and</em> the 95 % CI on FP-rate lies below the SLO — not when the clock rings. For low-traffic rules, extend the window automatically.</p>
+      </div>
+
+      <div class="card accent-purple" style="margin-top: 10px;">
+        <div class="card-label">3 · Versioned, atomic rollback</div>
+        <p>Replace "re-apply the <code>before</code> doc" with an <strong>immutable rule-bundle</strong> keyed by content hash. Rollback = switch the active pointer to <code>v(n-1)</code>, tamper-evident, race-free. Adds a global <strong>kill-switch</strong> that can disable a rule-set fleet-wide in &lt; 30 s.</p>
+      </div>
+
+      <div class="card accent-mythos" style="margin-top: 10px;">
+        <div class="card-label">4 · Per-tier SLOs &amp; alert budgets</div>
+        <p>The <code>3×</code> spike / <code>70 %</code> TP-drop thresholds are hard-coded constants. Replace with per-rule SLOs (crown-jewel EDR ≠ noisy auth rule) + a global alert-volume budget; refuse to promote if the projected volume pushes the fleet past its error budget.</p>
+      </div>
+
+      <div class="card accent-blue" style="margin-top: 10px;">
+        <div class="card-label">5 · Blast-radius simulator + HITL escalation</div>
+        <p>Pre-promotion, replay the rule against the last 24 h of live telemetry on a read-only mirror to predict the alert storm. Borderline verdicts (inconclusive, near-threshold) <strong>pause at 25 %</strong> and page on-call via the detection-engineer escalation queue instead of auto-rolling forward.</p>
+      </div>
+
+      <div class="card accent-green" style="margin-top: 10px;">
+        <div class="card-label">6 · Signed audit + crown-jewel lockout</div>
+        <p>Every stage transition gets a signed entry in a tamper-evident log (hash-chained to the previous). During active incidents or on crown-jewel assets, auto-apply is disabled — the applier queues the intent behind a human gate regardless of backtest verdict.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · a healthy canary and a killed one, same workflow</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// .soc-post-apply-observations — one row per observer tick</span>
+<span class="c">// ── healthy canary ────────────────────────────────────────────</span>
+snapshot_id:            <span class="s">"snap-rec-synth-cve-2024-27198"</span>
+rule_id:                <span class="s">"rule-jetbrains-teamcity-auth-bypass"</span>
+window_minutes:         <span class="n">15</span>
+pre_apply_alerts:        <span class="n">12</span>    post_apply_alerts:   <span class="n">14</span>      <span class="c">// × 1.17</span>
+pre_apply_tps:           <span class="n">4</span>     post_apply_tps:      <span class="n">5</span>
+gates_evaluated:        [<span class="s">"spike"</span>, <span class="s">"silence"</span>, <span class="s">"tp_drop"</span>]
+regression_detected:    <span class="n">false</span>
+final_status:           <span class="s">"clean"</span>          <span class="c">// rec stays applied</span>
+
+<span class="c">// ── killed canary ─────────────────────────────────────────────</span>
+snapshot_id:            <span class="s">"snap-rec-synth-cve-2024-49113"</span>
+rule_id:                <span class="s">"rule-argus-t1566-phishing-link"</span>
+pre_apply_alerts:        <span class="n">3</span>     post_apply_alerts:   <span class="n">142</span>     <span class="c">// × 47 → spike</span>
+pre_apply_tps:           <span class="n">2</span>     post_apply_tps:      <span class="n">0</span>       <span class="c">// tp_drop</span>
+regression_detected:    <span class="n">true</span>
+rollback_triggered:     <span class="n">true</span>
+final_status:           <span class="s">"regression_detected"</span>
+<span class="k">→ emit</span> rollback_mutation_intent {
+    rec_id: <span class="s">"rollback-snap-rec-synth-cve-2024-49113-…"</span>,
+    track:  <span class="s">"deterministic"</span>,
+    status: <span class="s">"auto_apply_ready"</span>,           <span class="c">// skips backtester — reverts are atomic</span>
+    details.rollback_to: { …original rule body… }
+  }
+parent rec flips to     <span class="s">"rolled_back"</span>   · MTTR captured in <code>.soc-outcomes</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART III · PHASE 3
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Drift detection -->
+<section class="slide" data-title="Phase 3 · Drift detection">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">PHASE 3</span> · Drift detection</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Notice when the world moves.</h1>
+  <div class="slide-sub">The loop that catches silent decay before it becomes an intrusion. No LLM — just a smoothed rolling average + thresholds.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Detection math</div>
+      <pre class="code"><span class="c">// per rule, last 30 days, ≥3 runs</span>
+<span class="c">// EMA = exponential moving average — a smoothed trend where</span>
+<span class="c">// the newest run counts most and older runs fade out.</span>
+<span class="c">// α=0.3 means the latest run gets ~30% of the weight.</span>
+ema_precision = EMA(precision, α=0.3)
+baseline      = median(last 7 runs before current)
+Δ             = ema_precision - baseline
+
+drift_significant =
+  |Δ| ≥ 0.08                                       <span class="c">// absolute drop</span>
+  <span class="k">OR</span>
+  (Δ ≤ -0.04 <span class="k">AND</span> variant_coverage_delta ≤ -0.10)
+
+<span class="c">// analogous for actor trust from .soc-actor-trust-tiers</span>
+<span class="c">// + reasoning_trace_quality (M2.5, 24h window)</span></pre>
+
+      <div style="margin-top: 14px;">
+        <div class="section-title">Effect</div>
+        <div class="card accent-purple">
+          <p>Files a <code>mutation_intent</code> with <code>argus.origin: drift_detected</code>, <code>status: eval_requested</code>. Existing M2.1 cascade re-scores against the current corpus on the next tick.</p>
+          <p style="margin-top: 6px;"><strong>48h cooldown</strong> per target to avoid flapping.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Why deterministic</div>
+      <div class="card accent-green">
+        <h3>A smoothed rolling average, then a threshold.</h3>
+        <p>
+          We track each rule's precision over time using an
+          <strong>exponential moving average (EMA)</strong> — a rolling average
+          that weights the most recent run highest and lets older runs fade out.
+          When the smoothed trend drops past a threshold, Argus files a drift
+          intent.
+        </p>
+        <p style="margin-top: 8px;">
+          One knob — <code>α = 0.3</code> (how much weight the latest run gets) —
+          controls the whole detector. Reviewable, calibrated, debuggable. No LLM,
+          no black box.
+        </p>
+      </div>
+
+      <div class="card accent-cyan" style="margin-top: 14px;">
+        <div class="card-label">Two streams, one workflow</div>
+        <h3>Rule drift + actor drift</h3>
+        <ul>
+          <li><strong>Rule drift</strong> — score trajectory per <code>rule_id</code></li>
+          <li><strong>Actor drift</strong> — trust trajectory + reasoning quality per <code>actor_id</code></li>
+        </ul>
+        <p style="margin-top: 8px;">Single <code>origin: drift_detected</code> with <code>kind</code> discriminator — keeps the applier path uniform.</p>
+      </div>
+
+      <div class="card accent-amber" style="margin-top: 14px;">
+        <div class="card-label">Workflow</div>
+        <p><code>soc-argus-drift-monitor.yaml</code> · 6h cadence · files to <code>.soc-recommendations</code></p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · rule <code>mythos.cred-dumping.lsass</code> is decaying</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// smoothed precision (EMA, α=0.3) · last 6 eval runs</span>
+2026-03-15    <span class="n">0.92</span>  ●●●●●●●●●●●●●●●●●●
+2026-03-22    <span class="n">0.91</span>  ●●●●●●●●●●●●●●●●●●
+2026-03-29    <span class="n">0.88</span>  ●●●●●●●●●●●●●●●●●
+2026-04-05    <span class="n">0.81</span>  ●●●●●●●●●●●●●●●
+2026-04-12    <span class="n">0.74</span>  ●●●●●●●●●●●●●●
+2026-04-17    <span class="n">0.61</span>  ●●●●●●●●●●●●      ← Δ = <span class="n">−0.27</span>  (threshold 0.08)
+
+<span class="c">// mutation_intent filed to .soc-recommendations</span>
+argus.origin:      <span class="s">"drift_detected"</span>
+argus.decision:    { kind: <span class="s">"rule_eval"</span>, door_class: <span class="s">"two_way"</span>, tier: <span class="s">"system"</span> }
+status:            <span class="s">"eval_requested"</span>
+payload:           { rule_id: <span class="s">"mythos.cred-dumping.lsass"</span>,
+                     requested_corpus: <span class="s">"argus-corpus-mythos-2026-04"</span> }
+cooldown:          <span class="n">48h</span>   <span class="c">// no re-file until 2026-04-19</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 18 · Playbook Learner -->
+<section class="slide" data-title="Phase 3 · Playbook learner">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">PHASE 3</span> · Playbook learning loop</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Argus learns which step actually works.</h1>
+  <div class="slide-sub">Per <code>(technique, playbook_step)</code> pair, correlate outcomes and remap under-performers — adversary-proof by construction.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Correlator</div>
+      <pre class="code"><span class="c">// per (technique, playbook_step), rolling window</span>
+
+success_rate  = successful_outcomes / total_outcomes
+rollback_rate = rollbacks          / total_applies
+
+<span class="k">if</span> success_rate &lt; threshold <span class="k">OR</span>
+   rollback_rate &gt; threshold:
+
+  <span class="c">// file a remap intent</span>
+  candidate = rank_from(
+    <span class="s">"argus/technique-playbook-mapping.json"</span>,
+    by=historical_success_on_adjacent
+  )
+
+  emit mutation_intent(
+    origin=<span class="s">"playbook_remap"</span>,
+    payload={
+      from: playbook_step,
+      to:   candidate,
+      technique: technique
+    }
+  )</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Adversary-proofing</div>
+      <div class="card accent-mythos">
+        <div class="card-label">Gate 1 · tier</div>
+        <h3>Frontier-tier outcomes only</h3>
+        <p>Quarantined actors can't poison the loop by deliberately failing — their outcomes are <em>filtered out</em> of the correlator.</p>
+      </div>
+
+      <div class="card accent-amber" style="margin-top: 14px;">
+        <div class="card-label">Gate 2 · sample</div>
+        <h3>Minimum sample size</h3>
+        <p>A single outcome can't flip a playbook step. The threshold requires enough evidence to be statistically distinguishable from noise.</p>
+      </div>
+
+      <div class="card accent-cyan" style="margin-top: 14px;">
+        <div class="card-label">Mapping source</div>
+        <h3><code>argus/technique-playbook-mapping.json</code></h3>
+        <p>Static, checked-in, human-reviewed. Candidates are ranked by historical success on <strong>adjacent</strong> techniques (same tactic, same kill-chain stage).</p>
+      </div>
+
+      <div class="card accent-green" style="margin-top: 14px;">
+        <div class="card-label">Workflow</div>
+        <p><code>soc-argus-playbook-learner.yaml</code> · 6h cadence</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · <code>T1071.004</code> (DNS C2) · the <code>network-isolate</code> step isn't working</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// rolling 30d window, frontier-tier outcomes only</span>
+(technique=<span class="s">"T1071.004"</span>, step=<span class="s">"network-isolate"</span>)
+  samples:        <span class="n">32</span>
+  success_rate:   <span class="n">0.44</span>   ← threshold <span class="n">0.70</span>  · under-performing
+  rollback_rate:  <span class="n">0.31</span>   ← threshold <span class="n">0.20</span>  · over-rolling-back
+
+<span class="c">// candidates from argus/technique-playbook-mapping.json</span>
+<span class="c">// ranked by success on adjacent techniques in the same kill-chain stage</span>
+  <span class="n">1</span>. tenant-quarantine-and-alert   adj success <span class="n">0.81</span>   ← pick
+  <span class="n">2</span>. upstream-dns-sinkhole         adj success <span class="n">0.68</span>
+  <span class="n">3</span>. host-isolate                  adj success <span class="n">0.52</span>
+
+<span class="c">// mutation_intent filed to .soc-recommendations</span>
+argus.origin:     <span class="s">"playbook_remap"</span>
+argus.decision:   { kind: <span class="s">"playbook_remap"</span>, door_class: <span class="s">"two_way"</span> }
+payload:          { technique: <span class="s">"T1071.004"</span>,
+                    from: <span class="s">"network-isolate"</span>,
+                    to:   <span class="s">"tenant-quarantine-and-alert"</span> }
+status:           <span class="s">"pending_review"</span>   <span class="c">// blast=wide → trust gate holds it</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 19 · Intel Ingestion -->
+<section class="slide" data-title="Phase 3 · Intel ingestion">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">PHASE 3</span> · Glasswing-compatible intel ingestion</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Abstract contract + concrete adapter.</h1>
+  <div class="slide-sub">The <code>.soc-intel-feed</code> contract is vendor-agnostic. Glasswing is one adapter; STIX/TAXII 2.1 is another; demo-seed is the third.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">The contract</div>
+      <pre class="code"><span class="c">// .soc-intel-feed row shape</span>
+{
+  <span class="p">"@timestamp"</span>: <span class="s">"..."</span>,
+  <span class="p">"feed_id"</span>: <span class="s">"glasswing"</span> | <span class="s">"vendor-x"</span> | <span class="s">"argus-demo"</span>,
+  <span class="p">"kind"</span>: <span class="s">"actor_capability"</span>
+        | <span class="s">"exploit_availability"</span>
+        | <span class="s">"campaign"</span>,
+  <span class="p">"reference"</span>: {
+    <span class="p">"cve"</span>: <span class="s">"CVE-2025-XXXX"</span>,
+    <span class="p">"technique_ids"</span>: [<span class="s">"T1003.001"</span>],
+    <span class="p">"actor_ids"</span>: [<span class="s">"apt-mythos-01"</span>]
+  },
+  <span class="p">"signal_strength"</span>: <span class="n">0.82</span>,
+  <span class="p">"half_life_days"</span>: <span class="n">14</span>,
+  <span class="p">"source_trust"</span>: <span class="n">0.9</span>,
+  <span class="p">"raw"</span>: { <span class="c">// opaque passthrough</span> }
+}</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Aggregator math</div>
+      <div class="card accent-purple">
+        <pre class="code" style="margin: 0;"><span class="c">// per CVE, 14d window</span>
+
+per_cve_signal = min(1.0,
+  Σ signal_strength × source_trust
+  over rows matching CVE
+  in the window)
+</pre>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="section-title">Shipped on this branch</div>
+        <div class="card" style="padding: 12px 16px;">
+          <div class="kv-row"><span class="kv-key">tmpl</span><span class="kv-val"><code>soc-intel-feed.json</code></span><span class="kv-tag">index template</span></div>
+          <div class="kv-row"><span class="kv-key">tmpl</span><span class="kv-val"><code>soc-intel-mythos-signals.json</code></span><span class="kv-tag">aggregate</span></div>
+          <div class="kv-row"><span class="kv-key">wf</span><span class="kv-val"><code>...intel-adapter-generic</code></span><span class="kv-tag">seed + heartbeat</span></div>
+          <div class="kv-row"><span class="kv-key">wf</span><span class="kv-val"><code>...intel-mythos-aggregator</code></span><span class="kv-tag">30m</span></div>
+          <div class="kv-row"><span class="kv-key">seed</span><span class="kv-val"><code>argus/intel-feed-seed.json</code></span><span class="kv-tag">demo data</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div class="card accent-green">
+          <p style="font-size: 13px;"><strong>Swap the seed-upsert for a TAXII poller</strong> — zero consumer changes, thanks to the <code>.soc-intel-feed</code> abstraction.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px;">
+    <div class="section-title">Example · two feeds agree on CVE-2025-23142</div>
+    <div class="card accent-blue">
+      <pre class="code" style="margin: 0; font-size: 11.5px; line-height: 1.45;"><span class="c">// .soc-intel-feed rows in the 14d window</span>
+2026-04-14  feed=<span class="s">"glasswing"</span>   kind=<span class="s">"actor_capability"</span>
+            cve=<span class="s">"CVE-2025-23142"</span>   signal_strength=<span class="n">0.82</span>   source_trust=<span class="n">0.9</span>
+
+2026-04-16  feed=<span class="s">"vendor-x"</span>    kind=<span class="s">"exploit_availability"</span>
+            cve=<span class="s">"CVE-2025-23142"</span>   signal_strength=<span class="n">0.55</span>   source_trust=<span class="n">0.5</span>
+
+<span class="c">// soc-argus-intel-mythos-aggregator (30m) · per-CVE, trust-weighted</span>
+per_cve_signal = min(<span class="n">1.0</span>,
+    <span class="n">0.82</span> × <span class="n">0.9</span>          <span class="c">// glasswing contribution</span>
+  + <span class="n">0.55</span> × <span class="n">0.5</span>          <span class="c">// vendor-x contribution</span>
+)
+              = min(<span class="n">1.0</span>, <span class="n">0.738</span> + <span class="n">0.275</span>)
+              = min(<span class="n">1.0</span>, <span class="n">1.013</span>)  = <span class="n">1.000</span>
+
+<span class="c">// upserted into .soc-intel-mythos-signals</span>
+{ cve_id: <span class="s">"CVE-2025-23142"</span>, mythos_signal: <span class="n">1.0</span>,
+  evidence_count: <span class="n">2</span>, window_days: <span class="n">14</span> }
+                 ↓                    <span class="c">// consumed CVE-side by M2.3 (weight 0.05)</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 20 · Argus Console -->
+<section class="slide" data-title="Phase 3 · Argus Console">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">PHASE 3</span> · Argus Console</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">One landing surface, two questions.</h1>
+  <div class="slide-sub">&ldquo;Is Argus working right now?&rdquo; + &ldquo;Why did Argus do X?&rdquo; — answered without leaving Kibana.</div>
+
+  <div class="grid-2" style="margin-bottom: 18px;">
+    <div class="card accent-cyan">
+      <div class="card-label">Panel 1 · Pulse</div>
+      <h3>Live health across all five layers</h3>
+      <ul>
+        <li>Per-pressure sparklines (P1–P4)</li>
+        <li>Tier mix · live actor distribution</li>
+        <li>Mutation throughput · applied / rolled back / blocked</li>
+        <li>Drift signals open</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-label">Panel 2 · Activity feed</div>
+      <h3>Chronological event stream</h3>
+      <ul>
+        <li>Filterable by layer / pressure / actor / tier</li>
+        <li>Deep-links into Discover, reasoning trace, alert flyout</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-label">Panel 3 · Mutation lineage</div>
+      <h3>Graph of a rule's lifecycle</h3>
+      <pre class="code" style="font-size: 11px; margin-top: 6px;">source → exploit-probability → synthesis
+       → eval → backtest → apply → observe
+                              ↘ rollback ↙
+                 ↘ drift-detected → eval …</pre>
+    </div>
+    <div class="card accent-green">
+      <div class="card-label">Panel 4 · Reasoning drill-down</div>
+      <h3>From alert → decision chain</h3>
+      <ul>
+        <li>Per-step confidence + delta</li>
+        <li>Injection-surface flags</li>
+        <li>Tier of each actor at decision time</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card accent-blue">
+      <div class="card-label">Lens-panel surface</div>
+      <p>Extended onto the existing Argus Console dashboard via <code>build_argus_console.js</code>. Panels: drift intents, playbook remaps, intel rows, top-CVE Mythos, recent intents, tier distribution.</p>
+    </div>
+    <div class="card accent-mythos">
+      <div class="card-label">React app-route</div>
+      <p><strong><code>/app/security/argus</code></strong> — feature-flagged behind <code>argusConsoleEnabled</code>, deep-linked from the Security solution side-nav. Renders five panels (Pulse, Activity feed, Mutation lineage, Reasoning drill-down, Decision graph) with live data. The Decision graph tab is gated behind <code>argusDecisionGraphEnabled</code> and renders typed-edge neighborhoods over <code>.soc-decision-graph</code>; the same payload is exposed to the agent via <code>argus.get_decision_graph</code> and the <code>argus-explain-decision</code> skill for agent-native parity.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART IV · STATUS · DEMO · ROADMAP
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Status -->
+<section class="slide" data-title="Feature-complete status">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">STATUS</span> · Feature-complete demo build</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Where we are, exactly.</h1>
+  <div class="slide-sub">This branch is a feature-complete demo build. Live-runtime validated on a real Kibana cluster.</div>
+
+  <div class="stat-grid">
+    <div class="stat">
+      <div class="stat-val">16</div>
+      <div class="stat-lbl">Argus workflows · all live-runtime validated</div>
+    </div>
+    <div class="stat purple">
+      <div class="stat-val">11</div>
+      <div class="stat-lbl">Kibana packages · 187+ tests green</div>
+    </div>
+    <div class="stat green">
+      <div class="stat-val">259</div>
+      <div class="stat-lbl">Recommendations · 0 dead-lettered</div>
+    </div>
+    <div class="stat amber">
+      <div class="stat-val">5/5</div>
+      <div class="stat-lbl">Phase 3 workstreams landed</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="section-title">Milestones shipped</div>
+      <div class="card" style="padding: 14px 18px;">
+        <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val">Detection-Eval vertical + ER7 corpus</span><span class="pill green">shipped</span></div>
+        <div class="kv-row"><span class="kv-key">M2.2</span><span class="kv-val">Exploit-to-Detection synthesis (closed-loop)</span><span class="pill green">shipped</span></div>
+        <div class="kv-row"><span class="kv-key">M2.3</span><span class="kv-val">Exploit probability · TS ⇔ Painless</span><span class="pill green">shipped</span></div>
+        <div class="kv-row"><span class="kv-key">M2.4</span><span class="kv-val">Frontier-adversary simulator</span><span class="pill green">shipped</span></div>
+        <div class="kv-row"><span class="kv-key">M2.5</span><span class="kv-val">Reasoning-trace governance</span><span class="pill green">shipped</span></div>
+        <div class="kv-row"><span class="kv-key">P3</span><span class="kv-val">Drift · playbook · intel · console</span><span class="pill green">shipped</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Pre-launch gaps closed</div>
+      <div class="card" style="padding: 14px 18px;">
+        <div class="kv-row"><span class="kv-val">Closed-loop eval synthesis</span><span class="kv-val"></span><span class="pill green">resolved</span></div>
+        <div class="kv-row"><span class="kv-val">Reset + seed hygiene</span><span class="kv-val"></span><span class="pill green">resolved</span></div>
+        <div class="kv-row"><span class="kv-val">Outcome-driven trust tiers</span><span class="kv-val"></span><span class="pill green">resolved</span></div>
+        <div class="kv-row"><span class="kv-val">4 advisory fixtures (up from 1)</span><span class="kv-val"></span><span class="pill green">resolved</span></div>
+        <div class="kv-row"><span class="kv-val">30+ labelled variants (up from 13)</span><span class="kv-val"></span><span class="pill green">resolved</span></div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="section-title">External ideas landed</div>
+        <div class="card" style="padding: 14px 18px;">
+          <div class="kv-row"><span class="kv-val">ATT&amp;CK ER7 + adversarial eval</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+          <div class="kv-row"><span class="kv-val">One-way / two-way door class</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+          <div class="kv-row"><span class="kv-val">Blast radius + shadow execution</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+          <div class="kv-row"><span class="kv-val">OTEL-GenAI + watchdog + trace evals</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+          <div class="kv-row"><span class="kv-val">MCP + A2A surfaces</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+          <div class="kv-row"><span class="kv-val">Shadow-AI signal + CISA KEV live</span><span class="kv-val"></span><span class="pill green">✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 23 · Demo beats -->
+<section class="slide" data-title="Demo beats">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">DEMO</span> · Three beats, ten minutes</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">The ten-minute story.</h1>
+  <div class="slide-sub">Full runbook: <code>soc-simulation/docs/argus/demo-runbook.md</code> §10</div>
+
+  <div class="grid-3">
+    <div class="card accent-cyan">
+      <div class="card-label">Beat 1 · 4 min</div>
+      <h3>CVE flows end-to-end</h3>
+      <ul>
+        <li>KEV-enriched advisory arrives</li>
+        <li>Exploit-probability scored (TS⇔Painless)</li>
+        <li>Rule + variants synthesized</li>
+        <li>M2.1 gate <strong>fails</strong> (starting state)</li>
+        <li>Reconciler flips rec to <code>auto_apply_ready</code></li>
+        <li>Rule ships under trust-tier policy</li>
+      </ul>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-label">Beat 2 · 3 min</div>
+      <h3>Argus governs itself</h3>
+      <ul>
+        <li>Trust-tier assessor <strong>quarantines</strong> a misbehaving actor</li>
+        <li>Reasoning watchdog <strong>freezes</strong> another on confidence dropout</li>
+        <li>Trust gate <strong>downgrades</strong> a wide-blast intent</li>
+        <li>Every decision is an auditable OTEL span</li>
+      </ul>
+    </div>
+
+    <div class="card accent-amber">
+      <div class="card-label">Beat 3 · 3 min</div>
+      <h3>Argus adapts (Phase 3)</h3>
+      <ul>
+        <li>Intel feed seeded</li>
+        <li>Mythos signal aggregated per CVE</li>
+        <li>Drift monitor files a <strong>re-eval intent</strong></li>
+        <li>Playbook learner <strong>remaps</strong> an under-performing step</li>
+        <li>Console panels update live</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="section-title">Drive it</div>
+    <pre class="code">./soc-simulation/setup.sh <span class="c"># one-command setup</span>
+./scripts/argus_live_demo.sh <span class="c"># scenarios 1 + 2, live runtime</span>
+
+<span class="c"># Phase 3 beats — kick workflows manually</span>
+curl ... soc-argus-intel-adapter-generic <span class="s">{"force_seed": true}</span>
+curl ... soc-argus-intel-mythos-aggregator
+curl ... soc-argus-drift-monitor
+curl ... soc-argus-playbook-learner</pre>
+  </div>
+</section>
+
+<!-- SLIDE 24 · Metrics + Roadmap -->
+<section class="slide" data-title="Metrics & roadmap">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">METRICS</span> · and what's next</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Metrics we track · roadmap we haven't.</h1>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Demo scorecard</div>
+      <div class="card" style="padding: 14px 18px;">
+        <div class="kv-row"><span class="kv-val">T2D new CVE</span><span class="kv-val"></span><span class="kv-tag">&lt; 15 min</span></div>
+        <div class="kv-row"><span class="kv-val">Mutation-robust score</span><span class="kv-val"></span><span class="kv-tag">&gt; 0.75</span></div>
+        <div class="kv-row"><span class="kv-val">Frontier resilience</span><span class="kv-val"></span><span class="kv-tag">&gt; 0.70</span></div>
+        <div class="kv-row"><span class="kv-val">FPR on benign</span><span class="kv-val"></span><span class="kv-tag">&lt; 0.02</span></div>
+        <div class="kv-row"><span class="kv-val">Trust-gate pass rate</span><span class="kv-val"></span><span class="kv-tag">0.60–0.85</span></div>
+        <div class="kv-row"><span class="kv-val">Trace completeness</span><span class="kv-val"></span><span class="kv-tag">1.00</span></div>
+        <div class="kv-row"><span class="kv-val">Drift intents filed / closed</span><span class="kv-val"></span><span class="kv-tag">24h rolling</span></div>
+        <div class="kv-row"><span class="kv-val">Playbook remap intents</span><span class="kv-val"></span><span class="kv-tag">24h rolling</span></div>
+      </div>
+
+      <div class="card accent-green" style="margin-top: 12px;">
+        <div class="card-label">Governance pulse · R6</div>
+        <p><strong>MTTR-rollback</strong> — <code>soc-recovery.yaml</code> emits <code>rollback_mttr_ms</code> to <code>.soc-outcomes</code> every 10 min; the trust-tier assessor aggregates <code>avg / p50 / p95</code> per actor into <code>.soc-actor-trust-tiers</code>; the Argus Console Pulse tile reads it via <code>/internal/security_solution/argus/governance_pulse</code>.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Detection spine · R3 + R4</div>
+      <div class="card accent-cyan">
+        <div class="card-label">R3 · landed</div>
+        <h3>Pareto-optimal rule synthesis</h3>
+        <p><code>synthesize_pareto.ts</code> enumerates a deterministic composition grid across <code>must_anchor_subset · wildcard_retention · minimum_should_match</code>, predicts P / R / FP-rate + per-axis false-negative rate per candidate, and picks one via a tunable weighted-sum scorer. Frontier + dominated candidates are attached to every filed <code>mutation_intent</code> as <code>argus.synthesis</code> when the CLI runs with <code>--pareto</code>.</p>
+      </div>
+      <div class="card accent-amber" style="margin-top: 10px;">
+        <div class="card-label">R4 · landed</div>
+        <h3>LLM + axis-aware variant generation</h3>
+        <p><code>llm_variant_provider.ts</code> defines a <code>VariantProvider</code> abstraction with a deterministic golden-set-gated scripted-LLM default. Every candidate passes <code>validateLlmVariant</code> (golden blocklist + axis invariants + LOLBAS / parent allow-lists) and emits a <code>VariantTraceEvent</code>, so variant-generation reasoning feeds the R11 eval suite. CLI flags <code>--variant-source</code> + <code>--max-rejection-rate</code> fail-closed if the provider drifts.</p>
+      </div>
+      <div class="section-title" style="margin-top: 16px;">Remaining backlog</div>
+      <div class="card accent-purple">
+        <div class="card-label">1</div>
+        <h3>Alerting on rollback MTTR regressions</h3>
+        <p>The p50 / p95 signal is live on the Pulse tile; the next step is a detection rule that fires when p95 breaches its per-tenant budget.</p>
+      </div>
+      <div class="card accent-blue" style="margin-top: 10px;">
+        <div class="card-label">2</div>
+        <h3>TAXII poller adapter</h3>
+        <p>Replace seed-upsert; zero consumer changes thanks to the <code>.soc-intel-feed</code> abstraction.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART V · ENGINEERING
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Mutation intent envelope -->
+<section class="slide" data-title="Mutation intent envelope">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">SPINE</span> · The <code>mutation_intent</code> envelope</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">One schema, one pipeline, one DLQ.</h1>
+  <div class="slide-sub">Every autonomous action in Argus is a <code>mutation_intent</code> document. Nothing bypasses this.</div>
+
+  <div class="split">
+    <div>
+      <pre class="code">{
+  <span class="p">"artifact_type"</span>: <span class="s">"mutation_intent"</span>,
+  <span class="p">"status"</span>: <span class="s">"pending"</span> | <span class="s">"auto_apply_ready"</span>
+          | <span class="s">"auto_applied"</span> | <span class="s">"rolled_back"</span>
+          | <span class="s">"pending_review"</span>,
+  <span class="p">"source"</span>: <span class="s">"soc-argus-<origin>"</span>,
+
+  <span class="p">"argus"</span>: {
+    <span class="p">"origin"</span>: <span class="s">"exploit_to_detection"</span>
+            | <span class="s">"drift_detected"</span>
+            | <span class="s">"playbook_remap"</span>
+            | <span class="s">"actor_freeze"</span>,
+    <span class="p">"decision"</span>: {
+      <span class="p">"kind"</span>: <span class="s">"rule_create"</span> | <span class="s">"rule_update"</span>
+            | <span class="s">"playbook_remap"</span> | <span class="s">"actor_freeze"</span>,
+      <span class="p">"door_class"</span>: <span class="s">"one_way"</span> | <span class="s">"two_way"</span>,
+      <span class="p">"confidence"</span>: <span class="n">0.0..1.0</span>,
+      <span class="p">"tier_at_decision"</span>: <span class="s">"frontier"</span> | ...
+    },
+    <span class="p">"expected_impact"</span>: {
+      <span class="p">"blast_radius"</span>: { <span class="p">"hosts"</span>: n, <span class="p">"tenants"</span>: n, <span class="p">"rules"</span>: n },
+      <span class="p">"blast_tier"</span>: <span class="s">"narrow"</span> | <span class="s">"wide"</span> | <span class="s">"global"</span>
+    }
+  },
+
+  <span class="p">"payload"</span>: { <span class="c">// artifact-specific</span> }
+}</pre>
+    </div>
+
+    <div>
+      <div class="section-title">Example · a real drift-triggered envelope</div>
+      <pre class="code" style="font-size: 11.5px; line-height: 1.45;">{
+  <span class="p">"artifact_type"</span>: <span class="s">"mutation_intent"</span>,
+  <span class="p">"status"</span>:        <span class="s">"eval_requested"</span>,
+  <span class="p">"source"</span>:        <span class="s">"soc-argus-drift-monitor"</span>,
+
+  <span class="p">"argus"</span>: {
+    <span class="p">"origin"</span>:   <span class="s">"drift_detected"</span>,
+    <span class="p">"decision"</span>: {
+      <span class="p">"kind"</span>:             <span class="s">"rule_eval"</span>,
+      <span class="p">"door_class"</span>:       <span class="s">"two_way"</span>,
+      <span class="p">"confidence"</span>:       <span class="n">1.0</span>,
+      <span class="p">"tier_at_decision"</span>: <span class="s">"system"</span>
+    },
+    <span class="p">"drift"</span>: {
+      <span class="p">"target_id"</span>:   <span class="s">"mythos.cred-dumping.lsass"</span>,
+      <span class="p">"delta"</span>:       <span class="n">-0.27</span>,
+      <span class="p">"reason_code"</span>: <span class="s">"score_decay"</span>
+    },
+    <span class="p">"expected_impact"</span>: {
+      <span class="p">"blast_radius"</span>: { <span class="p">"rules"</span>: <span class="n">1</span>, <span class="p">"tenants"</span>: <span class="n">0</span>, <span class="p">"hosts"</span>: <span class="n">0</span> },
+      <span class="p">"blast_tier"</span>:   <span class="s">"narrow"</span>
+    }
+  },
+
+  <span class="p">"payload"</span>: {
+    <span class="p">"rule_id"</span>:         <span class="s">"mythos.cred-dumping.lsass"</span>,
+    <span class="p">"requested_corpus"</span>: <span class="s">"argus-corpus-mythos-2026-04"</span>
+  }
+}</pre>
+
+      <div class="card accent-cyan" style="margin-top: 12px;">
+        <div class="card-label">Guarantees</div>
+        <ul style="font-size: 13px;">
+          <li><strong>Validator.</strong> <code>soc-mutation-intent-envelope-validator</code> — malformed → <code>.soc-dead-letter</code>. Nothing bypasses.</li>
+          <li><strong>No hidden state.</strong> Status <em>is</em> the state machine; every workflow is a reconciler.</li>
+          <li><strong>Schema evolution.</strong> Additive-only; removals need a migration workflow. Never silent.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 27 · Workflow lifecycle -->
+<section class="slide" data-title="Workflow lifecycle">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ENGINEERING</span> · Workflow lifecycle</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Three lifecycle classes, 16 workflows.</h1>
+  <div class="slide-sub">Every workflow emits a heartbeat. If you don't see one, it isn't running — no hidden state.</div>
+
+  <div class="grid-3">
+    <div class="card accent-cyan">
+      <div class="card-label">Reconcilers</div>
+      <h3>poll → act · every 1–2m</h3>
+      <ul>
+        <li><code>soc-argus-exploit-to-detection</code></li>
+        <li><code>soc-detection-eval</code></li>
+        <li><code>soc-argus-trust-gate</code></li>
+        <li><code>soc-autonomous-applier</code></li>
+        <li><code>soc-rule-backtester</code></li>
+        <li><code>soc-post-apply-observer</code></li>
+      </ul>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-label">Scheduled loops</div>
+      <h3>hourly / 6h / daily</h3>
+      <ul>
+        <li><code>soc-argus-trust-tier-assessor</code> · 1h</li>
+        <li><code>soc-argus-reasoning-watchdog</code> · 5m</li>
+        <li><code>soc-argus-drift-monitor</code> · 6h</li>
+        <li><code>soc-argus-playbook-learner</code> · 6h</li>
+        <li><code>soc-argus-intel-mythos-aggregator</code> · 30m</li>
+        <li><code>soc-kev-ingest</code> · 24h</li>
+      </ul>
+    </div>
+
+    <div class="card accent-amber">
+      <div class="card-label">Event-driven / manual</div>
+      <h3>on demand</h3>
+      <ul>
+        <li><code>soc-argus-arm-mythos-preset</code></li>
+        <li><code>soc-argus-frontier-simulator</code></li>
+        <li><code>soc-argus-intel-adapter-generic</code></li>
+        <li><code>soc-recovery</code></li>
+        <li><code>soc-demo-1-runner</code></li>
+        <li><code>soc-demo-2-runner</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="card accent-green">
+      <div class="card-label">Idempotency by construction</div>
+      <p style="font-size: 14px;">Workflows upsert on deterministic IDs. A timeout or crash just means the next tick re-reads the same documents and picks up where the previous tick left off. <strong>No state corruption possible.</strong></p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 28 · Extension points -->
+<section class="slide" data-title="Extension points">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ENGINEERING</span> · Extension points</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Where you plug new things in.</h1>
+  <div class="slide-sub">Rule of thumb: if your change touches the envelope schema, you're changing the spine — that's a design review, not a PR.</div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th style="width: 30%;">You want to …</th>
+        <th style="width: 40%;">Add this</th>
+        <th style="width: 30%;">Don't touch</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Ingest a new intel source</strong></td>
+        <td>New adapter workflow writing to <code>.soc-intel-feed</code></td>
+        <td>Aggregator, scorer</td>
+      </tr>
+      <tr>
+        <td><strong>Add a new decision kind</strong></td>
+        <td><code>ArgusDecisionKind</code> enum + schema + reconciler</td>
+        <td>Envelope validator</td>
+      </tr>
+      <tr>
+        <td><strong>Add a trust signal</strong></td>
+        <td>Extend <code>soc-argus-trust-tier-assessor</code> inputs</td>
+        <td>Trust-gate policy</td>
+      </tr>
+      <tr>
+        <td><strong>Add a drift axis</strong></td>
+        <td>New step in <code>soc-argus-drift-monitor</code></td>
+        <td>M2.1, recommendations</td>
+      </tr>
+      <tr>
+        <td><strong>Add a scoring contributor</strong></td>
+        <td>New weight in <code>@kbn/argus-exploit-probability</code> + Painless port</td>
+        <td>Existing contributors</td>
+      </tr>
+      <tr>
+        <td><strong>Expose a new skill via MCP</strong></td>
+        <td>Register in <code>@kbn/argus-tool-manifest</code></td>
+        <td>MCP / A2A servers themselves</td>
+      </tr>
+      <tr>
+        <td><strong>Add a new workflow</strong></td>
+        <td>Register in <code>_registry.json</code> with matching <code>connectors</code> enum</td>
+        <td>Registry schema (unless new connector)</td>
+      </tr>
+      <tr>
+        <td><strong>Add a dashboard panel</strong></td>
+        <td><code>build_argus_console.js</code>, regenerate <code>.ndjson</code></td>
+        <td>Hand-edit the .ndjson</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLIDE 29 · Agent-native parity -->
+<section class="slide" data-title="Agent-native parity">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ENGINEERING</span> · Agent-native parity</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Every UI affordance is reachable via the agent surface.</h1>
+  <div class="slide-sub">The trust-tier policy is the single source of truth — an agent cannot bypass a tier limit by going through the tool surface.</div>
+
+  <div class="grid-3">
+    <div class="card accent-cyan">
+      <div class="card-label">Skill projection</div>
+      <h3><code>@kbn/argus-tool-manifest</code></h3>
+      <p>Principal-scoped policy bundles with adversarial/reasoning/trust-tier gating. <code>propose_only</code> enforcement for actors without apply allowance.</p>
+      <div class="pill" style="margin-top: 8px;">27 tests</div>
+    </div>
+
+    <div class="card accent-purple">
+      <div class="card-label">MCP surface</div>
+      <h3><code>@kbn/argus-mcp-server</code></h3>
+      <p>Serves the Argus skill projection over MCP, backed by <code>RestGovernanceClient</code>. Governance snapshot consulted on every <code>list_tools</code> and <code>tools/call</code>.</p>
+      <div class="pill" style="margin-top: 8px;">16 tests</div>
+    </div>
+
+    <div class="card accent-green">
+      <div class="card-label">A2A surface</div>
+      <h3><code>@kbn/argus-a2a-server</code></h3>
+      <p>Same surface as A2A tasks. <code>InMemoryTaskStore</code> + cross-actor access checks. 63 tests total across the three agent packages.</p>
+      <div class="pill" style="margin-top: 8px;">20 tests</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="card accent-mythos">
+      <div class="card-label">The key property</div>
+      <h3>Same governance snapshot, both sides.</h3>
+      <p style="font-size: 14px;">
+        An agent listing tools gets the same trust-tier-filtered surface as the
+        operator. An agent calling a tool goes through the same envelope validator,
+        the same trust gate, the same backtester. <strong>There is no faster path
+        for the agent</strong> — that's the entire point.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 30 · Testing & Ops -->
+<section class="slide" data-title="Testing & ops">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">ENGINEERING</span> · Testing &amp; ops</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Evidence, not assertions.</h1>
+  <div class="slide-sub">Every claim on this deck is backed by a test, a proof doc, or a live-runtime log.</div>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Unit / component</div>
+      <div class="card" style="padding: 12px 16px;">
+        <div class="kv-row"><span class="kv-key">core</span><span class="kv-val">exploit-probability · exploit-to-detection · reasoning-traces</span><span class="kv-tag">48 tests</span></div>
+        <div class="kv-row"><span class="kv-key">gov</span><span class="kv-val"><code>@kbn/argus-trust-policy</code> (incl. 160-combo exhaustive)</span><span class="kv-tag">27 tests</span></div>
+        <div class="kv-row"><span class="kv-key">gov</span><span class="kv-val"><code>@kbn/argus-backtest</code> (+ YAML⇔TS drift detector)</span><span class="kv-tag">24 tests</span></div>
+        <div class="kv-row"><span class="kv-key">eval</span><span class="kv-val"><code>@kbn/evals-suite-argus-reasoning</code></span><span class="kv-tag">25 tests</span></div>
+        <div class="kv-row"><span class="kv-key">agent</span><span class="kv-val">tool-manifest + mcp-server + a2a-server</span><span class="kv-tag">63 tests</span></div>
+        <div class="kv-row"><span class="kv-key">total</span><span class="kv-val"><strong>All green · 0 TS errors · 0 lint errors</strong></span><span class="kv-tag">187+</span></div>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <div class="section-title">Live-runtime evidence</div>
+        <div class="card" style="padding: 12px 16px;">
+          <div class="kv-row"><span class="kv-val"><code>proof/demo-validation-2026-04-19-live.md</code></span><span class="kv-tag">completed=8</span></div>
+          <div class="kv-row"><span class="kv-val"><code>proof/feature-complete-evidence-2026-04-20.md</code></span><span class="kv-tag">all gaps + ideas</span></div>
+          <div class="kv-row"><span class="kv-val"><code>proof/m23-ts-parity.log</code></span><span class="kv-tag">6dp parity</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Ops &amp; demo enablement</div>
+      <pre class="code"><span class="c"># One-command setup</span>
+./soc-simulation/setup.sh
+
+<span class="c"># Reset (dev cluster hygiene)</span>
+./soc-simulation/setup.sh --reset-recommendations
+
+<span class="c"># Drive the demo end-to-end</span>
+./scripts/argus_live_demo.sh    <span class="c"># scenarios 1 + 2</span>
+
+<span class="c"># Manual Phase-3 beats</span>
+curl ... soc-argus-intel-adapter-generic \
+     <span class="s">'{"force_seed": true}'</span>
+curl ... soc-argus-intel-mythos-aggregator
+curl ... soc-argus-drift-monitor
+curl ... soc-argus-playbook-learner</pre>
+
+      <div style="margin-top: 12px;">
+        <div class="card accent-amber">
+          <div class="card-label">Known: chaos / FI</div>
+          <p>No formal chaos or fault-injection pass yet. Mirror-mode validation caught 4 step-level schema gaps that the live runtime papered over. <strong>Post-demo ops backlog.</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Shipping plan -->
+<section class="slide" data-title="Shipping plan">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">SHIP IT</span> · Independent modules, monotonic blast radius</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Seven modules. Each ships alone. Each returns value alone.</h1>
+  <div class="slide-sub">Argus decomposes into a stack where every tier is shippable on its own — later tiers unlock closed-loop autonomy, earlier tiers already pay rent. Blast radius grows monotonically; the kill-switch precedes every writing tier.</div>
+
+  <div class="ship-ladder">
+    <div class="ship-row m1">
+      <div class="ship-num">1</div>
+      <div class="ship-name">Playbooks &amp; Skills<code>Kibana Workflows + Agent Builder</code></div>
+      <div class="ship-value">Operator skills + workflows (<code>argus:playbook</code>, coverage-gap, exploit-to-detection) the human runs manually today.</div>
+      <div class="ship-dep">depends on: nothing · stock Kibana</div>
+      <div class="ship-blast none">no writes</div>
+    </div>
+
+    <div class="ship-row m2">
+      <div class="ship-num">2</div>
+      <div class="ship-name">Coverage data plane<code>.soc-detection-corpus · .soc-threat-profiles · coverage-gaps</code></div>
+      <div class="ship-value">MITRE heatmaps + corpus dashboards. Turns existing detections into a measurable inventory for humans and auditors.</div>
+      <div class="ship-dep">depends on: 1 · read-only indices + dashboards</div>
+      <div class="ship-blast read">read-only</div>
+    </div>
+
+    <div class="ship-row m3">
+      <div class="ship-num">3</div>
+      <div class="ship-name">Detection-Eval vertical<code>@kbn/evals + ER7 corpus + mutation-robustness</code></div>
+      <div class="ship-value">Anyone — human author or LLM — can measure a rule against ATT&amp;CK variants before it ships. CI gate available.</div>
+      <div class="ship-dep">depends on: 2 · corpus + eval runner</div>
+      <div class="ship-blast read">metrics</div>
+    </div>
+
+    <div class="ship-row m4">
+      <div class="ship-num">4</div>
+      <div class="ship-name">Exploit-to-Detection proposals<code>synthesize_pareto · .soc-recommendations</code></div>
+      <div class="ship-value">Pre-patch rule candidates with frontier/dominated grid. Humans pick and apply. Every rec is auditable before a single byte is shipped.</div>
+      <div class="ship-dep">depends on: 3 · writes <em>proposals only</em></div>
+      <div class="ship-blast advise">advisory</div>
+    </div>
+
+    <div class="ship-row m5">
+      <div class="ship-num">5</div>
+      <div class="ship-name">Reasoning-trace governance<code>OTEL-GenAI · decision graph · lineage</code></div>
+      <div class="ship-value">Audit spine for any LLM-assisted decision. Standalone value: compliance can answer "why was this rule shipped?" even without autonomy.</div>
+      <div class="ship-dep">depends on: 4 · appends to trace indices</div>
+      <div class="ship-blast read">audit</div>
+    </div>
+
+    <div class="ship-row m6">
+      <div class="ship-num">6</div>
+      <div class="ship-name">Backtest + Canary + Kill-switch<code>shadow-exec · canary rollout · kill-switch</code></div>
+      <div class="ship-value">Safe-rollout harness for <em>human-approved</em> rules. Shadow execution, one-way doors, blast-radius tiers — independent of the LLM loop.</div>
+      <div class="ship-dep">depends on: 5 · writes production rules (human-gated)</div>
+      <div class="ship-blast write">gated writes</div>
+    </div>
+
+    <div class="ship-row m7">
+      <div class="ship-num">7</div>
+      <div class="ship-name">Closed-loop autonomy<code>apply/defer/reject/rollback · trust tiers</code></div>
+      <div class="ship-value">Argus stops asking. Operator-armed L6 autonomy. Only unlocked once 1–6 have accumulated evidence on a per-tenant basis.</div>
+      <div class="ship-dep">depends on: 1–6 · opt-in per tenant</div>
+      <div class="ship-blast auto">autonomous</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top: 18px;">
+    <div class="card accent-green" style="padding: 12px 16px;">
+      <div class="card-label">Start here · fastest value</div>
+      <p><strong>Module 1 (Skills + Workflows)</strong> ships on stock Kibana. No new indices, no new plugins — just <code>argus:playbook</code> tagged workflows and the Agent Builder skill manifest. Operators get measurable triage speedups in week one. Modules 2–3 follow with dashboards and the eval gate — still zero production mutations.</p>
+    </div>
+    <div class="card accent-mythos" style="padding: 12px 16px;">
+      <div class="card-label">Non-negotiables at every tier</div>
+      <p><strong>Kill-switch precedes every writing tier</strong> (6+). <strong>Trust-policy matrix</strong> (blast × tier × door × backtest) lives at module 6 and is the prerequisite for module 7. Earlier tiers are reversible by design — anything module 1–5 touches can be rolled back by deleting an index doc.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Shipping plan · per-module detail -->
+<section class="slide" data-title="Shipping plan · detail">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">SHIP IT</span> · Per-module breakdown</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">What actually ships, what it returns, what it blocks.</h1>
+  <div class="slide-sub">For each module: the concrete artifacts that leave the repo, the day-1 KPI a buyer can measure, the t-shirt size of the work, and what downstream module it unlocks.</div>
+
+  <div class="ship-detail">
+    <div class="ship-detail-row m1">
+      <div class="ship-num">1</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body">Agent Builder skills (<code>argus:*</code>) · Kibana Workflows tagged <code>argus:playbook</code> · runbook docs</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Median triage time on a tier-1 alert ↓ 30%. Operator can resolve a CVE-to-hunt question without leaving Kibana. Zero schema churn for customers.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">Stock Kibana ≥ 9.2. Agent Builder enabled. <em>No new plugins, no new indices.</em></div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt xs">XS</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">Human-in-the-loop baseline for all later modules.</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m2">
+      <div class="ship-num">2</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body"><code>.soc-detection-corpus</code> · <code>.soc-threat-actors</code> · <code>.soc-threat-profiles</code> · <code>.soc-coverage-gaps</code> + MITRE heatmap &amp; corpus dashboards</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Customer can answer "where are my ATT&amp;CK gaps?" in &lt; 10 seconds. Every shipped detection becomes a measurable inventory item.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">4 read-only indices · seed job · 2 saved dashboards. All writes are Argus-owned seed docs.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt s">S</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">Eval corpus (M3) + proposal scoring (M4).</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m3">
+      <div class="ship-num">3</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body"><code>@kbn/evals-suite-argus-reasoning</code> · ATT&amp;CK ER7 external corpus · mutation-robustness evaluator · CI gate hook</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Any rule author (human or LLM) gets a P / R / mutation-robustness score before merge. CI blocks a rule whose robustness drops below the per-tenant floor.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">Node package + <code>@kbn/evals</code> runner. No runtime footprint on a production cluster.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt s">S</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">The quality gate every tier above depends on.</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m4">
+      <div class="ship-num">4</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body"><code>synthesize_pareto.ts</code> · <code>.soc-recommendations</code> · Argus Console "Proposals" tab (frontier vs dominated grid)</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Time-to-first-candidate on a fresh CVE &lt; 15 min. Analyst picks from 3–5 Pareto-optimal rule variants instead of writing from scratch.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">1 workflow + 1 index + 1 UI panel. Writes <em>proposals only</em> — production rules untouched until a human clicks apply.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt m">M</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">The loop's "propose" edge — mandatory for M6/M7.</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m5">
+      <div class="ship-num">5</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body">OTEL-GenAI span schema · <code>.soc-reasoning-traces</code> · decision-graph panel · lineage flyout · watchdog evaluators</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Compliance/SRE can answer "why was this rule shipped?" in &lt; 1 click. 100% trace completeness on LLM-assisted decisions even with no autonomy.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">Trace index + OTEL collector config. Zero impact on detection runtime.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt m">M</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">The audit spine M6/M7 write against.</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m6">
+      <div class="ship-num">6</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body"><code>@kbn/argus-backtest</code> · <code>@kbn/argus-trust-policy</code> · canary rollout workflow · kill-switch operator control · rollback reconciler</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">Every human-approved rule ships with shadow-exec evidence + 24h canary. MTTR-rollback p95 &lt; SLA. One-way-door actions blocked without operator arm.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">2 Kibana packages + 3 workflows + Task Manager jobs. Writes production rules <em>only</em> with human-approved intent.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt l">L</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">Safe-rollout harness — hard prerequisite for M7.</div>
+      </div>
+    </div>
+
+    <div class="ship-detail-row m7">
+      <div class="ship-num">7</div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Ships</div>
+        <div class="ship-detail-body">Closed-loop autonomy workflows (apply / defer / reject / rollback) · outcome-driven trust tiers · Mythos L6 operator-arm control</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Day-1 KPI (standalone)</div>
+        <div class="ship-detail-body muted">T2D on new CVE &lt; 15 min with no human in the critical path · 100% actions inside a pre-approved blast-radius tier · drift → auto-rollback.</div>
+      </div>
+      <div class="ship-detail-col">
+        <div class="ship-detail-label">Install footprint</div>
+        <div class="ship-detail-body muted">Opt-in per tenant. Requires ≥ 30 days of M5 trace data and M6 canary evidence before arming.</div>
+      </div>
+      <div class="ship-detail-col" style="align-items: flex-end;"><span class="ship-tshirt xl">XL</span></div>
+      <div class="ship-detail-col" style="align-items: flex-end;">
+        <div class="ship-detail-label">Unlocks</div>
+        <div class="ship-detail-body">Mythos-resilient closed loop. End of roadmap.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top: 14px;">
+    <div class="card accent-cyan" style="padding: 12px 16px;">
+      <div class="card-label">Revenue path · how each module sells</div>
+      <p>M1 lands as a <strong>free Agent Builder expansion pack</strong> (top-of-funnel). M2–M3 anchor <strong>Detection Engineering SKU</strong> value (measurability). M4 is the <strong>upsell</strong> moment (rule authoring accelerator). M5 unlocks <strong>governance/compliance</strong> attach. M6 gates the <strong>autonomous-SOC SKU</strong>. M7 is the Mythos-tier product — priced on L6 arm-days, not seats.</p>
+    </div>
+    <div class="card accent-amber" style="padding: 12px 16px;">
+      <div class="card-label">Cut-lines · where a customer can stop</div>
+      <p>Any customer can <strong>stop at any tier</strong> and still have a coherent product. Stop at M3 → a measurable detection-engineering workbench. Stop at M5 → auditable LLM-assisted authoring. Stop at M6 → a safe-rollout harness with manual approval. M7 is strictly opt-in per tenant, per blast-radius tier, per door-class — no customer is forced into autonomy to get value from the layers below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     PART VI · Q&A + CLOSE
+     ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Combined Q&A -->
+<section class="slide" data-title="Q&A">
+  <div class="slide-top">
+    <div class="slide-kicker"><span class="kicker-accent">Q&amp;A</span> · Anticipated questions</div>
+    <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">Argus</div></div>
+  </div>
+  <h1 class="slide-title">Questions &amp; answers.</h1>
+
+  <div class="split">
+    <div>
+      <div class="section-title">Product</div>
+      <div class="qa-item">
+        <div class="qa-q">How do we know this works?</div>
+        <div class="qa-a">Live-runtime validation on a real Kibana cluster (<code>completed=8, failed=0</code>), 187+ unit tests, YAML⇔TS drift detectors, per-module proof docs under <code>docs/argus/proof/</code>.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What's the risk of autonomous mis-action?</div>
+        <div class="qa-a">One-way doors force review. Blast-radius tiers cap what a probationary actor can touch. Every action is shadow-executed via the backtester. Rollback is the default response to a <code>dangerous</code> verdict.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Competitive positioning?</div>
+        <div class="qa-a">Our differentiator is the <strong>governance spine</strong> — blast-radius × tier × door-class × backtest — something the &ldquo;ship it autonomously&rdquo; entrants don't have.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">Engineering</div>
+      <div class="qa-item">
+        <div class="qa-q">Where is the state machine?</div>
+        <div class="qa-a">There isn't one. Every workflow is a reconciler against ES docs. <code>status</code> fields on <code>.soc-recommendations</code> are the state. A crashed workflow cannot corrupt state it doesn't own.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What if the LLM hallucinates a rule?</div>
+        <div class="qa-a">The eval gate catches it — a hallucinated rule fails variant-axis coverage and/or precision. The rec stays <code>pending</code>, the trace captures the failure, and the watchdog marks the actor's confidence down.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">How do you prevent the eval corpus from being gamed?</div>
+        <div class="qa-a">ATT&amp;CK ER7 external corpus — Argus is scored against a bank it didn't author. Phase-3 learning is gated to frontier-tier outcomes so a quarantined actor can't poison the loop.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 34 · Appendix / Close -->
+<section class="slide cover" data-title="Thank you">
+  <div class="slide-top" style="border: none; margin-bottom: 0; padding: 0; width: 100%;"></div>
+
+  <div class="cover-mark">A</div>
+  <h1 class="slide-title" style="font-size: 64px;">Thank you.</h1>
+  <div class="cover-tag">ARGUS — The Mythos-Resilient Defender</div>
+  <div class="cover-acronym"><strong>A</strong>utonomous · <strong>R</strong>esilient · <strong>G</strong>uardian for · <strong>U</strong>nified · <strong>S</strong>ecurity</div>
+  <div class="cover-body">
+    Detection that outruns the adversary's mutation budget,
+    under governance the humans can audit.
+  </div>
+
+  <div style="max-width: 900px; margin: 0 auto 32px; width: 100%;">
+    <div class="section-title" style="justify-content: center; text-align: center;">
+      <span style="flex: 0;">Where to look next</span>
+    </div>
+    <div class="card" style="padding: 14px 22px; text-align: left;">
+      <div class="kv-row"><span class="kv-key">map</span><span class="kv-val">What should Argus do · <code>docs/argus/capability-map.md</code></span><span class="kv-tag">contract</span></div>
+      <div class="kv-row"><span class="kv-key">gap</span><span class="kv-val">What Argus does today · <code>capability-and-gap-analysis.md</code></span><span class="kv-tag">reality</span></div>
+      <div class="kv-row"><span class="kv-key">demo</span><span class="kv-val">How to demo it · <code>demo-runbook.md</code> §10</span><span class="kv-tag">runbook</span></div>
+      <div class="kv-row"><span class="kv-key">proof</span><span class="kv-val">Live-runtime evidence · <code>proof/demo-validation-2026-04-19-live.md</code></span><span class="kv-tag">receipts</span></div>
+      <div class="kv-row"><span class="kv-key">spec</span><span class="kv-val">Every doc shape · <code>soc-simulation/schemas/</code></span><span class="kv-tag">schemas</span></div>
+      <div class="kv-row"><span class="kv-key">start</span><span class="kv-val">Single entry point · <code>soc-simulation/README.md</code></span><span class="kv-tag">README</span></div>
+    </div>
+  </div>
+
+  <div class="cover-meta">
+    <span><strong>ARGUS</strong> · Deck v1</span>
+    <span><strong>2026-04-17</strong></span>
+    <span>Elastic Security · Internal</span>
+  </div>
+</section>
+
+</div>
+
+<script>
+  (function() {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    document.getElementById('totSlide').textContent = total;
+    const curEl = document.getElementById('curSlide');
+    const progressEl = document.getElementById('progress');
+    const menu = document.getElementById('menu');
+    const menuGrid = document.getElementById('menuGrid');
+    const navPrev = document.getElementById('navPrev');
+    const navNext = document.getElementById('navNext');
+
+    let index = 0;
+
+    // build menu
+    slides.forEach((s, i) => {
+      const title = s.dataset.title || `Slide ${i + 1}`;
+      const item = document.createElement('div');
+      item.className = 'menu-item';
+      item.innerHTML = `<span class="mi-num">${String(i + 1).padStart(2, '0')}</span><span class="mi-title">${title}</span>`;
+      item.addEventListener('click', () => { go(i); toggleMenu(false); });
+      menuGrid.appendChild(item);
+    });
+    const menuItems = Array.from(menuGrid.children);
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      menuItems.forEach((m, i) => m.classList.toggle('active', i === index));
+      curEl.textContent = index + 1;
+      progressEl.style.width = `${((index + 1) / total) * 100}%`;
+      // update URL hash without polluting history
+      const hash = `#slide-${index + 1}`;
+      if (location.hash !== hash) {
+        history.replaceState(null, '', hash);
+      }
+      // scroll current slide to top (for overflow content)
+      if (slides[index]) slides[index].scrollTop = 0;
+    }
+
+    function go(i) {
+      if (i < 0) i = 0;
+      if (i >= total) i = total - 1;
+      if (i === index) return;
+      index = i;
+      render();
+    }
+
+    const next = () => go(index + 1);
+    const prev = () => go(index - 1);
+
+    // keyboard nav
+    document.addEventListener('keydown', (e) => {
+      if (menu.classList.contains('open') && e.key !== 'Escape' && e.key !== 'm' && e.key !== 'M') {
+        return;
+      }
+      switch (e.key) {
+        case 'ArrowRight':
+        case 'PageDown':
+          e.preventDefault(); next(); break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          e.preventDefault(); prev(); break;
+        case ' ':
+          e.preventDefault(); if (e.shiftKey) prev(); else next(); break;
+        case 'Home':
+          e.preventDefault(); go(0); break;
+        case 'End':
+          e.preventDefault(); go(total - 1); break;
+        case 'm':
+        case 'M':
+          e.preventDefault(); toggleMenu(); break;
+        case 'Escape':
+          if (menu.classList.contains('open')) toggleMenu(false);
+          else if (document.fullscreenElement) document.exitFullscreen();
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+          else document.exitFullscreen();
+          break;
+        case '?':
+          alert('ARGUS deck\n\n← →      navigate\nSpace    next  (Shift+Space: prev)\nHome/End first/last slide\nM        toggle menu\nF        toggle fullscreen\nEsc      close menu / exit fullscreen\n\nURL hash #slide-N jumps to slide N');
+          break;
+      }
+    });
+
+    // click halves of the screen to navigate (but not on interactive elements)
+    document.addEventListener('click', (e) => {
+      if (menu.classList.contains('open')) return;
+      if (e.target.closest('.nav-btn, .menu-item, .card, a, button, pre, table, code, .counter, .hint')) return;
+      const x = e.clientX;
+      if (x < window.innerWidth / 2) prev();
+      else next();
+    });
+
+    navNext.addEventListener('click', (e) => { e.stopPropagation(); next(); });
+    navPrev.addEventListener('click', (e) => { e.stopPropagation(); prev(); });
+
+    function toggleMenu(state) {
+      const open = state === undefined ? !menu.classList.contains('open') : state;
+      menu.classList.toggle('open', open);
+    }
+    menu.addEventListener('click', (e) => { if (e.target === menu) toggleMenu(false); });
+
+    // hash routing on load
+    function loadFromHash() {
+      const m = location.hash.match(/^#slide-(\d+)$/);
+      if (m) {
+        const i = parseInt(m[1], 10) - 1;
+        if (i >= 0 && i < total) index = i;
+      }
+      render();
+    }
+    window.addEventListener('hashchange', loadFromHash);
+    loadFromHash();
+
+    // prevent two-finger swipe from nav'ing the browser (trackpad)
+    document.addEventListener('wheel', (e) => {
+      // Don't interfere with vertical scroll inside a slide
+    }, { passive: true });
+
+    // swipe support for touch
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 60) { if (dx < 0) next(); else prev(); }
+    }, { passive: true });
+  })();
+</script>
+
+</body>
+</html>

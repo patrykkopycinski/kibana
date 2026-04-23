@@ -21,7 +21,7 @@
   },
   "_meta": {
     "description": "Single-document kill switch (_id='global') and per-scope overrides. When autonomy_enabled=false, every governed mutation path must block.",
-    "owner": "autosoc-governance",
+    "owner": "argus-governance",
     "schema_version": 1
   }
 }

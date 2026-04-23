@@ -1,19 +1,19 @@
-# AutoSOC structured-output schemas
+# Argus structured-output schemas
 
-These JSON Schemas (draft-2020-12) are the **contract** between AutoSOC agents
+These JSON Schemas (draft-2020-12) are the **contract** between Argus agents
 and the deterministic code that applies their decisions.
 
 Why they exist:
 
 - LLM free-text output drifts every model release. Parsing it with regex has
-  caused roughly 70 % of AutoSOC's apply-time failures.
+  caused roughly 70 % of Argus's apply-time failures.
 - Tool calls on every major provider (OpenAI, Anthropic, Bedrock) already
   enforce arguments against a JSON Schema. Shipping these schemas and asking
   agents to emit them via a tool call is portable, strict, and free.
 
 How they are used (Elastic-native; no external code):
 
-1. Every AutoSOC agent is given the relevant schema inline in its `instructions`
+1. Every Argus agent is given the relevant schema inline in its `instructions`
    and is told to emit a single JSON object shaped like it. This is the
    contract — no regex, no free-text scraping.
 2. The `soc-recommendation-applier` and `soc-autonomous-applier` workflows
@@ -33,7 +33,7 @@ Files:
 
 | Schema | Purpose |
 |---|---|
-| `recommendation.schema.json` | Envelope schema — every AutoSOC recommendation must validate against this. Uses a `type`-discriminated union. |
+| `recommendation.schema.json` | Envelope schema — every Argus recommendation must validate against this. Uses a `type`-discriminated union. |
 | `triage_verdict.schema.json` | Per-alert triage decision (disposition, confidence, techniques, reasoning, next_step). |
 | `rule_patch.schema.json` | Incremental change to an existing detection rule (threshold bump, query rewrite, disable). |
 | `rule_creation.schema.json` | New detection rule proposal (starts DISABLED in shadow mode). |

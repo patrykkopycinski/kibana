@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/shift_handover.schema.json",
-  "title": "AutoSOC Shift Handover",
+  "$id": "https://argus.local/schemas/shift_handover.schema.json",
+  "title": "Argus Shift Handover",
   "description": "One document per shift window summarising everything the autonomous SOC did for the incoming operator.",
   "type": "object",
   "additionalProperties": false,

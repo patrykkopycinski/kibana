@@ -28,13 +28,13 @@ import { exploreLinks } from '../../explore/links';
 import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
-import { autonomousSocLinks } from '../../autonomous_soc/links';
+import { argusLinks } from '../../argus/links';
 import { dashboardsLinks } from '../../dashboards/links';
 import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
-  autonomousSocLinks,
+  argusLinks,
   alertsLink,
   alertSummaryLink,
   attackDiscoveryLinks,
@@ -72,9 +72,11 @@ export const getFilteredLinks = async (
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
+  const isClassicNavUpdateEnabled = experimentalFeatures?.securityClassicNavUpdate ?? false;
+  const isArgusConsoleEnabled = experimentalFeatures?.argusConsoleEnabled ?? false;
   return Object.freeze([
     dashboardsLinks,
-    autonomousSocLinks,
+    ...(isArgusConsoleEnabled ? [argusLinks] : []),
     core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
       ? alertDetectionsLinks
       : alertsLink,

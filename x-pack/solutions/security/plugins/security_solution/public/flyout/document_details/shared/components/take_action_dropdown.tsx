@@ -23,6 +23,7 @@ import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useShowArgusReasoningAction } from '../../../../detections/components/alerts_table/timeline_actions/use_show_argus_reasoning';
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
 import { useResponderActionItem } from '../../../../common/components/endpoint/responder';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation';
@@ -274,6 +275,13 @@ export const TakeActionDropdown = memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
+    // argus reasoning deep-link (gated on argusConsoleEnabled experimental flag)
+    const { showArgusReasoningActionItems } = useShowArgusReasoningAction({
+      eventId: alertSummaryData.eventId,
+      isAlert,
+      closePopover: closePopoverHandler,
+    });
+
     // osquery interaction
     const osqueryAgentId = useMemo(
       () =>
@@ -376,6 +384,7 @@ export const TakeActionDropdown = memo(
               ...endpointResponseActionsConsoleItems,
               ...(osqueryAvailable ? [osqueryActionItem] : []),
               ...investigateInTimelineActionItems,
+              ...showArgusReasoningActionItems,
             ],
       [
         addToCaseActionItems,
@@ -389,6 +398,7 @@ export const TakeActionDropdown = memo(
         osqueryAvailable,
         osqueryActionItem,
         investigateInTimelineActionItems,
+        showArgusReasoningActionItems,
       ]
     );
 

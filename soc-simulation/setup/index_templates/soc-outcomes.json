@@ -13,7 +13,11 @@
         "@timestamp": { "type": "date" },
         "correlation_id": { "type": "keyword" },
         "case_id": { "type": "keyword" },
+        "pipeline": { "type": "keyword" },
+        "stage": { "type": "keyword" },
         "disposition": { "type": "keyword" },
+        "classification": { "type": "keyword" },
+        "confidence": { "type": "integer" },
         "confidence_history": {
           "type": "nested",
           "properties": {
@@ -25,7 +29,32 @@
         "time_to_respond": { "type": "long" },
         "agents_involved": { "type": "keyword" },
         "techniques_observed": { "type": "keyword" },
-        "confidence_accuracy": { "type": "float" }
+        "confidence_accuracy": { "type": "float" },
+
+        "alert_id":  { "type": "keyword" },
+        "rule_id":   { "type": "keyword" },
+        "rule_name": { "type": "keyword" },
+        "rule_uuid": { "type": "keyword" },
+        "threat_category": { "type": "keyword" },
+        "kill_chain_stage": { "type": "keyword" },
+        "verdict":   { "type": "keyword" },
+
+        "alerts_processed": { "type": "integer" },
+        "case_created": { "type": "boolean" },
+        "highest_tier": { "type": "integer" },
+        "pipeline_complete": { "type": "boolean" },
+
+        "actor_id":     { "type": "keyword" },
+        "rec_id":       { "type": "keyword" },
+        "rolled_back":  { "type": "boolean" },
+        "rollback_reason": { "type": "keyword" },
+        "false_positive": { "type": "boolean" },
+
+        "rollback_mttr_ms":    { "type": "long" },
+        "applied_at":          { "type": "date" },
+        "rolled_back_at":      { "type": "date" },
+        "rollback_attempt_count": { "type": "integer" },
+        "rollback_source":     { "type": "keyword" }
       }
     }
   }

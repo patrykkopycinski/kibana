@@ -1,0 +1,77 @@
+{
+  "description": "Write-time envelope validator for .soc-recommendations. Enforces the mutation_intent contract defined in soc-simulation/schemas/mutation_intent.schema.json and recommendation.schema.json. For rule-update mutations, also enforces rule_patch.schema.json — prose-only patches are rejected. Docs that violate the contract are rerouted to .soc-dead-letter with the validation errors attached, so the producer workflow is immediately debuggable. In envelope-validator-v4 the pipeline also admits informational analyst-facing types (capability_gap, rule_tuning, rule_authoring) with minimal validation — they land in .soc-recommendations for the Autonomy Feed UI but are ignored by soc-autonomous-applier because it filters by `type=mutation_intent`.",
+  "_meta": {
+    "owner": "soc-autonomous-applier",
+    "contract_schema": "mutation_intent.schema.json",
+    "introduced_in": "envelope-validator-v1",
+    "structured_patch_enforced_in": "envelope-validator-v2",
+    "autonomy_lifecycle_in": "envelope-validator-v3",
+    "analyst_feed_types_in": "envelope-validator-v4",
+    "no_action_autostamp_in": "envelope-validator-v5",
+    "details_action_mirrored_in": "envelope-validator-v6"
+  },
+  "processors": [
+    {
+      "set": {
+        "description": "Ensure @timestamp exists so DLQ rows are queryable even for producers that forgot it.",
+        "field": "@timestamp",
+        "value": "{{{_ingest.timestamp}}}",
+        "override": false
+      }
+    },
+    {
+      "script": {
+        "description": "Normalize type-drifted fields that break ES object mappings. expected_impact must be a Map — coerce scalar/string values to an empty map so the doc lands in .soc-recommendations instead of crashing the writer workflow.",
+        "lang": "painless",
+        "tag": "coerce_object_fields",
+        "source": "if (ctx.expected_impact != null && !(ctx.expected_impact instanceof Map)) { ctx.expected_impact = new HashMap(); }\nif (ctx.evidence != null && !(ctx.evidence instanceof List)) { ctx.evidence = new ArrayList(); }\nif (ctx.details != null && !(ctx.details instanceof Map)) { ctx.remove('details'); }"
+      }
+    },
+    {
+      "script": {
+        "description": "Collect every envelope violation into ctx._envelope_errors. Full envelope validation is applied only to type=mutation_intent docs. Informational analyst-facing types (capability_gap, rule_tuning, rule_authoring) get minimal validation so they can flow to the UI without being applied by the governance pipeline.",
+        "lang": "painless",
+        "tag": "validate_mutation_intent_envelope",
+        "source": "List errs = new ArrayList();\nString type = ctx.type instanceof String ? (String) ctx.type : null;\nList analystTypes = ['capability_gap','rule_tuning','rule_authoring'];\nif (type == null || type.isEmpty()) {\n  errs.add('missing_top_level:type');\n} else if (analystTypes.contains(type)) {\n  // Informational/analyst-facing — minimal validation so these show up in the\n  // Autonomy Feed UI. The applier filters on type=mutation_intent so these\n  // never trip the governance cascade.\n  String[] requiredAnalyst = new String[] {'rec_id','source','status','title'};\n  for (String f : requiredAnalyst) {\n    if (ctx.get(f) == null) { errs.add('missing_top_level:' + f); continue; }\n    if (ctx.get(f) instanceof String && ((String) ctx.get(f)).isEmpty()) { errs.add('empty_top_level:' + f); }\n  }\n} else if (!type.equals('mutation_intent')) {\n  errs.add('type_not_allowed:' + type);\n} else {\n  String[] requiredTop = new String[] {'rec_id','schema_version','source','status','title','summary','confidence','track','details'};\n  for (String f : requiredTop) {\n    if (ctx.get(f) == null) { errs.add('missing_top_level:' + f); continue; }\n    if (ctx.get(f) instanceof String && ((String) ctx.get(f)).isEmpty()) { errs.add('empty_top_level:' + f); }\n  }\n  if (ctx.track instanceof String) {\n    String tr = (String) ctx.track;\n    if (!tr.equals('deterministic') && !tr.equals('agentic')) { errs.add('track_invalid:' + tr); }\n  }\n  if (ctx.confidence != null && ctx.confidence instanceof Number) {\n    double cf = ((Number) ctx.confidence).doubleValue();\n    if (cf < 0 || cf > 100) { errs.add('confidence_out_of_range:' + cf); }\n  }\n  if (ctx.status instanceof String) {\n    String st = (String) ctx.status;\n    List allowedStatuses = ['pending','pending_backtest','auto_apply_ready','pending_review','applying','applied','rolled_back','failed','rejected','rejected_backtest','rejected_drift','rejected_budget','rejected_killswitch','rejected_freeze','rejected_ownership','rejected_loop','rejected_trust','approved_by_human','rejected_by_human','approved','auto-applied','auto-rejected'];\n    if (!allowedStatuses.contains(st)) { errs.add('status_invalid:' + st); }\n  }\n  if (ctx.details instanceof Map) {\n    Map details = (Map) ctx.details;\n    String[] reqDetails = new String[] {'artifact_type','artifact_id','op','expected_ownership','reason'};\n    for (String f : reqDetails) {\n      if (details.get(f) == null) { errs.add('missing_details:' + f); continue; }\n      if (details.get(f) instanceof String && ((String) details.get(f)).isEmpty()) { errs.add('empty_details:' + f); }\n    }\n    List allowedArtifactTypes = ['agent','skill','workflow','rule','exception'];\n    if (details.artifact_type instanceof String && !allowedArtifactTypes.contains(details.artifact_type)) {\n      errs.add('artifact_type_invalid:' + details.artifact_type);\n    }\n    List allowedOps = ['create','update','delete','enable','disable'];\n    if (details.op instanceof String && !allowedOps.contains(details.op)) {\n      errs.add('op_invalid:' + details.op);\n    }\n    List allowedOwners = ['autosoc','canonical','platform'];\n    if (details.expected_ownership instanceof String && !allowedOwners.contains(details.expected_ownership)) {\n      errs.add('expected_ownership_invalid:' + details.expected_ownership);\n    }\n    if (details.reason instanceof String && ((String) details.reason).length() < 20) {\n      errs.add('reason_too_short:len=' + ((String) details.reason).length());\n    }\n    String op = details.op instanceof String ? (String) details.op : null;\n    String at = details.artifact_type instanceof String ? (String) details.artifact_type : null;\n    if (op != null && (op.equals('create') || op.equals('update'))) {\n      if (details.get('new_definition') == null && details.get('patch') == null) {\n        errs.add('missing_payload_for_' + op + ':new_definition_or_patch_required');\n      }\n    }\n    if ('rule'.equals(at) && 'update'.equals(op)) {\n      if (!(details.patch instanceof Map)) {\n        errs.add('rule_update_requires_structured_patch:patch_missing_or_not_object');\n      } else {\n        Map patch = (Map) details.patch;\n        String[] reqPatch = new String[] {'rule_id','action','patch_fields','current_values','impact_prediction'};\n        for (String f : reqPatch) {\n          if (patch.get(f) == null) { errs.add('rule_patch_missing:' + f); }\n        }\n        if (patch.action instanceof String) {\n          List allowedActions = ['raise_threshold','lower_threshold','tighten_query','broaden_query','enable','disable','add_note','change_severity','change_risk_score'];\n          if (!allowedActions.contains(patch.action)) {\n            errs.add('rule_patch_action_invalid:' + patch.action);\n          }\n        }\n        if (patch.patch_fields != null && !(patch.patch_fields instanceof Map)) {\n          errs.add('rule_patch_fields_not_object');\n        } else if (patch.patch_fields instanceof Map && ((Map) patch.patch_fields).isEmpty()) {\n          errs.add('rule_patch_fields_empty');\n        }\n        if (patch.current_values != null && !(patch.current_values instanceof Map)) {\n          errs.add('rule_patch_current_values_not_object');\n        }\n        if (patch.impact_prediction instanceof Map) {\n          Map ip = (Map) patch.impact_prediction;\n          if (ip.get('expected_fp_reduction_pct') == null) { errs.add('rule_patch_impact_missing:expected_fp_reduction_pct'); }\n          if (ip.get('expected_tp_impact') == null) { errs.add('rule_patch_impact_missing:expected_tp_impact'); }\n        } else if (patch.impact_prediction != null) {\n          errs.add('rule_patch_impact_not_object');\n        }\n      }\n    }\n  }\n  boolean hk = ctx.housekeeping != null && ctx.housekeeping instanceof Boolean && ((Boolean) ctx.housekeeping).booleanValue();\n  if (!hk) {\n    List ev = ctx.evidence instanceof List ? (List) ctx.evidence : null;\n    if (ev == null || ev.isEmpty()) { errs.add('evidence_empty'); }\n    if (ctx.expected_impact == null) { errs.add('expected_impact_missing'); }\n  }\n}\nif (!errs.isEmpty()) {\n  ctx._envelope_errors = errs;\n}"
+      }
+    },
+    {
+      "script": {
+        "description": "For invalid docs: rebuild ctx as a DLQ row (original_doc + structured error fields). Runs only when validation flagged errors.",
+        "if": "ctx.containsKey('_envelope_errors')",
+        "lang": "painless",
+        "tag": "rewrite_as_dlq_row",
+        "source": "List errs = (List) ctx._envelope_errors;\nMap orig = new HashMap();\nfor (entry in ctx.entrySet()) {\n  String k = entry.getKey();\n  if (k.startsWith('_')) { continue; }\n  if (k.equals('@timestamp')) { continue; }\n  orig.put(k, entry.getValue());\n}\nList removeKeys = new ArrayList();\nfor (String k : ctx.keySet()) {\n  if (k.startsWith('_')) { continue; }\n  if (k.equals('@timestamp')) { continue; }\n  removeKeys.add(k);\n}\nfor (String k : removeKeys) { ctx.remove(k); }\nctx.remove('_envelope_errors');\nctx.source = 'soc-mutation-intent-envelope-validator';\nctx.error = 'envelope_validation_failed: ' + String.join('; ', errs);\nctx.validation_errors = errs;\nctx.rec_id = orig.get('rec_id') != null ? orig.get('rec_id') : '<missing>';\nctx.original_type = orig.get('type') != null ? orig.get('type') : '<missing>';\nctx.original_doc = orig;"
+      }
+    },
+    {
+      "script": {
+        "description": "Auto-stamp final_status=no_action for valid docs that carry no actionable payload. Agent findings reports (source=soc-deteng-agent, soc-signal-quality-agent, soc-gap-analyzer) often land here without a patch/new_definition when the agent correctly decided 'nothing to act on this cycle'. Without this processor they accumulate as untagged 'pending' forever. ALSO mirrors details.action='no_action' so downstream recommendation filters correctly hide them from the 'pending' count. Only runs when envelope validation passed AND producer did not set final_status itself.",
+        "if": "!ctx.containsKey('validation_errors') && !ctx.containsKey('final_status')",
+        "lang": "painless",
+        "tag": "autostamp_no_action_on_findings_reports",
+        "source": "String type = ctx.type instanceof String ? (String) ctx.type : null;\nMap details = ctx.details instanceof Map ? (Map) ctx.details : null;\nboolean isMutationIntent = 'mutation_intent'.equals(type);\nboolean hasActionPayload = details != null && (details.get('patch') != null || details.get('new_definition') != null);\nif (!isMutationIntent || !hasActionPayload) {\n  ctx.final_status = 'no_action';\n  ctx._rejection_reason = 'agent_findings_report_no_action_payload';\n  ctx._auto_stamped_at = ctx['@timestamp'];\n  if (ctx.details == null) { ctx.details = new HashMap(); }\n  if (ctx.details instanceof Map) { ((Map) ctx.details).put('action', 'no_action'); }\n}"
+      }
+    },
+    {
+      "reroute": {
+        "description": "Send invalid docs to .soc-dead-letter. Triggered when the validation script populated validation_errors. Note: the reroute processor is terminal, so this must be the last visible processor.",
+        "if": "ctx.validation_errors != null && ((List) ctx.validation_errors).size() > 0",
+        "destination": ".soc-dead-letter"
+      }
+    }
+  ],
+  "on_failure": [
+    {
+      "set": {
+        "field": "_pipeline_failure",
+        "value": "{{{_ingest.on_failure_message}}}"
+      }
+    },
+    {
+      "reroute": {
+        "destination": ".soc-dead-letter"
+      }
+    }
+  ]
+}

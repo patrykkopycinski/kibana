@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/recommendation.schema.json",
-  "title": "AutoSOC Recommendation",
-  "description": "Envelope for any decision an AutoSOC agent wants to surface or apply. Discriminated by `type`.",
+  "$id": "https://argus.local/schemas/recommendation.schema.json",
+  "title": "Argus Recommendation",
+  "description": "Envelope for any decision an Argus agent wants to surface or apply. Discriminated by `type`.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -38,7 +38,31 @@
     "source_doc_id": { "type": ["string", "null"] },
     "status": {
       "type": "string",
-      "enum": ["pending", "approved", "rejected", "applied", "failed", "auto-applied", "auto-rejected"]
+      "description": "Autonomy-first lifecycle. `pending` -> (for rule updates) `pending_backtest` -> `auto_apply_ready` (projection safe) OR `pending_review` (exception) -> `applying` -> `applied` -> `rolled_back` | (else) auto-apply terminal. `failed` and `rejected_*` are terminal rejection states. `approved_by_human` / `rejected_by_human` are human overrides for the exception queue. Legacy values `approved` / `auto-applied` / `auto-rejected` are retained for backward compatibility but new code should emit the explicit states.",
+      "enum": [
+        "pending",
+        "pending_backtest",
+        "auto_apply_ready",
+        "pending_review",
+        "applying",
+        "applied",
+        "rolled_back",
+        "failed",
+        "rejected",
+        "rejected_backtest",
+        "rejected_drift",
+        "rejected_budget",
+        "rejected_killswitch",
+        "rejected_freeze",
+        "rejected_ownership",
+        "rejected_loop",
+        "rejected_trust",
+        "approved_by_human",
+        "rejected_by_human",
+        "approved",
+        "auto-applied",
+        "auto-rejected"
+      ]
     },
     "title": { "type": "string", "minLength": 3, "maxLength": 200 },
     "summary": { "type": "string", "minLength": 10, "maxLength": 2000 },
@@ -108,7 +132,7 @@
     },
     "autosoc_owned_target": {
       "type": "boolean",
-      "description": "True if the target artifact was originally created by AutoSOC — enables auto-apply without human approval."
+      "description": "True if the target artifact was originally created by Argus (registry owner=autosoc) — enables auto-apply without human approval. Note: the field name keeps the historical `autosoc_owned_*` prefix to preserve schema ABI with persisted recommendations."
     }
   },
   "allOf": [

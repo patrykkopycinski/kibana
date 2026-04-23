@@ -1,0 +1,34 @@
+{
+  "index_patterns": [".soc-decision-graph"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "edge_id": { "type": "keyword" },
+        "relation": { "type": "keyword" },
+        "strength": { "type": "float" },
+        "from_kind": { "type": "keyword" },
+        "from_id": { "type": "keyword" },
+        "from_label": { "type": "keyword" },
+        "to_kind": { "type": "keyword" },
+        "to_id": { "type": "keyword" },
+        "to_label": { "type": "keyword" },
+        "evidence_ts": { "type": "date" },
+        "provenance": {
+          "properties": {
+            "source_index": { "type": "keyword" },
+            "source_doc_id": { "type": "keyword" }
+          }
+        },
+        "source": { "type": "keyword" }
+      }
+    }
+  }
+}

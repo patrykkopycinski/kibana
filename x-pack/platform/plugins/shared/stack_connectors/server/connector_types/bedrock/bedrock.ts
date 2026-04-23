@@ -59,6 +59,7 @@ import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   extractRegionId,
   formatBedrockBody,
+  modelRejectsTemperature,
   parseContent,
   tee,
   usesDeprecatedArguments,
@@ -389,7 +390,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     const res = (await this.streamApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            tools,
+            toolChoice,
+            model: model ?? this.model,
+          })
         ),
         model,
         signal,
@@ -434,6 +443,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
             maxTokens,
             tools,
             toolChoice,
+            model: model ?? this.model,
           })
         ),
         model,
@@ -461,13 +471,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
+    // Drop `temperature` for Anthropic reasoning models (Opus 4.6/4.7/4.8,
+    // …) which return a 400 `temperature is deprecated for this model`
+    // when the field is present in the payload.
+    const resolvedTemperature = modelRejectsTemperature(model ?? this.model)
+      ? undefined
+      : temperature;
     const res = await this.runApi(
       {
         body: JSON.stringify({
           messages,
           stop_sequences: stopSequences,
           system,
-          temperature,
+          ...(resolvedTemperature !== undefined ? { temperature: resolvedTemperature } : {}),
           max_tokens: maxTokens,
           tools,
           tool_choice: toolChoice,
@@ -550,10 +566,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    // Reasoning-tier Anthropic models (Opus 4.6/4.7/4.8) reject the
+    // `inferenceConfig.temperature` field with a 400 at the Bedrock
+    // converse endpoint — omit it entirely for those models.
+    const resolvedTemperature = modelRejectsTemperature(modelId) ? undefined : temperature;
     const request: ConverseRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(resolvedTemperature !== undefined ? { temperature: resolvedTemperature } : {}),
         stopSequences,
         maxTokens,
       },
@@ -605,10 +625,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    // Reasoning-tier Anthropic models (Opus 4.6/4.7/4.8) reject the
+    // `inferenceConfig.temperature` field with a 400 at the Bedrock
+    // converse-stream endpoint — omit it entirely for those models.
+    const resolvedTemperature = modelRejectsTemperature(modelId) ? undefined : temperature;
     const request: ConverseStreamRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(resolvedTemperature !== undefined ? { temperature: resolvedTemperature } : {}),
         stopSequences,
         maxTokens,
       },

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/reasoning_trace.schema.json",
-  "title": "AutoSOC Agent Reasoning Step",
-  "description": "One document per reasoning step emitted by an AutoSOC agent. A run_summary rollup is written once per run_id on completion.",
+  "$id": "https://argus.local/schemas/reasoning_trace.schema.json",
+  "title": "Argus Agent Reasoning Step",
+  "description": "One document per reasoning step emitted by an Argus agent. A run_summary rollup is written once per run_id on completion.",
   "type": "object",
   "additionalProperties": false,
   "required": ["run_id", "agent_id", "step_index", "step_type", "@timestamp"],

@@ -135,6 +135,7 @@
       "x-pack/solutions/security/packages/data-table",
       "x-pack/solutions/security/packages/ecs-data-quality-dashboard",
       "x-pack/solutions/security/packages/features",
+      "x-pack/solutions/security/packages/kbn-argus-console",
       "x-pack/solutions/security/packages/kbn-cloud-security-posture",
       "x-pack/solutions/security/packages/navigation",
       "x-pack/solutions/security/packages/side-nav",

@@ -10,9 +10,9 @@
  * By loading these later we can reduce the initial bundle size and allow users to delay loading these dependencies until they are needed.
  */
 
+import { Argus } from './argus';
 import { AssetInventory } from './asset_inventory';
 import { AttackDiscovery } from './attack_discovery';
-import { AutonomousSoc } from './autonomous_soc';
 import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
@@ -37,9 +37,9 @@ import { Configurations } from './configurations';
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
 const subPluginClasses = {
+  Argus,
   AssetInventory,
   AttackDiscovery,
-  AutonomousSoc,
   Detections,
   Cases,
   Exceptions,

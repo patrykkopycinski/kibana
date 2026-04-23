@@ -7,13 +7,13 @@ milestone can rely on. Versioned; breaking changes require a bump + a migration 
 
 ```yaml
 vulnerability.argus.exploit_probability:          # float, 0.0-1.0 inclusive
-vulnerability.argus.exploit_probability_version:  # semver; current: 1.0.0
+vulnerability.argus.exploit_probability_version:  # semver; current: 1.1.0 (R13 — Shadow-AI derivation)
 vulnerability.argus.exploit_context.cvss_v3_base:            # float 0-10
 vulnerability.argus.exploit_context.cisa_kev:                # boolean
 vulnerability.argus.exploit_context.epss_score:              # float 0-1
 vulnerability.argus.exploit_context.asset_criticality:       # keyword: low|medium|high|critical
 vulnerability.argus.exploit_context.public_exploit_available: # boolean
-vulnerability.argus.exploit_context.mythos_signal:           # float 0-1; 0.0 until Phase 3 intel feed
+vulnerability.argus.exploit_context.mythos_signal:           # float 0-1; R13: derived from host.argus.shadow_ai.* (see §2a) unless explicitly pinned
 vulnerability.argus.exploit_context.top_contributors:        # keyword[], names of top-k factors
 vulnerability.argus.scored_at:                               # date (iso8601)
 ```
@@ -22,7 +22,7 @@ All fields live under `vulnerability.argus.*` to avoid polluting the upstream
 `vulnerability` namespace owned by the vuln-checker PR (`kibana#258041`). Argus is a
 consumer; it never rewrites non-Argus fields.
 
-## 2. Score formula (v1.0.0)
+## 2. Score formula (v1.1.0)
 
 ```
 exploit_probability = clamp(
@@ -41,7 +41,7 @@ with initial weights:
   w_kev     = 0.25
   w_exploit = 0.10
   w_asset   = 0.20
-  w_mythos  = 0.05   # 0 effective in Phase 2; reserved for Phase 3 intel
+  w_mythos  = 0.05   # R13: fed by Shadow-AI telemetry; see §2a
 
 normalize_cvss(x)   = min(1.0, x / 10.0)
 asset_weight(level) = { low: 0.2, medium: 0.5, high: 0.8, critical: 1.0 }[level] | 0.5
@@ -49,6 +49,24 @@ asset_weight(level) = { low: 0.2, medium: 0.5, high: 0.8, critical: 1.0 }[level]
 
 Weights are *capped to sum ≤ 1.0* (they do). Any weight change is a new
 `exploit_probability_version` and a calibration run on the historic CVE set.
+
+### 2a. `mythos_signal` derivation (R13, v1.1.0)
+
+When `vulnerability.argus.exploit_context.mythos_signal` is not explicitly set,
+it is derived from the Shadow-AI envelope at `host.argus.shadow_ai.*` (or
+`threat.argus.shadow_ai.*` as fallback):
+
+```
+density    = min(detections_24h, 10) / 10
+severity   = { none: 0.0, low: 0.2, medium: 0.4, high: 0.7, critical: 1.0 }[max_severity]
+boost      = 0.2 * unauthorized_model_access + 0.3 * sensitive_data_leak
+mythos     = clamp(max(density, severity) + boost, 0, 1)
+```
+
+`max(density, severity)` (rather than the average) prevents a single high-severity
+detection from being diluted by a quiet 24-hour window. An explicit pin in
+`vulnerability.argus.exploit_context.mythos_signal` always wins — operators can
+use this to stamp an authoritative value during incident response.
 
 ## 3. `top_contributors` computation
 

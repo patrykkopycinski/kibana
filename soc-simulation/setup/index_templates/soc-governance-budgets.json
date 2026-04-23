@@ -25,8 +25,8 @@
     }
   },
   "_meta": {
-    "description": "Rate-limit + cooldown counters for AutoSOC autonomous mutations. Doc _id schema: '<scope>:<artifact_type>:<artifact_id>:<window>'.",
-    "owner": "autosoc-governance",
+    "description": "Rate-limit + cooldown counters for Argus autonomous mutations. Doc _id schema: '<scope>:<artifact_type>:<artifact_id>:<window>'.",
+    "owner": "argus-governance",
     "schema_version": 1
   }
 }

@@ -6,6 +6,7 @@
  */
 
 export { alertAnalysisSkill } from './alert_analysis';
+export { argusExplainDecisionSkill } from './argus_explain_decision';
 export { threatHuntingSkill } from './threat_hunting';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { getDetectionRuleEditSkill } from './detection_rule_edit';

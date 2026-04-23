@@ -8,7 +8,7 @@
  */
 
 /**
- * Dashboard builder for the "Autonomous SOC Command Center".
+ * Dashboard builder for the "Argus Command Center".
  *
  * Regenerates soc-command-center.ndjson in this directory.
  *
@@ -434,9 +434,9 @@ let y = 0;
 panels.push(
   markdownPanel({
     id: 'soc-banner',
-    title: 'Autonomous SOC — Command Center',
+    title: 'Argus — Command Center',
     markdown: [
-      '## Autonomous SOC — Command Center',
+      '## Argus — Command Center',
       '',
       'One-look situational awareness for the self-governed SOC simulation.',
       'Sections are ordered by operational urgency:',
@@ -809,7 +809,7 @@ panels.push(
   barPanel({
     id: 'soc-gov-by-type',
     title: 'Applied mutations by artifact type (7d)',
-    description: 'Which surfaces is AutoSOC actually editing?',
+    description: 'Which surfaces is Argus actually editing?',
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
@@ -1445,9 +1445,9 @@ const dashboard = {
   coreMigrationVersion: '8.8.0',
   managed: false,
   attributes: {
-    title: 'Autonomous SOC Command Center',
+    title: 'Argus Command Center',
     description:
-      'At-a-glance operational awareness for the autonomous SOC simulation: ' +
+      'At-a-glance operational awareness for Argus: ' +
       'autonomy state, alert→case flow, self-governance activity, system health, ' +
       'attack simulation, and learning/evolution signals.',
     timeRestore: true,

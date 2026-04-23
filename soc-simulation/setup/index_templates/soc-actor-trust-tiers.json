@@ -1,0 +1,73 @@
+{
+  "index_patterns": [".soc-actor-trust-tiers"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp":           { "type": "date" },
+        "actor_id":             { "type": "keyword" },
+        "actor_kind":            { "type": "keyword" },
+        "tier":                 { "type": "keyword" },
+        "previous_tier":        { "type": "keyword" },
+        "window_days":          { "type": "integer" },
+
+        "metrics": {
+          "properties": {
+            "eval_runs":              { "type": "integer" },
+            "eval_pass_rate":         { "type": "float" },
+            "avg_precision":          { "type": "float" },
+            "avg_recall":             { "type": "float" },
+            "avg_f1":                 { "type": "float" },
+            "avg_robustness":         { "type": "float" },
+            "reasoning_quality":      { "type": "float" },
+            "frontier_pass_rate":     { "type": "float" },
+            "simulation_runs":        { "type": "integer" },
+            "rejections_by_humans":   { "type": "integer" },
+            "rollbacks_triggered":    { "type": "integer" },
+            "outcomes_total":         { "type": "integer" },
+            "outcomes_false_positives": { "type": "integer" },
+            "rollback_rate":          { "type": "float" },
+            "fp_ratio":               { "type": "float" },
+            "avg_rollback_mttr_ms":   { "type": "long" },
+            "p50_rollback_mttr_ms":   { "type": "long" },
+            "p95_rollback_mttr_ms":   { "type": "long" },
+            "reasoning_eval_gate":    { "type": "keyword" },
+            "reasoning_eval_mean_safety":   { "type": "float" },
+            "reasoning_eval_mean_evidence": { "type": "float" }
+          }
+        },
+
+        "policy": {
+          "properties": {
+            "auto_apply":                 { "type": "boolean" },
+            "requires_human_approval":    { "type": "boolean" },
+            "allow_production_targets":   { "type": "boolean" },
+            "max_risk_score":             { "type": "integer" },
+            "max_impact_radius":          { "type": "keyword" }
+          }
+        },
+
+        "rationale":          { "type": "text" },
+        "justification_trace_id": { "type": "keyword" },
+
+        "watchdog_frozen":      { "type": "boolean" },
+        "watchdog_reason":      { "type": "keyword" },
+        "watchdog_short_mean":  { "type": "float" },
+        "watchdog_baseline_mean": { "type": "float" },
+        "watchdog_frozen_at":   { "type": "date" },
+        "watchdog_last_ok_at":  { "type": "date" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Argus Phase-3 — per-actor trust tier records. Driven by soc-argus-trust-tier-assessor.yaml; consumed by soc-argus-trust-gate.yaml and soc-autonomous-applier.yaml to decide whether recommendations may auto-apply. Tiers: frontier > trusted > probationary > quarantined. schema_version=2 adds outcome-driven signals (rollback_rate, fp_ratio) from .soc-outcomes (Argus G3).",
+    "owner": "argus-governance",
+    "schema_version": 2
+  }
+}

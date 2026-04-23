@@ -22,73 +22,80 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        size: 0
-        query:
-          bool:
-            filter:
-              - range:
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+            - exists:
+                field: "source"
+      aggs:
+        by_skill:
+          terms:
+            field: "source"
+            size: 500
+          aggs:
+            invocations_24h:
+              filter:
+                range:
+                  "@timestamp":
+                    gte: "now-24h"
+            invocations_7d:
+              filter:
+                range:
                   "@timestamp":
                     gte: "now-7d"
-              - exists:
-                  field: "source"
-        aggs:
-          by_skill:
-            terms:
-              field: "source"
-              size: 500
-            aggs:
-              invocations_24h:
-                filter:
-                  range:
-                    "@timestamp":
-                      gte: "now-24h"
-              invocations_7d:
-                filter:
-                  range:
-                    "@timestamp":
-                      gte: "now-7d"
-              success_24h:
-                filter:
-                  bool:
-                    must:
-                      - range:
-                          "@timestamp":
-                            gte: "now-24h"
-                      - term: { result: "applied" }
-              failure_24h:
-                filter:
-                  bool:
-                    must:
-                      - range:
-                          "@timestamp":
-                            gte: "now-24h"
-                      - terms:
-                          result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
-              success_7d:
-                filter:
-                  bool:
-                    must:
-                      - range:
-                          "@timestamp":
-                            gte: "now-7d"
-                      - term: { result: "applied" }
-              failure_7d:
-                filter:
-                  bool:
-                    must:
-                      - range:
-                          "@timestamp":
-                            gte: "now-7d"
-                      - terms:
-                          result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
-              last_run:
-                max:
-                  field: "@timestamp"
+            success_24h:
+              filter:
+                bool:
+                  must:
+                    - range:
+                        "@timestamp":
+                          gte: "now-24h"
+                    - term: {result: "applied"}
+            failure_24h:
+              filter:
+                bool:
+                  must:
+                    - range:
+                        "@timestamp":
+                          gte: "now-24h"
+                    - terms:
+                        result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
+            success_7d:
+              filter:
+                bool:
+                  must:
+                    - range:
+                        "@timestamp":
+                          gte: "now-7d"
+                    - term: {result: "applied"}
+            failure_7d:
+              filter:
+                bool:
+                  must:
+                    - range:
+                        "@timestamp":
+                          gte: "now-7d"
+                    - terms:
+                        result: ["failure", "validation_failed", "blocked_canonical", "blocked_loop", "blocked_budget", "blocked_cooldown"]
+            last_run:
+              max:
+                field: "@timestamp"
+
+  - name: gate_has_skill_buckets
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.rollup.output.aggregations.by_skill.buckets | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
 
   - name: upsert_metrics
     type: foreach
-    foreach: "{{ steps.rollup.output.aggregations.by_skill.buckets | default: [] }}"
+    foreach: "{{ steps.rollup.output.aggregations.by_skill.buckets }}"
+    if: "steps.gate_has_skill_buckets.output: yes"
     steps:
       - name: write_doc
         type: elasticsearch.index
@@ -98,11 +105,11 @@ steps:
           document:
             skill_id: "{{ foreach.item.key }}"
             invocations_24h: "{{ foreach.item.invocations_24h.doc_count | default: 0 }}"
-            invocations_7d:  "{{ foreach.item.invocations_7d.doc_count  | default: 0 }}"
+            invocations_7d: "{{ foreach.item.invocations_7d.doc_count  | default: 0 }}"
             success_count_24h: "{{ foreach.item.success_24h.doc_count | default: 0 }}"
             failure_count_24h: "{{ foreach.item.failure_24h.doc_count | default: 0 }}"
-            success_count_7d:  "{{ foreach.item.success_7d.doc_count  | default: 0 }}"
-            failure_count_7d:  "{{ foreach.item.failure_7d.doc_count  | default: 0 }}"
+            success_count_7d: "{{ foreach.item.success_7d.doc_count  | default: 0 }}"
+            failure_count_7d: "{{ foreach.item.failure_7d.doc_count  | default: 0 }}"
             success_rate_7d: >-
               {% assign s = foreach.item.success_7d.doc_count | default: 0 %}
               {% assign f = foreach.item.failure_7d.doc_count | default: 0 %}

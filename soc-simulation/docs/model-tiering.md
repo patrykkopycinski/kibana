@@ -1,9 +1,9 @@
-# AutoSOC Model Tiering
+# Argus Model Tiering
 
-AutoSOC workflows span a wide range of reasoning complexity, from strategic
+Argus workflows span a wide range of reasoning complexity, from strategic
 architectural planning to high-volume alert summarization. Running every
 step on Opus is both wasteful and slow. This document describes the tiering
-convention used across AutoSOC workflows and how to roll it out without
+convention used across Argus workflows and how to roll it out without
 changing any YAML.
 
 ## Tiers
@@ -24,8 +24,8 @@ mirrored into `.soc-workflow-registry` by `setup.sh`. A JSON schema in
 
 Changing `connector-id:` across ~15 workflow files would break every
 existing deployment where operators only have a single `opus` connector
-configured. Instead, AutoSOC standardizes on ONE connector id (`opus`)
-and exposes the tiering choice at the Kibana Connectors layer:
+configured. Instead, Argus standardizes on ONE connector id (`opus`) and
+exposes the tiering choice at the Kibana Connectors layer:
 
 1. Create three Generative-AI connectors in Kibana:
    - `opus` → your canonical Opus model (e.g. `claude-opus-4`). Required.
@@ -61,6 +61,27 @@ that actually benefit from Opus-level reasoning.
 - Keep `planner` on Opus until you have a regression suite wide enough to
   detect degradation on strategic reasoning.
 
+## Quick-apply commands
+
+To apply tiering in a single pass, replace `connector-id:` values:
+
+```bash
+# Analyst tier: routine analysis workflows → sonnet
+for f in soc-triage.yaml soc-alert-sweeper.yaml soc-autonomous-applier.yaml \
+         soc-watchdog.yaml soc-response.yaml soc-proactive-hunter.yaml \
+         soc-recommendation-applier.yaml soc-regression-gate.yaml; do
+  sed -i '' 's/connector-id: opus/connector-id: sonnet/' "soc-simulation/workflows/$f"
+done
+
+# Bulk tier: high-volume summarization → haiku
+for f in soc-shift-handover.yaml soc-forensic-summarizer.yaml \
+         soc-regression-harvester.yaml; do
+  sed -i '' 's/connector-id: opus/connector-id: haiku/' "soc-simulation/workflows/$f"
+done
+```
+
+Then reinstall workflows via `setup.sh` or the Kibana workflows API.
+
 ## Related rails
 
 - The `soc-watchdog` workflow already trips the global kill-switch on
@@ -68,3 +89,6 @@ that actually benefit from Opus-level reasoning.
 - The `soc-trust-scorer` outputs per-artifact trust and can be used as a
   signal for a future "auto-downgrade" policy ("if trust ≥ 0.9, downgrade
   tier by one").
+- The `soc-workflow-liveness-watchdog` monitors heartbeat freshness
+  across all tiers, ensuring stale workflows are detected regardless
+  of the connector used.

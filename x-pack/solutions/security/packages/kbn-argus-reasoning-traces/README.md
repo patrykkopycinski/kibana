@@ -60,5 +60,5 @@ span.setAttributes({
 - `soc-simulation/docs/argus/scaffolds/m2-5-trace-schema.md` — the ES-side
   schema the OTLP spans are projected into via a collector pipeline.
 - `soc-simulation/schemas/reasoning_trace.schema.json` — the existing
-  AutoSOC reasoning step schema; M2.5 spans land in the same index family
+  Argus reasoning step schema; M2.5 spans land in the same index family
   under `.soc-reasoning-traces-<date>`.

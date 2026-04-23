@@ -1,0 +1,62 @@
+[
+  {
+    "id": "argus-vuln-demo-001",
+    "cve": "CVE-2026-0001",
+    "base": 9.8,
+    "exploit_probability": 0.347,
+    "top_contributors": [
+      "asset_criticality",
+      "cvss_v3_base"
+    ],
+    "version": "1.0.0",
+    "scored_at": "2026-04-19T17:59:29.690461160Z",
+    "context": {
+      "cvss_v3_base": 9.8,
+      "public_exploit_available": false,
+      "cisa_kev": false,
+      "epss_score": 0.0,
+      "mythos_signal": 0.0,
+      "asset_criticality": "critical"
+    }
+  },
+  {
+    "id": "argus-vuln-demo-002",
+    "cve": "CVE-2026-0002",
+    "base": 7.2,
+    "exploit_probability": 0.7255,
+    "top_contributors": [
+      "cisa_kev",
+      "asset_criticality"
+    ],
+    "version": "1.0.0",
+    "scored_at": "2026-04-19T17:59:29.692411781Z",
+    "context": {
+      "cvss_v3_base": 7.2,
+      "public_exploit_available": true,
+      "cisa_kev": true,
+      "epss_score": 0.43,
+      "mythos_signal": 0.0,
+      "asset_criticality": "high"
+    }
+  },
+  {
+    "id": "argus-vuln-demo-003",
+    "cve": "CVE-2026-0003",
+    "base": 4.3,
+    "exploit_probability": 0.1045,
+    "top_contributors": [
+      "cvss_v3_base",
+      "asset_criticality"
+    ],
+    "version": "1.0.0",
+    "scored_at": "2026-04-19T17:59:29.692504489Z",
+    "context": {
+      "cvss_v3_base": 4.3,
+      "public_exploit_available": false,
+      "cisa_kev": false,
+      "epss_score": 0.0,
+      "mythos_signal": 0.0,
+      "asset_criticality": "low"
+    }
+  }
+]

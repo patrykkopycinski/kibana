@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://argus.local/argus/technique-playbook-mapping.json",
+  "description": "MITRE ATT&CK technique → playbook-step mapping consumed by soc-argus-playbook-learner. Each entry lists the candidate steps the learner is allowed to remap between. New techniques land via PR; the learner never invents mappings.",
+  "version": 1,
+  "mappings": [
+    {
+      "technique": "T1003.001",
+      "description": "OS Credential Dumping: LSASS Memory",
+      "candidate_steps": [
+        "isolate_host",
+        "kill_process_and_dump_memory",
+        "revoke_session_tokens",
+        "rotate_credentials_and_alert",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1059.001",
+      "description": "Command and Scripting Interpreter: PowerShell",
+      "candidate_steps": [
+        "kill_process_tree",
+        "quarantine_script_artifacts",
+        "isolate_host",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1055",
+      "description": "Process Injection",
+      "candidate_steps": [
+        "kill_process_tree",
+        "isolate_host",
+        "snapshot_and_escalate",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1071.001",
+      "description": "Application Layer Protocol: Web Protocols (C2 beaconing)",
+      "candidate_steps": [
+        "block_destination_ip",
+        "rotate_proxy_rules",
+        "isolate_host",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1486",
+      "description": "Data Encrypted for Impact (ransomware)",
+      "candidate_steps": [
+        "isolate_host",
+        "disable_user_account",
+        "snapshot_and_escalate",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1566.001",
+      "description": "Phishing: Spearphishing Attachment",
+      "candidate_steps": [
+        "quarantine_message",
+        "purge_from_inboxes",
+        "reset_user_password",
+        "human_review_only"
+      ]
+    },
+    {
+      "technique": "T1204.002",
+      "description": "User Execution: Malicious File",
+      "candidate_steps": [
+        "kill_process_tree",
+        "quarantine_file",
+        "isolate_host",
+        "human_review_only"
+      ]
+    }
+  ]
+}

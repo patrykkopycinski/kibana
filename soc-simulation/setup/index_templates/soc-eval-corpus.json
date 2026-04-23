@@ -1,0 +1,127 @@
+{
+  "index_patterns": [".soc-eval-corpus-*"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "@timestamp":         { "type": "date" },
+
+        "_argus": {
+          "properties": {
+            "corpus_id":       { "type": "keyword" },
+            "primitive_id":    { "type": "keyword" },
+            "variant_axis":    { "type": "keyword" },
+            "variant_index":   { "type": "integer" },
+            "should_fire":     { "type": "boolean" },
+            "expected_rule_ids": { "type": "keyword" },
+            "mutation_axes":   { "type": "keyword" },
+            "source":          { "type": "keyword" }
+          }
+        },
+
+        "event": {
+          "properties": {
+            "category":        { "type": "keyword" },
+            "type":            { "type": "keyword" },
+            "action":          { "type": "keyword" },
+            "dataset":         { "type": "keyword" }
+          }
+        },
+
+        "host": {
+          "properties": {
+            "name":            { "type": "keyword" },
+            "hostname":        { "type": "keyword" },
+            "os": {
+              "properties": {
+                "family":      { "type": "keyword" },
+                "name":        { "type": "keyword" },
+                "version":     { "type": "keyword" }
+              }
+            }
+          }
+        },
+
+        "user": {
+          "properties": {
+            "name":            { "type": "keyword" },
+            "domain":          { "type": "keyword" }
+          }
+        },
+
+        "process": {
+          "properties": {
+            "name":            { "type": "keyword" },
+            "executable":      { "type": "keyword" },
+            "command_line": {
+              "type": "text",
+              "fields": { "keyword": { "type": "keyword", "ignore_above": 8192 } }
+            },
+            "args":            { "type": "keyword" },
+            "pid":             { "type": "long" },
+            "parent": {
+              "properties": {
+                "name":        { "type": "keyword" },
+                "executable":  { "type": "keyword" },
+                "command_line": {
+                  "type": "text",
+                  "fields": { "keyword": { "type": "keyword", "ignore_above": 8192 } }
+                },
+                "pid":         { "type": "long" }
+              }
+            }
+          }
+        },
+
+        "file": {
+          "properties": {
+            "path":            { "type": "keyword" },
+            "name":            { "type": "keyword" },
+            "extension":       { "type": "keyword" },
+            "hash": {
+              "properties": {
+                "sha256":      { "type": "keyword" },
+                "sha1":        { "type": "keyword" },
+                "md5":         { "type": "keyword" }
+              }
+            }
+          }
+        },
+
+        "network": {
+          "properties": {
+            "protocol":        { "type": "keyword" },
+            "transport":       { "type": "keyword" },
+            "direction":       { "type": "keyword" }
+          }
+        },
+
+        "destination": {
+          "properties": {
+            "ip":              { "type": "ip" },
+            "port":            { "type": "long" },
+            "domain":          { "type": "keyword" }
+          }
+        },
+
+        "source": {
+          "properties": {
+            "ip":              { "type": "ip" },
+            "port":            { "type": "long" }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Argus M2.4 — labelled Mythos-era corpus events emitted by the frontier simulator and hand-authored variant bank. One index per corpus_id (e.g. .soc-eval-corpus-argus-corpus-mythos-2026-04). Consumed by the @kbn/evals-suite-argus-detection replay client to grade candidate detection rules.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

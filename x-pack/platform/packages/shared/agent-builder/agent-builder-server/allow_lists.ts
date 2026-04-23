@@ -132,6 +132,21 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'alert-analysis',
   'detection-rule-edit',
   'threat-hunting',
+  'argus-explain-decision',
+  // Argus playbook primitives surfaced in the Argus Console "Playbooks" tab.
+  // Each id is the stable identifier used in skill content, audit trails, and
+  // the Playbooks deep-link. Keep this block aligned with
+  // `x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/argus_playbooks/constants.ts`
+  // — adding a skill there without allowlisting it here causes the whole
+  // `registerSkills` chain to abort (first throw kills the rest), which is
+  // how every other Argus playbook skill silently disappeared from the
+  // Agent Builder library.
+  'argus-assess-readiness',
+  'argus-emulate-actor',
+  'argus-run-purple-team',
+  'argus-assess-cve',
+  'argus-find-datasource-gaps',
+  'argus-review-rule-quality',
 
   // O11Y
   'observability.rca',

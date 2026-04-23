@@ -6,20 +6,17 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
+import type { Client } from '@elastic/elasticsearch';
 import type { ReplayClient } from './replay_rule';
-import { createNoopReplayClient } from './replay_rule';
+import { createEsReplayClient } from './replay_rule';
 
 /**
- * Argus Detection Eval Vertical — test fixture.
+ * Argus Detection Eval Vertical — Playwright fixture.
  *
- * Extends the base `@kbn/evals` Playwright fixture with a `replayClient` worker
- * fixture. The replay client is the seam where the suite invokes the Security
- * Solution detection-rule runner to produce a `DetectionRuleTaskOutput` for each
- * corpus event.
- *
- * Day-1 (2026-04-17): `replayClient` is a no-op stub — the suite wiring is the
- * deliverable, not the replay logic. Day-2 replaces this with the real rule
- * runner seam (see issue #16904 phase 2 + docs/argus/scaffolds/m2-1-detection-rule-evaluator.md).
+ * Extends the base `@kbn/evals` fixture with a worker-scoped `replayClient`.
+ * The replay client is constructed once per worker from Scout's `esClient`
+ * worker fixture, giving the suite a direct, deterministic path to
+ * `.soc-eval-corpus-*` without needing Phoenix or an LLM connector.
  */
 export const evaluate = base.extend<
   {},
@@ -28,8 +25,8 @@ export const evaluate = base.extend<
   }
 >({
   replayClient: [
-    async (_, use) => {
-      await use(createNoopReplayClient());
+    async ({ esClient }, use) => {
+      await use(createEsReplayClient(esClient as unknown as Client));
     },
     { scope: 'worker' },
   ],

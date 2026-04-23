@@ -23,8 +23,116 @@
         "tool_call_count":   { "type": "integer" },
         "total_duration_ms": { "type": "long" },
         "final_status":      { "type": "keyword" },
-        "final_output_ref":  { "type": "keyword" }
+        "final_output_ref":  { "type": "keyword" },
+
+        "argus": {
+          "properties": {
+            "agent": {
+              "properties": {
+                "id":       { "type": "keyword" },
+                "version":  { "type": "keyword" }
+              }
+            },
+            "decision": {
+              "properties": {
+                "id":              { "type": "keyword" },
+                "kind":            { "type": "keyword" },
+                "confidence":      { "type": "float" },
+                "confidence_delta":{ "type": "float" },
+                "door_class":      { "type": "keyword" },
+                "blast_tier":      { "type": "keyword" },
+                "blast_radius": {
+                  "properties": {
+                    "hosts":       { "type": "integer" },
+                    "tenants":     { "type": "integer" },
+                    "rules":       { "type": "integer" }
+                  }
+                }
+              }
+            },
+            "actor": {
+              "properties": {
+                "trust_tier":      { "type": "keyword" }
+              }
+            },
+            "injection": {
+              "properties": {
+                "surface":         { "type": "keyword" }
+              }
+            },
+            "tool": {
+              "properties": {
+                "id":              { "type": "keyword" },
+                "input_hash":      { "type": "keyword" }
+              }
+            },
+            "correlation": {
+              "properties": {
+                "alert_id":        { "type": "keyword" }
+              }
+            }
+          }
+        },
+
+        "gen_ai": {
+          "properties": {
+            "system":             { "type": "keyword" },
+            "request": {
+              "properties": {
+                "model":          { "type": "keyword" },
+                "temperature":    { "type": "float" },
+                "top_p":          { "type": "float" },
+                "max_tokens":     { "type": "integer" }
+              }
+            },
+            "response": {
+              "properties": {
+                "id":             { "type": "keyword" },
+                "model":          { "type": "keyword" },
+                "finish_reasons": { "type": "keyword" }
+              }
+            },
+            "usage": {
+              "properties": {
+                "input_tokens":   { "type": "long" },
+                "output_tokens":  { "type": "long" },
+                "total_tokens":   { "type": "long" }
+              }
+            },
+            "operation": {
+              "properties": {
+                "name":           { "type": "keyword" }
+              }
+            },
+            "agent": {
+              "properties": {
+                "id":             { "type": "keyword" },
+                "name":           { "type": "keyword" },
+                "description":    { "type": "text" }
+              }
+            },
+            "tool": {
+              "properties": {
+                "name":           { "type": "keyword" },
+                "call_id":        { "type": "keyword" },
+                "type":           { "type": "keyword" }
+              }
+            },
+            "prompt":             { "type": "text", "index": false },
+            "completion":         { "type": "text", "index": false }
+          }
+        }
       }
     }
+  },
+  "_meta": {
+    "description": "Reasoning traces for all SOC agent decisions. Backward-compatible with the pre-Argus flat shape; Argus agents additionally populate argus.* per the ARGUS_TRACE_ATTR contract so the governance layer can correlate decisions to actor / trust tier / injection surface. Aligned with OpenTelemetry GenAI semantic conventions v1.x (gen_ai.*) for cross-vendor trace ingestion.",
+    "owner": "argus-governance",
+    "schema_version": 3,
+    "argus_decision_kinds": ["triage_verdict","rule_create","rule_patch","rule_deprecate","exception_create","case_close","response_action","eval_gate","trust_gate","reasoning_watchdog"],
+    "argus_trust_tiers": ["frontier","trusted","probationary","quarantined"],
+    "argus_door_classes": ["one_way","two_way"],
+    "argus_blast_tiers": ["small","medium","large","critical"],
+    "otel_genai_version": "1.x"
   }
 }

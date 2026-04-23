@@ -1,0 +1,10 @@
+{
+  "adversary_id": "soc-sim-opportunistic",
+  "name": "SOC Sim \u2014 Opportunistic",
+  "description": "Opportunistic intrusion with credential dumping + persistence.",
+  "atomic_ordering": [
+    "2ef6672fd5b1e94dab0f2af1c40a1d7c",
+    "da912f911c137cb52199c830f00a0da5",
+    "4960dc6d42d2c82ac32c9c50b64de097"
+  ]
+}

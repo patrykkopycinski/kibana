@@ -37,6 +37,9 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
+      argus: FileDirectory<{
+        playbooks: FileDirectory;
+      }>;
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;

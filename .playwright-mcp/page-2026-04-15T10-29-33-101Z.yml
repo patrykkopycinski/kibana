@@ -1,0 +1,91 @@
+- generic [ref=e1]:
+  - generic [ref=e15]:
+    - banner [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic:
+              - status "Page change announcements" [ref=e21]: Agent Chat - Agent Builder - Elastic
+              - button "Skip to main content" [ref=e22] [cursor=pointer]:
+                - generic [ref=e24]: Skip to main content
+            - link "Elastic home" [ref=e26] [cursor=pointer]:
+              - /url: /app/home
+              - img "Elastic Logo" [ref=e27]
+              - img [ref=e34]
+          - generic [ref=e42]:
+            - generic [ref=e43]:
+              - generic [ref=e44]:
+                - generic:
+                  - generic:
+                    - img
+                - searchbox "Find apps, content, and more." [ref=e45]
+              - 'generic "Keyboard shortcut: Command + /" [ref=e47]': ⌘/
+            - paragraph [ref=e48]: Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.
+          - generic [ref=e49]:
+            - button "Help menu" [ref=e52] [cursor=pointer]:
+              - img [ref=e56]
+            - generic [ref=e59]:
+              - button "Newsfeed menu - unread items available" [ref=e62] [cursor=pointer]
+              - button "Submit feedback" [ref=e72] [cursor=pointer]:
+                - img "Submit feedback" [ref=e76]
+              - button "Open the AI Assistant" [ref=e84] [cursor=pointer]:
+                - generic [ref=e90]: AI Assistant
+              - button "Account menu" [ref=e95] [cursor=pointer]:
+                - img "elastic" [ref=e99]:
+                  - generic [ref=e100]: e
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - button "Toggle primary navigation" [ref=e104] [cursor=pointer]
+            - button "Spaces navigation" [ref=e112] [cursor=pointer]:
+              - img "Default" [ref=e116]:
+                - generic [ref=e117]: D
+          - navigation "Breadcrumbs" [ref=e118]:
+            - list [ref=e119]:
+              - listitem [ref=e120]:
+                - link "Agent Builder" [ref=e121] [cursor=pointer]:
+                  - /url: /app/agent_builder
+              - listitem [ref=e122]:
+                - generic "Agent Chat" [ref=e123]
+    - main [ref=e131]:
+      - generic "Conversation header" [ref=e132]:
+        - generic [ref=e135]:
+          - button "Open conversations" [disabled] [ref=e141]:
+            - generic [ref=e145]: Conversations
+          - generic "Conversation actions" [ref=e147]:
+            - button "More" [ref=e150] [cursor=pointer]:
+              - generic [ref=e153]: More
+      - region "Conversation content" [ref=e154]:
+        - generic [ref=e156]:
+          - heading "How can I help you?" [level=2] [ref=e158]
+          - generic "Message input form" [ref=e160]:
+            - textbox "Message input" [active] [ref=e163]: Ask anything
+            - generic [ref=e165]:
+              - button "gpt-5.2" [ref=e169] [cursor=pointer]:
+                - generic [ref=e171]: gpt-5.2
+              - generic [ref=e173]:
+                - button "Elastic AI Agent" [expanded] [ref=e177] [cursor=pointer]:
+                  - generic [ref=e185]: Elastic AI Agent
+                - button "Submit" [disabled] [ref=e187]:
+                  - img
+  - generic:
+    - generic:
+      - log "Notification message list"
+  - dialog "Meet your active agent 🕵️‍♂️" [ref=e188]:
+    - generic [ref=e192]:
+      - heading "Meet your active agent 🕵️‍♂️" [level=2] [ref=e194]
+      - paragraph [ref=e197]: An agent's behavior is defined by its custom instructions and available tools. Switch agents when you need different capabilities for your tasks.
+      - generic [ref=e199]:
+        - list [ref=e201]:
+          - listitem "Step 1 active" [ref=e202]:
+            - img "active" [ref=e203]
+          - listitem "Step 2 incomplete" [ref=e205]:
+            - img "incomplete" [ref=e206]
+          - listitem "Step 3 incomplete" [ref=e208]:
+            - img "incomplete" [ref=e209]
+          - listitem "Step 4 incomplete" [ref=e211]:
+            - img "incomplete" [ref=e212]
+        - generic [ref=e214]:
+          - button "Close tour" [ref=e216] [cursor=pointer]:
+            - generic [ref=e218]: Close tour
+          - button "Next" [ref=e220] [cursor=pointer]:
+            - generic [ref=e222]: Next

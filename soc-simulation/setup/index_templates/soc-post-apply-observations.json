@@ -1,0 +1,49 @@
+{
+  "index_patterns": [".soc-post-apply-observations"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "snapshot_id": { "type": "keyword" },
+        "correlation_id": { "type": "keyword" },
+        "artifact_id": { "type": "keyword" },
+        "artifact_type": { "type": "keyword" },
+        "rule_id": { "type": "keyword" },
+        "mutation_op": { "type": "keyword" },
+        "source_agent": { "type": "keyword" },
+        "source_workflow": { "type": "keyword" },
+        "trust_tier": { "type": "keyword" },
+        "window_minutes": { "type": "integer" },
+        "applied_at": { "type": "date" },
+        "observed_at": { "type": "date" },
+        "pre_apply_alerts": { "type": "long" },
+        "post_apply_alerts": { "type": "long" },
+        "pre_apply_tps": { "type": "long" },
+        "post_apply_tps": { "type": "long" },
+        "alert_spike_multiplier": { "type": "float" },
+        "tp_delta": { "type": "float" },
+        "gates_evaluated": { "type": "keyword" },
+        "gates_passed": { "type": "keyword" },
+        "gates_failed": { "type": "keyword" },
+        "regression_detected": { "type": "boolean" },
+        "rollback_triggered": { "type": "boolean" },
+        "rollback_rec_id": { "type": "keyword" },
+        "final_status": { "type": "keyword" },
+        "reason": { "type": "text", "fields": { "keyword": { "type": "keyword", "ignore_above": 1024 } } },
+        "details": { "type": "object", "enabled": false }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Post-apply observation records emitted by soc-post-apply-observer. One row per mutation snapshot evaluated against its observation window. Feeds KPI dashboard and trust-scoring. Observer ALSO writes heartbeat/regression rows to .soc-audit-trail for the audit narrative.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

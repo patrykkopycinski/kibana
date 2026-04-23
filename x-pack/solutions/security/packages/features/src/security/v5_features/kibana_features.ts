@@ -10,6 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
   APP_ID,
+  ARGUS_CONSOLE_UI_ALL,
+  ARGUS_CONSOLE_UI_READ,
+  ARGUS_WRITE_API,
   CLOUD_DEFEND_APP_ID,
   CLOUD_POSTURE_APP_ID,
   INITIALIZE_SECURITY_SOLUTION,
@@ -57,12 +60,15 @@ export const getSecurityV5BaseKibanaFeature = ({
         LISTS_API_SUMMARY,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
+        // Argus write surface (kill-switch toggle + mutation approve/reject).
+        // Attached to `all` only so `siem.show` users cannot drive autonomy.
+        ARGUS_WRITE_API,
       ],
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
       },
-      ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD],
+      ui: [SECURITY_UI_SHOW, SECURITY_UI_CRUD, ARGUS_CONSOLE_UI_READ, ARGUS_CONSOLE_UI_ALL],
     },
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
@@ -72,7 +78,7 @@ export const getSecurityV5BaseKibanaFeature = ({
         all: [],
         read: [...savedObjects],
       },
-      ui: [SECURITY_UI_SHOW],
+      ui: [SECURITY_UI_SHOW, ARGUS_CONSOLE_UI_READ],
     },
   },
 });

@@ -94,15 +94,18 @@ services:
       FLEET_SERVER_POLICY_ID: fleet-server-policy
       FLEET_URL: http://fleet-server:8220
       KIBANA_FLEET_SETUP: "1"
-      KIBANA_FLEET_HOST: http://kibana:5601
+      # Kibana runs from source on the host (see config/kibana.dev.yml), not as a
+      # compose service. Point Fleet Server setup at the host Kibana via
+      # host.docker.internal so setup-on-first-boot can call the Fleet API.
+      KIBANA_FLEET_HOST: ${KIBANA_FLEET_HOST:-http://host.docker.internal:15601}
       KIBANA_FLEET_USERNAME: elastic
       KIBANA_FLEET_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
     ports:
       - "0.0.0.0:${FLEET_PORT:-18220}:8220"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       elasticsearch:
-        condition: service_healthy
-      kibana:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -128,6 +131,36 @@ services:
       interval: 10s
       retries: 30
       start_period: 120s
+    restart: unless-stopped
+
+  soc-endpoint-1:
+    image: docker.elastic.co/elastic-agent/elastic-agent:${STACK_VERSION:-9.4.0-SNAPSHOT}
+    container_name: soc-endpoint-1
+    hostname: soc-endpoint-1
+    user: root
+    depends_on:
+      fleet-server:
+        condition: service_healthy
+      caldera:
+        condition: service_healthy
+    environment:
+      # Internal compose network endpoints
+      FLEET_URL: http://fleet-server:8220
+      FLEET_INSECURE: "true"
+      # Host Kibana (runs from source on port 15601)
+      KIBANA_HOST: ${KIBANA_FLEET_HOST:-http://host.docker.internal:15601}
+      KIBANA_USERNAME: elastic
+      KIBANA_PASSWORD: ${ELASTIC_PASSWORD:-changeme}
+      # Caldera (internal compose network) — for sandcat fetch
+      CALDERA_URL: http://caldera:8888
+      CALDERA_API_KEY: ${CALDERA_API_KEY:-ADMIN123}
+      # Fleet policy to enrol into (must already exist on Kibana)
+      POLICY_ID: ${SOC_ENDPOINT_POLICY_ID:-soc-endpoint-policy}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["/opt/soc/enroll_and_run.sh"]
+    volumes:
+      - ./infra/endpoint/enroll_and_run.sh:/opt/soc/enroll_and_run.sh:ro
     restart: unless-stopped
 
   # Caldera command dispatch and polling is now done by two native workflows —

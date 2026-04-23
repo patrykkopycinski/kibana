@@ -1,0 +1,452 @@
+{
+  "SOC Triage": {
+    "id": "workflow-bfa15ff2-7212-4875-9187-efc144a28ab4",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Detection Eval (Argus M2.1)": {
+    "id": "workflow-4b60bfe0-7908-4c5f-9200-eb6dc6940a70",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "Argus Demo 2 Runner \u2014 Polymorphic Variant Swarm": {
+    "id": "workflow-2c10c045-419a-4c44-9113-3e86d41b1876",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "Argus Demo 1 Runner \u2014 Same-day CVE \u2192 Detection": {
+    "id": "workflow-5377d223-f07e-4f36-a507-85ac3cbc713b",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "Argus Trust Tier Assessor (Phase 3)": {
+    "id": "workflow-3f1d283b-aa8f-476b-a161-a22f73d5102f",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "Argus Trust Gate (Phase 3)": {
+    "id": "workflow-19d49383-5b6d-4ebc-803c-beed71763a3a",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Argus \u2014 Frontier Simulator (M2.4)": {
+    "id": "workflow-78bf010b-e86c-4827-aa0c-7cfdf72c5a7f",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Alert Sweeper": {
+    "id": "workflow-3f241633-fd0e-4a2b-a22b-fd796a2c9555",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Architecture Reviewer": {
+    "id": "workflow-45cf3785-052b-49b1-a0d9-84a5083793a8",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Argus \u2014 Arm Mythos-Class Preset": {
+    "id": "workflow-d95fae9e-375e-4dc3-9a28-5a28d7901d23",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "Argus Exploit-to-Detection Reconciler (M2.2)": {
+    "id": "workflow-369b6c28-fa8b-48c1-9fb6-0b131ed35351",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Autonomous Applier": {
+    "id": "workflow-411cab2a-e78a-4468-86ab-08e68f5ff022",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Caldera Dispatcher": {
+    "id": "workflow-3720d77e-f9c2-459b-b740-2d712f162a87",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Caldera Poller": {
+    "id": "workflow-e3c6f230-c059-4b90-b808-00bd86d6f8bf",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Case Creation": {
+    "id": "workflow-b8c02a69-1027-4916-bdcc-5d2e30acc2ed",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Detection Engineering": {
+    "id": "workflow-b533710a-3b72-400b-83cf-a20817d29ad6",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Difficulty Controller": {
+    "id": "workflow-e5b8c72c-d2ac-45c5-9d64-52279253b23e",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Envelope Validator": {
+    "id": "workflow-4a2566ee-9ed4-405f-bcba-5ca1ce634d53",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Forensic Summarizer": {
+    "id": "workflow-7d7d1756-558e-4c02-8113-8f7e78b0dc2e",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Capability Gap Analyzer": {
+    "id": "workflow-cbca7329-b27b-4ff0-ae64-e8280bf77271",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Meta Agent": {
+    "id": "workflow-d8192f74-cfa0-45a9-9132-1edf48bd458f",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Pipeline Run Telemetry Indexer (Event Log -> .soc-pipeline-runs)": {
+    "id": "workflow-58ce0c91-5210-4a00-a37d-ec758be94b3e",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Post-Apply Observer": {
+    "id": "workflow-873e69a1-4321-4f9d-bccb-9facdd571783",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Proactive Hunter": {
+    "id": "workflow-834d758d-91aa-4588-be83-576b10d3d9cd",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Recommendation Applier": {
+    "id": "workflow-ccb45fa6-2b7d-40e8-a995-142834d99a71",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Recovery": {
+    "id": "workflow-ec0c31fa-39a1-4b52-a25b-0fa060f5405f",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Registry Retro-Tag": {
+    "id": "workflow-6fffcc28-e339-4a9a-8b5d-45faf8299a57",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Regression Gate": {
+    "id": "workflow-1946fe08-4777-4f94-8d6f-1a7ca0b5d93f",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Regression Harvester": {
+    "id": "workflow-41d90eb3-cb87-4bee-a0c3-10891587c48d",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Response": {
+    "id": "workflow-51cd4498-2536-4804-9ad6-ef9820b54183",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Rule Backtester": {
+    "id": "workflow-7afd86d3-e081-4ec7-966b-e88e5d96c2da",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Self-Learning Loop": {
+    "id": "workflow-98b9a5a3-f68b-46ac-a2e4-d0d211de90b7",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Shift Handover": {
+    "id": "workflow-0906d8d0-e73a-43f4-9a7a-a9248c9e8554",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Skill Metrics Roller": {
+    "id": "workflow-960b4752-389a-4aad-ac6a-636fd6f95406",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Trust Scorer": {
+    "id": "workflow-90c7d5d8-2004-4ade-a72b-6618dd3d96fb",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Watchdog": {
+    "id": "workflow-d12b7a70-3901-46a5-81ea-9c3d42ebc138",
+    "enabled": true,
+    "createdAt": "2026-04-19T19:04:34.293Z",
+    "valid": true
+  },
+  "SOC Pipeline Runs Last-1h Health Snapshot": {
+    "id": "workflow-8391dd03-12e0-47a2-82cd-e6aeffd87583",
+    "enabled": true,
+    "createdAt": "2026-04-17T06:34:41.147Z",
+    "valid": true
+  },
+  "SOC Outcomes Latency Field Presence Snapshot": {
+    "id": "workflow-e13bd504-f64e-404c-a67f-4fdb33bbb6ac",
+    "enabled": true,
+    "createdAt": "2026-04-17T05:33:31.926Z",
+    "valid": true
+  },
+  "SOC No-Outcomes-in-6h Health Alert": {
+    "id": "workflow-294e7c7b-6e97-4978-8c24-dac983218d51",
+    "enabled": true,
+    "createdAt": "2026-04-17T06:03:35.059Z",
+    "valid": true
+  },
+  "SOC Outcomes Timestamp Skew Monitor": {
+    "id": "workflow-0da61731-4b37-44dd-a467-13aaf9936ce3",
+    "enabled": true,
+    "createdAt": "2026-04-17T07:03:43.734Z",
+    "valid": true
+  },
+  "SOC Outcomes vs Pipeline Telemetry Divergence Monitor": {
+    "id": "workflow-236acacc-7684-42b4-b81b-9f5a58ff48d3",
+    "enabled": true,
+    "createdAt": "2026-04-17T07:34:18.155Z",
+    "valid": true
+  },
+  "SOC Triage Classification Field Presence Monitor": {
+    "id": "workflow-5b86c36f-1d57-4170-acc4-a967b8980a7b",
+    "enabled": true,
+    "createdAt": "2026-04-17T08:04:24.294Z",
+    "valid": true
+  },
+  "_diag-if5-bare-1": {
+    "id": "workflow-320415dd-acae-47fc-ab20-9b7f4e9934e6",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:17:16.093Z",
+    "valid": true
+  },
+  "_diag-http-probe": {
+    "id": "workflow-f733b599-4e08-40a2-9dcf-5418b9bad04e",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:13:45.778Z",
+    "valid": true
+  },
+  "_diag-if-test-4": {
+    "id": "workflow-d2bc486b-b1bd-492c-8b5b-02ba3a0ee217",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:05:02.566Z",
+    "valid": true
+  },
+  "_diag-if-test-3": {
+    "id": "workflow-9e13e7b6-5b99-4d02-a164-968c54f7ca20",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:04:00.264Z",
+    "valid": true
+  },
+  "_diag-if-test-2": {
+    "id": "workflow-dfaf3346-78ba-4166-aff9-8c4d49a808d0",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:03:01.865Z",
+    "valid": true
+  },
+  "_diag-if-test": {
+    "id": "workflow-da65166a-758f-4789-b700-b808d06e17b4",
+    "enabled": true,
+    "createdAt": "2026-04-17T17:00:13.341Z",
+    "valid": true
+  },
+  "Test Foreach": {
+    "id": "workflow-94f4ae22-95b5-4ce0-9d87-2c2f4b40d7fe",
+    "enabled": true,
+    "createdAt": "2026-04-17T16:19:03.849Z",
+    "valid": true
+  },
+  "SOC Watchdog Health Report Extractor": {
+    "id": "workflow-d1646948-859a-4827-9f2e-664d394e76a6",
+    "enabled": true,
+    "createdAt": "2026-04-16T14:34:40.304Z",
+    "valid": true
+  },
+  "SOC Telemetry Presence Snapshot": {
+    "id": "workflow-703d5218-fe85-4036-b5ff-a283623ffa85",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:59.818Z",
+    "valid": true
+  },
+  "SOC Dead-letter Existence & Heartbeat": {
+    "id": "workflow-43addedd-2f7e-46ac-84cb-a6a28c614e36",
+    "enabled": true,
+    "createdAt": "2026-04-16T13:29:26.145Z",
+    "valid": true
+  },
+  "SOC Coverage Gap Mapper": {
+    "id": "workflow-6d4e17c3-f96a-4ad2-b84a-fab1339cdb02",
+    "enabled": true,
+    "createdAt": "2026-04-15T21:50:36.276Z",
+    "valid": true
+  },
+  "SOC Observability": {
+    "id": "workflow-0ba3ff09-2eb9-4088-83a4-7f64c302d5bc",
+    "enabled": true,
+    "createdAt": "2026-04-15T22:00:38.912Z",
+    "valid": true
+  },
+  "SOC Alert Workflow Sync": {
+    "id": "workflow-0de83ce1-cc6d-49d5-95de-ff4145177670",
+    "enabled": true,
+    "createdAt": "2026-04-15T22:30:11.998Z",
+    "valid": true
+  },
+  "SOC KPI Data Model": {
+    "id": "workflow-aec2a5b8-8c22-4f26-8303-5113c5688ada",
+    "enabled": true,
+    "createdAt": "2026-04-15T23:00:45.084Z",
+    "valid": true
+  },
+  "SOC Hotspot & Backlog Risk": {
+    "id": "workflow-02a40385-e4ba-474e-a368-d34981bdd7e5",
+    "enabled": true,
+    "createdAt": "2026-04-15T23:30:18.282Z",
+    "valid": true
+  },
+  "SOC Low-Confidence Closure Guardrail": {
+    "id": "workflow-85a09aab-768c-4111-a20e-09aed357e8ad",
+    "enabled": true,
+    "createdAt": "2026-04-16T04:00:58.366Z",
+    "valid": true
+  },
+  "SOC Audit Trail Quality": {
+    "id": "workflow-9571d526-f197-45e8-b098-c47f7c194fc9",
+    "enabled": true,
+    "createdAt": "2026-04-16T06:00:34.682Z",
+    "valid": true
+  },
+  "SOC Connector Policy Watch": {
+    "id": "workflow-6b32ff2f-2710-4a81-a407-7be8ff4560fa",
+    "enabled": true,
+    "createdAt": "2026-04-16T06:30:07.824Z",
+    "valid": true
+  },
+  "SOC Alert Correlation Integrity": {
+    "id": "workflow-0db8f0ae-5be5-4aed-b85c-f6fa1a7ec0d8",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:18.141Z",
+    "valid": true
+  },
+  "SOC Triage Determinism": {
+    "id": "workflow-9d503ef5-15a3-41d5-b5e0-ead479f5ebed",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:20.402Z",
+    "valid": true
+  },
+  "SOC Correlation Dependency": {
+    "id": "workflow-4d81616a-5cd6-4c60-8b6e-3f386f398e95",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:22.196Z",
+    "valid": true
+  },
+  "SOC Alert Dataset Bridge": {
+    "id": "workflow-e75da56e-3a04-4195-a41e-ec4f5a2f1b09",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:24.165Z",
+    "valid": true
+  },
+  "SOC Case Escalation Policy": {
+    "id": "workflow-79d6d0a3-73dd-46bc-9442-731f34fbfe7e",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:26.182Z",
+    "valid": true
+  },
+  "SOC Correlation Dependency Health": {
+    "id": "workflow-6df5552d-817a-4927-8c13-99838b62f5fb",
+    "enabled": true,
+    "createdAt": "2026-04-16T11:13:28.173Z",
+    "valid": true
+  },
+  "SOC Agent Health Telemetry Probe": {
+    "id": "workflow-01ecf5d0-1e9b-4596-a935-488596eefa1e",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:14.315Z",
+    "valid": true
+  },
+  "SOC Agent-Health Telemetry Presence Probe": {
+    "id": "workflow-2685da60-5baf-4b1f-ac26-8ca570d36714",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:18.658Z",
+    "valid": true
+  },
+  "SOC Agent Health Telemetry Presence Snapshot": {
+    "id": "workflow-8d1c2db2-2f5e-4893-8cd1-d3776ba92258",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:20.950Z",
+    "valid": true
+  },
+  "SOC Outcomes KPI Snapshot": {
+    "id": "workflow-ec60c41a-a4e8-4312-a54c-47ffb1db3ae5",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:24.005Z",
+    "valid": true
+  },
+  "SOC Correlation Dependency Probe": {
+    "id": "workflow-28f158ec-710f-40f2-a6a5-0a578dff206b",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:25.690Z",
+    "valid": true
+  },
+  "SOC Triage Output Normalization Snapshot": {
+    "id": "workflow-c613e616-1865-4520-9561-113e87faa172",
+    "enabled": true,
+    "createdAt": "2026-04-16T12:03:27.706Z",
+    "valid": true
+  },
+  "SOC Enrichment": {
+    "id": "workflow-e125ace1-2472-4227-be23-ed9fc0543096",
+    "enabled": true,
+    "createdAt": "2026-04-16T09:24:15.849Z",
+    "valid": true
+  },
+  "SOC Investigation": {
+    "id": "workflow-f7d9ecb3-31f5-450e-9075-77dcfd7f3283",
+    "enabled": true,
+    "createdAt": "2026-04-16T09:24:15.849Z",
+    "valid": true
+  },
+  "SOC Preflight": {
+    "id": "workflow-8e5716b0-0afe-48b6-969a-5d10a8230d6f",
+    "enabled": true,
+    "createdAt": "2026-04-15T21:29:12.577Z",
+    "valid": true
+  }
+}

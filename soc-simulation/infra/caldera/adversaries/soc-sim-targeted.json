@@ -1,0 +1,10 @@
+{
+  "adversary_id": "soc-sim-targeted",
+  "name": "SOC Sim \u2014 Targeted",
+  "description": "Targeted intrusion \u2014 discovery, staging, lateral-ish.",
+  "atomic_ordering": [
+    "bd527b63-9f9e-46e0-9816-b8434d2b8989",
+    "18b624a0c60972f73fc04ac083883079",
+    "8da404c2b1ef1ae5f86f006f6dda5e8f"
+  ]
+}

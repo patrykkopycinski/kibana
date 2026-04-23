@@ -1,0 +1,50 @@
+{
+  "index_patterns": [".soc-rule-backtester-runs"],
+  "data_stream": {},
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": true,
+      "properties": {
+        "@timestamp":     { "type": "date" },
+        "run_id":         { "type": "keyword" },
+        "rec_id":         { "type": "keyword" },
+        "advisory_id":    { "type": "keyword" },
+        "rule_id":        { "type": "keyword" },
+        "rule_name":      { "type": "keyword" },
+        "kql":            { "type": "keyword", "ignore_above": 4096 },
+        "index_pattern":  { "type": "keyword" },
+        "window": {
+          "properties": {
+            "gte":        { "type": "date" },
+            "lte":        { "type": "date" }
+          }
+        },
+        "backtest": {
+          "properties": {
+            "total_docs":          { "type": "long" },
+            "positive_hits":       { "type": "long" },
+            "baseline_noise_docs": { "type": "long" },
+            "fp_rate_estimate":    { "type": "float" },
+            "tp_rate_estimate":    { "type": "float" },
+            "hit_rate_per_hour":   { "type": "float" },
+            "coverage":            { "type": "float" }
+          }
+        },
+        "gate_decision": { "type": "keyword" },
+        "gate_reason":   { "type": "text" },
+        "duration_ms":   { "type": "long" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Argus R8 — shadow-execution / dry-run backtester results. Each row records a single backtester invocation of a draft-rule KQL against historical telemetry. The trust-gate feeds gate_decision=pass here into its auto_apply_ready verdict so rules that would have produced a flood of hits in the last N hours are downgraded to pending_review before the applier ever runs them.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

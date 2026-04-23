@@ -1,31 +1,18 @@
 version: '1'
 name: SOC Argus — Frontier Simulator (M2.4)
 description: >
-  Argus M2.4 — Frontier-adversary simulation mode. Runs only while the
-  Mythos-class preset is armed. Picks one primitive + variant axis from the
-  on-disk variant bank (soc-simulation/scripts/argus-variant-bank/) and emits a
-  single labelled event into .soc-eval-corpus-<corpus_id>. Every tick is
-  recorded in .soc-audit-trail for shift-handover and governance.
+  Argus Frontier Simulator — emits labelled Mythos-era corpus events into
+  .soc-eval-corpus-<corpus_id> to simulate an adversary running live variants.
 
-  Why this exists:
-    * The M2.1 Detection Eval Vertical needs a continuous, labelled,
-      Mythos-era corpus — not ad-hoc exports.
-    * Caldera (L5) emulates real execution against the lab fleet. The
-      frontier simulator is deliberately decoupled: it produces corpus
-      rows, not executed attacks, so M2.1 can replay them deterministically
-      without network side-effects.
-    * Polymorphism axes (command_args, process_ancestry, encoding_layers,
-      etc.) come from the level-6 profile's argus_metadata and are materialised
-      into the variant bank.
+  The full labelled corpus is pre-seeded at setup time by setup.sh from
+  soc-simulation/scripts/argus-variant-bank/ (see the README there). On every
+  tick this workflow picks a random variant, re-emits it with a fresh
+  @timestamp and a unique emission id, so downstream consumers see a realistic
+  "attacker re-runs primitive" stream.
 
-  Day-1 scope: single primitive (T1003.001) with one hand-crafted variant.
-  Phase 2 of issue m2-4 grows the variant bank to >=20 variants across
-  >=3 mutation axes and teaches the simulator to randomise selection.
-
-  Related Argus artifacts:
-    * docs/argus/scaffolds/m2-4-simulator-contract.md
-    * docs/argus/kickoff/day-1-m2-4.md
-    * docs/argus/issues/m2-4-frontier-simulation.md
+  Runs only when the Mythos-class adversary preset is armed — see
+  soc-argus-arm-mythos-preset.yaml, which flips
+  .soc-difficulty-state.preset_armed = "level-6".
 
 enabled: true
 
@@ -37,68 +24,111 @@ triggers:
 
 consts:
   corpus_id: "argus-corpus-mythos-2026-04"
-  primitive_id: "T1003.001"
-  variant_axis: "command_args"
-  variant_index: 0
+  corpus_index: ".soc-eval-corpus-argus-corpus-mythos-2026-04"
+  # Emissions land in a sibling index so the read-from-the-corpus +
+  # write-back-to-the-corpus loop does not trip Elasticsearch's
+  # "reindex cannot write into an index it is reading from" guard. The
+  # Argus Detection Eval suite queries both indices via the
+  # corpus_id tag so this twin stream is transparent to downstream consumers.
+  emissions_index: ".soc-eval-corpus-argus-corpus-mythos-2026-04-live"
+  emission_source: "soc-argus-frontier-simulator"
 
 steps:
-  - name: check_preset_armed
-    type: elasticsearch.search
+  # ── Guard: only emit when the Mythos preset is armed ────────────────
+  - name: preset_state
+    type: elasticsearch.request
     with:
-      index: .soc-audit-trail
-      size: 1
-      query:
-        bool:
-          filter:
-            - term: { event_type: argus_mythos_preset_armed }
-          must:
-            - range: { "@timestamp": { gte: "now-12h" } }
+      method: GET
+      path: "/.soc-difficulty-state/_doc/current"
 
-  - name: gate_armed
+  - name: gate_preset_armed
     type: console
     with:
-      message: "{% if steps.check_preset_armed.output.hits.total.value > 0 %}yes{% else %}no{% endif %}"
+      message: "{% if steps.preset_state.output._source.preset_armed == 'level-6' %}yes{% else %}no{% endif %}"
 
-  - name: emit_variant
-    type: elasticsearch.index
-    with:
-      index: ".soc-eval-corpus-{{ consts.corpus_id }}"
-      refresh: "wait_for"
-      document:
-        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-        _argus:
-          corpus_id: "{{ consts.corpus_id }}"
-          primitive_id: "{{ consts.primitive_id }}"
-          variant_axis: "{{ consts.variant_axis }}"
-          variant_index: "{{ consts.variant_index }}"
-          source: "soc-argus-frontier-simulator"
-          should_fire: true
-          expected_rule_ids:
-            - "mythos.cred-dumping.lsass"
-            - "mythos.cred-dumping.minidump"
-        process:
-          name: "lsass.exe"
-          command_line: "procdump -ma lsass.exe out.dmp"
-          parent:
-            name: "powershell.exe"
-        host:
-          os:
-            family: windows
-        event:
-          category: ["process"]
-          type: ["start"]
-    if: "steps.gate_armed.output: yes"
+  # Pick a random variant from the pre-seeded corpus (only when armed)
+  - name: pick_variant_when_armed
+    type: if
+    condition: "steps.gate_preset_armed.output: yes"
+    steps:
+      - name: pick_variant
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.corpus_index }}"
+          size: 1
+          query:
+            function_score:
+              query:
+                bool:
+                  filter:
+                    - term:
+                        _argus.corpus_id: "{{ consts.corpus_id }}"
+                    - term:
+                        _argus.should_fire:
+                          value: true
+              random_score: {}
+              boost_mode: replace
 
-  - name: audit
-    type: elasticsearch.index
-    with:
-      index: .soc-audit-trail
-      document:
-        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-        event_type: argus_frontier_sim_tick
-        source: "soc-argus-frontier-simulator"
-        preset_armed: "{{ steps.gate_armed.output }}"
-        corpus_id: "{{ consts.corpus_id }}"
-        primitive_id: "{{ consts.primitive_id }}"
-        variant_axis: "{{ consts.variant_axis }}"
-        variant_index: "{{ consts.variant_index }}"
+      # We re-emit via _reindex + inline Painless so ES copies the full
+      # source document (including nested ECS objects like host/process/event)
+      # without Liquid having to stringify them. The script overwrites the
+      # @timestamp + marks the copy as a simulation emission, and reassigns
+      # _id so we get a fresh document each tick.
+      - name: emit_variant
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/_reindex?refresh=true"
+          body:
+            source:
+              index: "{{ consts.corpus_index }}"
+              query:
+                ids:
+                  values:
+                    - "{{ steps.pick_variant.output.hits.hits[0]._id }}"
+            dest:
+              index: "{{ consts.emissions_index }}"
+            script:
+              lang: painless
+              source: "ctx._source['@timestamp'] = params.now; if (ctx._source._argus == null) { ctx._source._argus = new HashMap(); } ctx._source._argus.is_simulation_emission = true; ctx._source._argus.source = params.src; ctx._source._argus.emission_id = params.emid; ctx._id = params.emid;"
+              params:
+                now: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+                src: "{{ consts.emission_source }}"
+                emid: "{{ execution.startedAt | date: '%s' }}-{{ steps.pick_variant.output.hits.hits[0]._source._argus.primitive_id }}"
+
+      - name: heartbeat
+        type: elasticsearch.index
+        with:
+          index: .soc-audit-trail
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            event_type: argus_frontier_simulator_tick
+            source: "{{ consts.emission_source }}"
+            corpus_id: "{{ consts.corpus_id }}"
+            primitive_id: "{{ steps.pick_variant.output.hits.hits[0]._source._argus.primitive_id }}"
+            variant_axis: "{{ steps.pick_variant.output.hits.hits[0]._source._argus.variant_axis }}"
+            variant_index: "{{ steps.pick_variant.output.hits.hits[0]._source._argus.variant_index }}"
+            emission_id: "{{ execution.startedAt | date: '%s' }}-{{ steps.pick_variant.output.hits.hits[0]._source._argus.primitive_id }}"
+
+      - name: log_done
+        type: console
+        with:
+          message: "Frontier simulator tick complete — emitted {{ steps.pick_variant.output.hits.hits[0]._source._argus.primitive_id }}"
+
+  - name: skipped_heartbeat
+    type: if
+    condition: "steps.gate_preset_armed.output: no"
+    steps:
+      - name: log_skipped
+        type: console
+        with:
+          message: "Frontier simulator: preset not armed, skipping emission"
+      - name: heartbeat_skipped
+        type: elasticsearch.index
+        with:
+          index: .soc-audit-trail
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            event_type: argus_frontier_simulator_skipped
+            source: "{{ consts.emission_source }}"
+            reason: preset_not_armed

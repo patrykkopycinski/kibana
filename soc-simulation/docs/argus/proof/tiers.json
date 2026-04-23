@@ -1,0 +1,43 @@
+{"took":2,"timed_out":false,"_shards":{"total":1,"successful":1,"skipped":0,"failed":0},"hits":{"total":{"value":2,"relation":"eq"},"max_score":null,"hits":[{"_index":".soc-actor-trust-tiers","_id":"argus.exploit_to_detection","_score":null,"_source":{
+  "@timestamp": "2026-04-17T17:00:00.000Z",
+  "actor_id": "argus.exploit_to_detection",
+  "actor_kind": "agent",
+  "tier": "frontier",
+  "window_days": 7,
+  "metrics": {
+    "eval_runs": 12, "eval_pass_rate": 0.92,
+    "avg_precision": 0.94, "avg_recall": 0.87, "avg_f1": 0.905,
+    "avg_robustness": 0.78, "reasoning_quality": 0.88,
+    "frontier_pass_rate": 0.92, "simulation_runs": 3,
+    "rejections_by_humans": 0, "rollbacks_triggered": 0
+  },
+  "policy": {
+    "auto_apply": true, "requires_human_approval": false,
+    "allow_production_targets": true, "max_risk_score": 100,
+    "max_impact_radius": "production"
+  },
+  "rationale": "tier=frontier based on 7d eval metrics for actor argus.exploit_to_detection",
+  "justification_trace_id": "argus-trust-tier-20260417170000"
+}
+,"sort":[null]},{"_index":".soc-actor-trust-tiers","_id":"soc-experimental-agent","_score":null,"_source":{
+  "@timestamp": "2026-04-17T17:00:00.000Z",
+  "actor_id": "soc-experimental-agent",
+  "actor_kind": "agent",
+  "tier": "probationary",
+  "window_days": 7,
+  "metrics": {
+    "eval_runs": 6, "eval_pass_rate": 0.55,
+    "avg_precision": 0.74, "avg_recall": 0.58, "avg_f1": 0.65,
+    "avg_robustness": 0.4, "reasoning_quality": 0.55,
+    "frontier_pass_rate": 0.55, "simulation_runs": 0,
+    "rejections_by_humans": 1, "rollbacks_triggered": 0
+  },
+  "policy": {
+    "auto_apply": false, "requires_human_approval": true,
+    "allow_production_targets": false, "max_risk_score": 50,
+    "max_impact_radius": "canary"
+  },
+  "rationale": "tier=probationary based on 7d eval metrics for actor soc-experimental-agent",
+  "justification_trace_id": "argus-trust-tier-20260417170000"
+}
+,"sort":[null]}]}}

@@ -31,78 +31,64 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-6h"
-        size: 50
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-6h"
+      size: 50
   - name: get_coverage_gaps
     type: elasticsearch.search
     with:
       index: ".soc-coverage-gaps"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-24h"
-        size: 20
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      size: 20
   - name: get_rejected_recs
     type: elasticsearch.search
     with:
       index: ".soc-recommendations"
-      body:
-        query:
-          bool:
-            filter:
-              - terms:
-                  source: ["soc-deteng", "soc-deteng-agent", "soc-signal-quality-agent"]
-              - range:
-                  "@timestamp":
-                    gte: "now-7d"
-            should:
-              - term:
-                  status: rejected
-              - exists:
-                  field: sub_items
-            minimum_should_match: 1
-        size: 20
-        sort:
-          - "@timestamp": desc
-        _source:
-          - title
-          - summary
-          - rejection_reason
-          - reviewed_at
-          - sub_items
-          - source
+      query:
+        bool:
+          filter:
+            - terms:
+                source: ["soc-deteng", "soc-deteng-agent", "soc-signal-quality-agent"]
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+          should:
+            - term:
+                status: rejected
+            - exists:
+                field: sub_items
+          minimum_should_match: 1
+      size: 20
+      _source:
+        - title
+        - summary
+        - rejection_reason
+        - reviewed_at
+        - sub_items
+        - source
 
   - name: get_open_redesign_flags
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        query:
-          bool:
-            filter:
-              - term: { source: "soc-signal-quality-agent" }
-              - term: { event_type: "redesign_required" }
-              - range:
-                  "@timestamp":
-                    gte: "now-24h"
-        size: 20
-        sort:
-          - "@timestamp": desc
-        _source:
-          - "@timestamp"
-          - rule_id
-          - analysis_output
+      query:
+        bool:
+          filter:
+            - term: {source: "soc-signal-quality-agent"}
+            - term: {event_type: "redesign_required"}
+            - range:
+                "@timestamp":
+                  gte: "now-24h"
+      size: 20
+      _source:
+        - "@timestamp"
+        - rule_id
+        - analysis_output
 
   # ──────────────────────────────────────────────────────────────────────
   # Phase 1 — Signal Quality Agent (tactical FP/TP tuning)
@@ -120,6 +106,16 @@ steps:
         If a rule is structurally noisy, emit `redesign_required` and let the
         Principal Detection Engineer rewrite it in Phase 2.
 
+        IMPORTANT — structured patch envelope is mandatory for rule updates:
+        every `intents[]` entry where `details.artifact_type="rule"` AND
+        `details.op="update"` MUST carry `details.patch` with fields
+        rule_id, action, patch_fields, current_values, impact_prediction —
+        see the Structured Patch Envelope section of your instructions.
+        Prose-only intents are dead-lettered at ingest. ALWAYS call
+        `platform.core.manage_detection_rules` with `operation='read'` (or
+        `find`) first so `current_values` reflects the live rule state —
+        the backtester and drift gate both depend on it.
+
         Previously rejected recommendations (learn from these — do NOT repeat):
         {{ steps.get_rejected_recs.output.hits.hits | json }}
 
@@ -130,10 +126,22 @@ steps:
         {
           "findings": [ /* per-rule tuning observations */ ],
           "summary":  "...",
-          "intents":  [ /* mutation_intent objects for each exception / threshold / disable
-                           — same envelope as soc-meta (details.artifact_type="rule"|"exception",
-                           artifact_id="auto-*", op="update|enable|disable", expected_ownership="autosoc",
-                           patch|new_definition, evidence[], expected_impact{}) */ ]
+          "intents":  [ /* one mutation_intent per exception / threshold / disable.
+                           Envelope: {
+                             title, summary, confidence, track:"agentic",
+                             evidence[], expected_impact{},
+                             details: {
+                               artifact_type: "rule" | "exception",
+                               artifact_id: "auto-*",   // must be autosoc-owned
+                               op: "update" | "enable" | "disable",
+                               expected_ownership: "autosoc",
+                               reason: "<>=20 chars>",
+                               // For artifact_type="rule" AND op="update", patch MUST
+                               // be a structured rule_patch (see agent instructions).
+                               patch: { rule_id, action, patch_fields, current_values,
+                                        impact_prediction }
+                             }
+                           } */ ]
         }
     timeout: 300s
 
@@ -146,6 +154,39 @@ steps:
         source: "soc-signal-quality-agent"
         event_type: "signal_quality_tuning"
         analysis_output: "{{ steps.analyze_signal_quality.output | json }}"
+
+  # Argus M2.5 — governance trace for Phase 1. Emits a span document with
+  # `argus.*` populated so that every detection-engineering decision is
+  # attributable to an agent+decision_kind. Confidence is a unit-interval
+  # representation of the agent's own self-reported confidence.
+  - name: write_signal_quality_reasoning_trace
+    type: elasticsearch.index
+    with:
+      index: .soc-reasoning-trace
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "deteng-signal-quality-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        agent_id: "soc-signal-quality-agent"
+        step_index: 0
+        step_type: "run_summary"
+        content: "Signal Quality tuning cycle — {{ steps.analyze_signal_quality.output.intents | size | default: 0 }} intent(s) produced"
+        argus:
+          agent:
+            id: "soc-signal-quality-agent"
+            version: "argus-m2.5"
+          decision:
+            kind: "rule_update"
+            id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
+            confidence: "{{ steps.analyze_signal_quality.output.confidence | default: 75 | divided_by: 100.0 }}"
+          actor:
+            trust_tier: "scoped"
+        attributes:
+          argus.agent.id: "soc-signal-quality-agent"
+          argus.agent.version: "argus-m2.5"
+          argus.decision.kind: "rule_update"
+          argus.decision.id: "{{ steps.write_signal_quality_evolution_log.output._id }}"
+          argus.decision.confidence: "{{ steps.analyze_signal_quality.output.confidence | default: 75 | divided_by: 100.0 }}"
+          argus.actor.trust_tier: "scoped"
 
   - name: write_signal_quality_recommendation
     type: elasticsearch.index
@@ -164,7 +205,7 @@ steps:
         reasoning: "Tactical FP/TP tuning based on .soc-outcomes"
         confidence: 75
         track: "agentic"
-        expected_impact: "{{ steps.analyze_signal_quality.output.expected_impact | default: {} }}"
+        expected_impact: "{{ steps.analyze_signal_quality.output.expected_impact }}"
         evidence: "{{ steps.analyze_signal_quality.output.evidence | default: [] }}"
 
   # ──────────────────────────────────────────────────────────────────────
@@ -222,6 +263,38 @@ steps:
         event_type: "principal_deteng_cycle"
         analysis_output: "{{ steps.analyze_principal_deteng.output | json }}"
 
+  # Argus M2.5 — governance trace for Phase 2. Separate span from Phase 1 so
+  # the governance dashboard can distinguish tactical tuning from strategic
+  # authoring when it slices by `argus.decision.kind`.
+  - name: write_principal_reasoning_trace
+    type: elasticsearch.index
+    with:
+      index: .soc-reasoning-trace
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "deteng-principal-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        agent_id: "soc-deteng-agent"
+        step_index: 0
+        step_type: "run_summary"
+        content: "Principal DetEng cycle — {{ steps.analyze_principal_deteng.output.intents | size | default: 0 }} intent(s) produced"
+        argus:
+          agent:
+            id: "soc-deteng-agent"
+            version: "argus-m2.5"
+          decision:
+            kind: "rule_create"
+            id: "{{ steps.write_principal_evolution_log.output._id }}"
+            confidence: "{{ steps.analyze_principal_deteng.output.confidence | default: 75 | divided_by: 100.0 }}"
+          actor:
+            trust_tier: "scoped"
+        attributes:
+          argus.agent.id: "soc-deteng-agent"
+          argus.agent.version: "argus-m2.5"
+          argus.decision.kind: "rule_create"
+          argus.decision.id: "{{ steps.write_principal_evolution_log.output._id }}"
+          argus.decision.confidence: "{{ steps.analyze_principal_deteng.output.confidence | default: 75 | divided_by: 100.0 }}"
+          argus.actor.trust_tier: "scoped"
+
   - name: write_principal_recommendation
     type: elasticsearch.index
     with:
@@ -239,7 +312,7 @@ steps:
         reasoning: "Strategic rule authoring driven by coverage gaps + Signal Quality redesign flags"
         confidence: 75
         track: "agentic"
-        expected_impact: "{{ steps.analyze_principal_deteng.output.expected_impact | default: {} }}"
+        expected_impact: "{{ steps.analyze_principal_deteng.output.expected_impact }}"
         evidence: "{{ steps.analyze_principal_deteng.output.evidence | default: [] }}"
 
   # ──────────────────────────────────────────────────────────────────────
@@ -249,9 +322,17 @@ steps:
   # governance gates.
   # ──────────────────────────────────────────────────────────────────────
 
+  - name: gate_has_signal_quality_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.analyze_signal_quality.output.intents | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   - name: write_signal_quality_intents
     type: foreach
-    foreach: "{{ steps.analyze_signal_quality.output.intents | default: [] }}"
+    foreach: "{{ steps.analyze_signal_quality.output.intents }}"
+    if: "steps.gate_has_signal_quality_intents.output: yes"
     steps:
       - name: write_intent
         type: elasticsearch.index
@@ -275,11 +356,19 @@ steps:
             evidence: "{{ foreach.item.evidence | default: empty }}"
             details: "{{ foreach.item.details }}"
 
+  - name: gate_has_principal_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.analyze_principal_deteng.output.intents | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   - name: write_principal_intents
     type: foreach
-    foreach: "{{ steps.analyze_principal_deteng.output.intents | default: [] }}"
+    foreach: "{{ steps.analyze_principal_deteng.output.intents }}"
+    if: "steps.gate_has_principal_intents.output: yes"
     steps:
-      - name: write_intent
+      - name: write_principal_intent
         type: elasticsearch.index
         with:
           index: .soc-recommendations
@@ -300,6 +389,19 @@ steps:
             expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
             evidence: "{{ foreach.item.evidence | default: empty }}"
             details: "{{ foreach.item.details }}"
+
+      - name: seed_artifact_registry
+        type: elasticsearch.index
+        with:
+          index: .soc-artifact-registry
+          id: "{{ foreach.item.details.artifact_type | default: 'rule' }}-{{ foreach.item.details.artifact_id | default: foreach.index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            artifact_id: "{{ foreach.item.details.artifact_id }}"
+            type: "{{ foreach.item.details.artifact_type | default: 'rule' }}"
+            owner: "autosoc"
+            created_by: "soc-deteng"
+            created_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
 
   - name: log_result
     type: console

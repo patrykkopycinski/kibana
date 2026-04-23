@@ -160,6 +160,8 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
     "@kbn/security-solution-features",
+    "@kbn/argus-console",
+    "@kbn/argus-console-common",
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
     "@kbn/core-application-common",

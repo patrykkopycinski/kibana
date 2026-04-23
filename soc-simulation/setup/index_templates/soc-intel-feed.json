@@ -1,0 +1,39 @@
+{
+  "index_patterns": [".soc-intel-feed"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp":       { "type": "date" },
+        "intel_id":         { "type": "keyword" },
+        "feed_id":          { "type": "keyword" },
+        "adapter":          { "type": "keyword" },
+        "kind":             { "type": "keyword" },
+        "reference": {
+          "properties": {
+            "cve":           { "type": "keyword" },
+            "technique_ids": { "type": "keyword" },
+            "actor_ids":     { "type": "keyword" }
+          }
+        },
+        "signal_strength":  { "type": "float" },
+        "half_life_days":   { "type": "integer" },
+        "source_trust":     { "type": "float" },
+        "observed_at":      { "type": "date" },
+        "summary":          { "type": "text" },
+        "raw":              { "type": "object", "enabled": false }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Argus Phase 3 — abstract intel-feed contract. `.soc-intel-feed` is the downstream Mythos-era intel stream that `soc-argus-intel-mythos-aggregator` reads to compute `vulnerability.argus.exploit_context.mythos_signal`. Adapters (`argus_intel_adapter_generic`, future Glasswing adapter) normalise to this single shape. `signal_strength` is the adapter's best estimate of relevance to Mythos-class exploitation probability, in [0, 1]. `half_life_days` drives exponential decay at aggregation time. `source_trust` is the per-feed trust weight set at adapter config (Glasswing 0.9, generic 0.5). `raw` is an opaque forensics passthrough, never consumed by scoring logic.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

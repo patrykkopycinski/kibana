@@ -1,0 +1,42 @@
+[
+  {
+    "id": "workflow-3dee29ad-7ee5-405e-b995-0e547e4",
+    "enabled": false,
+    "name": "SOC Argus \u2014 Frontier Simulator (M2.4)"
+  },
+  {
+    "id": "workflow-0f93e968-c966-4621-877f-6284ee9",
+    "enabled": false,
+    "name": "Argus Trust Gate (Phase 3)"
+  },
+  {
+    "id": "workflow-fe1929bf-5228-4d8d-be4a-09f7b44",
+    "enabled": true,
+    "name": "SOC Argus \u2014 Arm Mythos-Class Preset"
+  },
+  {
+    "id": "workflow-90777018-2711-4416-810d-387fb0d",
+    "enabled": true,
+    "name": "Argus Exploit-to-Detection Reconciler (M2.2)"
+  },
+  {
+    "id": "workflow-5b35f18b-954c-4a3a-abd2-62f99a2",
+    "enabled": false,
+    "name": "SOC Argus \u2014 Frontier Simulator (M2.4)"
+  },
+  {
+    "id": "workflow-432e9de6-f960-422d-b082-ad616a6",
+    "enabled": false,
+    "name": "Argus Trust Gate (Phase 3)"
+  },
+  {
+    "id": "workflow-5693d91b-8dbc-421a-8b41-037a59d",
+    "enabled": true,
+    "name": "Argus Trust Tier Assessor (Phase 3)"
+  },
+  {
+    "id": "workflow-a86bc2d0-bee4-4e38-81d5-19751d4",
+    "enabled": false,
+    "name": "SOC Detection Eval (Argus M2.1)"
+  }
+]

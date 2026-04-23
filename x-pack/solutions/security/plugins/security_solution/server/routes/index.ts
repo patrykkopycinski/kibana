@@ -60,6 +60,7 @@ import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 import { registerInitializationRoutes } from '../lib/initialization';
+import { registerArgusRoutes } from '../lib/argus';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -137,7 +138,7 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
+  const { previewTelemetryUrlEnabled, argusConsoleEnabled } = config.experimentalFeatures;
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
@@ -167,6 +168,10 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
+
+  if (argusConsoleEnabled) {
+    registerArgusRoutes({ router, logger, experimentalFeatures: config.experimentalFeatures });
+  }
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

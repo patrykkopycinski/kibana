@@ -36,7 +36,7 @@
   },
   "_meta": {
     "description": "Operator-visible SOC action audit trail. Top-level `event_type`, `source`, `stage`, `pipeline` MUST stay as `keyword` so dashboards and governance queries can aggregate without relying on `.keyword` subfields.",
-    "owner": "autosoc-governance",
+    "owner": "argus-governance",
     "schema_version": 2
   }
 }

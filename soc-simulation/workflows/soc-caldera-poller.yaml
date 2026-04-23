@@ -10,18 +10,23 @@ description: >
   entirely from native workflow steps (elasticsearch.*, http, foreach, if).
 
   Terminal states per Caldera: finished, cleanup, paused. Anything else means
-  still running; if a command has been running longer than 10 minutes we mark
-  it failed with reason=timeout.
+  still running; commands still running after 10 minutes (as seen by ES date
+  math on claimed_at) are marked failed with reason=timeout.
 enabled: true
 
 triggers:
   - type: scheduled
     with:
-      every: 30s
+      every: 1m
   - type: manual
 
 consts:
-  caldera_url: "http://caldera:8888"
+  # Caldera URL — Kibana runs from source on the host (after Bedrock temperature
+  # platform fix), so the Docker-network hostname `caldera:8888` no longer resolves.
+  # Use the OrbStack-forwarded port `localhost:18888` to match soc-caldera-dispatcher.
+  # (Previously this was `http://caldera:8888`, which produced a steady stream of
+  # ENOTFOUND errors — 46/53 failures in the last hour of 2026-04-17 soak.)
+  caldera_url: "http://localhost:18888"
   caldera_api_key: "ADMIN123"
   timeout_minutes: 10
 
@@ -31,20 +36,33 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-attack-commands"
-      body:
-        size: 20
-        query:
-          bool:
-            filter:
-              - term: { status: "running" }
-              - exists: { field: "caldera_operation_id" }
-        sort:
-          - "claimed_at": asc
+      size: 20
+      query:
+        bool:
+          filter:
+            - term: {status: "running"}
+            - exists: {field: "caldera_operation_id"}
 
-  # ── Poll and update each ─────────────────────────────────────────────
+  # ── Pull commands that have been running for > timeout_minutes ──────
+  # Kept as a separate query so timeout detection is done server-side via
+  # ES date math (now-Xm), avoiding fragile Liquid timestamp arithmetic.
+  - name: timed_out_commands
+    type: elasticsearch.search
+    with:
+      index: ".soc-attack-commands"
+      size: 20
+      query:
+        bool:
+          filter:
+            - term: {status: "running"}
+            - exists: {field: "caldera_operation_id"}
+            - range:
+                claimed_at:
+                  lt: "now-10m"
+
   - name: poll
     type: foreach
-    foreach: "{{ steps.running_commands.output.hits.hits | default: [] }}"
+    foreach: "{{ steps.running_commands.output.hits.hits }}"
     steps:
       - name: get_operation
         type: http
@@ -53,42 +71,49 @@ steps:
           method: GET
           headers:
             KEY: "{{ consts.caldera_api_key }}"
-          timeout: 15s
 
-      # Terminal — finished/cleanup/paused: pull techniques from the chain
+      # Gate: is the Caldera operation in a terminal state?
+      # Pre-compute to scalar "yes"/"no" so KQL `output: yes` can match.
+      # IMPORTANT: http connector returns { status, statusText, headers, data }
+      # so Caldera operation fields live under steps.get_operation.output.data.*
+      - name: gate_terminal_state
+        type: console
+        with:
+          message: >-
+            {%- assign s = steps.get_operation.output.data.state -%}
+            {% if s == 'finished' or s == 'cleanup' or s == 'paused' %}yes{% else %}no{% endif %}
+
+      # Terminal — finished/cleanup/paused: pull techniques from the chain.
       - name: mark_completed
-        type: elasticsearch.document.update
+        type: elasticsearch.update
         with:
           index: ".soc-attack-commands"
           id: "{{ foreach.item._id }}"
-          body:
-            doc:
-              status: "completed"
-              completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-              caldera_state: "{{ steps.get_operation.output.state }}"
-              techniques_executed: "{{ steps.get_operation.output.chain | map: 'ability' | map: 'technique_id' | uniq | compact }}"
-        if: >-
-          {{ steps.get_operation.output.state == 'finished'
-             or steps.get_operation.output.state == 'cleanup'
-             or steps.get_operation.output.state == 'paused' }}
+          doc:
+            status: "completed"
+            completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            caldera_state: "{{ steps.get_operation.output.data.state }}"
+            techniques_executed: "{{ steps.get_operation.output.data.chain | map: 'ability' | map: 'technique_id' | uniq | compact }}"
+        if: "steps.gate_terminal_state.output: yes"
 
-      # Timeout — claimed_at older than 10 min and still not terminal
+  # ── Timeout handling: separate foreach over the timed-out query ─────
+  # Every command here is running > 10m AND not yet terminal (those get
+  # rewritten above before this step runs). Still we gate on caldera_state
+  # having been set to a non-terminal value in mark_completed above, but the
+  # simplest correct rule is "if it's still in status=running after 10m, fail".
+  - name: timeout
+    type: foreach
+    foreach: "{{ steps.timed_out_commands.output.hits.hits }}"
+    steps:
       - name: mark_timeout
-        type: elasticsearch.document.update
+        type: elasticsearch.update
         with:
           index: ".soc-attack-commands"
           id: "{{ foreach.item._id }}"
-          body:
-            doc:
-              status: "failed"
-              completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-              caldera_state: "{{ steps.get_operation.output.state | default: 'unknown' }}"
-              error: "Caldera operation did not terminate within {{ consts.timeout_minutes }} minutes"
-        if: >-
-          {{ steps.get_operation.output.state != 'finished'
-             and steps.get_operation.output.state != 'cleanup'
-             and steps.get_operation.output.state != 'paused'
-             and foreach.item._source.claimed_at < ('now-' | append: consts.timeout_minutes | append: 'm' | date: '%Y-%m-%dT%H:%M:%SZ') }}
+          doc:
+            status: "failed"
+            completed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            error: "Caldera operation did not terminate within {{ consts.timeout_minutes }} minutes"
 
   - name: heartbeat
     type: elasticsearch.index
@@ -98,8 +123,9 @@ steps:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         event_type: caldera_poller_tick
         running_count: "{{ steps.running_commands.output.hits.hits | size | default: 0 }}"
+        timed_out_count: "{{ steps.timed_out_commands.output.hits.hits | size | default: 0 }}"
 
   - name: log_done
     type: console
     with:
-      message: "Caldera poller tick complete — inspected {{ steps.running_commands.output.hits.hits | size | default: 0 }} running operations"
+      message: "Caldera poller tick complete — inspected {{ steps.running_commands.output.hits.hits | size | default: 0 }} running ops, marked {{ steps.timed_out_commands.output.hits.hits | size | default: 0 }} as timed out"

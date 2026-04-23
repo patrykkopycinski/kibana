@@ -11,11 +11,11 @@ export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
   attacks = 'attacks',
-  autonomousSoc = 'autonomous_soc',
   aiValue = 'ai_value',
   artifacts = 'artifacts',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
+  argus = 'argus',
   blocklist = 'blocklist',
 
   // TODO: https://github.com/elastic/kibana/issues/242434

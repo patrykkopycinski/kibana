@@ -28,27 +28,37 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-forensic-summary"
-      body:
-        size: 500
-        _source: ["case_id"]
-        query:
-          match_all: {}
+      size: 500
+      _source: ["case_id"]
+      query:
+        match_all: {}
 
   - name: emit_summaries
     type: foreach
-    foreach: "{{ steps.poll_closed_cases.output.cases | default: [] }}"
+    foreach: "{{ steps.poll_closed_cases.output.cases }}"
     steps:
       # Pull investigation artefacts for this case from the hunt/outcome indices.
       - name: hunt_findings
         type: elasticsearch.search
         with:
           index: ".soc-hunt-findings"
-          body:
-            size: 100
-            query:
-              bool:
-                filter:
-                  - term: { case_id.keyword: "{{ foreach.item.id }}" }
+          size: 100
+          query:
+            bool:
+              filter:
+                - term: {case_id.keyword: "{{ foreach.item.id }}"}
+
+      # Compute-and-match: has this case already been summarized?
+      - name: gate_needs_summary
+        type: console
+        with:
+          message: >-
+            {%- assign seen_ids = '' -%}
+            {%- for d in steps.existing_summaries.output.hits.hits -%}
+              {%- assign seen_ids = seen_ids | append: ',' | append: d._source.case_id -%}
+            {%- endfor -%}
+            {%- assign needle = ',' | append: foreach.item.id -%}
+            {% if seen_ids contains needle %}no{% else %}yes{% endif %}
 
       - name: compose_summary
         type: ai.agent
@@ -74,13 +84,14 @@ steps:
               "summary_markdown":  "<markdown string, <= 2000 chars>"
             }
         timeout: 120s
-        if: >-
-          {% assign seen_ids = '' %}
-          {% for d in steps.existing_summaries.output.hits.hits %}
-            {% assign seen_ids = seen_ids | append: ',' | append: d._source.case_id %}
-          {% endfor %}
-          {% assign needle = ',' | append: foreach.item.id %}
-          {{ seen_ids contains needle | not }}
+        if: "steps.gate_needs_summary.output: yes"
+
+      # Compute-and-match: did compose_summary actually produce output?
+      - name: gate_summary_produced
+        type: console
+        with:
+          message: >-
+            {% if steps.compose_summary.output.verdict %}yes{% else %}no{% endif %}
 
       - name: write_summary
         type: elasticsearch.index
@@ -89,15 +100,15 @@ steps:
           id: "{{ foreach.item.id }}"
           op_type: create
           document:
-            case_id:          "{{ foreach.item.id }}"
-            closed_at:        "{{ foreach.item.closedAt | default: foreach.item.updatedAt }}"
-            verdict:          "{{ steps.compose_summary.output.verdict | default: 'inconclusive' }}"
-            iocs:             "{{ steps.compose_summary.output.iocs | default: [] }}"
-            yara_rules:       "{{ steps.compose_summary.output.yara_rules | default: [] }}"
-            attribution:      "{{ steps.compose_summary.output.attribution | default: {} }}"
+            case_id: "{{ foreach.item.id }}"
+            closed_at: "{{ foreach.item.closedAt | default: foreach.item.updatedAt }}"
+            verdict: "{{ steps.compose_summary.output.verdict | default: 'inconclusive' }}"
+            iocs: "{{ steps.compose_summary.output.iocs | default: [] }}"
+            yara_rules: "{{ steps.compose_summary.output.yara_rules | default: [] }}"
+            attribution: "{{ steps.compose_summary.output.attribution }}"
             exceptions_created: "{{ steps.compose_summary.output.exceptions_created | default: [] }}"
             summary_markdown: "{{ steps.compose_summary.output.summary_markdown | default: 'No summary available.' }}"
-        if: "{{ steps.compose_summary.output != nil }}"
+        if: "steps.gate_summary_produced.output: yes"
 
   - name: log_done
     type: console

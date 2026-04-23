@@ -1,0 +1,29 @@
+{
+  "index_patterns": [".soc-intel-mythos-signals"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp":        { "type": "date" },
+        "cve_id":            { "type": "keyword" },
+        "mythos_signal":     { "type": "float" },
+        "top_feeds":         { "type": "keyword" },
+        "evidence_count":    { "type": "integer" },
+        "window_days":       { "type": "integer" },
+        "computed_at":       { "type": "date" },
+        "aggregator_version": { "type": "keyword" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "Argus Phase 3 — per-CVE Mythos signal aggregates produced by `soc-argus-intel-mythos-aggregator`. The aggregator sums decayed, trust-weighted `.soc-intel-feed` rows per CVE over a 14-day window and caps the result at 1.0. The M2.3 exploit-probability path reads this index (keyed by `cve_id`) when computing `vulnerability.argus.exploit_context.mythos_signal` for an alert whose host did not produce Shadow-AI telemetry — it is the intel-feed-driven complement to the R13 Shadow-AI derivation in `@kbn/argus-exploit-probability`.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

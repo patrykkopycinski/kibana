@@ -495,9 +495,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { subPluginClasses } = await this.lazySubPlugins();
       this._subPlugins = {
         alerts: new subPluginClasses.Detections(),
+        argus: new subPluginClasses.Argus(),
         assetInventory: new subPluginClasses.AssetInventory(),
         attackDiscovery: new subPluginClasses.AttackDiscovery(),
-        autonomousSoc: new subPluginClasses.AutonomousSoc(),
         rules: new subPluginClasses.Rules(),
         exceptions: new subPluginClasses.Exceptions(),
         cases: new subPluginClasses.Cases(),
@@ -530,9 +530,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const alerts = await subPlugins.alerts.start(storage, plugins);
     return {
       alerts,
+      argus: subPlugins.argus.start(),
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
-      autonomousSoc: subPlugins.autonomousSoc.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(this.isServerless),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),

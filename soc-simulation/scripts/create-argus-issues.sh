@@ -122,9 +122,11 @@ EPIC_BODY_FILE="$(mktemp -t argus-epic.XXXXXX.md)"
 trap 'rm -f "$EPIC_BODY_FILE"' EXIT
 
 cat > "$EPIC_BODY_FILE" <<'MD'
-# Argus — Mythos-Resilient AutoSOC (Phase 2 Epic)
+# Argus — Mythos-Resilient Defender (Phase 2 Epic)
 
-Argus is the evolution of AutoSOC for the Mythos era. See the full design tree
+Argus is a Mythos-resilient defender — a self-governing SOC built on the
+Elastic Stack, designed to stay sound under frontier-capability adversaries.
+See the full design tree
 in-repo under `soc-simulation/docs/argus/`:
 
 - Threat model: `soc-simulation/docs/argus/threat-model.html`
@@ -160,7 +162,7 @@ MD
 EPIC_LABEL_STR="$(resolve_labels "${EPIC_LABELS[@]}")"
 SUB_LABEL_STR="$(resolve_labels "${SUB_LABELS[@]}")"
 
-create_issue "Argus — Mythos-Resilient AutoSOC (Phase 2 Epic)" "$EPIC_BODY_FILE" "$EPIC_LABEL_STR"
+create_issue "Argus — Mythos-Resilient Defender (Phase 2 Epic)" "$EPIC_BODY_FILE" "$EPIC_LABEL_STR"
 
 # Sub-issues, order matches the dependency graph in KICKOFF.md §2.
 declare -a SUB_ISSUES=(

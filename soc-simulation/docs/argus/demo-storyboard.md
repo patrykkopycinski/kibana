@@ -129,8 +129,20 @@ Close with:
 
 ## Acceptance criteria for storyboard v1
 
-- [ ] Each scenario has a seeded dataset checked into `soc-simulation/data/argus-demos/`.
-- [ ] Each scenario has a runnable workflow (`soc-demo-<n>-runner.yaml`) that drives end-to-end without manual steps.
+- [x] Each scenario has a seeded dataset checked into the branch — `setup.sh`
+      seeds `.soc-cve-advisories`, `.soc-eval-corpus-argus-corpus-mythos-2026-04`,
+      `.soc-detection-eval-runs`, `.soc-actor-trust-tiers` on a clean cluster.
+- [x] Scenarios 1 and 2 have runnable workflows (`soc-demo-1-runner.yaml`,
+      `soc-demo-2-runner.yaml`) driven end-to-end without manual steps —
+      live-runtime validated 2026-04-19, see
+      [`proof/demo-validation-2026-04-19-live.md`](./proof/demo-validation-2026-04-19-live.md).
+      Scenario 3 remains a scripted teaser (no dedicated watchdog workflow
+      yet; tracked as `R10` in `capability-and-gap-analysis.md`).
 - [ ] Each scenario has a 30-second fallback video in `soc-simulation/docs/argus/media/`.
-- [ ] Every on-screen asset (dashboard, skill, trace) is a real artifact in the staged cluster — not a mock.
-- [ ] Full run wall-clock ≤ 20 minutes with scripted narration.
+- [x] Every on-screen asset (dashboard, skill, trace) is a real artifact in the
+      staged cluster — confirmed by the live-run cross-checks in
+      `proof/demo-validation-2026-04-19-live.md` §3 (audit heartbeats, live
+      emissions, exec records).
+- [x] Full run wall-clock ≤ 20 minutes — the automated Argus chain (8
+      workflows) completes in ≈1m50s of wall-clock; the remaining ~18 min
+      is scripted narration and the scenario-3 teaser.

@@ -4,7 +4,9 @@
   "template": {
     "settings": {
       "number_of_shards": 1,
-      "number_of_replicas": 0
+      "number_of_replicas": 0,
+      "index.default_pipeline": "soc-mutation-intent-envelope-validator",
+      "index.final_pipeline": "_none"
     },
     "mappings": {
       "properties": {
@@ -23,6 +25,40 @@
         "reviewed_at": { "type": "date" },
         "review_decision": { "type": "keyword" },
         "rejection_reason": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+        "trust_gate_decision": { "type": "keyword" },
+        "trust_gate_tier": { "type": "keyword" },
+        "trust_gate_door_class": { "type": "keyword" },
+        "trust_gate_checked_at": { "type": "date" },
+        "trust_gate_tick": { "type": "keyword" },
+        "argus": {
+          "properties": {
+            "origin": { "type": "keyword" },
+            "decision": {
+              "properties": {
+                "kind": { "type": "keyword" },
+                "confidence": { "type": "float" },
+                "door_class": { "type": "keyword" }
+              }
+            },
+            "agent": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "version": { "type": "keyword" }
+              }
+            },
+            "actor": {
+              "properties": {
+                "trust_tier": { "type": "keyword" }
+              }
+            },
+            "corpus": {
+              "properties": {
+                "id": { "type": "keyword" },
+                "expected_rule_id": { "type": "keyword" }
+              }
+            }
+          }
+        },
         "applied_at": { "type": "date" },
         "apply_error": { "type": "text" },
         "sub_items": { "type": "object", "enabled": false },
@@ -34,9 +70,18 @@
             "tp_gain_pct": { "type": "float" },
             "mttr_reduction_minutes": { "type": "float" },
             "hours_saved_per_week": { "type": "float" },
-            "coverage_delta_pct": { "type": "float" }
+            "coverage_delta_pct": { "type": "float" },
+            "blast_tier": { "type": "keyword" },
+            "blast_radius": {
+              "properties": {
+                "hosts":   { "type": "integer" },
+                "tenants": { "type": "integer" },
+                "rules":   { "type": "integer" }
+              }
+            }
           }
         },
+        "trust_gate_blast_tier": { "type": "keyword" },
         "evidence": {
           "type": "nested",
           "properties": {

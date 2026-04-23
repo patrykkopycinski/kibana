@@ -46,16 +46,28 @@ export type ArgusDecisionKind =
   | 'rule_create'
   | 'rule_patch'
   | 'rule_deprecate'
+  | 'rule_eval'
+  | 'rule_update'
   | 'exception_create'
   | 'case_close'
   | 'response_action'
-  | 'eval_gate';
+  | 'eval_gate'
+  | 'exploit_to_detection'
+  | 'trust_gate'
+  | 'trust_tier_assignment';
 
 /**
  * Trust tier of the actor whose input produced this decision. Feeds the
  * autonomy gate cascade in Phase 3 (see docs/argus/phase-3/trust-tier-thresholds.md).
  */
-export type ArgusTrustTier = 'trusted' | 'scoped' | 'untrusted' | 'adversarial';
+export type ArgusTrustTier =
+  | 'frontier'
+  | 'trusted'
+  | 'scoped'
+  | 'probationary'
+  | 'quarantined'
+  | 'untrusted'
+  | 'adversarial';
 
 /**
  * Attribute value shape accepted by OpenTelemetry attributes. Narrowed here

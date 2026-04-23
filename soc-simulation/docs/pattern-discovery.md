@@ -1,10 +1,9 @@
-# Pattern Discovery in AutoSOC
+# Pattern Discovery in Argus
 
-> Pattern discovery is the repeatable process by which the AutoSOC mesh moves
-> from raw evidence (alerts, outcomes, evolution-log events) to _durable_
-> hypotheses that change the system's behavior. This document is the
-> methodology. `case-studies/` holds the evidence for each pattern we have
-> accepted.
+> Pattern discovery is the repeatable process by which Argus moves from raw
+> evidence (alerts, outcomes, evolution-log events) to _durable_ hypotheses
+> that change the system's behavior. This document is the methodology.
+> `case-studies/` holds the evidence for each pattern we have accepted.
 
 ## Why this exists
 
@@ -212,8 +211,8 @@ definition.
 ## Glossary
 
 - **Canonical artifact** — installed by `setup.sh`, never auto-mutated.
-- **Autosoc-owned artifact** — created by AutoSOC, safe to auto-mutate
-  under governance rails.
+- **Argus-owned artifact** — created by Argus, safe to auto-mutate under
+  governance rails.
 - **Pattern hypothesis** — a candidate pattern with 2 tiers of evidence;
   must graduate to a case study before it can drive a canonical change.
 - **Negative evidence** — explicit human rejection of a similar pattern.

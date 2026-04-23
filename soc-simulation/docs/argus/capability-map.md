@@ -76,21 +76,22 @@ Gaps surfaced by this matrix (reasonable to punt to Phase 3):
 
 1. **P2 × 01 Sensing** — no mutation dataset captured from live telemetry. Phase-3 goal: feed observed evasions back into the mutation set.
 2. **P4 × 03 Validation** — no built-in way to measure *our reasoner against theirs*. Phase-3 goal: adversarial eval suites where the agent-under-test faces an adversarial prompt-injection regime.
-3. **P1 × 05 Governance** — no formal Mean-Time-to-Rollback measurement. Phase-3 goal: add an MTTR-rollback metric to the scorecard.
+3. ~~**P1 × 05 Governance** — no formal Mean-Time-to-Rollback measurement.~~ ✅ **landed 2026-04-20.** `soc-recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` every 10 min; trust-tier assessor rolls up `avg / p50 / p95` per actor; Pulse tile surfaces tenant-wide p50 via `/internal/security_solution/argus/governance_pulse`.
 
 ---
 
 ## 4. Phase-3 landing sites
 
-Closing-the-loop investments. Each has a design sketch in `phase-3/`.
+Closing-the-loop investments. All five have shipped locally and are
+demo-ready — see `docs/argus/demo-runbook.md` section 10.
 
-| Capability | Builds on | Design sketch |
-|---|---|---|
-| Drift detection | `soc-self-learning-loop` + M2.1 eval scores | [`phase-3/drift-detection.md`](./phase-3/drift-detection.md) |
-| Trust-tier thresholds for frontier-class mutations | `soc-trust-scorer` | [`phase-3/trust-thresholds.md`](./phase-3/trust-thresholds.md) |
-| Playbook learning loop | `soc-containment-playbook` + `.soc-outcomes` | [`phase-3/playbook-learning-loop.md`](./phase-3/playbook-learning-loop.md) |
-| Glasswing-compatible ingestion | `.soc-intel-feed` (new) → Sensing | [`phase-3/glasswing-ingestion.md`](./phase-3/glasswing-ingestion.md) |
-| Argus Console | Security Solution plugin | [`phase-3/argus-console.md`](./phase-3/argus-console.md) |
+| Capability | Builds on | Status | Design sketch | Artifact |
+|---|---|---|---|---|
+| Drift detection | `soc-self-learning-loop` + M2.1 eval scores | landed | [`phase-3/drift-detection.md`](./phase-3/drift-detection.md) | `workflows/soc-argus-drift-monitor.yaml` |
+| Trust-tier thresholds for frontier-class mutations | `soc-trust-scorer` | landed | [`phase-3/trust-thresholds.md`](./phase-3/trust-thresholds.md) | `workflows/soc-argus-trust-tier-assessor.yaml` + `soc-argus-trust-gate.yaml` |
+| Playbook learning loop | `soc-containment-playbook` + `.soc-outcomes` | landed | [`phase-3/playbook-learning-loop.md`](./phase-3/playbook-learning-loop.md) | `workflows/soc-argus-playbook-learner.yaml` + `argus/technique-playbook-mapping.json` |
+| Glasswing-compatible ingestion | `.soc-intel-feed` (new) → Sensing | landed (demo adapter; TAXII poller deferred) | [`phase-3/glasswing-ingestion.md`](./phase-3/glasswing-ingestion.md) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc-argus-intel-adapter-generic.yaml` + `soc-argus-intel-mythos-aggregator.yaml`, `argus/intel-feed-seed.json` |
+| Argus Console | Security Solution plugin | landed (extended the existing dashboard) | [`phase-3/argus-console.md`](./phase-3/argus-console.md) | `setup/dashboards/build_argus_console.js` (Phase 3 panel section) |
 
 ---
 

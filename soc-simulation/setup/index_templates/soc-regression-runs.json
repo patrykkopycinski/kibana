@@ -28,7 +28,7 @@
   },
   "_meta": {
     "description": "Per-run results of the regression gate. gate_result = pass|fail|skipped. Blocks the triggering autonomous mutation when gate_result=fail.",
-    "owner": "autosoc-governance",
+    "owner": "argus-governance",
     "schema_version": 1
   }
 }

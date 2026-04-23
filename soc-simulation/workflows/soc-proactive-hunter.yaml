@@ -20,154 +20,142 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-triage-results"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-24h"
-        size: 30
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      size: 30
   - name: get_recent_alerts
     type: elasticsearch.search
     with:
       index: ".alerts-security.alerts-*"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-24h"
-        size: 0
-        aggs:
-          techniques:
-            terms:
-              field: "kibana.alert.rule.threat.technique.id"
-              size: 30
-          by_host:
-            terms:
-              field: "host.name"
-              size: 20
-            aggs:
-              techniques:
-                terms:
-                  field: "kibana.alert.rule.threat.technique.id"
-                  size: 10
-          by_severity:
-            terms:
-              field: "kibana.alert.severity"
-              size: 5
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      size: 0
+      aggs:
+        techniques:
+          terms:
+            field: "kibana.alert.rule.threat.technique.id"
+            size: 30
+        by_host:
+          terms:
+            field: "host.name"
+            size: 20
+          aggs:
+            techniques:
+              terms:
+                field: "kibana.alert.rule.threat.technique.id"
+                size: 10
+        by_severity:
+          terms:
+            field: "kibana.alert.severity"
+            size: 5
 
   - name: get_previous_hunts
     type: elasticsearch.search
     with:
       index: ".soc-hunt-findings"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "now-48h"
-        size: 10
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "now-48h"
+      size: 10
   - name: log_start
     type: console
     with:
       message: "Proactive Hunter: starting hunt cycle with {{ steps.get_recent_alerts.output.aggregations.techniques.buckets | size }} observed techniques"
 
+  # Branch: full hypothesis+anomaly hunt when alerts exist, anomaly-only when not.
   - name: check_has_alerts
-    type: condition
-    with:
-      condition: "{{ steps.get_recent_alerts.output.hits.total.value }} > 0"
-      if_true: run_hunt
-      if_false: run_anomaly_only
+    type: if
+    condition: "steps.get_recent_alerts.output.hits.total.value > 0"
+    steps:
+      - name: run_hunt
+        type: ai.agent
+        agent-id: soc-triage-agent
+        connector-id: opus
+        with:
+          message: >
+            You are conducting a proactive threat hunt using your proactive-hunt skill.
+            This is NOT alert triage — you are hunting for threats that have NOT triggered alerts.
 
-  # ── Full hunt (hypothesis + anomaly) when alerts exist ───────────
-  - name: run_hunt
-    type: ai.agent
-    agent-id: soc-triage-agent
-    connector-id: opus
-    with:
-      message: >
-        You are conducting a proactive threat hunt using your proactive-hunt skill.
-        This is NOT alert triage — you are hunting for threats that have NOT triggered alerts.
+            CONTEXT:
 
-        CONTEXT:
+            Observed MITRE techniques in last 24h (by host):
+            {{ steps.get_recent_alerts.output.aggregations.by_host.buckets | json }}
 
-        Observed MITRE techniques in last 24h (by host):
-        {{ steps.get_recent_alerts.output.aggregations.by_host.buckets | json }}
+            Alert severity distribution:
+            {{ steps.get_recent_alerts.output.aggregations.by_severity.buckets | json }}
 
-        Alert severity distribution:
-        {{ steps.get_recent_alerts.output.aggregations.by_severity.buckets | json }}
+            Recent triage results count: {{ steps.get_recent_triage.output.hits.total.value }}
+            (Use your search tools to query specific triage details as needed.)
 
-        Recent triage results count: {{ steps.get_recent_triage.output.hits.total.value }}
-        (Use your search tools to query specific triage details as needed.)
+            Previous hunts count: {{ steps.get_previous_hunts.output.hits.total.value }}
+            (Use your search tools to check .soc-hunt-findings for recent hunts to avoid repeating.)
 
-        Previous hunts count: {{ steps.get_previous_hunts.output.hits.total.value }}
-        (Use your search tools to check .soc-hunt-findings for recent hunts to avoid repeating.)
+            INSTRUCTIONS:
 
-        INSTRUCTIONS:
+            1. HYPOTHESIS-DRIVEN HUNTS:
+               For each observed technique, identify the expected next-stage techniques using the
+               ATT&CK chaining templates. Build ES|QL queries scoped to the same hosts/users
+               where the original technique was observed.
 
-        1. HYPOTHESIS-DRIVEN HUNTS:
-           For each observed technique, identify the expected next-stage techniques using the
-           ATT&CK chaining templates. Build ES|QL queries scoped to the same hosts/users
-           where the original technique was observed.
+            2. ANOMALY DETECTION:
+               Run the standard anomaly queries:
+               - New login sources (country/IP not seen in 30 days)
+               - First-time process-parent relationships
+               - Unusual outbound connections to new destinations
+               - Data staging indicators (large files in temp directories)
+               - Service account interactive logins
 
-        2. ANOMALY DETECTION:
-           Run the standard anomaly queries:
-           - New login sources (country/IP not seen in 30 days)
-           - First-time process-parent relationships
-           - Unusual outbound connections to new destinations
-           - Data staging indicators (large files in temp directories)
-           - Service account interactive logins
+            3. SELF-VALIDATE:
+               - Every hypothesis must have a query and result
+               - Negative results are valuable — report them
+               - Findings must reference specific entities and timeframes
 
-        3. SELF-VALIDATE:
-           - Every hypothesis must have a query and result
-           - Negative results are valuable — report them
-           - Findings must reference specific entities and timeframes
+            Respond with JSON:
+            {"hunt_id": "hunt-<timestamp>", "hunt_type": "combined",
+             "hypotheses": [{"technique_observed": "Txxxx", "technique_hunted": "Tyyyy",
+               "host": "...", "query": "...", "result": "positive|negative", "evidence": "..."}],
+             "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
+             "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
+               "finding": "...", "entities_involved": [], "recommended_action": "..."}],
+             "coverage_update": {"techniques_hunted": ["Txxxx"], "data_sources_used": []}}
+        timeout: 600s
+    else:
+      - name: run_anomaly_only
+        type: ai.agent
+        agent-id: soc-triage-agent
+        connector-id: opus
+        with:
+          message: >
+            You are conducting a proactive anomaly detection hunt using your proactive-hunt skill.
+            There are no recent alerts, so focus on data-driven anomaly detection:
 
-        Respond with JSON:
-        {"hunt_id": "hunt-<timestamp>", "hunt_type": "combined",
-         "hypotheses": [{"technique_observed": "Txxxx", "technique_hunted": "Tyyyy",
-           "host": "...", "query": "...", "result": "positive|negative", "evidence": "..."}],
-         "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
-         "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
-           "finding": "...", "entities_involved": [], "recommended_action": "..."}],
-         "coverage_update": {"techniques_hunted": ["Txxxx"], "data_sources_used": []}}
-    timeout: 600s
-    next: write_findings
+            1. New login sources (country/IP not seen in 30 days)
+            2. First-time process-parent relationships on production hosts
+            3. Unusual outbound connections to never-seen destinations
+            4. Data staging indicators (large files in temp directories)
+            5. Service account interactive logins
 
-  # ── Anomaly-only hunt when no recent alerts ──────────────────────
-  - name: run_anomaly_only
-    type: ai.agent
-    agent-id: soc-triage-agent
-    connector-id: opus
-    with:
-      message: >
-        You are conducting a proactive anomaly detection hunt using your proactive-hunt skill.
-        There are no recent alerts, so focus on data-driven anomaly detection:
+            Previous hunts (avoid repeating):
+            {{ steps.get_previous_hunts.output.hits.hits | json }}
 
-        1. New login sources (country/IP not seen in 30 days)
-        2. First-time process-parent relationships on production hosts
-        3. Unusual outbound connections to never-seen destinations
-        4. Data staging indicators (large files in temp directories)
-        5. Service account interactive logins
+            Self-validate: every query must produce a result (even if zero findings).
 
-        Previous hunts (avoid repeating):
-        {{ steps.get_previous_hunts.output.hits.hits | json }}
-
-        Self-validate: every query must produce a result (even if zero findings).
-
-        Respond with JSON:
-        {"hunt_id": "hunt-<timestamp>", "hunt_type": "anomaly_detection",
-         "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
-         "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
-           "finding": "...", "entities_involved": [], "recommended_action": "..."}],
-         "coverage_update": {"data_sources_used": []}}
-    timeout: 300s
+            Respond with JSON:
+            {"hunt_id": "hunt-<timestamp>", "hunt_type": "anomaly_detection",
+             "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
+             "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
+               "finding": "...", "entities_involved": [], "recommended_action": "..."}],
+             "coverage_update": {"data_sources_used": []}}
+        timeout: 300s
 
   # ── Write findings ───────────────────────────────────────────────
+  # Only one of run_hunt / run_anomaly_only runs; the other is undefined.
+  # Liquid `| default:` falls through to the populated branch.
   - name: write_findings
     type: elasticsearch.index
     with:
@@ -175,7 +163,7 @@ steps:
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         source: "soc-proactive-hunter"
-        hunt_output: "{{ steps.run_hunt.output.message // steps.run_anomaly_only.output.message }}"
+        hunt_output: "{{ steps.run_hunt.output.message | default: steps.run_anomaly_only.output.message }}"
         status: "completed"
 
   - name: write_audit

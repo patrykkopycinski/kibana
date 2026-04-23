@@ -13,6 +13,42 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  */
 export const allowedExperimentalValues = Object.freeze({
   /**
+   * Enables the Argus console app-route at `/app/security/argus`, including the
+   * Pulse, Activity Feed, Mutation Lineage, and Reasoning Drill-down panels, plus
+   * the "Show Argus reasoning" action on the alert flyout. When false, the route
+   * is not registered and no flyout action is rendered.
+   */
+  argusConsoleEnabled: false,
+
+  /**
+   * Enables the Argus Coverage panel (Tier 1 deliverable) — surfaces the
+   * `.soc-detection-corpus` ingest, `.soc-threat-profiles` catalogue, and
+   * `.soc-threat-actors` index as a tactic × technique heatmap with actor-
+   * level drill-downs, plus the Navigator-layer export. When false, the
+   * coverage panel renders a disabled-state prompt and the related routes
+   * return 404.
+   */
+  argusCoverageEnabled: false,
+
+  /**
+   * Enables the scheduled CTI auto-intake workflow (Tier 4) that periodically
+   * fans out fresh KEV / OTX / vendor advisories into Argus's Exploit →
+   * Detection pipeline with `origin: 'cti_ingest'`. Off by default — when
+   * off, the workflow stays visible in Workflows Management so operators can
+   * still invoke it manually, but the schedule is skipped.
+   */
+  argusCtiAutoIntakeEnabled: false,
+
+  /**
+   * Enables the Tier 5 decision-graph surface — a queryable graph over the
+   * reasoning trace, mutation lineage, and autonomy decisions that lets an
+   * operator see *why* Argus took a specific apply/defer/rollback decision
+   * in a single view. Gated because the aggregation query shape is still
+   * evolving.
+   */
+  argusDecisionGraphEnabled: false,
+
+  /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
    * we don't want people to be able to violate security by getting access to whole documents

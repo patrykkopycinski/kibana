@@ -18,66 +18,62 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "now-6h"
-        aggs:
-          total: { value_count: { field: "@timestamp" } }
-          by_disposition:
-            terms: { field: "disposition", size: 20 }
-          avg_confidence:
-            avg: { field: "confidence" }
-          by_technique:
-            terms: { field: "techniques_observed", size: 10 }
-            aggs:
-              avg_conf: { avg: { field: "confidence" } }
-              fp_count:
-                filter: { term: { disposition: "auto_closed_fp" } }
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "now-6h"
+      aggs:
+        total: { value_count: { field: "@timestamp" } }
+        by_disposition:
+          terms: { field: "disposition", size: 20 }
+        avg_confidence:
+          avg: { field: "confidence" }
+        by_technique:
+          terms: { field: "techniques_observed", size: 10 }
+          aggs:
+            avg_conf: { avg: { field: "confidence" } }
+            fp_count:
+              filter: { term: { disposition: "auto_closed_fp" } }
 
   - name: triage_agg
     type: elasticsearch.search
     with:
       index: ".soc-triage-results"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "now-6h"
-        aggs:
-          total: { value_count: { field: "@timestamp" } }
-          by_disposition:
-            terms: { field: "disposition", size: 20 }
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "now-6h"
+      aggs:
+        total: { value_count: { field: "@timestamp" } }
+        by_disposition:
+          terms: { field: "disposition", size: 20 }
 
   - name: pipeline_agg
     type: elasticsearch.search
     with:
       index: ".soc-metrics"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "now-1h"
-        aggs:
-          total: { value_count: { field: "@timestamp" } }
-          by_status:
-            terms: { field: "status", size: 10 }
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "now-1h"
+      aggs:
+        total: { value_count: { field: "@timestamp" } }
+        by_status:
+          terms: { field: "status", size: 10 }
 
   - name: dead_letter_count
     type: elasticsearch.search
     with:
       index: ".soc-dead-letter"
-      body:
-        size: 0
-        query:
-          bool:
-            must:
-              - term: { status: "failed" }
-              - range: { "@timestamp": { gte: "now-1h" } }
+      size: 0
+      query:
+        bool:
+          must:
+            - term: { status: "failed" }
+            - range: { "@timestamp": { gte: "now-1h" } }
 
   # ── Analyze with meta-agent's health-check skill ─────────────────
   - name: health_check
@@ -119,15 +115,14 @@ steps:
     timeout: 300s
 
   # ── Write results ────────────────────────────────────────────────
-  - name: write_coverage_gaps
-    type: elasticsearch.index
-    with:
-      index: .soc-coverage-gaps
-      document:
-        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
-        source: "soc-watchdog"
-        health_report: "{{ steps.health_check.output | json }}"
-
+  # NOTE (2026-04): the watchdog previously also wrote an aggregate
+  # health-report blob to `.soc-coverage-gaps`, but that doc had no
+  # `technique_id` / `status` / `severity` / `confidence` fields and so
+  # was silently ignored by the downstream consumers
+  # (`soc-argus-playbook-coverage-gap-triage`, `soc-deteng`, `soc-meta`).
+  # The canonical producer of per-technique coverage-gap rows in the
+  # triage-playbook shape is now `soc-gap-analyzer`. The watchdog keeps
+  # its audit-trail health row below.
   - name: write_audit
     type: elasticsearch.index
     with:

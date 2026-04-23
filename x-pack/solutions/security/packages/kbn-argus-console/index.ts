@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export {
+  ArgusConsole,
+  resolveTabId,
+  type ArgusConsoleTabId,
+  type ArgusLegacyTabId,
+} from './src/argus_console/argus_console';
+export { ReasoningDrilldownPanel } from './src/panels/reasoning_drilldown_panel/reasoning_drilldown_panel';
+export { MutationLineagePanel } from './src/panels/mutation_lineage_panel/mutation_lineage_panel';
+export { ActivityFeedPanel } from './src/panels/activity_feed_panel/activity_feed_panel';
+export { PulsePanel } from './src/panels/pulse_panel/pulse_panel';
+export { MutationsPanel } from './src/panels/mutations_panel/mutations_panel';
+export { E2dFlowPanel } from './src/panels/e2d_flow_panel/e2d_flow_panel';
+export { ProposalsPanel, ProposalsTable } from './src/panels/proposals_panel';
+export { AutonomyDecisionsPanel } from './src/panels/autonomy_decisions_panel';
+export { CoverageGapsPanel } from './src/panels/coverage_gaps_panel';
+export { CoveragePanel, type CoveragePanelProps } from './src/panels/coverage_panel';
+export { CalderaQueuePanel } from './src/panels/caldera_queue_panel';
+export {
+  PlaybooksPanel,
+  type PlaybooksPanelProps,
+  type ArgusPlaybookEntry,
+} from './src/panels/playbooks_panel';
+export {
+  DecisionGraphFlyout,
+  type DecisionGraphFlyoutProps,
+  DecisionGraphPanel,
+  type DecisionGraphPanelProps,
+  DecisionGraphSvg,
+  type DecisionGraphSvgProps,
+} from './src/panels/decision_graph_panel';
+export {
+  ArgusArtifactDetailsFlyout,
+  type ArgusArtifactDetailsFlyoutProps,
+  type ArgusArtifactPivotTarget,
+} from './src/panels/artifact_details_flyout';
+export { KillSwitchChip } from './src/panels/kill_switch_chip';
+
+export {
+  useReasoningChain,
+  useMutationLineage,
+  useActivityFeed,
+  useGovernancePulse,
+  useMutations,
+  useE2dFlow,
+  useRecentCves,
+  useSynthesisProposals,
+  useRecentProposals,
+  useAutonomyDecisions,
+  useCoverageGaps,
+  useCalderaQueue,
+  useKillSwitch,
+  useMutationApproval,
+  useCoverageSnapshot,
+  useThreatProfiles,
+  useThreatActors,
+  useThreatActorCoverage,
+  useDecisionGraph,
+  type UseDecisionGraphArgs,
+  useArtifactDetails,
+  useActivityEventDetails,
+  useMutationLineageNodeDetails,
+  type UseArtifactDetailsArgs,
+  type UseActivityEventDetailsArgs,
+  type UseMutationLineageNodeDetailsArgs,
+  type ArgusHttp,
+  type FetchState,
+  type ActivityEvent,
+  type ActivityFeedFilters,
+  type ActivityLayer,
+  type GovernancePulseWindow,
+  type UseGovernancePulseArgs,
+  type UseMutationsArgs,
+  type UseE2dFlowArgs,
+  type UseRecentCvesArgs,
+  type UseSynthesisProposalsArgs,
+  type UseRecentProposalsArgs,
+  type UseAutonomyDecisionsArgs,
+  type UseCoverageGapsArgs,
+  type UseCalderaQueueArgs,
+  type UseKillSwitchArgs,
+  type UseKillSwitchResult,
+  type UseMutationApprovalArgs,
+  type UseMutationApprovalResult,
+  type UseCoverageSnapshotArgs,
+  type E2dFlowWindow,
+} from './src/hooks';
+
+// Re-exported for convenience so plugin consumers don't need to depend on
+// `@kbn/argus-console-common` directly. The common package remains the single
+// source of truth for pure types, builders, and constants.
+export {
+  buildReasoningChainFromSpanDocs,
+  buildMutationLineageFromDocs,
+  buildGovernancePulse,
+  CANONICAL_STAGE_ORDER,
+  REASONING_CHAIN_ROUTE,
+  MUTATION_LINEAGE_ROUTE,
+  GOVERNANCE_PULSE_ROUTE,
+  MUTATIONS_ROUTE,
+  ARGUS_CONSOLE_READ_CAPABILITY,
+  ARGUS_CONSOLE_ALL_CAPABILITY,
+  ARGUS_SOC_INDICES,
+  type SpanDocInput,
+  type MutationStageDocs,
+  type StageDoc,
+  type ReasoningChain,
+  type ReasoningChainBuildResult,
+  type ReasoningChainReasonCode,
+  type ReasoningChainSubject,
+  type ReasoningStep,
+  type ReasoningStepType,
+  type InjectionSurfaceFlag,
+  type TrustTier,
+  type LineageEdge,
+  type LineageEdgeKind,
+  type LineageNode,
+  type LineageNodeStatus,
+  type LineageNodeType,
+  type MutationLineage,
+  type MutationLineageBuildResult,
+  type MutationLineageReasonCode,
+  type MutationLineageSubject,
+  type GovernancePulse,
+  type GovernancePulseBuildResult,
+  type GovernancePulseMttr,
+  type ArgusMutationCounts,
+  type ArgusMutationFilter,
+  type ArgusMutationRow,
+  type ArgusMutationVerdict,
+  type ArgusMutationWindow,
+  type ArgusMutationsResponse,
+  type MutationLineageSubjectKind,
+  type ArgusE2dStageKind,
+  type ArgusE2dStageStatus,
+  type ArgusE2dStage,
+  type ArgusE2dFlowPayload,
+  type ArgusE2dFlowResponse,
+  type ArgusE2dOverallStatus,
+  type ArgusE2dReasonCode,
+  type ArgusE2dRecentCve,
+  type ArgusE2dRecentCvesResponse,
+  type ArgusSynthesisComposition,
+  type ArgusSynthesisDominationReason,
+  type ArgusSynthesisPredicted,
+  type ArgusSynthesisProposal,
+  type ArgusSynthesisProposalTier,
+  type ArgusSynthesisRecentResponse,
+  type ArgusSynthesisRecentRow,
+  type ArgusSynthesisResponse,
+  type ArgusSynthesisWeights,
+  type ArgusSynthesisWindow,
+  E2D_FLOW_ROUTE,
+  E2D_RECENT_CVES_ROUTE,
+  SYNTHESIS_PROPOSALS_ROUTE,
+  RECENT_PROPOSALS_ROUTE,
+  COVERAGE_ROUTE,
+  THREAT_PROFILES_ROUTE,
+  THREAT_ACTORS_ROUTE,
+  NAVIGATOR_LAYER_ROUTE,
+  type ArgusCoverageCell,
+  type ArgusCoverageSnapshot,
+  type ArgusThreatProfile,
+  type ArgusThreatActor,
+  type ArgusActorCoverage,
+  type ArgusNavigatorLayer,
+  DECISION_GRAPH_ROUTE,
+  type DecisionGraphEdge,
+  type DecisionGraphNode,
+  type DecisionGraphNodeKind,
+  type DecisionGraphRequest,
+  type DecisionGraphResponse,
+  ARTIFACT_DETAILS_ROUTE,
+  ARGUS_ARTIFACT_RELATED_KINDS,
+  type ArgusArtifactDetails,
+  type ArgusArtifactDetailsReasonCode,
+  type ArgusArtifactRelated,
+  type ArgusArtifactRelatedKind,
+} from '@kbn/argus-console-common';

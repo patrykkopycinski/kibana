@@ -3,10 +3,10 @@
 Status: **Draft**
 
 ## Problem
-
+i
 Mythos-era exploit-probability scoring (M2.3) reserves a `mythos_signal`
 contributor (weight 0.05) that currently returns `0.0` because Argus has no
-Mythos-era intel feed. Anthropic's Project Glasswing distributes signal about
+Mythos-era intel feed. Anthropic's Project Glasswing distrbutes signal about
 frontier-capability threat actors via a structured feed; we want to consume it as
 one intel source among several, without coupling Argus to a single vendor.
 

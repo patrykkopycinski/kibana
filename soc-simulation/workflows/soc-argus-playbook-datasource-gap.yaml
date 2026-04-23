@@ -1,0 +1,131 @@
+version: '1'
+name: Argus Playbook — Data Source Gap
+description: >
+  Argus playbook primitive: for a given data source (e.g. `endgame`,
+  `winlogbeat`, `system.auth`), scan `.soc-detection-corpus` for rules that
+  depend on it and cross-reference `.soc-coverage-gaps` to surface ATT&CK
+  techniques where coverage is missing or community-only. Optionally files a
+  `gap_analysis` mutation intent per uncovered technique so governance can
+  approve Argus-authored backfill rules.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: scheduled
+    with:
+      every: 24h
+
+inputs:
+  - name: data_source
+    type: string
+    required: true
+    description: "Data-source key as it appears in the corpus `data_sources[]` field (e.g. `endgame`, `winlogbeat`, `system.auth`, `okta.system`)."
+  - name: top_n
+    type: number
+    required: false
+    default: 10
+    description: "Maximum number of uncovered techniques to surface / file intents for."
+  - name: auto_file
+    type: boolean
+    required: false
+    default: true
+    description: "When true, file one gap_analysis mutation intent per uncovered technique. When false, only produce the candidate list for the Playbooks tab."
+
+consts:
+  corpus_index: ".soc-detection-corpus"
+  gaps_index: ".soc-coverage-gaps"
+  recommendations_index: ".soc-recommendations"
+  audit_index: ".soc-audit-trail"
+
+steps:
+  - name: fetch_corpus_techniques
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.corpus_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - term: { data_sources: "{{ inputs.data_source }}" }
+      aggs:
+        by_technique:
+          terms: { field: "mitre_technique", size: 200 }
+          aggs:
+            by_source:
+              terms: { field: "source", size: 20 }
+
+  - name: fetch_open_gaps
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.gaps_index }}"
+      size: "{{ inputs.top_n }}"
+      sort:
+        - severity: { order: "desc" }
+        - confidence: { order: "asc" }
+      query:
+        bool:
+          filter:
+            - term: { status: "open" }
+            - term: { data_sources: "{{ inputs.data_source }}" }
+
+  - name: log_scan
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        kind: "playbook_dispatch"
+        playbook: "soc-argus-playbook-datasource-gap"
+        data_source: "{{ inputs.data_source }}"
+        technique_count: "{{ steps.fetch_corpus_techniques.output.aggregations.by_technique.buckets | size }}"
+        open_gap_count: "{{ steps.fetch_open_gaps.output.hits.total.value }}"
+
+  - name: file_gap_intents
+    type: foreach
+    if: "{{ inputs.auto_file == true }}"
+    foreach: "{{ steps.fetch_open_gaps.output.hits.hits }}"
+    steps:
+      - name: write_gap_intent
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recommendations_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            type: "mutation_intent"
+            schema_version: 2
+            rec_id: "arg-ds-{{ inputs.data_source }}-{{ foreach.item._source.technique_id }}"
+            source: "argus.datasource_gap"
+            status: "pending"
+            track: "agentic"
+            title: "Backfill {{ foreach.item._source.technique_id }} coverage for {{ inputs.data_source }}"
+            summary: "Data source `{{ inputs.data_source }}` has an open gap on {{ foreach.item._source.technique_id }}. Author a new Argus detection rule that keys on this data source."
+            confidence: 55
+            kind: "rule_create"
+            argus:
+              origin: "gap_analysis"
+              decision:
+                kind: "rule_create"
+                confidence: 0.55
+                door_class: "two_way"
+              agent:
+                id: "argus.datasource_gap"
+                version: "1.0.0"
+              actor:
+                trust_tier: "frontier"
+              procedure_clusters:
+                - "datasource:{{ inputs.data_source }}"
+              evidence:
+                data_source: "{{ inputs.data_source }}"
+                technique_id: "{{ foreach.item._source.technique_id }}"
+                gap_severity: "{{ foreach.item._source.severity }}"
+                gap_confidence: "{{ foreach.item._source.confidence }}"
+
+outputs:
+  - name: data_source
+    value: "{{ inputs.data_source }}"
+  - name: covered_techniques
+    value: "{{ steps.fetch_corpus_techniques.output.aggregations.by_technique.buckets }}"
+  - name: open_gaps
+    value: "{{ steps.fetch_open_gaps.output.hits.hits }}"
+  - name: filed_count
+    value: "{{ steps.file_gap_intents.output | size }}"

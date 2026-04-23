@@ -89,7 +89,7 @@ import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
-import type { AutonomousSoc } from './autonomous_soc';
+import type { Argus } from './argus';
 import type { SiemReadiness } from './siem_readiness';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
@@ -259,9 +259,9 @@ export const CASES_SUB_PLUGIN_KEY = 'cases';
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;
+  argus: Argus;
   assetInventory: AssetInventory;
   attackDiscovery: AttackDiscovery;
-  autonomousSoc: AutonomousSoc;
   cloudDefend: CloudDefend;
   cloudSecurityPosture: CloudSecurityPosture;
   dashboards: Dashboards;
@@ -285,9 +285,9 @@ export interface SubPlugins {
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
   alerts: Awaited<ReturnType<Detections['start']>>;
+  argus: ReturnType<Argus['start']>;
   assetInventory: Awaited<ReturnType<AssetInventory['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
-  autonomousSoc: ReturnType<AutonomousSoc['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
   dashboards: ReturnType<Dashboards['start']>;

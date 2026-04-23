@@ -36,11 +36,6 @@ export const createNavigationTree = (
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
-      {
-        id: SecurityPageName.autonomousSoc,
-        icon: 'securityAnalyticsApp',
-        link: securityLink(SecurityPageName.autonomousSoc),
-      },
       defaultNavigationTree.rules(),
       services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
         ? defaultNavigationTree.alertDetections()

@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "description": "Upsert-by-agent_id catalog of every LLM agent AutoSOC knows about (canonical soc-* agents + autonomously created auto-* agents). This is NOT an event log — event-like writes (invocations, decisions, trust updates) belong in .soc-evolution-log, .soc-audit-trail, or .soc-trust-scores respectively. dynamic:false keeps rogue fields out."
+    "description": "Upsert-by-agent_id catalog of every LLM agent Argus knows about (canonical soc-* agents + autonomously created auto-* agents). This is NOT an event log — event-like writes (invocations, decisions, trust updates) belong in .soc-evolution-log, .soc-audit-trail, or .soc-trust-scores respectively. dynamic:false keeps rogue fields out."
   },
   "index_patterns": [".soc-agent-registry"],
   "priority": 500,

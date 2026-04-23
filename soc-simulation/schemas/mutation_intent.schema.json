@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/mutation_intent.schema.json",
+  "$id": "https://argus.local/schemas/mutation_intent.schema.json",
   "title": "Mutation Intent",
-  "description": "Internal schema used by the soc-autonomous-applier workflow. The meta-agent emits a mutation_intent for every change it wants to make to an autosoc-owned artifact; the soc-autonomous-applier workflow runs deterministic governance gates (kill-switch, ownership, budget, cooldown, loop-detection) against this shape, then dispatches the validated intent to soc-autonomous-applier-agent for snapshot + tool-based execution.",
+  "description": "Internal schema used by the soc-autonomous-applier workflow. The meta-agent emits a mutation_intent for every change it wants to make to an Argus-managed artifact (registry owner=autosoc); the soc-autonomous-applier workflow runs deterministic governance gates (kill-switch, ownership, budget, cooldown, loop-detection, trust-tier, drift, backtest) against this shape, then dispatches the validated intent to soc-autonomous-applier-agent for snapshot + tool-based execution.\n\nConditional rules:\n  - artifact_type='rule' AND op='update' -> `details.patch` MUST conform to rule_patch.schema.json#/properties/details. Prose-only patches are rejected at ingest and routed to .soc-dead-letter.\n  - Creates/updates of non-rule artifacts -> either `new_definition` or `patch` is required.",
   "type": "object",
   "required": ["details"],
   "properties": {
@@ -22,12 +22,17 @@
         "reason": { "type": "string", "minLength": 20 },
         "new_definition": {
           "type": "object",
-          "description": "Required for op=create|update. The full artifact definition the applier will PUT.",
+          "description": "Required for op=create|update on non-rule artifacts. The full artifact definition the applier will PUT.",
           "additionalProperties": true
         },
         "patch": {
           "type": "object",
-          "description": "Optional partial definition for op=update. Applier merges with current state.",
+          "description": "Partial definition for op=update. For rule artifacts this MUST conform to rule_patch.schema.json (patch_fields + current_values + impact_prediction). Applier merges with current state.",
+          "additionalProperties": true
+        },
+        "preview_rule": {
+          "type": "object",
+          "description": "For rule/op=update: post-merge rule the backtester will project against. Agent computes this so the backtester doesn't need to re-apply the patch logic.",
           "additionalProperties": true
         },
         "parent_recommendation_id": { "type": ["string", "null"] },
@@ -37,5 +42,64 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "details": {
+            "properties": {
+              "artifact_type": { "const": "rule" },
+              "op": { "const": "update" }
+            },
+            "required": ["artifact_type", "op"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "details": {
+            "required": ["patch"],
+            "properties": {
+              "patch": {
+                "type": "object",
+                "required": ["rule_id", "action", "patch_fields", "current_values", "impact_prediction"],
+                "description": "Structured rule patch; see rule_patch.schema.json.",
+                "properties": {
+                  "rule_id": { "type": "string", "minLength": 1 },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "raise_threshold",
+                      "lower_threshold",
+                      "tighten_query",
+                      "broaden_query",
+                      "enable",
+                      "disable",
+                      "add_note",
+                      "change_severity",
+                      "change_risk_score"
+                    ]
+                  },
+                  "patch_fields": { "type": "object" },
+                  "current_values": { "type": "object" },
+                  "impact_prediction": {
+                    "type": "object",
+                    "required": ["expected_fp_reduction_pct", "expected_tp_impact"],
+                    "properties": {
+                      "expected_fp_reduction_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+                      "expected_tp_impact": {
+                        "type": "string",
+                        "enum": ["none", "minor", "moderate", "significant", "unknown"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

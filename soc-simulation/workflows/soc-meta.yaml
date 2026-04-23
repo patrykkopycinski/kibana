@@ -33,34 +33,31 @@ steps:
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.signal_window }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
 
   - name: new_gaps_count
     type: elasticsearch.search
     with:
       index: ".soc-coverage-gaps"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.signal_window }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
 
   - name: new_evolution_count
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        size: 0
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.signal_window }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
 
   - name: signal_gate_log
     type: console
@@ -69,6 +66,16 @@ steps:
         Meta cycle signals — outcomes={{ steps.new_outcomes_count.output.hits.total.value | default: 0 }}
         gaps={{ steps.new_gaps_count.output.hits.total.value | default: 0 }}
         evolution={{ steps.new_evolution_count.output.hits.total.value | default: 0 }}
+
+  # Compute-and-match gate: did the cycle see any new signals?
+  - name: gate_no_new_signals
+    type: console
+    with:
+      message: >-
+        {%- assign _o = steps.new_outcomes_count.output.hits.total.value | default: 0 -%}
+        {%- assign _g = steps.new_gaps_count.output.hits.total.value | default: 0 -%}
+        {%- assign _e = steps.new_evolution_count.output.hits.total.value | default: 0 -%}
+        {% if _o == 0 and _g == 0 and _e == 0 %}yes{% else %}no{% endif %}
 
   - name: signal_gate_heartbeat
     type: elasticsearch.index
@@ -82,114 +89,85 @@ steps:
         recent_outcomes: "{{ steps.new_outcomes_count.output.hits.total.value | default: 0 }}"
         recent_gaps: "{{ steps.new_gaps_count.output.hits.total.value | default: 0 }}"
         recent_evolution: "{{ steps.new_evolution_count.output.hits.total.value | default: 0 }}"
-    if: >-
-      {{ (steps.new_outcomes_count.output.hits.total.value | default: 0) == 0
-         and (steps.new_gaps_count.output.hits.total.value | default: 0) == 0
-         and (steps.new_evolution_count.output.hits.total.value | default: 0) == 0 }}
+    if: "steps.gate_no_new_signals.output: yes"
 
   - name: signal_gate_skip
     type: console
     with:
       message: "Meta cycle: no new signals in last 35m — skipping (cost optimization)."
     end: true
-    if: >-
-      {{ (steps.new_outcomes_count.output.hits.total.value | default: 0) == 0
-         and (steps.new_gaps_count.output.hits.total.value | default: 0) == 0
-         and (steps.new_evolution_count.output.hits.total.value | default: 0) == 0 }}
+    if: "steps.gate_no_new_signals.output: yes"
 
   # ── 1. Context gather ───────────────────────────────────────────────
   - name: get_outcomes
     type: elasticsearch.search
     with:
       index: ".soc-outcomes"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.cycle_window }}"
-        size: 50
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 50
   - name: get_evolution_log
     type: elasticsearch.search
     with:
       index: ".soc-evolution-log"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.cycle_window }}"
-        size: 30
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 30
   - name: get_coverage_gaps
     type: elasticsearch.search
     with:
       index: ".soc-coverage-gaps"
-      body:
-        query:
-          range:
-            "@timestamp":
-              gte: "{{ consts.cycle_window }}"
-        size: 20
-        sort:
-          - "@timestamp": desc
-
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 20
   - name: get_agent_registry
     type: elasticsearch.search
     with:
       index: ".soc-agent-registry"
-      body:
-        query:
-          bool:
-            must_not:
-              - term:
-                  agent_id: seed
-        size: 50
-        sort:
-          - "last_updated": { order: desc, missing: "_last" }
-
+      query:
+        bool:
+          must_not:
+            - term:
+                agent_id: seed
+      size: 50
   - name: get_artifact_registry
     type: elasticsearch.search
     with:
       index: ".soc-artifact-registry"
-      body:
-        size: 200
-        sort:
-          - created_at: desc
-
+      size: 200
   - name: get_rejected_recs
     type: elasticsearch.search
     with:
       index: ".soc-recommendations"
-      body:
-        query:
-          bool:
-            filter:
-              - term:
-                  source: soc-meta
-              - range:
-                  "@timestamp":
-                    gte: "now-7d"
-            should:
-              - term:
-                  status: rejected
-              - term:
-                  status: failed
-            minimum_should_match: 1
-        size: 20
-        sort:
-          - "@timestamp": desc
-        _source:
-          - rec_id
-          - title
-          - summary
-          - rejection_reason
-          - reviewed_at
-          - type
-          - details
+      query:
+        bool:
+          filter:
+            - term:
+                source: soc-meta
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+          should:
+            - term:
+                status: rejected
+            - term:
+                status: failed
+          minimum_should_match: 1
+      size: 20
+      _source:
+        - rec_id
+        - title
+        - summary
+        - rejection_reason
+        - reviewed_at
+        - type
+        - details
 
   - name: get_existing_skills
     type: kibana.request
@@ -306,9 +284,21 @@ steps:
   #     These are the documents soc-autonomous-applier picks up (type=mutation_intent,
   #     status=pending). The applier runs deterministic gates, then dispatches
   #     validated intents to soc-autonomous-applier-agent.
+  #
+  #     The AI agent may return no intents this cycle (steady-state). Guard the
+  #     foreach with a compute-and-match gate so the workflow doesn't fail the
+  #     tick with "foreach expression must evaluate to an array".
+  - name: gate_has_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.plan.output.intents | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   - name: write_mutation_intents
     type: foreach
-    foreach: "{{ steps.plan.output.intents | default: [] }}"
+    foreach: "{{ steps.plan.output.intents }}"
+    if: "steps.gate_has_intents.output: yes"
     steps:
       - name: write_intent
         type: elasticsearch.index
@@ -333,6 +323,13 @@ steps:
             details: "{{ foreach.item.details }}"
 
   # ── 5. If nothing was proposed, log a no_action audit row ───────────
+  - name: gate_no_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.plan.output.intents | size | default: 0 -%}
+        {% if _n == 0 %}yes{% else %}no{% endif %}
+
   - name: log_no_intents
     type: elasticsearch.index
     with:
@@ -342,7 +339,7 @@ steps:
         event_type: meta_cycle_no_action
         source: soc-meta
         reason: "Meta agent produced zero intents — nothing new to evolve this cycle."
-    if: "{{ (steps.plan.output.intents | size | default: 0) == 0 }}"
+    if: "steps.gate_no_intents.output: yes"
 
   - name: log_done
     type: console

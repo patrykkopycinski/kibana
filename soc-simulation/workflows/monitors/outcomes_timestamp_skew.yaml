@@ -1,0 +1,57 @@
+version: '1'
+name: SOC Outcomes Timestamp Skew Monitor
+description: Deterministically detect clock/timestamp skew in .soc-outcomes* (docs with @timestamp > now+5m) and write a trendable health signal to .soc-audit-trail. This addresses watchdog-reported KPI window failures caused by future timestamps.
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+steps:
+  - name: check_outcomes_timestamp_skew
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes*"
+      size: 0
+      track_total_hits: true
+      query:
+        range:
+          "@timestamp":
+            gt: "now+5m"
+
+  - name: gate_skew_ok
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.check_outcomes_timestamp_skew.output.hits.total.value | default: 0 -%}
+        {% if _n > 0 %}no{% else %}yes{% endif %}
+
+  - name: write_ok
+    if: "steps.gate_skew_ok.output: yes"
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: soc_outcomes_timestamp_skew_check
+        status: OK
+        threshold: "@timestamp > now+5m"
+        outcomes:
+          index: ".soc-outcomes*"
+          docs_future_5m: "{{ steps.check_outcomes_timestamp_skew.output.hits.total.value | default: 0 }}"
+
+  - name: write_alert
+    if: "steps.gate_skew_ok.output: no"
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: soc_outcomes_timestamp_skew_check
+        status: ALERT
+        threshold: "@timestamp > now+5m"
+        outcomes:
+          index: ".soc-outcomes*"
+          docs_future_5m: "{{ steps.check_outcomes_timestamp_skew.output.hits.total.value | default: 0 }}"
+        notes:
+          - "soc-watchdog reported last-6h/last-1h KPI queries returning 0 due to .soc-outcomes timestamps being ahead of the current clock."
+          - "This check makes timestamp skew detectable and trendable so KPI windows can be corrected (e.g., NTP/clock fix or windowing relative to max(@timestamp))."

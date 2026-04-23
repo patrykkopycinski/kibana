@@ -12,6 +12,7 @@ import {
   usesDeprecatedArguments,
   extractRegionId,
   tee,
+  modelRejectsTemperature,
 } from './utils';
 import type { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
 
@@ -23,6 +24,59 @@ describe('formatBedrockBody', () => {
       messages: [{ role: 'user', content: 'Hello' }],
       max_tokens: expect.any(Number),
     });
+  });
+
+  it('includes temperature by default when no model is supplied', () => {
+    const result = formatBedrockBody({ messages: [{ role: 'user', content: 'Hello' }] });
+    expect(result).toHaveProperty('temperature', 0);
+  });
+
+  it('includes temperature for Claude models that support it (e.g. Sonnet 3.5)', () => {
+    const result = formatBedrockBody({
+      messages: [{ role: 'user', content: 'Hello' }],
+      temperature: 0.3,
+      model: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
+    });
+    expect(result).toHaveProperty('temperature', 0.3);
+  });
+
+  it.each([
+    'anthropic.claude-opus-4-6-20250101-v1:0',
+    'anthropic.claude-opus-4-7-20250514-v1:0',
+    'us.anthropic.claude-opus-4-7-20250514-v1:0',
+    'anthropic.claude-opus-4-8:0',
+    'CLAUDE-OPUS-4-7',
+  ])('omits temperature for reasoning model %s', (model) => {
+    const result = formatBedrockBody({
+      messages: [{ role: 'user', content: 'Hello' }],
+      temperature: 0,
+      model,
+    });
+    expect(result).not.toHaveProperty('temperature');
+  });
+});
+
+describe('modelRejectsTemperature', () => {
+  it('returns false for empty/undefined input', () => {
+    expect(modelRejectsTemperature()).toBe(false);
+    expect(modelRejectsTemperature(undefined)).toBe(false);
+    expect(modelRejectsTemperature(null)).toBe(false);
+    expect(modelRejectsTemperature('')).toBe(false);
+  });
+
+  it('returns false for Sonnet / Haiku / pre-4.6 Opus', () => {
+    expect(modelRejectsTemperature('anthropic.claude-3-5-sonnet-20240620-v1:0')).toBe(false);
+    expect(modelRejectsTemperature('anthropic.claude-3-haiku-20240307-v1:0')).toBe(false);
+    expect(modelRejectsTemperature('anthropic.claude-opus-4-0')).toBe(false);
+    expect(modelRejectsTemperature('anthropic.claude-opus-4-5-v1:0')).toBe(false);
+  });
+
+  it('returns true for Opus 4.6 / 4.7 / 4.8 variants (including prefixed + uppercased)', () => {
+    expect(modelRejectsTemperature('anthropic.claude-opus-4-6-20250101-v1:0')).toBe(true);
+    expect(modelRejectsTemperature('us.anthropic.claude-opus-4-7-20250514-v1:0')).toBe(true);
+    expect(modelRejectsTemperature('anthropic.claude-opus-4-8:0')).toBe(true);
+    expect(modelRejectsTemperature('CLAUDE-OPUS-4-7')).toBe(true);
+    expect(modelRejectsTemperature('claude-4-7-thinking')).toBe(true);
   });
 });
 

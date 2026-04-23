@@ -28,6 +28,7 @@ import { useAlertsActions } from '../../../detections/components/alerts_table/ti
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useShowArgusReasoningAction } from '../../../detections/components/alerts_table/timeline_actions/use_show_argus_reasoning';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
@@ -156,6 +157,12 @@ export const TakeActionButton = memo(
       onInvestigateInTimelineAlertClick: closePopoverHandler,
     });
 
+    const { showArgusReasoningActionItems } = useShowArgusReasoningAction({
+      eventId: documentId,
+      isAlert,
+      closePopover: closePopoverHandler,
+    });
+
     const noteItems = useMemo(
       () => [
         {
@@ -226,6 +233,7 @@ export const TakeActionButton = memo(
               ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
               ...(isAlert ? [] : noteItems),
               ...(isInSecurityApp ? investigateInTimelineActionItems : []),
+              ...(isInSecurityApp ? showArgusReasoningActionItems : []),
               ...(!isInSecurityApp ? exploreActionItems : []),
             ],
       [
@@ -240,6 +248,7 @@ export const TakeActionButton = memo(
         isRemoteDocument,
         noteItems,
         runWorkflowMenuItem,
+        showArgusReasoningActionItems,
         statusActionItems,
       ]
     );

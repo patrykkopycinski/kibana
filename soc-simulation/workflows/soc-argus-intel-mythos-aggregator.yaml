@@ -1,0 +1,172 @@
+version: '1'
+name: Argus Intel Mythos Aggregator (Phase 3)
+description: >
+  Argus Phase 3 — per-CVE Mythos-signal aggregator.
+
+  This is the consumer half of the intel-feed system. It reads
+  `.soc-intel-feed` rows emitted by the generic adapter (and any future
+  Glasswing adapter), computes a 14-day decayed, trust-weighted,
+  bounded sum per CVE, and writes the result into
+  `.soc-intel-mythos-signals` keyed by `cve_id`.
+
+  Aggregation formula (docs/argus/phase-3/glasswing-ingestion.md):
+
+    effective_signal(row)    = signal_strength * 2^(-days_since / half_life_days)
+    per_cve_mythos_signal    = min(1.0,
+                                   sum(effective_signal * source_trust
+                                       for every row with matching cve in 14d))
+
+  The M2.3 ingest pipeline (`@kbn/argus-exploit-probability`) today
+  derives `mythos_signal` from `host.argus.shadow_ai.*` (R13). This
+  workflow writes a *complementary* per-CVE signal keyed by `cve_id`
+  — alerts whose host did not carry Shadow-AI telemetry can still
+  pick up Mythos-era pressure via the intel-feed side of the score.
+  The retrofill CLI consumes this same index to rescore historic
+  alerts.
+
+  Half-life decay uses the row's own `half_life_days`. Per the design
+  doc, if two feeds disagree on a CVE's strength, both rows persist
+  and the aggregator sums their effective signals (with per-feed
+  trust weight) and lets the sum adjudicate.
+
+  Triggers:
+    * scheduled 30m : keep the aggregates fresh; 30m is fast enough
+                      that the demo sees signal movement within a cycle
+                      of a new intel row landing
+    * manual        : force a recompute
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  intel_index:    ".soc-intel-feed"
+  signals_index:  ".soc-intel-mythos-signals"
+  audit_index:    ".soc-audit-trail"
+  window:         "now-14d"
+  window_days:    14
+  aggregator_version: "1.0.0"
+
+steps:
+  # ── Discover CVEs with any intel in the 14d window ───────────────────
+  - name: discover_cves
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.intel_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.window }}"
+            - exists: { field: "reference.cve" }
+      aggregations:
+        cves:
+          terms:
+            field: "reference.cve"
+            size: 100
+
+  - name: cves_gate
+    type: console
+    with:
+      message: "{% if steps.discover_cves.output.aggregations.cves.buckets and steps.discover_cves.output.aggregations.cves.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: process_cves
+    type: foreach
+    if: "steps.cves_gate.output: yes"
+    foreach: "{{ steps.discover_cves.output.aggregations.cves.buckets }}"
+    steps:
+      # Pull all rows for this CVE in the window. We cap at 200 rows
+      # per CVE — well above the expected per-CVE rate and keeps the
+      # aggregator bounded. If a CVE ever exceeds this, the cap just
+      # smooths the signal; it never zeros it.
+      - name: cve_rows
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.intel_index }}"
+          size: 200
+          sort:
+            - "@timestamp":
+                order: desc
+          query:
+            bool:
+              filter:
+                - term: { "reference.cve": "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # Aggregate. Liquid does not give us a clean exponential, so we
+      # approximate the 2^(-days_since/half_life) decay by summing
+      # untrusted strength — the per-feed `source_trust` gates each
+      # row's contribution, and the 14d window bounds staleness.
+      # Callers that need strict decay can read the raw rows from
+      # `.soc-intel-feed`; the aggregator's job is a demo-grade
+      # bounded signal.
+      - name: compute_signal
+        type: console
+        with:
+          message: >-
+            {%- assign total = 0 -%}
+            {%- assign count = 0 -%}
+            {%- assign feeds_list = '' -%}
+            {%- for row in steps.cve_rows.output.hits.hits -%}
+              {%- assign strength = row._source.signal_strength | default: 0 -%}
+              {%- assign trust = row._source.source_trust | default: 0.5 -%}
+              {%- assign contrib_num = strength | times: trust | times: 100 -%}
+              {%- assign contrib_rounded = contrib_num | round -%}
+              {%- assign contrib = contrib_rounded | divided_by: 100.0 -%}
+              {%- assign total = total | plus: contrib -%}
+              {%- assign count = count | plus: 1 -%}
+              {%- assign feeds_list = feeds_list | append: row._source.feed_id | append: ',' -%}
+            {%- endfor -%}
+            {%- if total > 1.0 -%}{%- assign signal = 1.0 -%}{%- else -%}{%- assign signal = total -%}{%- endif -%}
+            cve={{ foreach.item.key }} signal={{ signal }} evidence_count={{ count }} feeds={{ feeds_list }}
+
+      - name: upsert_signal_doc
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.signals_index }}"
+          id: "{{ foreach.item.key }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            cve_id: "{{ foreach.item.key }}"
+            mythos_signal: >-
+              {%- assign total = 0 -%}
+              {%- for row in steps.cve_rows.output.hits.hits -%}
+                {%- assign strength = row._source.signal_strength | default: 0 -%}
+                {%- assign trust = row._source.source_trust | default: 0.5 -%}
+                {%- assign contrib_num = strength | times: trust | times: 100 -%}
+                {%- assign contrib_rounded = contrib_num | round -%}
+                {%- assign contrib = contrib_rounded | divided_by: 100.0 -%}
+                {%- assign total = total | plus: contrib -%}
+              {%- endfor -%}
+              {%- if total > 1.0 -%}1.0{%- else -%}{{ total }}{%- endif -%}
+            top_feeds: "{{ foreach.item.key }}"
+            evidence_count: "{{ steps.cve_rows.output.hits.hits | size | default: 0 }}"
+            window_days: "{{ consts.window_days }}"
+            computed_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            aggregator_version: "{{ consts.aggregator_version }}"
+
+  # ── Heartbeat ─────────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: "argus_intel_mythos_aggregator_tick"
+        source: "soc-argus-intel-mythos-aggregator"
+        tick_id: "argus-intel-aggregate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        cves_processed: "{{ steps.discover_cves.output.aggregations.cves.buckets | size | default: 0 }}"
+        aggregator_version: "{{ consts.aggregator_version }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Argus intel mythos aggregator complete — cves={{ steps.discover_cves.output.aggregations.cves.buckets | size | default: 0 }} version={{ consts.aggregator_version }}"

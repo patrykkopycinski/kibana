@@ -11,8 +11,8 @@ description: >
       must be operator-armed for demos and adversarial eval runs — the whole point is
       that reaching L6 is a decision, not an accident.
     * Deterministic, non-LLM: just writes a command doc. The dispatcher, poller,
-      difficulty controller, and trust-scorer already know how to react to difficulty=6
-      via the seeded .soc-attack-profiles/level-6 profile.
+      difficulty controller, and Argus Phase 3 trust gate already know how to react
+      to difficulty=6 via the seeded .soc-attack-profiles/level-6 profile.
     * Governance: every arm emits an .soc-audit-trail row so the event is recoverable
       from the shift-handover and Argus governance layer.
 

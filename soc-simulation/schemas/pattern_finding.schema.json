@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://autosoc.local/schemas/pattern_finding.schema.json",
+  "$id": "https://argus.local/schemas/pattern_finding.schema.json",
   "title": "Pattern Finding",
   "description": "Evidence backing any 'the agent found a pattern' claim. No pattern is trusted without it.",
   "$defs": {

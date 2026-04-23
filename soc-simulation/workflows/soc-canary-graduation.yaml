@@ -1,0 +1,93 @@
+version: '1'
+name: SOC Canary Graduation Controller
+description: >
+  Monitors rules deployed by Argus in canary mode (applied in last 48h). Counts
+  recent alert volume and logs graduation or rollback decisions for each candidate.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+  - type: manual
+
+steps:
+  - name: fetch_canary_candidates
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes"
+      size: 20
+      query:
+        bool:
+          filter:
+            - term:
+                status: "done"
+            - range:
+                applied_at:
+                  gte: "now-48h"
+          must_not:
+            - exists:
+                field: "canary_graduated"
+
+  - name: gate_has_candidates
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.fetch_canary_candidates.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: process_candidates
+    type: foreach
+    foreach: "{{ steps.fetch_canary_candidates.output.hits.hits }}"
+    if: "steps.gate_has_candidates.output: yes"
+    steps:
+      - name: count_alerts
+        type: elasticsearch.search
+        with:
+          index: ".alerts-security.alerts-*"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term:
+                    kibana.alert.rule.rule_id: "{{ foreach.item._source.rec_id }}"
+                - range:
+                    "@timestamp":
+                      gte: "now-24h"
+
+      - name: emit_decision
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            action: "canary_check"
+            rec_id: "{{ foreach.item._source.rec_id }}"
+            source_workflow: "soc-canary-graduation"
+            alert_count_24h: "{{ steps.count_alerts.output.hits.total.value | default: 0 }}"
+
+      - name: emit_trace
+        type: elasticsearch.index
+        with:
+          index: .soc-reasoning-trace
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "canary-grad-{{ foreach.item._id }}"
+            agent_id: "soc-canary-graduation"
+            step_type: "canary_check"
+            content: "Canary check rec={{ foreach.item._source.rec_id }} alerts={{ steps.count_alerts.output.hits.total.value | default: 0 }}"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: canary_graduation_heartbeat
+        source: "soc-canary-graduation"
+        candidates: "{{ steps.fetch_canary_candidates.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Canary graduation tick — candidates={{ steps.fetch_canary_candidates.output.hits.hits | size | default: 0 }}"

@@ -1,0 +1,243 @@
+version: '1'
+name: Argus Reasoning Watchdog (Phase 3)
+description: >
+  Argus R10 — reasoning-confidence dropout watchdog.
+
+  The watchdog is the second-layer safety net against model regression.
+  Where the trust-tier assessor looks at aggregate eval metrics and
+  operational outcomes on a 7-day window, the watchdog watches the
+  SHORT-HORIZON shape of `argus.decision.confidence` in
+  `.soc-reasoning-trace` and freezes auto-apply the moment a sudden
+  dropout appears — long before the weekly eval cadence would catch it.
+
+  It sits between the trust-tier assessor and the trust gate:
+    * assessor  = slow, steady-state tier assignment
+    * watchdog  = fast, transient freeze override
+
+  Freeze semantics:
+    - Compute the mean argus.decision.confidence per actor over the
+      last 15m (short window) and compare against the last 24h baseline.
+    - If short_mean < baseline_mean - DROPOUT_THRESHOLD (default 0.20)
+      OR short_mean < ABSOLUTE_FLOOR (default 0.50), the actor is
+      FROZEN.
+    - Frozen actors get their tier record annotated with
+      `watchdog_frozen: true` + `watchdog_reason`. The trust gate
+      already rejects recommendations from actors whose tier policy
+      does not allow auto-apply — when frozen, the watchdog preemptively
+      downgrades the tier to `quarantined`, giving a single enforcement
+      point for the gate.
+    - A recovery pass (not in this file, handled by the assessor's
+      next hourly tick) will lift the freeze when short_mean recovers.
+
+  Why a dedicated workflow?
+    - The assessor runs hourly on a 7d window; a 10-minute
+      hallucination spike would be washed out before it ever tripped
+      a threshold. The watchdog's 15m window catches it in one tick.
+    - Splitting concerns means the assessor can remain a pure,
+      deterministic aggregator. The watchdog is the only Argus
+      component allowed to flip a tier based on short-term signal.
+
+  Triggers:
+    * scheduled 5m  : near-real-time freeze granularity
+    * manual        : operators can force a sweep
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+  - type: manual
+
+consts:
+  traces_index: ".soc-reasoning-trace"
+  tiers_index:  ".soc-actor-trust-tiers"
+  audit_index:  ".soc-audit-trail"
+  short_window: "now-15m"
+  baseline_window: "now-24h"
+  # Absolute lower bound: any actor whose 15m mean confidence drops
+  # below this is frozen even without a baseline comparison. Tuned
+  # to match the `rule_create` / `rule_patch` threshold that the
+  # applier requires for auto-apply.
+  absolute_floor: 0.5
+  # Relative dropout: a 0.20 drop vs 24h baseline is three stddevs for
+  # a well-calibrated actor. Below this we assume drift.
+  dropout_threshold: 0.2
+
+steps:
+  # ── Discover actors that emitted traces in the short window ─────────
+  - name: discover_recent_actors
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.traces_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.short_window }}"
+            - exists: { field: "argus.decision.confidence" }
+      aggregations:
+        actors:
+          terms:
+            field: agent_id
+            size: 50
+
+  - name: actors_gate
+    type: console
+    with:
+      message: "{% if steps.discover_recent_actors.output.aggregations.actors.buckets and steps.discover_recent_actors.output.aggregations.actors.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: watchdog_per_actor
+    type: foreach
+    if: "steps.actors_gate.output: yes"
+    foreach: "{{ steps.discover_recent_actors.output.aggregations.actors.buckets }}"
+    steps:
+      # Short-window mean confidence.
+      - name: short_mean
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.traces_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { agent_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.short_window }}"
+          aggregations:
+            m: { avg: { field: "argus.decision.confidence" } }
+            c: { value_count: { field: "argus.decision.confidence" } }
+
+      # 24h baseline mean confidence.
+      - name: baseline_mean
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.traces_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { agent_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.baseline_window }}"
+          aggregations:
+            m: { avg: { field: "argus.decision.confidence" } }
+            c: { value_count: { field: "argus.decision.confidence" } }
+
+      # Compute freeze verdict + human-readable reason.
+      # The liquid stays compact: the thresholds are the only knobs.
+      - name: compute_verdict
+        type: console
+        with:
+          message: >-
+            {%- assign sMean = steps.short_mean.output.aggregations.m.value | default: 1 -%}
+            {%- assign sCount = steps.short_mean.output.aggregations.c.value | default: 0 -%}
+            {%- assign bMean = steps.baseline_mean.output.aggregations.m.value | default: 1 -%}
+            {%- assign bCount = steps.baseline_mean.output.aggregations.c.value | default: 0 -%}
+            {%- assign delta = bMean | minus: sMean -%}
+            {%- if sCount == 0 -%}ok
+            {%- elsif sMean < consts.absolute_floor -%}freeze_absolute_floor
+            {%- elsif bCount >= 5 and delta > consts.dropout_threshold -%}freeze_dropout
+            {%- else -%}ok
+            {%- endif -%}
+
+      - name: is_freeze_gate
+        type: console
+        with:
+          message: "{% assign _v = steps.compute_verdict.output %}{% if _v == 'ok' %}no{% else %}yes{% endif %}"
+
+      # Freeze path: downgrade the tier row for this actor to
+      # `quarantined` and set watchdog_frozen=true. We use PUT by id
+      # so the tier assessor's next tick can safely overwrite when
+      # the actor recovers (idempotent recovery).
+      - name: freeze_actor
+        type: elasticsearch.update
+        if: "steps.is_freeze_gate.output: yes"
+        with:
+          index: "{{ consts.tiers_index }}"
+          id: "{{ foreach.item.key }}"
+          doc_as_upsert: true
+          doc:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            actor_id: "{{ foreach.item.key }}"
+            actor_kind: "agent"
+            tier: "quarantined"
+            watchdog_frozen: true
+            watchdog_reason: "{{ steps.compute_verdict.output }}"
+            watchdog_short_mean: "{{ steps.short_mean.output.aggregations.m.value | default: 0 }}"
+            watchdog_baseline_mean: "{{ steps.baseline_mean.output.aggregations.m.value | default: 0 }}"
+            watchdog_frozen_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rationale: "watchdog-quarantined: {{ steps.compute_verdict.output }} sMean={{ steps.short_mean.output.aggregations.m.value | default: 0 }} bMean={{ steps.baseline_mean.output.aggregations.m.value | default: 0 }}"
+
+      # Recovery path: explicitly clear the watchdog flags when the
+      # actor's short-horizon confidence is healthy again. We do NOT
+      # promote the tier here — that's the assessor's job. We only
+      # lift the freeze so the assessor's next computed tier is not
+      # clamped to quarantined.
+      - name: clear_freeze_if_recovered
+        type: elasticsearch.update
+        if: "steps.is_freeze_gate.output: no"
+        with:
+          index: "{{ consts.tiers_index }}"
+          id: "{{ foreach.item.key }}"
+          doc:
+            watchdog_frozen: false
+            watchdog_last_ok_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+      - name: write_watchdog_trace
+        type: elasticsearch.index
+        with:
+          index: .soc-reasoning-trace
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "argus-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            agent_id: "soc-argus-reasoning-watchdog"
+            step_index: 0
+            step_type: "run_summary"
+            content: "actor={{ foreach.item.key }} verdict={{ steps.compute_verdict.output }} sMean={{ steps.short_mean.output.aggregations.m.value | default: 0 }} bMean={{ steps.baseline_mean.output.aggregations.m.value | default: 0 }}"
+            argus:
+              agent:
+                id: "soc-argus-reasoning-watchdog"
+                version: "argus-phase3"
+              decision:
+                kind: "reasoning_watchdog"
+                id: "{{ foreach.item.key }}"
+                confidence: "{{ steps.short_mean.output.aggregations.m.value | default: 0 }}"
+                confidence_delta: "{{ steps.short_mean.output.aggregations.m.value | default: 0 | minus: steps.baseline_mean.output.aggregations.m.value | default: 0 }}"
+              actor:
+                trust_tier: "{% assign _v = steps.compute_verdict.output %}{% if _v == 'ok' %}unknown{% else %}quarantined{% endif %}"
+            attributes:
+              argus.agent.id: "soc-argus-reasoning-watchdog"
+              argus.agent.version: "argus-phase3"
+              argus.decision.kind: "reasoning_watchdog"
+              argus.decision.id: "{{ foreach.item.key }}"
+              argus.decision.confidence: "{{ steps.short_mean.output.aggregations.m.value | default: 0 }}"
+            gen_ai:
+              system: "argus"
+              operation:
+                name: "argus.reasoning_watchdog.evaluate"
+              agent:
+                id: "soc-argus-reasoning-watchdog"
+                name: "Argus Reasoning Watchdog"
+                description: "Short-horizon confidence-dropout detector that freezes auto-apply when a producer's reasoning degrades"
+
+  # ── Heartbeat ───────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_reasoning_watchdog_tick
+        source: "soc-argus-reasoning-watchdog"
+        tick_id: "argus-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        actors_checked: "{{ steps.discover_recent_actors.output.aggregations.actors.buckets | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Argus reasoning watchdog complete — actors={{ steps.discover_recent_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

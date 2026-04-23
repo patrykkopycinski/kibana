@@ -1,0 +1,84 @@
+version: '1'
+name: Argus Playbook — Coverage Gap Triage
+description: >
+  Argus playbook primitive: inspect open coverage gaps for a threat profile,
+  rank by severity, and either file a `gap_analysis` mutation intent for the
+  top N gaps or hand them to the analyst as a case.
+enabled: true
+
+triggers:
+  - type: manual
+
+inputs:
+  - name: threat_profile_id
+    type: string
+    required: false
+  - name: top_n
+    type: number
+    required: false
+    default: 3
+  - name: auto_file
+    type: boolean
+    required: false
+    default: true
+
+consts:
+  gaps_index: ".soc-coverage-gaps"
+
+steps:
+  - name: fetch_gaps
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.gaps_index }}"
+      size: "{{ inputs.top_n }}"
+      sort:
+        - severity: { order: "desc" }
+        - confidence: { order: "asc" }
+      query:
+        bool:
+          filter:
+            - term: { status: "open" }
+
+  - name: log_triage
+    type: elasticsearch.index
+    with:
+      index: ".soc-audit-trail"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        kind: "playbook_dispatch"
+        playbook: "soc-argus-playbook-coverage-gap-triage"
+        threat_profile_id: "{{ inputs.threat_profile_id }}"
+        gap_count: "{{ steps.fetch_gaps.output.hits.total.value }}"
+
+  - name: file_intents
+    type: foreach
+    if: "{{ inputs.auto_file == true }}"
+    foreach: "{{ steps.fetch_gaps.output.hits.hits }}"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: ".soc-recommendations"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            type: "mutation_intent"
+            schema_version: 2
+            rec_id: "arg-gap-{{ foreach.item._id }}"
+            source: "argus.gap_analysis"
+            status: "pending"
+            track: "agentic"
+            title: "Gap coverage for {{ foreach.item._source.technique_id }}"
+            summary: "{{ foreach.item._source.note }}"
+            confidence: 55
+            kind: "rule_create"
+            argus:
+              origin: "gap_analysis"
+              decision: { kind: "rule_create", confidence: 0.55, door_class: "two_way" }
+              agent: { id: "argus.gap_analysis", version: "1.0.0" }
+              actor: { trust_tier: "frontier" }
+
+outputs:
+  - name: gaps
+    value: "{{ steps.fetch_gaps.output.hits.hits }}"
+  - name: filed_count
+    value: "{{ steps.file_intents.output | size }}"

@@ -3,12 +3,6 @@
 ## Setup
 - Run `yarn kbn bootstrap` for initial setup, after switching branches, or when encountering dependency errors
 
-## Local Development Runtime
-- **Elasticsearch runs in Docker** (container `soc-elasticsearch`, exposed on `http://localhost:19200`). Do not run ES from source and do not stop or recreate this container as part of routine dev — it is the shared data plane for all Argus / SOC simulation workflows.
-- **Kibana runs from source**, never from Docker. Use `yarn start --no-base-path` (or `node scripts/kibana --dev --no-base-path`) from the repo root. The `config/kibana.dev.yml` in this worktree already points at `http://localhost:19200` and the Agent Builder experimental flags are enabled there.
-- If a `soc-kibana` Docker container is running, stop it before starting Kibana from source: `docker stop soc-kibana` (port `15601` must be free for the source-run Kibana).
-- Fleet Server (`soc-fleet-server`) and Caldera (`soc-caldera`) containers stay up — they are part of the simulation fabric and are independent of the Kibana runtime choice.
-
 ## Overview
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.

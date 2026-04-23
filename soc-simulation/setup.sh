@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 ENV_FILE="${SCRIPT_DIR}/.env"
 
-# Argus-specific toggles. Default is "seed-all advisories, do NOT nuke
+# ARGUS-specific toggles. Default is "seed-all advisories, do NOT nuke
 # pre-existing recommendations" — the safe demo reset story. Operators
 # running a second live run who want a clean recommendation feed pass
 # --reset-recommendations explicitly.
@@ -30,11 +30,11 @@ while [[ $# -gt 0 ]]; do
 Usage: ./setup.sh [--env <env-file>] [--no-seed-advisories] [--no-demo-data] [--reset-recommendations]
 
   --env <env-file>            Load ES/Kibana creds from a dotenv file (default: ./.env)
-  --no-seed-advisories        Skip the Argus exploit-to-detection CLI seeding step.
+  --no-seed-advisories        Skip the ARGUS exploit-to-detection CLI seeding step.
                               By default setup runs the CLI with --seed-all so the
                               three demo advisories land in .soc-cve-advisories
                               (status=ingested) and the reconciler picks them up.
-  --no-demo-data              Skip demo-only data: Argus variant bank bulk load, Caldera
+  --no-demo-data              Skip demo-only data: ARGUS variant bank bulk load, Caldera
                               profile seeding, difficulty-state seed, and exploit-to-detection
                               --seed-all (same as --no-seed-advisories for advisories).
                               Index templates, agents, skills, workflows, registry, governance
@@ -66,7 +66,7 @@ echo "Kibana: $KIBANA_URL"
 echo ""
 
 if [[ "${NO_DEMO_DATA}" == "true" ]]; then
-  echo "--- Demo data disabled (--no-demo-data): skipping Argus variant bank, Caldera adversary profiles, difficulty-state seed, and exploit-to-detection advisory seed-all ---"
+  echo "--- Demo data disabled (--no-demo-data): skipping ARGUS variant bank, Caldera adversary profiles, difficulty-state seed, and exploit-to-detection advisory seed-all ---"
   echo ""
 fi
 
@@ -166,6 +166,18 @@ echo "OK"
 echo -n "Creating Fleet Server policy... "
 kbn_curl POST "/api/fleet/agent_policies" \
   --data '{"id":"fleet-server-policy","name":"Fleet Server Policy","namespace":"default","is_default_fleet_server":true,"has_fleet_server":true}' \
+  > /dev/null 2>&1 || true
+echo "OK"
+
+echo -n "Creating SOC Endpoint policy... "
+kbn_curl POST "/api/fleet/agent_policies" \
+  --data '{"id":"soc-endpoint-policy","name":"SOC Endpoint Policy","namespace":"default","monitoring_enabled":["logs","metrics"]}' \
+  > /dev/null 2>&1 || true
+echo "OK"
+
+echo -n "Attaching Elastic Defend integration... "
+kbn_curl POST "/api/fleet/package_policies" \
+  --data '{"name":"Elastic Defend - SOC Simulation","namespace":"default","policy_id":"soc-endpoint-policy","package":{"name":"endpoint","title":"Elastic Defend","version":"9.0.2"}}' \
   > /dev/null 2>&1 || true
 echo "OK"
 echo ""
@@ -312,6 +324,55 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
+# 3b. Entity Store v2, ML jobs, Agent Builder UI flags, workflows connector note
+# ---------------------------------------------------------------------------
+
+echo "--- Enabling Entity Store v2 ---"
+if kbn_curl POST "/api/security/entity_store/enable" \
+  --data '{"entityTypes": ["host", "user"]}' > /dev/null 2>&1; then
+  echo "  Entity Store v2 enable request accepted."
+else
+  echo "  WARN: Entity Store enable failed (license, privileges, or endpoint unavailable)."
+fi
+
+echo "--- ML anomaly detection jobs (ARGUS) ---"
+ML_JOBS_SCRIPT="${SCRIPT_DIR}/setup/ml_anomaly_jobs.sh"
+if [[ -f "$ML_JOBS_SCRIPT" ]]; then
+  chmod +x "$ML_JOBS_SCRIPT" 2>/dev/null || true
+  if ES_URL="${ES_URL}" ES_USER="${ES_USER}" ES_PASS="${ES_PASS}" \
+      bash "$ML_JOBS_SCRIPT"; then
+    echo "  ML jobs script completed."
+  else
+    echo "  WARN: ml_anomaly_jobs.sh failed (ML API, license, or indices missing)."
+  fi
+else
+  echo "  ml_anomaly_jobs.sh not found, skipping."
+fi
+
+echo "--- Kibana UI: Agent Builder experimental features ---"
+if kbn_curl POST "/api/kibana/settings" \
+  --data '{"changes":{"agentBuilder:experimentalFeatures":true}}' > /dev/null 2>&1; then
+  echo "  agentBuilder:experimentalFeatures enabled."
+else
+  echo "  WARN: could not set agentBuilder:experimentalFeatures (needs manage_advanced_settings)."
+fi
+
+echo "--- Security Solution experimental flags (kibana.yml) ---"
+cat <<'EONOTE'
+  For ARGUS Console + Entity Store v2 server routes, also set in kibana.yml and restart Kibana:
+    xpack.securitySolution.enableExperimental:
+      - argusConsoleEnabled
+      - entityAnalyticsEntityStoreV2
+  setup.sh cannot modify kibana.yml from this script.
+EONOTE
+
+echo "--- Workflows connector (alert-triggered execution) ---"
+echo "  Use Stack Management > Connectors: the Workflows connector type id is '.workflows' (system)."
+echo "  Detection rules and custom rules can invoke workflows on alert via this connector when licensed."
+
+echo ""
+
+# ---------------------------------------------------------------------------
 # 4. Seed data
 # ---------------------------------------------------------------------------
 
@@ -440,7 +501,7 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4c. Argus variant bank (M2.4)
+# 4c. ARGUS variant bank (M2.4)
 #     Bulk-load the labelled Mythos-era corpus from
 #     soc-simulation/scripts/argus-variant-bank/ into .soc-eval-corpus-<corpus_id>.
 #     Each .ndjson file contains one document per line; docs carry an _argus.corpus_id
@@ -450,7 +511,7 @@ echo ""
 
 BANK_DIR="${SCRIPT_DIR}/scripts/argus-variant-bank"
 if [[ -d "$BANK_DIR" && "${NO_DEMO_DATA}" != "true" ]]; then
-  echo "--- Seeding Argus variant bank into .soc-eval-corpus-* ---"
+  echo "--- Seeding ARGUS variant bank into .soc-eval-corpus-* ---"
   variant_count=0
 
   # Build a single big NDJSON bulk body across all axis files + negatives.
@@ -460,7 +521,7 @@ root = sys.argv[1]
 out_lines = []
 patterns = [
     os.path.join(root, "*", "axis-*.ndjson"),
-    # Argus R1 — corpora organised into named subtrees
+    # ARGUS R1 — corpora organised into named subtrees
     # (e.g. attack-er7/T1190/axis-*.ndjson). Each subtree has its own
     # corpus_id stamped on every doc so they land in separate indices.
     os.path.join(root, "*", "*", "axis-*.ndjson"),
@@ -508,15 +569,15 @@ PY
     echo "  No variants found in bank."
   fi
 elif [[ -d "$BANK_DIR" && "${NO_DEMO_DATA}" == "true" ]]; then
-  echo "--- Skipping Argus variant bank (--no-demo-data) ---"
+  echo "--- Skipping ARGUS variant bank (--no-demo-data) ---"
 else
-  echo "--- Argus variant bank: directory not found, skipping ---"
+  echo "--- ARGUS variant bank: directory not found, skipping ---"
 fi
 
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4d. Argus recommendation reset (opt-in via --reset-recommendations)
+# 4d. ARGUS recommendation reset (opt-in via --reset-recommendations)
 #     Clears pre-existing recommendations so a live demo starts from a clean
 #     feed. The `.soc-recommendations` template stays in place — only the
 #     documents are deleted.
@@ -524,7 +585,7 @@ echo ""
 
 if [[ "${RESET_RECOMMENDATIONS}" == "true" ]]; then
   echo "--- Resetting .soc-recommendations + .soc-cve-advisories (fresh demo state) ---"
-  for idx in ".soc-recommendations" ".soc-cve-advisories" ".soc-detection-eval-runs"; do
+  for idx in ".soc-recommendations" ".soc-cve-advisories" ".soc-argus-eval-runs"; do
     deleted=$(es_curl POST "/${idx}/_delete_by_query?conflicts=proceed&refresh=true" \
       --data-binary '{"query":{"match_all":{}}}' \
       2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin).get("deleted", 0))' \
@@ -538,7 +599,7 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4e. Argus exploit-to-detection seeding (M2.2)
+# 4e. ARGUS exploit-to-detection seeding (M2.2)
 #     Runs the CLI with --seed-all so every ARGUS_DEMO_ADVISORIES entry lands
 #     in `.soc-cve-advisories` with status=ingested + a filed recommendation
 #     + a labelled corpus. The reconciler workflow promotes them on its next
@@ -548,62 +609,31 @@ echo ""
 if [[ "${SEED_ADVISORIES}" == "true" ]]; then
   E2D_CLI_JS="${REPO_ROOT}/x-pack/solutions/security/packages/kbn-argus-exploit-to-detection/scripts/run_exploit_to_detection.js"
   if [[ -f "${E2D_CLI_JS}" ]]; then
-    echo "--- Seeding Argus demo advisories via exploit-to-detection CLI ---"
+    echo "--- Seeding ARGUS demo advisories via exploit-to-detection CLI ---"
     if ES_URL="${ES_URL}" ES_USER="${ES_USER}" ES_PASS="${ES_PASS}" \
         node "${E2D_CLI_JS}" \
           --es-url "${ES_URL}" \
           --es-user "${ES_USER}" \
           --es-pass "${ES_PASS}" \
           --seed-all; then
-      echo "  Argus advisories seeded successfully."
+      echo "  ARGUS advisories seeded successfully."
     else
       echo "  WARN: exploit-to-detection CLI failed — demo will be missing advisories."
       echo "  You can re-run manually:"
       echo "    node ${E2D_CLI_JS} --seed-all"
     fi
   else
-    echo "--- Argus exploit-to-detection CLI not found at ${E2D_CLI_JS} ---"
+    echo "--- ARGUS exploit-to-detection CLI not found at ${E2D_CLI_JS} ---"
     echo "    Run 'yarn kbn bootstrap' to build it, then re-run setup.sh."
   fi
 else
-  echo "--- Skipping Argus advisory seeding (--no-seed-advisories set) ---"
+  echo "--- Skipping ARGUS advisory seeding (--no-seed-advisories set) ---"
 fi
 
 echo ""
 
 # ---------------------------------------------------------------------------
-# 5. Agent Builder agents
-# ---------------------------------------------------------------------------
-
-AGENTS_DIR="${SCRIPT_DIR}/agents"
-if [[ -d "$AGENTS_DIR" ]]; then
-  echo "--- Deploying Agent Builder agents ---"
-  agent_count=0
-  for agent_file in "${AGENTS_DIR}"/*.json; do
-    [[ -f "$agent_file" ]] || continue
-    agent_id="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['id'])" "${agent_file}")"
-    echo "  Agent: ${agent_id} ($(basename "${agent_file}"))"
-    # Create agent; if it already exists (400), update it via PUT (strip id from body)
-    if ! kbn_curl POST "/api/agent_builder/agents" --data-binary "@${agent_file}" > /dev/null 2>&1; then
-      # Agent likely exists — update via PUT with id removed from body
-      body_no_id="$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); d.pop('id',None); print(json.dumps(d))" "${agent_file}")"
-      kbn_curl PUT "/api/agent_builder/agents/${agent_id}" --data "$body_no_id" > /dev/null 2>&1 || echo "    (warning: could not create or update ${agent_id})"
-    fi
-    agent_count=$(( agent_count + 1 ))
-  done
-  if [[ $agent_count -eq 0 ]]; then
-    echo "  No agent files found."
-  else
-    echo "  Done (${agent_count} agent(s))."
-  fi
-else
-  echo "--- Agents: directory not found, skipping ---"
-fi
-
-echo ""
-
-# ---------------------------------------------------------------------------
-# 5b. Skills
+# 5. Skills (Agent Builder)
 # ---------------------------------------------------------------------------
 
 SKILLS_DIR="${SCRIPT_DIR}/skills"
@@ -791,7 +821,7 @@ print(json.dumps({"query":{"bool":{"must_not":[{"terms":{"workflow_id":ids}}]}}}
   echo "  Seeded ${#declared_ids[@]} workflow(s) into .soc-workflow-registry."
 
   # Resolve Kibana saved-object ids for the Workflows Management bulk
-  # import we just ran above. This is what makes the Argus Playbooks
+  # import we just ran above. This is what makes the ARGUS Playbooks
   # "Run" action deep-link to the correct /app/workflows/<id> URL instead
   # of the slug (which 404s the detail page because the Workflows app
   # keys documents by a random `workflow-<uuid>` id). Fails soft: a miss
@@ -851,18 +881,31 @@ echo ""
 # 8. Detection rules
 # ---------------------------------------------------------------------------
 
-RULES_FILE="${SCRIPT_DIR}/detection_rules/rules.ndjson"
-if [[ -f "$RULES_FILE" ]]; then
-  echo "--- Deploying detection rules ---"
-  echo "  POST /api/detection_engine/rules/_import?overwrite=true"
+RULES_E2E="${SCRIPT_DIR}/detection_rules/rules-e2e.ndjson"
+RULES_DEMO="${SCRIPT_DIR}/detection_rules/rules-demo.ndjson"
+
+deploy_rules_ndjson() {
+  local label="$1"
+  local path="$2"
+  if [[ ! -f "$path" ]]; then
+    echo "--- Detection rules (${label}): file not found, skipping ---"
+    return 0
+  fi
+  echo "--- Deploying detection rules (${label}) ---"
+  echo "  POST /api/detection_engine/rules/_import?overwrite=true ($(basename "${path}"))"
   curl -sf -u "${ES_USER}:${ES_PASS}" \
     -X POST \
     -H "kbn-xsrf: true" \
     "${KIBANA_URL}/api/detection_engine/rules/_import?overwrite=true" \
-    --form "file=@${RULES_FILE};type=application/ndjson" > /dev/null
+    --form "file=@${path};type=application/ndjson" > /dev/null
   echo "  Done."
+}
+
+deploy_rules_ndjson "e2e" "${RULES_E2E}"
+if [[ "${NO_DEMO_DATA}" != "true" ]]; then
+  deploy_rules_ndjson "demo" "${RULES_DEMO}"
 else
-  echo "--- Detection rules: file not found, skipping ---"
+  echo "--- Skipping detection rules (demo bundle) (--no-demo-data) ---"
 fi
 
 echo ""
@@ -1015,15 +1058,6 @@ if [[ -d "$WORKFLOWS_DIR" ]]; then
     wf_id="${wf_name%.*}"
     [[ "$wf_id" == _* ]] && continue
     verify_http "workflow:${wf_id}" kbn "/api/workflows/${wf_id}" || true
-  done
-fi
-
-# ---- Kibana: agents -------------------------------------------------------
-if [[ -d "$AGENTS_DIR" ]]; then
-  for agent_file in "${AGENTS_DIR}"/*.json; do
-    [[ -f "$agent_file" ]] || continue
-    agent_id="$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['id'])" "${agent_file}")"
-    verify_http "agent:${agent_id}" kbn "/api/agent_builder/agents/${agent_id}" || true
   done
 fi
 

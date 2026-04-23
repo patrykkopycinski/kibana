@@ -1,12 +1,12 @@
 {
   "$schema": "../schemas/workflow_registry.schema.json",
-  "description": "Authored manifest of canonical Argus workflow metadata. setup.sh reads this file and upserts one document per workflow into .soc-workflow-registry. Every canonical workflow file (soc-*.yaml) under this directory MUST have exactly one entry here; setup.sh fails closed otherwise. model_tier documents the intended Opus/Sonnet/Haiku tier for cost optimization; the physical connector id in YAML stays 'opus' and operators choose the model by swapping the underlying Kibana connector config.",
+  "description": "Authored manifest of canonical ARGUS workflow metadata. setup.sh reads this file and upserts one document per workflow into .soc-workflow-registry. Every canonical workflow file (soc-*.yaml) under this directory MUST have exactly one entry here; setup.sh fails closed otherwise. model_tier documents the intended Opus/Sonnet/Haiku tier for cost optimization; the physical connector id in YAML stays 'opus' and operators choose the model by swapping the underlying Kibana connector config.",
   "workflows": [
     {
       "workflow_id": "soc-alert-sweeper",
       "automation_level": "fully_auto",
       "connectors": ["elastic_detection_rules", "elastic_cases"],
-      "summary": "Sweeps open detection-engine alerts and dispatches them to soc-triage for disposition.",
+      "summary": "Sweeps open detection-engine alerts; runs unified in-pipeline triage, tiered response, and soc-argus-case-lifecycle for investigation tiers.",
       "model_tier": "analyst",
       "owner": "canonical"
     },
@@ -44,14 +44,6 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-case-creation",
-      "automation_level": "fully_auto",
-      "connectors": ["elastic_cases", "elastic_detection_rules"],
-      "summary": "Creates and, on close, emits a forensic summary for every triaged true-positive alert.",
-      "model_tier": "none",
-      "owner": "canonical"
-    },
-    {
       "workflow_id": "soc-deteng",
       "automation_level": "semi_auto",
       "connectors": ["elastic_detection_rules", "recommendations"],
@@ -64,7 +56,7 @@
       "workflow_id": "soc-detection-corpus-sync",
       "automation_level": "fully_auto",
       "connectors": ["elastic_detection_rules"],
-      "summary": "Hourly sync of enabled Kibana detection rules into `.soc-detection-corpus` for Argus coverage (live_sync provenance, rule_id keyed by detection engine id).",
+      "summary": "Hourly sync of enabled Kibana detection rules into `.soc-detection-corpus` for ARGUS coverage (live_sync provenance, rule_id keyed by detection engine id).",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:coverage"]
@@ -90,7 +82,7 @@
       "workflow_id": "soc-meta",
       "automation_level": "fully_auto",
       "connectors": ["artifact_registry", "recommendations", "evolution_log"],
-      "summary": "Meta-agent loop: observes SOC state and emits mutation_intent recommendations to evolve Argus-managed artifacts (registry owner=autosoc).",
+      "summary": "Meta-agent loop: observes SOC state and emits mutation_intent recommendations to evolve ARGUS-managed artifacts (registry owner=autosoc).",
       "model_tier": "planner",
       "owner": "canonical"
     },
@@ -152,14 +144,6 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-triage",
-      "automation_level": "fully_auto",
-      "connectors": ["elastic_detection_rules", "recommendations", "elastic_cases"],
-      "summary": "LLM-assisted triage: produces a triage_verdict recommendation per alert with evidence and expected_impact.",
-      "model_tier": "analyst",
-      "owner": "canonical"
-    },
-    {
       "workflow_id": "soc-shift-handover",
       "automation_level": "fully_auto",
       "connectors": ["evolution_log", "outcomes", "audit_trail", "forensic_summary"],
@@ -195,7 +179,7 @@
       "workflow_id": "soc-detection-eval",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "detection_eval_runs", "audit_trail", "kibana_security_solution"],
-      "summary": "Argus M2.1 \u2014 Detection Eval Vertical. Poller that reads the latest rows from .soc-detection-eval-runs (populated by the @kbn/evals-suite-argus-detection Playwright suite) and feeds pass/fail + variant-coverage metrics into soc-regression-gate and the Argus Detection Eval Scorecard panel.",
+      "summary": "ARGUS M2.1 \u2014 Detection Eval Vertical. Poller that reads the latest rows from .soc-argus-eval-runs (populated by the @kbn/evals-suite-argus-detection Playwright suite) and feeds pass/fail + variant-coverage metrics into soc-regression-gate and the ARGUS Detection Eval Scorecard panel.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -203,7 +187,7 @@
       "workflow_id": "soc-argus-reasoning-eval",
       "automation_level": "fully_auto",
       "connectors": ["audit_trail", "reasoning_eval_runs", "reasoning_trace"],
-      "summary": "Argus R11 \u2014 Reasoning Eval Reconciler. Polls .soc-reasoning-eval-runs (written by @kbn/evals-suite-argus-reasoning), emits a fast-path quarantine hint on gate_decision=fail, writes a decision.kind=reasoning_eval governance span into .soc-reasoning-trace, and marks rows reconciled. Trust-tier transitions stay with soc-argus-trust-tier-assessor.",
+      "summary": "ARGUS R11 \u2014 Reasoning Eval Reconciler. Polls .soc-reasoning-eval-runs (written by @kbn/evals-suite-argus-reasoning), emits a fast-path quarantine hint on gate_decision=fail, writes a decision.kind=reasoning_eval governance span into .soc-reasoning-trace, and marks rows reconciled. Trust-tier transitions stay with soc-argus-trust-tier-assessor.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -211,7 +195,7 @@
       "workflow_id": "soc-argus-frontier-simulator",
       "automation_level": "human_in_the_loop",
       "connectors": ["caldera", "audit_trail", "eval_corpus"],
-      "summary": "Argus M2.4 \u2014 Frontier Simulator. Runs on a 30m schedule only while the Mythos-class preset is armed. Picks one primitive + variant axis from the on-disk variant bank and emits a single labelled event into .soc-eval-corpus-<corpus_id> for the M2.1 Detection Eval Vertical to replay. Produces corpus rows, not executed attacks \u2014 Caldera remains L5 territory.",
+      "summary": "ARGUS M2.4 \u2014 Frontier Simulator. Runs on a 30m schedule only while the Mythos-class preset is armed. Picks one primitive + variant axis from the on-disk variant bank and emits a single labelled event into .soc-eval-corpus-<corpus_id> for the M2.1 Detection Eval Vertical to replay. Produces corpus rows, not executed attacks \u2014 Caldera remains L5 territory.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -220,7 +204,7 @@
       "workflow_id": "soc-argus-arm-mythos-preset",
       "automation_level": "human_in_the_loop",
       "connectors": ["artifact_registry", "audit_trail", "caldera"],
-      "summary": "Argus Phase 1 \u2014 Manual-only arming switch for the Mythos-class adversary preset. Writes a signed arming record to the artifact registry and audit trail; the simulator and Caldera level-6 profile refuse to run unless this arm is active and within its window.",
+      "summary": "ARGUS Phase 1 \u2014 Manual-only arming switch for the Mythos-class adversary preset. Writes a signed arming record to the artifact registry and audit trail; the simulator and Caldera level-6 profile refuse to run unless this arm is active and within its window.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -229,7 +213,7 @@
       "workflow_id": "soc-argus-exploit-to-detection",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "artifact_registry", "audit_trail"],
-      "summary": "Argus M2.2 \u2014 Exploit-to-Detection reconciler. Polls .soc-cve-advisories for advisories synthesized by the CLI/tool, promotes them to status=detected, then reflects downstream @kbn/evals verdicts (auto_apply_ready/blocked_eval) back onto the advisory as eval_pass/eval_fail.",
+      "summary": "ARGUS M2.2 \u2014 Exploit-to-Detection reconciler. Polls .soc-cve-advisories for advisories synthesized by the CLI/tool, promotes them to status=detected, then reflects downstream @kbn/evals verdicts (auto_apply_ready/blocked_eval) back onto the advisory as eval_pass/eval_fail.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -238,7 +222,7 @@
       "workflow_id": "soc-argus-trust-tier-assessor",
       "automation_level": "fully_auto",
       "connectors": ["trust_scores", "recommendations", "audit_trail", "evolution_log"],
-      "summary": "Argus Phase 3 \u2014 Per-actor trust tier assessor. Computes tier (frontier/trusted/probationary/quarantined) per agent using 30-day eval pass rate, reasoning-trace quality, rejection + rollback counts; writes one record per actor into .soc-actor-trust-tiers and updates the actor policy fields consumed by the trust gate.",
+      "summary": "ARGUS Phase 3 \u2014 Per-actor trust tier assessor. Computes tier (frontier/trusted/probationary/quarantined) per agent using 30-day eval pass rate, reasoning-trace quality, rejection + rollback counts; writes one record per actor into .soc-actor-trust-tiers and updates the actor policy fields consumed by the trust gate.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -246,7 +230,7 @@
       "workflow_id": "soc-argus-trust-gate",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "trust_scores", "audit_trail"],
-      "summary": "Argus Phase 3 \u2014 Non-invasive trust policy gate. For every recommendation in auto_apply_ready, looks up the producing actor's tier; if the tier's policy forbids auto-apply or the rec's risk/impact exceeds the tier's caps, flips the rec to pending_review with rejection_reason=trust_policy. R5: also enforces door_class=one_way \u2192 pending_review regardless of tier.",
+      "summary": "ARGUS Phase 3 \u2014 Non-invasive trust policy gate. For every recommendation in auto_apply_ready, looks up the producing actor's tier; if the tier's policy forbids auto-apply or the rec's risk/impact exceeds the tier's caps, flips the rec to pending_review with rejection_reason=trust_policy. R5: also enforces door_class=one_way \u2192 pending_review regardless of tier.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -254,7 +238,7 @@
       "workflow_id": "soc-argus-shadow-executor",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "audit_trail", "trust_scores"],
-      "summary": "Argus Phase 3 (R8) \u2014 Shadow / dry-run executor. Replays every auto_apply_ready draft rule against historical telemetry and writes a verdict into .soc-rule-backtester-runs. Recs whose hit-rate exceeds the noise-cannon cap are downgraded to pending_review; passes are stamped shadow_gate=pass so the autonomous applier can pick them up.",
+      "summary": "ARGUS Phase 3 (R8) \u2014 Shadow / dry-run executor. Replays every auto_apply_ready draft rule against historical telemetry and writes a verdict into .soc-rule-backtester-runs. Recs whose hit-rate exceeds the noise-cannon cap are downgraded to pending_review; passes are stamped shadow_gate=pass so the autonomous applier can pick them up.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -262,7 +246,7 @@
       "workflow_id": "soc-kev-ingest",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "audit_trail"],
-      "summary": "Argus R14 \u2014 CISA Known Exploited Vulnerabilities live-feed orchestrator. Runs every 30m to surface (a) KEV freshness metrics, (b) CISA entries still waiting for the Exploit-to-Detection reconciler, and (c) KEV entries whose CISA due_date is within 72h but have no draft rule yet. The HTTPS fetch itself is done by the @kbn/argus-kev-ingest CLI; this workflow is the in-cluster funnel view.",
+      "summary": "ARGUS R14 \u2014 CISA Known Exploited Vulnerabilities live-feed orchestrator. Runs every 30m to surface (a) KEV freshness metrics, (b) CISA entries still waiting for the Exploit-to-Detection reconciler, and (c) KEV entries whose CISA due_date is within 72h but have no draft rule yet. The HTTPS fetch itself is done by the @kbn/argus-kev-ingest CLI; this workflow is the in-cluster funnel view.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -271,7 +255,7 @@
       "workflow_id": "soc-argus-reasoning-watchdog",
       "automation_level": "fully_auto",
       "connectors": ["trust_scores", "audit_trail", "evolution_log"],
-      "summary": "Argus Phase 3 (R10) \u2014 Reasoning-confidence dropout watchdog. Every 5m compares an actor's 15m mean argus.decision.confidence against the 24h baseline; if the short-window mean drops below the absolute floor or falls more than dropout_threshold vs. baseline, the actor is frozen (tier=quarantined, watchdog_frozen=true). Complements the hourly trust-tier assessor with short-horizon safety.",
+      "summary": "ARGUS Phase 3 (R10) \u2014 Reasoning-confidence dropout watchdog. Every 5m compares an actor's 15m mean argus.decision.confidence against the 24h baseline; if the short-window mean drops below the absolute floor or falls more than dropout_threshold vs. baseline, the actor is frozen (tier=quarantined, watchdog_frozen=true). Complements the hourly trust-tier assessor with short-horizon safety.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -319,7 +303,7 @@
       "workflow_id": "soc-demo-1-runner",
       "automation_level": "human_in_the_loop",
       "connectors": ["artifact_registry", "recommendations", "audit_trail"],
-      "summary": "Argus Demo Scenario 1 \u2014 Same-day CVE \u2192 Detection. Orchestrates the synthesize\u2192index\u2192reconcile\u2192eval chain against a seeded advisory so the end-to-end detection vertical can be demoed in one click.",
+      "summary": "ARGUS Demo Scenario 1 \u2014 Same-day CVE \u2192 Detection. Orchestrates the synthesize\u2192index\u2192reconcile\u2192eval chain against a seeded advisory so the end-to-end detection vertical can be demoed in one click.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -328,7 +312,7 @@
       "workflow_id": "soc-demo-2-runner",
       "automation_level": "human_in_the_loop",
       "connectors": ["eval_corpus", "recommendations", "audit_trail"],
-      "summary": "Argus Demo Scenario 2 \u2014 Polymorphic Variant Swarm. Orchestrates the frontier simulator \u2192 eval suite \u2192 trust gate chain against pre-seeded variants so the polymorphic resilience story can be demoed live.",
+      "summary": "ARGUS Demo Scenario 2 \u2014 Polymorphic Variant Swarm. Orchestrates the frontier simulator \u2192 eval suite \u2192 trust gate chain against pre-seeded variants so the polymorphic resilience story can be demoed live.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -337,7 +321,7 @@
       "workflow_id": "soc-argus-drift-monitor",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "trust_scores", "audit_trail"],
-      "summary": "Argus Phase 3 \u2014 Drift detection. Scans .soc-detection-eval-runs for rule eval-score drift (EMA baseline vs. current window) and .soc-actor-trust-tiers for actor trust-tier trajectory. Files mutation_intent recommendations to re-evaluate affected rules or re-run trust assessment; honours a 48h cooldown so a single drifting rule does not spam the recommender.",
+      "summary": "ARGUS Phase 3 \u2014 Drift detection. Scans .soc-argus-eval-runs for rule eval-score drift (EMA baseline vs. current window) and .soc-actor-trust-tiers for actor trust-tier trajectory. Files mutation_intent recommendations to re-evaluate affected rules or re-run trust assessment; honours a 48h cooldown so a single drifting rule does not spam the recommender.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -346,7 +330,7 @@
       "workflow_id": "soc-argus-playbook-learner",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "outcomes", "audit_trail"],
-      "summary": "Argus Phase 3 \u2014 Playbook learning loop. Correlates .soc-outcomes, .soc-autonomy-decisions, and .soc-post-apply-observations per (technique, playbook_step) pair; when success or rollback rate crosses a threshold, files a mutation_intent to remap the pair to a safer candidate step drawn from soc-simulation/argus/technique-playbook-mapping.json. Gated to frontier-tier actor outcomes to stay adversary-proof.",
+      "summary": "ARGUS Phase 3 \u2014 Playbook learning loop. Correlates .soc-outcomes, .soc-autonomy-decisions, and .soc-post-apply-observations per (technique, playbook_step) pair; when success or rollback rate crosses a threshold, files a mutation_intent to remap the pair to a safer candidate step drawn from soc-simulation/argus/technique-playbook-mapping.json. Gated to frontier-tier actor outcomes to stay adversary-proof.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -354,7 +338,7 @@
       "workflow_id": "soc-argus-intel-adapter-generic",
       "automation_level": "fully_auto",
       "connectors": ["intel_feed", "audit_trail"],
-      "summary": "Argus Phase 3 \u2014 Generic intel-feed adapter. Demo-grade upsert path into .soc-intel-feed. On first tick (or when manually forced) it loads soc-simulation/setup/seed_data/intel-feed-seed.json, then emits an hourly heartbeat so the Argus console can show feed health. Placeholder for the Glasswing/TAXII adapter; replaces nothing, only fans intel rows into the store.",
+      "summary": "ARGUS Phase 3 \u2014 Generic intel-feed adapter. Demo-grade upsert path into .soc-intel-feed. On first tick (or when manually forced) it loads soc-simulation/argus/intel-feed-seed.json, then emits an hourly heartbeat so the ARGUS console can show feed health. Placeholder for the Glasswing/TAXII adapter; replaces nothing, only fans intel rows into the store.",
       "model_tier": "none",
       "owner": "canonical"
     },
@@ -362,51 +346,110 @@
       "workflow_id": "soc-argus-intel-mythos-aggregator",
       "automation_level": "fully_auto",
       "connectors": ["intel_feed", "audit_trail"],
-      "summary": "Argus Phase 3 \u2014 Mythos-signal aggregator. Every 30m discovers CVEs with activity in .soc-intel-feed (14d window), computes a trust-weighted, bounded [0,1] signal per CVE, and upserts one row per CVE into .soc-intel-mythos-signals. Complements the Shadow-AI-derived mythos_signal already produced by @kbn/argus-exploit-probability.",
+      "summary": "ARGUS Phase 3 \u2014 Mythos-signal aggregator. Every 30m discovers CVEs with activity in .soc-intel-feed (14d window), computes a trust-weighted, bounded [0,1] signal per CVE, and upserts one row per CVE into .soc-intel-mythos-signals. Complements the Shadow-AI-derived mythos_signal already produced by @kbn/argus-exploit-probability.",
       "model_tier": "none",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-playbook-coverage-gap-triage",
-      "automation_level": "semi_auto",
-      "connectors": ["recommendations", "audit_trail"],
-      "summary": "Argus playbook \u2014 scores open .soc-coverage-gaps and optionally files gap_analysis mutation intents for the top N.",
-      "model_tier": "none",
-      "owner": "canonical",
-      "tags": ["argus:playbook"]
-    },
-    {
-      "workflow_id": "soc-argus-playbook-high-fp-tuning",
+      "workflow_id": "soc-argus-alert-to-hypothesis",
       "automation_level": "fully_auto",
-      "connectors": ["recommendations", "outcomes", "audit_trail"],
-      "summary": "Argus playbook \u2014 scans recent outcomes for rules with a high false-positive ratio and files consolidation intents.",
+      "connectors": ["elastic_detection_rules", "artifact_registry", "audit_trail", "reasoning_trace"],
+      "summary": "Polls open alerts not yet hypothesis-scanned; creates advisory docs to trigger synthesis when CVE coverage is absent; emits reasoning-trace and audit heartbeats.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
     },
     {
-      "workflow_id": "soc-argus-playbook-datasource-gap",
+      "workflow_id": "soc-argus-case-lifecycle",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_cases", "audit_trail"],
+      "summary": "Find-or-create investigation case, attach alert with rule context, tag tier/confidence, optional argus_mutation_id field, conditional assignee, audit trail.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-containment",
       "automation_level": "semi_auto",
-      "connectors": ["recommendations", "audit_trail"],
-      "summary": "Argus playbook \u2014 for a given data source, surfaces uncovered ATT&CK techniques from .soc-coverage-gaps and files gap_analysis intents.",
+      "connectors": ["elastic_defend", "elastic_cases", "kill_switch", "trust_scores", "audit_trail"],
+      "summary": "Governance-gated Defend response actions (isolate, kill_process, scan) with kill-switch, trust tier, budget, and cooldown gates plus audit.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
     },
     {
-      "workflow_id": "soc-argus-playbook-actor-escalation",
+      "workflow_id": "soc-argus-coverage-initializer",
+      "automation_level": "semi_auto",
+      "connectors": ["elastic_fleet", "elastic_detection_rules", "recommendations", "audit_trail", "reasoning_trace"],
+      "summary": "Discovers Fleet integrations and proposes enabling critical/high prebuilt rules missing from the ARGUS corpus; writes recommendations, coverage gaps, and governance trace.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": ["argus:coverage", "argus:playbook"]
+    },
+    {
+      "workflow_id": "soc-argus-coverage-native",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_detection_rules", "recommendations", "audit_trail"],
+      "summary": "Detection Engine coverage overview API mapped into ARGUS coverage-gap rows; diffs native snapshots and emits recommendations for newly uncovered techniques.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": ["argus:coverage"]
+    },
+    {
+      "workflow_id": "soc-argus-de-health",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_detection_rules", "audit_trail"],
+      "summary": "Native Detection Engine space health and per-rule execution results; writes focused .soc-argus-health docs (source=soc-argus-de-health) and audit rows.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-health-aggregator",
+      "automation_level": "fully_auto",
+      "connectors": ["audit_trail", "trust_scores", "detection_eval_runs"],
+      "summary": "Every 5m aggregates ARGUS subsystem signals into one .soc-argus-health document with overall green/yellow/red status.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-ml-anomaly-bridge",
+      "automation_level": "fully_auto",
+      "connectors": ["hunt_findings", "audit_trail", "elastic_detection_rules"],
+      "summary": "Bridge from Elastic ML anomaly records to .soc-hunt-findings as ml_anomaly_hypothesis rows; complements alert-driven hypothesis coverage.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": ["argus:playbook"]
+    },
+    {
+      "workflow_id": "soc-argus-playbook-runner",
       "automation_level": "semi_auto",
       "connectors": ["recommendations", "audit_trail", "elastic_cases"],
-      "summary": "Argus playbook \u2014 correlates threat-actor techniques against recent telemetry, then opens a case and queues backtests.",
+      "summary": "Parameterized runner for coverage-gap-triage, datasource-gap, high-fp-tuning, and actor-escalation playbooks via ES queries and optional mutation intents.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
+    },
+    {
+      "workflow_id": "soc-argus-rule-health-monitor",
+      "automation_level": "fully_auto",
+      "connectors": ["elastic_detection_rules", "outcomes", "autonomy_decisions", "audit_trail", "reasoning_trace"],
+      "summary": "Monitors applied ARGUS rules for high alert volume; correlates outcomes, alerts, autonomy decisions, and reasoning trace.",
+      "model_tier": "none",
+      "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-self-healer",
+      "automation_level": "fully_auto",
+      "connectors": ["audit_trail", "dead_letter"],
+      "summary": "Subscribes to workflows.failed; logs failures, retries allow-listed operational workflows once, otherwise dead-letter and audit alerts.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": ["argus:governance"]
     },
     {
       "workflow_id": "soc-argus-redundancy-scanner",
       "automation_level": "fully_auto",
       "connectors": ["recommendations", "artifact_registry", "audit_trail"],
-      "summary": "Argus Tier 2 \u2014 Redundancy scanner. Scans .soc-detection-corpus for techniques covered by many overlapping rules, then files consolidation mutation intents for Argus-authored rules so reviewers can retire dominated duplicates. Runs on a 24h schedule and on-demand.",
+      "summary": "ARGUS Tier 2 \u2014 Redundancy scanner. Scans .soc-detection-corpus for techniques covered by many overlapping rules, then files consolidation mutation intents for ARGUS-authored rules so reviewers can retire dominated duplicates. Runs on a 24h schedule and on-demand.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:playbook"]
@@ -415,7 +458,7 @@
       "workflow_id": "soc-workflow-liveness-watchdog",
       "automation_level": "fully_auto",
       "connectors": ["audit_trail", "dead_letter"],
-      "summary": "Meta-workflow that checks heartbeat freshness for all Argus/SOC workflow sources. Aggregates audit-trail heartbeats and detects stale workflows.",
+      "summary": "Meta-workflow that checks heartbeat freshness for all ARGUS/SOC workflow sources. Aggregates audit-trail heartbeats and detects stale workflows.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:governance"]
@@ -442,7 +485,7 @@
       "workflow_id": "soc-canary-graduation",
       "automation_level": "fully_auto",
       "connectors": ["outcomes", "autonomy_decisions", "reasoning_trace", "alerts"],
-      "summary": "Monitors canary-mode rules deployed by Argus. Graduates healthy rules and flags unhealthy ones for rollback based on 24h alert volume.",
+      "summary": "Monitors canary-mode rules deployed by ARGUS. Graduates healthy rules and flags unhealthy ones for rollback based on 24h alert volume.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": ["argus:governance"]

@@ -26,6 +26,7 @@ target
 .playwright-mcp
 .soc-runtime-logs
 soc-simulation/.env
+openspec
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml

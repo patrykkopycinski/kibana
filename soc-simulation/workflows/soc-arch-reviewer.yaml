@@ -1,10 +1,16 @@
 version: '1'
 name: SOC Architecture Reviewer
 description: >
-  Scheduled architectural review of the Argus mesh. Inventories all agents, skills,
+  Scheduled architectural review of the ARGUS mesh. Inventories all agents, skills,
   and workflows, gathers metrics, and uses the meta-agent with the architecture-review
   skill to identify consolidation opportunities and anti-patterns. Writes recommendations
   to .soc-recommendations for human review.
+
+consts:
+  evolution_log_index: ".soc-evolution-log"
+  metrics_index: ".soc-metrics"
+  recommendations_index: ".soc-recommendations"
+
 enabled: true
 
 triggers:
@@ -30,7 +36,7 @@ steps:
   - name: get_evolution_log
     type: elasticsearch.search
     with:
-      index: ".soc-evolution-log"
+      index: "{{ consts.evolution_log_index }}"
       query:
         range:
           "@timestamp":
@@ -39,7 +45,7 @@ steps:
   - name: get_metrics
     type: elasticsearch.search
     with:
-      index: ".soc-metrics"
+      index: "{{ consts.metrics_index }}"
       query:
         range:
           "@timestamp":
@@ -48,7 +54,7 @@ steps:
   - name: get_recommendations
     type: elasticsearch.search
     with:
-      index: ".soc-recommendations"
+      index: "{{ consts.recommendations_index }}"
       query:
         range:
           "@timestamp":
@@ -73,11 +79,10 @@ steps:
   # ── Run architectural analysis ───────────────────────────────────
   - name: review
     type: ai.agent
-    agent-id: soc-meta-agent
     connector-id: opus
     with:
       message: >
-        Perform an architectural review of the Argus mesh using your architecture-review skill.
+        Perform an architectural review of the ARGUS mesh using your architecture-review skill.
 
         Analyze the current inventory for consolidation opportunities, anti-patterns,
         and structural improvements.
@@ -92,12 +97,12 @@ steps:
         Recommendation stats: {{ steps.get_recommendations.output.aggregations | json }}
 
         IDEAL ARCHITECTURE:
-        - soc-triage-agent: Unified classification + enrichment + investigation
-        - soc-deteng-agent: Principal Detection Engineer — strategic rule authoring + coverage-gap closure + redesign of irredeemable rules
-        - soc-signal-quality-agent: Tactical FP/TP tuning (exceptions, thresholds, last-resort disables)
-        - soc-meta-agent: System evolution brain (skills for health-check, difficulty, arch-review)
-        - soc-autonomous-applier-agent: Governance-gated applier for Argus-managed mutations (registry owner=autosoc)
-        - soc-rec-applier-agent: Recommendation execution
+        - default: Unified classification + enrichment + investigation
+        - default: Principal Detection Engineer — strategic rule authoring + coverage-gap closure + redesign of irredeemable rules
+        - default: Tactical FP/TP tuning (exceptions, thresholds, last-resort disables)
+        - default: System evolution brain (skills for health-check, difficulty, arch-review)
+        - default: Elastic Security AI Assistant — governance-gated applier for ARGUS-managed mutations (registry owner=autosoc)
+        - default: Elastic Security AI Assistant — recommendation execution
         - Everything else: Deterministic workflows
 
         Evaluate all components against this ideal. Identify any meta-agent-created agents
@@ -111,13 +116,32 @@ steps:
           "summary":  "...",
           "intents":  [ /* ZERO or more mutation_intent objects — SAME envelope as soc-meta (title, summary, reasoning, confidence, track, housekeeping, expected_impact, evidence, details{artifact_type, artifact_id (auto-*), op, expected_ownership, reason, new_definition?, patch?, dependencies:[]}) */ ]
         }
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          summary:
+            type: string
+          intents:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        required:
+          - findings
+          - summary
+          - intents
     timeout: 600s
 
   # ── Write results ────────────────────────────────────────────────
   - name: write_evolution_log
     type: elasticsearch.index
     with:
-      index: .soc-evolution-log
+      index: "{{ consts.evolution_log_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         source: "soc-arch-reviewer"
@@ -127,7 +151,7 @@ steps:
   - name: write_recommendation
     type: elasticsearch.index
     with:
-      index: .soc-recommendations
+      index: "{{ consts.recommendations_index }}"
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         rec_id: "arch-review-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
@@ -136,7 +160,7 @@ steps:
         source_doc_id: "{{ steps.write_evolution_log.output._id }}"
         status: "pending"
         title: "Architecture Review - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
-        summary: "{{ steps.review.output.message }}"
+        summary: "{{ steps.review.output.summary | default: steps.review.output.message }}"
         details: "{{ steps.review.output | json }}"
         reasoning: "Periodic architectural review for consolidation opportunities"
         confidence: 70
@@ -152,7 +176,7 @@ steps:
       - name: write_intent
         type: elasticsearch.index
         with:
-          index: .soc-recommendations
+          index: "{{ consts.recommendations_index }}"
           document:
             "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
             rec_id: "arch-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"

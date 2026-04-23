@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Build the "Argus Operations Overview" dashboard in a running Kibana via the
+Build the "ARGUS Operations Overview" dashboard in a running Kibana via the
 saved-objects API, then export the bundle to NDJSON for check-in.
 
 This is the _source of truth_ for the dashboard. Re-run it against a clean
-Kibana to regenerate the NDJSON file under soc-simulation/dashboards/.
+Kibana to regenerate the NDJSON file under soc-simulation/setup/dashboards/.
 
 Implementation notes
 --------------------
@@ -15,12 +15,12 @@ portable: it can be imported into any Kibana with `.soc-*` data streams and
 works immediately, with no pre-existing data views required.
 
 We still provision a unified `argus-all-soc-dv` data view for the
-"Audit in Discover" deep-link from the Argus Console header, but the
+"Audit in Discover" deep-link from the ARGUS Console header, but the
 dashboard itself does not depend on it.
 
 Usage
 -----
-    KBN_BASE=http://localhost:15601 KBN_AUTH=elastic:changeme \
+    KBN_BASE=http://localhost:${KIBANA_PORT:-15601} KBN_AUTH=elastic:changeme \
         python3 soc-simulation/scripts/_build_argus_dashboard.py
 """
 from __future__ import annotations
@@ -36,18 +36,19 @@ import urllib.request
 import uuid
 from typing import Any
 
-DEFAULT_BASE = os.environ.get("KBN_BASE", "http://localhost:15601")
+_KIBANA_PORT = os.environ.get("KIBANA_PORT", "15601")
+DEFAULT_BASE = os.environ.get("KBN_BASE", f"http://localhost:{_KIBANA_PORT}")
 DEFAULT_AUTH = os.environ.get("KBN_AUTH", "elastic:changeme")
 
 DATA_VIEW_ID = "argus-all-soc-dv"
 DATA_VIEW_TITLE = ".soc-*,.ds-.soc-*-*"
-DATA_VIEW_NAME = "Argus — All SOC data"
+DATA_VIEW_NAME = "ARGUS — All SOC data"
 
 DASHBOARD_ID = "argus-operations-overview"
-DASHBOARD_TITLE = "Argus — Operations Overview"
+DASHBOARD_TITLE = "ARGUS — Operations Overview"
 DASHBOARD_DESCRIPTION = (
-    "Unified view of every Argus action across telemetry, detection, mutation, "
-    "response, and governance layers. Pair with the Argus Console at "
+    "Unified view of every ARGUS action across telemetry, detection, mutation, "
+    "response, and governance layers. Pair with the ARGUS Console at "
     "/app/security/argus for interactive drill-down."
 )
 
@@ -59,7 +60,9 @@ DASHBOARD_DEFAULT_TO = "now"
 INDEX_PATTERN = ".soc-*,.ds-.soc-*-*"
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-NDJSON_OUT = REPO_ROOT / "soc-simulation" / "dashboards" / "argus_operations_overview.ndjson"
+NDJSON_OUT = (
+    REPO_ROOT / "soc-simulation" / "setup" / "dashboards" / "argus-operations-overview.ndjson"
+)
 
 
 def kbn_request(
@@ -237,11 +240,11 @@ def viz_tsvb(
 # ---------------------------------------------------------------------------
 
 
-HEADER_MARKDOWN = """# Argus — Operations Overview
+HEADER_MARKDOWN = """# ARGUS — Operations Overview
 
-**Every Argus action, across every layer, in one place.**
+**Every ARGUS action, across every layer, in one place.**
 
-- 🔎 **Interactive drill-down** → [Open the Argus Console](/app/security/argus) for Pulse / Activity Feed / Mutation Lineage / Reasoning chains
+- 🔎 **Interactive drill-down** → [Open the ARGUS Console](/app/security/argus) for Pulse / Activity Feed / Mutation Lineage / Reasoning chains
 - 📜 **Raw audit trail** → [Open Discover over `.soc-*`](/app/discover#/?_g=(time:(from:now-24h,to:now))&_a=(dataSource:(type:dataView,dataViewId:'argus-all-soc-dv')))
 - 🧾 **Compliance log** → [Open `.soc-audit-trail`](/app/discover#/?_g=(time:(from:now-24h,to:now))&_a=(dataSource:(type:dataView,dataViewId:'soc-audit-trail')))
 
@@ -290,7 +293,7 @@ def build_plan() -> tuple[list[dict], list[dict]]:
     register(
         viz_tsvb(
             "argus-ops-metric-actions",
-            title="Total Argus actions",
+            title="Total ARGUS actions",
             tsvb_type="metric",
             series=[
                 _tsvb_series(
@@ -304,7 +307,7 @@ def build_plan() -> tuple[list[dict], list[dict]]:
             ],
         ),
         0, 4, 16, 8,
-        panel_title="Total Argus actions",
+        panel_title="Total ARGUS actions",
     )
 
     # Rollback MTTR — averaged across the window (field is rollback_mttr_ms,
@@ -411,7 +414,7 @@ def build_plan() -> tuple[list[dict], list[dict]]:
             ],
         ),
         0, 27, 20, 15,
-        panel_title="Top actors (drill via Argus Console for reasoning)",
+        panel_title="Top actors (drill via ARGUS Console for reasoning)",
     )
 
     register(
@@ -486,7 +489,7 @@ def build_plan() -> tuple[list[dict], list[dict]]:
                     metrics=[{"id": _gen_id(), "type": "count"}],
                     chart_type="line",
                     fill="0.3",
-                    filter_kuery='_index : ".soc-detection-eval-runs"',
+                    filter_kuery='_index : ".soc-argus-eval-runs"',
                 )
             ],
         ),

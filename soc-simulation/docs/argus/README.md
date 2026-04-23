@@ -90,7 +90,7 @@ truth.
 
 ## Current PR scope — community coverage + playbooks + decision graph
 
-The in-flight change (`openspec/changes/argus-community-coverage-and-playbooks`)
+The in-flight community coverage + playbooks + decision graph work
 lands the stack-native breadth layer on top of the Phase-C ARGUS Console.
 Concretely, what the current worktree ships:
 

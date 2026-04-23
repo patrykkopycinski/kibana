@@ -1,13 +1,13 @@
 # ARGUS — Mythos-Class Adversary Preset Spec
 
-> "Reaching level 6 is always an operator decision." — Argus governance principle
+> "Reaching level 6 is always an operator decision." — ARGUS governance principle
 
 The Mythos-class preset (`level-6`, `mythos_class_frontier`) is the canonical stress-test
 adversary for the Mythos era. It is the **only** difficulty level that is not reachable
 via the auto-escalation rules in `soc-difficulty-controller.yaml`. It must be armed
 manually via `soc-argus-arm-mythos-preset.yaml`.
 
-This doc is the contract between the preset and the rest of Argus: what the preset
+This doc is the contract between the preset and the rest of ARGUS: what the preset
 exercises, what it is allowed to do, and what it deliberately does *not* do.
 
 ---
@@ -21,7 +21,7 @@ A frontier-capability adversary characterised by the four Mythos-era pressures:
 - **P1 — Time compression.** Exploit built and deployed inside the historical MTTD window.
 - **P2 — Variant explosion.** ≥ 20 behavioural variants per primitive technique.
 - **P3 — Agentic adversary.** The adversary reasons about defender state and crafts
-  adversarial inputs (including prompt injection) against Argus skills.
+  adversarial inputs (including prompt injection) against ARGUS skills.
 - **P4 — Capability asymmetry.** Attacker may use novel techniques with zero public
   precedent in the defender's known-TTP set.
 
@@ -32,7 +32,7 @@ Explicit non-goals to keep the preset safe and reproducible:
 - No exploitation of systems outside the staged lab environment.
 - No persistence or side-effects that outlast the simulation teardown.
 - No testing of model-provider safety guardrails beyond what Project Glasswing's spirit
-  would sanction — Argus exists to *defend*, not to probe frontier models for new
+  would sanction — ARGUS exists to *defend*, not to probe frontier models for new
   jailbreaks.
 - No injection of payloads into production Elastic Cloud tenants.
 
@@ -64,7 +64,7 @@ setup.sh seeds it into `.soc-attack-profiles/_doc/level-6`, keyed by
 ### 2.2 Dynamic (agentic) portion — delivered in M2.4
 
 The static portion is what Caldera can run today. The agentic portion is what the
-**Argus Frontier Simulator** (`soc-argus-frontier-simulator`, M2.4) will add:
+**ARGUS Frontier Simulator** (`soc-argus-frontier-simulator`, M2.4) will add:
 
 - **Behaviour polymorphism.** ≥ 20 mutations per primitive along the five mutation
   axes declared in `argus_metadata.polymorphism.mutation_axes`.
@@ -93,7 +93,7 @@ The static portion is what Caldera can run today. The agentic portion is what th
 
 ## 3. Downstream contract
 
-Every Argus layer must know how to react when a Mythos-class arm lands.
+Every ARGUS layer must know how to react when a Mythos-class arm lands.
 
 | Layer | Expected reaction |
 |---|---|
@@ -123,7 +123,7 @@ of the following hold at the end of the operation:
 - [ ] No `.soc-autonomy-decisions` row with `status: applied` for a mutation whose
   trust tier was below the Mythos-class threshold.
 
-Failing any of these is a regression against Argus, not against the preset.
+Failing any of these is a regression against ARGUS, not against the preset.
 
 ---
 
@@ -137,4 +137,4 @@ note the rationale in this doc's §6.
 
 | Date | Version | Change |
 |---|---|---|
-| 2026-04-17 | 1.0.0 | Initial spec (Argus Phase 1). Static portion only; agentic extensions land with M2.4. |
+| 2026-04-17 | 1.0.0 | Initial spec (ARGUS Phase 1). Static portion only; agentic extensions land with M2.4. |

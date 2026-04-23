@@ -1,4 +1,4 @@
-# Argus — Live End-to-End Demo Validation (2026-04-19)
+# ARGUS — Live End-to-End Demo Validation (2026-04-19)
 
 > Supersedes the mirror-mode proof in
 > [`demo-validation-2026-04-17.md`](./demo-validation-2026-04-17.md). That
@@ -27,7 +27,7 @@
 | Wall-clock span | `2026-04-19T19:20:15.369Z` → `2026-04-19T19:22:05.496Z` (≈1m50s) |
 | Driver exit code | `0` |
 
-Every Argus-owned workflow in the active demo set executed end-to-end on
+Every ARGUS-owned workflow in the active demo set executed end-to-end on
 the runtime. Runtime itself is no longer a demo risk — downgrading
 `G-demo-1` from P0 in
 [`capability-and-gap-analysis.md`](../capability-and-gap-analysis.md).
@@ -40,7 +40,7 @@ All eight rows below were copy-pasted from the live-demo driver output
 and cross-checked against the archived `exec_*.json` pulls from
 `.workflows-executions`.
 
-### 2.1 SOC Argus — Arm Mythos-Class Preset
+### 2.1 SOC ARGUS — Arm Mythos-Class Preset
 ```
 wid=workflow-d95fae9e-375e-4dc3-9a28-5a28d7901d23
 trigger HTTP=200
@@ -58,7 +58,7 @@ Side-effect: `.soc-difficulty-state.preset_armed = "level-6"`, a pending
 attack command is queued, and an `argus_preset_armed` audit event
 landed.
 
-### 2.2 SOC Argus — Frontier Simulator (M2.4)
+### 2.2 SOC ARGUS — Frontier Simulator (M2.4)
 ```
 wid=workflow-78bf010b-e86c-4827-aa0c-7cfdf72c5a7f
 trigger HTTP=200
@@ -107,7 +107,7 @@ Audit heartbeat written:
   "emission_id": "1776626435-T1003.001" }
 ```
 
-### 2.3 Argus Exploit-to-Detection Reconciler (M2.2)
+### 2.3 ARGUS Exploit-to-Detection Reconciler (M2.2)
 ```
 wid=workflow-369b6c28-fa8b-48c1-9fb6-0b131ed35351
 trigger HTTP=200
@@ -125,7 +125,7 @@ steps=9
   - log_done                      type=console               status=completed
 ```
 
-### 2.4 SOC Detection Eval (Argus M2.1)
+### 2.4 SOC Detection Eval (ARGUS M2.1)
 ```
 wid=workflow-4b60bfe0-7908-4c5f-9200-eb6dc6940a70
 trigger HTTP=200
@@ -142,7 +142,7 @@ steps=4
 > the `must_not: term.reconciled` clause go to ES as raw JSON — the
 > engine's `.search` schema had been rejecting both.
 
-### 2.5 Argus Trust Tier Assessor (Phase 3)
+### 2.5 ARGUS Trust Tier Assessor (Phase 3)
 ```
 wid=workflow-3f1d283b-aa8f-476b-a161-a22f73d5102f
 trigger HTTP=200
@@ -155,7 +155,7 @@ stepExecutionIds=5   # discover_actors, actors_gate, process_actors (guarded),
 > previous `"Foreach expression … resolved to undefined"` runtime fault
 > when `aggregations.actors.buckets` is absent on cold clusters.
 
-### 2.6 Argus Trust Gate (Phase 3)
+### 2.6 ARGUS Trust Gate (Phase 3)
 ```
 wid=workflow-19d49383-5b6d-4ebc-803c-beed71763a3a
 trigger HTTP=200
@@ -168,7 +168,7 @@ steps=4
   - log_done            type=console               status=completed
 ```
 
-### 2.7 Argus Demo 1 Runner — Same-day CVE → Detection
+### 2.7 ARGUS Demo 1 Runner — Same-day CVE → Detection
 ```
 wid=workflow-5377d223-f07e-4f36-a507-85ac3cbc713b
 trigger HTTP=200
@@ -194,7 +194,7 @@ steps=11
 > which is exactly what this run does at 19:20:55 (E2D) and 19:21:35
 > (trust gate).
 
-### 2.8 Argus Demo 2 Runner — Polymorphic Variant Swarm
+### 2.8 ARGUS Demo 2 Runner — Polymorphic Variant Swarm
 ```
 wid=workflow-2c10c045-419a-4c44-9113-3e86d41b1876
 trigger HTTP=200
@@ -211,7 +211,7 @@ stepExecutionIds=7   # fetch_latest_eval_run, fetch_variant_count, fetch_e2d_hea
 Direct ES queries against the live cluster (authoritative ground truth,
 not demo-driver output):
 
-### 3.1 Argus heartbeats in the last 30 minutes
+### 3.1 ARGUS heartbeats in the last 30 minutes
 ```
 GET /.soc-audit-trail/_search
 { "query": { "bool": { "filter": [
@@ -237,7 +237,7 @@ Most recent events:
 | 2026-04-19T21:20:35Z     | `argus_frontier_simulator_tick`    | `soc-argus-frontier-simulator`  |
 
 Both demo runners' `argus_demo_run` heartbeats are present with the
-correct `source`, and every upstream Argus workflow they observe has a
+correct `source`, and every upstream ARGUS workflow they observe has a
 matching heartbeat within the same minute — i.e. the orchestration
 chain closed without manual intervention.
 
@@ -264,8 +264,8 @@ the `_argus.corpus_id` tag.
 | `soc-argus-trust-gate.yaml` | `find_actor_tier` → `elasticsearch.request` to use object-form `sort: [{ "@timestamp": { order: desc } }]`. |
 | `soc-demo-1-runner.yaml` | Removed the two `workflow.execute` calls (engine could not resolve targets by display name reliably). Runner now **observes** the E2D and trust-gate heartbeats; driver kicks the workflows explicitly. `fetch_scenario_recommendation` → `elasticsearch.request`. |
 | `soc-demo-2-runner.yaml` | Same observer-pattern refactor for the E2D dependency. `fetch_latest_eval_run` → `elasticsearch.request`. |
-| `soc-triage.yaml` | Removed empty `consts:` block that failed YAML schema validation. |
-| `scripts/argus_live_demo.sh` | Removed `SOC Triage` from the live-demo target list — it is not an Argus workflow, depends on a live Inference connector, and stalls the driver when triggered without real alert input. Documented inline. |
+| `soc-triage.yaml` | *(Historical.)* Removed empty `consts:` block that failed YAML schema validation. The `soc-triage` workflow was later removed; triage is handled by `soc-alert-sweeper.yaml`. |
+| `scripts/argus_live_demo.sh` | Removed `SOC Triage` from the live-demo target list — it is not an ARGUS workflow, depends on a live Inference connector, and stalls the driver when triggered without real alert input. Documented inline. |
 
 Schema/runtime discrepancy summary: any step that needs object-form
 `sort` on `@timestamp`, or that writes via `_reindex` with an inline
@@ -282,13 +282,13 @@ From a clean `yarn kbn bootstrap` + running ES (9.2 snapshot) + Kibana
 (local build exposing the Workflows runtime):
 
 ```bash
-# 1) seed all Argus state
+# 1) seed all ARGUS state
 ./soc-simulation/setup.sh
 
 # 2) reinstall the eight demo YAMLs in-place (idempotent PUT by ID)
 python3 /tmp/update_wf.py        # script referenced above; uses /api/workflows/workflow/{id}
 
-# 3) trigger the full Argus demo end-to-end
+# 3) trigger the full ARGUS demo end-to-end
 bash ./soc-simulation/scripts/argus_live_demo.sh
 
 # 4) inspect runtime logs
@@ -307,9 +307,9 @@ completed=8 failed/other=0
 ## 6. What this proof covers — and what it doesn't
 
 ✅ Covered
-- The Argus Workflows runtime can **create, schedule, advance, and
-  complete** the entire Argus demo chain on a local stateful cluster.
-- All eight Argus-owned demo workflows finish with `status=completed`
+- The ARGUS Workflows runtime can **create, schedule, advance, and
+  complete** the entire ARGUS demo chain on a local stateful cluster.
+- All eight ARGUS-owned demo workflows finish with `status=completed`
   and `error=null`.
 - Nested-ECS polymorphic emissions are written correctly.
 - Audit-trail heartbeats close the observation loop for both demo

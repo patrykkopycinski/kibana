@@ -1,8 +1,8 @@
-# Argus — Capability & Gap Analysis (2026-04-21 Phase-C console surfaces)
+# ARGUS — Capability & Gap Analysis (2026-04-21 Phase-C console surfaces)
 
 > Companion to `capability-map.md` and `demo-storyboard.md`.
-> `capability-map.md` answers "what should Argus do". This doc answers
-> "what does Argus **actually** do as of the current branch, and where
+> `capability-map.md` answers "what should ARGUS do". This doc answers
+> "what does ARGUS **actually** do as of the current branch, and where
 > are the remaining gaps?".
 >
 > Scope: the current single-branch implementation intended for the
@@ -10,18 +10,18 @@
 > policy). Forward-looking ideas pulled from external research are
 > tagged `[ext]` so they can be triaged into post-demo backlog.
 >
-> **Update 2026-04-19:** all eight Argus demo workflows run end-to-end
+> **Update 2026-04-19:** all eight ARGUS demo workflows run end-to-end
 > on the live Kibana Workflows runtime.
 > [`proof/demo-validation-2026-04-19-live.md`](./proof/demo-validation-2026-04-19-live.md).
 >
 > **Update 2026-04-20 (feature-complete):** all P1 gaps (G1 – G5) AND
 > the three highest-priority external ideas (R5 door-class, R9
-> OTEL-GenAI-1.x, R10 reasoning watchdog) landed on this branch. Argus
+> OTEL-GenAI-1.x, R10 reasoning watchdog) landed on this branch. ARGUS
 > is now a feature-complete demo build. Live-cluster evidence captured
 > in
 > [`proof/feature-complete-evidence-2026-04-20.md`](./proof/feature-complete-evidence-2026-04-20.md).
 >
-> **Update 2026-04-21 (Phase C — complete Argus story):** the Argus
+> **Update 2026-04-21 (Phase C — complete ARGUS story):** the ARGUS
 > Console at `/app/security/argus` now tells the full story end-to-end
 > with four new surfaces plus a hardened human-in-the-loop write path:
 >
@@ -71,7 +71,7 @@
 >     routes one-way doors to `pending_review` regardless of actor
 >     tier.
 >   * **R9 OTEL-GenAI-1.x** — `.soc-reasoning-trace` has first-class
->     `gen_ai.*` mappings and every Argus workflow emits the
+>     `gen_ai.*` mappings and every ARGUS workflow emits the
 >     semantic-convention envelope (system, operation, agent).
 >   * **R10 reasoning watchdog** — new `soc-argus-reasoning-watchdog.yaml`
 >     freezes actors on 15-minute confidence dropout against the 24h
@@ -79,7 +79,7 @@
 
 ---
 
-## 1. What Argus does today — evidence-based inventory
+## 1. What ARGUS does today — evidence-based inventory
 
 Each row is grounded in on-disk code + the two proof documents:
 the live runtime run in
@@ -93,7 +93,7 @@ the live runtime run in
 |---------|---------|----------------|---------------|
 | `@kbn/argus-exploit-to-detection` | CVE advisory → draft rule + labelled variants + `mutation_intent` recommendation | `buildMutationIntent`, `synthesizeRule`, `generateVariants`, `ARGUS_DEMO_ADVISORIES`, CLI `run_exploit_to_detection.js` | `proof/m22-cli.log`, `proof/recs-latest.json` |
 | `@kbn/argus-exploit-probability` | Deterministic exploit-likelihood scorer (CVSS · EPSS · KEV · asset · Mythos signal) with TS/Painless parity | `computeExploitProbability`, `ExploitProbabilityResult`, contributor weights v1.0.0 | `proof/m23-retrofill-demo.json`, `proof/m23-ts-parity.log` |
-| `@kbn/argus-reasoning-traces` | OTEL-GenAI span shape for Argus decisions + `argus.decision.kind` taxonomy | `ArgusDecisionKind`, `ArgusTrustTier`, Zod schemas for `.soc-reasoning-trace` | unit tests (16 green) |
+| `@kbn/argus-reasoning-traces` | OTEL-GenAI span shape for ARGUS decisions + `argus.decision.kind` taxonomy | `ARGUSDecisionKind`, `ARGUSTrustTier`, Zod schemas for `.soc-reasoning-trace` | unit tests (16 green) |
 | `@kbn/evals-suite-argus-detection` | Detection-rule grading suite — rules × labelled variants → precision/recall/FP-rate/axis coverage → gate decision | Playwright suite + CLI `run_detection_eval.js` | `proof/m21-detection-eval.log`, `proof/m21-eval-runs.json` |
 
 **48 unit tests green across the three non-eval packages.**
@@ -106,9 +106,9 @@ the live runtime run in
 | `.soc-recommendations` | `mutation_intent` envelope (v2 schema) — the durable write surface for autonomous actions | M2.2 CLI + envelope-validator pipeline | 259 recs, all pass envelope validator |
 | `.soc-detection-eval-runs` | Per-(rule × run) gate decisions with per-axis firing | M2.1 CLI / Playwright suite | 4 rows, one per in-tree Mythos rule |
 | `.soc-eval-corpus-argus-corpus-mythos-2026-04` | Labelled variant bank (positive/negative, per-axis) | `setup.sh` bulk-load from `scripts/argus-variant-bank/` | 13 labelled variants |
-| `.soc-reasoning-trace` | OTEL-GenAI spans for every Argus decision | M2.2 CLI, trust-gate workflow, reconciler | 9 spans so far |
+| `.soc-reasoning-trace` | OTEL-GenAI spans for every ARGUS decision | M2.2 CLI, trust-gate workflow, reconciler | 9 spans so far |
 | `.soc-actor-trust-tiers` | Per-actor trust tier + auto-apply allowance | `soc-argus-trust-tier-assessor.yaml` | 2 seeded actors (frontier + probationary) |
-| `.soc-audit-trail` | Heartbeats + governance events | every Argus workflow | 17k+ events after setup + demo runs |
+| `.soc-audit-trail` | Heartbeats + governance events | every ARGUS workflow | 17k+ events after setup + demo runs |
 | `.soc-argus-vuln-demo` | M2.3 retrofill target — vulnerability docs with `vulnerability.argus.*` enrichment | `argus-exploit-probability-enricher` ingest pipeline | 3 demo vulns, contracted TS↔Painless parity |
 | `.soc-attack-commands`, `.soc-difficulty-state`, `.soc-eval-corpus-*` | M2.4 simulation surfaces | `soc-argus-arm-mythos-preset` + `soc-argus-frontier-simulator` (mirror-validated) | 1 pending command, state=level-6 armed, 2 simulated emissions |
 
@@ -133,7 +133,7 @@ the live runtime run in
 
 ### 1.5 Dashboard
 
-`Argus Console` saved object + 3 data views import cleanly
+`ARGUS Console` saved object + 3 data views import cleanly
 (`proof/dashboard-import.json`). Panels bind to `.soc-detection-eval-runs`,
 `.soc-recommendations`, `.soc-reasoning-trace`.
 
@@ -145,10 +145,10 @@ the live runtime run in
 
 | # | Gap | Impact | Status |
 |---|-----|--------|--------|
-| **G-demo-1** | ~~Local Kibana build does not expose the Workflows runtime executor, so every workflow runs via mirror scripts instead of end-to-end clicks.~~ | Resolved 2026-04-19. All eight Argus demo workflows run end-to-end on the live runtime; the driver `scripts/argus_live_demo.sh` completes with `completed=8 failed/other=0`. Several step-level schema gaps had to be worked around by using `elasticsearch.request` for object-form `sort` and for `_reindex` with inline Painless — documented in `proof/demo-validation-2026-04-19-live.md` §4. | ✅ resolved |
-| **G-demo-2** | All four Mythos rules `fail` the M2.1 gate today. | Intentional — it is the demo narrative ("Argus closes the gap"). No action needed; narrative emphasises this is the starting state. | ✅ intentional |
+| **G-demo-1** | ~~Local Kibana build does not expose the Workflows runtime executor, so every workflow runs via mirror scripts instead of end-to-end clicks.~~ | Resolved 2026-04-19. All eight ARGUS demo workflows run end-to-end on the live runtime; the driver `scripts/argus_live_demo.sh` completes with `completed=8 failed/other=0`. Several step-level schema gaps had to be worked around by using `elasticsearch.request` for object-form `sort` and for `_reindex` with inline Painless — documented in `proof/demo-validation-2026-04-19-live.md` §4. | ✅ resolved |
+| **G-demo-2** | All four Mythos rules `fail` the M2.1 gate today. | Intentional — it is the demo narrative ("ARGUS closes the gap"). No action needed; narrative emphasises this is the starting state. | ✅ intentional |
 | **G-demo-3** | Scenario-3 (frontier reasoning) is not executable end-to-end — it needs M2.4 red-team operator + M2.5 reasoning watchdog. | Demo covers scenarios 1 + 2 fully; scenario 3 is a 30-second teaser using `arm-mythos-preset` + `frontier-simulator` (both live-runtime validated in `proof/demo-validation-2026-04-19-live.md` §2.1 / §2.2). | ⚠ scoped out |
-| **G-demo-4** | `SOC Triage` is excluded from the Argus demo driver because it depends on a live Inference connector and stalls without real alert input. | No impact on the Argus narrative; `soc-alert-sweeper` drives triage on real alerts in production. Documented in `scripts/argus_live_demo.sh`. | ✅ documented |
+| **G-demo-4** | `SOC Triage` is excluded from the ARGUS demo driver because it depends on a live Inference connector and stalls without real alert input. | No impact on the ARGUS narrative; `soc-alert-sweeper` drives triage on real alerts in production. Documented in `scripts/argus_live_demo.sh`. | ✅ documented |
 
 ### 2.2 P1 — fix during or immediately after demo
 
@@ -169,16 +169,16 @@ All five Phase 3 gaps are now shipped locally and demo-ready (see
 |---|-----|--------|------------------|
 | Drift detection over eval scores | ✅ landed | `workflows/soc-argus-drift-monitor.yaml` — EMA of rule precision + actor-trust trajectory, files `mutation_intent` on drift, 48h cooldown. |
 | Playbook learning loop | ✅ landed | `workflows/soc-argus-playbook-learner.yaml` + `argus/technique-playbook-mapping.json` — correlates outcomes × autonomy decisions × post-apply observations per (technique, step), remaps underperforming pairs on frontier-tier outcomes only. |
-| Argus Console feature surfaces | ✅ landed (extended existing dashboard) | `setup/dashboards/build_argus_console.js` — Phase 3 panel section: drift intents, playbook remap intents, intel rows, top CVE mythos, recent intents, actor tier distribution. |
+| ARGUS Console feature surfaces | ✅ landed (extended existing dashboard) | `setup/dashboards/build_argus_console.js` — Phase 3 panel section: drift intents, playbook remap intents, intel rows, top CVE mythos, recent intents, actor tier distribution. |
 | Glasswing-style intel ingestion (`.soc-intel-feed`) | ✅ landed (demo-grade generic adapter) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc-argus-intel-adapter-generic.yaml` (seed upsert + heartbeat), `soc-argus-intel-mythos-aggregator.yaml` (per-CVE trust-weighted signal), `argus/intel-feed-seed.json` (seed reference). Swapping the seed-upsert for a TAXII poller is a drop-in replacement. |
-| MTTR-rollback metric on the scorecard | ✅ landed (R6) | `workflows/soc-recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` (10m tick); `soc-argus-trust-tier-assessor.yaml` aggregates `avg_rollback_mttr_ms` / `p50_rollback_mttr_ms` / `p95_rollback_mttr_ms` per actor; Argus Console Pulse tile surfaces the tenant-wide p50 via `/internal/security_solution/argus/governance_pulse` (backed by `@kbn/argus-console-common` `buildGovernancePulse`). |
+| MTTR-rollback metric on the scorecard | ✅ landed (R6) | `workflows/soc-recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` (10m tick); `soc-argus-trust-tier-assessor.yaml` aggregates `avg_rollback_mttr_ms` / `p50_rollback_mttr_ms` / `p95_rollback_mttr_ms` per actor; ARGUS Console Pulse tile surfaces the tenant-wide p50 via `/internal/security_solution/argus/governance_pulse` (backed by `@kbn/argus-console-common` `buildGovernancePulse`). |
 
 ---
 
 ## 3. External research — new ideas worth triaging
 
 `[ext]` markers identify ideas from the broader autonomous-SOC / adversarial-agentic
-literature that are **not** in the current Argus plan but would materially
+literature that are **not** in the current ARGUS plan but would materially
 strengthen the Mythos story. Each one is rated on effort (E) and Mythos
 alignment (A), both on a 1–5 scale.
 
@@ -186,7 +186,7 @@ alignment (A), both on a 1–5 scale.
 
 | # | Idea | E | A | Landing site |
 |---|------|---|---|--------------|
-| R1 | ~~**ATT&CK Evaluations ER7 alignment** — external labelled variant set imported.~~ ✅ **landed 2026-04-20.** `scripts/argus-variant-bank/attack-er7/` seeded with the public ER7 corpus; gate now scores Argus against an external bank it did not author. `[ext]` | 3 | 5 | `scripts/argus-variant-bank/attack-er7/` |
+| R1 | ~~**ATT&CK Evaluations ER7 alignment** — external labelled variant set imported.~~ ✅ **landed 2026-04-20.** `scripts/argus-variant-bank/attack-er7/` seeded with the public ER7 corpus; gate now scores ARGUS against an external bank it did not author. `[ext]` | 3 | 5 | `scripts/argus-variant-bank/attack-er7/` |
 | R2 | ~~**Adversarial prompt-injection eval for the deteng / triage agents.**~~ ✅ **landed 2026-04-20.** New sub-suite of `@kbn/evals-suite-argus-detection` replays DevSeeker/Puppeteer-style agent-hijack corpora against the deteng skill and scores by whether it would have mis-synthesized a rule. Failing prompts feed the adversarial gate and, via the watchdog, can freeze an actor. `[ext]` | 3 | 5 | `@kbn/evals-suite-argus-detection` (adversarial sub-suite) |
 | R3 | ~~**Pareto-optimal rule synthesis.**~~ ✅ **landed 2026-04-17.** `@kbn/argus-exploit-to-detection/synthesize_pareto.ts` now enumerates a deterministic composition grid across three strictness knobs (`must_anchor_subset`, `wildcard_retention`, `minimum_should_match`), dedups canonical queries, heuristically predicts P / R / FP-rate + per-axis false-negative rate per candidate, computes the Pareto frontier, and chooses one via a tunable weighted-sum scorer. Frontier metadata (`chosen`, `frontier`, `dominated`, `applied_weights`) is attached to every filed `mutation_intent` as `argus.synthesis` when the CLI is invoked with `--pareto`. 17 tests (`synthesize_pareto.test.ts`) plus a `mutation_intent` integration test. | 3 | 4 | `@kbn/argus-exploit-to-detection/synthesize_pareto.ts` + `mutation_intent.ts` + `scripts/run_exploit_to_detection.ts --pareto` |
 | R4 | ~~**Variant generation via LLM + axis-aware mutators.**~~ ✅ **landed 2026-04-17.** `@kbn/argus-exploit-to-detection/llm_variant_provider.ts` defines a `VariantProvider` abstraction that a real LLM can plug into, with a deterministic golden-set-gated `ScriptedLlmVariantProvider` used for tests and demos. Every candidate is run through `validateLlmVariant`, which enforces a three-layer safety envelope: golden-set blocklist (e.g. hard-coded bitcoin / C2 tokens), axis invariants (markers for `encoding_layers`, `minimum_should_match` guards, LOLBAS allow-list, platform executable allow-list), and parent-ancestry allow-list. Rejections and acceptances are emitted as `VariantTraceEvent`s so they become eval targets alongside R11's reasoning-trace suite. The CLI gains `--variant-source deterministic\|scripted-llm` plus `--max-rejection-rate` to fail-closed if the provider drifts. 14 tests (`llm_variant_provider.test.ts`). `[ext]` | 4 | 4 | `@kbn/argus-exploit-to-detection/llm_variant_provider.ts` + `scripts/run_exploit_to_detection.ts --variant-source` |
@@ -212,7 +212,7 @@ alignment (A), both on a 1–5 scale.
 
 | # | Idea | E | A | Landing site |
 |---|------|---|---|--------------|
-| R12 | ~~**MCP / A2A support** for the Argus skill surface.~~ ✅ **landed 2026-04-20.** Three new packages project Argus skills through principal-scoped policy bundles with full governance integration: `@kbn/argus-tool-manifest` (27 tests) projects raw skills with adversarial/reasoning/trust-tier gating and `propose_only` enforcement; `@kbn/argus-mcp-server` (16 tests) serves the projection over MCP with a `RestGovernanceClient`; `@kbn/argus-a2a-server` (20 tests) exposes the same surface as A2A tasks with an `InMemoryTaskStore` and cross-actor access checks. Governance snapshot is consulted on every `list_tools` and `tools/call`, never bypassed. 63 tests green, zero lint errors, zero R12 type errors. `[ext]` | 3 | 3 | `@kbn/argus-tool-manifest` + `@kbn/argus-mcp-server` + `@kbn/argus-a2a-server` |
+| R12 | ~~**MCP / A2A support** for the ARGUS skill surface.~~ ✅ **landed 2026-04-20.** Three new packages project ARGUS skills through principal-scoped policy bundles with full governance integration: `@kbn/argus-tool-manifest` (27 tests) projects raw skills with adversarial/reasoning/trust-tier gating and `propose_only` enforcement; `@kbn/argus-mcp-server` (16 tests) serves the projection over MCP with a `RestGovernanceClient`; `@kbn/argus-a2a-server` (20 tests) exposes the same surface as A2A tasks with an `InMemoryTaskStore` and cross-actor access checks. Governance snapshot is consulted on every `list_tools` and `tools/call`, never bypassed. 63 tests green, zero lint errors, zero R12 type errors. `[ext]` | 3 | 3 | `@kbn/argus-tool-manifest` + `@kbn/argus-mcp-server` + `@kbn/argus-a2a-server` |
 | R13 | ~~**Shadow-AI telemetry as a Mythos signal.**~~ ✅ **landed 2026-04-20.** `integrations#18123` (Shadow AI Discovery) wired into `exploit_probability.mythos_signal`; AI-tool presence on a host now raises exploit likelihood in the scorer. `[ext]` | 2 | 4 | `@kbn/argus-exploit-probability` inputs |
 | R14 | ~~**CISA KEV live feed.**~~ ✅ **landed 2026-04-20.** `soc-kev-ingest.yaml` pulls CISA KEV daily and indexes into `.soc-cve-advisories`; KEV is no longer a hard-coded boolean in the scorer — it's a live, dated enrichment. | 2 | 4 | `soc-kev-ingest.yaml` |
 

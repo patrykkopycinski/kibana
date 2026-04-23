@@ -1,10 +1,10 @@
-# M2.R12 — External Tool Surface (MCP + A2A) for Argus Skills
+# M2.R12 — External Tool Surface (MCP + A2A) for ARGUS Skills
 
-Argus exposes its skill surface over two open agentic protocols so third-party
+ARGUS exposes its skill surface over two open agentic protocols so third-party
 agents (Claude Desktop, Cursor, Copilot, partner XDR copilots, other Elastic
-products) can call Argus as a **governed** tool provider. Every external call
+products) can call ARGUS as a **governed** tool provider. Every external call
 is funneled through the same door-class, blast-radius, trust-tier, adversarial,
-and watchdog gates that native Argus actors face. Nothing about being "external"
+and watchdog gates that native ARGUS actors face. Nothing about being "external"
 buys an escape from governance — it only buys a new `actor_id`.
 
 | Protocol | Role                                        | Transport                            |
@@ -12,7 +12,7 @@ buys an escape from governance — it only buys a new `actor_id`.
 | **MCP**  | Tool-call RPC for LLM clients               | stdio (v1), streamable HTTP/SSE (v2) |
 | **A2A**  | Peer-agent task handoff & long-running work | HTTP with task lifecycle events      |
 
-Both protocols read from the same source of truth — the Argus skill catalog
+Both protocols read from the same source of truth — the ARGUS skill catalog
 under `soc-simulation/skills/` plus the Agent Builder tool registry exposed by
 the Security Solution plugin — and project it through a **policy bundle** that
 depends on the calling principal's negotiated profile.
@@ -42,7 +42,7 @@ from user-controlled payload fields.
 
 New principals start in the `probationary` trust tier. They climb or fall
 through the same `soc-argus-trust-tier-assessor.yaml` outcomes loop that
-governs native Argus actors — there is no fast path for external callers.
+governs native ARGUS actors — there is no fast path for external callers.
 
 ---
 
@@ -79,7 +79,7 @@ read-only principal is unaffected.
 
 ## 3. Tool catalog projection
 
-Each Argus skill JSON under `soc-simulation/skills/` projects to **one MCP
+Each ARGUS skill JSON under `soc-simulation/skills/` projects to **one MCP
 tool descriptor** and **one entry in the A2A agent card**:
 
 ```
@@ -92,14 +92,14 @@ skill:<id>  →  MCP tool  argus.skill.<id>
 | `id`        | `name` (`argus.skill.<id>`)           | `skill.id`                |
 | `name`      | `description` (first line)            | `skill.name`              |
 | `description` | `description` (full)                | `skill.description`       |
-| (implicit)  | `inputSchema`   = `ArgusSkillInput`   | `skill.input_schema`      |
-| (implicit)  | `outputSchema`  = `ArgusSkillOutput`  | `skill.output_schema`     |
+| (implicit)  | `inputSchema`   = `ARGUSSkillInput`   | `skill.input_schema`      |
+| (implicit)  | `outputSchema`  = `ARGUSSkillOutput`  | `skill.output_schema`     |
 | (derived)   | `annotations`                         | `skill.annotations`       |
 
 The skill's `content` (system prompt) is **not** exposed externally.
 External callers see a typed contract, not a jailbreakable prompt.
 
-### `ArgusSkillInput` (shared)
+### `ARGUSSkillInput` (shared)
 
 ```ts
 z.object({
@@ -115,7 +115,7 @@ z.object({
 });
 ```
 
-### `ArgusSkillOutput` (shared)
+### `ARGUSSkillOutput` (shared)
 
 ```ts
 z.object({
@@ -151,7 +151,7 @@ Computed from the skill's tool_ids set:
 ## 4. Call dispatch pipeline
 
 ```
- external caller                            Argus governance
+ external caller                            ARGUS governance
  ───────────────                            ────────────────
   MCP tools/call              ┌────────────────────────────┐
     or                        │                            │
@@ -178,8 +178,8 @@ Computed from the skill's tool_ids set:
   door_class, blast_tier)     │      decides applied or    │
         │                     │      pending_review        │
         ▼                     │                            │
- caller receives              │ 5) return ArgusSkillOutput │
- ArgusSkillOutput             │    with mutation_intents[] │
+ caller receives              │ 5) return ARGUSSkillOutput │
+ ARGUSSkillOutput             │    with mutation_intents[] │
                               │    carrying resolved       │
                               │    status.                 │
                               └────────────────────────────┘
@@ -188,7 +188,7 @@ Computed from the skill's tool_ids set:
 Key properties:
 
 - **No new write paths**: the server writes `mutation_intent` the same way
-  native Argus agents do. The trust gate is untouched and unaware of the
+  native ARGUS agents do. The trust gate is untouched and unaware of the
   caller's protocol.
 - **`propose_only=true`** short-circuits to `status: 'pending_review'`
   regardless of the principal's profile. This is how `advisory` profile is
@@ -257,7 +257,7 @@ follow-up commit.
 
 - Skill JSONs under `soc-simulation/skills/` — same schema, no new fields.
 - `mutation_intent.schema.json` — unchanged. External callers emit the same
-  intent shape as native Argus agents.
+  intent shape as native ARGUS agents.
 - `soc-argus-trust-gate.yaml` — unchanged. The gate does not know or care
   that the caller came over MCP.
 - Agent Builder tool registry — unchanged. We consume it; we do not redefine

@@ -1,13 +1,13 @@
 # M2.4 — Frontier-Adversary Simulation Mode
 
-**Argus layer:** 01 Sensing (telemetry generation) · **Pressure:** P3 agentic adversary · **Extends:** `soc-difficulty-controller.yaml` + Phase 1 preset
+**ARGUS layer:** 01 Sensing (telemetry generation) · **Pressure:** P3 agentic adversary · **Extends:** `soc-difficulty-controller.yaml` + Phase 1 preset
 
 ## Context
 
 Phase 1 declared the Mythos-class adversary preset (`level-6`,
 `mythos_class_frontier`) and the arming workflow (`soc-argus-arm-mythos-preset`). The
 static Caldera abilities are seeded and runnable today. What is **not** yet runnable
-is the *agentic* portion: the part of the frontier adversary that reasons about Argus
+is the *agentic* portion: the part of the frontier adversary that reasons about ARGUS
 and crafts adversarial inputs.
 
 M2.4 delivers that layer.
@@ -24,7 +24,7 @@ with agentic behaviours:
 - **Long-dwell orchestration**: gapped execution with 48–336 hour jitter.
 
 The simulator is *additive* to Caldera, not a replacement — it enriches the same
-operation, writing into the same outcome streams, so every downstream Argus layer sees
+operation, writing into the same outcome streams, so every downstream ARGUS layer sees
 a realistic Mythos-class run.
 
 ## Scope

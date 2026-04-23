@@ -1,16 +1,16 @@
 # ARGUS — Demo Storyboard v1
 
 Three scripted scenarios for a 20-minute live demo. Each scenario maps to one Mythos-era
-pressure and one Argus milestone, so the demo is *evidence* for the threat-model doc, not
+pressure and one ARGUS milestone, so the demo is *evidence* for the threat-model doc, not
 a PowerPoint.
 
 ## Demo arc
 
 > "An adversary with frontier capabilities has three advantages over a human analyst:
-> **speed, variety, and reasoning**. Argus neutralises all three — and puts the governance
+> **speed, variety, and reasoning**. ARGUS neutralises all three — and puts the governance
 > in place to prove it."
 
-| # | Scenario | Pressure | Argus milestone | Wall-clock | What the audience sees |
+| # | Scenario | Pressure | ARGUS milestone | Wall-clock | What the audience sees |
 |---|---|---|---|---|---|
 | 1 | **Same-day CVE → live detection** | P1 speed | M2.2 + M2.3 | 3 min | CVE published → exploit-probability enriched → DetEng synthesises a rule → backtested → applied → alert fires. All autonomous. |
 | 2 | **Polymorphic variant swarm** | P2 variety | M2.1 + M2.2 | 4 min | 30 behavioural variants generated. Eval vertical grades each rule candidate and picks the precision-recall Pareto winner. |
@@ -30,17 +30,17 @@ Total: ~15 min scenarios + 3 min intro + 2 min wrap = ~20 min.
 | Beat | Narration | On-screen |
 |---|---|---|
 | 0:00 | "CVE drops at 09:00. Historical MTTD on a CVE of this severity is **72 hours**." | Timeline bar, 72h marker |
-| 0:20 | "Argus Sensing layer enriches within seconds. Exploit-probability is `0.92`." | Vuln-checker alert (Security Solution) |
+| 0:20 | "ARGUS Sensing layer enriches within seconds. Exploit-probability is `0.92`." | Vuln-checker alert (Security Solution) |
 | 0:40 | "Hypothesis layer — the DetEng skill picks up the alert. The exploit-to-detection tool drafts a rule from the advisory PoC." | DetEng skill trace (APM) |
 | 1:20 | "Validation layer — backtester confirms 0 historical FPs, proposed rule lands on the Pareto curve." | Eval scorecard |
 | 1:50 | "Action layer — autonomous-applier lands the rule. Trust gate `tier=frontier` allows because backtest passed." | Rule diff + apply log |
 | 2:15 | "A minute later, emulated attacker runs the exploit. Rule fires. **MTTD: 2 min 30 s**." | Alert timeline |
-| 2:45 | "Argus closes the loop — outcome is logged, the eval harness snapshots this case for regression." | `.soc-outcomes` doc |
+| 2:45 | "ARGUS closes the loop — outcome is logged, the eval harness snapshots this case for regression." | `.soc-outcomes` doc |
 
 **Evidence captured.** `soc-apply-log` entry, eval snapshot, alert doc, reasoning trace. All
 reproducible from a seeded dataset.
 
-**Pressure answered.** P1 (time compression): Argus ships rule + alert inside 3 minutes.
+**Pressure answered.** P1 (time compression): ARGUS ships rule + alert inside 3 minutes.
 
 ---
 
@@ -59,14 +59,14 @@ staged environment.
 | 1:10 | "M2.1 Detection Eval Vertical grades our base rule on all 30 — coverage: **11 / 30**." | Eval scorecard |
 | 1:40 | "DetEng synthesises N candidate rules. Each candidate is graded on **detection**, **FP on 30d baseline**, **maintainability**." | Pareto plot |
 | 2:20 | "Pareto winner lands. Coverage jumps to **28 / 30** with FP unchanged. Two variants remain uncovered — eval flags them as regression-watch." | Scorecard delta |
-| 3:00 | "The two uncovered variants *aren't* autonomously covered. Argus hands them to a DetEng for review with full context." | Review bundle |
+| 3:00 | "The two uncovered variants *aren't* autonomously covered. ARGUS hands them to a DetEng for review with full context." | Review bundle |
 
 **Evidence captured.** Baseline coverage, Pareto curve, final rule diff, uncovered variants.
 
 **Pressure answered.** P2 (variant explosion): the eval vertical quantifies coverage and
 the synthesis step improves it by 17 variants, measurable.
 
-**Anti-demo note.** Some variants remain uncovered. This is the right answer — Argus is
+**Anti-demo note.** Some variants remain uncovered. This is the right answer — ARGUS is
 honest about its ceiling and routes remaining cases to a human. No magical 100 %.
 
 ---
@@ -89,12 +89,12 @@ legitimate-binary proxying, adversarial prompt-injection against the triage agen
 | 3:10 | "Human confirms — prompt injection. We feed the sample into the eval suite. **The next version of the triage agent now passes this test.**" | Eval delta |
 | 3:50 | "Meanwhile: containment playbook isolates the compromised host, autonomous-applier deploys the one rule we *are* confident in (unusual LOLBin proxying)." | Response actions |
 | 4:30 | "End-state. Attacker is contained. Governance layer has a full audit: every agent decision, every tool call, every trust shift — all in Elasticsearch." | Governance dashboard |
-| 5:30 | "And this entire scenario — including the adversarial prompt — is now a regression test. Any future version of Argus that fails it cannot ship." | Regression gate |
+| 5:30 | "And this entire scenario — including the adversarial prompt — is now a regression test. Any future version of ARGUS that fails it cannot ship." | Regression gate |
 
 **Evidence captured.** OTLP trace, trust-score events, audit trail, regression test, alert
 and response timeline.
 
-**Pressure answered.** P3 (agentic adversary): the adversary reasons, Argus reasons, and
+**Pressure answered.** P3 (agentic adversary): the adversary reasons, ARGUS reasons, and
 the governance layer wins because it *watches both*.
 
 ---
@@ -105,7 +105,7 @@ Open with:
 
 > "Threat models for the last decade assumed the attacker had to *learn* the environment.
 > Mythos-class adversaries don't — they reason about it. If we build SOCs for the old
-> threat model, we lose at machine speed. Argus is Elastic's answer."
+> threat model, we lose at machine speed. ARGUS is Elastic's answer."
 
 Close with:
 
@@ -143,6 +143,6 @@ Close with:
       staged cluster — confirmed by the live-run cross-checks in
       `proof/demo-validation-2026-04-19-live.md` §3 (audit heartbeats, live
       emissions, exec records).
-- [x] Full run wall-clock ≤ 20 minutes — the automated Argus chain (8
+- [x] Full run wall-clock ≤ 20 minutes — the automated ARGUS chain (8
       workflows) completes in ≈1m50s of wall-clock; the remaining ~18 min
       is scripted narration and the scenario-3 teaser.

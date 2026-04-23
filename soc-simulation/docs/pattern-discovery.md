@@ -1,6 +1,6 @@
-# Pattern Discovery in Argus
+# Pattern Discovery in ARGUS
 
-> Pattern discovery is the repeatable process by which Argus moves from raw
+> Pattern discovery is the repeatable process by which ARGUS moves from raw
 > evidence (alerts, outcomes, evolution-log events) to _durable_ hypotheses
 > that change the system's behavior. This document is the methodology.
 > `case-studies/` holds the evidence for each pattern we have accepted.
@@ -211,7 +211,7 @@ definition.
 ## Glossary
 
 - **Canonical artifact** — installed by `setup.sh`, never auto-mutated.
-- **Argus-owned artifact** — created by Argus, safe to auto-mutate under
+- **ARGUS-owned artifact** — created by ARGUS, safe to auto-mutate under
   governance rails.
 - **Pattern hypothesis** — a candidate pattern with 2 tiers of evidence;
   must graduate to a case study before it can drive a canonical change.

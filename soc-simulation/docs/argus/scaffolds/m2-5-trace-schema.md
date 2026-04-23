@@ -13,7 +13,7 @@ Document shape:
   "parent_span_id": "0a11...|null",
 
   "otlp": {                             // preserved raw passthrough for forensics
-    "name": "skill.soc-triage.invoke",
+    "name": "skill.soc-alert-sweeper.invoke",
     "kind": "internal|client|server",
     "status_code": "ok|error",
     "attributes": { "...": "..." }
@@ -21,7 +21,7 @@ Document shape:
 
   "argus": {
     "kind": "skill|agent|tool",
-    "actor_id": "soc-triage-skill",     // tool/skill/agent id
+    "actor_id": "soc-alert-sweeper-skill", // tool/skill/agent id (triage merged into alert sweeper)
     "actor_version": "1.4.2",
     "invocation_id": "<uuid>",          // one per skill turn; groups spans
     "turn": 3,                          // 1-based turn counter within the invocation
@@ -67,7 +67,7 @@ Constraints:
 - `decision.value` is always a flat object, never free text only.
 - Raw prompts are **never** logged. Only digests (sha256 of canonical JSON) land in the
   trace. Raw prompts may be retained by upstream OTLP per its retention policy, never
-  by Argus.
+  by ARGUS.
 
 ## 3. Injection-surface detector
 

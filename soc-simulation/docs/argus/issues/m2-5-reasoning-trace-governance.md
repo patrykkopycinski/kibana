@@ -1,21 +1,21 @@
 # M2.5 — Reasoning-Trace Governance
 
-**Argus layer:** 05 Governance · **Pressure:** P3 agentic adversary · **Net-new**
+**ARGUS layer:** 05 Governance · **Pressure:** P3 agentic adversary · **Net-new**
 
 ## Context
 
-Argus skills and agents make decisions at machine speed. Without structured
+ARGUS skills and agents make decisions at machine speed. Without structured
 reasoning-trace capture, we cannot answer the single most important governance
 question of the Mythos era: *"Why did this agent do this?"* The existing
 `.soc-audit-trail` records *what* happened; M2.5 records *why*.
 
 This milestone adopts OpenTelemetry tracing (OTLP) as the transport, Elasticsearch
-as the backing store, and an Argus-specific enrichment layer that maps skill/agent
+as the backing store, and an ARGUS-specific enrichment layer that maps skill/agent
 decisions into a reviewable schema.
 
 ## Goal
 
-Every Argus skill, agent, and Agent-Builder tool invocation emits an OTLP trace that
+Every ARGUS skill, agent, and Agent-Builder tool invocation emits an OTLP trace that
 lands in Elasticsearch as `.soc-reasoning-traces-*`. A reviewer can ask:
 
 - Which tool calls did this skill consider, and which did it reject? Why?
@@ -31,27 +31,27 @@ lands in Elasticsearch as `.soc-reasoning-traces-*`. A reviewer can ask:
 
 ### In scope
 
-- OTLP instrumentation in the Argus-owned skills/agents using the Agent Builder
+- OTLP instrumentation in the ARGUS-owned skills/agents using the Agent Builder
   trace SDK (falling back to a thin wrapper if upstream isn't available).
 - Mapping pipeline OTLP → `.soc-reasoning-traces-*` using the existing
-  `apm-@custom` + `logs-otel-*` infra; Argus adds an ingest processor
-  `argus_reasoning_trace_enricher` that lifts Argus-specific attributes.
+  `apm-@custom` + `logs-otel-*` infra; ARGUS adds an ingest processor
+  `argus_reasoning_trace_enricher` that lifts ARGUS-specific attributes.
 - Schema: see `scaffolds/m2-5-trace-schema.md` for the full field dictionary.
-- Governance dashboard panel (Security Solution → Argus → Reasoning Traces) with
+- Governance dashboard panel (Security Solution → ARGUS → Reasoning Traces) with
   drill-down from an alert to the reasoning chain that produced its triage verdict.
 - Injection-surface detector: a subprocess on the enricher that flags traces where a
   skill consumed a field labelled as a simulated injection.
 
 ### Out of scope
 
-- Forcing non-Argus skills to emit traces (opt-in).
+- Forcing non-ARGUS skills to emit traces (opt-in).
 - Custom tracing protocol — OTLP only.
 - Retention / archival policy — inherits from existing APM ILM.
 
 ## Acceptance criteria
 
 - [ ] Agent Builder tool and skill wrappers emit OTLP spans for every invocation,
-      with the Argus-specific attributes from the schema.
+      with the ARGUS-specific attributes from the schema.
 - [ ] Enricher ingest processor populates `.soc-reasoning-traces-*` with the mapped
       documents; end-to-end lag < 30 s P95.
 - [ ] Injection-surface detector fires on at least one trace per Scenario-3 run and
@@ -62,7 +62,7 @@ lands in Elasticsearch as `.soc-reasoning-traces-*`. A reviewer can ask:
 
 ## Data contract (preview)
 
-Full contract in `../scaffolds/m2-5-trace-schema.md`. Minimum Argus-mapped fields:
+Full contract in `../scaffolds/m2-5-trace-schema.md`. Minimum ARGUS-mapped fields:
 
 ```json
 {
@@ -72,7 +72,7 @@ Full contract in `../scaffolds/m2-5-trace-schema.md`. Minimum Argus-mapped field
   "parent_span_id": "otlp-<hex>|null",
   "argus": {
     "kind": "skill|agent|tool",
-    "actor_id": "soc-triage-skill",
+    "actor_id": "soc-alert-sweeper-skill",
     "invocation_id": "<uuid>",
     "decision": { "kind": "triage_verdict|rule_draft|tool_choice", "value": "..." },
     "confidence": 0.0,
@@ -85,8 +85,8 @@ Full contract in `../scaffolds/m2-5-trace-schema.md`. Minimum Argus-mapped field
 
 ## Phases
 
-1. **OTLP wrappers** (1 wk): Argus-owned skills/agents/tools emit spans.
-2. **Enrichment pipeline** (1 wk): ingest processor maps OTLP → Argus schema.
+1. **OTLP wrappers** (1 wk): ARGUS-owned skills/agents/tools emit spans.
+2. **Enrichment pipeline** (1 wk): ingest processor maps OTLP → ARGUS schema.
 3. **Injection-surface detector** (0.5 wk): flags traces that touched a simulated
    injection field.
 4. **Governance dashboard** (0.5 wk): alert → reasoning drill-down.

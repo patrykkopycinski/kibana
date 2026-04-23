@@ -4,7 +4,7 @@ Status: **Draft**
 
 ## Problem
 
-Argus must allow autonomous mutations at machine speed *without* letting a
+ARGUS must allow autonomous mutations at machine speed *without* letting a
 frontier-class adversary weaponise that autonomy. Today's `soc-trust-scorer` has
 three tiers (`trusted`, `probationary`, `quarantined`). Phase 2 adds a fourth:
 `frontier` — the only tier allowed to auto-apply changes to frontier-class

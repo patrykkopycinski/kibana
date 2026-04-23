@@ -97,7 +97,7 @@ node scripts/jest x-pack/solutions/security/plugins/security_solution/server/lib
 
 ## You are not stuck if…
 
-- The existing enrichment pipeline isn't obvious — enrich a **new** Argus-namespaced field rather than editing the legacy one. Consolidation is a follow-up.
+- The existing enrichment pipeline isn't obvious — enrich a **new** ARGUS-namespaced field rather than editing the legacy one. Consolidation is a follow-up.
 - You have no intel feed yet — M2.3 is allowed to compute against CVSS + CVE-publish-date signals alone on day 1; Glasswing ingestion (Phase 3) fills in the rest.
 - Feature flag doesn't exist — create it in the first commit; that **is** the shippable day-1 artifact.
 

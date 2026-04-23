@@ -324,7 +324,7 @@
      ═════════════════════════════════════════════════════════════════ -->
 <div class="hero">
   <div class="hero-left">
-    <div class="eyebrow">Argus · Mythos-Era Threat Model</div>
+    <div class="eyebrow">ARGUS · Mythos-Era Threat Model</div>
     <h1 class="caps">Defending at<br/>Machine Speed.</h1>
     <p class="tagline">
       <strong>ARGUS</strong> is the Autonomous Resilient Guardian for Unified Security — an
@@ -357,13 +357,13 @@
       have access to equivalent capabilities, whether from <em>Mythos itself</em>, its successors,
       or open-source approximations. The traditional SOC — built around human-tempo triage,
       signature rules, and CVE patch windows — is architecturally misaligned with this threat.
-      Argus is our architectural response.
+      ARGUS is our architectural response.
     </p>
   </div>
 
   <div class="section-lede">
     A Mythos-era adversary applies <strong>four pressures</strong> that existing SOC architectures
-    were not designed to absorb. The shape of Argus is a direct answer to each.
+    were not designed to absorb. The shape of ARGUS is a direct answer to each.
   </div>
 
   <div class="grid g2">
@@ -377,7 +377,7 @@
         review, deploy) cannot keep pace with automated exploit generation.
       </p>
       <div class="counter">
-        <strong>Argus counter:</strong> Exploit-to-Detection Synthesis — draft ES|QL/EQL rules
+        <strong>ARGUS counter:</strong> Exploit-to-Detection Synthesis — draft ES|QL/EQL rules
         directly from CVE + PoC within minutes of disclosure, gated by backtest + regression.
       </div>
     </div>
@@ -392,7 +392,7 @@
         static one.
       </p>
       <div class="counter">
-        <strong>Argus counter:</strong> Mutation-robust detection evaluation — rules are scored
+        <strong>ARGUS counter:</strong> Mutation-robust detection evaluation — rules are scored
         against generated exploit variants (<code>detection.mutation_robust</code> evaluator)
         before they ship.
       </div>
@@ -407,7 +407,7 @@
         responses. Telemetry shape changes — fewer obvious signatures, more goal-aligned sequences.
       </p>
       <div class="counter">
-        <strong>Argus counter:</strong> Defender autonomy matched to attacker autonomy — long-running
+        <strong>ARGUS counter:</strong> Defender autonomy matched to attacker autonomy — long-running
         planner agents (meta, deteng, hunter, triage) operating on <code>.soc-*</code> state with
         governance-gated mutation.
       </div>
@@ -422,7 +422,7 @@
         a fast, reasoning adversary — a losing geometry.
       </p>
       <div class="counter">
-        <strong>Argus counter:</strong> Telemetry moat + stack-native reasoning agents. Elastic's
+        <strong>ARGUS counter:</strong> Telemetry moat + stack-native reasoning agents. Elastic's
         data gravity is the asymmetric advantage the attacker cannot replicate remotely.
       </div>
     </div>
@@ -446,7 +446,7 @@
       <div class="label">Principle 1</div>
       <h4>Defender autonomy matches attacker autonomy</h4>
       <p>
-        If the adversary is a long-running goal-directed agent, the defender must be too. Argus
+        If the adversary is a long-running goal-directed agent, the defender must be too. ARGUS
         operates as a mesh of planner-class agents with shared state in Elasticsearch — not a
         human running queries with copilots. Autonomy is not a feature; it is the <em>architectural
         baseline</em>.
@@ -457,7 +457,7 @@
       <div class="label">Principle 2</div>
       <h4>Telemetry is the moat</h4>
       <p>
-        The frontier model's ceiling is set by the data it reaches. Argus treats the Elastic
+        The frontier model's ceiling is set by the data it reaches. ARGUS treats the Elastic
         telemetry surface — endpoint, network, cloud, identity, <em>and</em> agent reasoning traces —
         as a single queryable substrate. The attacker's reasoner does not have this; we exploit that
         asymmetry.
@@ -500,7 +500,7 @@
       <div class="label" style="color: var(--mythos);">Non-goal</div>
       <h4>We are not trying to out-reason the attacker</h4>
       <p>
-        Argus wins through <em>data proximity, speed of mutation, and governance rigor</em>, not by
+        ARGUS wins through <em>data proximity, speed of mutation, and governance rigor</em>, not by
         fielding a bigger reasoner. The strategy assumes we will always be 6–18 months behind
         frontier capability — and designs for resilience under that assumption.
       </p>
@@ -515,7 +515,7 @@
 <div class="section">
   <div class="section-title"><span class="num">3</span> The Five-Layer Architecture <span class="rule"></span></div>
   <div class="section-lede">
-    Argus organizes capabilities into five layers, each with a distinct contract. Existing
+    ARGUS organizes capabilities into five layers, each with a distinct contract. Existing
     Elastic work maps cleanly into these layers; the <span class="pill pill-mythos">Δ Mythos-era</span>
     deltas are the new investments Phase 2 delivers.
   </div>
@@ -544,7 +544,7 @@
         <em>proposed mutations</em>, not autonomous actions.
       </div>
       <div class="layer-tech">
-        soc-triage · soc-deteng · soc-proactive-hunter<br/>
+        soc-alert-sweeper · soc-deteng · soc-proactive-hunter<br/>
         kibana#257949 (XDR correlation) · kibana#259559 (default skills)<br/>
         <span class="pill pill-mythos" style="margin-top:4px">Δ exploit→detection synth · zero-day hypothesizer</span>
       </div>
@@ -613,7 +613,7 @@
   <div class="section-title"><span class="num">4</span> Pressure → Capability Map <span class="rule"></span></div>
   <div class="section-lede">
     Every Phase-2 milestone is anchored to a named adversary pressure. If a milestone does not
-    reduce one of these four, it does not belong in Argus.
+    reduce one of these four, it does not belong in ARGUS.
   </div>
 
   <div class="card">
@@ -621,7 +621,7 @@
       <thead>
         <tr>
           <th style="width: 200px">Adversary pressure</th>
-          <th>Argus capability</th>
+          <th>ARGUS capability</th>
           <th style="width: 160px">Milestone</th>
           <th style="width: 220px">Layer · Existing anchor</th>
           <th style="width: 120px">Status</th>
@@ -658,21 +658,21 @@
         </tr>
         <tr>
           <td class="name"><span class="pill pill-mythos">#3 Agentic adversary</span></td>
-          <td><strong>Reasoning-Trace Governance</strong> — every Argus agent emits OTLP spans → Elasticsearch; each autonomous action references a trace id.</td>
+          <td><strong>Reasoning-Trace Governance</strong> — every ARGUS agent emits OTLP spans → Elasticsearch; each autonomous action references a trace id.</td>
           <td><span class="pill pill-argus">M2.5</span></td>
           <td>Governance · native OTLP → ES</td>
           <td><span class="pill pill-green">New capability</span></td>
         </tr>
         <tr>
           <td class="name"><span class="pill pill-mythos">#4 Capability asymmetry</span></td>
-          <td><strong>Telemetry-first detection surface</strong> — Shadow-AI-Discovery telemetry becomes an Argus sensor; rules and behaviors land in Argus rule packs.</td>
+          <td><strong>Telemetry-first detection surface</strong> — Shadow-AI-Discovery telemetry becomes an ARGUS sensor; rules and behaviors land in ARGUS rule packs.</td>
           <td><span class="pill pill-argus">M2.1 + M2.2</span></td>
           <td>Sensing · <code>integrations#18123</code></td>
           <td><span class="pill pill-cyan">In-flight upstream</span></td>
         </tr>
         <tr>
           <td class="name"><span class="pill pill-mythos">All four</span></td>
-          <td><strong>Argus Console</strong> — a single pane of glass showing mutation cascade, reasoning trace, scorecard, and demo-ready posture. Phase-3.</td>
+          <td><strong>ARGUS Console</strong> — a single pane of glass showing mutation cascade, reasoning trace, scorecard, and demo-ready posture. Phase-3.</td>
           <td><span class="pill pill-argus">P3</span></td>
           <td>Governance (UX) · Security Solution plugin</td>
           <td><span class="pill pill-muted">Phase 3</span></td>
@@ -702,8 +702,8 @@
       </div>
       <div>
         <ul class="feature-list">
-          <li><strong>Argus threat model</strong> <span class="pill pill-argus">this doc</span> — primary strategic artifact; named adversary pressures, design principles, layer map.</li>
-          <li><strong>Argus architecture one-pager</strong> — printable, demo-ready diagram of the five layers + two-paragraph pitch.</li>
+          <li><strong>ARGUS threat model</strong> <span class="pill pill-argus">this doc</span> — primary strategic artifact; named adversary pressures, design principles, layer map.</li>
+          <li><strong>ARGUS architecture one-pager</strong> — printable, demo-ready diagram of the five layers + two-paragraph pitch.</li>
           <li><strong>Capability mapping matrix</strong> — every existing Kibana PR / security-team issue mapped to a layer and pressure.</li>
           <li><strong>Mythos-era simulation preset</strong> — <code>mythos_class_adversary</code> Caldera profile (telemetry-only, sandboxed).</li>
           <li><strong>Demo storyboard v1</strong> — three scripted scenarios (CVE response, frontier simulation, governance trace), ~10 min total.</li>
@@ -724,7 +724,7 @@
           <li><strong>M2.2 · Exploit-to-Detection Synthesis</strong> — extends <code>kibana#258362</code> (deteng skill) with a <code>synthesize_detection_from_exploit</code> tool: CVE + PoC → draft rule → auto-backtest → <code>pending_review</code>.</li>
           <li><strong>M2.3 · Mythos-era Exploit Probability</strong> — extends <code>kibana#258041</code> (vuln checker) with a <code>mythos_era.exploit_probability_24h</code> field enriched from KEV / EPSS / SSVC / public PoC availability.</li>
           <li><strong>M2.4 · Frontier-Adversary Simulation Mode</strong> — level-6 preset in the difficulty controller; goal-directed chained profile emulating planner-class adversary behavior. Caldera-only, sandboxed.</li>
-          <li><strong>M2.5 · Reasoning-Trace Governance</strong> — every Argus agent emits OTLP spans into Elasticsearch; every <code>.soc-autonomy-decisions</code> row carries <code>trace_id</code>. Auditable chain-of-thought.</li>
+          <li><strong>M2.5 · Reasoning-Trace Governance</strong> — every ARGUS agent emits OTLP spans into Elasticsearch; every <code>.soc-autonomy-decisions</code> row carries <code>trace_id</code>. Auditable chain-of-thought.</li>
         </ul>
         <div class="mt-sm text-xs text-muted">Exit criterion: end-to-end demo — new CVE published at T+0 ⇒ rule drafted, evaluated, gated, applied, trace visible — in under 15 min.</div>
       </div>
@@ -742,7 +742,7 @@
           <li><strong>Trust-tier thresholds for frontier-class mutations</strong> — higher bar for rules that originated from exploit synthesis; more human-in-the-loop until trust is earned.</li>
           <li><strong>Playbook learning loop</strong> — containment outcomes feed back into <code>soc-containment-playbook</code> skill; successful chains are reinforced, failures deprecated.</li>
           <li><strong>Glasswing-compatible ingestion</strong> — optional feed of defender-facing intelligence (if/when Anthropic opens it) flows into the Sensing layer as an enrichment source.</li>
-          <li><strong>Argus Console</strong> — dedicated UI in the Security Solution plugin: mutation cascade timeline, reasoning-trace viewer, scorecard, demo mode.</li>
+          <li><strong>ARGUS Console</strong> — dedicated UI in the Security Solution plugin: mutation cascade timeline, reasoning-trace viewer, scorecard, demo mode.</li>
         </ul>
         <div class="mt-sm text-xs text-muted">Exit criterion: system self-maintains under a realistic adversary mix for 30 consecutive days with operator approval rate &gt; 80% and rollback rate &lt; 2%.</div>
       </div>
@@ -776,7 +776,7 @@
         <tr>
           <td class="name">1</td>
           <td class="name">Time-to-detection (T2D) for new CVE</td>
-          <td>Wall-clock from CVE disclosure to first deployed (gated-approved) detection rule against Argus lab traffic.</td>
+          <td>Wall-clock from CVE disclosure to first deployed (gated-approved) detection rule against ARGUS lab traffic.</td>
           <td><strong>&lt; 15 min</strong> (p95)</td>
           <td><code>.soc-evolution-log</code> + <code>kibana#258362</code> timestamps</td>
         </tr>
@@ -824,9 +824,9 @@
      7. EXIT CRITERIA
      ═════════════════════════════════════════════════════════════════ -->
 <div class="section">
-  <div class="section-title"><span class="num">7</span> "Argus Is Demo-Ready" Checklist <span class="rule"></span></div>
+  <div class="section-title"><span class="num">7</span> "ARGUS Is Demo-Ready" Checklist <span class="rule"></span></div>
   <div class="section-lede">
-    What has to be true before we put Argus in front of a customer, a keynote, or an exec.
+    What has to be true before we put ARGUS in front of a customer, a keynote, or an exec.
   </div>
 
   <div class="grid g2">
@@ -835,7 +835,7 @@
       <ul class="feature-list">
         <li><strong>Threat model doc</strong> tells the Mythos story in under 3 minutes.</li>
         <li><strong>One-pager architecture</strong> prints legibly on a single page.</li>
-        <li><strong>Capability map</strong> resolves every Argus feature to a GitHub artifact.</li>
+        <li><strong>Capability map</strong> resolves every ARGUS feature to a GitHub artifact.</li>
         <li><strong>Storyboard</strong> rehearsed end-to-end with &lt; 10 min run time.</li>
       </ul>
     </div>
@@ -844,7 +844,7 @@
       <ul class="feature-list">
         <li><strong>M2.1 eval vertical</strong> running on every rule change; scorecard live.</li>
         <li><strong>M2.2 exploit-to-detection</strong> produces a gated rule from a staged CVE in &lt; 15 min.</li>
-        <li><strong>M2.4 frontier preset</strong> running in the lab against the production Argus stack.</li>
+        <li><strong>M2.4 frontier preset</strong> running in the lab against the production ARGUS stack.</li>
         <li><strong>M2.5 reasoning traces</strong> resolvable for 100% of autonomous actions.</li>
       </ul>
     </div>
@@ -853,7 +853,7 @@
   <div class="callout callout-argus mt-md">
     <div class="callout-label">The One-Sentence Pitch</div>
     <p>
-      <em>"Argus is what you get when you assume the attacker has Mythos and design the SOC as
+      <em>"ARGUS is what you get when you assume the attacker has Mythos and design the SOC as
       a planner-class mesh on top of the world's best telemetry substrate — fast enough to
       draft detection rules in minutes, disciplined enough to gate every autonomous action
       with a trace, and honest enough to score its own rules against the variants the

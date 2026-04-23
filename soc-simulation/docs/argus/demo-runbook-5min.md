@@ -1,11 +1,11 @@
 ---
-title: Argus Console — 5-minute demo runbook
+title: ARGUS Console — 5-minute demo runbook
 audience: field demo · exec flyover · customer brief
-stack: Elastic Stack + Kibana + Argus (security_solution plugin)
+stack: Elastic Stack + Kibana + ARGUS (security_solution plugin)
 app_route: /app/security/argus
 ---
 
-# Argus Console — 5-minute demo runbook
+# ARGUS Console — 5-minute demo runbook
 
 A single-URL, single-operator script for the `/app/security/argus`
 application route. Every surface it hits is shipped in this PR.
@@ -24,7 +24,7 @@ cd soc-simulation
 # Bring up ES + Kibana (skip if you already have a local stack).
 ./setup.sh
 
-# Seed every Argus surface in one shot:
+# Seed every ARGUS surface in one shot:
 #   .soc-* governance, lineage, reasoning, outcomes
 #   + .soc-detection-corpus, .soc-threat-actors, .soc-threat-profiles
 #   + .soc-coverage-gaps (15 open rows across 5 data sources)
@@ -44,7 +44,7 @@ Open Kibana and navigate to:
 
 > **`/app/security/argus`**
 
-Argus Console loads with a sidebar of panels + a deep-linkable URL.
+ARGUS Console loads with a sidebar of panels + a deep-linkable URL.
 
 ---
 
@@ -55,7 +55,7 @@ the demo from the link alone.
 
 ### Beat 1 · The pitch (0:00 – 0:45) · `?panel=pulse`
 
-> "Argus is an **autonomous SOC** built on the Elastic Stack. It ingests
+> "ARGUS is an **autonomous SOC** built on the Elastic Stack. It ingests
 > CVEs, synthesizes detection rules, evaluates them, governs them, and
 > applies them — all observable in one Kibana app. Here's the last
 > 24 hours."
@@ -79,12 +79,12 @@ Pick a row where `overallStatus` is `applied` — the canvas shows all
 six Pareto candidates, the dominated alternatives, the final verdict,
 and the backtest numbers.
 
-> "Every stage is a real document. Argus didn't just pick a rule — it
+> "Every stage is a real document. ARGUS didn't just pick a rule — it
 > considered five others, and we can see why they lost."
 
 ### Beat 3 · Coverage + gap analysis (1:45 – 2:45) · `?panel=coverage`
 
-> "Argus doesn't operate in a vacuum. The **Coverage** panel asks:
+> "ARGUS doesn't operate in a vacuum. The **Coverage** panel asks:
 > what does the community already cover, and where are *we* the only
 > line of defence?"
 
@@ -94,7 +94,7 @@ Point to the tactic × technique heatmap. Cells are coloured by
 - Toggle the profile picker to **Ransomware** — the heatmap reshapes
   to show only ransomware-relevant techniques.
 - Click an actor (e.g. **APT29**) — the flyout lists every technique
-  the actor is known to use, split by Argus-authored vs
+  the actor is known to use, split by ARGUS-authored vs
   community-authored vs uncovered.
 - Click **Export Navigator layer** — a v4.5 JSON downloads; drop it
   into ATT&CK Navigator for the exec readout.
@@ -104,24 +104,26 @@ Point to the tactic × technique heatmap. Cells are coloured by
 
 ### Beat 4 · Analyst playbooks (2:45 – 3:45) · `?panel=playbooks`
 
-> "Playbooks in Argus are **native Kibana primitives** — no bespoke
+> "Playbooks in ARGUS are **native Kibana primitives** — no bespoke
 > engine. Every playbook is both a tagged Workflow (deterministic,
 > observable in the Workflows UI) and an Agent Builder skill
 > (LLM-callable)."
 
 The Playbooks tab groups entries by **user intent**:
 
-- **Investigate new CVE** → `soc-argus-exploit-to-detection` (canonical)
-- **Triage coverage gap** → `soc-argus-playbook-coverage-gap-triage`
-- **Scan data-source gap** → `soc-argus-playbook-datasource-gap` *(new
-  in this PR — files `gap_analysis` intents per uncovered technique)*
-- **Tune high-FP rule** → `soc-argus-playbook-high-fp-tuning` *(now
-  files `consolidation` intents instead of no-op)*
+- **Investigate new CVE** → `soc-argus-exploit-to-detection` (canonical workflow)
+- **Triage coverage gap / scan data-source gap / tune high-FP rule /
+  actor escalation** → `soc-argus-playbook-runner` with the matching
+  `playbook_id` input (`coverage-gap-triage`, `datasource-gap`,
+  `high-fp-tuning`, `actor-escalation`). The old one-YAML-per-playbook
+  workflows (`soc-argus-playbook-coverage-gap-triage`,
+  `soc-argus-playbook-datasource-gap`, `soc-argus-playbook-high-fp-tuning`,
+  `soc-argus-playbook-actor-escalation`) were removed.
 
-Click the data-source-gap playbook · pick `winlogbeat` · run it. The
-Workflows UI opens — every step is live. When it completes, the new
-`gap_analysis` intents show up in the **Mutations** panel, **pending
-governance verdict**.
+Run **ARGUS Playbook Runner** from the Workflows UI · set `playbook_id` to
+`datasource-gap` (optional: `dry_run: false`) · execute. When it completes,
+any filed `mutation_intent` rows show up in the **Mutations** panel under
+**pending governance verdict** (exact intents depend on indexed evidence).
 
 > "One click, a typed workflow ran, governance caught it. Nothing was
 > auto-applied."
@@ -130,7 +132,7 @@ governance verdict**.
 
 Open the Reasoning Drill-down on the Overview tab and pick a recent trace.
 
-> "For every autonomous action Argus takes, we capture the **reasoning
+> "For every autonomous action ARGUS takes, we capture the **reasoning
 > trace**: thought → tool_call → tool_result → decision →
 > recommendation. If something looks wrong…"
 
@@ -138,7 +140,7 @@ Click **Show decision graph** on any reasoning-step row.
 
 > "…this flyout walks the `.soc-decision-graph` edge index from that
 > reasoning run outwards. Advisories, intents, outcomes, rules, actors
-> and techniques are all typed edges — 'why did Argus do X' becomes a
+> and techniques are all typed edges — 'why did ARGUS do X' becomes a
 > graph query."
 
 Click **Open full-screen explorer** in the flyout footer.
@@ -150,7 +152,7 @@ Click **Open full-screen explorer** in the flyout footer.
 
 ### Beat 6 · Audit + kill switch (4:45 – 5:00) · `?panel=kill_switch`
 
-> "And the escape hatch: one operator, one toggle, Argus goes to
+> "And the escape hatch: one operator, one toggle, ARGUS goes to
 > read-only mode and every decision from that moment forward is a
 > human's. Audited in `.soc-audit-trail`."
 
@@ -214,6 +216,6 @@ cut on the record:
 
 ## 5. One-line summary (for the deck)
 
-> **Argus is a Kibana-native autonomous SOC: CVE → governed detection
+> **ARGUS is a Kibana-native autonomous SOC: CVE → governed detection
 > rule, with every decision observable, replayable, and graph-queryable
 > from a single `/app/security/argus` URL.**

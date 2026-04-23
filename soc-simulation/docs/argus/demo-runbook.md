@@ -1,6 +1,6 @@
-# Argus Demo Runbook — End-to-End
+# ARGUS Demo Runbook — End-to-End
 
-A concrete, step-by-step runbook for driving the Argus Phase 2 + Phase 3 demo
+A concrete, step-by-step runbook for driving the ARGUS Phase 2 + Phase 3 demo
 against a local Kibana + Elasticsearch stack. This is the companion of
 [`demo-storyboard.md`](./demo-storyboard.md) — the storyboard is what the
 audience sees; this runbook is what the demo operator types.
@@ -27,12 +27,12 @@ it before the live demo.
 | Requirement | Command | Verification |
 |---|---|---|
 | Kibana + Elasticsearch running | — | `curl -u elastic:$ES_PASS http://localhost:19200/_cluster/health` returns `"status":"green"` or `"yellow"` |
-| Argus stack bootstrapped | `./soc-simulation/setup.sh` | Last line prints `Setup complete` |
+| ARGUS stack bootstrapped | `./soc-simulation/setup.sh` | Last line prints `Setup complete` |
 | Detection rules loaded | (included in `setup.sh`) | `GET kbn:/api/detection_engine/rules/_find?per_page=1` returns ≥ 1 rule |
 | `.soc-*` index templates installed | (included in `setup.sh`) | `GET .soc-detection-eval-runs` returns the index (auto-created on first write) |
 | Labelled corpus seeded | (included in `setup.sh`, pulls from `scripts/argus-variant-bank/`) | `GET .soc-eval-corpus-argus-corpus-mythos-2026-04/_count` returns ≥ 13 |
-| Argus Console imported | (included in `setup.sh`) | Kibana → Dashboards → "Argus Console — Mythos-Resilience Invariants" |
-| (Optional) Argus React app-route | `argusConsoleEnabled: true` in Kibana config | Kibana side-nav → Security → **Argus**; deep-links from alert flyouts |
+| ARGUS Console imported | (included in `setup.sh`) | Kibana → Dashboards → "ARGUS Console — Mythos-Resilience Invariants" |
+| (Optional) ARGUS React app-route | `argusConsoleEnabled: true` in Kibana config | Kibana side-nav → Security → **ARGUS**; deep-links from alert flyouts |
 
 Set the environment variables used by the commands below. The local
 `docker-compose.yml` exposes Elasticsearch on `19200` and Kibana on `15601`
@@ -140,7 +140,7 @@ route is `POST /api/workflows/workflow/{id}/run`. Resolve the UUID first:
 FRONTIER_ID=$(curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Elastic-Api-Version: 2023-10-31' \
   "$KBN_URL/api/workflows?size=200" \
-  | jq -r '.results[] | select(.name | startswith("SOC Argus — Frontier Simulator")) | .id')
+  | jq -r '.results[] | select(.name | startswith("SOC ARGUS — Frontier Simulator")) | .id')
 echo "$FRONTIER_ID"
 ```
 
@@ -186,14 +186,14 @@ The document's `_argus.emission_source` is `soc-argus-frontier-simulator` and
 
 `soc-detection-eval.yaml` polls `.soc-detection-eval-runs` every 2 minutes
 and reconciles any unreconciled rows back onto `.soc-recommendations`,
-emitting an Argus governance trace per reconciled run. Trigger it manually
+emitting an ARGUS governance trace per reconciled run. Trigger it manually
 to avoid waiting for the scheduler:
 
 ```bash
 POLLER_ID=$(curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Elastic-Api-Version: 2023-10-31' \
   "$KBN_URL/api/workflows?size=200" \
-  | jq -r '.results[] | select(.name == "SOC Detection Eval (Argus M2.1)") | .id')
+  | jq -r '.results[] | select(.name == "SOC Detection Eval (ARGUS M2.1)") | .id')
 
 curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
@@ -224,17 +224,17 @@ curl -s -u "$ES_USER:$ES_PASS" \
 
 Expect `argus.decision.kind` values drawn from the open set
 `{rule_eval, rule_update, rule_create, triage_verdict, reasoning_watchdog, …}`
-— the exact mix depends on which workflows have fired. The Argus Console
-dashboard aggregates this index under *Argus decisions — last 24h by kind*.
+— the exact mix depends on which workflows have fired. The ARGUS Console
+dashboard aggregates this index under *ARGUS decisions — last 24h by kind*.
 
-## 6. Open the Argus Console
+## 6. Open the ARGUS Console
 
 Two surfaces now render the same underlying data — pick whichever best
 matches the story you're telling.
 
 ### 6a. Classic dashboard (always available)
 
-1. Kibana → Dashboards → **"Argus Console — Mythos-Resilience Invariants"**.
+1. Kibana → Dashboards → **"ARGUS Console — Mythos-Resilience Invariants"**.
 2. Confirm the four top-row metrics render:
    - **Latest eval — precision** (≥ 0.8 after step 2 on the seeded corpus)
    - **Latest eval — recall** (≥ 0.8)
@@ -242,7 +242,7 @@ matches the story you're telling.
    - **Gate pass-rate (24h)** (> 0)
 3. Scroll to the **Recent detection-eval runs** table: each row shows
    `rule_id`, `gate_decision`, and the three score columns.
-4. **Argus decisions — last 24h by kind** shows counts per
+4. **ARGUS decisions — last 24h by kind** shows counts per
    `argus.decision.kind`. If the table is empty, no workflows have fired yet
    — trigger steps 3 and 4 again.
 5. **Low-confidence decisions (<0.5)** should be empty on a healthy seeded
@@ -251,8 +251,8 @@ matches the story you're telling.
 ### 6b. React app-route — `/app/security/argus` (behind `argusConsoleEnabled`)
 
 When the `argusConsoleEnabled` experimental flag is on, the Security Solution
-plugin mounts a dedicated **Argus** page at `/app/security/argus` that tells
-the complete Argus story across a tab bar. Tabs are grouped into **read
+plugin mounts a dedicated **ARGUS** page at `/app/security/argus` that tells
+the complete ARGUS story across a tab bar. Tabs are grouped into **read
 surfaces** and **write surfaces**:
 
 **Read surfaces**
@@ -264,7 +264,7 @@ surfaces** and **write surfaces**:
 - **Activity feed** — chronological stream of escalations / suppressions /
   mutation intents; each row deep-links to the matching reasoning or
   lineage.
-- **Mutation lineage** — hand-rolled SVG graph of the mutation stages Argus
+- **Mutation lineage** — hand-rolled SVG graph of the mutation stages ARGUS
   traversed (primitive → variant → injection surface → verdict).
 - **Reasoning drill-down** — ordered reasoning steps for an alert or run,
   including verdict, trust tier, and any `injection_surface_flags`.
@@ -307,7 +307,7 @@ forged client call without the API capability is rejected.
 
 Enter the page from three places:
 
-- **Side nav**: Security → **Argus** (the link is visible when the flag is
+- **Side nav**: Security → **ARGUS** (the link is visible when the flag is
   on and the user has `siem.show`).
 - **Deep-link with a subject**: `/app/security/argus?alert_id=<id>` or
   `?run_id=<id>` or `?rule_id=<id>` (mix-and-match — `alert_id` seeds both
@@ -315,7 +315,7 @@ Enter the page from three places:
   overrides lineage). Deep-linking to a specific tab is also supported
   via `?tab=mutations|e2d|proposals|autonomy|coverage|caldera`.
 - **Alert flyout**: open any detection alert, click **Take action →
-  Show Argus reasoning**. The action only appears for alerts (never for
+  Show ARGUS reasoning**. The action only appears for alerts (never for
   non-alert events) and is gated on the same experimental flag.
 
 Server-side, both panels read from internal HTTP routes and the exact same
@@ -337,13 +337,13 @@ curl -s -u "$KBN_USER:$KBN_PASS" \
   | jq '{subject, verdict, trust_tier, steps: (.steps // [] | length), reason_code}'
 ```
 
-An alert with no Argus run returns
+An alert with no ARGUS run returns
 `{"subject":..., "reason_code":"no_trace"}` — that's the expected degraded
 payload the React panel renders as "No reasoning trace available".
 
 ### 6c. Governance signal — Rollback MTTR (R6)
 
-Argus R6 closes the governance loop: every rolled-back mutation now produces
+ARGUS R6 closes the governance loop: every rolled-back mutation now produces
 a time-to-rollback measurement that flows all the way to the Pulse tile.
 
 The emission chain:
@@ -417,7 +417,7 @@ to see the full emission chain in the tooltip.
 
 Drive the demo in this order so the Console lights up naturally:
 
-1. **Open the Argus Console.** If you have the React app-route, open
+1. **Open the ARGUS Console.** If you have the React app-route, open
    `/app/security/argus` and leave it on the Pulse panel — panels populate
    from the seeded data and the audience sees green metrics immediately.
    Otherwise open the classic dashboard (§6a).
@@ -433,7 +433,7 @@ Drive the demo in this order so the Console lights up naturally:
 5. **Step 5** (governance trace) — explain M2.5: "Every agent decision is
    attributable to an agent, a decision kind, and a trust tier. Here is the
    audit trail a CISO can hand to an auditor."
-6. Open a seeded alert, click **Take action → Show Argus reasoning**, and
+6. Open a seeded alert, click **Take action → Show ARGUS reasoning**, and
    close on the React app-route's reasoning drill-down: the audience sees
    the *same* payload an autonomous agent reasons over (§12).
 
@@ -459,16 +459,16 @@ and re-seeds the labelled corpus from `scripts/argus-variant-bank/`. Plan for
 | CLI runner exits with `ERR_MODULE_NOT_FOUND` on `@kbn/babel-register/install` | You used `--import` (ESM) or dropped the `.js` suffix | Use `--require @kbn/babel-register/install.js` (see §2) |
 | CLI runner exits with `loadCorpusLabels found zero documents` | Corpus index empty | Re-run `setup.sh` to re-ingest the variant bank |
 | Gate pass-rate is `0` | No eval runs in the last 24h | Trigger step 2; wait for the poller or trigger step 4 |
-| Argus Console panels are empty (dashboard) | Data views missing | `GET kbn:/api/data_views` should include `.soc-reasoning-trace`, `.soc-detection-eval-runs`, `.soc-eval-corpus-*`; re-run `setup.sh` if missing |
+| ARGUS Console panels are empty (dashboard) | Data views missing | `GET kbn:/api/data_views` should include `.soc-reasoning-trace`, `.soc-detection-eval-runs`, `.soc-eval-corpus-*`; re-run `setup.sh` if missing |
 | React app-route link not visible in side nav | `argusConsoleEnabled` flag off or user lacks `siem.show` | Enable the flag in `kibana.yml`: `xpack.securitySolution.enableExperimental: ['argusConsoleEnabled']` and re-login |
 | Eval poller reports "0 new eval-run row(s)" | All runs already reconciled | Trigger step 2 again to create new rows |
 | `argus.decision.confidence` missing on a span | Workflow used an older template | Re-run `setup.sh` to re-apply the `.soc-reasoning-trace` index template and regenerate traces |
 
-## 10. Phase 3 — Adaptive Argus demo
+## 10. Phase 3 — Adaptive ARGUS demo
 
-Phase 3 turns Argus from a static gate into an adaptive system. Four
+Phase 3 turns ARGUS from a static gate into an adaptive system. Four
 workflows and one new intel index drive the loop; all are demo-ready
-locally and surface in the Argus Console.
+locally and surface in the ARGUS Console.
 
 > **Naming note.** Kibana's bulk workflow import currently drops the `name:`
 > field from some YAMLs, so the Drift Monitor and Intel Mythos Aggregator
@@ -485,7 +485,7 @@ the demo has Mythos-era intel immediately.
 INTEL_ID=$(curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Elastic-Api-Version: 2023-10-31' \
   "$KBN_URL/api/workflows?size=200" \
-  | jq -r '.results[] | select(.name | startswith("Argus Intel Adapter")) | .id')
+  | jq -r '.results[] | select(.name | startswith("ARGUS Intel Adapter")) | .id')
 
 curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
@@ -577,7 +577,7 @@ four indices — `.soc-autonomy-decisions`, `.soc-outcomes`,
 LEARNER_ID=$(curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Elastic-Api-Version: 2023-10-31' \
   "$KBN_URL/api/workflows?size=200" \
-  | jq -r '.results[] | select(.name | startswith("Argus Playbook Learner")) | .id')
+  | jq -r '.results[] | select(.name | startswith("ARGUS Playbook Learner")) | .id')
 
 curl -s -u "$KBN_USER:$KBN_PASS" \
   -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
@@ -594,8 +594,8 @@ curl -s -u "$ES_USER:$ES_PASS" \
 
 ### 10.5 Phase 3 panel walk-through
 
-On the classic Argus Console, scroll past Phase 2 to the **Phase 3 —
-Adaptive Argus** banner:
+On the classic ARGUS Console, scroll past Phase 2 to the **Phase 3 —
+Adaptive ARGUS** banner:
 
 - **Drift intents (24h)** / **Playbook remap intents (24h)** — the two
   adaptive loops' output volume; each should increment after steps 10.3
@@ -612,7 +612,7 @@ Adaptive Argus** banner:
 
 After the Phase 2 beats (section 7), extend the narrative:
 
-1. **Step 10.1** — "Argus now ingests Mythos-era intel through a feed
+1. **Step 10.1** — "ARGUS now ingests Mythos-era intel through a feed
    abstraction. The generic adapter has seed data today; swapping in a
    Glasswing TAXII poller is a drop-in addition."
 2. **Step 10.2** — "The aggregator turns per-row intel into a bounded
@@ -622,11 +622,11 @@ After the Phase 2 beats (section 7), extend the narrative:
    under adversary mutation and files a `mutation_intent` for
    re-evaluation — no human hand on the keyboard."
 4. **Step 10.4** — "The playbook learner is the feedback arrow — when a
-   (technique, step) pair underperforms on frontier-tier outcomes, Argus
+   (technique, step) pair underperforms on frontier-tier outcomes, ARGUS
    remaps it to a safer candidate."
 5. **Close** on the Phase 3 panels (or, if using the React app-route, on
    the **Mutation lineage** panel with a recent drift intent in view).
-   The adaptive loops are how Argus stays ahead of a Mythos-tier adversary
+   The adaptive loops are how ARGUS stays ahead of a Mythos-tier adversary
    that changes the game every day.
 
 ## 11. Re-importing workflows manually
@@ -675,9 +675,9 @@ addressable by an autonomous agent via the Agent Builder skill
 `fetchReasoningChain` helper that backs the internal HTTP route, so UI
 and agent payloads never diverge.
 
-Typical prompt for the Argus agent:
+Typical prompt for the ARGUS agent:
 
-> "Why did Argus escalate alert `<alert_id>`? Return the reasoning chain."
+> "Why did ARGUS escalate alert `<alert_id>`? Return the reasoning chain."
 
 The agent returns the ordered reasoning steps, verdict, trust tier, and
 any `injection_surface_flags` — exactly the payload rendered in the

@@ -4,7 +4,7 @@
 # 2.0; you may not use this file except in compliance with the Elastic License
 # 2.0.
 #
-# Argus — mirror-mode validation for two workflows that the local Kibana
+# ARGUS — mirror-mode validation for two workflows that the local Kibana
 # workflow runtime does not expose:
 #
 #   * soc-argus-arm-mythos-preset.yaml

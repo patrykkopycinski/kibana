@@ -1,17 +1,17 @@
-# Phase 3 Design — Argus Console
+# Phase 3 Design — ARGUS Console
 
 Status: **Draft**
 
 ## Problem
 
-The five Argus layers produce rich, cross-referenced telemetry, but today it's
+The five ARGUS layers produce rich, cross-referenced telemetry, but today it's
 spread across: a Workflows UI, raw data views on `.soc-*` indices, Discover, the
 Security Solution alert flyout, the APM trace UI, and a handful of dashboards.
 Demo operators and real SOC users both need a single landing surface that answers
 two questions fast:
 
-1. **"Is Argus working right now?"** — live signals across the five layers.
-2. **"Why did Argus do X?"** — drill-down from any alert / mutation / action to
+1. **"Is ARGUS working right now?"** — live signals across the five layers.
+2. **"Why did ARGUS do X?"** — drill-down from any alert / mutation / action to
    the reasoning chain and the governance state at the time.
 
 ## Decision
@@ -34,7 +34,7 @@ Top-of-page summary. Real-time Lens visualisations powered by shared filters:
 
 ### Panel 2 — Activity feed
 
-Chronological stream of Argus events across all five layers. Filterable by
+Chronological stream of ARGUS events across all five layers. Filterable by
 layer, by pressure, by actor, by trust tier. Each row links to:
 
 - The underlying `.soc-*` document (via Discover deep-link).
@@ -51,11 +51,11 @@ source → exploit-probability → synthesis → eval → backtest → apply →
                                                      ↘ drift-detected → eval (re-score) → …
 ```
 
-Each node is clickable; clicking opens the underlying Argus document.
+Each node is clickable; clicking opens the underlying ARGUS document.
 
 ### Panel 4 — Reasoning drill-down
 
-From any alert, a "Show Argus reasoning" button opens a side panel with:
+From any alert, a "Show ARGUS reasoning" button opens a side panel with:
 
 - The reasoning-trace chain (M2.5) that produced the triage verdict.
 - Per-step confidence and confidence-delta.
@@ -98,8 +98,8 @@ agent-native parity rule.
 1. **Pulse refresh interval** — Lens auto-refresh at 30s may be too chatty for
    large clusters. Proposed: default 60s, user-configurable.
 2. **Alert → console deep-link** — do we embed in the existing Alert flyout or
-   ship a separate flyout? Proposed: "Show Argus reasoning" button in the flyout,
+   ship a separate flyout? Proposed: "Show ARGUS reasoning" button in the flyout,
    opens the drill-down inline without leaving the alert.
 3. **Demo mode** — for the storyboard demo, we want a scripted subset of the
-   console. Proposed: a saved "Argus demo" view that bookmarks the three
+   console. Proposed: a saved "ARGUS demo" view that bookmarks the three
    scenario contexts.

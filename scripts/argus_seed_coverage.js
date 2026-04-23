@@ -15,8 +15,8 @@
  *   .soc-threat-actors      — curated actor set with technique + software lists
  *
  * Idempotent: every doc uses a deterministic _id, so running twice produces
- * the same index state. Safe to call before `live_argus_demo.sh` so the
- * heatmap and actor drill-downs render populated immediately.
+ * the same index state. Safe to call before `soc-simulation/scripts/seed_argus_demo.sh`
+ * so the heatmap and actor drill-downs render populated immediately.
  *
  * Usage:
  *   ES_URL=http://localhost:19200 ES_AUTH=elastic:changeme \

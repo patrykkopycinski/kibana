@@ -1,4 +1,4 @@
-# Argus Benchmark: Autonomous Detection Engineering Evaluation
+# ARGUS Benchmark: Autonomous Detection Engineering Evaluation
 
 > Version 1.0 — 2026-04-23
 
@@ -6,7 +6,7 @@
 
 No existing benchmark evaluates **end-to-end autonomous detection engineering**. SOC-Bench measures incident response. CTI-REALM measures rule generation. Neither measures the closed-loop cycle of detect → synthesize → validate → deploy → monitor → self-heal.
 
-The Argus Benchmark fills this gap.
+The ARGUS Benchmark fills this gap.
 
 ## Evaluation Dimensions
 
@@ -103,7 +103,7 @@ Run `soc-simulation/scripts/run_argus_benchmark.sh` which:
 3. Queries all scoring indices
 4. Produces a JSON scorecard
 
-## Current Argus Score
+## Current ARGUS Score
 
 Based on live cluster measurement (2026-04-23):
 

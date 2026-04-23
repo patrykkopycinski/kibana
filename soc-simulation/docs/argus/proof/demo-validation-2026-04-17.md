@@ -1,4 +1,4 @@
-# Argus Demo Validation — 2026-04-17
+# ARGUS Demo Validation — 2026-04-17
 
 > **Status:** End-to-end demo validated against a live local cluster (Elasticsearch
 > 9.x @ `http://localhost:19200`, Kibana @ `http://localhost:15601`).
@@ -12,7 +12,7 @@
 
 ## 0. Repository preflight — lint, types, tests
 
-All three Argus packages pass the full validation trio on the current branch.
+All three ARGUS packages pass the full validation trio on the current branch.
 
 ### `node scripts/eslint --fix` on the three packages
 
@@ -57,7 +57,7 @@ Tests:       16 passed, 16 total
   `.soc-audit-trail`, `.soc-eval-corpus-*`.
 - Ingest pipelines deployed: `soc-mutation-intent-envelope-validator`,
   `argus-exploit-probability-enricher`.
-- Argus variant bank bulk-loaded (13 labelled variants in
+- ARGUS variant bank bulk-loaded (13 labelled variants in
   `.soc-eval-corpus-argus-corpus-mythos-2026-04`).
 - Workflows installed via the Kibana Workflow API.
 
@@ -78,7 +78,7 @@ Tests:       16 passed, 16 total
 
 Source: `index-counts.json` (this directory).
 
-### Argus workflow definitions installed in Kibana
+### ARGUS workflow definitions installed in Kibana
 
 Verbatim from `GET /api/workflows?size=500` (Kibana Workflow Management
 plugin):
@@ -86,14 +86,14 @@ plugin):
 ```
 total workflows: 104
 argus workflows: 8
-  id=workflow-3dee29ad-...  enabled=0  name=SOC Argus — Frontier Simulator (M2.4)
-  id=workflow-0f93e968-...  enabled=0  name=Argus Trust Gate (Phase 3)
-  id=workflow-fe1929bf-...  enabled=1  name=SOC Argus — Arm Mythos-Class Preset
-  id=workflow-90777018-...  enabled=1  name=Argus Exploit-to-Detection Reconciler (M2.2)
-  id=workflow-5b35f18b-...  enabled=0  name=SOC Argus — Frontier Simulator (M2.4)
-  id=workflow-432e9de6-...  enabled=0  name=Argus Trust Gate (Phase 3)
-  id=workflow-5693d91b-...  enabled=1  name=Argus Trust Tier Assessor (Phase 3)
-  id=workflow-a86bc2d0-...  enabled=0  name=SOC Detection Eval (Argus M2.1)
+  id=workflow-3dee29ad-...  enabled=0  name=SOC ARGUS — Frontier Simulator (M2.4)
+  id=workflow-0f93e968-...  enabled=0  name=ARGUS Trust Gate (Phase 3)
+  id=workflow-fe1929bf-...  enabled=1  name=SOC ARGUS — Arm Mythos-Class Preset
+  id=workflow-90777018-...  enabled=1  name=ARGUS Exploit-to-Detection Reconciler (M2.2)
+  id=workflow-5b35f18b-...  enabled=0  name=SOC ARGUS — Frontier Simulator (M2.4)
+  id=workflow-432e9de6-...  enabled=0  name=ARGUS Trust Gate (Phase 3)
+  id=workflow-5693d91b-...  enabled=1  name=ARGUS Trust Tier Assessor (Phase 3)
+  id=workflow-a86bc2d0-...  enabled=0  name=SOC Detection Eval (ARGUS M2.1)
 ```
 
 Source: `argus-workflows.json` (this directory).
@@ -336,7 +336,7 @@ remains the source of truth for those.
 
 ---
 
-## 6. Argus Console dashboard (Kibana saved objects import)
+## 6. ARGUS Console dashboard (Kibana saved objects import)
 
 ```
 POST /api/saved_objects/_import?overwrite=true (data views)
@@ -349,7 +349,7 @@ POST /api/saved_objects/_import?overwrite=true (dashboard)
 Source: `dashboard-dataviews-import.json`, `dashboard-import.json`
 (this directory).
 
-**Verdict:** the Argus Console dashboard + its three data views import
+**Verdict:** the ARGUS Console dashboard + its three data views import
 cleanly into the live Kibana instance. A reviewer can open it at
 `http://localhost:15601/app/dashboards#/view/argus-console`.
 
@@ -417,7 +417,7 @@ in particular is covered).
 | M2.3 — TS ↔ Painless parity          | byte-identical scores + ordering           | §4b (m23-ts-parity.log)                            | ✅ |
 | Phase 3 — trust-tier assessor        | `.soc-actor-trust-tiers` seeded            | §5a (tiers.json)                                   | ✅ |
 | Phase 3 — trust gate                 | non-invasive status + reason rewrite       | §5b/§5c (m3-gate-result.json, gated-recs.json)     | ✅ |
-| Argus Console dashboard              | saved-objects import clean                 | §6 (dashboard-import.json)                         | ✅ |
+| ARGUS Console dashboard              | saved-objects import clean                 | §6 (dashboard-import.json)                         | ✅ |
 | Mythos preset + frontier simulator   | arm + simulated-emission ES data contract  | §7 (mythos_workflows_mirror.log)                   | ✅ (mirror) |
 
 ### Known limitations (called out for the demo)
@@ -431,7 +431,7 @@ in particular is covered).
    files on disk remain the contract; the CLIs and the direct-ES
    runners are stand-in executors.
 2. **All four Mythos rules fail the M2.1 gate today.** This is the
-   designed starting state — the demo narrative is that Argus will close
+   designed starting state — the demo narrative is that ARGUS will close
    the coverage gap. The fail verdicts, precision=1.0, and per-axis
    firing in `m21-eval-runs.json` make that point empirically.
 

@@ -10,16 +10,16 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 
 import { ArgusConsole, resolveTabId } from '@kbn/argus-console';
-import type {
-  ArgusConsoleTabId,
-  ArgusMutationFilter,
-  ArgusMutationWindow,
-  ArgusPlaybookEntry,
-  ArgusSynthesisWindow,
-  DecisionGraphNodeKind,
-  MutationLineageSubject,
-  ReasoningChainSubject,
-} from '@kbn/argus-console';
+import type { ArgusConsoleTabId, ArgusPlaybookEntry } from '@kbn/argus-console';
+import {
+  ARGUS_CONSOLE_ALL_UI_CAPABILITY,
+  type ArgusMutationFilter,
+  type ArgusMutationWindow,
+  type ArgusSynthesisWindow,
+  type DecisionGraphNodeKind,
+  type MutationLineageSubject,
+  type ReasoningChainSubject,
+} from '@kbn/argus-console-common';
 
 type E2dWindow = '24h' | '7d';
 
@@ -131,21 +131,23 @@ const ArgusPageComponent: React.FC = () => {
   const history = useHistory();
 
   // Capability gating matches the privileges wired into the base siemV5
-  // feature — `argus_all` grants the kill-switch toggle and mutation
-  // approve/reject actions. The backend is still the source of truth;
-  // this only avoids rendering dead affordances for read-only users.
+  // feature — `ARGUS_CONSOLE_ALL_UI_CAPABILITY` grants the kill-switch toggle
+  // and mutation approve/reject actions. The backend is still the source of
+  // truth; this only avoids rendering dead affordances for read-only users.
   // Capabilities are exposed under the feature id (SECURITY_FEATURE_ID =
   // 'siemV5'), matching the `capabilities[SECURITY_FEATURE_ID]` pattern
   // used elsewhere in Security Solution.
   const capabilities = services.application?.capabilities;
   const canArgusWrite = Boolean(
-    (capabilities?.[SECURITY_FEATURE_ID] as Record<string, unknown> | undefined)?.argus_all
+    (capabilities?.[SECURITY_FEATURE_ID] as Record<string, unknown> | undefined)?.[
+      ARGUS_CONSOLE_ALL_UI_CAPABILITY
+    ]
   );
 
   const onWriteError = useCallback(
     (error: Error) => {
       services.notifications?.toasts.addError(error, {
-        title: 'Argus write failed',
+        title: 'ARGUS write failed',
       });
     },
     [services.notifications]
@@ -180,7 +182,7 @@ const ArgusPageComponent: React.FC = () => {
   //
   // The Workflows Management URL convention is `/app/workflows/<id>` where
   // `<id>` is the Kibana saved-object id (typically `workflow-<uuid>`).
-  // Argus surfaces workflows keyed by their registry slug (e.g.
+  // ARGUS surfaces workflows keyed by their registry slug (e.g.
   // `soc-argus-exploit-to-detection`), so navigating with the slug alone
   // 404s the detail page. We therefore prefer the resolved
   // `kibana_workflow_id` carried alongside each entry and fall back to the
@@ -382,6 +384,6 @@ const ArgusPageComponent: React.FC = () => {
   );
 };
 
-ArgusPageComponent.displayName = 'ArgusPage';
+ArgusPageComponent.displayName = 'ARGUSPage';
 
 export const ArgusPage = React.memo(ArgusPageComponent);

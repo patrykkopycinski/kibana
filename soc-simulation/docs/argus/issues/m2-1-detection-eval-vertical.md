@@ -1,12 +1,12 @@
 # M2.1 — Detection Eval Vertical
 
-**Argus layer:** 03 Validation · **Pressure:** P2 variant explosion · **Extends:** [`elastic/security-team#16546`][s1] (Unified Skill Evaluation Platform)
+**ARGUS layer:** 03 Validation · **Pressure:** P2 variant explosion · **Extends:** [`elastic/security-team#16546`][s1] (Unified Skill Evaluation Platform)
 
 ## Context
 
 [`security-team#16546`][s1] delivers a unified evaluation platform via `@kbn/evals` +
 AESOP. That platform is skill-agnostic — it evaluates arbitrary skill input/output pairs.
-Argus depends on a **specialised vertical** that understands detection rules as the unit
+ARGUS depends on a **specialised vertical** that understands detection rules as the unit
 of evaluation: a rule fires or does not fire against a labelled telemetry set, and is
 scored on precision, recall, FP rate on a 30-day baseline, and stability under
 adversarial mutation.
@@ -32,7 +32,7 @@ a scorecard with four numbers per detection-rule candidate:
 
 ### In scope
 
-- `soc-detection-eval` workflow (Argus-owned) that composes an existing `@kbn/evals`
+- `soc-detection-eval` workflow (ARGUS-owned) that composes an existing `@kbn/evals`
   suite and pipes results into `.soc-detection-eval-runs`.
 - Evaluator contract: `detection_rule_evaluator.ts` implementing the standard
   `@kbn/evals` evaluator interface, reading rule metadata from
@@ -42,7 +42,7 @@ a scorecard with four numbers per detection-rule candidate:
   expected-fire metadata.
 - Regression affordance: every `.soc-backtests` row gets a paired
   `.soc-detection-eval-runs` row for cross-comparison.
-- Dashboard panel under Security Solution → Argus → "Detection Eval Scorecard."
+- Dashboard panel under Security Solution → ARGUS → "Detection Eval Scorecard."
 
 ### Out of scope
 
@@ -97,7 +97,7 @@ a scorecard with four numbers per detection-rule candidate:
    setup-verify assertions.
 4. **Regression-gate integration** (0.5 wk): teach `soc-regression-gate` to consume
    `.soc-detection-eval-runs` alongside `.soc-regression-runs`.
-5. **Dashboard panel** (0.5 wk): Argus → Detection Eval Scorecard.
+5. **Dashboard panel** (0.5 wk): ARGUS → Detection Eval Scorecard.
 
 Est. total: 3.5 weeks.
 
@@ -111,6 +111,6 @@ Est. total: 3.5 weeks.
 ## Links
 
 - Anchor: [`security-team#16546`][s1]
-- Argus threat model: `../threat-model.html`
-- Argus capability map: `../capability-map.md`
+- ARGUS threat model: `../threat-model.html`
+- ARGUS capability map: `../capability-map.md`
 - Scaffold workflow: `../../workflows/soc-detection-eval.yaml` (lands in this milestone)

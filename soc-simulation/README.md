@@ -1,8 +1,8 @@
-# Argus
+# ARGUS
 
 **A Mythos-resilient defender.**
 
-Argus is a self-governing Security Operations Center — built on Elasticsearch,
+ARGUS is a self-governing Security Operations Center — built on Elasticsearch,
 Kibana, Elastic Agent, Workflows, and Agent Builder — designed to stay sound
 when a frontier-capability adversary enters the loop.
 
@@ -13,21 +13,21 @@ explodes behavioural variants past any static ruleset, brings agentic
 reasoning into the attack loop, and operates with capability asymmetry — using
 novel techniques that have zero precedent in any defender's known-TTP set.
 
-Argus — the hundred-eyed watcher of Greek myth — is the defender built to
+ARGUS — the hundred-eyed watcher of Greek myth — is the defender built to
 survive that.
 
 ---
 
-## The four pressures Argus absorbs
+## The four pressures ARGUS absorbs
 
 The Mythos-era threat model is captured in [`docs/argus/threat-model.html`](./docs/argus/threat-model.html). In short:
 
-| Pressure | What the adversary does | How Argus absorbs it |
+| Pressure | What the adversary does | How ARGUS absorbs it |
 | --- | --- | --- |
 | **P1 — Time compression** | Exploit built and deployed inside the historical MTTD window. | Detection-eval vertical + backtester (R8) reproject every rule mutation against the last *N* hours before any auto-apply. |
 | **P2 — Variant explosion** | ≥ 20 behavioural variants per primitive technique. | Axis-based variant bank + exploit-to-detection synthesis keep detections grouped by behaviour, not signature. |
-| **P3 — Agentic adversary** | Attacker reasons about defender state, crafts adversarial inputs against Argus skills. | Reasoning-trace governance (R11) scores every decision on evidence / calibration / coherence / safety, and quarantines actors that trip the gate. |
-| **P4 — Capability asymmetry** | Novel techniques with no public precedent. | Trust-tiered auto-apply (R7): blast-radius caps, door-class (one-way vs two-way), and actor trust tier decide what Argus is allowed to change without a human. |
+| **P3 — Agentic adversary** | Attacker reasons about defender state, crafts adversarial inputs against ARGUS skills. | Reasoning-trace governance (R11) scores every decision on evidence / calibration / coherence / safety, and quarantines actors that trip the gate. |
+| **P4 — Capability asymmetry** | Novel techniques with no public precedent. | Trust-tiered auto-apply (R7): blast-radius caps, door-class (one-way vs two-way), and actor trust tier decide what ARGUS is allowed to change without a human. |
 
 ---
 
@@ -36,7 +36,7 @@ The Mythos-era threat model is captured in [`docs/argus/threat-model.html`](./do
 See [`docs/argus/architecture.html`](./docs/argus/architecture.html) for the
 slide-ready version.
 
-1. **Sensing** — Elastic Agent, Endpoint, integrations. Argus never invents
+1. **Sensing** — Elastic Agent, Endpoint, integrations. ARGUS never invents
    telemetry; it ingests what the platform ships.
 2. **Reasoning** — `@kbn/evals`-driven skill ecosystem with reasoning traces
    persisted in `.soc-reasoning-trace` for eval and audit.
@@ -46,7 +46,7 @@ slide-ready version.
 4. **Action** — Scoped, reversible mutations (rules, exceptions, thresholds,
    scoped containment). One-way doors require human arming.
 5. **Learning** — Case studies, pattern discovery, outcome/regression indices.
-   Argus learns from its own traces and retires patterns that drift.
+   ARGUS learns from its own traces and retires patterns that drift.
 
 ---
 
@@ -76,13 +76,13 @@ breaking reindex / re-tag:
 
 | Data plane token | Meaning |
 | --- | --- |
-| `.soc-*` index aliases | Argus operational indices (traces, audit, registry, outcomes, ...). |
-| `owner: "autosoc"` in `.soc-artifact-registry` | Marks an artifact as **Argus-managed** (as opposed to `owner: "canonical"` for setup-seeded artifacts). |
+| `.soc-*` index aliases | ARGUS operational indices (traces, audit, registry, outcomes, ...). |
+| `owner: "autosoc"` in `.soc-artifact-registry` | Marks an artifact as **ARGUS-managed** (as opposed to `owner: "canonical"` for setup-seeded artifacts). |
 | `autosoc-owned` rule tag in Kibana Detection Engine | Same signal as above, surfaced on the rule object itself. |
 | `auto-*` / `autosoc-*` artifact-id prefixes | Convention that allows the applier's ownership-gate to fast-path obvious cases before checking the registry. |
 
 These are historical names, preserved as an ABI. Treat them as opaque tokens;
-the product, the story, and the narrative everywhere else is **Argus**.
+the product, the story, and the narrative everywhere else is **ARGUS**.
 
 ---
 
@@ -90,17 +90,16 @@ the product, the story, and the narrative everywhere else is **Argus**.
 
 | You want... | Go here |
 | --- | --- |
-| The canonical Argus spec tree (threat model, architecture, milestones) | [`docs/argus/`](./docs/argus/) |
+| The canonical ARGUS spec tree (threat model, architecture, milestones) | [`docs/argus/`](./docs/argus/) |
 | Capability & gap analysis — what's landed, what's next | [`docs/argus/capability-and-gap-analysis.md`](./docs/argus/capability-and-gap-analysis.md) |
 | Implementer's Day-0 checklist | [`docs/argus/KICKOFF.md`](./docs/argus/KICKOFF.md) |
 | Demo storyboards + operator runbook | [`docs/argus/demo-storyboard.md`](./docs/argus/demo-storyboard.md), [`docs/argus/demo-runbook.md`](./docs/argus/demo-runbook.md) |
 | Canonical workflow manifest | [`workflows/_registry.json`](./workflows/_registry.json) |
 | Elasticsearch index templates | [`setup/index_templates/`](./setup/index_templates/) |
 | Schemas (source of truth for envelopes) | [`schemas/`](./schemas/) |
-| Agents (Agent Builder JSON) | [`agents/`](./agents/) |
-| Skills (`@kbn/skills-toolkit` JSON) | [`skills/`](./skills/) |
+| Skills (Agent Builder / default assistant JSON) | [`skills/`](./skills/) |
 | Mythos-class adversary preset + Caldera profile | [`caldera_profiles/level6-mythos-class.json`](./caldera_profiles/level6-mythos-class.json), [`workflows/soc-argus-arm-mythos-preset.yaml`](./workflows/soc-argus-arm-mythos-preset.yaml) |
-| Pre-Argus historical artifacts (read-only) | [`docs/archive/autosoc-history/`](./docs/archive/autosoc-history/) |
+| Pre-ARGUS historical artifacts (read-only) | [`docs/archive/autosoc-history/`](./docs/archive/autosoc-history/) |
 
 ## The governance packages
 
@@ -119,7 +118,7 @@ runtime. These are the parts you can trust without reading the YAML.
 
 ```bash
 # First-time operator (fresh cluster):
-./setup.sh             # seeds indices, workflows, agents, skills, dashboards
+./setup.sh             # seeds indices, workflows, skills, dashboards
 ./scripts/argus_live_demo.sh  # end-to-end live demo
 
 # Implementer:
@@ -136,7 +135,7 @@ detection alert against a live endpoint:
 2. Enrolls `soc-endpoint-1` (Elastic Agent + Caldera sandcat) via the host
    Kibana on `http://localhost:15601` and attaches the `osquery_manager` +
    `system` integrations to the `soc-endpoint-policy`.
-3. Installs and enables the `[Argus] Linux pipe-to-shell (T1059.004)`
+3. Installs and enables the `[ARGUS] Linux pipe-to-shell (T1059.004)`
    detection rule.
 4. Creates a small Caldera adversary + ability, launches one operation, and
    records a `.soc-attack-commands` bookkeeping doc.

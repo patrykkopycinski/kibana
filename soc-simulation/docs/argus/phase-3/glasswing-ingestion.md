@@ -5,10 +5,10 @@ Status: **Draft**
 ## Problem
 i
 Mythos-era exploit-probability scoring (M2.3) reserves a `mythos_signal`
-contributor (weight 0.05) that currently returns `0.0` because Argus has no
+contributor (weight 0.05) that currently returns `0.0` because ARGUS has no
 Mythos-era intel feed. Anthropic's Project Glasswing distrbutes signal about
 frontier-capability threat actors via a structured feed; we want to consume it as
-one intel source among several, without coupling Argus to a single vendor.
+one intel source among several, without coupling ARGUS to a single vendor.
 
 ## Decision
 
@@ -76,7 +76,7 @@ mythos_signal = min(
 ## Privacy / scope
 
 - `.soc-intel-feed` is a **downstream consumer**, never a producer, of any
-  customer telemetry. Only Argus-owned workflows and the M2.3 enricher read it.
+  customer telemetry. Only ARGUS-owned workflows and the M2.3 enricher read it.
 - Adapters never store authentication tokens in the index — only in Kibana
   saved-object credentials.
 - Raw feed payloads are preserved in `raw` for at most 30 days (ILM policy).
@@ -88,7 +88,7 @@ mythos_signal = min(
 
 ## Non-goals
 
-- Making Argus a STIX/TAXII server. We consume, never produce.
+- Making ARGUS a STIX/TAXII server. We consume, never produce.
 - Normalising conflicting intel. If two feeds disagree on a CVE's `signal_strength`,
   both rows persist; the enricher sums effective signals with their per-feed trust
   weight and lets the sum adjudicate.

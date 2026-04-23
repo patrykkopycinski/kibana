@@ -8,8 +8,8 @@
 ## Before you touch code
 
 - [ ] Read the trace schema in the scaffold and the attribute contract.
-- [ ] Identify the one Argus agent you'll instrument first — recommended:
-      `soc-deteng-agent` (smallest reasoning graph, easiest to verify).
+- [ ] Identify the one ARGUS skill you'll instrument first — recommended:
+      `soc-mutation-planning` / deteng-aligned path (smallest reasoning graph, easiest to verify).
 - [ ] Confirm the staged Elasticsearch supports OTLP ingest — if not, ingest via
       Elastic Agent's OTLP receiver into the ES output.
 
@@ -28,7 +28,7 @@ soc-simulation/docs/argus/
 
 Touch (minimally):
 
-- `soc-simulation/agents/soc-deteng-agent.json` — add an `argus.tracing: { enabled: true, exporter: 'otlp' }` metadata block. Do **not** change the agent's behaviour; just declare intent.
+- `soc-simulation/skills/soc-mutation-planning.json` (or the first skill you instrument) — add an `argus.tracing: { enabled: true, exporter: 'otlp' }` metadata block. Do **not** change the skill's behaviour; just declare intent.
 
 ## First-commit skeleton (copy-paste)
 
@@ -49,7 +49,7 @@ export const ARGUS_TRACE_ATTR = {
   correlatedAlertId: 'argus.correlation.alert_id',
 } as const;
 
-export type ArgusTraceAttr = keyof typeof ARGUS_TRACE_ATTR;
+export type ARGUSTraceAttr = keyof typeof ARGUS_TRACE_ATTR;
 ```
 
 `otlp_exporter.ts`:
@@ -58,7 +58,7 @@ export type ArgusTraceAttr = keyof typeof ARGUS_TRACE_ATTR;
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
-export function buildArgusTraceSdk(endpoint: string): NodeSDK {
+export function buildARGUSTraceSdk(endpoint: string): NodeSDK {
   return new NodeSDK({
     traceExporter: new OTLPTraceExporter({ url: endpoint }),
     serviceName: 'argus-security-solution',

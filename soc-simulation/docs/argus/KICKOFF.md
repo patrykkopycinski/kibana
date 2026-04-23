@@ -1,4 +1,4 @@
-# Argus — Implementation Kickoff
+# ARGUS — Implementation Kickoff
 
 Status: **Ready to build.** Spec tree is frozen; this document is the entry point
 for implementers.
@@ -68,7 +68,7 @@ Minimum viable team = **3 pairs** running in parallel:
 | --- | --- | --- |
 | **A — Eval** | M2.1 Detection Eval Vertical | M2.2 Exploit-to-Detection |
 | **B — Simulation** | M2.4 Frontier Adversary Simulation | M2.3 Exploit Probability |
-| **C — Governance** | M2.5 Reasoning-Trace Governance | Phase 3 Argus Console |
+| **C — Governance** | M2.5 Reasoning-Trace Governance | Phase 3 ARGUS Console |
 
 If only **one pair** is available: go M2.1 → M2.2 → M2.3 → M2.4 → M2.5. The
 demo storyboard unlocks scenarios in the same order.
@@ -121,7 +121,7 @@ order:
 - [ ] Capability map (`capability-map.md`) is updated to mark the milestone
       delta as **Landed**.
 
-### Definition of Done — Argus as a whole
+### Definition of Done — ARGUS as a whole
 
 - [ ] All five Phase 2 milestones meet their DoD.
 - [ ] All three demo storyboard scenarios run green back-to-back.
@@ -152,7 +152,7 @@ the missing ones are created.
 
 ## 7. Invariants — do not let these drift
 
-These two rules are the spine of the Argus story. A PR that violates either
+These two rules are the spine of the ARGUS story. A PR that violates either
 should be rejected at review.
 
 1. **Caldera generates test telemetry only.** Detection, evaluation,
@@ -180,7 +180,7 @@ should be rejected at review.
 
 ## 9. Where to read next
 
-- New to Argus? → [`threat-model.html`](./threat-model.html)
+- New to ARGUS? → [`threat-model.html`](./threat-model.html)
 - Visual overview? → [`architecture.html`](./architecture.html)
 - What's implemented where? → [`capability-map.md`](./capability-map.md)
 - Running the demo? → [`demo-storyboard.md`](./demo-storyboard.md)

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Seed the Argus Console demo data plane so every panel renders populated
+# Seed the ARGUS Console demo data plane so every panel renders populated
 # state end-to-end:
 #
 #   - Pulse panel: live "Rollback MTTR (p50)" tile
@@ -9,7 +9,7 @@
 #
 #   - Mutation lineage panel (subject: rule:rule-soc-1024)
 #     → requires a `.soc-mutation-intents` doc linking rule-soc-1024 → mut-intent-42
-#       plus per-stage docs in .soc-detection-eval-runs, .soc-backtest-results,
+#       plus per-stage docs in .soc-argus-eval-runs (detection), .soc-backtests,
 #       .soc-recommendations, and .soc-outcomes keyed on mutation_intent_id.
 #
 #   - Reasoning drill-down panel (subject: run:run-7a3 and run:run-9c1)
@@ -28,12 +28,12 @@
 #   soc-simulation/scripts/seed_argus_demo.sh
 #
 # Env overrides:
-#   ES_URL   (default http://localhost:19200)
+#   ES_URL   (default http://localhost:${ES_PORT:-19200})
 #   ES_AUTH  (default elastic:changeme)
 
 set -euo pipefail
 
-ES_URL="${ES_URL:-http://localhost:19200}"
+ES_URL="${ES_URL:-http://localhost:${ES_PORT:-19200}}"
 ES_AUTH="${ES_AUTH:-elastic:changeme}"
 
 CURL=(curl -sS -u "${ES_AUTH}" -H 'Content-Type: application/json' -H 'Connection: close' --max-time 15)
@@ -73,7 +73,7 @@ echo "[argus-seed] ES: ${ES_URL}"
 
 # ---------------------------------------------------------------------------
 # 1. Ensure the two indices we need that don't exist yet.
-#    (.soc-outcomes, .soc-reasoning-trace, .soc-detection-eval-runs,
+#    (.soc-outcomes, .soc-reasoning-trace, .soc-argus-eval-runs,
 #     .soc-recommendations, .soc-actor-trust-tiers all already exist.)
 # ---------------------------------------------------------------------------
 
@@ -104,22 +104,9 @@ MUTATION_INTENTS_MAPPING='{
   }
 }'
 
-BACKTEST_RESULTS_MAPPING='{
-  "mappings": {
-    "properties": {
-      "@timestamp":         { "type": "date" },
-      "mutation_intent_id": { "type": "keyword" },
-      "rule_id":            { "type": "keyword" },
-      "label":              { "type": "text" },
-      "subtitle":           { "type": "text" },
-      "status":             { "type": "keyword" },
-      "metadata":           { "type": "object", "dynamic": true }
-    }
-  }
-}'
-
 ensure_index ".soc-mutation-intents"  "${MUTATION_INTENTS_MAPPING}"
-ensure_index ".soc-backtest-results"  "${BACKTEST_RESULTS_MAPPING}"
+ensure_index ".soc-argus-eval-runs" '{"mappings":{"dynamic":true,"properties":{"@timestamp":{"type":"date"},"run_kind":{"type":"keyword"}}}}'
+ensure_index ".soc-backtests" '{"mappings":{"dynamic":true,"properties":{"@timestamp":{"type":"date"}}}}'
 
 # ---------------------------------------------------------------------------
 # 2. Demo-subject stage docs (mutation_intent_id = mut-intent-42,
@@ -216,8 +203,9 @@ echo "[argus-seed] upserting mutation_intent ${MUTATION_INTENT_ID} (rule=${RULE_
 }" >/dev/null
 
 echo "[argus-seed] upserting eval run for ${MUTATION_INTENT_ID}"
-"${CURL[@]}" -X PUT "${ES_URL}/.soc-detection-eval-runs/_doc/argus-demo-eval-${MUTATION_INTENT_ID}?refresh=true" -d "{
+"${CURL[@]}" -X PUT "${ES_URL}/.soc-argus-eval-runs/_doc/argus-demo-eval-${MUTATION_INTENT_ID}?refresh=true" -d "{
   \"@timestamp\":         \"${T_EVAL}\",
+  \"run_kind\":             \"detection\",
   \"mutation_intent_id\": \"${MUTATION_INTENT_ID}\",
   \"rule_id\":            \"${RULE_ID}\",
   \"label\":              \"Offline eval passed\",
@@ -241,7 +229,7 @@ echo "[argus-seed] upserting backtest for ${MUTATION_INTENT_ID}"
 # them so reviewers can inspect *why* the backtester flagged a window.
 BACKTEST_WINDOW_START=$(iso_seconds_offset $((-30 * 86400)))
 BACKTEST_WINDOW_END="${T_BACKTEST}"
-"${CURL[@]}" -X PUT "${ES_URL}/.soc-backtest-results/_doc/argus-demo-backtest-${MUTATION_INTENT_ID}?refresh=true" -d "{
+"${CURL[@]}" -X PUT "${ES_URL}/.soc-backtests/_doc/argus-demo-backtest-${MUTATION_INTENT_ID}?refresh=true" -d "{
   \"@timestamp\":         \"${T_BACKTEST}\",
   \"mutation_intent_id\": \"${MUTATION_INTENT_ID}\",
   \"rule_id\":            \"${RULE_ID}\",
@@ -543,7 +531,7 @@ write_span "{
 # 7. Seed the canonical demo alert doc.
 #
 # Clicking "Lineage" or "Reasoning" on the activity-feed rows wired to
-# alert-abc (evt-001, evt-002) fires the Argus backend routes with
+# alert-abc (evt-001, evt-002) fires the ARGUS backend routes with
 # subject_kind=alert&subject_id=alert-abc. Both routes resolve that
 # alert through `.alerts-security.alerts-*` and read the nested
 # `kibana.alert.argus.{mutation_intent_id,rule_id,run_id}` keys to pivot
@@ -679,8 +667,8 @@ fi
 #      .soc-outcomes           → 50 additional rollback MTTR samples
 #      .soc-actor-trust-tiers  → 10 actors × 1 current tier
 #      .soc-reasoning-trace    → 3 extra runs × 10 spans = 30 spans
-#      .soc-detection-eval-runs→ 15 eval runs
-#      .soc-backtest-results   → 15 backtest runs
+#      .soc-argus-eval-runs→ 15 eval runs
+#      .soc-backtests   → 15 backtest runs
 #      .soc-recommendations    → 15 rule-application recommendations
 #
 #    Everything is idempotent: bulk payloads upsert by deterministic _id,
@@ -1099,13 +1087,13 @@ for ((i=0; i<15; i++)); do
   r=$(( 70 + (i % 20) ))
   fp="0.00$(( (i % 9) + 1 ))"
   printf '{"index":{"_id":"%s"}}\n' "${eid}" >>"${eval_bulk_file}"
-  printf '{"@timestamp":"%s","mutation_intent_id":"%s","rule_id":"%s","label":"Offline eval passed","subtitle":"PR=0.%d recall=0.%d fp=%s","status":"done","metadata":{"precision":0.%d,"recall":0.%d,"fp_rate":%s}}\n' \
+  printf '{"@timestamp":"%s","run_kind":"detection","mutation_intent_id":"%s","rule_id":"%s","label":"Offline eval passed","subtitle":"PR=0.%d recall=0.%d fp=%s","status":"done","metadata":{"precision":0.%d,"recall":0.%d,"fp_rate":%s}}\n' \
     "${ts}" "${mid}" "${rid}" "${p}" "${r}" "${fp}" "${p}" "${r}" "${fp}" \
     >>"${eval_bulk_file}"
 done
 
 post_bulk_file "detection_eval_runs" \
-  "${ES_URL}/.soc-detection-eval-runs/_bulk?refresh=true" \
+  "${ES_URL}/.soc-argus-eval-runs/_bulk?refresh=true" \
   "${eval_bulk_file}"
 
 # ----- 8f. 15 backtest results --------------------------------------------
@@ -1160,7 +1148,7 @@ for ((i=0; i<15; i++)); do
 done
 
 post_bulk_file "backtest_results" \
-  "${ES_URL}/.soc-backtest-results/_bulk?refresh=true" \
+  "${ES_URL}/.soc-backtests/_bulk?refresh=true" \
   "${backtest_bulk_file}"
 
 # ----- 8g. 15 rule-application recommendations ----------------------------
@@ -1192,11 +1180,11 @@ post_bulk_file "recommendations" \
 # ---------------------------------------------------------------------------
 # 9. Coverage-gaps + community corpus + threat actors + threat profiles.
 #
-# These four indices power the new Argus Console surfaces shipped with the
+# These four indices power the new ARGUS Console surfaces shipped with the
 # community-coverage-and-playbooks scope (Coverage panel, Actors flyout,
 # Playbooks tab grouping, the `list_uncovered_techniques` /
 # `list_actor_coverage` / `export_navigator_layer` Agent Builder tools, and
-# the `soc-argus-playbook-datasource-gap` workflow). Without these seeds the
+# `soc-argus-playbook-runner` with `playbook_id: datasource-gap`). Without these seeds the
 # new tools degrade to the empty-state payload and the Coverage panel renders
 # all-grey cells.
 # ---------------------------------------------------------------------------
@@ -1244,8 +1232,8 @@ fi
 #     `source: argus.demo-seed` then append. Each gap carries `technique_id`,
 #     `severity`, `confidence`, `status`, `data_sources[]`, and a short
 #     human-readable `note` — the canonical shape consumed by
-#     `soc-argus-playbook-coverage-gap-triage`, `soc-meta`, `soc-deteng`, and
-#     the new datasource-gap playbook.
+#     `soc-argus-playbook-runner` (coverage-gap-triage / datasource-gap inputs),
+#     `soc-meta`, `soc-deteng`, and related coverage tooling.
 # ---------------------------------------------------------------------------
 
 echo "[argus-seed] seeding .soc-coverage-gaps demo rows"
@@ -1259,21 +1247,21 @@ gaps_bulk_file="${BULK_TMPDIR}/coverage_gaps.ndjson"
 
 # (technique_id, severity, confidence, data_source, note)
 GAP_ROWS=(
-  "T1562.001|high|0.82|winlogbeat|Community-only coverage for disable-or-modify-tools; no Argus-authored rule"
-  "T1490|high|0.78|winlogbeat|Inhibit-system-recovery: covered by sigma/escu but not by Argus"
+  "T1562.001|high|0.82|winlogbeat|Community-only coverage for disable-or-modify-tools; no ARGUS-authored rule"
+  "T1490|high|0.78|winlogbeat|Inhibit-system-recovery: covered by sigma/escu but not by ARGUS"
   "T1555|high|0.74|system.auth|Credentials from password stores: gap on macOS+Linux endpoints"
-  "T1110|med|0.62|okta.system|Brute-force on identity provider — community rule exists, not Argus-authored"
-  "T1548.002|med|0.58|winlogbeat|UAC bypass: Splunk ESCU has coverage, Argus does not"
-  "T1070.004|med|0.55|winlogbeat|File-deletion evasion: single community rule, no Argus-authored fallback"
-  "T1021.002|high|0.80|winlogbeat|SMB admin-share lateral: Red Canary only, no Argus rule"
+  "T1110|med|0.62|okta.system|Brute-force on identity provider — community rule exists, not ARGUS-authored"
+  "T1548.002|med|0.58|winlogbeat|UAC bypass: Splunk ESCU has coverage, ARGUS does not"
+  "T1070.004|med|0.55|winlogbeat|File-deletion evasion: single community rule, no ARGUS-authored fallback"
+  "T1021.002|high|0.80|winlogbeat|SMB admin-share lateral: Red Canary only, no ARGUS rule"
   "T1560|med|0.52|winlogbeat|Archive-collected-data: Red Canary only"
-  "T1105|low|0.41|winlogbeat|Ingress tool transfer: narrow community rule, no Argus rule"
-  "T1036|med|0.60|winlogbeat|Masquerading: single ESCU rule, low overlap with Argus corpus"
+  "T1105|low|0.41|winlogbeat|Ingress tool transfer: narrow community rule, no ARGUS rule"
+  "T1036|med|0.60|winlogbeat|Masquerading: single ESCU rule, low overlap with ARGUS corpus"
   "T1068|high|0.77|endgame|Privilege-escalation exploit: missing endpoint-data-source coverage"
-  "T1005|low|0.38|endgame|Data-from-local-system: elastic-prebuilt only, no Argus rule"
-  "T1204|med|0.55|endgame|User-execution: Elastic-prebuilt only, low Argus alignment"
-  "T1071.004|med|0.57|packetbeat|DNS C2: community rule exists, no Argus rule for DNS-tunnel specifically"
-  "T1041|med|0.52|packetbeat|Exfil over C2: single elastic-prebuilt rule, no Argus rule"
+  "T1005|low|0.38|endgame|Data-from-local-system: elastic-prebuilt only, no ARGUS rule"
+  "T1204|med|0.55|endgame|User-execution: Elastic-prebuilt only, low ARGUS alignment"
+  "T1071.004|med|0.57|packetbeat|DNS C2: community rule exists, no ARGUS rule for DNS-tunnel specifically"
+  "T1041|med|0.52|packetbeat|Exfil over C2: single elastic-prebuilt rule, no ARGUS rule"
 )
 
 for i in "${!GAP_ROWS[@]}"; do
@@ -1292,7 +1280,7 @@ post_bulk_file "coverage_gaps" \
   "${gaps_bulk_file}"
 
 # ---------------------------------------------------------------------------
-# 11. Canonical CVE → Argus rule wiring — powers three Console surfaces in one
+# 11. Canonical CVE → ARGUS rule wiring — powers three Console surfaces in one
 #     pass so the demo story is internally consistent:
 #
 #       (a) Proposals panel  → .soc-recommendations docs carrying
@@ -1307,7 +1295,7 @@ post_bulk_file "coverage_gaps" \
 #           `source: 'argus'` for each canonical rule. These surface under
 #           `contributing_sources: ['argus', …]` on the heatmap cells so
 #           operators can see which techniques the demo corpus covers.
-#           (The Argus-authored *count* is driven by the recommendations
+#           (The ARGUS-authored *count* is driven by the recommendations
 #           with `mitre_techniques` seeded below — see coverage.ts →
 #           fetchAuthoredDocs.)
 #
@@ -1320,10 +1308,10 @@ post_bulk_file "coverage_gaps" \
 #           `rolled_back`).
 #
 #     Six canonical rules span the three decision-graph CVEs plus three
-#     Argus-native ones so the Proposals list always has ≥6 rows in `now-24h`:
+#     ARGUS-native ones so the Proposals list always has ≥6 rows in `now-24h`:
 # ---------------------------------------------------------------------------
 
-echo "[argus-seed] seeding canonical CVE advisories + Pareto recommendations + Argus corpus"
+echo "[argus-seed] seeding canonical CVE advisories + Pareto recommendations + ARGUS corpus"
 
 # (cve_id|advisory_id|recommendation_id|draft_rule_id|primary_technique|secondary_technique|title)
 # The `draft_rule_id` doubles as the corpus `_id` / rule_id so coverage joins.
@@ -1334,7 +1322,7 @@ CANONICAL_RULES=(
   "CVE-2026-18001|argus-adv-lsass-dump-2026-04|rec-synth-lsass-dump-2026-04|rule-soc-1024|T1003.001|T1059.001|LSASS credential dumping via procdump / comsvcs"
   "CVE-2024-38178|argus-adv-cve-2024-38178|rec-synth-cve-2024-38178|rule-argus-t1059-powershell-encoded|T1059.001|T1027|Scripting Engine memory corruption via EncodedCommand PowerShell"
   "CVE-2024-49113|argus-adv-cve-2024-49113|rec-synth-cve-2024-49113|rule-argus-t1566-phishing-link|T1566.002|T1204.001|Spearphishing link to credential-harvest lure"
-  "CVE-ARGUS-E2E-LINUX|argus-adv-e2e-linux-pipe-to-shell|rec-synth-e2e-linux-pipe-to-shell|argus-linux-pipe-to-shell|T1059.004|T1190|Argus E2E — Linux pipe-to-shell downloader (live Caldera loop)"
+  "CVE-ARGUS-E2E-LINUX|argus-adv-e2e-linux-pipe-to-shell|rec-synth-e2e-linux-pipe-to-shell|argus-linux-pipe-to-shell|T1059.004|T1190|ARGUS E2E — Linux pipe-to-shell downloader (live Caldera loop)"
 )
 
 advisory_bulk_file="${BULK_TMPDIR}/canonical_advisories.ndjson"
@@ -1352,7 +1340,7 @@ for i in "${!CANONICAL_RULES[@]}"; do
 
   # ----- (a) advisory doc — join key for the proposals join --------------
   printf '{"index":{"_id":"%s"}}\n' "${advisory_id}" >>"${advisory_bulk_file}"
-  printf '{"@timestamp":"%s","advisory_id":"%s","cve_id":"%s","title":"%s","summary":"Argus-synthesised detection for %s — 10 Pareto candidates, 4 on the frontier, chosen pick dominates on precision and fp_rate.","severity":"high","status":"detected","source":"argus.demo-seed","target_platforms":["windows","linux"],"mitre_techniques":[{"technique_id":"%s","technique_name":"%s","tactic":"initial-access"},{"technique_id":"%s","technique_name":"%s","tactic":"execution"}],"recommendation_id":"%s","draft_rule_id":"%s"}\n' \
+  printf '{"@timestamp":"%s","advisory_id":"%s","cve_id":"%s","title":"%s","summary":"ARGUS-synthesised detection for %s — 10 Pareto candidates, 4 on the frontier, chosen pick dominates on precision and fp_rate.","severity":"high","status":"detected","source":"argus.demo-seed","target_platforms":["windows","linux"],"mitre_techniques":[{"technique_id":"%s","technique_name":"%s","tactic":"initial-access"},{"technique_id":"%s","technique_name":"%s","tactic":"execution"}],"recommendation_id":"%s","draft_rule_id":"%s"}\n' \
     "${ts}" "${advisory_id}" "${cve_id}" "${title}" "${cve_id}" \
     "${tech1}" "${tech1}" "${tech2}" "${tech2}" \
     "${rec_id}" "${rule_id}" \
@@ -1366,7 +1354,7 @@ for i in "${!CANONICAL_RULES[@]}"; do
   #
   # Shape mirrors `SynthesisRawBlock` in
   #   x-pack/solutions/security/packages/kbn-argus-console-common/src/builders/synthesis_proposals_builder.ts
-  # `weights` uses `axis_fn` (builder normalises to ArgusSynthesisWeights).
+  # `weights` uses `axis_fn` (builder normalises to ARGUSSynthesisWeights).
   precision_chosen="0.9$(( 2 + i % 5 ))"           # 0.92–0.96
   recall_chosen="0.8$(( 1 + i % 6 ))"              # 0.81–0.86
   fp_rate_chosen="0.00$(( (i % 4) + 2 ))"          # 0.002–0.005
@@ -1420,7 +1408,7 @@ for i in "${!CANONICAL_RULES[@]}"; do
     "${precision_dom3}" "${recall_dom3}" "${fp_rate_dom3}" "${axis_dom3}" \
     >>"${synth_recs_bulk_file}"
 
-  # ----- (b) Argus-authored corpus entry ---------------------------------
+  # ----- (b) ARGUS-authored corpus entry ---------------------------------
   printf '{"index":{"_id":"%s"}}\n' "${rule_id}" >>"${argus_corpus_bulk_file}"
   printf '{"@timestamp":"%s","rule_id":"%s","source":"argus","title":"%s","mitre_technique":["%s","%s"],"advisory_id":"%s","cve_id":"%s","draft_rule_id":"%s"}\n' \
     "${ts}" "${rule_id}" "${title}" "${tech1}" "${tech2}" \
@@ -1445,7 +1433,7 @@ post_bulk_file "argus_corpus" \
 
 # ---------------------------------------------------------------------------
 # 11b. Backfill Pareto synthesis metadata onto the autonomy-flow
-# recommendations (the `argus-adv-*-2026-04` advisories seeded by the Argus
+# recommendations (the `argus-adv-*-2026-04` advisories seeded by the ARGUS
 # autonomy loop). Without this, the Proposals tab shows "No candidate set
 # recorded" when the user clicks one of those advisories — because the
 # autonomy flow predates the R3 synthesis step.
@@ -1600,8 +1588,8 @@ post_bulk_file "applied_outcomes" \
 # downstream join docs the Exploit→Detection flow panel reads:
 #
 #   .soc-mutation-intents       → governance stage
-#   .soc-detection-eval-runs    → evaluated stage
-#   .soc-backtest-results       → backtested stage
+#   .soc-argus-eval-runs    → evaluated stage
+#   .soc-backtests       → backtested stage
 #   .soc-outcomes               → applied + running stages
 #   .alerts-security.alerts-*   → live hit count on the running stage
 #
@@ -1636,14 +1624,14 @@ echo "[argus-seed] seeding E2D flow demo variants (6 canonical rules × 6 paths)
 # across indices (some store `mutation_intent_id` as `keyword`, some as
 # `text` with a `.keyword` subfield), so we broadcast both forms and ignore
 # whichever one the target rejects.
-for _index in .soc-mutation-intents .soc-detection-eval-runs .soc-backtest-results .soc-outcomes; do
+for _index in .soc-mutation-intents .soc-argus-eval-runs .soc-backtests .soc-outcomes; do
   "${CURL[@]}" -X POST "${ES_URL}/${_index}/_delete_by_query?refresh=true" \
     -d '{"query":{"bool":{"should":[
            {"prefix":{"mutation_intent_id":"mut-e2d-"}},
            {"prefix":{"mutation_intent_id.keyword":"mut-e2d-"}}
          ],"minimum_should_match":1}}}' >/dev/null || true
 done
-# Also clear any prior E2D-scoped outcomes for the 5 canonical Argus-
+# Also clear any prior E2D-scoped outcomes for the 5 canonical ARGUS-
 # synthesized rules that don't share identity with other demos. We
 # intentionally leave `rule-soc-1024` alone so the mut-intent-42 MTTR
 # rollback lineage (~55 historical rollbacks) stays intact — variant 4's
@@ -1697,7 +1685,7 @@ emit_eval() {
   local ts
   ts=$(iso_minutes_ago "${age}")
   printf '{"index":{"_id":"eval-%s"}}\n' "${mid}" >>"${e2d_evals_file}"
-  printf '{"@timestamp":"%s","mutation_intent_id":"%s","rule_id":"%s","status":"done","gate_decision":"%s","gate_reason":"%s","scores":{"precision":%s,"recall":%s,"fp_rate_baseline":%s,"variant_coverage":%s}}\n' \
+  printf '{"@timestamp":"%s","run_kind":"detection","mutation_intent_id":"%s","rule_id":"%s","status":"done","gate_decision":"%s","gate_reason":"%s","scores":{"precision":%s,"recall":%s,"fp_rate_baseline":%s,"variant_coverage":%s}}\n' \
     "${ts}" "${mid}" "${rule}" "${gate}" "${reason}" "${p}" "${r}" "${fp}" "${cov}" \
     >>"${e2d_evals_file}"
 }
@@ -1940,7 +1928,7 @@ post_bulk_file "e2d_intents" \
 # --- Attach draft_rule bodies to the 3 walkthrough mutation intents ---------
 # The E2D "Rule synthesized" stage reads .soc-mutation-intents and renders any
 # `draft_rule` field in the flyout. Enriching the walkthrough intents lets the
-# demo show what Argus actually wrote — not just metadata.
+# demo show what ARGUS actually wrote — not just metadata.
 enrich_intent_with_draft_rule() {
   # $1=mutation_intent_id  $2=rule_id  $3=name  $4=description  $5=severity
   # $6=risk_score  $7=language  $8=query  $9=mitre_json  $10=justification_json
@@ -1979,7 +1967,7 @@ JSON
 enrich_intent_with_draft_rule \
   "mut-e2d-defender" \
   "argus.defense-evasion.t1562_001.argus-adv-defender-disable-2026-04" \
-  "Argus — Windows Defender tampering (T1562.001)" \
+  "ARGUS — Windows Defender tampering (T1562.001)" \
   "Detects PowerShell invocations that disable or weaken Microsoft Defender real-time protection or add exclusion paths. Anchored on Set-MpPreference / Add-MpPreference tokens that are rare outside of admin-authored GPO scripts, which is the invariant behind the autonomy-flow advisory." \
   "high" "73" "kuery" \
   "process.name:(\\\"powershell.exe\\\" or \\\"pwsh.exe\\\") and process.args:(\\\"Set-MpPreference\\\" or \\\"Add-MpPreference\\\") and process.command_line:(*DisableRealtimeMonitoring* or *DisableBehaviorMonitoring* or *ExclusionPath* or *ExclusionExtension*)" \
@@ -1989,7 +1977,7 @@ enrich_intent_with_draft_rule \
 enrich_intent_with_draft_rule \
   "mut-e2d-dnsc2" \
   "argus.command-and-control.t1071_004.argus-adv-dns-c2-2026-04" \
-  "Argus — DNS tunnel to untrusted resolver (T1071.004)" \
+  "ARGUS — DNS tunnel to untrusted resolver (T1071.004)" \
   "Detects DNS traffic to a registered domain with high entropy subdomains resolved against non-enterprise resolvers. This is the invariant behind argus-adv-dns-c2-2026-04, where the actor beacons via TXT queries encoding stage-two C2." \
   "medium" "57" "kuery" \
   "event.dataset:\\\"dns\\\" and dns.question.type:(\\\"TXT\\\" or \\\"NULL\\\") and dns.question.registered_domain:(\\\"tunnel.example-c2.com\\\" or \\\"beacon.sb-c2.net\\\") and not destination.ip:(\\\"10.0.0.0/8\\\" or \\\"172.16.0.0/12\\\" or \\\"192.168.0.0/16\\\")" \
@@ -1999,7 +1987,7 @@ enrich_intent_with_draft_rule \
 enrich_intent_with_draft_rule \
   "mut-e2d-psencadv" \
   "argus.execution.t1059_001.argus-adv-ps-encoded-2026-04" \
-  "Argus — PowerShell encoded command (T1059.001)" \
+  "ARGUS — PowerShell encoded command (T1059.001)" \
   "Detects powershell.exe / pwsh.exe invocations using -EncodedCommand with long base64 payloads. Encoded invocations bypass script-block logging hooks that rely on plaintext args, which is the invariant exploited in argus-adv-ps-encoded-2026-04." \
   "high" "68" "kuery" \
   "process.name:(\\\"powershell.exe\\\" or \\\"pwsh.exe\\\") and process.args:(\\\"-enc\\\" or \\\"-EncodedCommand\\\" or \\\"-ec\\\" or \\\"-e\\\") and process.args:/[A-Za-z0-9+\\\\/=]{120,}/" \
@@ -2007,10 +1995,10 @@ enrich_intent_with_draft_rule \
   '{"advisory_excerpts":["argus-adv-ps-encoded-2026-04: operators launched powershell -enc <base64> to stage an in-memory downloader.","Encoded payload decodes to IEX (New-Object Net.WebClient).DownloadString — classic T1059.001."],"observable_signals":["ps_encoded_flag: -enc / -EncodedCommand / short-form -ec or -e as a process.args token","long_b64_arg: base64-looking process arg of 120+ chars immediately following the flag","ps_parent: canonical PowerShell process name"],"precision_hypothesis":"Requiring BOTH the flag AND a long base64 token keeps admin one-liners (-Command \\\"Get-Service\\\") out of scope. Probationary trust gate blocks auto-apply despite backtest passing."}'
 
 post_bulk_file "e2d_evals" \
-  "${ES_URL}/.soc-detection-eval-runs/_bulk?refresh=true" \
+  "${ES_URL}/.soc-argus-eval-runs/_bulk?refresh=true" \
   "${e2d_evals_file}"
 post_bulk_file "e2d_backtests" \
-  "${ES_URL}/.soc-backtest-results/_bulk?refresh=true" \
+  "${ES_URL}/.soc-backtests/_bulk?refresh=true" \
   "${e2d_backtests_file}"
 post_bulk_file "e2d_outcomes" \
   "${ES_URL}/.soc-outcomes/_bulk?refresh=true" \
@@ -2020,9 +2008,9 @@ post_bulk_file "e2d_alerts" \
   "${e2d_alerts_file}"
 
 # ============================================================================
-# 14. Prebuilt-rule enablements — Argus doesn't only synthesise custom rules,
+# 14. Prebuilt-rule enablements — ARGUS doesn't only synthesise custom rules,
 #     it also autonomously enables Elastic's prebuilt detection rules when
-#     the community-vetted candidate beats Argus's Pareto frontier on
+#     the community-vetted candidate beats ARGUS's Pareto frontier on
 #     PR@k / false-positive cost. This section:
 #
 #       14a. Actually enables a curated subset of prebuilt rules via the
@@ -2031,7 +2019,7 @@ post_bulk_file "e2d_alerts" \
 #       14b. Emits 7 autonomy-decision docs with `artifact_type:
 #            "prebuilt_rule"` spanning all 6 UI status buckets (auto_applied
 #            × 4, required_human × 1, rolled_back × 1, deferred × 1,
-#            rejected × 1) so the Autonomy panel has a visible "Argus
+#            rejected × 1) so the Autonomy panel has a visible "ARGUS
 #            enabled prebuilt rule X" narrative alongside the custom-rule
 #            decisions.
 #
@@ -2126,7 +2114,7 @@ emit_prebuilt_decision() {
     >>"${prebuilt_autonomy_file}"
 }
 
-# 4× auto_applied — Argus picked a prebuilt rule over its own synthesised
+# 4× auto_applied — ARGUS picked a prebuilt rule over its own synthesised
 # Pareto-frontier candidate because PR@k was higher and FP cost lower.
 emit_prebuilt_decision  8  "2c17e5d7-08b9-43b2-b58a-0270d65ac85b" \
   "Windows Defender Exclusions Added via PowerShell" "enable" "argus-prebuilt-enabler" \
@@ -2139,7 +2127,7 @@ emit_prebuilt_decision  22 "c8cccb06-faf2-4cd5-886e-2c9636cfcb87" \
   "Disabling Windows Defender Security Settings via PowerShell" "enable" "argus-prebuilt-enabler" \
   "auto_applied" true false \
   '["trust","backtest","regression","signal_quality"]' "" \
-  "Community-vetted prebuilt rule dominates Argus synthesised candidate on cost × PR@k; enabled as the chosen response to the Defender-tamper advisory." \
+  "Community-vetted prebuilt rule dominates ARGUS synthesised candidate on cost × PR@k; enabled as the chosen response to the Defender-tamper advisory." \
   91 "trusted"
 
 emit_prebuilt_decision  41 "083383af-b9a4-42b7-a463-29c40efe7797" \
@@ -2157,7 +2145,7 @@ emit_prebuilt_decision  72 "11013227-0301-4a8c-b150-4db924484475" \
   88 "trusted"
 
 # 1× required_human — high-severity prebuilt rule, signal-quality gate
-# flagged noisy hosts so Argus holds for analyst ack.
+# flagged noisy hosts so ARGUS holds for analyst ack.
 emit_prebuilt_decision  120 "577ec21e-56fe-4065-91d8-45eb8224fe77" \
   "PowerShell MiniDump Script" "enable" "argus-prebuilt-enabler" \
   "required_human" false true \
@@ -2165,7 +2153,7 @@ emit_prebuilt_decision  120 "577ec21e-56fe-4065-91d8-45eb8224fe77" \
   "High-severity prebuilt rule — signal-quality gate flagged 3 noisy admin jump-hosts in prod. Queued for human approval before enable." \
   78 "probationary"
 
-# 1× rolled_back — Argus enabled, FP spike after 40 min, auto-rollback
+# 1× rolled_back — ARGUS enabled, FP spike after 40 min, auto-rollback
 # disabled the prebuilt rule.
 emit_prebuilt_decision  205 "2ffa1f1e-b6db-47fa-994b-1512743847eb" \
   "Windows Defender Disabled via Registry Modification" "disable" "argus-rollback-agent" \
@@ -2207,11 +2195,11 @@ echo "  .soc-mutation-intents    → 24 intents (14 applied · 6 blocked · 4 dr
 echo "  .soc-outcomes            → 55 rollback samples + 18 applied alignment rows"
 echo "  .soc-actor-trust-tiers   → 10 actors (1 system · 5 trusted · 2 probationary · 1 untrusted · 1 quarantined)"
 echo "  .soc-reasoning-trace     → 3 extra demo runs × 10 spans (run-demo-ransom · run-demo-identity · run-demo-cloud)"
-echo "  .soc-detection-eval-runs → 15 eval runs"
-echo "  .soc-backtest-results    → 15 backtest runs"
+echo "  .soc-argus-eval-runs → 15 eval runs"
+echo "  .soc-backtests    → 15 backtest runs"
 echo "  .soc-recommendations     → 15 rule-application recommendations + 6 canonical Pareto syntheses"
 echo "  .soc-cve-advisories      → 6 canonical CVE advisories linked to Pareto syntheses"
-echo "  .soc-detection-corpus    → ~30 community detections + 6 Argus-authored (source=argus)"
+echo "  .soc-detection-corpus    → ~30 community detections + 6 ARGUS-authored (source=argus)"
 echo "  .soc-threat-profiles     → 3 built-in profiles (ransomware · IT→OT · living-off-the-land)"
 echo "  .soc-threat-actors       → 3 actors (Dragonfly · LAPSUS$ · APT29) with technique lists"
 echo "  .soc-coverage-gaps       → 15 open gaps across 5 data sources (winlogbeat · endgame · system.auth · okta.system · packetbeat)"
@@ -2232,7 +2220,7 @@ echo "  CVE-2026-18001 → RUNNING (LSASS dump, 8 hits/24h)"
 echo "  CVE-2024-38178 → BACKTEST FAILED (11 TP / 47 FP, gate rejected)"
 echo "  CVE-2024-49113 → APPLIED THEN ROLLED BACK (canary regression, MTTR 92s)"
 echo ""
-echo "Prebuilt-rule enablements (Autonomy panel — Argus can also reuse prebuilt rules):"
+echo "Prebuilt-rule enablements (Autonomy panel — ARGUS can also reuse prebuilt rules):"
 echo "  4 auto_applied  → Defender tamper × 2, PowerShell obfuscation × 1, DNS C2 × 1"
 echo "  1 required_human → PowerShell MiniDump (signal-quality gate, HITL)"
 echo "  1 rolled_back   → Defender registry modification (FP spike, auto-rollback)"

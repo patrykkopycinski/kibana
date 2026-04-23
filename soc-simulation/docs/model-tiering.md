@@ -1,9 +1,9 @@
-# Argus Model Tiering
+# ARGUS Model Tiering
 
-Argus workflows span a wide range of reasoning complexity, from strategic
+ARGUS workflows span a wide range of reasoning complexity, from strategic
 architectural planning to high-volume alert summarization. Running every
 step on Opus is both wasteful and slow. This document describes the tiering
-convention used across Argus workflows and how to roll it out without
+convention used across ARGUS workflows and how to roll it out without
 changing any YAML.
 
 ## Tiers
@@ -11,9 +11,9 @@ changing any YAML.
 | Tier       | Typical model   | When to use                                                           | Example workflows                                                   |
 |------------|-----------------|-----------------------------------------------------------------------|---------------------------------------------------------------------|
 | `planner`  | Claude Opus     | Strategic reasoning, multi-hop causal analysis, architecture review.  | `soc-meta`, `soc-arch-reviewer`, `soc-gap-analyzer`, `soc-deteng`   |
-| `analyst`  | Claude Sonnet   | Routine, schema-driven analysis with a well-defined output contract.  | `soc-triage`, `soc-alert-sweeper`, `soc-autonomous-applier`, `soc-watchdog`, `soc-response`, `soc-proactive-hunter`, `soc-recommendation-applier`, `soc-regression-gate` |
+| `analyst`  | Claude Sonnet   | Routine, schema-driven analysis with a well-defined output contract.  | `soc-alert-sweeper` *(replaces removed `soc-triage`)*, `soc-autonomous-applier`, `soc-watchdog`, `soc-response`, `soc-proactive-hunter`, `soc-recommendation-applier`, `soc-regression-gate` |
 | `bulk`     | Claude Haiku    | High-volume summarization, narrative writing, stale-detection polling.| `soc-shift-handover`, `soc-forensic-summarizer`, `soc-regression-harvester`, `soc-difficulty-controller`, `soc-trust-scorer` |
-| `none`     | —               | Workflow has no LLM steps (pure Elastic / Kibana orchestration).      | `soc-caldera-dispatcher`, `soc-caldera-poller`, `soc-case-creation`, `soc-recovery`, `soc-registry-retro-tag`, `soc-skill-metrics-roller` |
+| `none`     | —               | Workflow has no LLM steps (pure Elastic / Kibana orchestration).      | `soc-caldera-dispatcher`, `soc-caldera-poller`, `soc-argus-case-lifecycle` *(replaces removed `soc-case-creation`)*, `soc-recovery`, `soc-registry-retro-tag`, `soc-skill-metrics-roller` |
 
 The tier for every workflow is declared in
 `soc-simulation/workflows/_registry.json` under the `model_tier` key and is
@@ -24,7 +24,7 @@ mirrored into `.soc-workflow-registry` by `setup.sh`. A JSON schema in
 
 Changing `connector-id:` across ~15 workflow files would break every
 existing deployment where operators only have a single `opus` connector
-configured. Instead, Argus standardizes on ONE connector id (`opus`) and
+configured. Instead, ARGUS standardizes on ONE connector id (`opus`) and
 exposes the tiering choice at the Kibana Connectors layer:
 
 1. Create three Generative-AI connectors in Kibana:
@@ -67,7 +67,7 @@ To apply tiering in a single pass, replace `connector-id:` values:
 
 ```bash
 # Analyst tier: routine analysis workflows → sonnet
-for f in soc-triage.yaml soc-alert-sweeper.yaml soc-autonomous-applier.yaml \
+for f in soc-alert-sweeper.yaml soc-autonomous-applier.yaml \
          soc-watchdog.yaml soc-response.yaml soc-proactive-hunter.yaml \
          soc-recommendation-applier.yaml soc-regression-gate.yaml; do
   sed -i '' 's/connector-id: opus/connector-id: sonnet/' "soc-simulation/workflows/$f"
@@ -92,3 +92,21 @@ Then reinstall workflows via `setup.sh` or the Kibana workflows API.
 - The `soc-workflow-liveness-watchdog` monitors heartbeat freshness
   across all tiers, ensuring stale workflows are detected regardless
   of the connector used.
+
+## Workflow-Level Model Routing
+
+With the zero-agent architecture, model tiering happens at the workflow step level via `connector-id`:
+
+| Workflow Step | Connector | Rationale |
+|---|---|---|
+| Rule synthesis (`ai.agent` in `soc-deteng.yaml`) | `opus` | Deep reasoning about attack chains and ECS field selection |
+| Triage reasoning (`ai.agent` in `soc-alert-sweeper.yaml`) | `opus` | Complex classification with entity correlation |
+| Mutation planning (`ai.agent` in `soc-meta.yaml`) | `opus` | Strategic planning with governance envelope construction |
+| Backtesting (`security.backtestRule`) | N/A | Pure ES query — no LLM |
+| Shadow execution (`security.shadowExecuteRule`) | N/A | Pure ES query — no LLM |
+| Corpus sync (`security.syncDetectionCorpus`) | N/A | Pure ES query — no LLM |
+| Entity graph (`security.buildAlertEntityGraph`) | N/A | Pure ES query — no LLM |
+
+### Cost Impact
+
+By replacing 4 agent-based steps with custom workflow steps, the LLM cost per full ARGUS cycle drops by ~60-70%. The remaining LLM calls (rule synthesis, triage, planning) stay on Opus because they genuinely require complex reasoning.

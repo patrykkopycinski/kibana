@@ -40,13 +40,13 @@ x-pack/solutions/security/packages/kbn-evals-suite-argus-detection/
   README.md
 ```
 
-The runtime glue is owned by Argus; the *harness* (scheduling, retries, score
+The runtime glue is owned by ARGUS; the *harness* (scheduling, retries, score
 aggregation, snapshots) is owned by `@kbn/evals`.
 
 ## 1. Evaluator interface (revised 2026-04-17)
 
 The real `@kbn/evals` `Evaluator` shape is a flat `{ name, kind, evaluate }` object
-operating on an `Example` / `TaskOutput` pair. The Argus detection vertical
+operating on an `Example` / `TaskOutput` pair. The ARGUS detection vertical
 ships **four `CODE`-kind evaluators** that each score one dimension of the same
 `DetectionRuleTaskOutput`:
 
@@ -122,7 +122,7 @@ Trusted-tier (non-frontier) runs use the thresholds in
   "corpus_id": "argus-corpus-mythos-2026-04",
   "version": "1.0.0",
   "created_at": "...",
-  "description": "Seed corpus for Argus Detection Eval Vertical covering Scenario 1/2/3 rules.",
+  "description": "Seed corpus for ARGUS Detection Eval Vertical covering Scenario 1/2/3 rules.",
   "primitives": [
     {
       "technique_id": "T1003.001",
@@ -165,7 +165,7 @@ import { createEvaluateDetectionRules } from '../src/evaluate_dataset';
 import { mythosCorpus2026_04 } from '../datasets/mythos_corpus_2026_04';
 
 evaluate.describe(
-  'Argus Detection Eval Vertical',
+  'ARGUS Detection Eval Vertical',
   { tag: tags.serverless.security.complete },
   () => {
     evaluate(

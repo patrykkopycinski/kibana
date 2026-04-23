@@ -9,7 +9,7 @@ recall=0.86` at M2.1 time can quietly decay over weeks as the adversary adapts.
 Today, the only signal we have is a downstream FP / missed-TP spike — by which
 point a real intrusion may already have slipped.
 
-Argus needs to detect **eval-score drift** and **trust drift** early enough to
+ARGUS needs to detect **eval-score drift** and **trust drift** early enough to
 force a re-run of the detection-eval vertical before an adversary notices.
 
 ## Decision

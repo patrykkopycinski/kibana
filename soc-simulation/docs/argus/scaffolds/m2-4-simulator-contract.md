@@ -95,7 +95,7 @@ only responsibility is to *plant* them cleanly, one injection per generated aler
 
 - The simulator never posts to Caldera. Caldera-facing work stays with the existing
   dispatcher.
-- The simulator never mutates production indices. All writes land in Argus-owned
+- The simulator never mutates production indices. All writes land in ARGUS-owned
   indices (`.soc-eval-corpus-*`, `.soc-eval-injection-alerts-*`,
   `.soc-attack-commands`, `.soc-audit-trail`).
 - The simulator does not score anything. Scoring is M2.1's job.

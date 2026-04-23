@@ -8,7 +8,7 @@
  */
 
 /**
- * Dashboard builder for the "Argus Command Center".
+ * Dashboard builder for the "ARGUS Command Center".
  *
  * Regenerates soc-command-center.ndjson in this directory.
  *
@@ -434,9 +434,9 @@ let y = 0;
 panels.push(
   markdownPanel({
     id: 'soc-banner',
-    title: 'Argus — Command Center',
+    title: 'ARGUS — Command Center',
     markdown: [
-      '## Argus — Command Center',
+      '## ARGUS — Command Center',
       '',
       'One-look situational awareness for the self-governed SOC simulation.',
       'Sections are ordered by operational urgency:',
@@ -809,7 +809,7 @@ panels.push(
   barPanel({
     id: 'soc-gov-by-type',
     title: 'Applied mutations by artifact type (7d)',
-    description: 'Which surfaces is Argus actually editing?',
+    description: 'Which surfaces is ARGUS actually editing?',
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
@@ -1183,7 +1183,7 @@ panels.push(
     id: 'soc-handover-latest',
     title: 'Most recent shift narrative',
     description:
-      'Most recent shift-handover document. Narrative is markdown authored by soc-meta-agent.',
+      'Most recent shift-handover document. Narrative is markdown authored by default.',
     index: '.soc-shift-handover',
     esql: [
       'FROM .soc-shift-handover',
@@ -1288,7 +1288,7 @@ panels.push(
       '### Reasoning trace',
       '',
       'Indexed record of what agents actually did on each run. ' +
-        'Currently pilot-wired to `soc-triage`; additional workflows will ' +
+        'Currently pilot-wired to `soc-alert-sweeper`; additional workflows will ' +
         'emit `run_summary` records here over time.',
     ].join('\n'),
     grid: { x: 0, y, w: 48, h: 3 },
@@ -1445,9 +1445,9 @@ const dashboard = {
   coreMigrationVersion: '8.8.0',
   managed: false,
   attributes: {
-    title: 'Argus Command Center',
+    title: 'ARGUS Command Center',
     description:
-      'At-a-glance operational awareness for Argus: ' +
+      'At-a-glance operational awareness for ARGUS: ' +
       'autonomy state, alert→case flow, self-governance activity, system health, ' +
       'attack simulation, and learning/evolution signals.',
     timeRestore: true,

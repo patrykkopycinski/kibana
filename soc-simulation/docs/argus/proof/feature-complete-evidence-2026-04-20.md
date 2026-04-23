@@ -1,4 +1,4 @@
-# Argus Feature-Complete Evidence — 2026-04-20
+# ARGUS Feature-Complete Evidence — 2026-04-20
 
 > Companion proof doc to `capability-and-gap-analysis.md` (feature-complete
 > update). Captures live-cluster evidence for every P1 gap (G1 – G5) and
@@ -6,22 +6,22 @@
 >
 > All values below were pulled directly from the local Elasticsearch/Kibana
 > stack via `curl` against `http://localhost:19200` after the canonical
-> Argus workflows were redeployed and re-run end-to-end.
+> ARGUS workflows were redeployed and re-run end-to-end.
 
 ---
 
 ## 0. Canonical workflows deployed (post-cleanup)
 
 After wiping 350+ stale duplicate workflows, exactly **six** canonical
-Argus workflows remain, all enabled:
+ARGUS workflows remain, all enabled:
 
 ```
-enabled=true  Argus Exploit-to-Detection Reconciler (M2.2)
-enabled=true  Argus Trust Gate (Phase 3)
-enabled=true  Argus Demo 2 Runner — Polymorphic Variant Swarm
-enabled=true  Argus Demo 1 Runner — Same-day CVE → Detection
-enabled=true  Argus Reasoning Watchdog (Phase 3)     ← NEW (R10)
-enabled=true  Argus Trust Tier Assessor (Phase 3)
+enabled=true  ARGUS Exploit-to-Detection Reconciler (M2.2)
+enabled=true  ARGUS Trust Gate (Phase 3)
+enabled=true  ARGUS Demo 2 Runner — Polymorphic Variant Swarm
+enabled=true  ARGUS Demo 1 Runner — Same-day CVE → Detection
+enabled=true  ARGUS Reasoning Watchdog (Phase 3)     ← NEW (R10)
+enabled=true  ARGUS Trust Tier Assessor (Phase 3)
 ```
 
 Source index: `.workflows-workflows-000001`.
@@ -140,7 +140,7 @@ assertion that `rule_create` → `door_class=two_way`.
 
 `.soc-reasoning-trace` now carries first-class `gen_ai.*` mappings
 (system, request, response, usage, operation, agent, tool), and every
-Argus workflow emits the semantic-convention envelope.
+ARGUS workflow emits the semantic-convention envelope.
 
 Live state of `.soc-reasoning-trace`:
 
@@ -159,7 +159,7 @@ Operation breakdown:
 | `exploit_to_detection.synthesize` | 4 | `soc-argus-exploit-to-detection` |
 
 All 4 canonical decision-emitting workflows produce OTEL-GenAI traces,
-making Argus decision history portable to any OTEL-compliant viewer
+making ARGUS decision history portable to any OTEL-compliant viewer
 (Phoenix, Langfuse, Jaeger, etc.).
 
 ---
@@ -186,7 +186,7 @@ These surfaced during the feature-complete pass and are documented
 here so the next rerun doesn't rediscover them:
 
 1. **Workflow duplication.** Running `setup.sh` multiple times without
-   `--reset` produces duplicate Argus workflows (same name, different
+   `--reset` produces duplicate ARGUS workflows (same name, different
    IDs). Stale duplicates race the canonical ones and starve the
    feature-rich reconciler. Mitigation: a cleanup pass that queries
    `.workflows-workflows-000001`, groups by `name`, keeps the longest
@@ -224,4 +224,4 @@ here so the next rerun doesn't rediscover them:
 | F9 | Redeploy + capture evidence | ✅ done | this doc |
 | F10 | Doc update | ✅ done | `capability-and-gap-analysis.md` + this proof |
 
-Argus is **feature-complete** on this branch for the demo build.
+ARGUS is **feature-complete** on this branch for the demo build.

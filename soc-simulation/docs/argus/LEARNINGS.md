@@ -1,6 +1,6 @@
-# Learnings from Building Argus
+# Learnings from Building ARGUS
 
-> Captured 2026-04-23 — institutional knowledge from the full Argus build cycle.
+> Captured 2026-04-23 — institutional knowledge from the full ARGUS build cycle.
 
 ---
 
@@ -46,7 +46,7 @@ This is a **P0 in any autonomous system** because the governance loop itself bre
 
 ## 4. The "last mile" of autonomy is governance, not capability
 
-Argus could synthesize detection rules from CVE advisories very early. The capability was there by Phase 2. But making that capability **safe to run unsupervised** took 3x longer than building the capability itself.
+ARGUS could synthesize detection rules from CVE advisories very early. The capability was there by Phase 2. But making that capability **safe to run unsupervised** took 3x longer than building the capability itself.
 
 The governance stack we built:
 - Kill switch (global autonomy halt)
@@ -54,7 +54,7 @@ The governance stack we built:
 - Budget/cooldown gates (rate limiting)
 - Backtest gate (historical projection)
 - Shadow execution (dry-run validation)
-- Ownership check (prevent modifying non-Argus artifacts)
+- Ownership check (prevent modifying non-ARGUS artifacts)
 - Loop detection (prevent cascading mutations)
 - Envelope validation (schema conformance)
 - Dead letter + recovery (stalled document handling)
@@ -69,7 +69,7 @@ That's 11 governance mechanisms for 1 autonomous action (rule mutation). Each ex
 
 ## 5. Handoff points are where autonomous loops die
 
-The Argus loop is: Advisory → Synthesis → Mutation Intent → Backtest → Shadow → Trust Gate → Apply → Observe → Graduate/Rollback.
+The ARGUS loop is: Advisory → Synthesis → Mutation Intent → Backtest → Shadow → Trust Gate → Apply → Observe → Graduate/Rollback.
 
 Every `→` is a handoff where a document must exist in one index, be picked up by a different workflow, and produce an output in another index. When we ran the full loop end-to-end for the first time, it stalled at 3 different points:
 
@@ -81,11 +81,11 @@ Every `→` is a handoff where a document must exist in one index, be picked up 
 
 ---
 
-## 6. No benchmark exists for what Argus does
+## 6. No benchmark exists for what ARGUS does
 
-When we tried to score Argus against industry benchmarks:
-- **SOC-Bench** measures incident response (ransomware IR). Argus does detection engineering.
-- **CTI-REALM** measures rule generation quality. Argus does that but also deploys, monitors, and self-heals.
+When we tried to score ARGUS against industry benchmarks:
+- **SOC-Bench** measures incident response (ransomware IR). ARGUS does detection engineering.
+- **CTI-REALM** measures rule generation quality. ARGUS does that but also deploys, monitors, and self-heals.
 - **SANS SOC Survey** measures operational metrics. Useful but doesn't capture autonomy.
 - **Microsoft Agentic SOC** is a strategic framework, not a test suite.
 
@@ -133,7 +133,7 @@ When we cleaned up deprecated workflows, the registry was the authority. Without
 
 ## 10. The Elastic Stack is an underappreciated agent runtime
 
-Argus runs entirely on the Elastic Stack: Elasticsearch as shared state, Kibana Workflows as orchestration, Agent Builder agents as reasoning, Fleet as telemetry collection. No external agent framework (LangGraph, CrewAI, AutoGen) was needed.
+ARGUS runs entirely on the Elastic Stack: Elasticsearch as shared state, Kibana Workflows as orchestration, Agent Builder agents as reasoning, Fleet as telemetry collection. No external agent framework (LangGraph, CrewAI, AutoGen) was needed.
 
 What makes this work:
 - Elasticsearch's near-real-time indexing gives sub-second handoffs between workflows
@@ -146,6 +146,40 @@ What makes this work:
 
 ---
 
+## 11. Skills and workflow steps beat custom agents
+
+Early ARGUS iterations created 9 custom agents (triage, detection engineering, signal quality, meta-planner, applier, etc.) with large system prompts and specific tool allowlists. Each agent needed:
+- A JSON definition file deployed via Agent Builder API
+- Trust tier bootstrapping
+- Workflow steps referencing it by `agent-id`
+- Maintenance when tools or prompts changed
+
+The zero-agent refactor showed that **4 of 6 original agent roles were purely mechanical** — they ran ES queries, counted hits, and returned structured results. Custom workflow steps (`security.backtestRule`, `security.shadowExecuteRule`, `security.syncDetectionCorpus`, `security.buildAlertEntityGraph`) replaced them with zero LLM cost, typed schemas, and scoped ES clients.
+
+The remaining 2 roles that genuinely need LLM reasoning (rule synthesis, mutation planning) became **skills** — portable knowledge modules that any agent can use. Workflow `ai.agent` steps run without `agent-id`, using the default Elastic Security AI Assistant with all registered skills automatically available.
+
+**Key insight**: Custom agents are worth creating only when you need (a) a persistent conversation with memory, (b) specialized tool allowlists for security isolation, or (c) per-agent model routing. For single-turn workflow-invoked LLM calls, skills + default agent + inline prompts are simpler, cheaper, and easier to maintain.
+
+---
+
+## 12. Ruthless simplification reveals the essential architecture
+
+The consolidation pass was not a polish pass — it was a **compression** of the system until only the load-bearing parts remained.
+
+**Scale of the cut:** We started from roughly **53 workflows**, **43 index templates**, and **9 custom Agent Builder agents**. The end state landed near **~35 workflows**, **~35 templates**, and **0 dedicated ARGUS agents** — the same outcomes are carried by workflows, custom Elasticsearch-backed steps, skills on the default assistant, and inline prompts where reasoning is unavoidable.
+
+**The keep/kill heuristic:** If a workflow step can be expressed as **an Elasticsearch query plus a threshold or aggregation**, it does not need an LLM. That single rule retired most of the “agent mesh” and moved cost out of token spend and into deterministic, auditable execution. The LLM budget is reserved for synthesis, planning, and narrative — not for counting documents.
+
+**Parameterized playbooks:** One **parameterized playbook runner** replaced four near-duplicate, copy-pasted workflows. Operators pass intent (profile, actor, data source, CVE) instead of maintaining parallel YAML trees that only differ by constants.
+
+**Unified eval ledger:** A single **eval runs** index and write path replaced four parallel run ledgers that had drifted in field names and lifecycle. One place to query “what did we score, when, and against what corpus” restores observability and dashboard truth.
+
+**What ARGUS is now:** **Workflows** own orchestration and scheduling; **custom steps** own mechanical operations (backtest, shadow execute, corpus sync, alert graphs); **skills** encode reusable LLM knowledge and procedures; **inline prompts** on `ai.agent` steps hold the small amount of reasoning that must stay co-located with a branch. There is no separate “agent fleet” to deploy, tier, and patch — only platform primitives.
+
+**Cost signal:** In practice this restructuring cut on the order of **60–70% of LLM cost per ARGUS cycle**, not by cheaper models alone but by **not calling a model** where the stack already had the answer in indices.
+
+---
+
 ## Summary: What would we do differently?
 
 1. **Start with index templates, not agents.** Define the data model first.
@@ -154,3 +188,4 @@ What makes this work:
 4. **Define your own benchmark early.** Don't wait until you need to prove value.
 5. **Design handoffs explicitly.** Every status transition, every index hop, every field dependency — map them as a directed graph.
 6. **Keep the demo autonomous.** If you need a CLI script to make the demo work, you have a gap.
+7. **Prefer skills over custom agents for workflow-invoked LLM tasks.** Default assistant + skills beats per-role Agent Builder deployments when the call is single-turn and orchestrated by workflows.

@@ -3,7 +3,7 @@
   ".soc-recommendations": 259,
   ".soc-actor-trust-tiers": 2,
   ".soc-argus-vuln-demo": 3,
-  ".soc-detection-eval-runs": 4,
+  ".soc-argus-eval-runs": 4,
   ".soc-reasoning-trace": 9,
   ".soc-eval-corpus-argus-corpus-mythos-2026-04": 13,
   ".soc-audit-trail": 17148

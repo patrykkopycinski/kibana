@@ -1,6 +1,6 @@
 # ARGUS — Capability Map
 
-Every existing Elastic PR / issue / component mapped to its Argus layer and the Mythos-era
+Every existing Elastic PR / issue / component mapped to its ARGUS layer and the Mythos-era
 pressure it helps absorb. Use this doc to:
 
 - Reconcile new proposals against in-flight work (no duplication).
@@ -11,13 +11,13 @@ Legend:
 
 - **Pressure** — `P1` time compression · `P2` variant explosion · `P3` agentic adversary · `P4` capability asymmetry
 - **Layer** — `01` Sensing · `02` Hypothesis · `03` Validation · `04` Action · `05` Governance
-- **Status** — `shipped` / `in-flight` / `extends` (Argus extends an in-flight PR) / `new` / `P3` (Phase 3)
+- **Status** — `shipped` / `in-flight` / `extends` (ARGUS extends an in-flight PR) / `new` / `P3` (Phase 3)
 
 ---
 
 ## 1. Existing anchors (ground truth)
 
-Capabilities already shipped or in-flight. Argus inherits them as-is; the milestones in the
+Capabilities already shipped or in-flight. ARGUS inherits them as-is; the milestones in the
 next section extend them rather than replace.
 
 | Layer | Pressure | Component | Anchor | Status | Notes |
@@ -42,9 +42,9 @@ next section extend them rather than replace.
 
 ---
 
-## 2. Argus Mythos-era deltas (Phase 2)
+## 2. ARGUS Mythos-era deltas (Phase 2)
 
-The five milestones are the *Argus-specific* investments. Every one is anchored to an
+The five milestones are the *ARGUS-specific* investments. Every one is anchored to an
 existing PR or issue and named after the pressure it absorbs.
 
 | ID | Capability | Pressure | Layer | Extends / Lands on | Artifact |
@@ -67,7 +67,7 @@ gaps to track.
 |             | **P1** Time compression | **P2** Variant explosion | **P3** Agentic adversary | **P4** Capability asymmetry |
 |:------------|:-----------------------|:-------------------------|:-------------------------|:----------------------------|
 | **01 Sensing** | M2.3 · `kibana#258041` | — | M2.4 frontier preset | `integrations#18123` (Shadow AI) |
-| **02 Hypothesis** | M2.2 · `kibana#258362` | M2.2 (draft rules) | `kibana#259559` skills · `kibana#257949` correlation | Argus planner-agent mesh |
+| **02 Hypothesis** | M2.2 · `kibana#258362` | M2.2 (draft rules) | `kibana#259559` skills · `kibana#257949` correlation | ARGUS planner-agent mesh |
 | **03 Validation** | — | **M2.1** detection eval vertical | `soc-regression-gate` | — |
 | **04 Action** | `soc-autonomous-applier` | `soc-autonomous-applier` | `soc-response` · `soc-containment-playbook` | — |
 | **05 Governance** | — | `soc-self-learning-loop` | **M2.5** OTLP traces | `soc-trust-scorer` · `soc-watchdog` |
@@ -91,25 +91,25 @@ demo-ready — see `docs/argus/demo-runbook.md` section 10.
 | Trust-tier thresholds for frontier-class mutations | `soc-trust-scorer` | landed | [`phase-3/trust-thresholds.md`](./phase-3/trust-thresholds.md) | `workflows/soc-argus-trust-tier-assessor.yaml` + `soc-argus-trust-gate.yaml` |
 | Playbook learning loop | `soc-containment-playbook` + `.soc-outcomes` | landed | [`phase-3/playbook-learning-loop.md`](./phase-3/playbook-learning-loop.md) | `workflows/soc-argus-playbook-learner.yaml` + `argus/technique-playbook-mapping.json` |
 | Glasswing-compatible ingestion | `.soc-intel-feed` (new) → Sensing | landed (demo adapter; TAXII poller deferred) | [`phase-3/glasswing-ingestion.md`](./phase-3/glasswing-ingestion.md) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc-argus-intel-adapter-generic.yaml` + `soc-argus-intel-mythos-aggregator.yaml`, `argus/intel-feed-seed.json` |
-| Argus Console | Security Solution plugin | landed (extended the existing dashboard) | [`phase-3/argus-console.md`](./phase-3/argus-console.md) | `setup/dashboards/build_argus_console.js` (Phase 3 panel section) |
+| ARGUS Console | Security Solution plugin | landed (extended the existing dashboard) | [`phase-3/argus-console.md`](./phase-3/argus-console.md) | `setup/dashboards/build_argus_console.js` (Phase 3 panel section) |
 
 ---
 
 ## 5. Non-goals & scope boundaries
 
-Explicit scope boundaries that keep Argus focused.
+Explicit scope boundaries that keep ARGUS focused.
 
-- **Not** a replacement for the Security Solution plugin. Argus is a thin set of agents, skills, workflows, and evaluators that *ride* the plugin.
-- **Not** a new model or a new reasoner. Argus assumes BYO frontier model via Agent Builder connectors.
+- **Not** a replacement for the Security Solution plugin. ARGUS is a thin set of agents, skills, workflows, and evaluators that *ride* the plugin.
+- **Not** a new model or a new reasoner. ARGUS assumes BYO frontier model via Agent Builder connectors.
 - **Not** production-deployed Caldera. Caldera is a sandboxed telemetry generator. Every production path is Elastic-Stack-native.
 - **Not** a replacement for `@kbn/evals`. M2.1 is a **vertical** of existing eval infrastructure, not a parallel one.
-- **Not** in scope: Shadow-AI *detection rules*. If rules on `integrations#18123` telemetry become compelling, they land in a separate rule pack issue — **not** within Argus Phase 2.
+- **Not** in scope: Shadow-AI *detection rules*. If rules on `integrations#18123` telemetry become compelling, they land in a separate rule pack issue — **not** within ARGUS Phase 2.
 
 ---
 
 ## 6. How to keep this doc honest
 
-- New PR / issue relevant to Argus? Add a row in §1 with the anchor link.
+- New PR / issue relevant to ARGUS? Add a row in §1 with the anchor link.
 - New milestone? Add to §2 with a sub-issue body in `issues/`.
 - Filled a gap in §3? Remove the cell from the gap list and add to the matrix.
 - Strong quarterly review signal: if any Phase-2 row has no artifact link within 6 weeks of its milestone window, escalate.

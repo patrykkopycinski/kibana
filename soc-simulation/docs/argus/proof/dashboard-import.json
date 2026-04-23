@@ -1,1 +1,1 @@
-{"successCount":1,"success":true,"warnings":[],"successResults":[{"type":"dashboard","id":"argus-console","meta":{"title":"Argus Console — Mythos-Resilience Invariants","icon":"dashboardApp"},"managed":false,"overwrite":true}]}
+{"successCount":1,"success":true,"warnings":[],"successResults":[{"type":"dashboard","id":"argus-console","meta":{"title":"ARGUS Console — Mythos-Resilience Invariants","icon":"dashboardApp"},"managed":false,"overwrite":true}]}

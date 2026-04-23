@@ -23,6 +23,9 @@ target
 .claude/worktrees/
 .cursor
 !x-pack/solutions/security/.cursor
+.playwright-mcp
+.soc-runtime-logs
+soc-simulation/.env
 !x-pack/solutions/security/test/security_solution_cypress/.cursor/
 .windsurf
 *.iml

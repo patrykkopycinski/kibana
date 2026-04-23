@@ -1,6 +1,6 @@
 # M2.3 — Exploit-Probability Field Contract
 
-Stable field contract under `vulnerability.argus.*` that every downstream Argus
+Stable field contract under `vulnerability.argus.*` that every downstream ARGUS
 milestone can rely on. Versioned; breaking changes require a bump + a migration row.
 
 ## 1. Fields
@@ -19,8 +19,8 @@ vulnerability.argus.scored_at:                               # date (iso8601)
 ```
 
 All fields live under `vulnerability.argus.*` to avoid polluting the upstream
-`vulnerability` namespace owned by the vuln-checker PR (`kibana#258041`). Argus is a
-consumer; it never rewrites non-Argus fields.
+`vulnerability` namespace owned by the vuln-checker PR (`kibana#258041`). ARGUS is a
+consumer; it never rewrites non-ARGUS fields.
 
 ## 2. Score formula (v1.1.0)
 
@@ -82,7 +82,7 @@ This is the field the Security Solution alert flyout renders as "Top factors."
    vuln-checker alert emission:
    - Reads `vulnerability.id`, `host.risk.calculated_level`,
      `threat.software.cisa_kev`, `threat.software.epss.score`.
-   - Writes the Argus fields above.
+   - Writes the ARGUS fields above.
    - Skips silently (no exception) if any of the upstream fields are missing — the
      absence of inputs is itself a data-quality event, written to
      `.soc-audit-trail` with `event_type: argus_exploit_probability_missing_inputs`.

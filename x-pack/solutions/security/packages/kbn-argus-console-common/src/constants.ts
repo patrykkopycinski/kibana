@@ -20,7 +20,7 @@ export const RECENT_PROPOSALS_ROUTE = '/internal/security_solution/argus/recent_
 // Phase C routes — the "complete-story" additions. Three pure reads and two
 // writes. Writes are gated server-side by the `securitySolution-argus_write`
 // API capability; reads reuse the base `securitySolution` privilege like the
-// other internal Argus routes.
+// other internal ARGUS routes.
 export const AUTONOMY_DECISIONS_ROUTE =
   '/internal/security_solution/argus/autonomy_decisions' as const;
 export const COVERAGE_GAPS_ROUTE = '/internal/security_solution/argus/coverage_gaps' as const;
@@ -45,11 +45,6 @@ export const NAVIGATOR_LAYER_ROUTE =
 export const REDUNDANCY_SUMMARY_ROUTE =
   '/internal/security_solution/argus/coverage/redundancy_summary' as const;
 
-// Tier 4 routes — autocomplete + quality-score history.
-export const AUTOCOMPLETE_ROUTE = '/internal/security_solution/argus/autocomplete' as const;
-export const QUALITY_SCORE_HISTORY_ROUTE =
-  '/internal/security_solution/argus/quality_score_history' as const;
-
 // Tier 5 routes — decision-graph adapter + playbooks discovery index.
 export const DECISION_GRAPH_ROUTE = '/internal/security_solution/argus/decision_graph' as const;
 /**
@@ -64,7 +59,7 @@ export const PLAYBOOKS_INDEX_ROUTE = '/internal/security_solution/argus/playbook
 
 /**
  * Generic "fetch one document + best-effort related entities" route used by
- * the shared Argus details flyout (Activity feed + Mutation lineage).
+ * the shared ARGUS details flyout (Activity feed + Mutation lineage).
  * Contract: `GET ?source_index=...&source_doc_id=...&include_related=...`.
  */
 export const ARTIFACT_DETAILS_ROUTE = '/internal/security_solution/argus/artifact_details' as const;
@@ -79,29 +74,21 @@ export const ARGUS_CONSOLE_READ_UI_CAPABILITY = 'argus_read' as const;
 export const ARGUS_CONSOLE_ALL_UI_CAPABILITY = 'argus_all' as const;
 
 /**
- * Server-side API capability used by `requiredPrivileges` on every Argus write
+ * Server-side API capability used by `requiredPrivileges` on every ARGUS write
  * route. Appears as an `api:` entry on the `privileges.all` privilege group of
  * the base `siemV5` feature — so anyone with `siem.crud` gets it, and anyone
  * with `siem.show` does not.
  */
 export const ARGUS_WRITE_API_CAPABILITY = 'securitySolution-argus_write' as const;
 
-/**
- * @deprecated use `ARGUS_CONSOLE_READ_UI_CAPABILITY` — these dotted strings
- * hard-coded the old `siem` feature id and are no longer resolvable. Kept for
- * one release for external consumers; remove once the console package is
- * updated downstream.
- */
-export const ARGUS_CONSOLE_READ_CAPABILITY = 'siem.argus_read' as const;
-export const ARGUS_CONSOLE_ALL_CAPABILITY = 'siem.argus_all' as const;
-
 export const ARGUS_SOC_INDICES = {
   reasoningTrace: '.soc-reasoning-trace',
   actorTrustTiers: '.soc-actor-trust-tiers',
   mutationIntents: '.soc-mutation-intents',
   recommendations: '.soc-recommendations',
-  detectionEvalRuns: '.soc-detection-eval-runs',
-  backtestResults: '.soc-backtest-results',
+  /** Unified eval verticals — filter by `run_kind` (detection | reasoning | adversarial | shadow_backtest | …). */
+  detectionEvalRuns: '.soc-argus-eval-runs',
+  backtestResults: '.soc-backtests',
   outcomes: '.soc-outcomes',
   // Live-demo / telemetry source. The activity-feed route reads from this
   // index so UI shows telemetry-layer events (EDR alerts, ingest signals).
@@ -124,11 +111,6 @@ export const ARGUS_SOC_INDICES = {
   detectionCorpus: '.soc-detection-corpus',
   threatProfiles: '.soc-threat-profiles',
   threatActors: '.soc-threat-actors',
-  // Tier 2 — mined procedure patterns + redundancy groupings.
-  detectionPatterns: '.soc-detection-patterns',
-  // Tier 4 — quality-score trajectory per rule, fed by the post-apply
-  // observer and the score-recomputer script.
-  qualityScoreHistory: '.soc-quality-score-history',
   // Tier 5 — condensed decision graph over the reasoning trace / lineage /
   // autonomy ledger used by the `argus.decision_graph` read.
   decisionGraph: '.soc-decision-graph',

@@ -38,7 +38,7 @@ Update:
 
 ```yaml
 version: '1'
-name: SOC Argus — Frontier Simulator (M2.4)
+name: SOC ARGUS — Frontier Simulator (M2.4)
 description: >
   Runs only while the Mythos-class preset is armed. Picks one primitive +
   variant axis from the variant bank, emits a labelled event into

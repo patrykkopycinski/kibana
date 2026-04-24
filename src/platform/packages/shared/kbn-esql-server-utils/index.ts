@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { EsqlServerPluginSetup } from './types';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { EsqlServerPlugin } = await import('./plugin');
-  return new EsqlServerPlugin(initContext);
-};
-
-export type { EsqlServerPluginSetup as PluginSetup };
+export { EsqlService, type EsqlServiceOptions } from './esql_service';
+export {
+  buildServerESQLCallbacks,
+  type BuildServerESQLCallbacksOptions,
+} from './build_server_esql_callbacks';

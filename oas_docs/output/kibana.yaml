@@ -12403,14 +12403,17 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              update:
-                enable_field_rendering: false
-                ids:
-                  - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                  - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
-                kibana_alert_workflow_status: acknowledged
-                with_replacements: true
+            examples:
+              PostAttackDiscoveryBulkRequestBodyExample:
+                summary: Acknowledge two Attack discoveries in bulk.
+                value:
+                  update:
+                    enable_field_rendering: false
+                    ids:
+                      - c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                      - 5aa8f2900c0b03854b3b1a52a19558c5ea9893865c78235d4ad3dcc46196f4c7
+                    kibana_alert_workflow_status: acknowledged
+                    with_replacements: true
             schema:
               type: object
               properties:
@@ -12491,10 +12494,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                PostAttackDiscoveryBulkResponse400Example:
+                  summary: Bad Request error returned when the bulk update payload is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -12683,17 +12689,20 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                connector_names:
-                  - GPT-5 Chat
-                data:
-                  - connector_name: GPT-5 Chat
-                    id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                    title: Suspicious process execution on host-01
-                page: 1
-                per_page: 10
-                total: 1
-                unique_alert_ids_count: 0
+              examples:
+                AttackDiscoveryFindResponse200Example:
+                  summary: Paginated list of Attack discoveries matching the search criteria.
+                  value:
+                    connector_names:
+                      - GPT-5 Chat
+                    data:
+                      - connector_name: GPT-5 Chat
+                        id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                        title: Suspicious process execution on host-01
+                    page: 1
+                    per_page: 10
+                    total: 1
+                    unique_alert_ids_count: 0
               schema:
                 type: object
                 properties:
@@ -12735,10 +12744,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request payload.
-                status_code: 400
+              examples:
+                AttackDiscoveryFindResponse400Example:
+                  summary: Bad Request error returned when find query parameters are invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request payload.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -12783,27 +12795,30 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              alertsIndexPattern: .alerts-security.alerts-default
-              anonymizationFields:
-                - allowed: true
-                  anonymized: true
-                  field: host.name
-                - allowed: true
-                  anonymized: true
-                  field: user.name
-                - allowed: true
-                  anonymized: false
-                  field: process.name
-              apiConfig:
-                actionTypeId: .gen-ai
-                connectorId: 12345678-1234-1234-1234-123456789012
-              connectorName: GPT-5 Chat
-              end: now
-              replacements: {}
-              size: 100
-              start: now-24h
-              subAction: invokeAI
+            examples:
+              PostAttackDiscoveryGenerateRequestBodyExample:
+                summary: Generate Attack discoveries from alerts in the last 24 hours.
+                value:
+                  alertsIndexPattern: .alerts-security.alerts-default
+                  anonymizationFields:
+                    - allowed: true
+                      anonymized: true
+                      field: host.name
+                    - allowed: true
+                      anonymized: true
+                      field: user.name
+                    - allowed: true
+                      anonymized: false
+                      field: process.name
+                  apiConfig:
+                    actionTypeId: .gen-ai
+                    connectorId: 12345678-1234-1234-1234-123456789012
+                  connectorName: GPT-5 Chat
+                  end: now
+                  replacements: {}
+                  size: 100
+                  start: now-24h
+                  subAction: invokeAI
             schema:
               $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenerationConfig'
         required: true
@@ -12811,8 +12826,11 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                execution_uuid: edd26039-0990-4d9f-9829-2a1fcacb77b5
+              examples:
+                PostAttackDiscoveryGenerateResponse200Example:
+                  summary: Generation started; use the returned execution UUID to track progress.
+                  value:
+                    execution_uuid: edd26039-0990-4d9f-9829-2a1fcacb77b5
               schema:
                 type: object
                 properties:
@@ -12826,10 +12844,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                PostAttackDiscoveryGenerateResponse400Example:
+                  summary: Bad Request error returned when the generate payload is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -13836,16 +13857,19 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                generations:
-                  - alerts_context_count: 75
-                    connector_id: chatGpt5_0ChatAzure
-                    discoveries: 3
-                    end: '2025-09-29T06:42:44.810Z'
-                    execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                    loading_message: AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.
-                    start: '2025-09-29T06:42:08.962Z'
-                    status: succeeded
+              examples:
+                GetAttackDiscoveryGenerationsResponse200Example:
+                  summary: Latest Attack Discovery generation metadata for the current user.
+                  value:
+                    generations:
+                      - alerts_context_count: 75
+                        connector_id: chatGpt5_0ChatAzure
+                        discoveries: 3
+                        end: '2025-09-29T06:42:44.810Z'
+                        execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
+                        loading_message: AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.
+                        start: '2025-09-29T06:42:08.962Z'
+                        status: succeeded
               schema:
                 type: object
                 properties:
@@ -13860,10 +13884,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid size parameter. Must be a positive number.
-                status_code: 400
+              examples:
+                GetAttackDiscoveryGenerationsResponse400Example:
+                  summary: Bad Request error returned when the size parameter is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid size parameter. Must be a positive number.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -13933,17 +13960,20 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                data:
-                  - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
-                    title: Suspicious process execution on host-01
-                generation:
-                  alerts_context_count: 50
-                  discoveries: 1
-                  end: '2025-09-29T06:42:44.810Z'
-                  execution_uuid: 2e13f386-46cf-4d65-9e2b-68609e132ba5
-                  start: '2025-09-29T06:42:08.962Z'
-                  status: succeeded
+              examples:
+                GetAttackDiscoveryGenerationResponse200Example:
+                  summary: Single Attack Discovery generation with its discoveries and metadata.
+                  value:
+                    data:
+                      - id: c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f
+                        title: Suspicious process execution on host-01
+                    generation:
+                      alerts_context_count: 50
+                      discoveries: 1
+                      end: '2025-09-29T06:42:44.810Z'
+                      execution_uuid: 2e13f386-46cf-4d65-9e2b-68609e132ba5
+                      start: '2025-09-29T06:42:08.962Z'
+                      status: succeeded
               schema:
                 type: object
                 properties:
@@ -13961,10 +13991,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                GetAttackDiscoveryGenerationResponse400Example:
+                  summary: Bad Request error returned when the get-generation request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -14022,15 +14055,18 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                alerts_context_count: 75
-                connector_id: chatGpt5_0ChatAzure
-                discoveries: 3
-                end: '2025-09-29T06:42:44.810Z'
-                execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
-                loading_message: AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.
-                start: '2025-09-29T06:42:08.962Z'
-                status: dismissed
+              examples:
+                PostAttackDiscoveryGenerationsDismissResponse200Example:
+                  summary: Successfully dismissed an Attack Discovery generation.
+                  value:
+                    alerts_context_count: 75
+                    connector_id: chatGpt5_0ChatAzure
+                    discoveries: 3
+                    end: '2025-09-29T06:42:44.810Z'
+                    execution_uuid: 46b218d5-535d-4329-be56-d0f6af6986b7
+                    loading_message: AI is analyzing up to 100 alerts in the last 24 hours to generate discoveries.
+                    start: '2025-09-29T06:42:08.962Z'
+                    status: dismissed
               schema:
                 type: object
                 properties:
@@ -14099,10 +14135,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                PostAttackDiscoveryGenerationsDismissResponse400Example:
+                  summary: Bad Request error returned when the dismiss request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -14151,21 +14190,24 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              actions: []
-              enabled: true
-              name: Daily Security Analysis
-              params:
-                alerts_index_pattern: .alerts-security.alerts-default
-                api_config:
-                  actionTypeId: bedrock
-                  connectorId: my-bedrock-connector
-                  name: Claude 3.5 Sonnet
-                end: now
-                size: 100
-                start: now-24h
-              schedule:
-                interval: 24h
+            examples:
+              CreateAttackDiscoverySchedulesRequestBodyExample:
+                summary: Create a daily Attack Discovery schedule that runs every 24 hours.
+                value:
+                  actions: []
+                  enabled: true
+                  name: Daily Security Analysis
+                  params:
+                    alerts_index_pattern: .alerts-security.alerts-default
+                    api_config:
+                      actionTypeId: bedrock
+                      connectorId: my-bedrock-connector
+                      name: Claude 3.5 Sonnet
+                    end: now
+                    size: 100
+                    start: now-24h
+                  schedule:
+                    interval: 24h
             schema:
               $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleCreateProps'
         description: Attack Discovery schedule configuration including name, parameters, schedule interval, and actions
@@ -14174,36 +14216,42 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
-                created_by: elastic
-                enabled: true
-                id: 12345678-1234-1234-1234-123456789012
-                name: Daily Security Analysis
-                params:
-                  alerts_index_pattern: .alerts-security.alerts-default
-                  api_config:
-                    actionTypeId: bedrock
-                    connectorId: my-bedrock-connector
-                    name: Claude 3.5 Sonnet
-                  end: now
-                  size: 100
-                  start: now-24h
-                schedule:
-                  interval: 24h
-                updated_at: '2023-10-31T10:00:00.000Z'
-                updated_by: elastic
+              examples:
+                CreateAttackDiscoverySchedulesResponse200Example:
+                  summary: A newly created Attack Discovery schedule.
+                  value:
+                    actions: []
+                    created_at: '2023-10-31T10:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    id: 12345678-1234-1234-1234-123456789012
+                    name: Daily Security Analysis
+                    params:
+                      alerts_index_pattern: .alerts-security.alerts-default
+                      api_config:
+                        actionTypeId: bedrock
+                        connectorId: my-bedrock-connector
+                        name: Claude 3.5 Sonnet
+                      end: now
+                      size: 100
+                      start: now-24h
+                    schedule:
+                      interval: 24h
+                    updated_at: '2023-10-31T10:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: The Attack Discovery schedule was successfully created.
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                CreateAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the create schedule payload is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -14302,30 +14350,33 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                data:
-                  - actions: []
-                    created_at: '2023-10-31T10:00:00.000Z'
-                    created_by: elastic
-                    enabled: true
-                    id: 12345678-1234-1234-1234-123456789012
-                    name: Daily Security Analysis
-                    params:
-                      alerts_index_pattern: .alerts-security.alerts-default
-                      api_config:
-                        actionTypeId: bedrock
-                        connectorId: my-bedrock-connector
-                        name: Claude 3.5 Sonnet
-                      end: now
-                      size: 100
-                      start: now-24h
-                    schedule:
-                      interval: 24h
-                    updated_at: '2023-10-31T10:00:00.000Z'
-                    updated_by: elastic
-                page: 1
-                per_page: 10
-                total: 1
+              examples:
+                FindAttackDiscoverySchedulesResponse200Example:
+                  summary: Paginated list of Attack Discovery schedules matching the search criteria.
+                  value:
+                    data:
+                      - actions: []
+                        created_at: '2023-10-31T10:00:00.000Z'
+                        created_by: elastic
+                        enabled: true
+                        id: 12345678-1234-1234-1234-123456789012
+                        name: Daily Security Analysis
+                        params:
+                          alerts_index_pattern: .alerts-security.alerts-default
+                          api_config:
+                            actionTypeId: bedrock
+                            connectorId: my-bedrock-connector
+                            name: Claude 3.5 Sonnet
+                          end: now
+                          size: 100
+                          start: now-24h
+                        schedule:
+                          interval: 24h
+                        updated_at: '2023-10-31T10:00:00.000Z'
+                        updated_by: elastic
+                    page: 1
+                    per_page: 10
+                    total: 1
               schema:
                 type: object
                 properties:
@@ -14352,10 +14403,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request payload.
-                status_code: 400
+              examples:
+                FindAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when find-schedules query parameters are invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request payload.
+                    status_code: 400
               schema:
                 type: object
                 properties:
@@ -14409,8 +14463,11 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                id: 12345678-1234-1234-1234-123456789012
+              examples:
+                DeleteAttackDiscoverySchedulesResponse200Example:
+                  summary: Confirmation returned after deleting an Attack Discovery schedule.
+                  value:
+                    id: 12345678-1234-1234-1234-123456789012
               schema:
                 type: object
                 properties:
@@ -14423,10 +14480,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                DeleteAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the delete schedule request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -14466,40 +14526,46 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
-                created_by: elastic
-                enabled: true
-                id: 12345678-1234-1234-1234-123456789012
-                last_execution:
-                  date: '2023-10-31T10:00:00.000Z'
-                  last_duration: 45.2
-                  status: ok
-                name: Daily Security Analysis
-                params:
-                  alerts_index_pattern: .alerts-security.alerts-default
-                  api_config:
-                    actionTypeId: bedrock
-                    connectorId: my-bedrock-connector
-                    name: Claude 3.5 Sonnet
-                  end: now
-                  size: 100
-                  start: now-24h
-                schedule:
-                  interval: 24h
-                updated_at: '2023-10-31T10:00:00.000Z'
-                updated_by: elastic
+              examples:
+                GetAttackDiscoverySchedulesResponse200Example:
+                  summary: An Attack Discovery schedule retrieved by ID, including last execution metadata.
+                  value:
+                    actions: []
+                    created_at: '2023-10-31T10:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    id: 12345678-1234-1234-1234-123456789012
+                    last_execution:
+                      date: '2023-10-31T10:00:00.000Z'
+                      last_duration: 45.2
+                      status: ok
+                    name: Daily Security Analysis
+                    params:
+                      alerts_index_pattern: .alerts-security.alerts-default
+                      api_config:
+                        actionTypeId: bedrock
+                        connectorId: my-bedrock-connector
+                        name: Claude 3.5 Sonnet
+                      end: now
+                      size: 100
+                      start: now-24h
+                    schedule:
+                      interval: 24h
+                    updated_at: '2023-10-31T10:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: Successfully retrieved Attack Discovery schedule with complete configuration and metadata
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                GetAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the get-schedule request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -14538,20 +14604,23 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              actions: []
-              name: Updated Daily Security Analysis
-              params:
-                alerts_index_pattern: .alerts-security.alerts-default
-                api_config:
-                  actionTypeId: bedrock
-                  connectorId: my-bedrock-connector
-                  name: Claude 3.5 Sonnet
-                end: now
-                size: 200
-                start: now-48h
-              schedule:
-                interval: 12h
+            examples:
+              UpdateAttackDiscoverySchedulesRequestBodyExample:
+                summary: Update an Attack Discovery schedule to run every 12 hours over a 48-hour window.
+                value:
+                  actions: []
+                  name: Updated Daily Security Analysis
+                  params:
+                    alerts_index_pattern: .alerts-security.alerts-default
+                    api_config:
+                      actionTypeId: bedrock
+                      connectorId: my-bedrock-connector
+                      name: Claude 3.5 Sonnet
+                    end: now
+                    size: 200
+                    start: now-48h
+                  schedule:
+                    interval: 12h
             schema:
               $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiScheduleUpdateProps'
         description: Updated Attack Discovery schedule configuration. All fields are required as this replaces the entire schedule configuration.
@@ -14560,36 +14629,42 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                actions: []
-                created_at: '2023-10-31T10:00:00.000Z'
-                created_by: elastic
-                enabled: true
-                id: 12345678-1234-1234-1234-123456789012
-                name: Updated Daily Security Analysis
-                params:
-                  alerts_index_pattern: .alerts-security.alerts-default
-                  api_config:
-                    actionTypeId: bedrock
-                    connectorId: my-bedrock-connector
-                    name: Claude 3.5 Sonnet
-                  end: now
-                  size: 200
-                  start: now-48h
-                schedule:
-                  interval: 12h
-                updated_at: '2023-10-31T12:00:00.000Z'
-                updated_by: elastic
+              examples:
+                UpdateAttackDiscoverySchedulesResponse200Example:
+                  summary: An Attack Discovery schedule after being updated.
+                  value:
+                    actions: []
+                    created_at: '2023-10-31T10:00:00.000Z'
+                    created_by: elastic
+                    enabled: true
+                    id: 12345678-1234-1234-1234-123456789012
+                    name: Updated Daily Security Analysis
+                    params:
+                      alerts_index_pattern: .alerts-security.alerts-default
+                      api_config:
+                        actionTypeId: bedrock
+                        connectorId: my-bedrock-connector
+                        name: Claude 3.5 Sonnet
+                      end: now
+                      size: 200
+                      start: now-48h
+                    schedule:
+                      interval: 12h
+                    updated_at: '2023-10-31T12:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryApiSchedule'
           description: Successfully updated Attack Discovery schedule with the new configuration and metadata
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                UpdateAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the update schedule payload is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -14648,8 +14723,11 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                id: 12345678-1234-1234-1234-123456789012
+              examples:
+                DisableAttackDiscoverySchedulesResponse200Example:
+                  summary: Confirmation returned after disabling an Attack Discovery schedule.
+                  value:
+                    id: 12345678-1234-1234-1234-123456789012
               schema:
                 type: object
                 properties:
@@ -14662,10 +14740,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                DisableAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the disable schedule request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.
@@ -14706,8 +14787,11 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                id: 12345678-1234-1234-1234-123456789012
+              examples:
+                EnableAttackDiscoverySchedulesResponse200Example:
+                  summary: Confirmation returned after enabling an Attack Discovery schedule.
+                  value:
+                    id: 12345678-1234-1234-1234-123456789012
               schema:
                 type: object
                 properties:
@@ -14720,10 +14804,13 @@ paths:
         '400':
           content:
             application/json:
-              example:
-                error: Bad Request
-                message: Invalid request parameters.
-                status_code: 400
+              examples:
+                EnableAttackDiscoverySchedulesResponse400Example:
+                  summary: Bad Request error returned when the enable schedule request is invalid.
+                  value:
+                    error: Bad Request
+                    message: Invalid request parameters.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/Security_Attack_discovery_API_AttackDiscoveryGenericError'
           description: Bad Request response.

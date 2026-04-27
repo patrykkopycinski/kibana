@@ -46,15 +46,30 @@ function parseArgs(args: string[]): CliOptions {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     switch (arg) {
-      case '--suite':
-        options.suite = args[++i];
+      case '--suite': {
+        const value = args[++i];
+        if (!value || value.startsWith('--')) {
+          throw new Error(`--suite requires a value, got: ${value}`);
+        }
+        options.suite = value;
         break;
-      case '--model':
-        options.model = args[++i];
+      }
+      case '--model': {
+        const value = args[++i];
+        if (!value || value.startsWith('--')) {
+          throw new Error(`--model requires a value, got: ${value}`);
+        }
+        options.model = value;
         break;
-      case '--endpoint':
-        options.endpoint = args[++i];
+      }
+      case '--endpoint': {
+        const value = args[++i];
+        if (!value || value.startsWith('--')) {
+          throw new Error(`--endpoint requires a value, got: ${value}`);
+        }
+        options.endpoint = value;
         break;
+      }
       case '--code-only':
         options.codeOnly = true;
         break;
@@ -152,7 +167,8 @@ export const localCli = {
 
       log.info(`Running evals: node scripts/evals ${evalArgs.join(' ')}`);
 
-      const kibanaRoot = resolve(__dirname, '..', '..', '..', '..', '..', '..', '..');
+      const kibanaRoot =
+        process.env.REPO_ROOT ?? resolve(__dirname, '..', '..', '..', '..', '..', '..', '..');
       const child = spawnChild('node', [resolve(kibanaRoot, 'scripts/evals'), ...evalArgs], {
         cwd: kibanaRoot,
         stdio: 'inherit',
@@ -161,6 +177,10 @@ export const localCli = {
 
       const exitCode = await new Promise<number>((resolvePromise) => {
         child.on('close', (code) => resolvePromise(code ?? 1));
+        child.on('error', (err) => {
+          log.error(`Failed to spawn eval process: ${err.message}`);
+          resolvePromise(127);
+        });
       });
 
       if (exitCode !== 0) {

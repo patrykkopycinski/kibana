@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { execSync, spawn } from 'node:child_process';
+import { execFileSync, execSync, spawn } from 'node:child_process';
 import type { RuntimeType } from './detect';
 import type { ModelConfig } from './model_registry';
 
@@ -14,8 +14,26 @@ const log = {
   warn: (msg: string) => process.stderr.write(`[evals-local] WARN: ${msg}\n`),
 };
 
-function exec(cmd: string, timeoutMs = 60_000): string {
+const SAFE_MODEL_PATTERN = /^[\w.:\-\/]+$/;
+
+function assertSafeModelId(value: string, label: string): void {
+  if (!SAFE_MODEL_PATTERN.test(value)) {
+    throw new Error(
+      `Unsafe characters in ${label}: "${value}". Only alphanumerics, dots, colons, hyphens, underscores, and slashes are allowed.`
+    );
+  }
+}
+
+function execShell(cmd: string, timeoutMs = 60_000): string {
   return execSync(cmd, {
+    encoding: 'utf8',
+    timeout: timeoutMs,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  }).trim();
+}
+
+function execSafe(command: string, args: string[], timeoutMs = 60_000): string {
+  return execFileSync(command, args, {
     encoding: 'utf8',
     timeout: timeoutMs,
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -53,9 +71,9 @@ export async function ensureRuntime(): Promise<RuntimeType> {
 
   log.info('No local runtime found. Installing Ollama...');
   if (process.platform === 'darwin') {
-    exec('brew install --quiet ollama', 120_000);
+    execSafe('brew', ['install', '--quiet', 'ollama'], 120_000);
   } else {
-    exec('curl -fsSL https://ollama.com/install.sh | sh', 120_000);
+    execShell('curl -fsSL https://ollama.com/install.sh | sh', 120_000);
   }
   return 'ollama';
 }
@@ -73,9 +91,12 @@ async function isOllamaServing(): Promise<boolean> {
 }
 
 export async function ensureModel(runtime: RuntimeType, model: ModelConfig): Promise<string> {
+  assertSafeModelId(model.ollamaTag, 'ollamaTag');
+  assertSafeModelId(model.lmsSearchId, 'lmsSearchId');
+
   if (runtime === 'ollama') {
     try {
-      const models = exec('ollama list');
+      const models = execSafe('ollama', ['list']);
       const modelName = model.ollamaTag.split(':')[0];
       const modelExists = models.split('\n').some((line) => {
         const firstCol = line.trim().split(/\s+/)[0] ?? '';
@@ -83,13 +104,13 @@ export async function ensureModel(runtime: RuntimeType, model: ModelConfig): Pro
       });
       if (!modelExists) {
         log.info(`Pulling ${model.name} (${model.ollamaTag})...`);
-        exec(`ollama pull ${model.ollamaTag}`, 600_000);
+        execSafe('ollama', ['pull', model.ollamaTag], 600_000);
       } else {
         log.info(`Model ${model.name} already available.`);
       }
     } catch {
       log.info(`Pulling ${model.name} (${model.ollamaTag})...`);
-      exec(`ollama pull ${model.ollamaTag}`, 600_000);
+      execSafe('ollama', ['pull', model.ollamaTag], 600_000);
     }
 
     if (!(await isOllamaServing())) {
@@ -105,25 +126,29 @@ export async function ensureModel(runtime: RuntimeType, model: ModelConfig): Pro
   }
 
   try {
-    exec('lms status');
+    execSafe('lms', ['status']);
   } catch {
-    exec('lms daemon up', 30_000);
+    execSafe('lms', ['daemon', 'up'], 30_000);
     await waitForEndpoint('http://localhost:1234/v1/models');
   }
 
   try {
-    const installed = exec('lms ls');
+    const installed = execSafe('lms', ['ls']);
     if (!installed.includes(model.lmsSearchId)) {
       log.info(`Downloading ${model.name} via LM Studio...`);
-      exec(`lms get ${model.lmsSearchId} --mlx`, 600_000);
+      execSafe('lms', ['get', model.lmsSearchId, '--mlx'], 600_000);
     }
   } catch {
     log.info(`Downloading ${model.name} via LM Studio...`);
-    exec(`lms get ${model.lmsSearchId} --mlx`, 600_000);
+    execSafe('lms', ['get', model.lmsSearchId, '--mlx'], 600_000);
   }
 
-  exec(`lms load ${model.lmsSearchId} --gpu max --context-length ${model.contextLength}`, 60_000);
-  exec('lms server start --port 1234 --cors', 15_000);
+  execSafe(
+    'lms',
+    ['load', model.lmsSearchId, '--gpu', 'max', '--context-length', String(model.contextLength)],
+    60_000
+  );
+  execSafe('lms', ['server', 'start', '--port', '1234', '--cors'], 15_000);
   await waitForEndpoint('http://localhost:1234/v1/models');
   return 'http://localhost:1234/v1';
 }

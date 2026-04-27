@@ -63,7 +63,9 @@ export async function negotiateModel(
 
   const loaded = detection.loadedModel;
   const registryEntry = registry.findByModelName(loaded.name);
-  const toolCallOk = detection.endpoint ? await validateToolCalling(detection.endpoint) : false;
+  const toolCallOk = detection.endpoint
+    ? await validateToolCalling(detection.endpoint, loaded.name)
+    : false;
 
   if (toolCallOk && registryEntry && registryEntry.judgeQuality !== 'poor') {
     log.info(`Found loaded model: ${loaded.name} (${registryEntry.judgeQuality} quality)`);

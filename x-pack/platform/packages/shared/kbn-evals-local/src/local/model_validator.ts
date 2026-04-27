@@ -14,13 +14,13 @@ const log = {
  * Validate that a local model supports tool/function calling by sending a test request.
  * Returns true if the model can produce structured tool call responses.
  */
-export async function validateToolCalling(endpoint: string): Promise<boolean> {
+export async function validateToolCalling(endpoint: string, modelName?: string): Promise<boolean> {
   const chatUrl = endpoint.endsWith('/v1')
     ? `${endpoint}/chat/completions`
     : `${endpoint}/v1/chat/completions`;
 
   const testRequest = {
-    model: '',
+    model: modelName ?? '',
     messages: [
       {
         role: 'user',

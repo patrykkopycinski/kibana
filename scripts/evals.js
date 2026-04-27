@@ -461,7 +461,12 @@ function main() {
     require('@kbn/setup-node-env');
     var localModule = require('@kbn/evals-local');
     localModule.injectLocalConnector(args).then(function () {
+      // Sync process.argv with the filtered args so @kbn/evals CLI doesn't see --local flags
+      process.argv = [process.argv[0], process.argv[1]].concat(args);
       void require('@kbn/evals').cli.run();
+    }).catch(function (err) {
+      console.error('[evals-local] Failed to inject local connector:', err);
+      process.exit(1);
     });
     return;
   }

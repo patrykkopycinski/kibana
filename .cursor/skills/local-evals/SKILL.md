@@ -85,7 +85,33 @@ Then offer to create a PR with all updated data:
 node scripts/evals local benchmark --all --update-registry --create-pr
 ```
 
-## Workflow 4: Use Local Model for Any Eval
+## Workflow 4: Push Results to Golden Cluster
+
+When the user wants local eval results indexed into the shared Elasticsearch golden cluster:
+
+1. Ensure vault config exists at `x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json`
+   (or run `node scripts/evals init` to set it up)
+
+2. Use `--golden` flag to push results:
+   ```bash
+   # Run local evals and push results to golden cluster
+   node scripts/evals local --suite agent-builder --golden
+
+   # Same with a specific model
+   node scripts/evals local --suite agent-builder --model qwen2.5-32b-instruct --golden
+
+   # Or use a named export profile
+   node scripts/evals local --suite agent-builder --export-profile local
+   ```
+
+3. Results are indexed into `kibana-evaluations` data stream on the golden cluster with:
+   - Model metadata (local model name, parameters)
+   - Eval scores per evaluator
+   - Trace data (if OTEL exporters configured)
+
+This enables collecting quality data from local model runs for customer recommendations.
+
+## Workflow 5: Use Local Model for Any Eval
 
 When the user wants to use their local model with an existing eval command:
 

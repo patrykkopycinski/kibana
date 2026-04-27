@@ -363,6 +363,8 @@ function runFastHelp() {
   logInfo('    --keep-loaded               Keep model in memory after run');
   logInfo('    --validate-only             Validate model tool-calling support only');
   logInfo('    --list-models               List recommended models for this machine');
+  logInfo('    --golden                    Push results to golden cluster (uses vault config.json)');
+  logInfo('    --export-profile <name>     Use a specific export profile (e.g. local, config)');
   logInfo('  local benchmark [--model X]   Benchmark model(s) for quality and speed');
   logInfo('');
   logInfo('Flags (any command):');
@@ -378,6 +380,7 @@ function runFastHelp() {
   logInfo('  node scripts/evals run --suite agent-builder --judge eis-gpt-4.1');
   logInfo('  node scripts/evals local --suite agent-builder');
   logInfo('  node scripts/evals local --suite agent-builder --model qwen2.5-32b-instruct');
+  logInfo('  node scripts/evals local --suite agent-builder --golden');
   logInfo('  node scripts/evals run --suite agent-builder --local');
   return true;
 }

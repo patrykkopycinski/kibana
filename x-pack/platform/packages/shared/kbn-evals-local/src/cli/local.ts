@@ -25,6 +25,7 @@ interface CliOptions {
   suite?: string;
   model?: string;
   endpoint?: string;
+  exportProfile?: string;
   codeOnly: boolean;
   keepLoaded: boolean;
   stopServer: boolean;
@@ -70,6 +71,17 @@ function parseArgs(args: string[]): CliOptions {
         options.endpoint = value;
         break;
       }
+      case '--export-profile': {
+        const value = args[++i];
+        if (!value || value.startsWith('--')) {
+          throw new Error(`--export-profile requires a value, got: ${value}`);
+        }
+        options.exportProfile = value;
+        break;
+      }
+      case '--golden':
+        options.exportProfile = 'config';
+        break;
       case '--code-only':
         options.codeOnly = true;
         break;
@@ -167,6 +179,12 @@ export const localCli = {
       const evalArgs = ['run'];
       if (options.suite) {
         evalArgs.push('--suite', options.suite);
+      }
+      if (options.exportProfile) {
+        evalArgs.push('--export-profile', options.exportProfile);
+        log.info(
+          `Export profile: ${options.exportProfile} (results will be pushed to golden cluster)`
+        );
       }
       evalArgs.push(...options.args);
 

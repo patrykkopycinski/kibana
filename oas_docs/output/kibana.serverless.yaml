@@ -27048,6 +27048,25 @@ paths:
                                             type: array
                                   enabled:
                                     type: boolean
+                                  global_data_tags:
+                                    items:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        name:
+                                          description: The name of the custom field. Cannot contain spaces.
+                                          type: string
+                                        value:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                          description: The value of the custom field.
+                                      required:
+                                        - name
+                                        - value
+                                    maxItems: 100
+                                    nullable: true
+                                    type: array
                                   id:
                                     description: Package policy unique identifier.
                                     type: string
@@ -28208,6 +28227,25 @@ paths:
                                           type: array
                                 enabled:
                                   type: boolean
+                                global_data_tags:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      name:
+                                        description: The name of the custom field. Cannot contain spaces.
+                                        type: string
+                                      value:
+                                        anyOf:
+                                          - type: string
+                                          - type: number
+                                        description: The value of the custom field.
+                                    required:
+                                      - name
+                                      - value
+                                  maxItems: 100
+                                  nullable: true
+                                  type: array
                                 id:
                                   description: Package policy unique identifier.
                                   type: string
@@ -29140,6 +29178,25 @@ paths:
                                             type: array
                                   enabled:
                                     type: boolean
+                                  global_data_tags:
+                                    items:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        name:
+                                          description: The name of the custom field. Cannot contain spaces.
+                                          type: string
+                                        value:
+                                          anyOf:
+                                            - type: string
+                                            - type: number
+                                          description: The value of the custom field.
+                                      required:
+                                        - name
+                                        - value
+                                    maxItems: 100
+                                    nullable: true
+                                    type: array
                                   id:
                                     description: Package policy unique identifier.
                                     type: string
@@ -30056,6 +30113,25 @@ paths:
                                           type: array
                                 enabled:
                                   type: boolean
+                                global_data_tags:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      name:
+                                        description: The name of the custom field. Cannot contain spaces.
+                                        type: string
+                                      value:
+                                        anyOf:
+                                          - type: string
+                                          - type: number
+                                        description: The value of the custom field.
+                                    required:
+                                      - name
+                                      - value
+                                  maxItems: 100
+                                  nullable: true
+                                  type: array
                                 id:
                                   description: Package policy unique identifier.
                                   type: string
@@ -31225,6 +31301,25 @@ paths:
                                           type: array
                                 enabled:
                                   type: boolean
+                                global_data_tags:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      name:
+                                        description: The name of the custom field. Cannot contain spaces.
+                                        type: string
+                                      value:
+                                        anyOf:
+                                          - type: string
+                                          - type: number
+                                        description: The value of the custom field.
+                                    required:
+                                      - name
+                                      - value
+                                  maxItems: 100
+                                  nullable: true
+                                  type: array
                                 id:
                                   description: Package policy unique identifier.
                                   type: string
@@ -32266,6 +32361,25 @@ paths:
                                           type: array
                                 enabled:
                                   type: boolean
+                                global_data_tags:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      name:
+                                        description: The name of the custom field. Cannot contain spaces.
+                                        type: string
+                                      value:
+                                        anyOf:
+                                          - type: string
+                                          - type: number
+                                        description: The value of the custom field.
+                                    required:
+                                      - name
+                                      - value
+                                  maxItems: 100
+                                  nullable: true
+                                  type: array
                                 id:
                                   description: Package policy unique identifier.
                                   type: string
@@ -34412,6 +34526,24 @@ paths:
                 force:
                   description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
                   type: boolean
+                global_data_tags:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      name:
+                        description: The name of the custom field. Cannot contain spaces.
+                        type: string
+                      value:
+                        anyOf:
+                          - type: string
+                          - type: number
+                        description: The value of the custom field.
+                    required:
+                      - name
+                      - value
+                  maxItems: 100
+                  type: array
                 id:
                   description: Policy unique identifier.
                   type: string
@@ -34802,6 +34934,25 @@ paths:
                                 type: array
                       enabled:
                         type: boolean
+                      global_data_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              description: The name of the custom field. Cannot contain spaces.
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                              description: The value of the custom field.
+                          required:
+                            - name
+                            - value
+                        maxItems: 100
+                        nullable: true
+                        type: array
                       id:
                         description: Package policy unique identifier.
                         type: string
@@ -50590,6 +50741,25 @@ paths:
                                   type: array
                         enabled:
                           type: boolean
+                        global_data_tags:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                description: The name of the custom field. Cannot contain spaces.
+                                type: string
+                              value:
+                                anyOf:
+                                  - type: string
+                                  - type: number
+                                description: The value of the custom field.
+                            required:
+                              - name
+                              - value
+                          maxItems: 100
+                          nullable: true
+                          type: array
                         id:
                           description: Package policy unique identifier.
                           type: string
@@ -51174,6 +51344,25 @@ paths:
                     force:
                       description: Force package policy creation even if the package is not verified, or if the agent policy is managed.
                       type: boolean
+                    global_data_tags:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          name:
+                            description: The name of the custom field. Cannot contain spaces.
+                            type: string
+                          value:
+                            anyOf:
+                              - type: string
+                              - type: number
+                            description: The value of the custom field.
+                        required:
+                          - name
+                          - value
+                      maxItems: 100
+                      nullable: true
+                      type: array
                     id:
                       description: Package policy unique identifier
                       type: string
@@ -51771,6 +51960,25 @@ paths:
                                 type: array
                       enabled:
                         type: boolean
+                      global_data_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              description: The name of the custom field. Cannot contain spaces.
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                              description: The value of the custom field.
+                          required:
+                            - name
+                            - value
+                        maxItems: 100
+                        nullable: true
+                        type: array
                       id:
                         description: Package policy unique identifier.
                         type: string
@@ -52425,6 +52633,25 @@ paths:
                                   type: array
                         enabled:
                           type: boolean
+                        global_data_tags:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              name:
+                                description: The name of the custom field. Cannot contain spaces.
+                                type: string
+                              value:
+                                anyOf:
+                                  - type: string
+                                  - type: number
+                                description: The value of the custom field.
+                            required:
+                              - name
+                              - value
+                          maxItems: 100
+                          nullable: true
+                          type: array
                         id:
                           description: Package policy unique identifier.
                           type: string
@@ -53125,6 +53352,25 @@ paths:
                                 type: array
                       enabled:
                         type: boolean
+                      global_data_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              description: The name of the custom field. Cannot contain spaces.
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                              description: The value of the custom field.
+                          required:
+                            - name
+                            - value
+                        maxItems: 100
+                        nullable: true
+                        type: array
                       id:
                         description: Package policy unique identifier.
                         type: string
@@ -53722,6 +53968,25 @@ paths:
                       type: boolean
                     force:
                       type: boolean
+                    global_data_tags:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          name:
+                            description: The name of the custom field. Cannot contain spaces.
+                            type: string
+                          value:
+                            anyOf:
+                              - type: string
+                              - type: number
+                            description: The value of the custom field.
+                        required:
+                          - name
+                          - value
+                      maxItems: 100
+                      nullable: true
+                      type: array
                     inputs:
                       items:
                         additionalProperties: false
@@ -54312,6 +54577,25 @@ paths:
                                 type: array
                       enabled:
                         type: boolean
+                      global_data_tags:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            name:
+                              description: The name of the custom field. Cannot contain spaces.
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                              description: The value of the custom field.
+                          required:
+                            - name
+                            - value
+                        maxItems: 100
+                        nullable: true
+                        type: array
                       id:
                         description: Package policy unique identifier.
                         type: string
@@ -55350,6 +55634,25 @@ paths:
                                         type: array
                               enabled:
                                 type: boolean
+                              global_data_tags:
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    name:
+                                      description: The name of the custom field. Cannot contain spaces.
+                                      type: string
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                      description: The value of the custom field.
+                                  required:
+                                    - name
+                                    - value
+                                maxItems: 100
+                                nullable: true
+                                type: array
                               id:
                                 type: string
                               inputs:
@@ -55869,6 +56172,25 @@ paths:
                                 type: array
                               force:
                                 type: boolean
+                              global_data_tags:
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    name:
+                                      description: The name of the custom field. Cannot contain spaces.
+                                      type: string
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - type: number
+                                      description: The value of the custom field.
+                                  required:
+                                    - name
+                                    - value
+                                maxItems: 100
+                                nullable: true
+                                type: array
                               id:
                                 type: string
                               inputs:

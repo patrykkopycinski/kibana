@@ -47,7 +47,7 @@ export function updateRegistry(results: BenchmarkResult[], pkgDir: string): void
       existing.tokPerSecEstimate = result.tokPerSec || existing.tokPerSecEstimate;
       existing.toolCalling = result.toolCallingPass;
       const quality = deriveJudgeQuality(result);
-      if (quality !== 'poor' || !existing.toolCalling) {
+      if (quality !== 'poor') {
         existing.judgeQuality = quality as ModelConfig['judgeQuality'];
       }
     }

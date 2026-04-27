@@ -120,6 +120,11 @@ function listModels(): void {
 
 export const localCli = {
   async run(args: string[]): Promise<void> {
+    if (args[0] === 'benchmark') {
+      const { benchmarkCli } = await import('./benchmark');
+      return benchmarkCli.run(args.slice(1));
+    }
+
     const options = parseArgs(args);
 
     if (options.listModels) {

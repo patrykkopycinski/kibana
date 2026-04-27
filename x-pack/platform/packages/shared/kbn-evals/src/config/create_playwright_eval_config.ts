@@ -105,6 +105,6 @@ export function createPlaywrightEvalsConfig({
     projects: [...setupProjects, ...nextProjects],
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
-    timeout: timeout ?? 5 * 60_000,
+    timeout: timeout ?? (parseInt(process.env.EVAL_TASK_TIMEOUT_MS || '', 10) || 5 * 60_000),
   });
 }

@@ -38,7 +38,7 @@ export const LOCAL_TIER: LocalTierConfig = {
   optionalLlmEvaluators: LLM_EVALUATORS,
   thresholdMultiplier: 0.8,
   maxSamplesPerExperiment: 10,
-  taskTimeoutMs: 120_000,
+  taskTimeoutMs: 600_000,
 };
 
 /**

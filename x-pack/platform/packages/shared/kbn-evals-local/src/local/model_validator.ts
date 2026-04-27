@@ -50,7 +50,7 @@ export async function validateToolCalling(endpoint: string, modelName?: string):
 
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 30_000);
+    const timer = setTimeout(() => controller.abort(), 120_000);
 
     const response = await fetch(chatUrl, {
       method: 'POST',

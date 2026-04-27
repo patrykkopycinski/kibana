@@ -104,6 +104,37 @@ async function benchmarkSingleModel(model: ModelConfig, suite: string): Promise<
     };
   }
 
+  // Warm up the model so it's loaded in GPU before validation
+  log.info('Warming up model...');
+  try {
+    const warmupUrl = endpoint.replace('/v1', '') + '/api/generate';
+    await fetch(warmupUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: model.ollamaTag, prompt: 'hi', stream: false }),
+      signal: AbortSignal.timeout(60_000),
+    });
+  } catch {
+    // warmup via chat completions fallback
+    try {
+      const chatUrl = endpoint.endsWith('/v1')
+        ? `${endpoint}/chat/completions`
+        : `${endpoint}/v1/chat/completions`;
+      await fetch(chatUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer local-eval' },
+        body: JSON.stringify({
+          model: model.ollamaTag,
+          messages: [{ role: 'user', content: 'hi' }],
+          max_tokens: 5,
+        }),
+        signal: AbortSignal.timeout(60_000),
+      });
+    } catch {
+      // proceed anyway
+    }
+  }
+
   const toolCallingPass = await validateToolCalling(endpoint, model.ollamaTag);
   log.info(`Tool calling: ${toolCallingPass ? 'PASS' : 'FAIL'}`);
 

@@ -1,0 +1,12 @@
+{
+  "modelId": "qwen3-8b",
+  "modelName": "Qwen3-8B",
+  "ollamaTag": "qwen3:8b",
+  "suite": "llm-tasks",
+  "toolCallingPass": false,
+  "tokPerSec": 63,
+  "evalExitCode": 0,
+  "startedAt": "2026-04-27T15:33:20.266Z",
+  "durationMs": 219408,
+  "date": "2026-04-27"
+}

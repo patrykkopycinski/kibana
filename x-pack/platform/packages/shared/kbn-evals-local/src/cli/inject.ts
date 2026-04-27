@@ -26,11 +26,19 @@ export async function injectLocalConnector(args: string[]): Promise<void> {
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--local') continue;
     if (args[i] === '--local-endpoint') {
-      localEndpoint = args[++i];
+      const value = args[++i];
+      if (!value || value.startsWith('--')) {
+        throw new Error(`--local-endpoint requires a value, got: ${value}`);
+      }
+      localEndpoint = value;
       continue;
     }
     if (args[i] === '--local-model') {
-      localModel = args[++i];
+      const value = args[++i];
+      if (!value || value.startsWith('--')) {
+        throw new Error(`--local-model requires a value, got: ${value}`);
+      }
+      localModel = value;
       continue;
     }
     filteredArgs.push(args[i]);

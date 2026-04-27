@@ -73,6 +73,9 @@ export class ModelRegistry {
       .filter((m) => m.minRamGb <= ram)
       .sort((a, b) => a.priority - b.priority);
     if (eligible.length === 0) {
+      if (this.models.length === 0) {
+        throw new Error('No models available in the registry. Check models.json.');
+      }
       return this.models[this.models.length - 1];
     }
     return eligible[0];

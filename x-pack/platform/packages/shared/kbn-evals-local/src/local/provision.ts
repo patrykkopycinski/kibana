@@ -7,7 +7,7 @@
 
 import { execSync, spawn } from 'node:child_process';
 import type { RuntimeType } from './detect';
-import type { ModelConfig } from './models';
+import type { ModelConfig } from './model_registry';
 
 const log = {
   info: (msg: string) => process.stderr.write(`[evals-local] ${msg}\n`),
@@ -76,7 +76,12 @@ export async function ensureModel(runtime: RuntimeType, model: ModelConfig): Pro
   if (runtime === 'ollama') {
     try {
       const models = exec('ollama list');
-      if (!models.includes(model.ollamaTag.split(':')[0])) {
+      const modelName = model.ollamaTag.split(':')[0];
+      const modelExists = models.split('\n').some((line) => {
+        const firstCol = line.trim().split(/\s+/)[0] ?? '';
+        return firstCol === model.ollamaTag || firstCol.split(':')[0] === modelName;
+      });
+      if (!modelExists) {
         log.info(`Pulling ${model.name} (${model.ollamaTag})...`);
         exec(`ollama pull ${model.ollamaTag}`, 600_000);
       } else {

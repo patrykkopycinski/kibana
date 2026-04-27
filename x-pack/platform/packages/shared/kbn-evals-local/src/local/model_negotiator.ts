@@ -7,7 +7,7 @@
 
 import * as readline from 'node:readline';
 import type { DetectionResult } from './detect';
-import type { ModelConfig, ModelRegistry } from './models';
+import type { ModelConfig, ModelRegistry } from './model_registry';
 import { validateToolCalling } from './model_validator';
 
 const log = {
@@ -25,9 +25,16 @@ export interface NegotiationResult {
 async function promptUser(question: string): Promise<boolean> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
   return new Promise((resolve) => {
+    let answered = false;
     rl.question(question, (answer) => {
+      answered = true;
       rl.close();
       resolve(!answer || answer.toLowerCase().startsWith('y'));
+    });
+    rl.on('close', () => {
+      if (!answered) {
+        resolve(false);
+      }
     });
   });
 }

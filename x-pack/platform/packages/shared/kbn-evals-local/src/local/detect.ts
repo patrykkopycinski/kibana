@@ -82,7 +82,7 @@ function commandExists(cmd: string): boolean {
 
 export async function detect(customEndpoint?: string): Promise<DetectionResult> {
   if (customEndpoint) {
-    const isOllama = customEndpoint.includes('11434');
+    const isOllama = customEndpoint.includes(':11434');
     const runtime: RuntimeType = isOllama ? 'ollama' : 'lm-studio';
     const loadedModel = isOllama
       ? await getOllamaModels(customEndpoint.replace('/v1', ''))

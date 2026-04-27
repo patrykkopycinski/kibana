@@ -12,9 +12,10 @@ const LOCAL_CONNECTOR_ID = 'local-eval-model';
  * The format matches what parseConnectorsFromEnv() in @kbn/evals expects.
  */
 export function createLocalConnector(endpoint: string, modelName: string): string {
-  const apiUrl = endpoint.endsWith('/v1')
-    ? `${endpoint}/chat/completions`
-    : `${endpoint}/v1/chat/completions`;
+  const normalized = endpoint.replace(/\/+$/, '');
+  const apiUrl = normalized.endsWith('/v1')
+    ? `${normalized}/chat/completions`
+    : `${normalized}/v1/chat/completions`;
 
   const config = {
     [LOCAL_CONNECTOR_ID]: {

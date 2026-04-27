@@ -6,7 +6,7 @@
  */
 
 import { detect } from '../local/detect';
-import { ModelRegistry } from '../local/models';
+import { ModelRegistry } from '../local/model_registry';
 import { ensureRuntime, ensureModel } from '../local/provision';
 import { teardown } from '../local/teardown';
 
@@ -32,10 +32,20 @@ function parseBenchmarkArgs(args: string[]): BenchmarkOptions {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === '--model') options.model = args[++i];
-    else if (arg === '--all') options.all = true;
-    else if (arg === '--suite') options.suite = args[++i];
-    else if (arg === '--update-registry') options.updateRegistry = true;
+    if (arg === '--model') {
+      const value = args[++i];
+      if (!value || value.startsWith('--')) {
+        throw new Error(`--model requires a value, got: ${value}`);
+      }
+      options.model = value;
+    } else if (arg === '--all') options.all = true;
+    else if (arg === '--suite') {
+      const value = args[++i];
+      if (!value || value.startsWith('--')) {
+        throw new Error(`--suite requires a value, got: ${value}`);
+      }
+      options.suite = value;
+    } else if (arg === '--update-registry') options.updateRegistry = true;
     else if (arg === '--create-pr') options.createPr = true;
   }
 

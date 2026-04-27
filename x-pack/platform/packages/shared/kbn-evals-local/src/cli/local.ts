@@ -9,7 +9,7 @@ import { spawn as spawnChild } from 'node:child_process';
 import { totalmem } from 'node:os';
 import { resolve } from 'node:path';
 import { detect } from '../local/detect';
-import { ModelRegistry } from '../local/models';
+import { ModelRegistry } from '../local/model_registry';
 import { negotiateModel } from '../local/model_negotiator';
 import { ensureRuntime, ensureModel } from '../local/provision';
 import { teardown } from '../local/teardown';
@@ -126,10 +126,11 @@ export const localCli = {
 
     let endpoint: string;
     const modelToUse = negotiation.model;
+    let actualRuntime = detection.runtime;
 
     if (negotiation.action === 'provision') {
-      const runtime = await ensureRuntime();
-      endpoint = await ensureModel(runtime, modelToUse);
+      actualRuntime = await ensureRuntime();
+      endpoint = await ensureModel(actualRuntime, modelToUse);
     } else {
       endpoint = detection.endpoint!;
     }
@@ -167,7 +168,7 @@ export const localCli = {
       }
     } finally {
       await teardown({
-        runtime: detection.runtime,
+        runtime: actualRuntime,
         modelTag: modelToUse.ollamaTag || modelToUse.name,
         keepLoaded: options.keepLoaded,
         serverWasRunning: detection.serverWasRunning,

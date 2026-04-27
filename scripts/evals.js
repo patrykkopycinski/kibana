@@ -460,8 +460,10 @@ function main() {
     process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
     require('@kbn/setup-node-env');
     var localModule = require('@kbn/evals-local');
-    localModule.injectLocalConnector(args);
-    // Fall through to normal @kbn/evals CLI with connector injected
+    localModule.injectLocalConnector(args).then(function () {
+      void require('@kbn/evals').cli.run();
+    });
+    return;
   }
 
   process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';

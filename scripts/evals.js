@@ -356,6 +356,19 @@ function runFastHelp() {
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');
+  logInfo('  local [--suite <id>] [...]    Run evals with auto-provisioned local model');
+  logInfo('    --model <id>                Use a specific model (default: auto-select by RAM)');
+  logInfo('    --endpoint <url>            Use a custom local endpoint');
+  logInfo('    --code-only                 Skip LLM-as-judge evaluators (CODE only)');
+  logInfo('    --keep-loaded               Keep model in memory after run');
+  logInfo('    --validate-only             Validate model tool-calling support only');
+  logInfo('    --list-models               List recommended models for this machine');
+  logInfo('  local benchmark [--model X]   Benchmark model(s) for quality and speed');
+  logInfo('');
+  logInfo('Flags (any command):');
+  logInfo('  --local                       Inject local model connector (no provisioning)');
+  logInfo('  --local-model <name>          Local model name for --local');
+  logInfo('  --local-endpoint <url>        Local endpoint for --local');
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
@@ -363,6 +376,9 @@ function runFastHelp() {
   logInfo('  node scripts/evals stop');
   logInfo('  node scripts/evals logs --service scout');
   logInfo('  node scripts/evals run --suite agent-builder --judge eis-gpt-4.1');
+  logInfo('  node scripts/evals local --suite agent-builder');
+  logInfo('  node scripts/evals local --suite agent-builder --model qwen2.5-32b-instruct');
+  logInfo('  node scripts/evals run --suite agent-builder --local');
   return true;
 }
 
@@ -429,6 +445,23 @@ function main() {
     require('@kbn/setup-node-env');
     void require('@kbn/evals').cli.run();
     return;
+  }
+
+  // @kbn/evals-local: dedicated "local" subcommand (full orchestrator: provision, eval, teardown)
+  if (command === 'local') {
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    void require('@kbn/evals-local').localCli.run(args.slice(1));
+    return;
+  }
+
+  // @kbn/evals-local: --local flag on any other command (just injects the connector, no provisioning)
+  if (hasFlag(args, '--local')) {
+    process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
+    require('@kbn/setup-node-env');
+    var localModule = require('@kbn/evals-local');
+    localModule.injectLocalConnector(args);
+    // Fall through to normal @kbn/evals CLI with connector injected
   }
 
   process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';

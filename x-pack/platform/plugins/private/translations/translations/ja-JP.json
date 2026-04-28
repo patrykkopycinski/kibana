@@ -47068,7 +47068,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "ストリームアプリのウェルカム画像",
     "xpack.streams.streamDetailView.yourPreviewWillAppearHereImage": "プレビューはここに表示されます ストリームアプリの画像",
     "xpack.streams.streamNotFound.backButton": "Streamsに戻る",
-    "xpack.streams.streamNotFound.description": "ストリーム {streamName} は存在しません。",
     "xpack.streams.streamQualityDetails.loadingMessage": "読み込み中...",
     "xpack.streams.streamRouting.previewMatchesTooltipAriaLabel": "詳細情報",
     "xpack.streams.streamsDetailRouting.editConditionLabel": "ルーティング条件を編集",

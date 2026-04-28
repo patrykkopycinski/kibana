@@ -47069,7 +47069,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "流应用的欢迎图像",
     "xpack.streams.streamDetailView.yourPreviewWillAppearHereImage": "您的预览将在此处显示（数据流应用示意图）",
     "xpack.streams.streamNotFound.backButton": "返回 Streams",
-    "xpack.streams.streamNotFound.description": "流 {streamName} 不存在。",
     "xpack.streams.streamQualityDetails.loadingMessage": "正在加载……",
     "xpack.streams.streamRouting.previewMatchesTooltipAriaLabel": "其他信息",
     "xpack.streams.streamsDetailRouting.editConditionLabel": "编辑路由条件",

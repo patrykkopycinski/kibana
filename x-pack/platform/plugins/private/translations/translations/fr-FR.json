@@ -46917,7 +46917,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "Image de bienvenue pour l'application de flux",
     "xpack.streams.streamDetailView.yourPreviewWillAppearHereImage": "Votre aperçu apparaîtra ici (image pour l'application Streams)",
     "xpack.streams.streamNotFound.backButton": "Retour à Streams",
-    "xpack.streams.streamNotFound.description": "Le flux {streamName} n'existe pas.",
     "xpack.streams.streamQualityDetails.loadingMessage": "Chargement…",
     "xpack.streams.streamRouting.previewMatchesTooltipAriaLabel": "Informations supplémentaires",
     "xpack.streams.streamsDetailRouting.editConditionLabel": "Modifier la condition de routage",

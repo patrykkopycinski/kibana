@@ -46875,7 +46875,6 @@
     "xpack.streams.streamDetailView.welcomeImage": "Willkommensbild für die Streams-App",
     "xpack.streams.streamDetailView.yourPreviewWillAppearHereImage": "Ihre Vorschau wird hier als Bild für die Streams-App angezeigt",
     "xpack.streams.streamNotFound.backButton": "Zurück zu Streams",
-    "xpack.streams.streamNotFound.description": "Der Stream {streamName} existiert nicht.",
     "xpack.streams.streamQualityDetails.loadingMessage": "Wird geladen ...",
     "xpack.streams.streamRouting.previewMatchesTooltipAriaLabel": "Zusätzliche Informationen",
     "xpack.streams.streamsDetailRouting.editConditionLabel": "Routing-Bedingung bearbeiten",

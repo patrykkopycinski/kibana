@@ -19757,7 +19757,6 @@
     "xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder": "サービストークンを指定",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel": "ホスト",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder": "ホストURLを指定",
-    "xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout": "リモートのElasticsearch出力はサーバーレスプロジェクトへの接続をサポートしていません。",
     "xpack.fleet.settings.editOutputFlyout.remoteESTypeText": "出力ホスト、リモートクラスターのサービストークン、および詳細なYAML構成を入力します。これらのパラメーターの使い方については{doc}を参照してください。",
     "xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink": "代わりにシークレットストレージを使用する場合はクリックしてください",
     "xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle": "このフィールドをシークレットとして保存してください。現在、プレーンテキストとして保存されるように設定されています。{enableSecretLink}",

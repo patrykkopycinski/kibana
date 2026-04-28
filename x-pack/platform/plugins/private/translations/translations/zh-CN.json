@@ -19759,7 +19759,6 @@
     "xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder": "指定服务令牌",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel": "主机",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder": "指定主机 URL",
-    "xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout": "远程 Elasticsearch 输出不支持连接到无服务器项目。",
     "xpack.fleet.settings.editOutputFlyout.remoteESTypeText": "输入您的输出主机、远程集群的服务令牌和任何高级 YAML 配置。在 {doc} 中详细了解如何使用这些参数。",
     "xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink": "单击以改为使用秘密存储",
     "xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle": "此字段应存储为机密，当前它设置为以纯文本格式存储。{enableSecretLink}",

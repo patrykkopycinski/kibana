@@ -19692,7 +19692,6 @@
     "xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder": "Spécifier un jeton de service",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel": "Hôtes",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder": "Indiquer l'URL de l'hôte",
-    "xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout": "La sortie Elasticsearch distante ne prend pas en charge la connectivité à un projet sans serveur.",
     "xpack.fleet.settings.editOutputFlyout.remoteESTypeText": "Indiquez vos hôtes de sortie, le jeton de service pour votre cluster distant et toute configuration YAML avancée. Découvrez comment utiliser ces paramètres dans {doc}.",
     "xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink": "Cliquer pour utiliser un stockage secret à la place",
     "xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle": "Ce champ doit être stocké en tant que secret. Il est actuellement stocké en texte brut. {enableSecretLink}",

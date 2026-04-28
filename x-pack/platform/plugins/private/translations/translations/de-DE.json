@@ -19679,7 +19679,6 @@
     "xpack.fleet.settings.editOutputFlyout.remoteESHostPlaceholder": "Service-Token angeben",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputLabel": "Hosts",
     "xpack.fleet.settings.editOutputFlyout.remoteEsHostsInputPlaceholder": "Host-URL angeben",
-    "xpack.fleet.settings.editOutputFlyout.remoteESOutputTypeCallout": "Remote-Elasticsearch-Ausgang unterstützt keine Verbindung zu einem serverlosen Projekt.",
     "xpack.fleet.settings.editOutputFlyout.remoteESTypeText": "Geben Sie Ihre Ausgangshosts, das Service-Token für Ihren Remote-Cluster und eine beliebige erweiterte YAML-Konfiguration ein. Erfahren Sie mehr darüber, wie Sie diese Parameter in {doc} verwenden können.",
     "xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink": "Klicken Sie, um stattdessen den geheimen Speicher zu verwenden",
     "xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle": "Dieses Feld sollte als Geheimnis gespeichert werden; derzeit ist es jedoch so eingestellt, dass es als Klartext gespeichert wird. {enableSecretLink}",

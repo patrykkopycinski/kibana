@@ -29040,7 +29040,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the download source
+          in: path
           name: sourceId
           required: true
           schema:
@@ -29120,7 +29121,8 @@ paths:
         Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-settings-read.
       operationId: get-fleet-agent-download-sources-sourceid
       parameters:
-        - in: path
+        - description: The ID of the download source
+          in: path
           name: sourceId
           required: true
           schema:
@@ -29311,7 +29313,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the download source
+          in: path
           name: sourceId
           required: true
           schema:
@@ -29607,22 +29610,26 @@ paths:
         List all agent policies.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
       operationId: get-fleet-agent-policies
       parameters:
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
             type: number
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             type: number
-        - in: query
+        - description: Field to sort results by
+          in: query
           name: sortField
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort order, ascending or descending
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -29630,12 +29637,14 @@ paths:
               - desc
               - asc
             type: string
-        - in: query
+        - description: When true, only show policies with upgradeable agents
+          in: query
           name: showUpgradeable
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
@@ -29659,7 +29668,8 @@ paths:
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -30597,7 +30607,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: Whether to add the system integration to the new agent policy
+          in: query
           name: sys_monitoring
           required: false
           schema:
@@ -31766,7 +31777,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -32723,12 +32735,14 @@ paths:
         Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-agents-read OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid
       parameters:
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -33662,12 +33676,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -34833,7 +34849,8 @@ paths:
         Get the auto-upgrade status for agents assigned to an agent policy.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status
       parameters:
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
@@ -34951,12 +34968,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -35893,7 +35912,8 @@ paths:
         Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
@@ -36010,7 +36030,8 @@ paths:
         Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
@@ -36633,7 +36654,8 @@ paths:
         Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND fleet-settings-read.
       operationId: get-fleet-agent-policies-agentpolicyid-outputs
       parameters:
-        - in: path
+        - description: The ID of the agent policy
+          in: path
           name: agentPolicyId
           required: true
           schema:
@@ -36798,6 +36820,7 @@ paths:
               type: object
               properties:
                 agentPolicyId:
+                  description: The ID of the agent policy
                   type: string
                 force:
                   description: bypass validation checks that can prevent agent policy deletion
@@ -37035,12 +37058,14 @@ paths:
         Get a summary of agent statuses for a given agent policy.
       operationId: get-fleet-agent-status
       parameters:
-        - in: query
+        - description: Filter by agent policy ID
+          in: query
           name: policyId
           required: false
           schema:
             type: string
-        - in: query
+        - description: Filter by one or more agent policy IDs
+          in: query
           name: policyIds
           required: false
           schema:
@@ -37048,7 +37073,8 @@ paths:
               type: string
             maxItems: 1000
             type: array
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
@@ -37161,7 +37187,8 @@ paths:
         Get the data streams that an agent is actively sending data to.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agent-status-data
       parameters:
-        - in: query
+        - description: Agent IDs to check data for, as an array or comma-separated string
+          in: query
           name: agentsIds
           required: true
           schema:
@@ -37169,17 +37196,20 @@ paths:
               type: string
             maxItems: 10000
             type: array
-        - in: query
+        - description: Filter by integration package name
+          in: query
           name: pkgName
           required: false
           schema:
             type: string
-        - in: query
+        - description: Filter by integration package version
+          in: query
           name: pkgVersion
           required: false
           schema:
             type: string
-        - in: query
+        - description: When true, return a preview of the ingested data
+          in: query
           name: previewData
           required: false
           schema:
@@ -38553,58 +38583,68 @@ paths:
         List agents, with optional filtering and pagination.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents
       parameters:
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
             type: number
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             default: 20
             type: number
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
             type: string
-        - in: query
+        - description: When true, include agentless agents in the results
+          in: query
           name: showAgentless
           required: false
           schema:
             default: true
             type: boolean
-        - in: query
+        - description: When true, include inactive agents in the results
+          in: query
           name: showInactive
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, include CPU and memory metrics in the response
+          in: query
           name: withMetrics
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, only return agents that are upgradeable
+          in: query
           name: showUpgradeable
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, return a summary of agent statuses in the response
+          in: query
           name: getStatusSummary
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: Field to sort results by
+          in: query
           name: sortField
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort order, ascending or descending
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -38612,22 +38652,26 @@ paths:
               - asc
               - desc
             type: string
-        - in: query
+        - description: JSON-encoded array of sort values for `search_after` pagination
+          in: query
           name: searchAfter
           required: false
           schema:
             type: string
-        - in: query
+        - description: When true, opens a new point-in-time for pagination
+          in: query
           name: openPit
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: Point-in-time ID for pagination
+          in: query
           name: pitId
           required: false
           schema:
             type: string
-        - in: query
+        - description: Duration to keep the point-in-time alive, for example, `1m`
+          in: query
           name: pitKeepAlive
           required: false
           schema:
@@ -39186,7 +39230,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -39269,12 +39314,14 @@ paths:
         Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-agentid
       parameters:
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, include CPU and memory metrics in the response
+          in: query
           name: withMetrics
           required: false
           schema:
@@ -39730,7 +39777,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -40203,7 +40251,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -40452,7 +40501,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -40697,7 +40747,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -40785,7 +40836,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -40966,7 +41018,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -41033,7 +41086,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -41120,7 +41174,8 @@ paths:
         Get a list of files uploaded by a specific agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-agentid-uploads
       parameters:
-        - in: path
+        - description: The agent ID
+          in: path
           name: agentId
           required: true
           schema:
@@ -41229,29 +41284,34 @@ paths:
         Get the current status of recent agent actions.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-action-status
       parameters:
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
             default: 0
             type: number
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             default: 20
             type: number
-        - in: query
+        - description: Return actions created before this date
+          in: query
           name: date
           required: false
           schema:
             type: string
-        - in: query
+        - description: Return only the latest N actions
+          in: query
           name: latest
           required: false
           schema:
             type: number
-        - in: query
+        - description: Number of error details to include per action
+          in: query
           name: errorSize
           required: false
           schema:
@@ -41438,7 +41498,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the action to cancel
+          in: path
           name: actionId
           required: true
           schema:
@@ -42540,7 +42601,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the uploaded file
+          in: path
           name: fileId
           required: true
           schema:
@@ -42614,12 +42676,14 @@ paths:
         Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-files-fileid-filename
       parameters:
-        - in: path
+        - description: The ID of the uploaded file
+          in: path
           name: fileId
           required: true
           schema:
             type: string
-        - in: path
+        - description: The name of the uploaded file
+          in: path
           name: fileName
           required: true
           schema:
@@ -42886,12 +42950,14 @@ paths:
         Get a list of all tags used across enrolled agents.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
       operationId: get-fleet-agents-tags
       parameters:
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
             type: string
-        - in: query
+        - description: When true, include tags from inactive agents
+          in: query
           name: showInactive
           required: false
           schema:
@@ -42968,7 +43034,8 @@ paths:
         Check whether the current user has the required permissions to use Fleet. Optionally verifies Fleet Server setup privileges.
       operationId: get-fleet-check-permissions
       parameters:
-        - in: query
+        - description: When true, check Fleet Server setup privileges in addition to standard Fleet privileges
+          in: query
           name: fleetServerSetup
           required: false
           schema:
@@ -44046,19 +44113,22 @@ paths:
         List all enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.
       operationId: get-fleet-enrollment-api-keys
       parameters:
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
             default: 1
             type: number
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             default: 20
             type: number
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
@@ -44365,7 +44435,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the enrollment API key
+          in: path
           name: keyId
           required: true
           schema:
@@ -44447,7 +44518,8 @@ paths:
         Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all OR fleet-setup.
       operationId: get-fleet-enrollment-api-keys-keyid
       parameters:
-        - in: path
+        - description: The ID of the enrollment API key
+          in: path
           name: keyId
           required: true
           schema:
@@ -44700,12 +44772,14 @@ paths:
         Get a list of integration categories.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-categories
       parameters:
-        - in: query
+        - description: When true, include prerelease packages in the results
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include categories that only contain policy templates
+          in: query
           name: include_policy_templates
           required: false
           schema:
@@ -44994,7 +45068,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
@@ -45079,7 +45154,8 @@ paths:
         Get a list of data streams created by installed integration packages.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-data-streams
       parameters:
-        - in: query
+        - description: Filter by data stream type
+          in: query
           name: type
           required: false
           schema:
@@ -45090,12 +45166,14 @@ paths:
               - synthetics
               - profiling
             type: string
-        - in: query
+        - description: Filter data streams by dataset name
+          in: query
           name: datasetQuery
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort order, ascending or descending
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -45104,7 +45182,8 @@ paths:
               - asc
               - desc
             type: string
-        - in: query
+        - description: When true, only return data streams that are not associated with a package
+          in: query
           name: uncategorisedOnly
           required: false
           schema:
@@ -45190,22 +45269,26 @@ paths:
         Get a list of integration packages available in the registry.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages
       parameters:
-        - in: query
+        - description: Filter packages by category
+          in: query
           name: category
           required: false
           schema:
             type: string
-        - in: query
+        - description: When true, include prerelease packages in the results
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, exclude the install status from the response
+          in: query
           name: excludeInstallStatus
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include the number of package policies per package
+          in: query
           name: withPackagePoliciesCount
           required: false
           schema:
@@ -45759,13 +45842,15 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: When true, ignore mapping update errors during installation
+          in: query
           name: ignoreMappingUpdateErrors
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, skip data stream rollover after installation
+          in: query
           name: skipDataStreamRollover
           required: false
           schema:
@@ -45779,6 +45864,10 @@ paths:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
                 value: <binary package archive>
           application/gzip; application/zip:
+            examples:
+              postInstallByUploadRequestExample:
+                description: Upload a .zip or .tar.gz package archive (max 100MB)
+                value: <binary package archive>
             schema:
               format: binary
               type: string
@@ -45786,6 +45875,15 @@ paths:
         '200':
           content:
             application/gzip; application/zip:
+              examples:
+                postInstallByUploadExample:
+                  description: Package successfully installed from upload
+                  value:
+                    _meta:
+                      install_source: upload
+                    items:
+                      - id: my-custom-package-logs-default
+                        type: index_template
               schema:
                 additionalProperties: false
                 type: object
@@ -45877,6 +45975,13 @@ paths:
         '400':
           content:
             application/gzip; application/zip:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
               schema:
                 additionalProperties: false
                 description: Generic Error
@@ -45929,7 +46034,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: When true, allow installing prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
@@ -46777,12 +46883,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, delete the package even if it has active package policies
+          in: query
           name: force
           required: false
           schema:
@@ -46910,27 +47018,32 @@ paths:
         Get information about a package by name, returning the latest installed or available version.
       operationId: get-fleet-epm-packages-pkgname
       parameters:
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, returns the package even if the signature cannot be verified
+          in: query
           name: ignoreUnverified
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, return the full package info including assets
+          in: query
           name: full
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include package metadata such as whether it has package policies
+          in: query
           name: withMetadata
           required: false
           schema:
@@ -47555,23 +47668,27 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, allow installing prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, ignore mapping update errors during installation
+          in: query
           name: ignoreMappingUpdateErrors
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, skip data stream rollover after installation
+          in: query
           name: skipDataStreamRollover
           required: false
           schema:
@@ -47747,7 +47864,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
@@ -48372,17 +48490,20 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, delete the package even if it has active package policies
+          in: query
           name: force
           required: false
           schema:
@@ -48510,32 +48631,38 @@ paths:
         Get information about a specific version of a package.
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, returns the package even if the signature cannot be verified
+          in: query
           name: ignoreUnverified
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, return the full package info including assets
+          in: query
           name: full
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, include package metadata such as whether it has package policies
+          in: query
           name: withMetadata
           required: false
           schema:
@@ -49160,28 +49287,33 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, allow installing prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, ignore mapping update errors during installation
+          in: query
           name: ignoreMappingUpdateErrors
           required: false
           schema:
             default: false
             type: boolean
-        - in: query
+        - description: When true, skip data stream rollover after installation
+          in: query
           name: skipDataStreamRollover
           required: false
           schema:
@@ -49357,12 +49489,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
@@ -49980,17 +50114,20 @@ paths:
         Get the contents of a specific file from a package.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-pkgname-pkgversion-filepath
       parameters:
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: path
+        - description: File path within the package
+          in: path
           name: filePath
           required: true
           schema:
@@ -50059,17 +50196,20 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: The ID of the package policy
+          in: query
           name: packagePolicyId
           required: true
           schema:
@@ -50246,12 +50386,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
@@ -50329,12 +50471,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
@@ -50434,12 +50578,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
@@ -50532,17 +50678,20 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, allow prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
@@ -50827,7 +50976,8 @@ paths:
         Get usage statistics for a specific package, such as the number of agent policies using it.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-pkgname-stats
       parameters:
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
@@ -50907,7 +51057,8 @@ paths:
         Get a list of all currently installed integration packages.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-packages-installed
       parameters:
-        - in: query
+        - description: Filter by data stream type
+          in: query
           name: dataStreamType
           required: false
           schema:
@@ -50918,17 +51069,20 @@ paths:
               - synthetics
               - profiling
             type: string
-        - in: query
+        - description: When true, only return packages with active data streams
+          in: query
           name: showOnlyActiveDataStreams
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: Filter packages by name
+          in: query
           name: nameQuery
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort values from the previous page for `search_after` pagination
+          in: query
           name: searchAfter
           required: false
           schema:
@@ -50938,13 +51092,15 @@ paths:
                 - type: number
             maxItems: 10
             type: array
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             default: 15
             type: number
-        - in: query
+        - description: Sort order, ascending or descending
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -51166,17 +51322,20 @@ paths:
         Get an inputs template for a package, used to pre-populate package policy forms.<br/><br/>[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.
       operationId: get-fleet-epm-templates-pkgname-pkgversion-inputs
       parameters:
-        - in: path
+        - description: Package name
+          in: path
           name: pkgName
           required: true
           schema:
             type: string
-        - in: path
+        - description: Package version
+          in: path
           name: pkgVersion
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Output format for the inputs template: json, yml, or yaml'
+          in: query
           name: format
           required: false
           schema:
@@ -51186,12 +51345,14 @@ paths:
               - yml
               - yaml
             type: string
-        - in: query
+        - description: When true, allow prerelease versions
+          in: query
           name: prerelease
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: When true, return inputs even if the package signature cannot be verified
+          in: query
           name: ignoreUnverified
           required: false
           schema:
@@ -51913,7 +52074,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the Fleet Server host
+          in: path
           name: itemId
           required: true
           schema:
@@ -51993,7 +52155,8 @@ paths:
         Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-fleet-server-hosts-itemid
       parameters:
-        - in: path
+        - description: The ID of the Fleet Server host
+          in: path
           name: itemId
           required: true
           schema:
@@ -52189,7 +52352,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the Fleet Server host
+          in: path
           name: itemId
           required: true
           schema:
@@ -52614,17 +52778,20 @@ paths:
         Get the Kubernetes manifest for deploying Elastic Agent.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes
       parameters:
-        - in: query
+        - description: If true, returns the manifest as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: Fleet Server host URL to include in the manifest
+          in: query
           name: fleetServer
           required: false
           schema:
             type: string
-        - in: query
+        - description: Enrollment token to include in the manifest
+          in: query
           name: enrolToken
           required: false
           schema:
@@ -52694,17 +52861,20 @@ paths:
         Download the Kubernetes manifest for deploying Elastic Agent.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
       operationId: get-fleet-kubernetes-download
       parameters:
-        - in: query
+        - description: If true, returns the manifest as a downloadable file
+          in: query
           name: download
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: Fleet Server host URL to include in the manifest
+          in: query
           name: fleetServer
           required: false
           schema:
             type: string
-        - in: query
+        - description: Enrollment token to include in the manifest
+          in: query
           name: enrolToken
           required: false
           schema:
@@ -52875,7 +53045,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: Set to true to confirm you understand the risks of rotating the key pair
+          in: query
           name: acknowledge
           required: false
           schema:
@@ -53174,7 +53345,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the output
+          in: path
           name: outputId
           required: true
           schema:
@@ -53272,7 +53444,8 @@ paths:
         Get output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read OR fleet-agent-policies-read.
       operationId: get-fleet-outputs-outputid
       parameters:
-        - in: path
+        - description: The ID of the output
+          in: path
           name: outputId
           required: true
           schema:
@@ -53370,7 +53543,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the output
+          in: path
           name: outputId
           required: true
           schema:
@@ -53478,7 +53652,8 @@ paths:
         Get the latest health status of an output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-outputs-outputid-health
       parameters:
-        - in: path
+        - description: The ID of the output
+          in: path
           name: outputId
           required: true
           schema:
@@ -53559,22 +53734,26 @@ paths:
         List all package policies.
       operationId: get-fleet-package-policies
       parameters:
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
             type: number
-        - in: query
+        - description: Number of results per page
+          in: query
           name: perPage
           required: false
           schema:
             type: number
-        - in: query
+        - description: Field to sort results by
+          in: query
           name: sortField
           required: false
           schema:
             type: string
-        - in: query
+        - description: Sort order, ascending or descending
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -53582,17 +53761,20 @@ paths:
               - desc
               - asc
             type: string
-        - in: query
+        - description: When true, only show policies with available upgrades
+          in: query
           name: showUpgradeable
           required: false
           schema:
             type: boolean
-        - in: query
+        - description: A KQL query string to filter results
+          in: query
           name: kuery
           required: false
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -53600,7 +53782,8 @@ paths:
               - simplified
               - legacy
             type: string
-        - in: query
+        - description: When true, include the agent count per package policy
+          in: query
           name: withAgentCount
           required: false
           schema:
@@ -54230,7 +54413,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -55468,7 +55652,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -56133,12 +56318,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the package policy
+          in: path
           name: packagePolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: When true, delete the package policy even if it is managed
+          in: query
           name: force
           required: false
           schema:
@@ -56207,12 +56394,14 @@ paths:
         Get a package policy by ID.
       operationId: get-fleet-package-policies-packagepolicyid
       parameters:
-        - in: path
+        - description: The ID of the package policy
+          in: path
           name: packagePolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -56849,12 +57038,14 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the package policy
+          in: path
           name: packagePolicyId
           required: true
           schema:
             type: string
-        - in: query
+        - description: 'Format for the response: simplified or legacy'
+          in: query
           name: format
           required: false
           schema:
@@ -59780,7 +59971,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the proxy
+          in: path
           name: itemId
           required: true
           schema:
@@ -59860,7 +60052,8 @@ paths:
         Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read.
       operationId: get-fleet-proxies-itemid
       parameters:
-        - in: path
+        - description: The ID of the proxy
+          in: path
           name: itemId
           required: true
           schema:
@@ -59983,7 +60176,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: The ID of the proxy
+          in: path
           name: itemId
           required: true
           schema:
@@ -60138,7 +60332,8 @@ paths:
         Get the synchronization status of remote integrations for a specific output by its ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.
       operationId: get-fleet-remote-synced-integrations-outputid-remote-status
       parameters:
-        - in: path
+        - description: The ID of the output
+          in: path
           name: outputId
           required: true
           schema:
@@ -61207,7 +61402,8 @@ paths:
           schema:
             maxLength: 50
             type: string
-        - in: query
+        - description: Partial match filtering for uninstall token values
+          in: query
           name: search
           required: false
           schema:
@@ -61220,7 +61416,8 @@ paths:
           schema:
             minimum: 5
             type: number
-        - in: query
+        - description: Page number
+          in: query
           name: page
           required: false
           schema:
@@ -61338,7 +61535,8 @@ paths:
         Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: get-fleet-uninstall-tokens-uninstalltokenid
       parameters:
-        - in: path
+        - description: The ID of the uninstall token
+          in: path
           name: uninstallTokenId
           required: true
           schema:

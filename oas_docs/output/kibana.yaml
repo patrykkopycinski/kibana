@@ -80805,6 +80805,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createShortUrlRequest:
+                description: Request a short URL that resolves to a dashboard with a preset time range.
+                summary: Create a short URL for a dashboard locator
+                value:
+                  locatorId: DASHBOARD_APP_LOCATOR
+                  params:
+                    dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                    timeRange:
+                      from: now-7d
+                      to: now
+                  slug: my-dashboard
             schema:
               type: object
               properties:
@@ -80833,6 +80845,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                createShortUrlResponse:
+                  description: The created short URL record.
+                  summary: Short URL created
+                  value:
+                    accessCount: 0
+                    accessDate: 1767225600000
+                    createDate: 1767225600000
+                    id: c54b04f5d4b3aa3c
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
+                      version: 9.4.0
+                    slug: my-dashboard
               schema:
                 $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
           description: Indicates a successful call.
@@ -80859,6 +80889,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                resolveShortUrlResponse:
+                  description: The short URL record matching the given slug.
+                  summary: Short URL resolved by slug
+                  value:
+                    accessCount: 12
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
+                    id: c54b04f5d4b3aa3c
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
+                      version: 9.4.0
+                    slug: my-dashboard
               schema:
                 $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
           description: Indicates a successful call.
@@ -80896,6 +80944,24 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getShortUrlResponse:
+                  description: The short URL record matching the given identifier.
+                  summary: Short URL retrieved by ID
+                  value:
+                    accessCount: 12
+                    accessDate: 1767744000000
+                    createDate: 1767225600000
+                    id: c54b04f5d4b3aa3c
+                    locator:
+                      id: DASHBOARD_APP_LOCATOR
+                      state:
+                        dashboardId: edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b
+                        timeRange:
+                          from: now-7d
+                          to: now
+                      version: 9.4.0
+                    slug: my-dashboard
               schema:
                 $ref: '#/components/schemas/Short_URL_APIs_urlResponse'
           description: Indicates a successful call.
@@ -130186,11 +130252,16 @@ components:
       type: object
       properties:
         accessCount:
+          description: Number of times the short URL has been resolved.
           type: integer
         accessDate:
-          type: string
+          description: Unix epoch (milliseconds) of the last time the short URL was resolved. Set to the creation time when the URL has never been accessed.
+          format: int64
+          type: integer
         createDate:
-          type: string
+          description: Unix epoch (milliseconds) when the short URL was created.
+          format: int64
+          type: integer
         id:
           description: The identifier for the short URL.
           type: string

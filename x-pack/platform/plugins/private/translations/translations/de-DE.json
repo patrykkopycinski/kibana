@@ -32260,8 +32260,6 @@
     "xpack.ml.splom.randomScoringLabel": "Zufällige Wertung",
     "xpack.ml.splom.sampleSizeInfoTooltip": "Anzahl der Dokumente, die in der Streudiagrammmatrix angezeigt werden sollen.",
     "xpack.ml.splom.sampleSizeLabel": "Stichprobengröße",
-    "xpack.ml.splom.toggleOff": "Aus",
-    "xpack.ml.splom.toggleOn": "An",
     "xpack.ml.splomSpec.outlierScoreThresholdName": "Schwellenwert für Ausreißerwert:",
     "xpack.ml.stepDefineForm.invalidQuery": "Ungültige Abfrage",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "Suchen Sie z. B. nach {example}",

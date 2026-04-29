@@ -32378,8 +32378,6 @@
     "xpack.ml.splom.randomScoringLabel": "随机评分",
     "xpack.ml.splom.sampleSizeInfoTooltip": "在散点图矩阵中药显示的文档数量。",
     "xpack.ml.splom.sampleSizeLabel": "样例大小",
-    "xpack.ml.splom.toggleOff": "关闭",
-    "xpack.ml.splom.toggleOn": "开启",
     "xpack.ml.splomSpec.outlierScoreThresholdName": "离群值分数阈值：",
     "xpack.ml.stepDefineForm.invalidQuery": "无效查询",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "搜索，如 {example}）",

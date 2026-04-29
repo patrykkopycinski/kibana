@@ -32374,8 +32374,6 @@
     "xpack.ml.splom.randomScoringLabel": "ランダムスコアリング",
     "xpack.ml.splom.sampleSizeInfoTooltip": "散布図マトリックスに表示するドキュメントの数。",
     "xpack.ml.splom.sampleSizeLabel": "サンプルサイズ",
-    "xpack.ml.splom.toggleOff": "オフ",
-    "xpack.ml.splom.toggleOn": "オン",
     "xpack.ml.splomSpec.outlierScoreThresholdName": "異常スコアしきい値：",
     "xpack.ml.stepDefineForm.invalidQuery": "無効なクエリー",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "{example}の検索",

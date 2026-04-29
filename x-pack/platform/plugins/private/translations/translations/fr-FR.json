@@ -32196,8 +32196,6 @@
     "xpack.ml.splom.randomScoringLabel": "Scores aléatoires",
     "xpack.ml.splom.sampleSizeInfoTooltip": "Quantité de documents à afficher dans la matrice de nuages de points.",
     "xpack.ml.splom.sampleSizeLabel": "Taille de l'échantillon",
-    "xpack.ml.splom.toggleOff": "Arrêt",
-    "xpack.ml.splom.toggleOn": "Marche",
     "xpack.ml.splomSpec.outlierScoreThresholdName": "Seuil de score d'aberrations :",
     "xpack.ml.stepDefineForm.invalidQuery": "Requête non valide",
     "xpack.ml.stepDefineForm.queryPlaceholderKql": "Rechercher par ex. {example}",

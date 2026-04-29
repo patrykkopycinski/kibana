@@ -66602,8 +66602,6 @@ paths:
                       maximum: 9007199254740991
                       minimum: -9007199254740991
                       type: integer
-                    filter:
-                      type: string
                     frequency:
                       pattern: '[smdh]$'
                       type: string
@@ -74150,7 +74148,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install the Entity Store, creating engines for the specified entity types and configuring log extraction.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+        Install the Entity Store and create engines for the specified entity types. A single `logExtraction` configuration is shared across all entity types. Supply it once at install to customize settings; omit it (or send an empty object) to use defaults on first install or preserve the existing configuration on re-install. To change settings after install, use the update endpoint.<br/><br/>[Required authorization] Route required privileges: securitySolution.
       operationId: post-security-entity-store-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -74183,7 +74181,6 @@ paths:
                   logExtraction:
                     delay: 2m
                     fieldHistoryLength: 20
-                    filter: 'host.os.type: linux'
                     frequency: 5m
                     lookbackPeriod: 12h
             schema:
@@ -74235,9 +74232,6 @@ paths:
                       maximum: 9007199254740991
                       minimum: -9007199254740991
                       type: integer
-                    filter:
-                      default: ''
-                      type: string
                     frequency:
                       default: 30s
                       pattern: '[smdh]$'

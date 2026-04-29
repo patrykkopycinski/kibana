@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export {
-  API_HEADERS,
-  RULE_API_PATH,
-  INSIGHTS_API_PATH,
-  ALERTING_EVENTS_INDEX,
-  RULE_DOCTOR_INSIGHTS_INDEX,
-  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from './constants';
+export const ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID =
+  'observability:alerting:experimentalFeatures';
+
+export const ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID =
+  'observability:alerting:ruleDoctorInterval';

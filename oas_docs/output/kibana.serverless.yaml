@@ -74233,7 +74233,7 @@ paths:
                       minimum: -9007199254740991
                       type: integer
                     frequency:
-                      default: 30s
+                      default: 1m
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:

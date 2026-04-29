@@ -529,8 +529,6 @@
     "console.settingsPage.generalSettingsLabel": "Allgemeine Einstellungen",
     "console.settingsPage.indicesAndAliasesLabelText": "Indizes und Aliasse",
     "console.settingsPage.manualRefreshLabel": "Vorschläge zur Autovervollständigung manuell aktualisieren",
-    "console.settingsPage.offLabel": "Aus",
-    "console.settingsPage.onLabel": "An",
     "console.settingsPage.pageDescription": "Passen Sie die Konsole an Ihren Workflow an.",
     "console.settingsPage.pageTitle": "Konsoleinstellungen",
     "console.settingsPage.refreshButtonLabel": "Aktualisieren",

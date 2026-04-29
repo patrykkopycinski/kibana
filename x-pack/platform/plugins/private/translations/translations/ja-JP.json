@@ -529,8 +529,6 @@
     "console.settingsPage.generalSettingsLabel": "一般設定",
     "console.settingsPage.indicesAndAliasesLabelText": "インデックスとエイリアス",
     "console.settingsPage.manualRefreshLabel": "自動入力候補を手動で更新",
-    "console.settingsPage.offLabel": "オフ",
-    "console.settingsPage.onLabel": "オン",
     "console.settingsPage.pageDescription": "ワークフローに合わせてコンソールをカスタマイズします。",
     "console.settingsPage.pageTitle": "コンソール設定",
     "console.settingsPage.refreshButtonLabel": "更新",

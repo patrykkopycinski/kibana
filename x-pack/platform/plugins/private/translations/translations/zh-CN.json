@@ -529,8 +529,6 @@
     "console.settingsPage.generalSettingsLabel": "常规设置",
     "console.settingsPage.indicesAndAliasesLabelText": "索引和别名",
     "console.settingsPage.manualRefreshLabel": "手动刷新自动完成建议",
-    "console.settingsPage.offLabel": "关闭",
-    "console.settingsPage.onLabel": "开启",
     "console.settingsPage.pageDescription": "定制 Console 以适合您的工作流。",
     "console.settingsPage.pageTitle": "控制台设置",
     "console.settingsPage.refreshButtonLabel": "刷新",

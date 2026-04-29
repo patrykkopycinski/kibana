@@ -527,8 +527,6 @@
     "console.settingsPage.generalSettingsLabel": "Paramètres généraux",
     "console.settingsPage.indicesAndAliasesLabelText": "Index et alias",
     "console.settingsPage.manualRefreshLabel": "Actualiser manuellement les suggestions de saisie semi-automatique",
-    "console.settingsPage.offLabel": "Désactivé",
-    "console.settingsPage.onLabel": "Activé",
     "console.settingsPage.pageDescription": "Personnalisez la console en fonction de votre workflow.",
     "console.settingsPage.pageTitle": "Paramètres de la console",
     "console.settingsPage.refreshButtonLabel": "Actualiser",

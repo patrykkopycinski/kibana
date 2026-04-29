@@ -27806,7 +27806,6 @@
     "xpack.ml.feature.reserved.description": "Um Benutzerzugriff zu gewähren, sollten Sie entweder die Rolle machine_learning_user oder machine_learning_admin zuweisen.",
     "xpack.ml.featureRegistry.mlFeatureName": "Machine Learning",
     "xpack.ml.featureRegistry.privilegesTooltip": "Die Gewährung der Feature-Berechtigung „Alle“ oder „Lesen“ für Machine Learning gewährt auch die entsprechenden Feature-Berechtigungen für bestimmte Typen von in Kibana gespeicherten Objekten, nämlich Indexmuster, Dashboards, gespeicherte Discover-Sitzungen und Visualisierungen sowie gespeicherte Objekte für Machine-Learning-Jobs, trainierte Modelle und Module.",
-    "xpack.ml.feedbackButton.defaultText": "Feedback geben",
     "xpack.ml.fieldTypeIcon.booleanTypeAriaLabel": "Boolescher Typ",
     "xpack.ml.fieldTypeIcon.dateTypeAriaLabel": "Datentyp",
     "xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel": "{geoPointParam} Typ",

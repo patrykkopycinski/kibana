@@ -27914,7 +27914,6 @@
     "xpack.ml.feature.reserved.description": "ユーザーアクセスを許可するには、machine_learning_user か machine_learning_admin ロールのどちらかを割り当てる必要があります。",
     "xpack.ml.featureRegistry.mlFeatureName": "機械学習",
     "xpack.ml.featureRegistry.privilegesTooltip": "機械学習にすべてまたは読み取り機能権限を付与すると、特定のタイプのKibanaで保存されたオブジェクト（インデックスパターン、ダッシュボード、保存されたDiscoverセッション、ビジュアライゼーション、機械学習ジョブ、学習済みモデル、モジュールで保存されたオブジェクト）にも同等の機能権限が付与されます。",
-    "xpack.ml.feedbackButton.defaultText": "フィードバックを送信",
     "xpack.ml.fieldTypeIcon.booleanTypeAriaLabel": "ブールタイプ",
     "xpack.ml.fieldTypeIcon.dateTypeAriaLabel": "日付タイプ",
     "xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel": "{geoPointParam} タイプ",

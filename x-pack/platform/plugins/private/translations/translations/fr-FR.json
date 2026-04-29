@@ -27833,7 +27833,6 @@
     "xpack.ml.feature.reserved.description": "Pour accorder l'accès aux utilisateurs, vous devez également affecter le rôle machine_learning_user ou machine_learning_admin.",
     "xpack.ml.featureRegistry.mlFeatureName": "Machine Learning",
     "xpack.ml.featureRegistry.privilegesTooltip": "L'octroi des privilèges de fonctionnalité Tout ou Lire au Machine Learning accordera également les privilèges de fonctionnalité équivalents à certains types d'objets Kibana enregistrés, à savoir les modèles d'indexation, les tableaux de bord, les sessions Discover et visualisations enregistrées ainsi que les tâches de Machine Learning, les modèles entraînés et les objets de modules enregistrés.",
-    "xpack.ml.feedbackButton.defaultText": "Donner un retour",
     "xpack.ml.fieldTypeIcon.booleanTypeAriaLabel": "type booléen",
     "xpack.ml.fieldTypeIcon.dateTypeAriaLabel": "type de données",
     "xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel": "Type {geoPointParam}",

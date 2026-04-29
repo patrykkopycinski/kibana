@@ -27914,7 +27914,6 @@
     "xpack.ml.feature.reserved.description": "要向用户授予访问权限，还应分配 machine_learning_user 或 machine_learning_admin 角色。",
     "xpack.ml.featureRegistry.mlFeatureName": "Machine Learning",
     "xpack.ml.featureRegistry.privilegesTooltip": "为 Machine Learning 授予所有或读取功能权限还会向某些类型的 Kibana 已保存对象（即索引模式、仪表板、保存的 Discover 会话和可视化，以及 Machine Learning 作业、已训练模型和模块已保存对象）授予对等功能权限。",
-    "xpack.ml.feedbackButton.defaultText": "反馈",
     "xpack.ml.fieldTypeIcon.booleanTypeAriaLabel": "布尔类型",
     "xpack.ml.fieldTypeIcon.dateTypeAriaLabel": "日期类型",
     "xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel": "{geoPointParam} 类型",

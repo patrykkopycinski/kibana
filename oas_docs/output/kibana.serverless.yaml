@@ -41354,6 +41354,128 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/fleet/enrollment_api_keys/_bulk_delete:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/enrollment_api_keys/_bulk_delete</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Revoke or delete multiple enrollment API keys.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-enrollment-api-keys-bulk-delete
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkDeleteByIdsExample:
+                description: Bulk delete enrollment API keys by IDs
+                value:
+                  forceDelete: true
+                  tokenIds:
+                    - token-id-1
+                    - token-id-2
+              bulkDeleteByKueryExample:
+                description: Bulk delete enrollment API keys by KQL query
+                value:
+                  forceDelete: false
+                  kuery: policy_id:"policy-id-1"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                forceDelete:
+                  default: false
+                  description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
+                  type: boolean
+                includeHidden:
+                  default: false
+                  description: When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.
+                  type: boolean
+                kuery:
+                  description: KQL query to select enrollment tokens to delete.
+                  type: string
+                tokenIds:
+                  description: List of enrollment token IDs to delete.
+                  items:
+                    type: string
+                  maxItems: 10000
+                  type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                bulkDeleteEnrollmentApiKeysExample:
+                  description: The enrollment API keys were successfully processed
+                  value:
+                    action: deleted
+                    count: 2
+                    errorCount: 0
+                    successCount: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  action:
+                    type: string
+                  count:
+                    type: number
+                  errorCount:
+                    type: number
+                  successCount:
+                    type: number
+                required:
+                  - action
+                  - count
+                  - successCount
+                  - errorCount
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: Either tokenIds or kuery must be provided
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Bulk revoke or delete enrollment API keys
+      tags:
+        - Fleet enrollment API keys
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
       description: |-
@@ -41363,7 +41485,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+        Revoke or delete an enrollment API key by ID. Use `forceDelete=true` to remove the document.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
       operationId: delete-fleet-enrollment-api-keys-keyid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -41379,6 +41501,20 @@ paths:
           required: true
           schema:
             type: string
+        - description: When false (default), invalidate the API key and mark the token as inactive. When true, also delete the token document.
+          in: query
+          name: forceDelete
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: When true, allow deletion of hidden enrollment tokens (managed/agentless policies). Defaults to false.
+          in: query
+          name: includeHidden
+          required: false
+          schema:
+            default: false
+            type: boolean
       responses:
         '200':
           content:
@@ -41439,7 +41575,7 @@ paths:
                     message: EnrollmentAPIKey key-id-1 not found
                     statusCode: 404
           description: Not Found
-      summary: Revoke an enrollment API key
+      summary: Revoke or delete an enrollment API key
       tags:
         - Fleet enrollment API keys
       x-metaTags:

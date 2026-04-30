@@ -18278,7 +18278,6 @@ paths:
         '200':
           content:
             application/json:
-              description: Elasticsearch update by query or update by IDs response
               examples:
                 add:
                   value:
@@ -18297,7 +18296,13 @@ paths:
                     total: 1
                     updated: 1
                     version_conflicts: 0
-          description: Indicates a successful call.
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: |
+            Indicates a successful call. The body matches an Elasticsearch update-by-query response
+            (for example `took`, `updated`, `failures`).
         '400':
           content:
             application/json:
@@ -25369,16 +25374,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSharedExceptionList:
+                value:
+                  description: This is a sample detection type exception list.
+                  list_id: simple_list
+                  name: Sample Detection Exception List
+                  namespace_type: single
+                  os_types:
+                    - linux
+                  tags:
+                    - malware
             schema:
-              example:
-                description: This is a sample detection type exception list.
-                list_id: simple_list
-                name: Sample Detection Exception List
-                namespace_type: single
-                os_types:
-                  - linux
-                tags:
-                  - malware
               type: object
               properties:
                 description:

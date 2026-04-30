@@ -13604,8 +13604,6 @@
     "xpack.apm.servicesTable.environmentColumnLabel": "Environnement",
     "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 environment} other {# environnements}}",
     "xpack.apm.servicesTable.filterServicesPlaceholder": "Rechercher des services par nom",
-    "xpack.apm.servicesTable.healthColumnLabel": "Intégrité",
-    "xpack.apm.servicesTable.healthColumnLabel.tooltip": "L'état de santé est déterminé par les anomalies de latence détectées par les tâches ML spécifiques à l'environnement de service sélectionné et aux types de transaction compatibles. Ce type de transactions inclut \"chargement de la page\", \"requête\" et \"mobile\".",
     "xpack.apm.servicesTable.latencyAvgColumnLabel": "Latence (moy.)",
     "xpack.apm.servicesTable.metricsExplanationLabel": "Que sont ces indicateurs ?",
     "xpack.apm.servicesTable.nameColumnLabel": "Nom",

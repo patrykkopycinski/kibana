@@ -13671,8 +13671,6 @@
     "xpack.apm.servicesTable.environmentColumnLabel": "環境",
     "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 environment} other {# 個の環境}}",
     "xpack.apm.servicesTable.filterServicesPlaceholder": "名前でサービスを検索",
-    "xpack.apm.servicesTable.healthColumnLabel": "ヘルス",
-    "xpack.apm.servicesTable.healthColumnLabel.tooltip": "ヘルスステータスは、選択したサービス環境とサポートされているトランザクションタイプに固有のMLジョブで検出されたレイテンシの異常によって決定されます。これらのトランザクションタイプには、page-load、request、mobileが含まれます。",
     "xpack.apm.servicesTable.latencyAvgColumnLabel": "レイテンシ（平均）",
     "xpack.apm.servicesTable.metricsExplanationLabel": "これらのメトリックは何か。",
     "xpack.apm.servicesTable.nameColumnLabel": "名前",

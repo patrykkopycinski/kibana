@@ -13628,8 +13628,6 @@
     "xpack.apm.servicesTable.environmentColumnLabel": "Umgebung",
     "xpack.apm.servicesTable.environmentCount": "{environmentCount, plural, one {1 environment} other {# Umgebungen}}",
     "xpack.apm.servicesTable.filterServicesPlaceholder": "Services nach Name durchsuchen",
-    "xpack.apm.servicesTable.healthColumnLabel": "Status",
-    "xpack.apm.servicesTable.healthColumnLabel.tooltip": "Der Integritätsstatus wird durch die Latenzanomalien bestimmt, die von den ML-Aufträgen erkannt werden, die für die ausgewählte Serviceumgebung und die unterstützten Transaktionstypen spezifisch sind. Diese Transaktionstypen umfassen „Seitenladen“, „Anfrage“ und „Mobil“.",
     "xpack.apm.servicesTable.latencyAvgColumnLabel": "Latenz (Durchschn.)",
     "xpack.apm.servicesTable.metricsExplanationLabel": "Was sind diese Metriken?",
     "xpack.apm.servicesTable.nameColumnLabel": "Name",

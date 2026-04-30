@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
@@ -12,28 +13,21 @@ import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import type { NormalizationOptions } from '../../../components/normalization_menu';
-import {
-  ComparisonMode,
-  NormalizationMode,
-  NormalizationMenu,
-} from '../../../components/normalization_menu';
-import { DifferentialComparisonMode } from '../../../components/differential_comparison_mode';
+import { NormalizationMode, NormalizationMenu } from '../../../components/normalization_menu';
 
-export function DifferentialFlameGraphSearchPanel() {
+export function DifferentialTopNSearchPanel() {
   const {
-    path,
     query,
     query: {
       rangeFrom,
       rangeTo,
       comparisonRangeFrom,
       comparisonRangeTo,
-      comparisonMode,
       baseline = 1,
       comparison = 1,
       normalizationMode,
     },
-  } = useProfilingParams('/flamegraphs/differential');
+  } = useProfilingParams('/functions/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
 
@@ -62,25 +56,6 @@ export function DifferentialFlameGraphSearchPanel() {
     comparisonTime,
   };
 
-  function onChangeComparisonMode(nextComparisonMode: ComparisonMode) {
-    if (!('comparisonRangeFrom' in query)) {
-      return;
-    }
-
-    profilingRouter.push(routePath, {
-      path,
-      query: {
-        ...query,
-        ...(nextComparisonMode === ComparisonMode.Absolute
-          ? {
-              comparisonMode: ComparisonMode.Absolute,
-              normalizationMode,
-            }
-          : { comparisonMode: ComparisonMode.Relative }),
-      },
-    });
-  }
-
   function onChangeNormalizationMode(
     nextNormalizationMode: NormalizationMode,
     options: NormalizationOptions
@@ -105,25 +80,17 @@ export function DifferentialFlameGraphSearchPanel() {
   return (
     <EuiFlexGroup direction="column">
       <PrimaryAndComparisonSearchBar />
-      <EuiFlexGroup direction="row">
-        <DifferentialComparisonMode
-          comparisonMode={comparisonMode}
-          onChange={onChangeComparisonMode}
-        />
-        {comparisonMode === ComparisonMode.Absolute && (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <NormalizationMenu
-                  onChange={onChangeNormalizationMode}
-                  mode={normalizationMode}
-                  options={normalizationOptions}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <NormalizationMenu
+              onChange={onChangeNormalizationMode}
+              mode={normalizationMode}
+              options={normalizationOptions}
+            />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

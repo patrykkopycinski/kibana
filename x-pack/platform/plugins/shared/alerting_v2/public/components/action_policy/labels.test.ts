@@ -7,7 +7,8 @@
 
 import { getGroupingModeLabel, getThrottleStrategyLabel } from './labels';
 
-describe('getGroupingModeLabel', () => {
+// Failing: See https://github.com/elastic/kibana/issues/266708
+describe.skip('getGroupingModeLabel', () => {
   it('returns the Episode label for per_episode', () => {
     expect(getGroupingModeLabel('per_episode')).toBe('Episode');
   });

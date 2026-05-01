@@ -106557,6 +106557,7 @@ components:
             - none
           type: string
         compression_level:
+          nullable: true
           type: number
         config_yaml:
           nullable: true
@@ -107759,6 +107760,7 @@ components:
             - none
           type: string
         compression_level:
+          nullable: true
           type: number
         config_yaml:
           nullable: true
@@ -110287,6 +110289,7 @@ components:
             - none
           type: string
         compression_level:
+          nullable: true
           type: number
         config_yaml:
           nullable: true

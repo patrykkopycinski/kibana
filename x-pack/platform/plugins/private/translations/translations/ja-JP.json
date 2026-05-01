@@ -662,8 +662,6 @@
     "contentManagement.contentList.table.column.name.title": "名前",
     "contentManagement.contentList.table.column.updatedAt.title": "最終更新",
     "contentManagement.contentList.table.column.updatedAt.unknownLabel": "最終更新日が不明です",
-    "contentManagement.contentList.table.emptyState.body": "表示する{entityPlural}はありません。",
-    "contentManagement.contentList.table.emptyState.title": "{entityPlural}は見つかりませんでした",
     "contentManagement.contentList.tagsRenderer.emptyMessage": "タグがありません",
     "contentManagement.contentList.tagsRenderer.noMatchesMessage": "検索に一致するタグはありません",
     "contentManagement.contentList.tagsRenderer.tagsLabel": "タグ",

@@ -662,8 +662,6 @@
     "contentManagement.contentList.table.column.name.title": "名称",
     "contentManagement.contentList.table.column.updatedAt.title": "上次更新时间",
     "contentManagement.contentList.table.column.updatedAt.unknownLabel": "上次更新时间未知",
-    "contentManagement.contentList.table.emptyState.body": "没有 {entityPlural} 可显示。",
-    "contentManagement.contentList.table.emptyState.title": "未找到 {entityPlural}",
     "contentManagement.contentList.tagsRenderer.emptyMessage": "没有任何标签",
     "contentManagement.contentList.tagsRenderer.noMatchesMessage": "没有标签匹配搜索",
     "contentManagement.contentList.tagsRenderer.tagsLabel": "标签",

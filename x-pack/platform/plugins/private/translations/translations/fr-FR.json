@@ -660,8 +660,6 @@
     "contentManagement.contentList.table.column.name.title": "Nom",
     "contentManagement.contentList.table.column.updatedAt.title": "Dernière mise à jour",
     "contentManagement.contentList.table.column.updatedAt.unknownLabel": "Dernière mise à jour inconnue",
-    "contentManagement.contentList.table.emptyState.body": "Il n’y a pas de {entityPlural} à afficher.",
-    "contentManagement.contentList.table.emptyState.title": "Aucun {entityPlural} trouvé",
     "contentManagement.contentList.tagsRenderer.emptyMessage": "Il n'y a aucune balise",
     "contentManagement.contentList.tagsRenderer.noMatchesMessage": "Aucune balise ne correspond à la recherche",
     "contentManagement.contentList.tagsRenderer.tagsLabel": "Balises",

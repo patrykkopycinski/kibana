@@ -662,8 +662,6 @@
     "contentManagement.contentList.table.column.name.title": "Name",
     "contentManagement.contentList.table.column.updatedAt.title": "Letzte Aktualisierung",
     "contentManagement.contentList.table.column.updatedAt.unknownLabel": "Letzte Aktualisierung unbekannt",
-    "contentManagement.contentList.table.emptyState.body": "Es gibt keine {entityPlural} anzuzeigen.",
-    "contentManagement.contentList.table.emptyState.title": "Keine {entityPlural} gefunden",
     "contentManagement.contentList.tagsRenderer.emptyMessage": "Es sind keine Tags vorhanden",
     "contentManagement.contentList.tagsRenderer.noMatchesMessage": "Kein Tag entspricht der Suche",
     "contentManagement.contentList.tagsRenderer.tagsLabel": "Tags",

@@ -11842,7 +11842,6 @@
     "xpack.aiops.changePointDetection.fetchErrorTitle": "Impossible de récupérer les points de modification",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "Récupération des points de modification...",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "Impossible de récupérer les partitions",
-    "xpack.aiops.changePointDetection.fieldValueColumn": "Valeur du champ",
     "xpack.aiops.changePointDetection.maxSeriesToPlotDescription": "Le nombre maximal de points de modification à visualiser.",
     "xpack.aiops.changePointDetection.maxSeriesToPlotError": "La valeur maximale de la série doit être comprise entre {minValue} et {maxValue}",
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "Série max.",

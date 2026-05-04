@@ -11865,7 +11865,6 @@
     "xpack.aiops.changePointDetection.fetchErrorTitle": "Änderungspunkte konnten nicht abgerufen werden",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "Änderungspunkte werden abgerufen …",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "Partitionen konnten nicht abgerufen werden",
-    "xpack.aiops.changePointDetection.fieldValueColumn": "Feldwert",
     "xpack.aiops.changePointDetection.maxSeriesToPlotDescription": "Die maximale Anzahl der Änderungspunkte, die visualisiert werden sollen.",
     "xpack.aiops.changePointDetection.maxSeriesToPlotError": "Der maximale Serienwert muss zwischen {minValue} und {maxValue} liegen",
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "Max-Serie",

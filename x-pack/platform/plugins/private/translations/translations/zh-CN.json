@@ -11894,7 +11894,6 @@
     "xpack.aiops.changePointDetection.fetchErrorTitle": "无法提取更改点",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "正在提取更改点……",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "无法提取分区",
-    "xpack.aiops.changePointDetection.fieldValueColumn": "字段值",
     "xpack.aiops.changePointDetection.maxSeriesToPlotDescription": "要可视化的更改点的最大数目。",
     "xpack.aiops.changePointDetection.maxSeriesToPlotError": "最大序列值必须介于 {minValue} 和 {maxValue} 之间",
     "xpack.aiops.changePointDetection.maxSeriesToPlotLabel": "最大序列",

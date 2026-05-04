@@ -53032,7 +53032,6 @@
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "インラインで定義されたSyntheticテストスクリプトを実行します。",
     "xpack.synthetics.addEditMonitor.scriptEditor.label": "スクリプトエディター",
     "xpack.synthetics.addEditMonitor.scriptEditor.placeholder": "// ここにPlaywrightスクリプトを貼り付け...",
-    "xpack.synthetics.addMonitor.forbidden": "必要なすべてのスペースでモニターを更新する十分な権限がありません。",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.prompt": "モニターが表示されていない理由",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.title": "説明",
     "xpack.synthetics.alertDropdown.noPermissions": "このアクションを実行する十分な権限がありません。",

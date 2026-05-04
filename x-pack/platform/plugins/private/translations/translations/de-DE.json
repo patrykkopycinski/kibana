@@ -52842,7 +52842,6 @@
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "Führt synthetische Testskripte aus, die inline definiert sind.",
     "xpack.synthetics.addEditMonitor.scriptEditor.label": "Skript-Editor",
     "xpack.synthetics.addEditMonitor.scriptEditor.placeholder": "// Fügen Sie hier Ihr Playwright-Skript ein...",
-    "xpack.synthetics.addMonitor.forbidden": "Sie verfügen nicht über ausreichende Berechtigungen, um Monitore in allen erforderlichen Bereichen zu aktualisieren.",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.prompt": "Warum sehe ich keine Überwachungen?",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.title": "Erklären",
     "xpack.synthetics.alertDropdown.noPermissions": "Sie haben nicht die erforderlichen Berechtigungen, um diese Aktion auszuführen.",

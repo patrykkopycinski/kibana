@@ -53025,7 +53025,6 @@
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "运行内联定义的 Synthetics 测试脚本。",
     "xpack.synthetics.addEditMonitor.scriptEditor.label": "脚本编辑器",
     "xpack.synthetics.addEditMonitor.scriptEditor.placeholder": "// 在此处粘贴 Playwright 脚本......",
-    "xpack.synthetics.addMonitor.forbidden": "您没有足够的权限在全部所需工作区中更新监测。",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.prompt": "为什么我看不到任何监测？",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.title": "解释",
     "xpack.synthetics.alertDropdown.noPermissions": "您的权限不足，无法执行此操作。",

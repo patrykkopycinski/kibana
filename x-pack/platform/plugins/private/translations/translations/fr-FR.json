@@ -52662,7 +52662,6 @@
     "xpack.synthetics.addEditMonitor.scriptEditor.helpText": "Exécute des scripts de tests synthétiques définis en ligne.",
     "xpack.synthetics.addEditMonitor.scriptEditor.label": "Éditeur de script",
     "xpack.synthetics.addEditMonitor.scriptEditor.placeholder": "// Collez votre script Playwright ici...",
-    "xpack.synthetics.addMonitor.forbidden": "Vous n’avez pas suffisamment d’autorisations pour mettre à jour les moniteurs dans tous les espaces requis.",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.prompt": "Pourquoi n'y a-t-il aucun moniteur ?",
     "xpack.synthetics.aiAssistant.starterPrompts.explainNoData.title": "Expliquer",
     "xpack.synthetics.alertDropdown.noPermissions": "Vous ne disposez pas d'autorisations suffisantes pour effectuer cette action.",

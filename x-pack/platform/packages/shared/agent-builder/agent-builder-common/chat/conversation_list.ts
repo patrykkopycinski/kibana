@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export type { OpenConversationSidebarOptions } from '@kbn/agent-builder-browser';
+export interface ConversationListOptions {
+  agentId?: string;
+}

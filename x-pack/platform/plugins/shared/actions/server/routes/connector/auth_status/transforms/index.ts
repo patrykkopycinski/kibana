@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { AuthMode } from '@kbn/connector-specs';
-import type { Connector } from '../types';
+export { transformAuthStatusResponse } from './transform_auth_status_response/latest';
 
-export function getAuthMode(authMode: Connector['authMode'] | undefined): AuthMode {
-  return authMode ?? 'shared';
-}
+export { transformAuthStatusResponseV1 } from './transform_auth_status_response/v1';

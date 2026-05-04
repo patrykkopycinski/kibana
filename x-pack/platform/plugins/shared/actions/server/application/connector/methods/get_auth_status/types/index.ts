@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { AuthMode } from '@kbn/connector-specs';
-import type { Connector } from '../types';
-
-export function getAuthMode(authMode: Connector['authMode'] | undefined): AuthMode {
-  return authMode ?? 'shared';
-}
+export type { GetAuthStatusParams, GetAuthStatusResult } from './get_auth_status';

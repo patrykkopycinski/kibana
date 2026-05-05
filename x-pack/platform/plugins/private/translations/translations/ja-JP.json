@@ -11049,7 +11049,6 @@
     "xpack.agentBuilder.conversation.toolResponseFlyout.title": "ツールの応答を検査",
     "xpack.agentBuilder.conversation.traceFlyout.title": "トレース",
     "xpack.agentBuilder.conversation.viewTraceButton": "トレースを表示",
-    "xpack.agentBuilder.conversation.visualization.edit": "可視化を編集",
     "xpack.agentBuilder.conversation.visualization.saveToDashboard": "ダッシュボードに保存",
     "xpack.agentBuilder.conversationActions.actions": "詳細",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "詳細",

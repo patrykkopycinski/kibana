@@ -11004,7 +11004,6 @@
     "xpack.agentBuilder.conversation.toolResponseFlyout.title": "Examiner la réponse de l'outil",
     "xpack.agentBuilder.conversation.traceFlyout.title": "Trace",
     "xpack.agentBuilder.conversation.viewTraceButton": "Afficher la trace",
-    "xpack.agentBuilder.conversation.visualization.edit": "Modifier la visualisation",
     "xpack.agentBuilder.conversation.visualization.saveToDashboard": "Enregistrer dans le tableau de bord",
     "xpack.agentBuilder.conversationActions.actions": "Plus",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "Plus",

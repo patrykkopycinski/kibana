@@ -11047,7 +11047,6 @@
     "xpack.agentBuilder.conversation.toolResponseFlyout.title": "检查工具响应",
     "xpack.agentBuilder.conversation.traceFlyout.title": "追踪",
     "xpack.agentBuilder.conversation.viewTraceButton": "查看追踪",
-    "xpack.agentBuilder.conversation.visualization.edit": "编辑可视化",
     "xpack.agentBuilder.conversation.visualization.saveToDashboard": "保存到仪表板",
     "xpack.agentBuilder.conversationActions.actions": "更多",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "更多",

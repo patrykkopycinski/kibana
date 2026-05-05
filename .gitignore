@@ -21,6 +21,7 @@ target
 .idea
 .claude/*.local.json
 .claude/worktrees/
+.worktrees/
 .cursor
 !x-pack/solutions/security/.cursor
 .playwright-mcp

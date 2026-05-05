@@ -1,0 +1,250 @@
+# Detection Emulation Skill — Tech Preview
+
+Productize James Spiteri's hackathon **SMEAGOL** agent into a composable
+Detection Emulation Skill inside Agent Builder. Validates Elastic
+Security detection rules before they reach production by simulating
+attack techniques and measuring true-positive / false-positive rates,
+producing a confidence score that gates rule promotion.
+
+## Source of truth
+
+- **Epic**: `elastic/security-team#15974` (`[Epic] Detection Emulation Skill`).
+- **Frozen prototype reference**: `docs/proposed-features/detection-emulation-skill/SMEAGOL-source-transfer.sh`
+  — full hackathon agent transfer (9 workflows, 17 tools, agent system
+  prompt). Read it before designing any tool or workflow contract.
+- **Folder charter**: `docs/proposed-features/detection-emulation-skill/README.md`.
+
+## What we are building
+
+A skill plug-in for Agent Builder, callable both directly by users and
+programmatically by the **Detection Engineering Skill** as a pre-deploy
+validation gate, that:
+
+1. Accepts a candidate detection rule + target host(s)
+2. Generates an emulation scenario (attack graph: nodes, edges, lateral
+   movement) from the rule's MITRE ATT&CK technique mapping
+3. Executes the scenario in **one of two modes**, hard-separated:
+   - **Log Injection** (default, safer): writes synthetic ECS documents
+     into a dedicated emulation index that the rule must opt-in to.
+   - **Real Execution** (gated): runs commands on Elastic Defend
+     endpoints — only available when the operator has the dedicated
+     `emulation:execute` privilege AND the target host is on a
+     per-space allowlist.
+4. Monitors telemetry for matching alerts, computes TP / FP rates, and
+   returns a confidence score + per-phase report
+5. Persists emulation history for regression comparison
+6. Streams progress and partial results back to the caller in real time
+
+## Acceptance criteria (from the Epic)
+
+- [ ] Submit a rule + target hosts via NL / programmatic call
+- [ ] Emulation scenarios generated from rule technique mapping
+- [ ] TP and FP rates measured with a confidence score
+- [ ] Detection Engineering Skill can call us as a validation gate
+- [ ] Auto-migrated rules (Splunk, QRadar, SIGMA) can be validated
+- [ ] Historical results tracked for regression comparison
+
+## Risk-driven guardrails (NON-NEGOTIABLE)
+
+This is the productization deliverable that turns SMEAGOL from a
+hackathon demo into something an enterprise SOC team can deploy. The
+plan MUST mitigate every risk below. Each task in `tasks.md` MUST cite
+the risk IDs it closes. PR review checklist MUST verify all listed
+risks are mitigated before merge to `main`.
+
+### S — Security (offensive-tool surface)
+
+- **S1. Arbitrary command execution.** SMEAGOL's
+  `smeagol.execute.action.with.results` calls `/api/endpoint/action/execute`,
+  which runs arbitrary commands on hosts. Mitigation: a dedicated
+  Kibana feature privilege `emulation:execute` (separate from `read`
+  and from `defend:execute`). Skill MUST reject the call with a typed
+  error if the operator lacks it. Real Execution mode MUST also
+  verify a per-space host allowlist (`emulation:targets:<space>`).
+  Default deny.
+- **S2. Hardcoded credentials.** Prototype YAMLs embed Basic Auth
+  (`Authorization: Basic SmFtZXM6...`). Mitigation: NO secrets in any
+  workflow YAML; use Kibana saved-object connectors and inference
+  endpoints exclusively. CI lint that scans the workflow YAML registry
+  for `Authorization: Basic` and `Bearer` literals.
+- **S3. Privilege escalation via internal APIs.** Prototype calls
+  `/internal/alerting/rules/backfill/_schedule`. Mitigation: wrap every
+  call we make in a versioned public API; if no public API exists,
+  block on landing one (do not import the internal route directly).
+- **S4. Audit trail gap.** Mitigation: every Real Execution emits a
+  `kibana.security.emulation.action` event into the Kibana audit log
+  with operator id, target host id, command hash, rule id, mode,
+  emulation_id. Required for SOX/regulated customers.
+- **S5. Cross-tenant leakage.** Mitigation: every saved object the
+  skill creates (history docs, plans, attack graphs) MUST be
+  space-scoped. Index-level role descriptors MUST scope by space id.
+- **S6. Log-injection telemetry pollution.** Mitigation: synthetic logs
+  go ONLY to `.kibana-security-emulation-logs-<space>-*` (NOT
+  `logs-*`). The skill REFUSES to inject if the target rule's
+  `index` array does not include that pattern, returning a structured
+  error explaining how to opt in.
+- **S7. Default-allow on production hosts.** Mitigation: out of the
+  box, the host allowlist is empty. Operators must explicitly enroll
+  hosts (and re-enroll annually) — the UI nags about expiring
+  allowlist entries.
+- **S8. Prompt-injection / agent jailbreak.** A malicious rule
+  description, alert body, or telemetry payload that the agent reads
+  as context could steer it into running arbitrary commands.
+  Mitigation: structured tool inputs only (no free-text command field
+  in tool args); the LLM-suggested command is rendered to the operator
+  for confirmation in interactive mode and policy-gated in
+  programmatic mode.
+- **S9. Replay / forensic confusion.** Synthetic logs and Real
+  Execution alerts MUST be tagged at the rule-engine level
+  (`kibana.alert.emulation.id`, `kibana.alert.emulation.mode`) so an
+  analyst can isolate them from real attacker activity in a few
+  clicks. Detection Engine renders an "Emulation" badge on alerts
+  with this field set.
+
+### O — Safety / Operational
+
+- **O1. Alert fatigue from emulation alerts mixing with real ones.**
+  Mitigation: Detection Engine surfaces an "Emulation alerts" filter
+  by default; emulation alerts excluded from default analyst
+  triage queues unless operator opts in.
+- **O2. False-positive amplification.** Per S6, opt-in index pattern
+  is enforced.
+- **O3. Storage growth.** Emulation history index has a 90-day default
+  ILM policy with a per-space `max_size` cap. Synthetic-log index has
+  a 7-day default. Both are user-configurable.
+- **O4. Concurrent-emulation cross-contamination.** A given rule can
+  only have one Real-Execution emulation in flight at a time per
+  target host. The skill takes a host-level lock; conflicting calls
+  return `409 Conflict`.
+- **O5. Heisenbug — emulation masks real attacks.** Mitigation: SOC
+  ops console exposes a "Suppress detection? Y/N" toggle on each
+  Real-Execution start; default Y for low-severity rules, default N
+  for `critical`/`high`. Suppressions auto-expire when emulation
+  ends.
+- **O6. Defend agent / cluster DOS.** Per-emulation phase budget
+  enforced (default: 10 commands per host per minute). Hard ceiling
+  on plan size: max 20 phases, max 50 hosts. Beyond that, the skill
+  refuses with a typed error.
+- **O7. Manual rule-run cost spike.** Mitigation: rate-limit
+  manual-rule-run calls per emulation; coalesce multiple phases that
+  trigger the same rule into a single backfill window.
+- **O8. Time-bombed defaults.** Workflow YAMLs MUST have NO hardcoded
+  ISO dates as defaults; CI lint blocks `default: "20\d\d-` patterns.
+
+### L — Legal / Compliance
+
+- **L1–L5. Customer data, geo / sanctions, EULA, residency, audit.**
+  Mitigation:
+  1. Real Execution defaults to disabled on Elastic Cloud Serverless
+     until Legal sign-off lands; Tech Preview ships with Log Injection
+     only on Cloud (Real Execution = self-managed only).
+  2. EULA addendum drafted by Legal before Tech Preview opens to
+     external customers.
+  3. Audit log entries (S4) retained per the customer's
+     existing audit retention policy; the skill does NOT mint a
+     parallel audit channel.
+
+### P — Product / UX
+
+- **P1. Mode confusion.** Real Execution vs. Log Injection MUST be a
+  hard preference, not a button label. Toggle persists per-space. UI
+  banner shows current mode at all times during emulation.
+- **P2. Distinguishability.** S9 closes this at the data layer. UI
+  shows a colored "EMULATION" badge on alerts whose
+  `kibana.alert.emulation.id` is set.
+- **P3. Result fidelity.** Per-mode caveats surfaced inline:
+  log-injection results explicitly state "this validates rule LOGIC
+  but NOT Defend ingestion or pipeline transforms." Real-Execution
+  results explicitly state "this validates the full pipeline."
+- **P4. Schema drift.** Emulation history index has a versioned
+  mapping owned by the skill team; index template ships with the
+  plugin. Schema changes go through migration + ECS-style alias.
+- **P5. Discoverability.** Skill is registered in the Agent Builder
+  catalog with a clear card; Detection Engineering Skill links to it
+  in its rule-validation workflow.
+- **P6. Determinism.** For a given (rule, host, mode) tuple, the
+  skill produces a deterministic attack-graph fingerprint; reruns
+  with the same fingerprint reuse the cached scenario. Operators
+  can force-regenerate via a `?fresh=true` flag.
+
+### E — Engineering
+
+- **E1. ELSER-2 dependency.** History semantic-search degrades
+  gracefully to BM25 when ELSER is unavailable; users see a "fewer
+  semantic results" notice rather than a hard error.
+- **E2. Internal-API coupling.** Per S3, all calls flow through
+  versioned public APIs. CI fails the build if a `internal/...`
+  import lands in skill code.
+- **E3. Connector dependencies.** No third-party connector required
+  for the Tech Preview path; Brave Search / web search is OUT of
+  scope (the prototype's `web.search` workflow is dropped).
+- **E4. Workflow Engine schema lock-in.** Skill author guidelines
+  document the minimum Workflow Engine version required and the
+  fields we consume. Test suite asserts on contract.
+- **E5. Multi-cluster.** Tech Preview is single-cluster only;
+  cross-cluster emulation is out of scope.
+- **E6. Performance.** Each emulation has a wall-clock budget (30 min
+  default, configurable to a hard ceiling of 2 h). Long-running
+  phases honor cancellation tokens.
+
+## Out of scope for the Tech Preview
+
+- Cross-cluster / cross-tenant emulation
+- Web search / external IOC enrichment (drop SMEAGOL's `web.search`)
+- Custom emulation scripting beyond the predefined ECS document
+  templates (Phase 2 follow-up)
+- Multi-step lateral movement that crosses network segments NOT
+  enrolled in the same Defend policy
+- "Train your own emulation model" / fine-tuned LLMs
+
+## Phasing strategy
+
+Each phase MUST land behind a feature flag (`detectionEmulation.<phase>`)
+so we can ship to dogfood internally before tech-preview opens.
+
+- **Phase 0 — Foundation (no offensive code).** Saved objects, RBAC
+  privileges, audit-log integration, index templates, ILM policies,
+  feature flag scaffolding. Closes S2, S4, S5, O3, O8, P4 at the
+  framework level. PR-reviewable in isolation.
+- **Phase 1 — Log Injection mode.** ECS document templates, the
+  index-pattern opt-in check (S6), the emulation history schema, the
+  TP/FP scoring engine. Closes O1, O2, P3 (log-injection caveat). Ships
+  as Tech Preview behind a feature flag.
+- **Phase 2 — Real Execution mode.** RBAC enforcement (S1),
+  per-space host allowlist (S7), host-level locking (O4), rate limit
+  (O6, O7), suppression toggle (O5), audit emission (S4). Self-managed
+  only at Tech Preview launch; Cloud gated on Legal sign-off (L1).
+- **Phase 3 — Skill composition with Detection Engineering.** API
+  contract: `validateRule(rule, hosts) -> ValidationReport`. Closes
+  the closed-loop CI for the Detection Engineering Skill.
+- **Phase 4 — Migration validator integration.** Splunk / QRadar /
+  SIGMA migration triggers Detection Emulation as part of the
+  promotion pipeline.
+
+## Success metrics for Tech-Preview exit
+
+- 0 P0 / P1 security defects open at exit
+- ≥80% of internal dogfood emulations complete within their wall-clock
+  budget
+- ≥95% of TP/FP scores correlate with manual SOC analyst review (within
+  ±10%)
+- Audit log integration validated by Security team
+- Legal & Privacy sign-off documented for Cloud GA
+
+## Definition of Done (per task)
+
+- Cites the risk IDs it closes
+- Behind a `detectionEmulation.*` feature flag
+- Unit + integration test that asserts the relevant guardrail
+- ECS field reuse over new fields wherever possible
+- No new `internal/...` API imports
+- No hardcoded secrets, dates, or hostnames in any committed YAML
+- Documented in the skill's user-facing README
+
+## Reviewers / Stakeholders
+
+- PM / Product: TBD (per Epic)
+- Detection Engineering: Eng owner of the partner skill
+- SecOps Platform: index template + RBAC privilege approver
+- Legal / Privacy: required sign-off before Cloud Tech Preview
+- ECS / Audit: schema and audit-log additions

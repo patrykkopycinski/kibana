@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/argus-variant-bank-curation",
+  "owner": "@elastic/security-detection-rule-management",
+  "description": "Tools for curating production-grounded ARGUS variant bank from analytics cluster alert clustering",
+  "devOnly": true
+}

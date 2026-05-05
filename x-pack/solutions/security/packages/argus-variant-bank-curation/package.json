@@ -1,0 +1,16 @@
+{
+  "name": "@kbn/argus-variant-bank-curation",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "generate-report": "node scripts/generate_candidate_report.js",
+    "process-reviews": "node scripts/process_analyst_reviews.js"
+  },
+  "dependencies": {
+    "@kbn/config-schema": "link:../../../../platform/packages/shared/kbn-config-schema"
+  },
+  "devDependencies": {
+    "@types/node": "*"
+  }
+}

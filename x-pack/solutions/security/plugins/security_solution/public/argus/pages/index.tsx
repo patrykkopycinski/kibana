@@ -24,6 +24,7 @@ import {
 type E2dWindow = '24h' | '7d';
 
 const VALID_TABS: readonly string[] = [
+  'inbox',
   'command_center',
   'detection_pipeline',
   'coverage_threats',

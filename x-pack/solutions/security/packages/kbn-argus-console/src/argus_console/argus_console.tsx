@@ -37,6 +37,7 @@ import { CoverageGapsPanel } from '../panels/coverage_gaps_panel';
 import { CoveragePanel } from '../panels/coverage_panel';
 import { DecisionGraphPanel } from '../panels/decision_graph_panel';
 import { E2dFlowPanel } from '../panels/e2d_flow_panel/e2d_flow_panel';
+import { InboxPanel } from '../panels/inbox_panel';
 import { KillSwitchChip } from '../panels/kill_switch_chip';
 import { MutationLineagePanel } from '../panels/mutation_lineage_panel/mutation_lineage_panel';
 import { MutationsPanel } from '../panels/mutations_panel/mutations_panel';
@@ -46,6 +47,7 @@ import { PulsePanel } from '../panels/pulse_panel/pulse_panel';
 import { ReasoningDrilldownPanel } from '../panels/reasoning_drilldown_panel/reasoning_drilldown_panel';
 
 export type ArgusConsoleTabId =
+  | 'inbox'
   | 'command_center'
   | 'detection_pipeline'
   | 'coverage_threats'
@@ -210,6 +212,13 @@ interface TabDescriptor {
 
 const TABS: readonly TabDescriptor[] = [
   {
+    id: 'inbox',
+    name: 'Inbox',
+    subtitle:
+      'Items waiting on you — blocked mutations and autonomy decisions the autonomous applier deferred',
+    icon: 'email',
+  },
+  {
     id: 'command_center',
     name: 'Command center',
     subtitle: 'Pulse KPIs · activity feed · mutation lineage · reasoning drill-down',
@@ -218,7 +227,8 @@ const TABS: readonly TabDescriptor[] = [
   {
     id: 'detection_pipeline',
     name: 'Detection pipeline',
-    subtitle: 'Advisory → synthesis → backtest → shadow → apply → observe (E2D + proposals + mutations)',
+    subtitle:
+      'Advisory → synthesis → backtest → shadow → apply → observe (E2D + proposals + mutations)',
     icon: 'pipelineApp',
   },
   {
@@ -446,6 +456,31 @@ export const ArgusConsole: React.FC<ArgusConsoleProps> = ({
         </EuiText>
 
         <EuiSpacer size="l" />
+
+        {/* ── Inbox ──────────────────────────────────────────────── */}
+        {activeTab === 'inbox' && (
+          <InboxPanel
+            http={http}
+            canApproveMutations={canArgusWrite}
+            onApprovalError={onWriteError}
+            onOpenAutonomyDecision={() => {
+              // The Governance tab's table view already exposes the row
+              // and its `review_reason` once the operator filters to
+              // "required_human"; switching tabs gives them the full
+              // gate-evaluation context they need to act.
+              setGovernanceMode('table');
+              setActiveTab('governance');
+            }}
+            onOpenMutationDetail={() => {
+              // The mutation detail flyout lives on the Mutations
+              // sub-view of the Detection Pipeline tab. We seed the
+              // pipeline stage there and let the table find the row by
+              // its mutation_intent_id.
+              setPipelineStage('mutations');
+              setActiveTab('detection_pipeline');
+            }}
+          />
+        )}
 
         {/* ── Command Center ─────────────────────────────────────── */}
         {activeTab === 'command_center' && (

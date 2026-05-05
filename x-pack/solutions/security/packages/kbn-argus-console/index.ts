@@ -19,6 +19,7 @@ export { MutationsPanel } from './src/panels/mutations_panel/mutations_panel';
 export { E2dFlowPanel } from './src/panels/e2d_flow_panel/e2d_flow_panel';
 export { ProposalsPanel, ProposalsTable } from './src/panels/proposals_panel';
 export { AutonomyDecisionsPanel } from './src/panels/autonomy_decisions_panel';
+export { InboxPanel, type InboxPanelProps } from './src/panels/inbox_panel';
 export { CoverageGapsPanel } from './src/panels/coverage_gaps_panel';
 export { CoveragePanel, type CoveragePanelProps } from './src/panels/coverage_panel';
 export { CalderaQueuePanel } from './src/panels/caldera_queue_panel';

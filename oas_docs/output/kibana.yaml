@@ -81819,6 +81819,7 @@ paths:
           name: product_name
   /api/status:
     get:
+      description: Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.
       operationId: get-status
       parameters:
         - description: Set to "true" to get the response in v7 format.
@@ -81837,6 +81838,39 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                statusAvailableResponse:
+                  description: A successful response when Kibana and its core services are operating normally.
+                  summary: Kibana is available
+                  value:
+                    metrics:
+                      collection_interval_in_millis: 5000
+                      elasticsearch_client:
+                        totalActiveSockets: 4
+                        totalIdleSockets: 2
+                        totalQueuedRequests: 0
+                      last_updated: '2026-04-30T12:00:05.000Z'
+                    name: kibana
+                    status:
+                      core:
+                        elasticsearch:
+                          level: available
+                          summary: Elasticsearch is available
+                        savedObjects:
+                          level: available
+                          summary: SavedObjects service has completed migrations and is available
+                      overall:
+                        level: available
+                        summary: All services are available
+                      plugins: {}
+                    uuid: 5b2de169-2785-441b-ae8c-186a1936b17d
+                    version:
+                      build_date: '2026-04-30T12:00:00.000Z'
+                      build_flavor: traditional
+                      build_hash: ad8f0fa4d5022f56bbe2c4d51e9d0fcfa1ee67fc
+                      build_number: 100200
+                      build_snapshot: false
+                      number: 9.3.0
               schema:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
@@ -81846,12 +81880,45 @@ paths:
         '503':
           content:
             application/json:
+              examples:
+                statusUnavailableResponse:
+                  description: A response when one or more core services are unavailable.
+                  summary: Kibana is unavailable
+                  value:
+                    metrics:
+                      collection_interval_in_millis: 5000
+                      elasticsearch_client:
+                        totalActiveSockets: 0
+                        totalIdleSockets: 0
+                        totalQueuedRequests: 0
+                      last_updated: '2026-04-30T12:00:05.000Z'
+                    name: kibana
+                    status:
+                      core:
+                        elasticsearch:
+                          level: unavailable
+                          summary: Unable to connect to Elasticsearch
+                        savedObjects:
+                          level: unavailable
+                          summary: SavedObjects service depends on Elasticsearch
+                      overall:
+                        level: unavailable
+                        summary: Some services are unavailable
+                      plugins: {}
+                    uuid: 5b2de169-2785-441b-ae8c-186a1936b17d
+                    version:
+                      build_date: '2026-04-30T12:00:00.000Z'
+                      build_flavor: traditional
+                      build_hash: ad8f0fa4d5022f56bbe2c4d51e9d0fcfa1ee67fc
+                      build_number: 100200
+                      build_snapshot: false
+                      number: 9.3.0
               schema:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_redactedResponse'
                 description: Kibana's operational status. A minimal response is sent for unauthorized users.
-          description: Kibana or some of it's essential services are unavailable. Kibana may be degraded or unavailable.
+          description: Kibana or some of its essential services are unavailable. Kibana may be degraded or unavailable.
       summary: Get Kibana's current status
       tags:
         - system

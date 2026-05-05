@@ -6,13 +6,17 @@
  */
 
 import type {
+  GovernanceCoverageSnapshot,
   GovernancePulseBuildResult,
+  GovernancePulseCoverageTrend,
   GovernancePulseDrift,
   GovernancePulseHoursSaved,
   GovernancePulseMttd,
   GovernancePulseMttr,
+  GovernancePulseSignalToNoise,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  GovernancePulseTriggerToRule,
   HoursSavedConstants,
 } from '../types/governance_pulse';
 
@@ -103,6 +107,75 @@ export interface GovernancePulseAggsInput {
    * *spent* — subtracted from the hours-saved total.
    */
   readonly human_rollbacks?: { readonly doc_count?: number | null } | null;
+  /**
+   * Vision-doc 1.6.8 — outcomes labelled `disposition: confirmed`
+   * (true positives) in the window. Filter agg → `doc_count`.
+   */
+  readonly tp_count?: { readonly doc_count?: number | null } | null;
+  /**
+   * Vision-doc 1.6.8 — outcomes labelled `disposition: false_positive` in
+   * the window. Filter agg → `doc_count`.
+   */
+  readonly fp_count?: { readonly doc_count?: number | null } | null;
+}
+
+/**
+ * Loose shape of the aggregations block returned by the mutation-intents
+ * lag query (vision-doc 4.1). The route adds these aggs alongside the
+ * existing `blocked_count` / `drift_*` filter aggs.
+ */
+export interface MutationIntentsLagAggsInput {
+  /**
+   * Number of mutation_intents in the window with a finite
+   * `synthesis_lag_ms` value. Volume signal — drives whether the section
+   * renders at all.
+   */
+  readonly lag_count?: { readonly value?: number | null } | null;
+  /**
+   * Subset of `lag_count` whose `synthesis_lag_ms < 60_000`. The vision-doc
+   * 4.1 target compliance count.
+   */
+  readonly lag_under_60s?: { readonly doc_count?: number | null } | null;
+  /** Mean `synthesis_lag_ms` across the window. */
+  readonly avg_lag?: { readonly value?: number | null } | null;
+  /** 50th + 95th percentiles of `synthesis_lag_ms`. */
+  readonly lag_percentiles?: {
+    readonly values?: {
+      readonly ['50.0']?: number | null;
+      readonly ['95.0']?: number | null;
+    } | null;
+  } | null;
+}
+
+/**
+ * Loose shape of the `.soc-coverage-snapshots` aggregation. The route runs
+ * a `top_hits` agg with `size: 1` sorted by `@timestamp` asc/desc to grab
+ * the baseline (oldest) and current (newest) snapshots in the window —
+ * the trend is computed in TS.
+ */
+export interface CoverageSnapshotsAggsInput {
+  readonly oldest?: {
+    readonly hits?: {
+      readonly hits?: ReadonlyArray<{
+        readonly _source?: CoverageSnapshotSource | null;
+      }>;
+    };
+  } | null;
+  readonly latest?: {
+    readonly hits?: {
+      readonly hits?: ReadonlyArray<{
+        readonly _source?: CoverageSnapshotSource | null;
+      }>;
+    };
+  } | null;
+}
+
+/** Loose shape of a `.soc-coverage-snapshots` source document. */
+export interface CoverageSnapshotSource {
+  readonly ['@timestamp']?: string | null;
+  readonly total_techniques?: number | null;
+  readonly covered_techniques?: number | null;
+  readonly coverage_pct?: number | null;
 }
 
 /**
@@ -119,6 +192,27 @@ export interface MutationIntentsAggsInput {
   readonly blocked_count?: { readonly doc_count?: number | null } | null;
   readonly drift_open?: { readonly doc_count?: number | null } | null;
   readonly drift_resolved?: { readonly doc_count?: number | null } | null;
+  /**
+   * Vision-doc 4.1 — number of mutation_intents in the window carrying a
+   * finite `synthesis_lag_ms` field. `value_count` agg → `value`. Routed
+   * alongside the existing throughput aggs because both queries hit the
+   * same `.soc-mutation-intents` index.
+   */
+  readonly lag_count?: { readonly value?: number | null } | null;
+  /**
+   * Vision-doc 4.1 — subset of `lag_count` whose `synthesis_lag_ms < 60_000`.
+   * Filter agg → `doc_count`.
+   */
+  readonly lag_under_60s?: { readonly doc_count?: number | null } | null;
+  /** Mean `synthesis_lag_ms` across the window. */
+  readonly avg_lag?: { readonly value?: number | null } | null;
+  /** 50th + 95th percentiles of `synthesis_lag_ms`. */
+  readonly lag_percentiles?: {
+    readonly values?: {
+      readonly ['50.0']?: number | null;
+      readonly ['95.0']?: number | null;
+    } | null;
+  } | null;
 }
 
 /**
@@ -157,6 +251,12 @@ export interface BuildGovernancePulseArgs {
   readonly mutationAggs?: MutationIntentsAggsInput | null;
   readonly trustAggs?: ActorTrustTiersAggsInput | null;
   /**
+   * Vision-doc 4.2 — `.soc-coverage-snapshots` aggregation payload (oldest +
+   * latest snapshot in the window). Optional so cold-start clusters degrade
+   * to `coverage_trend: null`.
+   */
+  readonly coverageSnapshotsAggs?: CoverageSnapshotsAggsInput | null;
+  /**
    * B12 — Override of the per-action minute constants used by the
    * hours-saved proxy. Only the keys provided are applied; missing keys fall
    * back to `DEFAULT_HOURS_SAVED_CONSTANTS`. Operator-supplied overrides
@@ -187,6 +287,7 @@ export const buildGovernancePulse = ({
   aggs,
   mutationAggs,
   trustAggs,
+  coverageSnapshotsAggs,
   hoursSavedOverrides,
 }: BuildGovernancePulseArgs): GovernancePulseBuildResult => {
   return {
@@ -198,6 +299,9 @@ export const buildGovernancePulse = ({
     mutation_throughput: buildThroughput(aggs, mutationAggs),
     drift: buildDrift(mutationAggs),
     tier_mix: buildTierMix(trustAggs),
+    signal_to_noise: buildSignalToNoise(aggs),
+    trigger_to_rule: buildTriggerToRule(mutationAggs),
+    coverage_trend: buildCoverageTrend(coverageSnapshotsAggs),
   };
 };
 
@@ -408,4 +512,104 @@ const buildTierMix = (
 const toFiniteNumber = (value: number | null | undefined): number | null => {
   if (value === null || value === undefined) return null;
   return Number.isFinite(value) ? value : null;
+};
+
+/**
+ * Vision-doc 1.6.8 — signal-to-noise tile.
+ *
+ * Reads `tp_count.doc_count` and `fp_count.doc_count` from the outcomes
+ * filter aggs. Returns `null` when both counters are zero (cold start /
+ * detection-only environment) so the UI can render "—" rather than a
+ * misleading `0%`.
+ */
+const buildSignalToNoise = (
+  aggs?: GovernancePulseAggsInput | null
+): GovernancePulseSignalToNoise | null => {
+  if (!aggs) return null;
+  const confirmed = toCount(aggs.tp_count?.doc_count);
+  const falsePositive = toCount(aggs.fp_count?.doc_count);
+  const total = confirmed + falsePositive;
+  if (total === 0) return null;
+  return {
+    confirmed,
+    false_positive: falsePositive,
+    confirmed_ratio: roundTo(confirmed / total, 4),
+  };
+};
+
+/**
+ * Vision-doc 4.1 — trigger-to-rule synthesis lag tile.
+ *
+ * Reads `lag_count`, `lag_under_60s`, `avg_lag`, `lag_percentiles` from the
+ * mutation-intents aggs. Returns `null` when `lag_count === 0` so the UI
+ * can render "—" rather than NaN ms.
+ *
+ * The vision-doc 4.1 metric is "trigger-to-rule creation time < 1 min";
+ * `under_one_minute_ratio` is the headline compliance number (1.0 ⇒ every
+ * synthesis was sub-minute). p50 / avg / p95 frame the distribution.
+ */
+const buildTriggerToRule = (
+  mutationAggs?: MutationIntentsAggsInput | null
+): GovernancePulseTriggerToRule | null => {
+  const lagCount = toFiniteNumber(mutationAggs?.lag_count?.value) ?? 0;
+  if (!mutationAggs || lagCount <= 0) return null;
+  const under60s = toCount(mutationAggs.lag_under_60s?.doc_count);
+  return {
+    lag_count: lagCount,
+    lag_count_under_60s: under60s,
+    under_one_minute_ratio: roundTo(under60s / lagCount, 4),
+    avg_ms: toFiniteNumber(mutationAggs.avg_lag?.value),
+    p50_ms: toFiniteNumber(mutationAggs.lag_percentiles?.values?.['50.0']),
+    p95_ms: toFiniteNumber(mutationAggs.lag_percentiles?.values?.['95.0']),
+  };
+};
+
+/**
+ * Vision-doc 4.2 — ATT&CK coverage trend tile.
+ *
+ * Reads `oldest` and `latest` `top_hits` aggs from `.soc-coverage-snapshots`.
+ * Returns `null` when either side is missing — the trend is undefined with
+ * fewer than two snapshots in the window. Coverage_pct is two-decimal-rounded
+ * (matching the producer workflow output) so the delta_pp is always sensible.
+ */
+const buildCoverageTrend = (
+  aggs?: CoverageSnapshotsAggsInput | null
+): GovernancePulseCoverageTrend | null => {
+  if (!aggs) return null;
+  const baseline = readCoverageSnapshot(aggs.oldest?.hits?.hits?.[0]?._source);
+  const current = readCoverageSnapshot(aggs.latest?.hits?.hits?.[0]?._source);
+  if (!baseline || !current) return null;
+  // If baseline and current point at the same row (window contains one
+  // snapshot only) the delta is exactly 0 — still informative ("no change
+  // observed") but not a trend signal. Suppress upstream so the tile reads
+  // "—" instead of "+0pp".
+  if (baseline.snapshot_at === current.snapshot_at) return null;
+  return {
+    baseline,
+    current,
+    delta_pp: roundTo(current.coverage_pct - baseline.coverage_pct, 2),
+  };
+};
+
+const readCoverageSnapshot = (
+  source?: CoverageSnapshotSource | null
+): GovernanceCoverageSnapshot | null => {
+  if (!source) return null;
+  const snapshotAt = source['@timestamp'];
+  if (typeof snapshotAt !== 'string' || snapshotAt.length === 0) return null;
+  const total = toCount(source.total_techniques);
+  const covered = toCount(source.covered_techniques);
+  if (total === 0) return null;
+  // Producer rolls coverage_pct itself (covered/total*100, two decimals).
+  // Trust it but defend against drift — recompute when missing or non-finite
+  // so a producer regression can't poison the tile.
+  const declaredPct = toFiniteNumber(source.coverage_pct);
+  const coveragePct =
+    declaredPct !== null ? roundTo(declaredPct, 2) : roundTo((covered / total) * 100, 2);
+  return {
+    snapshot_at: snapshotAt,
+    total_techniques: total,
+    covered_techniques: Math.min(covered, total),
+    coverage_pct: coveragePct,
+  };
 };

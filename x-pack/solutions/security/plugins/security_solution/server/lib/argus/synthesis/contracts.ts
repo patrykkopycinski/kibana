@@ -200,6 +200,9 @@ export const MutationIntentEnvelopeSchema = z
     draft_rule: draftRuleSchema,
     variant_corpus_id: nonEmptyString,
     variant_count: z.number().int().min(1),
+    // Vision-doc 4.1 — synthesis lag (ms). Optional so chat-on-demand /
+    // fixture-derived intents with no advisory ingest timestamp stay valid.
+    synthesis_lag_ms: z.number().int().min(0).optional(),
     evidence: z
       .array(
         z

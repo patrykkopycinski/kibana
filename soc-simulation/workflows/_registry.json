@@ -709,6 +709,21 @@
       ]
     },
     {
+      "workflow_id": "soc-argus-coverage-snapshotter",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "elastic_detection_rules",
+        "audit_trail"
+      ],
+      "summary": "AutoDEX vision-doc 4.2 — once-per-hour ATT&CK coverage rollup. Calls the in-cluster ARGUS coverage route and writes one slim {total_techniques, covered_techniques, coverage_pct} row to `.soc-coverage-snapshots`. Powers the Pulse panel coverage-trend tile (oldest + latest top_hits over the window).",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:coverage",
+        "argus:governance"
+      ]
+    },
+    {
       "workflow_id": "soc-argus-de-health",
       "automation_level": "fully_auto",
       "connectors": [

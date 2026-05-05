@@ -42,12 +42,22 @@ const fetchAdvisoryById = async (
   advisoryId: string
 ): Promise<StructuredAdvisory | undefined> => {
   try {
-    const response = await esClient.search<StructuredAdvisory>({
+    const response = await esClient.search<StructuredAdvisory & { '@timestamp'?: string }>({
       index: ARGUS_CVE_ADVISORIES_INDEX,
       size: 1,
       query: { term: { advisory_id: advisoryId } },
     });
-    return response.hits.hits[0]?._source;
+    const source = response.hits.hits[0]?._source;
+    if (!source) return undefined;
+    // Vision-doc 4.1 — thread the advisory's ingest timestamp through to the
+    // synthesizer so `buildMutationIntent` can stamp `synthesis_lag_ms` onto
+    // the produced envelope. `.soc-cve-advisories` is a data stream; every
+    // doc carries `@timestamp` at ingest time, which is the canonical
+    // "trigger" event for the trigger-to-rule KPI.
+    if (source.ingested_at === undefined && source['@timestamp']) {
+      return { ...source, ingested_at: source['@timestamp'] };
+    }
+    return source;
   } catch {
     return undefined;
   }

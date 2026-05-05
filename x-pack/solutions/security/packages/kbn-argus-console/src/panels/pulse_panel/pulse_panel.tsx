@@ -23,12 +23,15 @@ import {
 
 import type {
   GovernancePulse,
+  GovernancePulseCoverageTrend,
   GovernancePulseDrift,
   GovernancePulseHoursSaved,
   GovernancePulseMttd,
   GovernancePulseMttr,
+  GovernancePulseSignalToNoise,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  GovernancePulseTriggerToRule,
 } from '@kbn/argus-console-common';
 
 import { useGovernancePulse, type ArgusHttp } from '../../hooks';
@@ -395,6 +398,140 @@ const tierMixTiles = (mix: GovernancePulseTierMix | null): readonly PulseMetric[
   ];
 };
 
+/**
+ * Vision-doc 1.6.8 — signal-to-noise tile (S/N).
+ *
+ * Tone bands favour the SOC perspective: anything below 50% is danger
+ * (alerts mostly noise), 50–80% warning, ≥80% success (alerts mostly real).
+ */
+const snrTone = (ratio: number | null): PulseMetric['tone'] => {
+  if (ratio === null) return 'subdued';
+  if (ratio >= 0.8) return 'success';
+  if (ratio >= 0.5) return 'warning';
+  return 'danger';
+};
+
+const formatPercent = (ratio: number): string => `${(ratio * 100).toFixed(0)}%`;
+
+const signalToNoiseTile = (snr: GovernancePulseSignalToNoise | null): PulseMetric => {
+  if (!snr || snr.confirmed_ratio === null) {
+    return {
+      id: 'signal-to-noise',
+      label: 'Signal-to-noise (TP/total)',
+      value: '—',
+      description: 'no labelled outcomes in window',
+      tone: 'subdued',
+      tooltip:
+        'Confirmed-rate across labelled outcomes — confirmed / (confirmed + ' +
+        'false_positive). Sourced from .soc-outcomes.disposition. Vision-doc ' +
+        '1.6.8 — performance telemetry "signal-to-noise" headline metric.',
+    };
+  }
+  const total = snr.confirmed + snr.false_positive;
+  return {
+    id: 'signal-to-noise',
+    label: 'Signal-to-noise (TP/total)',
+    value: formatPercent(snr.confirmed_ratio),
+    description: `${snr.confirmed} confirmed · ${snr.false_positive} FP · ${total} labelled`,
+    tone: snrTone(snr.confirmed_ratio),
+    tooltip:
+      'TP-rate across labelled outcomes in the window. Higher is better — ' +
+      '≥80% means alerts are mostly real, <50% means the SOC is drowning in ' +
+      'false positives. Vision-doc 1.6.8.',
+  };
+};
+
+/**
+ * Vision-doc 4.1 — trigger-to-rule synthesis lag tile.
+ *
+ * The vision-doc target is "<1 min". We surface compliance ratio as the
+ * headline (e.g. "85% under 1m") and the p50 lag as context. Tone bands
+ * are tighter than MTTD: ≥95% compliance success, ≥75% warning, otherwise
+ * danger.
+ */
+const triggerToRuleTone = (ratio: number | null): PulseMetric['tone'] => {
+  if (ratio === null) return 'subdued';
+  if (ratio >= 0.95) return 'success';
+  if (ratio >= 0.75) return 'warning';
+  return 'danger';
+};
+
+const triggerToRuleTile = (lag: GovernancePulseTriggerToRule | null): PulseMetric => {
+  if (!lag) {
+    return {
+      id: 'trigger-to-rule',
+      label: 'Trigger-to-rule (<1m compliance)',
+      value: '—',
+      description: 'no synthesis runs in window',
+      tone: 'subdued',
+      tooltip:
+        'Fraction of mutation_intents whose synthesis_lag_ms is under 60s. ' +
+        'Sourced from .soc-mutation-intents.synthesis_lag_ms (advisory ingest → ' +
+        'mutation_intent built). Vision-doc 4.1 success metric.',
+    };
+  }
+  const desc =
+    `${lag.lag_count_under_60s}/${lag.lag_count} runs <1m` +
+    (lag.p50_ms !== null ? ` · p50 ${formatDuration(lag.p50_ms)}` : '');
+  return {
+    id: 'trigger-to-rule',
+    label: 'Trigger-to-rule (<1m compliance)',
+    value: formatPercent(lag.under_one_minute_ratio ?? 0),
+    description: desc,
+    tone: triggerToRuleTone(lag.under_one_minute_ratio),
+    tooltip:
+      'Vision-doc 4.1 target compliance — fraction of synthesis runs that ' +
+      'completed within 60s of advisory ingest. p50 / avg / p95 frame the ' +
+      'distribution; 100% means every synthesis was sub-minute.',
+  };
+};
+
+/**
+ * Vision-doc 4.2 — ATT&CK coverage trend tile.
+ *
+ * The headline is the latest coverage_pct; the description shows the delta
+ * vs the window-baseline ("+3.2pp last 24h"). A negative delta is rendered
+ * as `danger` — coverage regression is itself a drift signal.
+ */
+const coverageTrendTone = (deltaPp: number | null): PulseMetric['tone'] => {
+  if (deltaPp === null) return 'subdued';
+  if (deltaPp > 0) return 'success';
+  if (deltaPp === 0) return 'subdued';
+  return 'danger';
+};
+
+const coverageTrendTile = (trend: GovernancePulseCoverageTrend | null): PulseMetric => {
+  if (!trend) {
+    return {
+      id: 'coverage-trend',
+      label: 'ATT&CK coverage',
+      value: '—',
+      description: 'fewer than two snapshots in window',
+      tone: 'subdued',
+      tooltip:
+        'Latest ATT&CK coverage % from .soc-coverage-snapshots, with delta ' +
+        'vs the oldest snapshot in the window. Producer: ' +
+        'soc-argus-coverage-snapshotter (1h cadence). Vision-doc 4.2.',
+    };
+  }
+  const delta = trend.delta_pp;
+  const sign = delta > 0 ? '+' : delta < 0 ? '' : '±';
+  return {
+    id: 'coverage-trend',
+    label: 'ATT&CK coverage',
+    value: `${trend.current.coverage_pct.toFixed(2)}%`,
+    description:
+      `${trend.current.covered_techniques}/${trend.current.total_techniques} techniques · ` +
+      `${sign}${delta.toFixed(2)}pp vs baseline`,
+    tone: coverageTrendTone(delta),
+    tooltip:
+      'Latest coverage_pct surfaced from .soc-coverage-snapshots. Trend = ' +
+      'current.coverage_pct − baseline.coverage_pct (in percentage points). ' +
+      'Negative ⇒ coverage regression — itself a drift signal worth ' +
+      'investigating. Vision-doc 4.2 success metric.',
+  };
+};
+
 const DEMO_PULSE: GovernancePulse = {
   window_start: 'now-24h',
   window_end: 'now',
@@ -424,6 +561,30 @@ const DEMO_PULSE: GovernancePulse = {
   mutation_throughput: { applied: 7, rolled_back: 1, blocked: 2 },
   drift: { open_count: 3, resolved_count: 2 },
   tier_mix: { trusted: 6, probationary: 2, untrusted: 1, system: 3, total: 12 },
+  signal_to_noise: { confirmed: 18, false_positive: 2, confirmed_ratio: 0.9 },
+  trigger_to_rule: {
+    lag_count: 4,
+    lag_count_under_60s: 4,
+    under_one_minute_ratio: 1,
+    avg_ms: 18_000,
+    p50_ms: 14_500,
+    p95_ms: 41_000,
+  },
+  coverage_trend: {
+    baseline: {
+      snapshot_at: '2026-04-19T12:00:00.000Z',
+      total_techniques: 200,
+      covered_techniques: 110,
+      coverage_pct: 55,
+    },
+    current: {
+      snapshot_at: '2026-04-20T11:00:00.000Z',
+      total_techniques: 200,
+      covered_techniques: 124,
+      coverage_pct: 62,
+    },
+    delta_pp: 7,
+  },
 };
 
 /** Placeholder while loading or when live data is unavailable (never masked as demo). */
@@ -436,6 +597,9 @@ const EMPTY_PULSE_PLACEHOLDER: GovernancePulse = {
   mutation_throughput: null,
   drift: null,
   tier_mix: null,
+  signal_to_noise: null,
+  trigger_to_rule: null,
+  coverage_trend: null,
 };
 
 interface TileRowProps {
@@ -656,6 +820,36 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({
             title="Trust tier mix"
             subtitle="actor distribution (.soc-actor-trust-tiers, most-recent-per-actor)"
             metrics={tierMixTiles(payload.tier_mix)}
+            isLoading={isLoading}
+            onMetricClick={onMetricClick}
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <TileRow
+            title="Signal-to-noise"
+            subtitle="confirmed / (confirmed + false_positive) over labelled outcomes — vision §1.6.8"
+            metrics={[signalToNoiseTile(payload.signal_to_noise)]}
+            isLoading={isLoading}
+            onMetricClick={onMetricClick}
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <TileRow
+            title="Trigger-to-rule synthesis lag"
+            subtitle="advisory ingest → mutation_intent built (target <1m, vision §4.1)"
+            metrics={[triggerToRuleTile(payload.trigger_to_rule)]}
+            isLoading={isLoading}
+            onMetricClick={onMetricClick}
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <TileRow
+            title="ATT&CK coverage trend"
+            subtitle="latest coverage % + delta vs window-baseline (.soc-coverage-snapshots, vision §4.2)"
+            metrics={[coverageTrendTile(payload.coverage_trend)]}
             isLoading={isLoading}
             onMetricClick={onMetricClick}
           />

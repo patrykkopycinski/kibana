@@ -1,0 +1,83 @@
+version: '1'
+name: SOC ARGUS — Coverage Snapshotter
+description: >
+  AutoDEX vision-doc 4.2 — once-per-hour ATT&CK coverage rollup. Calls the
+  in-cluster ARGUS coverage route, extracts the three scalars the Pulse
+  panel and conformance matrix care about (total_techniques,
+  covered_techniques = argus_authored_count + only_community_count, and
+  coverage_pct), and writes one slim row into `.soc-coverage-snapshots`.
+  Document id is `cov-{generated_at}` so reruns within the same hour are
+  idempotent. The Pulse panel's vision-doc 4.2 tile reads oldest + latest
+  via two `top_hits` aggs over this index — that's the entire data path.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  snapshot_index: ".soc-coverage-snapshots"
+  audit_index: ".soc-audit-trail"
+
+steps:
+  - name: fetch_coverage_snapshot
+    type: kibana.request
+    with:
+      method: GET
+      path: /internal/security_solution/argus/coverage
+
+  - name: write_snapshot
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.snapshot_index }}"
+      id: >-
+        cov-{{ steps.fetch_coverage_snapshot.output.generated_at | default: 'now' | replace: ':', '' | replace: '-', '' | replace: '.', '' | slice: 0, 14 }}
+      document:
+        "@timestamp": "{{ steps.fetch_coverage_snapshot.output.generated_at | default: 'now' }}"
+        snapshot_at: "{{ steps.fetch_coverage_snapshot.output.generated_at | default: 'now' }}"
+        profile_id: "{{ steps.fetch_coverage_snapshot.output.profile_id | default: null }}"
+        profile_name: "{{ steps.fetch_coverage_snapshot.output.profile_name | default: null }}"
+        total_techniques: "{{ steps.fetch_coverage_snapshot.output.total_techniques | default: 0 }}"
+        # `covered_techniques` is the union of techniques the ARGUS corpus
+        # AND the community corpus already cover. The vision-doc tile
+        # tracks the headline number — uncovered = total − (this).
+        covered_techniques: >-
+          {%- assign argus_only = steps.fetch_coverage_snapshot.output.only_argus_count | default: 0 -%}
+          {%- assign community_only = steps.fetch_coverage_snapshot.output.only_community_count | default: 0 -%}
+          {%- assign shared = steps.fetch_coverage_snapshot.output.shared_count | default: 0 -%}
+          {{ argus_only | plus: community_only | plus: shared }}
+        argus_authored_count: "{{ steps.fetch_coverage_snapshot.output.argus_authored_count | default: 0 }}"
+        community_authored_count: "{{ steps.fetch_coverage_snapshot.output.community_authored_count | default: 0 }}"
+        only_argus_count: "{{ steps.fetch_coverage_snapshot.output.only_argus_count | default: 0 }}"
+        only_community_count: "{{ steps.fetch_coverage_snapshot.output.only_community_count | default: 0 }}"
+        shared_count: "{{ steps.fetch_coverage_snapshot.output.shared_count | default: 0 }}"
+        # Two-decimal coverage_pct so the Pulse builder can display it
+        # verbatim. Matches the precision the builder's `roundTo(_, 2)`
+        # path expects.
+        coverage_pct: >-
+          {%- assign argus_only = steps.fetch_coverage_snapshot.output.only_argus_count | default: 0 -%}
+          {%- assign community_only = steps.fetch_coverage_snapshot.output.only_community_count | default: 0 -%}
+          {%- assign shared = steps.fetch_coverage_snapshot.output.shared_count | default: 0 -%}
+          {%- assign covered = argus_only | plus: community_only | plus: shared -%}
+          {%- assign total = steps.fetch_coverage_snapshot.output.total_techniques | default: 0 -%}
+          {% if total > 0 %}{{ covered | times: 100.0 | divided_by: total | round: 2 }}{% else %}0{% endif %}
+        producer: soc-argus-coverage-snapshotter
+        schema_version: 1
+
+  - name: audit_snapshot
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: coverage_snapshot_emitted
+        source: soc-argus-coverage-snapshotter
+        total_techniques: "{{ steps.fetch_coverage_snapshot.output.total_techniques | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        Coverage snapshot emitted (total={{ steps.fetch_coverage_snapshot.output.total_techniques | default: 0 }})

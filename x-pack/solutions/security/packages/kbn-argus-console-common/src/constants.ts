@@ -114,6 +114,12 @@ export const ARGUS_SOC_INDICES = {
   // Tier 5 — condensed decision graph over the reasoning trace / lineage /
   // autonomy ledger used by the `argus.decision_graph` read.
   decisionGraph: '.soc-decision-graph',
+  // Vision-doc 4.2 — once-per-hour ATT&CK coverage rollup the
+  // `soc-argus-coverage-snapshotter` workflow writes. Stores
+  // {total_techniques, covered_techniques, coverage_pct} so the Pulse panel
+  // can compute a trend (current vs window-baseline) without re-aggregating
+  // .soc-coverage-gaps + .soc-detection-corpus on every page-load.
+  coverageSnapshots: '.soc-coverage-snapshots',
 } as const;
 
 /**

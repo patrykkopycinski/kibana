@@ -94,12 +94,22 @@ export function argusSynthesizeRuleCandidateTool(
 
       let advisory: StructuredAdvisory | undefined;
       try {
-        const lookup = await esClient.asCurrentUser.search<StructuredAdvisory>({
+        const lookup = await esClient.asCurrentUser.search<
+          StructuredAdvisory & { '@timestamp'?: string }
+        >({
           index: ARGUS_CVE_ADVISORIES_INDEX,
           size: 1,
           query: { term: { advisory_id: advisoryId } },
         });
-        advisory = lookup.hits.hits[0]?._source;
+        const source = lookup.hits.hits[0]?._source;
+        // Vision-doc 4.1 — thread the advisory's `@timestamp` (data-stream
+        // ingest time) into the canonical `ingested_at` field so the
+        // chat-driven synthesis path stamps `synthesis_lag_ms` exactly the
+        // way the workflow path does.
+        advisory =
+          source && source.ingested_at === undefined && source['@timestamp']
+            ? { ...source, ingested_at: source['@timestamp'] }
+            : source;
       } catch (err) {
         const reason = err instanceof Error ? err.message : String(err);
         logger.warn(

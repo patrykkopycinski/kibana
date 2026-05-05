@@ -14,6 +14,7 @@ import {
   GOVERNANCE_PULSE_ROUTE,
   buildGovernancePulse,
   type ActorTrustTiersAggsInput,
+  type CoverageSnapshotsAggsInput,
   type GovernancePulseAggsInput,
   type HoursSavedConstants,
   type MutationIntentsAggsInput,
@@ -67,10 +68,15 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
           const core = await context.core;
           const esClient = core.elasticsearch.client.asCurrentUser;
 
-          // Three independent searches fan out in parallel. Each is wrapped in
+          // Four independent searches fan out in parallel. Each is wrapped in
           // `Promise.allSettled` so a missing index (serverless cold start,
-          // pre-M2.5 clusters) can't take down the whole Pulse tile.
-          const [outcomesSettled, mutationSettled, trustSettled] = await Promise.allSettled([
+          // pre-M2.5 clusters) can't take down the whole Pulse tile. The
+          // fourth (coverage-snapshots) is the vision-doc 4.2 trend tile —
+          // its index doesn't exist on stacks that haven't yet enabled
+          // `soc-argus-coverage-snapshotter`, so the section degrades to
+          // `coverage_trend: null` rather than 503'ing the route.
+          const [outcomesSettled, mutationSettled, trustSettled, coverageSettled] =
+            await Promise.allSettled([
             esClient.search({
               index: ARGUS_SOC_INDICES.outcomes,
               ignore_unavailable: true,
@@ -180,6 +186,16 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                     },
                   },
                 },
+                // Vision-doc 1.6.8 — TP / FP volume signal. The `disposition`
+                // field is the canonical SOC-side label on `.soc-outcomes`
+                // (analyst confirms or marks false-positive). Rows without
+                // a label don't contribute to the ratio.
+                tp_count: {
+                  filter: { term: { disposition: 'confirmed' } },
+                },
+                fp_count: {
+                  filter: { term: { disposition: 'false_positive' } },
+                },
               },
             }),
             esClient.search({
@@ -226,6 +242,19 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                     },
                   },
                 },
+                // Vision-doc 4.1 — synthesis-lag aggregations. Stamped on
+                // every mutation_intent at synthesize-time
+                // (`synthesis_lag_ms = synthesize_completed_at − advisory.@timestamp`).
+                // `lag_count` is the volume signal; `lag_under_60s` is the
+                // vision-doc target (< 1 min) compliance count.
+                lag_count: { value_count: { field: 'synthesis_lag_ms' } },
+                lag_under_60s: {
+                  filter: { range: { synthesis_lag_ms: { lt: 60_000 } } },
+                },
+                avg_lag: { avg: { field: 'synthesis_lag_ms' } },
+                lag_percentiles: {
+                  percentiles: { field: 'synthesis_lag_ms', percents: [50, 95] },
+                },
               },
             }),
             esClient.search({
@@ -253,6 +282,59 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                 },
               },
             }),
+            // Vision-doc 4.2 — coverage trend. Two `top_hits` aggs grab the
+            // oldest + latest snapshot in the window so the builder can
+            // compute the trend in TS. `ignore_unavailable: true` is the
+            // critical degradation lever — clusters that haven't yet
+            // enabled `soc-argus-coverage-snapshotter` get
+            // `coverage_trend: null`, not a 404.
+            esClient.search({
+              index: ARGUS_SOC_INDICES.coverageSnapshots,
+              ignore_unavailable: true,
+              size: 0,
+              track_total_hits: false,
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': { gte: windowStart, lte: windowEnd },
+                      },
+                    },
+                  ],
+                },
+              },
+              aggs: {
+                oldest: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ '@timestamp': { order: 'asc' } }],
+                    _source: {
+                      includes: [
+                        '@timestamp',
+                        'total_techniques',
+                        'covered_techniques',
+                        'coverage_pct',
+                      ],
+                    },
+                  },
+                },
+                latest: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    _source: {
+                      includes: [
+                        '@timestamp',
+                        'total_techniques',
+                        'covered_techniques',
+                        'coverage_pct',
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
           ]);
 
           const outcomesAggs =
@@ -271,6 +353,12 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                   | ActorTrustTiersAggsInput
                   | undefined) ?? null
               : null;
+          const coverageSnapshotsAggs =
+            coverageSettled.status === 'fulfilled'
+              ? (coverageSettled.value.aggregations as unknown as
+                  | CoverageSnapshotsAggsInput
+                  | undefined) ?? null
+              : null;
 
           // Log (at debug) when a section failed — helps diagnose "why is my
           // drift tile empty" on a real cluster without shouting at users on
@@ -286,6 +374,11 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
           if (trustSettled.status === 'rejected') {
             logger.debug(`ARGUS pulse trust-tier query failed: ${String(trustSettled.reason)}`);
           }
+          if (coverageSettled.status === 'rejected') {
+            logger.debug(
+              `ARGUS pulse coverage-snapshots query failed: ${String(coverageSettled.reason)}`
+            );
+          }
 
           const result = buildGovernancePulse({
             windowStart,
@@ -293,6 +386,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
             aggs: outcomesAggs,
             mutationAggs,
             trustAggs,
+            coverageSnapshotsAggs,
             hoursSavedOverrides: parseHoursSavedOverrides(request.query.constants, logger),
           });
 
@@ -334,6 +428,8 @@ const normaliseOutcomesAggs = (
     auto_triaged_outcomes?: { doc_count?: number | null };
     auto_recovered_rollbacks?: { doc_count?: number | null };
     human_rollbacks?: { doc_count?: number | null };
+    tp_count?: { doc_count?: number | null };
+    fp_count?: { doc_count?: number | null };
   };
   return {
     outcomes_total: filtered.outcomes_total ?? null,
@@ -347,6 +443,8 @@ const normaliseOutcomesAggs = (
     auto_triaged_outcomes: filtered.auto_triaged_outcomes ?? null,
     auto_recovered_rollbacks: filtered.auto_recovered_rollbacks ?? null,
     human_rollbacks: filtered.human_rollbacks ?? null,
+    tp_count: filtered.tp_count ?? null,
+    fp_count: filtered.fp_count ?? null,
   };
 };
 

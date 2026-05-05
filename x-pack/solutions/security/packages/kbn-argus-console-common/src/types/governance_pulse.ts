@@ -89,6 +89,34 @@ export interface GovernancePulse {
    * from `.soc-actor-trust-tiers`. Null when the index is missing.
    */
   readonly tier_mix: GovernancePulseTierMix | null;
+  /**
+   * Signal-to-noise telemetry — vision-doc 1.6.8 ("performance telemetry
+   * layer tracking … signal-to-noise … per-rule health"). Aggregates the
+   * `disposition` field on `.soc-outcomes` across the window into a
+   * confirmed-rate, where `confirmed / (confirmed + false_positive)` is the
+   * canonical SOC S/N ratio. Null when no outcomes carry a `disposition`
+   * label (cold start / detection-only environment).
+   */
+  readonly signal_to_noise: GovernancePulseSignalToNoise | null;
+  /**
+   * Trigger-to-rule synthesis lag — vision-doc 4.1 success metric ("trigger
+   * to rule creation time < 1 min"). Aggregates the `synthesis_lag_ms` field
+   * (advisory ingest → mutation intent built) the synthesis driver stamps
+   * on every mutation_intent. The headline is the p50; avg + p95 surface
+   * tail-risk. Null when no in-window mutation_intent carries the field
+   * (cold start, or every intent in the window pre-dates the stamping).
+   */
+  readonly trigger_to_rule: GovernancePulseTriggerToRule | null;
+  /**
+   * ATT&CK coverage trend — vision-doc 4.2 success metric ("ATT&CK coverage
+   * % continuous improvement"). Reads `.soc-coverage-snapshots` (the
+   * once-per-hour rollup workflow `soc-argus-coverage-snapshotter` writes).
+   * Returns the latest snapshot plus the delta vs the oldest snapshot in
+   * the window — that delta is what the tile renders as "trend". Null when
+   * the snapshot index has fewer than two rows in the window (no trend
+   * observable yet).
+   */
+  readonly coverage_trend: GovernancePulseCoverageTrend | null;
 }
 
 /**
@@ -294,6 +322,98 @@ export interface GovernancePulseTierMix {
   readonly system: number;
   /** Total actors seen in the tier index. Equals the sum of the four tiers. */
   readonly total: number;
+}
+
+/**
+ * Signal-to-noise — vision-doc 1.6.8.
+ *
+ * Sourced from `.soc-outcomes.disposition`: the canonical labels are
+ * `confirmed` (true positive) and `false_positive`. Other dispositions
+ * (`benign`, `duplicate`, `inconclusive`) don't carry a TP/FP signal so
+ * they don't contribute to the ratio.
+ *
+ * `confirmed_ratio` is the headline (range `[0, 1]`); zero confirmed AND zero
+ * false-positive labels collapses the section to `null` upstream.
+ */
+export interface GovernancePulseSignalToNoise {
+  /** Outcomes labelled `confirmed` (true positive) in the window. */
+  readonly confirmed: number;
+  /** Outcomes labelled `false_positive` in the window. */
+  readonly false_positive: number;
+  /**
+   * `confirmed / (confirmed + false_positive)` — null only if both
+   * components are zero (in which case the whole section is null
+   * upstream). Range `[0, 1]`.
+   */
+  readonly confirmed_ratio: number | null;
+}
+
+/**
+ * Trigger-to-rule synthesis lag — vision-doc 4.1.
+ *
+ * Sourced from `.soc-mutation-intents.synthesis_lag_ms` (the milliseconds
+ * elapsed between advisory ingest and mutation_intent envelope creation).
+ * `lag_count` is the volume signal — when zero, the whole section is null.
+ * `under_one_minute_ratio` is the vision-doc target compliance rate —
+ * `lag_count_under_60s / lag_count`.
+ */
+export interface GovernancePulseTriggerToRule {
+  /** Number of mutation_intents in the window with a finite `synthesis_lag_ms`. */
+  readonly lag_count: number;
+  /**
+   * Number of those mutation_intents whose `synthesis_lag_ms < 60_000` —
+   * the vision-doc 4.1 compliance count.
+   */
+  readonly lag_count_under_60s: number;
+  /**
+   * Vision-doc 4.1 target compliance ratio. `lag_count_under_60s / lag_count`
+   * — `1.0` means every synthesis was sub-minute; `0.0` means none. Null
+   * only when `lag_count === 0` (in which case the section is null upstream).
+   */
+  readonly under_one_minute_ratio: number | null;
+  /** Mean lag (ms). `null` when ES couldn't compute (single-doc bucket). */
+  readonly avg_ms: number | null;
+  /** 50th percentile of lag (ms). The headline tile metric. */
+  readonly p50_ms: number | null;
+  /** 95th percentile of lag (ms). Tail-risk signal. */
+  readonly p95_ms: number | null;
+}
+
+/**
+ * ATT&CK coverage trend — vision-doc 4.2.
+ *
+ * Sourced from `.soc-coverage-snapshots` (the rollup index the
+ * `soc-argus-coverage-snapshotter` workflow writes once per hour). The
+ * builder returns the latest snapshot plus the delta vs the oldest
+ * snapshot inside the window so the UI can render "+3.2pp last 24h" or
+ * "-1.1pp last 24h" honestly.
+ *
+ * Null when the snapshot index has fewer than two rows in the window — the
+ * trend is undefined with one data point.
+ */
+export interface GovernancePulseCoverageTrend {
+  /** Latest coverage snapshot — the headline tile metric. */
+  readonly current: GovernanceCoverageSnapshot;
+  /** Earliest snapshot in the window — the comparison baseline. */
+  readonly baseline: GovernanceCoverageSnapshot;
+  /**
+   * Percentage-point delta from `baseline.coverage_pct` to
+   * `current.coverage_pct`. Positive ⇒ coverage growing; negative ⇒
+   * coverage regressing (a drift signal worth tracking on its own).
+   */
+  readonly delta_pp: number;
+}
+
+/** One coverage snapshot. Mirror of `.soc-coverage-snapshots` doc fields. */
+export interface GovernanceCoverageSnapshot {
+  /** ISO8601 timestamp of the snapshot. */
+  readonly snapshot_at: string;
+  /** Total ATT&CK techniques tracked at the snapshot. */
+  readonly total_techniques: number;
+  /** Techniques with at least one production rule covering them. */
+  readonly covered_techniques: number;
+  /** `covered_techniques / total_techniques * 100`, two-decimal-rounded. */
+  readonly coverage_pct: number;
 }
 
 /**

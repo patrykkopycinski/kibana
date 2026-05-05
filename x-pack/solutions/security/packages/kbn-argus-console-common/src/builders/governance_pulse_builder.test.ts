@@ -680,3 +680,312 @@ describe('resolveHoursSavedConstants', () => {
     expect(result.minutes_per_triage).toBe(0);
   });
 });
+
+describe('signal_to_noise (vision-doc 1.6.8)', () => {
+  it('returns null when no disposition labels exist (cold start)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      aggs: {
+        tp_count: { doc_count: 0 },
+        fp_count: { doc_count: 0 },
+      },
+    });
+    expect(result.signal_to_noise).toBeNull();
+  });
+
+  it('surfaces confirmed_ratio when both TP + FP labels exist', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      aggs: {
+        tp_count: { doc_count: 80 },
+        fp_count: { doc_count: 20 },
+      },
+    });
+    expect(result.signal_to_noise).toEqual({
+      confirmed: 80,
+      false_positive: 20,
+      confirmed_ratio: 0.8,
+    });
+  });
+
+  it('reports confirmed_ratio = 1 when only TP labels exist (zero false positives)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      aggs: {
+        tp_count: { doc_count: 5 },
+        fp_count: { doc_count: 0 },
+      },
+    });
+    expect(result.signal_to_noise).toEqual({
+      confirmed: 5,
+      false_positive: 0,
+      confirmed_ratio: 1,
+    });
+  });
+
+  it('reports confirmed_ratio = 0 when only FP labels exist (every alert noisy)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      aggs: {
+        tp_count: { doc_count: 0 },
+        fp_count: { doc_count: 8 },
+      },
+    });
+    expect(result.signal_to_noise).toEqual({
+      confirmed: 0,
+      false_positive: 8,
+      confirmed_ratio: 0,
+    });
+  });
+
+  it('coerces malformed counts to zero (defensive against agg drift)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      aggs: {
+        tp_count: { doc_count: -3 },
+        fp_count: { doc_count: Number.NaN },
+      },
+    });
+    expect(result.signal_to_noise).toBeNull();
+  });
+
+  it('returns null when aggs are missing entirely', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+    });
+    expect(result.signal_to_noise).toBeNull();
+  });
+});
+
+describe('trigger_to_rule (vision-doc 4.1)', () => {
+  it('returns null when no mutation_intents carry synthesis_lag_ms', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      mutationAggs: {
+        lag_count: { value: 0 },
+      },
+    });
+    expect(result.trigger_to_rule).toBeNull();
+  });
+
+  it('surfaces under_one_minute_ratio when synthesis is sub-minute', () => {
+    // 10 mutation_intents in window, all < 60s — vision-doc target 100% met.
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      mutationAggs: {
+        lag_count: { value: 10 },
+        lag_under_60s: { doc_count: 10 },
+        avg_lag: { value: 12_000 },
+        lag_percentiles: { values: { '50.0': 9_000, '95.0': 30_000 } },
+      },
+    });
+    expect(result.trigger_to_rule).toEqual({
+      lag_count: 10,
+      lag_count_under_60s: 10,
+      under_one_minute_ratio: 1,
+      avg_ms: 12_000,
+      p50_ms: 9_000,
+      p95_ms: 30_000,
+    });
+  });
+
+  it('reports partial compliance when some synthesis runs are slow', () => {
+    // 10 intents total, 6 under 60s — 60% compliance.
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      mutationAggs: {
+        lag_count: { value: 10 },
+        lag_under_60s: { doc_count: 6 },
+        avg_lag: { value: 90_000 },
+        lag_percentiles: { values: { '50.0': 45_000, '95.0': 270_000 } },
+      },
+    });
+    expect(result.trigger_to_rule).toEqual({
+      lag_count: 10,
+      lag_count_under_60s: 6,
+      under_one_minute_ratio: 0.6,
+      avg_ms: 90_000,
+      p50_ms: 45_000,
+      p95_ms: 270_000,
+    });
+  });
+
+  it('coerces missing percentile / avg fields to null', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      mutationAggs: {
+        lag_count: { value: 3 },
+        lag_under_60s: { doc_count: 1 },
+        avg_lag: { value: null },
+        lag_percentiles: { values: { '50.0': null, '95.0': null } },
+      },
+    });
+    expect(result.trigger_to_rule).toEqual({
+      lag_count: 3,
+      lag_count_under_60s: 1,
+      under_one_minute_ratio: 0.3333,
+      avg_ms: null,
+      p50_ms: null,
+      p95_ms: null,
+    });
+  });
+
+  it('returns null when mutation aggs are missing entirely', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+    });
+    expect(result.trigger_to_rule).toBeNull();
+  });
+});
+
+describe('coverage_trend (vision-doc 4.2)', () => {
+  const oldestSnapshot = {
+    '@timestamp': '2026-04-19T12:00:00.000Z',
+    total_techniques: 200,
+    covered_techniques: 110,
+    coverage_pct: 55,
+  };
+  const latestSnapshot = {
+    '@timestamp': '2026-04-20T11:00:00.000Z',
+    total_techniques: 200,
+    covered_techniques: 124,
+    coverage_pct: 62,
+  };
+
+  it('returns null when no snapshot aggs are present (cold start)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+    });
+    expect(result.coverage_trend).toBeNull();
+  });
+
+  it('returns null when only one snapshot exists (trend undefined)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: { hits: { hits: [{ _source: latestSnapshot }] } },
+        latest: { hits: { hits: [{ _source: latestSnapshot }] } },
+      },
+    });
+    expect(result.coverage_trend).toBeNull();
+  });
+
+  it('surfaces baseline + current + delta_pp when two snapshots exist', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: { hits: { hits: [{ _source: oldestSnapshot }] } },
+        latest: { hits: { hits: [{ _source: latestSnapshot }] } },
+      },
+    });
+    expect(result.coverage_trend).toEqual({
+      baseline: {
+        snapshot_at: oldestSnapshot['@timestamp'],
+        total_techniques: 200,
+        covered_techniques: 110,
+        coverage_pct: 55,
+      },
+      current: {
+        snapshot_at: latestSnapshot['@timestamp'],
+        total_techniques: 200,
+        covered_techniques: 124,
+        coverage_pct: 62,
+      },
+      delta_pp: 7,
+    });
+  });
+
+  it('surfaces a negative delta when coverage regressed (drift signal)', () => {
+    const regressedLatest = {
+      '@timestamp': '2026-04-20T11:00:00.000Z',
+      total_techniques: 200,
+      covered_techniques: 100,
+      coverage_pct: 50,
+    };
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: { hits: { hits: [{ _source: oldestSnapshot }] } },
+        latest: { hits: { hits: [{ _source: regressedLatest }] } },
+      },
+    });
+    expect(result.coverage_trend?.delta_pp).toBe(-5);
+  });
+
+  it('recomputes coverage_pct when the producer omits or drifts the field', () => {
+    const driftedLatest = {
+      '@timestamp': '2026-04-20T11:00:00.000Z',
+      total_techniques: 100,
+      covered_techniques: 80,
+      // Producer regression: missing coverage_pct. Builder should recompute
+      // covered/total*100 = 80% rather than fall through to null.
+      coverage_pct: null,
+    };
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: { hits: { hits: [{ _source: oldestSnapshot }] } },
+        latest: { hits: { hits: [{ _source: driftedLatest }] } },
+      },
+    });
+    expect(result.coverage_trend?.current.coverage_pct).toBe(80);
+  });
+
+  it('returns null when total_techniques is zero (degenerate snapshot)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: {
+          hits: { hits: [{ _source: { ...oldestSnapshot, total_techniques: 0 } }] },
+        },
+        latest: { hits: { hits: [{ _source: latestSnapshot }] } },
+      },
+    });
+    expect(result.coverage_trend).toBeNull();
+  });
+
+  it('returns null when oldest = latest (single snapshot in window)', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: { hits: { hits: [{ _source: latestSnapshot }] } },
+        latest: { hits: { hits: [{ _source: latestSnapshot }] } },
+      },
+    });
+    expect(result.coverage_trend).toBeNull();
+  });
+
+  it('returns null when @timestamp is missing on either side', () => {
+    const result = buildGovernancePulse({
+      windowStart: WINDOW_START,
+      windowEnd: WINDOW_END,
+      coverageSnapshotsAggs: {
+        oldest: {
+          hits: {
+            hits: [{ _source: { ...oldestSnapshot, '@timestamp': undefined } }],
+          },
+        },
+        latest: { hits: { hits: [{ _source: latestSnapshot }] } },
+      },
+    });
+    expect(result.coverage_trend).toBeNull();
+  });
+});

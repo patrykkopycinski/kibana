@@ -15,6 +15,7 @@ import {
   buildGovernancePulse,
   type ActorTrustTiersAggsInput,
   type GovernancePulseAggsInput,
+  type HoursSavedConstants,
   type MutationIntentsAggsInput,
 } from '@kbn/argus-console-common';
 
@@ -28,6 +29,14 @@ import type { ArgusRoutesDeps } from '../types';
 const querySchema = schema.object({
   window_start: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
   window_end: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
+  /**
+   * B12 — JSON-encoded `Partial<HoursSavedConstants>` override of the
+   * per-action minute constants used by the hours-saved proxy. Operators
+   * tune the proxy without redeploying by passing e.g.
+   * `?constants={"minutes_per_authoring":120}`. Malformed JSON is silently
+   * ignored — defaults apply, dashboards never break.
+   */
+  constants: schema.maybe(schema.string({ minLength: 1, maxLength: 1024 })),
 });
 
 const DEFAULT_WINDOW_START = 'now-24h';
@@ -97,6 +106,80 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                 mttr_percentiles: {
                   percentiles: { field: 'rollback_mttr_ms', percents: [50, 95] },
                 },
+                // B11 — MTTD aggregations. `time_to_detect` is a long (ms)
+                // populated on `.soc-outcomes` rows produced by the SOC
+                // simulation pipeline. Wrap the count in a filter agg so it
+                // only counts outcomes that actually carry the field — a
+                // straight `value_count` would double-count rows where the
+                // field is missing in flat-mapping rollouts.
+                detect_outcomes: {
+                  filter: { exists: { field: 'time_to_detect' } },
+                  aggs: {
+                    c: { value_count: { field: 'time_to_detect' } },
+                  },
+                },
+                avg_ttd: { avg: { field: 'time_to_detect' } },
+                ttd_percentiles: {
+                  percentiles: { field: 'time_to_detect', percents: [50, 95] },
+                },
+                // B12 — Hours-saved proxy source counts. Each filter agg
+                // returns a `doc_count` the builder reads as a non-negative
+                // integer.
+                rules_authored: {
+                  // Outcomes whose `applied_at` falls in the window AND that
+                  // were not rolled back. Together these represent
+                  // autonomously-authored detection rules that stayed in
+                  // production — the counterfactual analyst-authoring time
+                  // saved.
+                  filter: {
+                    bool: {
+                      filter: [{ exists: { field: 'applied_at' } }],
+                      must_not: [{ term: { rolled_back: true } }],
+                    },
+                  },
+                },
+                auto_triaged_outcomes: {
+                  // Outcomes the autonomous pipeline closed end-to-end:
+                  // `pipeline_complete=true` AND no human case was opened
+                  // (`case_created=false`). The case-created flag is the
+                  // cleanest discriminator the schema offers between
+                  // analyst-handled vs autonomous closes.
+                  filter: {
+                    bool: {
+                      filter: [
+                        { term: { pipeline_complete: true } },
+                        { term: { case_created: false } },
+                      ],
+                    },
+                  },
+                },
+                auto_recovered_rollbacks: {
+                  // Rollbacks AutoDEX handled itself — `rollback_source=auto`.
+                  // No analyst paged.
+                  filter: {
+                    bool: {
+                      filter: [
+                        { term: { rolled_back: true } },
+                        { term: { rollback_source: 'auto' } },
+                      ],
+                    },
+                  },
+                },
+                human_rollbacks: {
+                  // Rollbacks that required human triage — every
+                  // `rolled_back=true` row whose `rollback_source` exists
+                  // and is NOT `auto`. These cost analyst time and the
+                  // builder subtracts the cost from the headline.
+                  filter: {
+                    bool: {
+                      filter: [
+                        { term: { rolled_back: true } },
+                        { exists: { field: 'rollback_source' } },
+                      ],
+                      must_not: [{ term: { rollback_source: 'auto' } }],
+                    },
+                  },
+                },
               },
             }),
             esClient.search({
@@ -126,9 +209,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
                         { term: { drift_detected: true } },
                         {
                           bool: {
-                            must_not: [
-                              { term: { drift_resolved: true } },
-                            ],
+                            must_not: [{ term: { drift_resolved: true } }],
                           },
                         },
                       ],
@@ -180,11 +261,15 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
               : null;
           const mutationAggs =
             mutationSettled.status === 'fulfilled'
-              ? (mutationSettled.value.aggregations as unknown as MutationIntentsAggsInput | undefined) ?? null
+              ? (mutationSettled.value.aggregations as unknown as
+                  | MutationIntentsAggsInput
+                  | undefined) ?? null
               : null;
           const trustAggs =
             trustSettled.status === 'fulfilled'
-              ? (trustSettled.value.aggregations as unknown as ActorTrustTiersAggsInput | undefined) ?? null
+              ? (trustSettled.value.aggregations as unknown as
+                  | ActorTrustTiersAggsInput
+                  | undefined) ?? null
               : null;
 
           // Log (at debug) when a section failed — helps diagnose "why is my
@@ -208,6 +293,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
             aggs: outcomesAggs,
             mutationAggs,
             trustAggs,
+            hoursSavedOverrides: parseHoursSavedOverrides(request.query.constants, logger),
           });
 
           return response.ok({ body: result });
@@ -239,11 +325,62 @@ const normaliseOutcomesAggs = (
     mttr_percentiles?: {
       values?: { ['50.0']?: number | null; ['95.0']?: number | null } | null;
     };
+    detect_outcomes?: { c?: { value?: number | null } };
+    avg_ttd?: { value?: number | null };
+    ttd_percentiles?: {
+      values?: { ['50.0']?: number | null; ['95.0']?: number | null } | null;
+    };
+    rules_authored?: { doc_count?: number | null };
+    auto_triaged_outcomes?: { doc_count?: number | null };
+    auto_recovered_rollbacks?: { doc_count?: number | null };
+    human_rollbacks?: { doc_count?: number | null };
   };
   return {
     outcomes_total: filtered.outcomes_total ?? null,
     rollback_count: { value: filtered.rollback_count?.c?.value ?? 0 },
     avg_mttr: filtered.avg_mttr ?? null,
     mttr_percentiles: filtered.mttr_percentiles ?? null,
+    detect_count: { value: filtered.detect_outcomes?.c?.value ?? 0 },
+    avg_ttd: filtered.avg_ttd ?? null,
+    ttd_percentiles: filtered.ttd_percentiles ?? null,
+    rules_authored: filtered.rules_authored ?? null,
+    auto_triaged_outcomes: filtered.auto_triaged_outcomes ?? null,
+    auto_recovered_rollbacks: filtered.auto_recovered_rollbacks ?? null,
+    human_rollbacks: filtered.human_rollbacks ?? null,
   };
+};
+
+/**
+ * B12 — Parse the optional `?constants=` JSON-encoded override blob into a
+ * `Partial<HoursSavedConstants>` the builder can consume. Defensive on every
+ * level: malformed JSON, non-object payloads, unknown keys, non-numeric
+ * values are all silently dropped — the builder falls back to defaults for
+ * any unset key. We only debug-log parse failures so a typo in a dashboard
+ * URL never breaks the Pulse tile, but operators still have a forensic trail.
+ */
+const parseHoursSavedOverrides = (
+  raw: string | undefined,
+  logger: ArgusRoutesDeps['logger']
+): Partial<HoursSavedConstants> | null => {
+  if (!raw) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    logger.debug(`ARGUS pulse hours-saved constants override is not valid JSON: ${String(err)}`);
+    return null;
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+  const candidate = parsed as Record<string, unknown>;
+  const overrides: { -readonly [K in keyof HoursSavedConstants]?: HoursSavedConstants[K] } = {};
+  const accept = (key: keyof HoursSavedConstants) => {
+    const value = candidate[key];
+    if (typeof value !== 'number') return;
+    overrides[key] = value;
+  };
+  accept('minutes_per_authoring');
+  accept('minutes_per_triage');
+  accept('minutes_per_rollback_recovery');
+  accept('minutes_per_human_rollback');
+  return Object.keys(overrides).length > 0 ? (overrides as Partial<HoursSavedConstants>) : null;
 };

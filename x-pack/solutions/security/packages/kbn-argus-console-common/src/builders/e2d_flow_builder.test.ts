@@ -75,7 +75,6 @@ const EVAL_RUN: E2dRawEvalRunDoc = {
   _index: '.soc-argus-eval-runs',
   _source: {
     '@timestamp': '2026-04-17T10:08:00.000Z',
-    run_kind: 'detection',
     rule_id: 'rule-acme',
     scores: {
       precision: 0.95,

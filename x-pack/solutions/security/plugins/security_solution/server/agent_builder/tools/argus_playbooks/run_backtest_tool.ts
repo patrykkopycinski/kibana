@@ -46,7 +46,8 @@ export function argusRunBacktestTool(
     tags: ['security', 'argus', 'argus:playbook', 'backtest'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
     handler: async ({ rule_id: ruleId, lookback, corpus_id: corpusId }, { esClient }) => {
       const runId = `argus-bt-${Date.now().toString(36)}`;

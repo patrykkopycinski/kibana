@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/server';
 import { i18n } from '@kbn/i18n';
@@ -148,15 +148,12 @@ export const resolveEntityContextStepDefinition = createServerStepDefinition({
         }
       >();
 
-      for (const hit of hits) {
+      hits.forEach((hit) => {
         const source = hit._source;
-        if (!source) {
-          continue;
-        }
-        const entity = source.entity as Record<string, unknown> | undefined;
-        if (!entity || typeof entity.id !== 'string') {
-          continue;
-        }
+        const entity = source?.entity as Record<string, unknown> | undefined;
+        // Drop hits without a usable entity envelope; the upstream search
+        // is best-effort so partial documents shouldn't crash the step.
+        if (!source || !entity || typeof entity.id !== 'string') return;
         const entityId = entity.id;
         const entityType = typeof entity.type === 'string' ? entity.type : 'unknown';
         const riskBlock = entity.risk as Record<string, unknown> | undefined;
@@ -195,7 +192,7 @@ export const resolveEntityContextStepDefinition = createServerStepDefinition({
           watchlists: readWatchlists(source),
           behaviors: activeBehaviorKeys(entity.behaviors),
         });
-      }
+      });
 
       return {
         output: {

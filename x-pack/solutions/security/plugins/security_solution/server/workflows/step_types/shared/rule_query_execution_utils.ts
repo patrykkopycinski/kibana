@@ -231,7 +231,9 @@ const assertSafeEsqlForCountHits = (trimmed: string, mode: 'full' | 'fragment') 
     }
   } else {
     if (/\|\s*STATS\b/i.test(trimmed)) {
-      throw new Error('ES|QL full query must not include STATS; the server appends the count aggregate');
+      throw new Error(
+        'ES|QL full query must not include STATS; the server appends the count aggregate'
+      );
     }
   }
 };
@@ -272,7 +274,8 @@ export const mapSampleHits = (
 ): Array<{ _id: string; _index: string; timestamp?: string }> =>
   hits.slice(0, 5).map((h) => {
     const fields = h.fields as Record<string, unknown[]> | undefined;
-    const tsRaw = fields?.[TIMESTAMP_FIELD]?.[0] ?? h._source?.[TIMESTAMP_FIELD];
+    const source = h._source as Record<string, unknown> | undefined;
+    const tsRaw = fields?.[TIMESTAMP_FIELD]?.[0] ?? source?.[TIMESTAMP_FIELD];
     return {
       _id: h._id ?? '',
       _index: h._index ?? '',

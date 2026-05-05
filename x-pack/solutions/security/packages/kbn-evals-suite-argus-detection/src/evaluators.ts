@@ -43,8 +43,14 @@ export type GateDecision = 'pass' | 'fail' | 'marginal';
 
 /**
  * ARGUS governance thresholds for a promotable detection rule candidate.
- * These are intentionally conservative defaults; per-rule overrides live in
- * the detection rule's metadata (future work, not on the demo path).
+ * These are intentionally conservative defaults. Per-rule overrides live on
+ * the rule itself (`CandidateRule.gate_overrides`) and are merged with these
+ * defaults via {@link resolveGateThresholds} (B6 — closes F-003).
+ *
+ * Run-wide overrides (e.g. a tuned per-corpus gate) can still be passed via
+ * `CreateEvaluateDetectionRulesDeps.gateThresholdsOverride`; the resolution
+ * order is `default ∪ run-wide ∪ per-rule` with the per-rule override winning
+ * when a given key is set in more than one layer.
  */
 export const DEFAULT_GATE_THRESHOLDS = Object.freeze({
   min_precision: 0.9,
@@ -56,6 +62,91 @@ export const DEFAULT_GATE_THRESHOLDS = Object.freeze({
 });
 
 export type GateThresholds = typeof DEFAULT_GATE_THRESHOLDS;
+
+/**
+ * Partial override shape used by per-rule and per-run overrides. Each key is
+ * optional — unset keys fall through to the next layer. Values are validated
+ * by {@link resolveGateThresholds}: any value outside `[0, 1]` is rejected
+ * (this is a fail-loud guard rather than a silent clamp; bad config should
+ * surface, not be tolerated).
+ */
+export type GateThresholdsOverride = Partial<GateThresholds>;
+
+/**
+ * Audit field surfaced on every {@link RuleEvaluationRow}. It records the
+ * highest-precedence layer that contributed to the final `gate_thresholds` so
+ * a downstream consumer can see *why* a rule was scored under different
+ * thresholds (e.g. a low-volume host rule with `min_precision` relaxed to 0.7).
+ */
+export type GateThresholdsOrigin = 'default' | 'run_level' | 'per_rule';
+
+const THRESHOLD_KEYS: ReadonlyArray<keyof GateThresholds> = [
+  'min_precision',
+  'min_recall',
+  'min_variant_coverage',
+  'max_fp_rate',
+  'marginal_band',
+];
+
+const isValidThresholdValue = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
+
+const validateOverride = (override: GateThresholdsOverride, layerName: string): void => {
+  for (const key of THRESHOLD_KEYS) {
+    const value = override[key];
+    if (value !== undefined && !isValidThresholdValue(value)) {
+      throw new Error(
+        `[gate-thresholds] ${layerName} override.${key} must be a finite number in [0, 1]; got ${String(
+          value
+        )}`
+      );
+    }
+  }
+};
+
+/**
+ * Merge defaults with a run-level override and a per-rule override. The
+ * per-rule override takes precedence over the run-level override, which takes
+ * precedence over defaults. Returns the resolved thresholds and an `origin`
+ * describing the highest-precedence layer that contributed at least one key
+ * (handy for the eval-runs index audit).
+ *
+ * Throws if any override value is outside `[0, 1]` — drift in these
+ * thresholds matters, and silent clamping would hide it.
+ */
+export const resolveGateThresholds = (
+  defaults: GateThresholds = DEFAULT_GATE_THRESHOLDS,
+  runOverride?: GateThresholdsOverride,
+  ruleOverride?: GateThresholdsOverride
+): { thresholds: GateThresholds; origin: GateThresholdsOrigin } => {
+  if (runOverride) validateOverride(runOverride, 'run');
+  if (ruleOverride) validateOverride(ruleOverride, 'per-rule');
+
+  const merged: GateThresholds = { ...defaults };
+  let origin: GateThresholdsOrigin = 'default';
+
+  if (runOverride) {
+    for (const key of THRESHOLD_KEYS) {
+      const value = runOverride[key];
+      if (value !== undefined) {
+        merged[key] = value;
+        origin = 'run_level';
+      }
+    }
+  }
+
+  if (ruleOverride) {
+    for (const key of THRESHOLD_KEYS) {
+      const value = ruleOverride[key];
+      if (value !== undefined) {
+        merged[key] = value;
+        origin = 'per_rule';
+      }
+    }
+  }
+
+  return { thresholds: Object.freeze(merged), origin };
+};
 
 export const computePrecision = (
   c: Pick<AggregateCounts, 'true_positives' | 'false_positives'>

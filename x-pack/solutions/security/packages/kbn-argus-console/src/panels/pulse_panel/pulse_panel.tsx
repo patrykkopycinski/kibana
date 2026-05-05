@@ -24,6 +24,8 @@ import {
 import type {
   GovernancePulse,
   GovernancePulseDrift,
+  GovernancePulseHoursSaved,
+  GovernancePulseMttd,
   GovernancePulseMttr,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
@@ -88,6 +90,140 @@ const mttrTone = (p50Ms: number | null): PulseMetric['tone'] => {
 };
 
 /**
+ * MTTD tile — vision-doc 4.4 success metric (B11).
+ *
+ * Mirrors the MTTR tile: shows the p50 as the headline (single-outlier
+ * resistant), with avg + p95 in the description. Tone bands are tighter than
+ * MTTR because detection latency is normally measured in seconds-to-minutes,
+ * not minutes-to-hours: <30s success, <2min warning, >2min danger.
+ */
+const mttdTone = (p50Ms: number | null): PulseMetric['tone'] => {
+  if (p50Ms === null) return 'subdued';
+  if (p50Ms < 30_000) return 'success';
+  if (p50Ms < 2 * 60_000) return 'warning';
+  return 'danger';
+};
+
+const mttdTile = (mttd: GovernancePulseMttd | null): PulseMetric => {
+  if (!mttd || mttd.p50_ms === null) {
+    return {
+      id: 'detection-mttd',
+      label: 'Detection MTTD (p50)',
+      value: '—',
+      description: 'no detection outcomes in window',
+      tone: 'subdued',
+      tooltip:
+        'Median time between attack signal availability and the corresponding alert ' +
+        'firing, measured across .soc-outcomes.time_to_detect. Vision-doc 4.4 success metric.',
+    };
+  }
+
+  const descParts: string[] = [
+    `${mttd.detect_count} detection${mttd.detect_count === 1 ? '' : 's'}`,
+  ];
+  if (mttd.avg_ms !== null) descParts.push(`avg ${formatDuration(mttd.avg_ms)}`);
+  if (mttd.p95_ms !== null) descParts.push(`p95 ${formatDuration(mttd.p95_ms)}`);
+
+  return {
+    id: 'detection-mttd',
+    label: 'Detection MTTD (p50)',
+    value: formatDuration(mttd.p50_ms),
+    description: descParts.join(' · '),
+    tone: mttdTone(mttd.p50_ms),
+    tooltip:
+      'Median time between an attack signal first being available in events and the ' +
+      'corresponding alert firing. Sourced from .soc-outcomes.time_to_detect over ' +
+      'the window. Vision-doc 4.4 — a primary success metric for the Detection Engine.',
+  };
+};
+
+/**
+ * Hours-saved proxy tone (B12). The headline metric is *intentionally*
+ * allowed to go negative when human-handled rollbacks dominate — that is the
+ * failure mode AutoDEX governance exists to prevent and the tile must
+ * surface it loudly.
+ */
+const hoursSavedTone = (totalHours: number | null): PulseMetric['tone'] => {
+  if (totalHours === null) return 'subdued';
+  if (totalHours < 0) return 'danger';
+  if (totalHours < 4) return 'warning';
+  return 'success';
+};
+
+/**
+ * Format a non-negative hour count for the headline tile. Whole numbers
+ * render without a decimal, fractional values keep one decimal so a 1.5h
+ * proxy doesn't read as "2 h" or "1 h" on the dashboard.
+ */
+const formatHours = (hours: number): string => {
+  const rounded = Math.round(hours * 10) / 10;
+  if (Number.isInteger(rounded)) return `${rounded} h`;
+  return `${rounded.toFixed(1)} h`;
+};
+
+const hoursSavedTile = (hoursSaved: GovernancePulseHoursSaved | null): PulseMetric => {
+  if (!hoursSaved) {
+    return {
+      id: 'hours-saved',
+      label: 'Estimated analyst hours saved',
+      value: '—',
+      description: 'no AutoDEX activity in window',
+      tone: 'subdued',
+      tooltip:
+        'Estimated analyst hours saved (proxy). Sourced from rules autonomously authored, ' +
+        'alerts auto-triaged, and rollbacks auto-recovered, weighted by per-action minute ' +
+        'constants. See B12 RFC for the model. Vision-doc 4.3 success metric.',
+    };
+  }
+
+  const { breakdown, source_counts: sourceCounts, total_hours: totalHours } = hoursSaved;
+  // Build a compact breakdown sentence ("6 h authoring · 5 h triage · 1 h
+  // recovery · -0 h rollback cost"). Skip zero-hour rows in the description
+  // so the line stays readable on small windows; the headline still reflects
+  // the full math.
+  const descParts: string[] = [];
+  if (breakdown.authoring_hours !== 0) {
+    descParts.push(`${formatHours(breakdown.authoring_hours)} authoring`);
+  }
+  if (breakdown.triage_hours !== 0) {
+    descParts.push(`${formatHours(breakdown.triage_hours)} triage`);
+  }
+  if (breakdown.recovery_hours !== 0) {
+    descParts.push(`${formatHours(breakdown.recovery_hours)} auto-recovery`);
+  }
+  if (breakdown.human_rollback_hours !== 0) {
+    // Already negative — render with explicit sign so the cost is unambiguous.
+    descParts.push(`${formatHours(breakdown.human_rollback_hours)} human rollback`);
+  }
+  if (descParts.length === 0) {
+    descParts.push('no observable contributions');
+  }
+
+  const totalRules = sourceCounts.rules_authored;
+  const tooltipParts: string[] = [
+    `${totalRules} rule${totalRules === 1 ? '' : 's'} authored, ` +
+      `${sourceCounts.auto_triaged_outcomes} auto-triaged, ` +
+      `${sourceCounts.auto_recovered_rollbacks} auto-recovered, ` +
+      `${sourceCounts.human_rollbacks} human-handled.`,
+    'Proxy from .soc-outcomes × tunable per-action minute constants. See B12 RFC.',
+  ];
+
+  // Render negative totals with explicit sign so leadership reads "-2 h"
+  // rather than misinterpreting "2 h" as a saving.
+  const headline =
+    totalHours < 0 ? `-${formatHours(Math.abs(totalHours))}` : formatHours(totalHours);
+
+  return {
+    id: 'hours-saved',
+    label: 'Estimated analyst hours saved',
+    value: headline,
+    description: descParts.join(' · '),
+    tone: hoursSavedTone(totalHours),
+    tooltip: tooltipParts.join(' '),
+  };
+};
+
+/**
  * MTTR tile (section 1). Mirrors the original single-widget Pulse — still the
  * headline governance-recovery signal.
  */
@@ -129,9 +265,7 @@ const mttrTile = (mttr: GovernancePulseMttr | null): PulseMetric => {
  * window. Reads both `.soc-outcomes` (applied + rolled_back) and
  * `.soc-mutation-intents` (blocked by governance).
  */
-const throughputTiles = (
-  throughput: GovernancePulseThroughput | null
-): readonly PulseMetric[] => {
+const throughputTiles = (throughput: GovernancePulseThroughput | null): readonly PulseMetric[] => {
   if (!throughput) {
     return [
       {
@@ -264,6 +398,28 @@ const tierMixTiles = (mix: GovernancePulseTierMix | null): readonly PulseMetric[
 const DEMO_PULSE: GovernancePulse = {
   window_start: 'now-24h',
   window_end: 'now',
+  mttd: { detect_count: 12, avg_ms: 24_000, p50_ms: 18_000, p95_ms: 72_000 },
+  hours_saved: {
+    total_hours: 12,
+    breakdown: {
+      authoring_hours: 6,
+      triage_hours: 5,
+      recovery_hours: 1,
+      human_rollback_hours: 0,
+    },
+    source_counts: {
+      rules_authored: 4,
+      auto_triaged_outcomes: 60,
+      auto_recovered_rollbacks: 4,
+      human_rollbacks: 0,
+    },
+    applied_constants: {
+      minutes_per_authoring: 90,
+      minutes_per_triage: 5,
+      minutes_per_rollback_recovery: 15,
+      minutes_per_human_rollback: 30,
+    },
+  },
   rollback_mttr: null,
   mutation_throughput: { applied: 7, rolled_back: 1, blocked: 2 },
   drift: { open_count: 3, resolved_count: 2 },
@@ -274,6 +430,8 @@ const DEMO_PULSE: GovernancePulse = {
 const EMPTY_PULSE_PLACEHOLDER: GovernancePulse = {
   window_start: 'now-24h',
   window_end: 'now',
+  mttd: null,
+  hours_saved: null,
   rollback_mttr: null,
   mutation_throughput: null,
   drift: null,
@@ -288,7 +446,13 @@ interface TileRowProps {
   readonly onMetricClick?: (metricId: string) => void;
 }
 
-const TileRow: React.FC<TileRowProps> = ({ title, subtitle, metrics, isLoading, onMetricClick }) => (
+const TileRow: React.FC<TileRowProps> = ({
+  title,
+  subtitle,
+  metrics,
+  isLoading,
+  onMetricClick,
+}) => (
   <>
     <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -326,7 +490,7 @@ const TileRow: React.FC<TileRowProps> = ({ title, subtitle, metrics, isLoading, 
               hasBorder
               paddingSize="m"
               data-test-subj={`argusPulseTile-${metric.id}`}
-              onClick={isClickable ? () => onMetricClick!(metric.id) : undefined}
+              onClick={isClickable && onMetricClick ? () => onMetricClick(metric.id) : undefined}
               style={isClickable ? { cursor: 'pointer' } : undefined}
             >
               {metric.tooltip ? (
@@ -405,9 +569,7 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiBadge
-            color={
-              fetchError ? 'danger' : demoMode ? 'hollow' : hasLiveData ? 'success' : 'hollow'
-            }
+            color={fetchError ? 'danger' : demoMode ? 'hollow' : hasLiveData ? 'success' : 'hollow'}
           >
             {fetchError ? 'unavailable' : demoMode ? 'demo' : hasLiveData ? 'live' : 'offline'}
           </EuiBadge>
@@ -425,6 +587,7 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title="Could not load governance pulse"
             color="danger"
             iconType="error"
@@ -439,6 +602,26 @@ export const PulsePanel: React.FC<PulsePanelProps> = ({
 
       {overrideRow ?? (
         <>
+          <TileRow
+            title="Detection responsiveness"
+            subtitle="mean time to detect (.soc-outcomes.time_to_detect)"
+            metrics={[mttdTile(payload.mttd)]}
+            isLoading={isLoading}
+            onMetricClick={onMetricClick}
+          />
+
+          <EuiHorizontalRule margin="m" />
+
+          <TileRow
+            title="Analyst time saved (proxy)"
+            subtitle="estimate from .soc-outcomes × per-action minute constants — see B12 RFC"
+            metrics={[hoursSavedTile(payload.hours_saved)]}
+            isLoading={isLoading}
+            onMetricClick={onMetricClick}
+          />
+
+          <EuiHorizontalRule margin="m" />
+
           <TileRow
             title="Governance recovery"
             subtitle="rollback MTTR (.soc-outcomes.rollback_mttr_ms)"

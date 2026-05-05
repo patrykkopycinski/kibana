@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "timestamp": "2026-05-05T15:32:08Z",
+  "es_url": "http://localhost:19200",
+  "benchmark_doc": "soc-simulation/docs/argus/ARGUS-BENCHMARK.md",
+  "runner": "soc-simulation/scripts/run_argus_benchmark.sh",
+  "wait_min": 0,
+  "criteria": {
+    "d1_1": {"earned": 0, "max": 5, "reason": "no rule-creation intents in .soc-mutation-intents"},
+    "d1_2": {"earned": 3, "max": 5, "reason": "new-rule intent present but no explicit index_pattern"},
+    "d1_3": {"earned": 5, "max": 5, "reason": "5 mutation intents carry mitre_technique"},
+    "d1_4": {"earned": 10, "max": 10, "reason": "16 gate_decision=pass + 0 projection_safe in .soc-backtests"},
+    "d1_5": {"earned": 5, "max": 5, "reason": "40 autonomously-applied mutation intents"},
+    "d2_1": {"earned": 5, "max": 5, "reason": "kill-switch wired (.soc-kill-switch has 1 doc(s) with autonomy_enabled)"},
+    "d2_2": {"earned": 5, "max": 5, "reason": "33 mutation intents reference backtester in governance reason"},
+    "d2_3": {"earned": 5, "max": 5, "reason": "6 mutation intents declined by governance gate"},
+    "d2_4": {"earned": 5, "max": 5, "reason": "41 canonical-owned artifacts in .soc-artifact-registry"},
+    "d2_5": {"earned": 0, "max": 5, "reason": "no rollback intents emitted"},
+    "d3_1": {"earned": 5, "max": 5, "reason": "3 disable/tune intents (noise reduction)"},
+    "d3_2": {"earned": 5, "max": 5, "reason": "55 outcomes carry rollback_mttr_ms"},
+    "d3_3": {"earned": 5, "max": 5, "reason": "8 dead-letter-recovery audit rows"},
+    "d3_4": {"earned": 5, "max": 5, "reason": "10 actor-trust-tier records"},
+    "d4_1": {"earned": 5, "max": 5, "reason": "20 open coverage gaps"},
+    "d4_2": {"earned": 0, "max": 5, "reason": "no auto-authored rules from advisories or coverage gaps"},
+    "d4_3": {"earned": 5, "max": 5, "reason": "1 enabler decision(s) + 0 enable intent(s)"},
+    "d5_1": {"earned": 3, "max": 3, "reason": "354 traces / 96 decisions (ratio 1.0)"},
+    "d5_2": {"earned": 4, "max": 4, "reason": "47 decision-graph edges"},
+    "d5_3": {"earned": 3, "max": 3, "reason": "61 heartbeats in last 30 min"}
+  },
+  "total_earned": 83,
+  "total_max": 100,
+  "tier": "Semi-Autonomous"
+}

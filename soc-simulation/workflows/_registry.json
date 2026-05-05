@@ -235,6 +235,35 @@
       "owner": "canonical"
     },
     {
+      "workflow_id": "soc-skill-self-adjust",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "skill_metrics",
+        "recommendations"
+      ],
+      "summary": "AutoDEX B9 — Self-adjusting skills loop. Every 1h reads the latest .soc-skill-metrics rollup per skill_id, classifies through the evaluateSkillHealth verdict matrix (Liquid mirror of the pure-logic spec in kbn-argus-tool-manifest/src/skill_health.ts; 21 unit tests). Emits per-skill rows into .soc-skill-recommendations with verdict (insufficient_data | healthy | review | reprompt | demote) + closed-set recommended_actions (log_only | open_review_case | reprompt_skill | demote_actor | freeze_skill). Doc id = skill_id (idempotent upsert). RFC: rfcs/B9-skill-self-adjust.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc-incident-reverse-intel",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "forensic_summary",
+        "outcomes",
+        "intel_feed"
+      ],
+      "summary": "AutoDEX B10 — Incident TTPs → threat-intel reverse loop. Hourly + on-demand. Reads confirmed .soc-forensic-summary cases + .soc-outcomes.techniques_observed, aggregates per ATT&CK technique, applies threshold gating (min_observations=2, base_signal_strength=0.4 capped+saturating at 0.95, source_trust=0.85), and emits canonical .soc-intel-feed rows with kind: ttp_observed and full evidence.* audit-trail block (observation count, TP/FP split, distinct actors / campaigns / rule_ids / incident_ids, window). Pure-logic spec at lib/argus/intel/reverse_intel_extractor.ts (24 unit tests). RFC: rfcs/B10-incident-reverse-intel.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:intel"
+      ]
+    },
+    {
       "workflow_id": "soc-forensic-summarizer",
       "automation_level": "fully_auto",
       "connectors": [
@@ -322,6 +351,23 @@
         "audit_trail"
       ],
       "summary": "ARGUS M2.2 — Exploit-to-Detection reconciler. Polls .soc-cve-advisories for advisories synthesized by the CLI/tool, promotes them to status=detected, then reflects downstream @kbn/evals verdicts (auto_apply_ready/blocked_eval) back onto the advisory as eval_pass/eval_fail.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:playbook"
+      ]
+    },
+    {
+      "workflow_id": "soc-argus-synthesis-driver",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "recommendations",
+        "artifact_registry",
+        "audit_trail",
+        "kill_switch",
+        "evolution_log"
+      ],
+      "summary": "AutoDEX B1 — autonomous synthesis driver. Scheduled every 5m; reads .soc-kill-switch; selects pending CVE advisories from .soc-cve-advisories; runs Path A end-to-end per advisory by invoking the security.argusSynthesizeAdvisory workflow step (Pareto frontier + LLM-variant generation + validation + canonical mutation_intent write). Replaces the legacy TaskManager-driven synthesis_driver_task. Write-time B16 contract guards in the step refuse drifted documents.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": [
@@ -516,6 +562,49 @@
       "summary": "ARGUS Phase 3 — Generic intel-feed adapter. Demo-grade upsert path into .soc-intel-feed. On first tick (or when manually forced) it loads soc-simulation/argus/intel-feed-seed.json, then emits an hourly heartbeat so the ARGUS console can show feed health. Placeholder for the Glasswing/TAXII adapter; replaces nothing, only fans intel rows into the store.",
       "model_tier": "none",
       "owner": "canonical"
+    },
+    {
+      "workflow_id": "soc-argus-dac-export",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "recommendations",
+        "audit_trail"
+      ],
+      "summary": "AutoDEX B4 — Detection-as-code (DaC) export spike. Every 1h scans applied ARGUS-authored mutation_intent rows that have not yet been exported and queues a DaC artifact per rule into `.soc-dac-export-queue` for an out-of-cluster sidecar agent to pick up and open PRs. Pure-logic core: `lib/argus/dac/rule_artifact.ts` (23 unit tests; round-trip identity proven). Keeps git credentials out of Kibana. RFC: rfcs/B4-dac-export.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc-argus-fp-baseline-roller",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "alerts",
+        "outcomes",
+        "audit_trail"
+      ],
+      "summary": "AutoDEX B3 — production-grounded FP baseline roller. Every 24h aggregates per-rule alert counts from `.alerts-security.alerts-default` over the last 7 days and writes one row per rule into `.soc-rule-fp-baseline` (verdict=volume_only/cold_start, expected_alerts_per_hour grounded). Pure-logic spec at `lib/argus/governance/fp_baseline_estimator.ts` (22 unit tests) covers the full verdict matrix including the labelled / insufficient_labels paths a follow-up registered step will consume. RFC: rfcs/B3-fp-baseline.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc-argus-intel-adapter-kev",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "intel_feed",
+        "audit_trail"
+      ],
+      "summary": "AutoDEX B2 — production CTI source spike. Every 30m, fans out KEV advisories already fetched by `soc-kev-ingest` into `.soc-intel-feed` rows of `kind: exploit_availability` so the M2.3 exploit-probability mythos_signal contributor reads real CISA-curated production data instead of demo seeds. Idempotent (intel_id=kev-<cve>); zero new auth, no new HTTPS clients. RFC: rfcs/B2-production-cti.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:intel"
+      ]
     },
     {
       "workflow_id": "soc-argus-intel-adapter-analytics",

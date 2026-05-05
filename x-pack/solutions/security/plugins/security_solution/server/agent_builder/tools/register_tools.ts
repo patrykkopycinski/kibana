@@ -24,6 +24,7 @@ import {
   argusOpenInvestigationTool,
   argusRunBacktestTool,
   argusSummarizeCoverageTool,
+  argusSynthesizeRuleCandidateTool,
   argusToggleKillSwitchTool,
 } from './argus_playbooks';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -47,6 +48,7 @@ export const registerTools = async (
 
   if (experimentalFeatures.argusConsoleEnabled) {
     agentBuilder.tools.register(argusFileMutationIntentTool(core, logger));
+    agentBuilder.tools.register(argusSynthesizeRuleCandidateTool(core, logger));
     agentBuilder.tools.register(argusRunBacktestTool(core, logger));
     agentBuilder.tools.register(argusApproveRejectMutationTool(core, logger));
     agentBuilder.tools.register(argusOpenInvestigationTool(core, logger));

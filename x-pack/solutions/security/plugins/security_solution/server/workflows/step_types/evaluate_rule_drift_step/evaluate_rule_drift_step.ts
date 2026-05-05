@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   ALERT_RULE_UUID,
@@ -20,7 +20,7 @@ import {
 
 export { evaluateRuleDriftInputSchema };
 
-const ALERT_INDICES = ['.alerts-security.alerts-*'] as const;
+const ALERT_INDICES: string[] = ['.alerts-security.alerts-*'];
 const TIMESTAMP_FIELD = '@timestamp';
 
 const ruleScope = (ruleId: string): estypes.QueryDslQueryContainer => ({
@@ -57,8 +57,11 @@ export const evaluateRuleDriftStepDefinition = createServerStepDefinition({
   ...evaluateRuleDriftStepCommonDefinition,
   handler: async (context) => {
     try {
-      const { rule_id: ruleId, window_hours: windowHours, fp_threshold: fpThreshold } =
-        context.input;
+      const {
+        rule_id: ruleId,
+        window_hours: windowHours,
+        fp_threshold: fpThreshold,
+      } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
       const windowMs = windowHours * 60 * 60 * 1000;
       const lte = Date.now();
@@ -66,7 +69,10 @@ export const evaluateRuleDriftStepDefinition = createServerStepDefinition({
       const baselineLte = currentGte;
       const baselineGte = baselineLte - windowMs;
 
-      const currentRange = timeRange(new Date(currentGte).toISOString(), new Date(lte).toISOString());
+      const currentRange = timeRange(
+        new Date(currentGte).toISOString(),
+        new Date(lte).toISOString()
+      );
       const baselineRange = timeRange(
         new Date(baselineGte).toISOString(),
         new Date(baselineLte).toISOString()
@@ -158,9 +164,12 @@ export const evaluateRuleDriftStepDefinition = createServerStepDefinition({
       }));
 
       const baselineRate = baselineTotal / Math.max(windowHours, 1e-6);
-      const currentRate = currentTotal / Math.max(windowHours, 1e-6);
       const trend =
-        baselineTotal > 0 ? (currentTotal - baselineTotal) / baselineTotal : currentTotal > 0 ? 1 : 0;
+        baselineTotal > 0
+          ? (currentTotal - baselineTotal) / baselineTotal
+          : currentTotal > 0
+          ? 1
+          : 0;
 
       const baselineHourlyCounts = (baselineBuckets ?? []).map((b) => b.doc_count);
       const baselineAvg =
@@ -176,7 +185,8 @@ export const evaluateRuleDriftStepDefinition = createServerStepDefinition({
       if (fpRate > fpThreshold) {
         fnIndicators += 1;
       }
-      const maxHourly = hourlyAlerts.length > 0 ? Math.max(...hourlyAlerts.map((h) => h.doc_count)) : 0;
+      const maxHourly =
+        hourlyAlerts.length > 0 ? Math.max(...hourlyAlerts.map((h) => h.doc_count)) : 0;
       if (baselineAvg > 0 && maxHourly > baselineAvg * 3) {
         fnIndicators += 1;
       }

@@ -20,10 +20,7 @@ const toggleKillSwitchSchema = z.object({
     .string()
     .min(1)
     .describe('Required reason — stored on the audit trail for post-hoc review.'),
-  actor: z
-    .string()
-    .default('agent_builder')
-    .describe('Attribution for the audit trail.'),
+  actor: z.string().default('agent_builder').describe('Attribution for the audit trail.'),
 });
 
 /**
@@ -44,7 +41,8 @@ export function argusToggleKillSwitchTool(
     tags: ['security', 'argus', 'argus:playbook', 'write', 'kill-switch'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
     handler: async ({ enabled, reason, actor }, { esClient }) => {
       const now = new Date().toISOString();

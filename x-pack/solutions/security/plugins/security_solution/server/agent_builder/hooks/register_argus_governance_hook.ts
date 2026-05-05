@@ -8,6 +8,7 @@
 import { HookExecutionMode, HookLifecycle } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { BeforeToolCallHookContext } from '@kbn/agent-builder-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -80,7 +81,9 @@ function extractArtifactId(toolParams: Record<string, unknown>): string | undefi
 }
 
 async function readKillSwitchActive(es: {
-  search: (params: Record<string, unknown>) => Promise<{ hits: { hits: Array<{ _source?: unknown }> } }>;
+  search: (
+    params: Record<string, unknown>
+  ) => Promise<{ hits: { hits: Array<{ _source?: unknown }> } }>;
 }): Promise<{ active: boolean; reason?: string }> {
   const res = await es.search({
     index: KILL_SWITCH_INDEX,
@@ -103,7 +106,9 @@ async function readKillSwitchActive(es: {
 
 async function readTrustGateFailure(
   es: {
-    search: (params: Record<string, unknown>) => Promise<{ hits: { hits: Array<{ _source?: unknown }> } }>;
+    search: (
+      params: Record<string, unknown>
+    ) => Promise<{ hits: { hits: Array<{ _source?: unknown }> } }>;
   },
   agentId: string | undefined
 ): Promise<string | undefined> {
@@ -134,7 +139,9 @@ async function readTrustGateFailure(
     const threshold =
       typeof hit.confidence_threshold === 'number' ? hit.confidence_threshold : minTrust;
     if (hit.trust_score < threshold) {
-      return `trust_scores: trust_score ${hit.trust_score} is below required threshold ${threshold} (tier=${hit.trust_tier ?? 'unknown'})`;
+      return `trust_scores: trust_score ${
+        hit.trust_score
+      } is below required threshold ${threshold} (tier=${hit.trust_tier ?? 'unknown'})`;
     }
     return undefined;
   }
@@ -150,7 +157,9 @@ async function readTrustGateFailure(
     | { approval_rate?: number; auto_approve_eligible?: boolean; tier?: string }
     | undefined;
   if (src?.auto_approve_eligible === false && (src.approval_rate ?? 0) < 0.75) {
-    return `trust_scores: aggregate auto_approve_eligible=false and approval_rate ${String(src.approval_rate)} below 0.75 (tier=${src.tier ?? 'unknown'})`;
+    return `trust_scores: aggregate auto_approve_eligible=false and approval_rate ${String(
+      src.approval_rate
+    )} below 0.75 (tier=${src.tier ?? 'unknown'})`;
   }
   return undefined;
 }
@@ -209,7 +218,9 @@ async function readBudgetCooldownFailure(
       final_status?: string;
       review_reason?: string;
     };
-    return `autonomy_decisions: recent gate failure (${d.first_failing_gate ?? d.final_status ?? 'unknown'}; ${d.review_reason ?? 'no reason'})`;
+    return `autonomy_decisions: recent gate failure (${
+      d.first_failing_gate ?? d.final_status ?? 'unknown'
+    }; ${d.review_reason ?? 'no reason'})`;
   }
 
   if (artifactId) {
@@ -239,9 +250,7 @@ async function readBudgetCooldownFailure(
 }
 
 async function appendAuditTrail(
-  es: {
-    index: (params: Record<string, unknown>) => Promise<unknown>;
-  },
+  es: ElasticsearchClient,
   doc: Record<string, unknown>
 ): Promise<void> {
   await es.index({
@@ -311,10 +320,9 @@ export function registerArgusGovernanceHook(
             logger.warn(`ARGUS governance budget/cooldown read failed (fail-open): ${String(err)}`);
           }
 
-          const gateFailure =
-            kill.active
-              ? `kill_switch: autonomy is disabled (${kill.reason ?? 'no reason given'})`
-              : trustFail ?? budgetCooldownFail;
+          const gateFailure = kill.active
+            ? `kill_switch: autonomy is disabled (${kill.reason ?? 'no reason given'})`
+            : trustFail ?? budgetCooldownFail;
 
           try {
             await appendAuditTrail(esClient, {

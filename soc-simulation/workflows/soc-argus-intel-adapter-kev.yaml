@@ -1,0 +1,151 @@
+version: '1'
+name: ARGUS Intel Adapter — CISA KEV (B2 production-CTI spike)
+description: >
+  AutoDEX B2 — production CTI source.
+
+  The vision-doc and conformance-matrix flag intelligence consumption (1.2.2 /
+  1.8.2 / §3.1) as 🟡: adapter scaffolds exist (`soc-argus-intel-adapter-generic`,
+  `soc-argus-intel-adapter-analytics`) but neither is wired to a real upstream
+  feed. The generic adapter ships demo seeds; the analytics adapter is a
+  stub waiting on cross-cluster auth. Meanwhile `soc-kev-ingest.yaml` already
+  fetches the CISA Known Exploited Vulnerabilities catalog every 30 minutes
+  via the `@kbn/argus-kev-ingest` CLI, but only writes to `.soc-cve-advisories`
+  — the advisory lane Path A consumes. The threat-intel lane (the
+  `mythos_signal` contributor in the M2.3 exploit-probability formula) still
+  reads only seed rows.
+
+  This workflow is the spike that proves the production-CTI adapter pattern
+  by **fanning out** the already-fetched KEV advisories into `.soc-intel-feed`
+  rows of `kind: exploit_availability`. CISA KEV is the highest-trust public
+  CTI source (US-government-curated; entries reflect confirmed in-the-wild
+  exploitation), so it gives the intel-feed lane real production grounding
+  with zero new auth, no new HTTPS clients, and no new credentials.
+
+  How it works:
+
+    1. Discover KEV advisories ingested in the last 24h that have not yet
+       been fanned-out — keyed by `intel_id = "kev-<cve_id>"` so reruns are
+       idempotent (`op_type: index`).
+    2. For each advisory, emit one `.soc-intel-feed` row:
+         * `kind: exploit_availability` (KEV inclusion = confirmed exploited)
+         * `reference.cve = <cve>`
+         * `reference.technique_ids = <inferred ATT&CK techniques>`
+         * `signal_strength = 0.85`  (KEV inclusion is strong evidence, but
+                                       not as strong as a Mythos-aligned
+                                       campaign-level intel row)
+         * `half_life_days = 30`     (KEV entries don't decay quickly —
+                                       they remain operationally relevant
+                                       until the rule lands)
+         * `source_trust = 0.9`      (CISA-curated; public; auditable)
+    3. Emit a freshness metric so dashboards can chart "KEV → intel-feed"
+       throughput separately from raw KEV catalog freshness.
+    4. Emit an audit-trail tick.
+
+  Idempotency: `intel_id = kev-<cve_id>` and `op_type: index` mean a second
+  run of the same window simply overwrites the same docs. The exploit-
+  probability scorer is `.refresh: wait_for`-tolerant.
+
+  Migration path (see RFC `rfcs/B2-production-cti.md`):
+    * Phase 1 (THIS spike): KEV → intel-feed.
+    * Phase 2: cross-cluster analytics adapter to `ia-cti_enrichment`
+      (gated on auth-decision RFC).
+    * Phase 3: STIX/TAXII 2.1 adapter for tenant-private feeds.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  advisories_index: ".soc-cve-advisories"
+  intel_index:      ".soc-intel-feed"
+  metrics_index:    ".soc-metrics"
+  audit_index:      ".soc-audit-trail"
+  feed_id:          "cisa-kev"
+  adapter:          "argus_intel_adapter_kev"
+  source_trust:     0.9
+  signal_strength:  0.85
+  half_life_days:   30
+  window_recent:    "now-24h"
+  fanout_max:       100
+
+steps:
+  # ── 1. Discover recent KEV advisories ────────────────────────────────
+  - name: find_recent_kev
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: "{{ consts.fanout_max }}"
+      query:
+        bool:
+          filter:
+            - term: { source: "cisa_kev" }
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.window_recent }}"
+      sort:
+        - "@timestamp":
+            order: desc
+
+  # ── 2. Fan-out: one .soc-intel-feed row per CVE ──────────────────────
+  - name: fanout_intel_rows
+    type: foreach
+    foreach: "{{ steps.find_recent_kev.output.hits.hits }}"
+    if: "steps.find_recent_kev.output.hits.hits | size | default: 0 > 0"
+    steps:
+      - name: write_intel_row
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.intel_index }}"
+          id: "kev-{{ foreach.item._source.cve_id }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            intel_id: "kev-{{ foreach.item._source.cve_id }}"
+            feed_id: "{{ consts.feed_id }}"
+            adapter: "{{ consts.adapter }}"
+            kind: "exploit_availability"
+            reference:
+              cve: "{{ foreach.item._source.cve_id }}"
+              technique_ids: "{{ foreach.item._source.mitre | default: [] }}"
+            signal_strength: "{{ consts.signal_strength }}"
+            half_life_days: "{{ consts.half_life_days }}"
+            source_trust: "{{ consts.source_trust }}"
+            observed_at: "{{ foreach.item._source.kev.dateAdded | default: foreach.item._source['@timestamp'] }}"
+            summary: >-
+              CISA KEV: {{ foreach.item._source.cve_id }} — {{ foreach.item._source.kev.shortDescription | default: 'known exploited vulnerability per CISA catalog' }}
+
+  # ── 3. Freshness metric ──────────────────────────────────────────────
+  - name: write_freshness_metric
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.metrics_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "argus.intel_adapter_kev"
+        metric: "intel_feed_kev_fanout"
+        feed_id: "{{ consts.feed_id }}"
+        adapter: "{{ consts.adapter }}"
+        window: "{{ consts.window_recent }}"
+        rows_fanned_out: "{{ steps.find_recent_kev.output.hits.total.value | default: 0 }}"
+
+  # ── 4. Heartbeat ─────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: "argus_intel_adapter_tick"
+        source: "soc-argus-intel-adapter-kev"
+        tick_id: "argus-intel-kev-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        adapter: "{{ consts.adapter }}"
+        feed_id: "{{ consts.feed_id }}"
+        rows_upserted: "{{ steps.find_recent_kev.output.hits.total.value | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS KEV intel adapter complete — feed={{ consts.feed_id }} adapter={{ consts.adapter }} rows={{ steps.find_recent_kev.output.hits.total.value | default: 0 }}"

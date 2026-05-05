@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "timestamp": "2026-05-05T15:14:33Z",
+  "es_url": "http://localhost:19200",
+  "benchmark_doc": "soc-simulation/docs/argus/ARGUS-BENCHMARK.md",
+  "runner": "soc-simulation/scripts/run_argus_benchmark.sh",
+  "wait_min": 0,
+  "criteria": {
+    "d1_1": {"earned": 0, "max": 5, "reason": "no draft rules synthesized for seed advisories"},
+    "d1_2": {"earned": 0, "max": 5, "reason": "draft rule index pattern missing or invalid"},
+    "d1_3": {"earned": 0, "max": 5, "reason": "MITRE technique tag missing"},
+    "d1_4": {"earned": 0, "max": 10, "reason": "no projection_safe verdicts in .soc-backtests"},
+    "d1_5": {"earned": 0, "max": 5, "reason": "no autonomous applies recorded"},
+    "d2_1": {"earned": 0, "max": 5, "reason": "no kill-switch-respected evidence"},
+    "d2_2": {"earned": 0, "max": 5, "reason": "no rule-update intents cleared backtester"},
+    "d2_3": {"earned": 3, "max": 5, "reason": "gates wired but no deferrals fired during run"},
+    "d2_4": {"earned": 3, "max": 5, "reason": "gate wired but no blocks fired during run"},
+    "d2_5": {"earned": 0, "max": 5, "reason": "no rollback intents emitted"},
+    "d3_1": {"earned": 0, "max": 5, "reason": "no disable intents observed"},
+    "d3_2": {"earned": 5, "max": 5, "reason": "55 outcomes carry rollback_mttr_ms"},
+    "d3_3": {"earned": 5, "max": 5, "reason": "6 dead-letter-recovery audit rows"},
+    "d3_4": {"earned": 5, "max": 5, "reason": "10 actor-trust-tier records"},
+    "d4_1": {"earned": 5, "max": 5, "reason": "15 open coverage gaps"},
+    "d4_2": {"earned": 0, "max": 5, "reason": "no auto-authored rules from coverage gaps"},
+    "d4_3": {"earned": 0, "max": 5, "reason": "no prebuilt-rule enablement"},
+    "d5_1": {"earned": 3, "max": 3, "reason": "344 traces / 96 decisions (ratio 1.0)"},
+    "d5_2": {"earned": 4, "max": 4, "reason": "47 decision-graph edges"},
+    "d5_3": {"earned": 1, "max": 3, "reason": "0 heartbeats in last 30 min (<5)"}
+  },
+  "total_earned": 34,
+  "total_max": 100,
+  "tier": "Manual"
+}

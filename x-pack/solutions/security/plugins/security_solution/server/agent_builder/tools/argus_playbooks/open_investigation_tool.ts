@@ -17,7 +17,10 @@ const openInvestigationSchema = z.object({
   subject_kind: z
     .enum(['alert', 'entity', 'rule', 'rec'])
     .describe('What the investigation anchors on.'),
-  subject_id: z.string().min(1).describe('Identifier for the subject (alert._id, entity name, etc).'),
+  subject_id: z
+    .string()
+    .min(1)
+    .describe('Identifier for the subject (alert._id, entity name, etc).'),
   title: z.string().min(1).describe('Title for the generated case.'),
   note: z
     .string()
@@ -44,12 +47,10 @@ export function argusOpenInvestigationTool(
     tags: ['security', 'argus', 'argus:playbook', 'cases'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
-    handler: async (
-      { subject_kind: kind, subject_id: id, title, note },
-      { request }
-    ) => {
+    handler: async ({ subject_kind: kind, subject_id: id, title, note }, { request }) => {
       try {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const casesStart = (pluginsStart as { cases?: { getCasesClientWithRequest?: Function } })

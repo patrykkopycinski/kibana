@@ -15,6 +15,9 @@ import { securityTool } from '../constants';
  * signatures.
  */
 export const ARGUS_FILE_MUTATION_INTENT_TOOL_ID = securityTool('argus.file_mutation_intent');
+export const ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID = securityTool(
+  'argus.synthesize_rule_candidate'
+);
 export const ARGUS_RUN_BACKTEST_TOOL_ID = securityTool('argus.run_backtest');
 export const ARGUS_APPROVE_REJECT_MUTATION_TOOL_ID = securityTool('argus.approve_reject_mutation');
 export const ARGUS_OPEN_INVESTIGATION_TOOL_ID = securityTool('argus.open_investigation');

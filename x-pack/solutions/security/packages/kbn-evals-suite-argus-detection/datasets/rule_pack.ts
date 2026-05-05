@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { GateThresholdsOverride } from '../src/evaluators';
 
 /**
  * A candidate detection rule evaluated by the ARGUS Detection Eval Vertical.
@@ -27,6 +28,21 @@ export interface CandidateRule {
   name: string;
   description: string;
   query: QueryDslQueryContainer;
+  /**
+   * Optional per-rule governance gate overrides (B6 — closes F-003). Any key
+   * left unset falls through to the run-level override and then to
+   * `DEFAULT_GATE_THRESHOLDS`. See {@link
+   * import('../src/evaluators').resolveGateThresholds} for the full
+   * resolution order. Use this for rules with legitimately different
+   * precision profiles — e.g. a low-volume host-based rule that would never
+   * clear the global `min_precision: 0.9` because its denominator is too
+   * small to be statistically meaningful.
+   *
+   * The resolved thresholds are recorded on every `RuleEvaluationRow.scores`
+   * payload alongside `gate_thresholds_origin`, so audit consumers can see
+   * which layer contributed to the gate decision.
+   */
+  gate_overrides?: GateThresholdsOverride;
 }
 
 /**

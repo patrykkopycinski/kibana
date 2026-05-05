@@ -12,7 +12,10 @@ import type { Logger } from '@kbn/logging';
 import { ARGUS_SOC_INDICES } from '@kbn/argus-console-common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
-import { ARGUS_FILE_MUTATION_INTENT_TOOL_ID } from './constants';
+import {
+  ARGUS_FILE_MUTATION_INTENT_TOOL_ID,
+  ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID,
+} from './constants';
 
 /**
  * Input contract for the ARGUS file_mutation_intent tool.
@@ -50,9 +53,7 @@ const fileMutationIntentSchema = z.object({
       threshold: z.number().optional(),
       severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
     })
-    .describe(
-      'Minimal rule-delta preview rendered in the Mutation Detail flyout before approval.'
-    ),
+    .describe('Minimal rule-delta preview rendered in the Mutation Detail flyout before approval.'),
   advisory_id: z
     .string()
     .optional()
@@ -84,9 +85,33 @@ export function argusFileMutationIntentTool(
     tags: ['security', 'argus', 'argus:playbook', 'mutation-intent'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
     handler: async (params, { esClient }) => {
+      // Path C convergence (RFC B1, §3.3): cti_ingest must go through Path A
+      // (`argus.synthesize_rule_candidate`) so the chat skill inherits the
+      // same gates as the autonomous TaskManager driver — Pareto frontier,
+      // validateLlmVariant blocklist, axis markers. Filing a verbatim
+      // CVE-driven intent here would bypass those gates.
+      if (params.origin === 'cti_ingest') {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `cti_ingest mutation intents must be produced by ${ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID} ` +
+                  `so they go through Path A (Pareto frontier, variant validation, golden-set blocklist). ` +
+                  `Call that tool with the advisory_id instead — it writes the mutation intent for you.`,
+                origin: params.origin,
+                use_instead: ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID,
+              },
+            },
+          ],
+        };
+      }
+
       const recId = `arg-${params.origin}-${Date.now().toString(36)}`;
       const now = new Date().toISOString();
 
@@ -126,7 +151,11 @@ export function argusFileMutationIntentTool(
         },
         argus: {
           origin: params.origin,
-          decision: { kind: 'rule_create', confidence: params.confidence / 100, door_class: 'two_way' },
+          decision: {
+            kind: 'rule_create',
+            confidence: params.confidence / 100,
+            door_class: 'two_way',
+          },
           agent: { id: `argus.${params.origin}`, version: '1.0.0' },
           actor: { trust_tier: 'frontier' },
         },
@@ -157,7 +186,9 @@ export function argusFileMutationIntentTool(
         });
       } catch (error) {
         logger.error(
-          `argus.file_mutation_intent failed: ${error instanceof Error ? error.message : String(error)}`
+          `argus.file_mutation_intent failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`
         );
         return {
           results: [

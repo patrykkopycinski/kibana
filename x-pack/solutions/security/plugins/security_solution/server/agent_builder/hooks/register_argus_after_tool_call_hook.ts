@@ -8,7 +8,13 @@
 import { HookExecutionMode, HookLifecycle } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AfterToolCallHookContext, RunToolReturn } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import {
+  isResourceResult,
+  isResourceListResult,
+  isEsqlResultsResult,
+  isOtherResult,
+} from '@kbn/agent-builder-common/tools/tool_result';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -157,15 +163,15 @@ const processToolReturn = (toolReturn: RunToolReturn): RunToolReturn => {
     return cloned;
   }
   for (const result of cloned.results) {
-    if (result.type === ToolResultType.resource) {
+    if (isResourceResult(result)) {
       normalizeContentNode(result.data.content);
     }
-    if (result.type === ToolResultType.resourceList) {
+    if (isResourceListResult(result)) {
       for (const res of result.data.resources) {
         normalizeContentNode(res.content);
       }
     }
-    if (result.type === ToolResultType.esqlResults) {
+    if (isEsqlResultsResult(result)) {
       for (const row of result.data.values) {
         for (const cell of row) {
           if (cell !== null && typeof cell === 'object') {
@@ -174,7 +180,7 @@ const processToolReturn = (toolReturn: RunToolReturn): RunToolReturn => {
         }
       }
     }
-    if (result.type === ToolResultType.other) {
+    if (isOtherResult(result)) {
       normalizeContentNode(result.data);
     }
   }
@@ -194,9 +200,7 @@ const isArgusScopedToolOrAgent = (toolId: string, agentId: string): boolean => {
 };
 
 const appendAuditTrail = async (
-  es: {
-    index: (params: Record<string, unknown>) => Promise<unknown>;
-  },
+  es: ElasticsearchClient,
   doc: Record<string, unknown>
 ): Promise<void> => {
   await es.index({

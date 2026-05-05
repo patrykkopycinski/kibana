@@ -8,10 +8,28 @@
 import type {
   GovernancePulseBuildResult,
   GovernancePulseDrift,
+  GovernancePulseHoursSaved,
+  GovernancePulseMttd,
   GovernancePulseMttr,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  HoursSavedConstants,
 } from '../types/governance_pulse';
+
+/**
+ * Default per-action minute constants for the B12 hours-saved proxy.
+ *
+ * See [B12 RFC §2 — "Default minute constants"](../../../../../../../../soc-simulation/docs/autodex/rfcs/B12-hours-saved-proxy.md#default-minute-constants)
+ * for the rationale. These are conservative defaults — every tenant SHOULD
+ * override after one quarter of operation using their own task-tracking
+ * data. The route accepts overrides via the `?constants=` query parameter.
+ */
+export const DEFAULT_HOURS_SAVED_CONSTANTS: HoursSavedConstants = {
+  minutes_per_authoring: 90,
+  minutes_per_triage: 5,
+  minutes_per_rollback_recovery: 15,
+  minutes_per_human_rollback: 30,
+};
 
 /**
  * Loose shape of the ES `aggregations` block returned by the governance-pulse
@@ -37,6 +55,54 @@ export interface GovernancePulseAggsInput {
    * (`applied = outcomes_total - rollback_count`).
    */
   readonly outcomes_total?: { readonly value?: number | null } | null;
+  /**
+   * B11 — Number of outcome docs in the window with a finite
+   * `time_to_detect` value. Volume signal for the MTTD tile; zero means the
+   * section is `null` upstream.
+   */
+  readonly detect_count?: { readonly value?: number | null } | null;
+  /**
+   * B11 — Arithmetic mean of `time_to_detect` (ms) across the window.
+   * Null when ES could not compute it (no matching docs).
+   */
+  readonly avg_ttd?: { readonly value?: number | null } | null;
+  /**
+   * B11 — 50th + 95th percentile of `time_to_detect` (ms). Same shape as
+   * `mttr_percentiles`.
+   */
+  readonly ttd_percentiles?: {
+    readonly values?: {
+      readonly ['50.0']?: number | null;
+      readonly ['95.0']?: number | null;
+    } | null;
+  } | null;
+  /**
+   * B12 — Outcomes whose corresponding mutation_intent reached `applied`
+   * state in the window and stayed there (not rolled back). Each one
+   * represents an autonomously-authored detection rule that, in the
+   * counterfactual without AutoDEX, an analyst would have authored. Filter
+   * agg, so the count lives on `doc_count`.
+   */
+  readonly rules_authored?: { readonly doc_count?: number | null } | null;
+  /**
+   * B12 — Outcomes the autonomous pipeline closed without analyst
+   * intervention (`pipeline_complete=true` and disposition is auto-
+   * resolved or auto-escalated). Each one represents one analyst triage
+   * cycle skipped.
+   */
+  readonly auto_triaged_outcomes?: { readonly doc_count?: number | null } | null;
+  /**
+   * B12 — Rollbacks that AutoDEX handled itself (`rolled_back=true`,
+   * `rollback_source='auto'`). Each one represents one rollback the
+   * analyst would otherwise have had to investigate + execute.
+   */
+  readonly auto_recovered_rollbacks?: { readonly doc_count?: number | null } | null;
+  /**
+   * B12 — Rollbacks that required human triage (`rolled_back=true`,
+   * `rollback_source != 'auto'`). Each one represents analyst time
+   * *spent* — subtracted from the hours-saved total.
+   */
+  readonly human_rollbacks?: { readonly doc_count?: number | null } | null;
 }
 
 /**
@@ -90,6 +156,13 @@ export interface BuildGovernancePulseArgs {
   readonly aggs?: GovernancePulseAggsInput | null;
   readonly mutationAggs?: MutationIntentsAggsInput | null;
   readonly trustAggs?: ActorTrustTiersAggsInput | null;
+  /**
+   * B12 — Override of the per-action minute constants used by the
+   * hours-saved proxy. Only the keys provided are applied; missing keys fall
+   * back to `DEFAULT_HOURS_SAVED_CONSTANTS`. Operator-supplied overrides
+   * travel through the route's `?constants=` query param into this field.
+   */
+  readonly hoursSavedOverrides?: Partial<HoursSavedConstants> | null;
 }
 
 /**
@@ -114,14 +187,125 @@ export const buildGovernancePulse = ({
   aggs,
   mutationAggs,
   trustAggs,
+  hoursSavedOverrides,
 }: BuildGovernancePulseArgs): GovernancePulseBuildResult => {
   return {
     window_start: windowStart,
     window_end: windowEnd,
+    mttd: buildMttd(aggs),
+    hours_saved: buildHoursSaved(aggs, hoursSavedOverrides),
     rollback_mttr: buildMttr(aggs),
     mutation_throughput: buildThroughput(aggs, mutationAggs),
     drift: buildDrift(mutationAggs),
     tier_mix: buildTierMix(trustAggs),
+  };
+};
+
+/**
+ * Resolve the effective constants to use for the hours-saved proxy: defaults
+ * with any operator overrides applied. Negative or non-finite override values
+ * are silently dropped so a malformed `?constants=` query param can't poison
+ * the headline number — the default for that key is used instead.
+ *
+ * Exported so callers (route handler, tests) can inspect the resolved set
+ * before passing it along; the route also stamps the resolved set onto the
+ * `applied_constants` field of the response.
+ */
+export const resolveHoursSavedConstants = (
+  overrides?: Partial<HoursSavedConstants> | null
+): HoursSavedConstants => {
+  const resolved: HoursSavedConstants = { ...DEFAULT_HOURS_SAVED_CONSTANTS };
+  if (!overrides) return resolved;
+
+  const apply = (key: keyof HoursSavedConstants) => {
+    const candidate = overrides[key];
+    if (candidate === undefined || candidate === null) return;
+    if (!Number.isFinite(candidate)) return;
+    if (candidate < 0) return;
+    (resolved as Record<keyof HoursSavedConstants, number>)[key] = candidate;
+  };
+
+  apply('minutes_per_authoring');
+  apply('minutes_per_triage');
+  apply('minutes_per_rollback_recovery');
+  apply('minutes_per_human_rollback');
+  return resolved;
+};
+
+const buildHoursSaved = (
+  aggs?: GovernancePulseAggsInput | null,
+  overrides?: Partial<HoursSavedConstants> | null
+): GovernancePulseHoursSaved | null => {
+  if (!aggs) return null;
+
+  const rulesAuthored = toCount(aggs.rules_authored?.doc_count);
+  const autoTriaged = toCount(aggs.auto_triaged_outcomes?.doc_count);
+  const autoRecovered = toCount(aggs.auto_recovered_rollbacks?.doc_count);
+  const humanRollbacks = toCount(aggs.human_rollbacks?.doc_count);
+
+  if (rulesAuthored === 0 && autoTriaged === 0 && autoRecovered === 0 && humanRollbacks === 0) {
+    return null;
+  }
+
+  const constants = resolveHoursSavedConstants(overrides);
+  const authoringHours = (rulesAuthored * constants.minutes_per_authoring) / 60;
+  const triageHours = (autoTriaged * constants.minutes_per_triage) / 60;
+  const recoveryHours = (autoRecovered * constants.minutes_per_rollback_recovery) / 60;
+  // Negative contribution — stored as a negative number so the breakdown
+  // sums to `total_hours` arithmetically.
+  const humanRollbackHours = -((humanRollbacks * constants.minutes_per_human_rollback) / 60);
+
+  const totalHours = authoringHours + triageHours + recoveryHours + humanRollbackHours;
+
+  return {
+    total_hours: roundTo(totalHours, 2),
+    breakdown: {
+      authoring_hours: roundTo(authoringHours, 2),
+      triage_hours: roundTo(triageHours, 2),
+      recovery_hours: roundTo(recoveryHours, 2),
+      human_rollback_hours: roundTo(humanRollbackHours, 2),
+    },
+    source_counts: {
+      rules_authored: rulesAuthored,
+      auto_triaged_outcomes: autoTriaged,
+      auto_recovered_rollbacks: autoRecovered,
+      human_rollbacks: humanRollbacks,
+    },
+    applied_constants: constants,
+  };
+};
+
+/**
+ * Coerce a doc_count-shaped agg value to a non-negative integer count.
+ * Unlike `toFiniteNumber` (which returns `null`), this returns `0` so the
+ * builder can do straightforward arithmetic without null-checks.
+ */
+const toCount = (value: number | null | undefined): number => {
+  if (value === null || value === undefined) return 0;
+  if (!Number.isFinite(value)) return 0;
+  if (value < 0) return 0;
+  return Math.floor(value);
+};
+
+const roundTo = (value: number, decimals: number): number => {
+  const factor = 10 ** decimals;
+  const rounded = Math.round(value * factor) / factor;
+  // Normalise `-0` → `0`. JS arithmetic produces `-0` whenever a negation
+  // hits a zero (e.g. `-(0 * 30 / 60)`) and `-0` !== `0` in deep-equality
+  // checks (Jest, jsdom dashboards). The Pulse tile must surface a
+  // canonical zero so leadership reads "0 h" not "-0 h".
+  return rounded === 0 ? 0 : rounded;
+};
+
+const buildMttd = (aggs?: GovernancePulseAggsInput | null): GovernancePulseMttd | null => {
+  const detectCount = toFiniteNumber(aggs?.detect_count?.value) ?? 0;
+  if (!aggs || detectCount <= 0) return null;
+
+  return {
+    detect_count: detectCount,
+    avg_ms: toFiniteNumber(aggs.avg_ttd?.value),
+    p50_ms: toFiniteNumber(aggs.ttd_percentiles?.values?.['50.0']),
+    p95_ms: toFiniteNumber(aggs.ttd_percentiles?.values?.['95.0']),
   };
 };
 

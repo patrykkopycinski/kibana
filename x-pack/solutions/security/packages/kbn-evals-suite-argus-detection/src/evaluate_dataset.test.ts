@@ -126,6 +126,94 @@ describe('aggregateRuleRun', () => {
     const row = aggregateRuleRun({ ...runArgs, replay, labels: [] });
     expect(row.replay_error).toBe('connection refused');
   });
+
+  it('records gate_thresholds_origin=default when no override is supplied (B6)', () => {
+    const replay: ReplayRuleResult = {
+      rule_id: rule.rule_id,
+      fired_variant_ids: [],
+      fire_count: 0,
+    };
+    const row = aggregateRuleRun({ ...runArgs, replay, labels: [] });
+    expect(row.gate_thresholds_origin).toBe('default');
+    expect(row.gate_thresholds.min_precision).toBe(0.9);
+  });
+
+  it('applies a run-level override (B6) and records the origin', () => {
+    const replay: ReplayRuleResult = {
+      rule_id: rule.rule_id,
+      fired_variant_ids: [],
+      fire_count: 0,
+    };
+    const row = aggregateRuleRun({
+      ...runArgs,
+      replay,
+      labels: [],
+      runOverride: { min_precision: 0.7 },
+    });
+    expect(row.gate_thresholds_origin).toBe('run_level');
+    expect(row.gate_thresholds.min_precision).toBe(0.7);
+  });
+
+  it('applies a per-rule override that wins over a run-level override (B6)', () => {
+    // A low-volume host-based rule that legitimately runs at lower precision.
+    const lowVolumeRule = {
+      ...rule,
+      rule_id: 'mythos.low-volume-host-baselined',
+      gate_overrides: { min_precision: 0.6, max_fp_rate: 0.05 },
+    };
+    // 1 TP and 1 FP — precision = 0.5. Default gate would FAIL precision (0.9 - 0.5 = 0.4 > 0.1).
+    // With per-rule min_precision = 0.6, it should also FAIL on precision (0.6 - 0.5 = 0.1 = marginal_band edge → marginal),
+    // but max_fp_rate is also overridden to 0.05; let's pick numbers that pass under override and fail without.
+    const labels = [
+      label('T1003.001', 'command_args', 0, true),
+      label('T1003.001', 'command_args', 1, true),
+      label('T1003.001', 'command_args', 2, true),
+      label('T1003.001', '_negatives', 0, false),
+      label('T1003.001', '_negatives', 1, false),
+    ];
+    const replayPass: ReplayRuleResult = {
+      rule_id: lowVolumeRule.rule_id,
+      fired_variant_ids: [
+        // 2 TP / 3 positives → recall ~0.66
+        variantDocId('T1003.001', 'command_args', 0),
+        variantDocId('T1003.001', 'command_args', 1),
+        // 1 FP / 2 negatives → fp_rate = 0.5
+        variantDocId('T1003.001', '_negatives', 0),
+      ],
+      fire_count: 3,
+    };
+    // With defaults: precision=2/3, recall=0.66, fp_rate=0.5 → FAIL fp_rate (>0.02 by 0.48 >> marginal_band).
+    // With per-rule override max_fp_rate=0.05 + min_precision=0.6: precision 0.66≥0.6 ✓, fp_rate 0.5 still way over 0.05 → FAIL.
+    // So this rule still fails — but the gate_thresholds it was scored under should reflect the override.
+    const row = aggregateRuleRun({
+      ...runArgs,
+      rule: lowVolumeRule,
+      replay: replayPass,
+      labels,
+      runOverride: { min_precision: 0.95 }, // run-level wants 0.95
+    });
+    expect(row.gate_thresholds_origin).toBe('per_rule');
+    // Per-rule wins on min_precision (0.6) and max_fp_rate (0.05); other keys fall through.
+    expect(row.gate_thresholds.min_precision).toBe(0.6);
+    expect(row.gate_thresholds.max_fp_rate).toBe(0.05);
+    // Run-level didn't touch min_recall, so it stays at default.
+    expect(row.gate_thresholds.min_recall).toBe(0.6);
+  });
+
+  it('rejects out-of-range per-rule overrides (B6)', () => {
+    const badRule = {
+      ...rule,
+      gate_overrides: { min_precision: 1.5 },
+    };
+    const replay: ReplayRuleResult = {
+      rule_id: badRule.rule_id,
+      fired_variant_ids: [],
+      fire_count: 0,
+    };
+    expect(() => aggregateRuleRun({ ...runArgs, rule: badRule, replay, labels: [] })).toThrow(
+      /per-rule override.min_precision must be a finite number in \[0, 1\]/
+    );
+  });
 });
 
 describe('correctClassificationEvaluator', () => {

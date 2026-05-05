@@ -56,9 +56,12 @@ export type {
   GovernancePulse,
   GovernancePulseBuildResult,
   GovernancePulseDrift,
+  GovernancePulseHoursSaved,
+  GovernancePulseMttd,
   GovernancePulseMttr,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  HoursSavedConstants,
 } from './governance_pulse';
 
 export type {

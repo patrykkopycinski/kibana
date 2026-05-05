@@ -45,12 +45,10 @@ export function argusApproveRejectMutationTool(
     tags: ['security', 'argus', 'argus:playbook', 'write'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
-    handler: async (
-      { rec_id: recId, verdict, reason, approver },
-      { esClient }
-    ) => {
+    handler: async ({ rec_id: recId, verdict, reason, approver }, { esClient }) => {
       const now = new Date().toISOString();
       const outcomeId = `${recId}-${verdict}-${Date.now().toString(36)}`;
 

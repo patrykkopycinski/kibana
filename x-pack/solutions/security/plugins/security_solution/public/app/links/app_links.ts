@@ -72,7 +72,6 @@ export const getFilteredLinks = async (
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
-  const isClassicNavUpdateEnabled = experimentalFeatures?.securityClassicNavUpdate ?? false;
   const isArgusConsoleEnabled = experimentalFeatures?.argusConsoleEnabled ?? false;
   return Object.freeze([
     dashboardsLinks,

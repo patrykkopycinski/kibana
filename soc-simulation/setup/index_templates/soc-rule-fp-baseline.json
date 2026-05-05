@@ -1,0 +1,43 @@
+{
+  "index_patterns": [".soc-rule-fp-baseline"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-audit-permanent"
+    },
+    "mappings": {
+      "dynamic": false,
+      "properties": {
+        "@timestamp":               { "type": "date" },
+        "rule_id":                  { "type": "keyword" },
+        "rule_name":                { "type": "keyword" },
+        "verdict":                  { "type": "keyword" },
+        "window_hours":             { "type": "float" },
+        "alert_count":              { "type": "long" },
+        "true_positive_count":      { "type": "long" },
+        "false_positive_count":     { "type": "long" },
+        "expected_alerts_per_hour": { "type": "float" },
+        "fp_rate_estimate":         { "type": "float" },
+        "confidence":               { "type": "float" },
+        "reasons":                  { "type": "keyword" },
+        "thresholds_applied": {
+          "properties": {
+            "min_alerts_for_baseline": { "type": "long" },
+            "min_labels_for_fp_rate":  { "type": "long" },
+            "volume_quantile":         { "type": "float" },
+            "smoothing_alpha":         { "type": "float" },
+            "default_fp_rate":         { "type": "float" }
+          }
+        },
+        "schema_version":           { "type": "integer" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "AutoDEX B3 — production-grounded per-rule FP baseline. Each row is the latest baseline snapshot for a single detection rule, written by `soc-argus-fp-baseline-roller.yaml`. Doc id = rule_id so each rule has a single most-recent baseline. Consumed by a future workflow that maps baselines into B6's `gate_overrides.max_fp_rate` per rule. `verdict` indicates telemetry maturity (cold_start / volume_only / labelled / insufficient_labels) — NOT rule health (that's B7's `evaluateRuleTuning`). `expected_alerts_per_hour = alert_count / window_hours`. `fp_rate_estimate` is Laplace-smoothed `(fp+1)/(tp+fp+2)` only when `tp+fp >= min_labels_for_fp_rate`, otherwise null and consumers fall back to `default_fp_rate`.",
+    "owner": "argus-governance",
+    "schema_version": 1
+  }
+}

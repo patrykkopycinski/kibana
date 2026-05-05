@@ -162,6 +162,7 @@
     "@kbn/security-solution-features",
     "@kbn/argus-console",
     "@kbn/argus-console-common",
+    "@kbn/argus-exploit-to-detection",
     "@kbn/content-management-plugin",
     "@kbn/discover-utils",
     "@kbn/core-application-common",

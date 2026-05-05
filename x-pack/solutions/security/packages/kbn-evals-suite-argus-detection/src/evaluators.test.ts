@@ -13,6 +13,7 @@ import {
   computeScores,
   computeGateDecision,
   DEFAULT_GATE_THRESHOLDS,
+  resolveGateThresholds,
 } from './evaluators';
 
 describe('ARGUS detection evaluators — pure math', () => {
@@ -128,6 +129,99 @@ describe('ARGUS detection evaluators — pure math', () => {
           variant_coverage: 0.8,
         })
       ).toBe('fail');
+    });
+  });
+
+  describe('resolveGateThresholds (B6 — closes F-003)', () => {
+    it('returns the unmodified defaults when neither override is present', () => {
+      const { thresholds, origin } = resolveGateThresholds();
+      expect(thresholds).toEqual(DEFAULT_GATE_THRESHOLDS);
+      expect(origin).toBe('default');
+    });
+
+    it('applies a run-level override and reports run_level origin', () => {
+      const { thresholds, origin } = resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, {
+        min_precision: 0.7,
+      });
+      expect(thresholds.min_precision).toBe(0.7);
+      // unchanged keys fall through to defaults
+      expect(thresholds.min_recall).toBe(DEFAULT_GATE_THRESHOLDS.min_recall);
+      expect(thresholds.max_fp_rate).toBe(DEFAULT_GATE_THRESHOLDS.max_fp_rate);
+      expect(origin).toBe('run_level');
+    });
+
+    it('applies a per-rule override and reports per_rule origin', () => {
+      const { thresholds, origin } = resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, undefined, {
+        max_fp_rate: 0.05,
+      });
+      expect(thresholds.max_fp_rate).toBe(0.05);
+      expect(origin).toBe('per_rule');
+    });
+
+    it('per-rule override wins over run-level override on the same key', () => {
+      const { thresholds, origin } = resolveGateThresholds(
+        DEFAULT_GATE_THRESHOLDS,
+        { min_precision: 0.7, min_recall: 0.5 },
+        { min_precision: 0.6 }
+      );
+      // per-rule wins
+      expect(thresholds.min_precision).toBe(0.6);
+      // run-level still applies for keys the per-rule override doesn't set
+      expect(thresholds.min_recall).toBe(0.5);
+      expect(origin).toBe('per_rule');
+    });
+
+    it('partial overrides only change the keys that are set', () => {
+      const { thresholds } = resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, undefined, {
+        marginal_band: 0.05,
+      });
+      expect(thresholds.marginal_band).toBe(0.05);
+      expect(thresholds.min_precision).toBe(DEFAULT_GATE_THRESHOLDS.min_precision);
+      expect(thresholds.min_recall).toBe(DEFAULT_GATE_THRESHOLDS.min_recall);
+      expect(thresholds.min_variant_coverage).toBe(DEFAULT_GATE_THRESHOLDS.min_variant_coverage);
+      expect(thresholds.max_fp_rate).toBe(DEFAULT_GATE_THRESHOLDS.max_fp_rate);
+    });
+
+    it('returns a frozen result so callers cannot mutate the resolved layer', () => {
+      const { thresholds } = resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, {
+        min_precision: 0.7,
+      });
+      expect(Object.isFrozen(thresholds)).toBe(true);
+    });
+
+    it('rejects out-of-range run-level overrides (negative)', () => {
+      expect(() => resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, { min_precision: -0.1 })).toThrow(
+        /run override.min_precision must be a finite number in \[0, 1\]/
+      );
+    });
+
+    it('rejects out-of-range per-rule overrides (greater than 1)', () => {
+      expect(() =>
+        resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, undefined, { max_fp_rate: 1.5 })
+      ).toThrow(/per-rule override.max_fp_rate must be a finite number in \[0, 1\]/);
+    });
+
+    it('rejects non-finite override values (NaN)', () => {
+      expect(() =>
+        resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, undefined, {
+          marginal_band: Number.NaN,
+        })
+      ).toThrow(/per-rule override.marginal_band must be a finite number in \[0, 1\]/);
+    });
+
+    it('reports run_level origin when only the run override sets a key', () => {
+      const { origin } = resolveGateThresholds(
+        DEFAULT_GATE_THRESHOLDS,
+        { min_recall: 0.4 },
+        {} // empty per-rule override
+      );
+      expect(origin).toBe('run_level');
+    });
+
+    it('reports default origin when all overrides are empty objects', () => {
+      const { origin, thresholds } = resolveGateThresholds(DEFAULT_GATE_THRESHOLDS, {}, {});
+      expect(origin).toBe('default');
+      expect(thresholds).toEqual(DEFAULT_GATE_THRESHOLDS);
     });
   });
 });

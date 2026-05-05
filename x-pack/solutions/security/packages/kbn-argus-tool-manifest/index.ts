@@ -33,3 +33,15 @@ export {
 export { loadSkillsFromDisk, parseSkill } from './src/skill_loader';
 
 export { ARGUS_A2A_AGENT_ID, assembleAgentCard, type A2aAgentCard } from './src/agent_card';
+
+export {
+  DEFAULT_SKILL_HEALTH_THRESHOLDS,
+  evaluateSkillHealth,
+  resolveSkillHealthThresholds,
+  type EvaluateSkillHealthInput,
+  type SkillHealthAction,
+  type SkillHealthRecommendation,
+  type SkillHealthThresholds,
+  type SkillHealthVerdict,
+  type SkillMetricsSnapshot,
+} from './src/skill_health';

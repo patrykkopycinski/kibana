@@ -17,6 +17,7 @@ export {
   ARGUS_PLAYBOOK_TAG,
   ARGUS_RUN_BACKTEST_TOOL_ID,
   ARGUS_SUMMARIZE_COVERAGE_TOOL_ID,
+  ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID,
   ARGUS_TOGGLE_KILL_SWITCH_TOOL_ID,
 } from './constants';
 
@@ -30,4 +31,5 @@ export { argusListUncoveredTechniquesTool } from './list_uncovered_techniques_to
 export { argusOpenInvestigationTool } from './open_investigation_tool';
 export { argusRunBacktestTool } from './run_backtest_tool';
 export { argusSummarizeCoverageTool } from './summarize_coverage_tool';
+export { argusSynthesizeRuleCandidateTool } from './synthesize_rule_candidate_tool';
 export { argusToggleKillSwitchTool } from './toggle_kill_switch_tool';

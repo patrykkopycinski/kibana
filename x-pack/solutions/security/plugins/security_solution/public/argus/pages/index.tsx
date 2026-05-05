@@ -218,7 +218,6 @@ const ArgusPageComponent: React.FC = () => {
     initialMutationsWindow,
     initialE2dCve,
     initialE2dWindow,
-    initialProposalsCve,
     initialProposalsWindow,
     initialDecisionGraphRoot,
   } = useMemo(() => {
@@ -247,10 +246,6 @@ const ArgusPageComponent: React.FC = () => {
     const tab: ArgusConsoleTabId | undefined =
       explicitTab ?? (decisionGraphRoot ? 'governance' : cveId ? 'detection_pipeline' : undefined);
 
-    // When landing directly on the Proposals tab, route the CVE param into
-    // the proposals-initial slot; otherwise it still seeds the E2D tab.
-    const proposalsCve = explicitTab === 'proposals' ? cveId : undefined;
-
     return {
       reasoningSubject: reasoning,
       lineageSubject: lineage,
@@ -259,7 +254,6 @@ const ArgusPageComponent: React.FC = () => {
       initialMutationsWindow: asWindow(params.get('mutations_window')),
       initialE2dCve: cveId,
       initialE2dWindow: asE2dWindow(params.get('e2d_window')),
-      initialProposalsCve: proposalsCve,
       initialProposalsWindow: asProposalsWindow(params.get('proposals_window')),
       initialDecisionGraphRoot: decisionGraphRoot,
     };
@@ -369,7 +363,6 @@ const ArgusPageComponent: React.FC = () => {
         initialMutationsWindow={initialMutationsWindow}
         initialE2dCve={initialE2dCve}
         initialE2dWindow={initialE2dWindow}
-        initialProposalsCve={initialProposalsCve}
         initialProposalsWindow={initialProposalsWindow}
         headerRightSideItems={headerRightSideItems}
         canArgusWrite={canArgusWrite}

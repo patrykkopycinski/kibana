@@ -4867,6 +4867,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/argus-inference-variant-provider@link:x-pack/solutions/security/packages/kbn-argus-inference-variant-provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/argus-kev-ingest@link:x-pack/solutions/security/packages/kbn-argus-kev-ingest":
   version "0.0.0"
   uid ""
@@ -6920,6 +6924,10 @@
   uid ""
 
 "@kbn/evals-suite-argus-detection@link:x-pack/solutions/security/packages/kbn-evals-suite-argus-detection":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-argus-reasoning@link:x-pack/solutions/security/packages/kbn-evals-suite-argus-reasoning":
   version "0.0.0"
   uid ""
 

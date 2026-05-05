@@ -45,6 +45,25 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
+  // Security Solution — ARGUS playbook primitives (gated server-side by
+  // `argusConsoleEnabled` / `argusDecisionGraphEnabled`). Keep this block
+  // aligned with
+  // `x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/argus_playbooks/constants.ts`
+  // — the tool registration loop aborts on the first throw, so a missing
+  // entry here makes every later ARGUS tool silently disappear.
+  `${internalNamespaces.security}.argus.file_mutation_intent`,
+  `${internalNamespaces.security}.argus.synthesize_rule_candidate`,
+  `${internalNamespaces.security}.argus.run_backtest`,
+  `${internalNamespaces.security}.argus.approve_reject_mutation`,
+  `${internalNamespaces.security}.argus.open_investigation`,
+  `${internalNamespaces.security}.argus.toggle_kill_switch`,
+  `${internalNamespaces.security}.argus.summarize_coverage`,
+  `${internalNamespaces.security}.argus.list_uncovered_techniques`,
+  `${internalNamespaces.security}.argus.export_navigator_layer`,
+  `${internalNamespaces.security}.argus.get_mutation_detail`,
+  `${internalNamespaces.security}.argus.list_actor_coverage`,
+  `${internalNamespaces.security}.argus.get_decision_graph`,
+
   // Streams – read
   `${internalNamespaces.streams}.list_streams`,
   `${internalNamespaces.streams}.get_stream`,

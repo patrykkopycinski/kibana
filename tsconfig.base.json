@@ -162,6 +162,8 @@
       "@kbn/argus-exploit-probability/*": ["x-pack/solutions/security/packages/kbn-argus-exploit-probability/*"],
       "@kbn/argus-exploit-to-detection": ["x-pack/solutions/security/packages/kbn-argus-exploit-to-detection"],
       "@kbn/argus-exploit-to-detection/*": ["x-pack/solutions/security/packages/kbn-argus-exploit-to-detection/*"],
+      "@kbn/argus-inference-variant-provider": ["x-pack/solutions/security/packages/kbn-argus-inference-variant-provider"],
+      "@kbn/argus-inference-variant-provider/*": ["x-pack/solutions/security/packages/kbn-argus-inference-variant-provider/*"],
       "@kbn/argus-kev-ingest": ["x-pack/solutions/security/packages/kbn-argus-kev-ingest"],
       "@kbn/argus-kev-ingest/*": ["x-pack/solutions/security/packages/kbn-argus-kev-ingest/*"],
       "@kbn/argus-mcp-server": ["x-pack/solutions/security/packages/kbn-argus-mcp-server"],

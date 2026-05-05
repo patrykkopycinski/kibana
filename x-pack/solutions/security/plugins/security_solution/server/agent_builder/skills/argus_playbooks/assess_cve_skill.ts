@@ -9,8 +9,8 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import {
-  ARGUS_FILE_MUTATION_INTENT_TOOL_ID,
   ARGUS_RUN_BACKTEST_TOOL_ID,
+  ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID,
 } from '../../tools/argus_playbooks';
 import { ARGUS_ASSESS_CVE_SKILL_ID } from './constants';
 
@@ -20,10 +20,10 @@ export const argusAssessCveSkill = defineSkillType({
   basePath: 'skills/security/argus/playbooks',
   description:
     'Assess a specific CVE from the ARGUS perspective: is it on our radar, does an advisory ' +
-    'exist in `.soc-cve-advisories`, and do we already have coverage? Optionally files a ' +
-    'cti_ingest mutation intent to trigger the Exploit-to-Detection pipeline for this CVE. ' +
-    'Use when the user pastes a CVE id and asks "do we cover CVE-YYYY-NNNN?" or "should we ' +
-    'respond to this advisory?".',
+    'exist in `.soc-cve-advisories`, and do we already have coverage? Optionally synthesises ' +
+    'a rule candidate via Path A (Pareto frontier + variant validation) to trigger the ' +
+    'Exploit-to-Detection pipeline for this CVE. Use when the user pastes a CVE id and asks ' +
+    '"do we cover CVE-YYYY-NNNN?" or "should we respond to this advisory?".',
   content: `# ARGUS · Assess CVE
 
 ## When to use this skill
@@ -44,12 +44,16 @@ Typical prompts:
    \`.soc-recommendations\` for any mutation intent tagged with this CVE id.
    Report whether ARGUS has already synthesised a rule candidate.
 3. **Trigger synthesis if warranted.** If no advisory or intent exists and the
-   user wants ARGUS to act, call \`security.argus.file_mutation_intent\` with
-   \`origin: 'cti_ingest'\` and include the CVE id in \`summary\`. This kicks
-   off the Exploit-to-Detection reconciler.
-4. **Backtest new candidates.** If synthesis produced a candidate rule, queue
-   \`security.argus.run_backtest\` with a 7-day lookback so the user can see
-   whether the new rule would have fired.
+   user wants ARGUS to act, call
+   \`security.argus.synthesize_rule_candidate\` with the CVE id as
+   \`advisory_id\`. The tool runs Path A end-to-end (Pareto frontier, variant
+   validation, golden-set blocklist) and writes a mutation intent through
+   the same gates the autonomous synthesis driver uses — never call
+   \`security.argus.file_mutation_intent\` with \`origin: 'cti_ingest'\`;
+   that path is now blocked at the tool layer.
+4. **Backtest new candidates.** If synthesis produced a candidate rule
+   (returned \`rec_id\`), queue \`security.argus.run_backtest\` with a 7-day
+   lookback so the user can see whether the new rule would have fired.
 
 ## Guardrails
 
@@ -61,7 +65,7 @@ Typical prompts:
   asked for synthesis, stop at the "not on radar" step rather than filing
   speculative intents.`,
   getRegistryTools: () => [
-    ARGUS_FILE_MUTATION_INTENT_TOOL_ID,
+    ARGUS_SYNTHESIZE_RULE_CANDIDATE_TOOL_ID,
     ARGUS_RUN_BACKTEST_TOOL_ID,
     platformCoreTools.search,
   ],

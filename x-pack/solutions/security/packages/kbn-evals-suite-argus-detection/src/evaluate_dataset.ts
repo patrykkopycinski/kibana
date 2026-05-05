@@ -16,10 +16,13 @@ import {
   DEFAULT_GATE_THRESHOLDS,
   computeGateDecision,
   computeScores,
+  resolveGateThresholds,
   type AggregateCounts,
   type AggregateScores,
   type GateDecision,
   type GateThresholds,
+  type GateThresholdsOrigin,
+  type GateThresholdsOverride,
 } from './evaluators';
 
 // ---------------------------------------------------------------------------
@@ -217,6 +220,13 @@ export interface RuleEvaluationRow {
   };
   gate_decision: GateDecision;
   gate_thresholds: GateThresholds;
+  /**
+   * Highest-precedence layer that contributed to the resolved
+   * `gate_thresholds`. Surfaces in `.soc-argus-eval-runs` so an analyst can
+   * see *why* a rule was scored under non-default thresholds without having
+   * to cross-reference the rule pack (B6).
+   */
+  gate_thresholds_origin: GateThresholdsOrigin;
   replay_error?: string;
 }
 
@@ -229,7 +239,8 @@ export const aggregateRuleRun = ({
   runId,
   suiteId,
   nowIso,
-  thresholds = DEFAULT_GATE_THRESHOLDS,
+  defaultThresholds = DEFAULT_GATE_THRESHOLDS,
+  runOverride,
 }: {
   rule: CandidateRule;
   replay: ReplayRuleResult;
@@ -239,7 +250,18 @@ export const aggregateRuleRun = ({
   runId: string;
   suiteId: string;
   nowIso: string;
-  thresholds?: GateThresholds;
+  /**
+   * Defaults the resolution should fall back to. Tests pass a known-good
+   * frozen object; production callers leave this unset so
+   * `DEFAULT_GATE_THRESHOLDS` is used.
+   */
+  defaultThresholds?: GateThresholds;
+  /**
+   * Run-wide override (e.g. a tuned per-corpus gate). Per-rule overrides on
+   * `rule.gate_overrides` win over this. See
+   * {@link resolveGateThresholds}.
+   */
+  runOverride?: GateThresholdsOverride;
 }): RuleEvaluationRow => {
   const firedIds = new Set(replay.fired_variant_ids);
   let tp = 0;
@@ -272,7 +294,12 @@ export const aggregateRuleRun = ({
     true_negatives: tn,
   };
   const scores = computeScores(counts, [...positiveAxes], [...firedAxes]);
-  const gateDecision = computeGateDecision(scores, thresholds);
+  const { thresholds: resolvedThresholds, origin: thresholdsOrigin } = resolveGateThresholds(
+    defaultThresholds,
+    runOverride,
+    rule.gate_overrides
+  );
+  const gateDecision = computeGateDecision(scores, resolvedThresholds);
 
   return {
     '@timestamp': nowIso,
@@ -293,7 +320,8 @@ export const aggregateRuleRun = ({
       fired_variant_ids: replay.fired_variant_ids,
     },
     gate_decision: gateDecision,
-    gate_thresholds: thresholds,
+    gate_thresholds: resolvedThresholds,
+    gate_thresholds_origin: thresholdsOrigin,
     replay_error: replay.error,
   };
 };
@@ -308,8 +336,13 @@ export interface CreateEvaluateDetectionRulesDeps {
   log: ToolingLog;
   /** Override rule pack — defaults to {@link MYTHOS_DETECTION_RULES}. */
   rules?: readonly CandidateRule[];
-  /** Override promotion thresholds (e.g. a tuned per-corpus gate). */
-  gateThresholds?: GateThresholds;
+  /**
+   * Run-level override for promotion thresholds (e.g. a tuned per-corpus
+   * gate). Per-rule overrides on `CandidateRule.gate_overrides` win over
+   * this. Both layers are validated by {@link resolveGateThresholds} —
+   * out-of-range values throw. (B6.)
+   */
+  gateThresholdsOverride?: GateThresholdsOverride;
   /** Injected for deterministic tests. */
   now?: () => Date;
   /** Injected for deterministic tests. */
@@ -347,7 +380,7 @@ export const createEvaluateDetectionRules = ({
   replayClient,
   log,
   rules = MYTHOS_DETECTION_RULES,
-  gateThresholds = DEFAULT_GATE_THRESHOLDS,
+  gateThresholdsOverride,
   now = () => new Date(),
   generateRunId = defaultRunId,
 }: CreateEvaluateDetectionRulesDeps) => {
@@ -386,10 +419,11 @@ export const createEvaluateDetectionRules = ({
         runId,
         suiteId,
         nowIso,
-        thresholds: gateThresholds,
+        runOverride: gateThresholdsOverride,
       });
       log.info(
         `[argus-deteng] rule=${rule.rule_id} gate=${row.gate_decision} ` +
+          `thresholds_origin=${row.gate_thresholds_origin} ` +
           `precision=${row.scores.precision.toFixed(2)} ` +
           `recall=${row.scores.recall.toFixed(2)} ` +
           `fp_rate=${row.scores.fp_rate_baseline.toFixed(3)} ` +

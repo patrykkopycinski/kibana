@@ -18,6 +18,8 @@ export {
 
 export {
   buildGovernancePulse,
+  resolveHoursSavedConstants,
+  DEFAULT_HOURS_SAVED_CONSTANTS,
   type ActorTrustTiersAggsInput,
   type BuildGovernancePulseArgs,
   type GovernancePulseAggsInput,
@@ -151,9 +153,12 @@ export type {
   GovernancePulse,
   GovernancePulseBuildResult,
   GovernancePulseDrift,
+  GovernancePulseHoursSaved,
+  GovernancePulseMttd,
   GovernancePulseMttr,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  HoursSavedConstants,
   ActivityEvent,
   ActivityFeedFilters,
   ActivityFeedResponse,

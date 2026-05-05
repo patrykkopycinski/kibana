@@ -72,7 +72,7 @@ export const shadowExecuteRuleStepDefinition = createServerStepDefinition({
 
       const hitsPerHour = totalHits / hoursInWindow;
       const passes = hitsPerHour <= max_hits_per_hour_threshold;
-      const verdict = passes ? 'pass' : 'fail';
+      const verdict: 'pass' | 'fail' = passes ? 'pass' : 'fail';
       const reason = passes
         ? i18n.translate('xpack.securitySolution.workflows.steps.shadowExecuteRule.reasonPass', {
             defaultMessage:

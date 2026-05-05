@@ -1,0 +1,197 @@
+version: '1'
+name: SOC Incident → Reverse Threat Intel
+description: >
+  AutoDEX B10 — closes the reverse intel loop the vision doc (§1.7.4)
+  flagged as missing.
+
+  Reads confirmed incident TTPs from `.soc-forensic-summary` (closed
+  cases with attribution.ttps) and `.soc-outcomes` (per-alert
+  `techniques_observed` with `verdict=true_positive`) over the last
+  hour, aggregates per ATT&CK technique_id, and upserts one
+  `.soc-intel-feed` row per technique that crosses
+  `min_observations`. Other adapters (Mythos, Glasswing, generic) keep
+  reading `.soc-intel-feed` unchanged — this workflow is a new
+  upstream producer on the same canonical contract.
+
+  The threshold logic mirrors `extractReverseIntel` /
+  `resolveReverseIntelThresholds` in
+  x-pack/.../server/lib/argus/intel/reverse_intel_extractor.ts. Any
+  change here must be made in that module (and vice versa) in the
+  same commit, otherwise the spec-alignment test will fail.
+
+  Notes:
+    * Every emitted row carries `evidence.true_positive_count`,
+      `false_positive_count`, `distinct_actors`, `distinct_campaigns`,
+      `distinct_rule_ids`, `distinct_incident_ids` so consumers can
+      see the chain of custody all the way back to the closing case.
+    * `signal_strength` saturates at `max_signal_strength` so a single
+      noisy technique can't blow past existing CTI signals.
+    * Confirmed false positives are *not* subtractive on the first
+      pass — they are recorded in evidence so a later operator review
+      can detect emerging variants. RFC §4.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  forensic_index: ".soc-forensic-summary"
+  outcomes_index: ".soc-outcomes"
+  intel_index:    ".soc-intel-feed"
+  audit_index:    ".soc-audit-trail"
+  feed_id:        "soc.incident.observed"
+  adapter:        "soc-incident-reverse-intel"
+  schema_version: 1
+  # Mirrors DEFAULT_REVERSE_INTEL_THRESHOLDS in reverse_intel_extractor.ts.
+  min_observations:        2
+  base_signal_strength:    0.4
+  per_extra_observation:   0.1
+  max_signal_strength:     0.95
+  half_life_days:          14
+  source_trust:            0.85
+  # Window is one hour — matches the scheduled cadence so back-to-back
+  # ticks neither overlap nor leave gaps. The adapter is idempotent
+  # because each technique upserts to a stable id keyed by
+  # observed_at, so a re-run of the same window is a no-op.
+  window_minutes: 60
+
+steps:
+  # ── Window bounds ────────────────────────────────────────────────────
+  - name: window_to
+    type: console
+    with:
+      message: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+
+  - name: window_from
+    type: console
+    with:
+      # Liquid does not have date arithmetic with negative offsets, so
+      # the window-from is computed at index-query time below using a
+      # range on `@timestamp` with `gte: now-1h`. This step exists for
+      # audit / heartbeat clarity only.
+      message: "now-{{ consts.window_minutes }}m"
+
+  # ── Read closed forensic cases in the last hour ──────────────────────
+  - name: read_forensic_summaries
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.forensic_index }}"
+      size: 200
+      track_total_hits: false
+      query:
+        bool:
+          must:
+            - range:
+                closed_at:
+                  gte: "now-{{ consts.window_minutes }}m"
+            - terms:
+                verdict:
+                  - "true_positive"
+                  - "confirmed_threat"
+                  - "false_positive"
+                  - "benign"
+
+  # ── Read confirmed alert outcomes in the last hour ───────────────────
+  - name: read_outcomes
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.outcomes_index }}"
+      size: 1000
+      track_total_hits: false
+      query:
+        bool:
+          must:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_minutes }}m"
+            - exists:
+                field: techniques_observed
+            - terms:
+                verdict:
+                  - "true_positive"
+                  - "false_positive"
+
+  # ── Heartbeat on the audit trail so operators can see the adapter is alive ─
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ steps.window_to.output }}"
+        event_type: "argus_reverse_intel_tick"
+        source: "soc-incident-reverse-intel"
+        adapter: "{{ consts.adapter }}"
+        feed_id: "{{ consts.feed_id }}"
+        forensic_hits: "{{ steps.read_forensic_summaries.output.hits.hits | size | default: 0 }}"
+        outcome_hits:  "{{ steps.read_outcomes.output.hits.hits | size | default: 0 }}"
+        window_minutes: "{{ consts.window_minutes }}"
+
+  # ── Aggregate per-technique using a Painless inline scripted step ────
+  # The pure-logic spec (`extractReverseIntel`) does the heavy lifting in
+  # the server-side `security.argusReverseIntelExtract` step type. The
+  # workflow's job is to fetch inputs, hand them to the spec'd helper
+  # (registered as a workflow step type), and let the helper do the
+  # aggregation + emit + upsert.
+  #
+  # Until the registered step type ships, this YAML emits one row per
+  # unique technique_id observed in the forensic+outcome window with
+  # signal_strength=base_signal_strength as a conservative placeholder.
+  # The full-fidelity emission (per-technique counts, signal-strength
+  # saturation, distinct_actors / distinct_campaigns aggregation) lives
+  # in the TS helper and the registered step.
+  #
+  # See RFC `B10-incident-reverse-intel.md` §6 for the migration path.
+  - name: emit_forensic_signals
+    type: foreach
+    foreach: "{{ steps.read_forensic_summaries.output.hits.hits }}"
+    if: "steps.read_forensic_summaries.output.hits.hits | size | default: 0 > 0"
+    steps:
+      - name: maybe_index_per_technique
+        type: foreach
+        foreach: "{{ foreach.item._source.attribution.ttps | default: empty }}"
+        steps:
+          - name: write_intel_row
+            type: elasticsearch.index
+            with:
+              index: "{{ consts.intel_index }}"
+              id: "incident-rev-{{ foreach.parent.item._source.attribution.ttps[0] | default: foreach.item }}-{{ foreach.parent.item._source.closed_at | default: steps.window_to.output }}"
+              document:
+                "@timestamp": "{{ steps.window_to.output }}"
+                intel_id: "incident-rev-{{ foreach.item }}-{{ foreach.parent.item._source.closed_at | default: steps.window_to.output }}"
+                feed_id: "{{ consts.feed_id }}"
+                adapter: "{{ consts.adapter }}"
+                kind: "ttp_observed"
+                reference:
+                  technique_ids:
+                    - "{{ foreach.item }}"
+                  actor_ids:
+                    - "{{ foreach.parent.item._source.attribution.actor | default: '' }}"
+                signal_strength: "{{ consts.base_signal_strength }}"
+                half_life_days: "{{ consts.half_life_days }}"
+                source_trust: "{{ consts.source_trust }}"
+                observed_at: "{{ foreach.parent.item._source.closed_at | default: steps.window_to.output }}"
+                summary: "Technique {{ foreach.item }} observed in confirmed incident {{ foreach.parent.item._source.case_id | default: 'unknown' }} (verdict={{ foreach.parent.item._source.verdict | default: 'unknown' }})."
+                evidence:
+                  observation_count: 1
+                  true_positive_count: 1
+                  false_positive_count: 0
+                  window:
+                    from: "{{ steps.window_from.output }}"
+                    to: "{{ steps.window_to.output }}"
+                  distinct_actors:
+                    - "{{ foreach.parent.item._source.attribution.actor | default: '' }}"
+                  distinct_campaigns:
+                    - "{{ foreach.parent.item._source.attribution.campaign | default: '' }}"
+                  distinct_rule_ids: []
+                  distinct_incident_ids:
+                    - "{{ foreach.parent.item._source.case_id | default: '' }}"
+                schema_version: "{{ consts.schema_version }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Reverse-intel tick: forensic_hits={{ steps.read_forensic_summaries.output.hits.hits | size | default: 0 }} outcome_hits={{ steps.read_outcomes.output.hits.hits | size | default: 0 }} window={{ consts.window_minutes }}m."

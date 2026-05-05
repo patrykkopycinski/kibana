@@ -58,7 +58,8 @@ export function argusSummarizeCoverageTool(
     tags: ['security', 'argus', 'argus:playbook', 'read', 'coverage'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request }) => getAgentBuilderResourceAvailability({ core, request, logger }),
+      handler: async ({ request }) =>
+        getAgentBuilderResourceAvailability({ core, request, logger }),
     },
     handler: async ({ threat_profile_id: profileId, top_n_gaps: topN }, { esClient }) => {
       try {

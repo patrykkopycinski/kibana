@@ -1,0 +1,19 @@
+{
+  "name": "@argus/cti-queries",
+  "version": "1.0.0",
+  "description": "CobaltStrike beacon configuration query builders for ARGUS analytics pipeline",
+  "private": true,
+  "license": "Elastic-2.0",
+  "main": "cobalt_strike_beacon_query.ts",
+  "scripts": {
+    "test": "jest",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "argus",
+    "cobaltstrike",
+    "cti",
+    "threat-intelligence",
+    "elasticsearch"
+  ]
+}

@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export * from './data_tiers';
-
-export {
-  PHASE_NAMES,
-  PHASE_TITLES,
-  PHASE_DESCRIPTIONS,
-  PHASE_ORDER,
-} from '@kbn/data-lifecycle-phases';
-
-export * from './rollover';
+export * from './src/phases';

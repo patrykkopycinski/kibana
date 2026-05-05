@@ -13516,7 +13516,6 @@
     "xpack.apm.serviceMap.serviceNode.agentInfo": "エージェント：{agentName}",
     "xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip": "{count, plural, one {# active alert} other {# 件のアクティブなアラート}}",
     "xpack.apm.serviceMap.serviceNode.ariaLabel": "サービス：{serviceName}",
-    "xpack.apm.serviceMap.serviceNode.healthInfo": "健康状態: {status}",
     "xpack.apm.serviceMap.subtypePopoverStat": "サブタイプ",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "APM 設定の詳細については、ドキュメントを参照してください",
     "xpack.apm.serviceMap.timeoutPromptDescription": "サービスマップのデータの取得中にタイムアウトしました。時間範囲を狭めて範囲を制限するか、小さい値で構成設定''{configName}''を使用してください。",

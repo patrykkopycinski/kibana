@@ -13474,7 +13474,6 @@
     "xpack.apm.serviceMap.serviceNode.agentInfo": "Agent: {agentName}",
     "xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip": "{count, plural, one {# active alert} other {# aktive Warnungen}}",
     "xpack.apm.serviceMap.serviceNode.ariaLabel": "Service: {serviceName}",
-    "xpack.apm.serviceMap.serviceNode.healthInfo": "Gesundheitszustand: {status}",
     "xpack.apm.serviceMap.subtypePopoverStat": "Subtype",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "Erfahren Sie mehr über APM-Einstellungen in der Dokumentation",
     "xpack.apm.serviceMap.timeoutPromptDescription": "Zeitüberschreitung beim Abrufen von Daten für die Servicelandkarte. Begrenzen Sie den Umfang, indem Sie einen kleineren Zeitraum auswählen, oder verwenden Sie die Konfigurationseinstellung ''{configName}'' mit einem reduzierten Wert.",

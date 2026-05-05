@@ -13451,7 +13451,6 @@
     "xpack.apm.serviceMap.serviceNode.agentInfo": "Agent : {agentName}",
     "xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip": "{count, plural, one {# active alert} other {# alertes actives}}",
     "xpack.apm.serviceMap.serviceNode.ariaLabel": "Service : {serviceName}",
-    "xpack.apm.serviceMap.serviceNode.healthInfo": "État de santé : {status}",
     "xpack.apm.serviceMap.subtypePopoverStat": "Sous-type",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "En savoir plus sur les paramètres APM dans la documentation",
     "xpack.apm.serviceMap.timeoutPromptDescription": "Délai expiré lors de la récupération des données pour la carte de services. Limitez la portée en sélectionnant une plage temporelle plus restreinte, ou utilisez le paramètre de configuration \"{configName}\" avec une valeur réduite.",

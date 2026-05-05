@@ -13515,7 +13515,6 @@
     "xpack.apm.serviceMap.serviceNode.agentInfo": "代理：{agentName}",
     "xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip": "{count, plural, one {# active alert} other {# 个活动告警}}",
     "xpack.apm.serviceMap.serviceNode.ariaLabel": "服务：{serviceName}",
-    "xpack.apm.serviceMap.serviceNode.healthInfo": "运行状况：{status}",
     "xpack.apm.serviceMap.subtypePopoverStat": "子类型",
     "xpack.apm.serviceMap.timeoutPrompt.docsLink": "查看相关文档，了解有关 APM 设置的更多信息",
     "xpack.apm.serviceMap.timeoutPromptDescription": "获取服务地图数据时超时。选择较小的时间范围来限制范围，或者使用具有较小值的配置设置“{configName}”。",

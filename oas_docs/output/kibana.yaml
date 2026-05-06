@@ -47168,6 +47168,143 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/epm/packages/_bulk_namespace_customization:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_namespace_customization</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Enable or disable namespace-level index template customization for a list of packages in one call. Use this for IaC-style declarative flows.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+      operationId: post-fleet-epm-packages-bulk-namespace-customization
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              bulkNamespaceCustomizationRequest:
+                value:
+                  disable:
+                    - dev
+                  enable:
+                    - production
+                    - staging
+                  packages:
+                    - system
+                    - nginx
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                disable:
+                  description: Namespaces to disable namespace-level customization for on each package.
+                  items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                enable:
+                  description: Namespaces to enable namespace-level customization for on each package.
+                  items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                packages:
+                  description: Package names to apply the customization changes to.
+                  items:
+                    type: string
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+              required:
+                - packages
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                successResponse:
+                  value:
+                    items:
+                      - name: system
+                        namespace_customization_enabled_for:
+                          - production
+                          - staging
+                        success: true
+                      - error: Package nginx is not installed
+                        name: nginx
+                        success: false
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        name:
+                          type: string
+                        namespace_customization_enabled_for:
+                          description: 'The opt-in list on the package. Returned whenever the package is installed: the new list on success, or the unchanged list when the request is rejected (for example, because of a namespace-prefix restriction).'
+                          items:
+                            type: string
+                          maxItems: 100
+                          type: array
+                        success:
+                          type: boolean
+                      required:
+                        - name
+                        - success
+                    maxItems: 1000
+                    type: array
+                required:
+                  - items
+          description: 'OK: A successful request.'
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    error: Bad Request
+                    message: 'Namespaces must not appear in both enable and disable: production'
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: A bad request.
+      summary: Bulk enable/disable namespace-level customization for packages
+      tags:
+        - Elastic Package Manager (EPM)
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/epm/packages/_bulk_rollback:
     post:
       description: |-
@@ -48798,6 +48935,12 @@ paths:
         content:
           application/json:
             examples:
+              putUpdatePackageNamespaceCustomizationExample:
+                description: Enable namespace-level customization for the `production` and `staging` namespaces
+                value:
+                  namespace_customization_enabled_for:
+                    - production
+                    - staging
               putUpdatePackageRequestExample:
                 description: Update keep_policies_up_to_date setting for a package
                 value:
@@ -48808,8 +48951,12 @@ paths:
               properties:
                 keepPoliciesUpToDate:
                   type: boolean
-              required:
-                - keepPoliciesUpToDate
+                namespace_customization_enabled_for:
+                  description: Namespaces for which namespace-level customization is enabled on this package.
+                  items:
+                    type: string
+                  maxItems: 100
+                  type: array
       responses:
         '200':
           content:
@@ -50429,6 +50576,12 @@ paths:
         content:
           application/json:
             examples:
+              putUpdatePackageNamespaceCustomizationExample:
+                description: Enable namespace-level customization for the `production` and `staging` namespaces
+                value:
+                  namespace_customization_enabled_for:
+                    - production
+                    - staging
               putUpdatePackageRequestExample:
                 description: Update keep_policies_up_to_date setting for a package
                 value:
@@ -50439,8 +50592,12 @@ paths:
               properties:
                 keepPoliciesUpToDate:
                   type: boolean
-              required:
-                - keepPoliciesUpToDate
+                namespace_customization_enabled_for:
+                  description: Namespaces for which namespace-level customization is enabled on this package.
+                  items:
+                    type: string
+                  maxItems: 100
+                  type: array
       responses:
         '200':
           content:

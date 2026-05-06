@@ -54670,8 +54670,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle": "Impossible de supprimer les connecteurs",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel": "Supprimer {count}",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel": "Types de connecteurs disponibles",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription": "Autoriser le connecteur",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName": "Autoriser",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription": "Annuler l'autorisation",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName": "Annuler l'autorisation",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription": "Supprimer ce connecteur",

@@ -55059,8 +55059,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle": "コネクターを削除できません",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel": "{count} 件を削除",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel": "利用可能なコネクタータイプ",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription": "コネクターを認証",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName": "認証",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription": "認証をキャンセル",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName": "承認取り消し",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription": "このコネクターを削除",

@@ -55049,8 +55049,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle": "无法删除连接器",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel": "删除 {count} 个",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel": "可用连接器类型",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription": "授权连接器",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName": "授权",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription": "取消授权",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName": "取消授权",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription": "删除此连接器",

@@ -54851,8 +54851,6 @@
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteDisabledTitle": "Connectors können nicht gelöscht werden",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.buttons.deleteLabel": "{count} löschen",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListLabel": "Verfügbare Connector-Typen",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorDescription": "Connector autorisieren",
-    "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.authorizeConnectorName": "Autorisieren",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationDescription": "Autorisierung widerrufen",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.cancelAuthorizationName": "Autorisierung abbrechen",
     "xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.deleteActionDescription": "Diesen Connector löschen",

@@ -27,7 +27,7 @@ export const createMarkdownVisFn = (): MarkdownVisExpressionFunctionDefinition =
   name: 'markdownVis',
   type: 'render',
   inputTypes: [],
-  help: i18n.translate('visTypeMarkdown.function.help', {
+  help: i18n.translate('dashboardMarkdown.function.help', {
     defaultMessage: 'Markdown visualization',
   }),
   args: {
@@ -35,13 +35,13 @@ export const createMarkdownVisFn = (): MarkdownVisExpressionFunctionDefinition =
       types: ['string'],
       aliases: ['_'],
       required: true,
-      help: i18n.translate('visTypeMarkdown.function.markdown.help', {
+      help: i18n.translate('dashboardMarkdown.function.markdown.help', {
         defaultMessage: 'Markdown to render',
       }),
     },
     font: {
       types: ['style'],
-      help: i18n.translate('visTypeMarkdown.function.font.help', {
+      help: i18n.translate('dashboardMarkdown.function.font.help', {
         defaultMessage: 'Font settings.',
       }),
       default: `{font size=12}`,
@@ -49,7 +49,7 @@ export const createMarkdownVisFn = (): MarkdownVisExpressionFunctionDefinition =
     openLinksInNewTab: {
       types: ['boolean'],
       default: false,
-      help: i18n.translate('visTypeMarkdown.function.openLinksInNewTab.help', {
+      help: i18n.translate('dashboardMarkdown.function.openLinksInNewTab.help', {
         defaultMessage: 'Opens links in new tab',
       }),
     },

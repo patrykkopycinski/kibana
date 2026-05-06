@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/private/vis_type_markdown'],
-  coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/private/vis_type_markdown',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/private/vis_type_markdown/{public,server}/**/*.{ts,tsx}',
-  ],
+import { toExpressionAst } from './to_ast';
+
+export const markdownVisType = {
+  name: 'markdown',
+  title: 'Markdown',
+  icon: 'text',
+  disableCreate: true,
+  disableEdit: true,
+  toExpressionAst,
+  visConfig: {},
+  editorConfig: {},
 };

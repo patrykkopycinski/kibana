@@ -59,8 +59,8 @@ apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin do
 echo "Docker installed."
 echo "To start Caldera, copy docker-compose.yml and run:"
 echo "  docker compose up -d caldera"
-echo "(attack dispatch + polling is now driven by soc-caldera-dispatcher and"
-echo " soc-caldera-poller workflows in the Kibana stack — no Python sidecars needed)"
+echo "(attack dispatch + polling is now driven by soc_caldera_dispatcher and"
+echo " soc_caldera_poller workflows in the Kibana stack — no Python sidecars needed)"
 echo "=== Setup complete ==="
 STARTUP
 )"

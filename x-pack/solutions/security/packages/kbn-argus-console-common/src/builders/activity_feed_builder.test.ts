@@ -178,7 +178,7 @@ describe('hitToEvent per-layer title synthesis', () => {
       doc_id: 'sweep-verdict-1',
       source: {
         '@timestamp': '2026-04-22T13:29:09.200Z',
-        pipeline: 'soc-alert-sweeper',
+        pipeline: 'soc_alert_sweeper',
         stage: 'per_alert_verdict',
         classification: 'SUSPICIOUS',
         disposition: 'INCONCLUSIVE',

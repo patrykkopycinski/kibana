@@ -3,19 +3,19 @@
 **Milestone:** Frontier-adversary simulation mode  
 **Spec:** [`../issues/m2-4-frontier-simulation.md`](../issues/m2-4-frontier-simulation.md) · [`../scaffolds/m2-4-simulator-contract.md`](../scaffolds/m2-4-simulator-contract.md)  
 **Pair owner:** Simulation (Pair B) — starts Day 0, parallel with M2.1.  
-**Target Day-1 outcome:** `soc-argus-frontier-simulator` workflow registered, single-variant dry-run emits a labelled event into `.soc-eval-corpus-*`.
+**Target Day-1 outcome:** `soc_argus_frontier_simulator` workflow registered, single-variant dry-run emits a labelled event into `.soc-eval-corpus-*`.
 
 ## Before you touch code
 
 - [ ] Confirm the L6 Caldera profile seeded correctly (`GET .soc-attack-profiles/_doc/level-6` → `found: true`).
-- [ ] Arm the Mythos preset once and verify Caldera dispatches: `POST /api/workflowsExecution/workflows/soc-argus-arm-mythos-preset/run`.
+- [ ] Arm the Mythos preset once and verify Caldera dispatches: `POST /api/workflowsExecution/workflows/soc_argus_arm_mythos_preset/run`.
 - [ ] Read the simulator contract and the polymorphism axes in the L6 profile's `argus_metadata`.
 
 ## Files to create
 
 ```
 soc-simulation/workflows/
-  soc-argus-frontier-simulator.yaml   # scheduled every 30m when L6 armed
+  soc_argus_frontier_simulator.yaml   # scheduled every 30m when L6 armed
 soc-simulation/scripts/
   argus-variant-bank/
     T1003.001/
@@ -29,12 +29,12 @@ soc-simulation/docs/argus/
 Update:
 
 - `soc-simulation/workflows/_registry.json` — add an entry for
-  `soc-argus-frontier-simulator` with `automation_level: human_in_the_loop` and
+  `soc_argus_frontier_simulator` with `automation_level: human_in_the_loop` and
   `connectors: ["caldera", "audit_trail", "eval_corpus"]`.
 
 ## Workflow skeleton (copy-paste)
 
-`soc-argus-frontier-simulator.yaml`:
+`soc_argus_frontier_simulator.yaml`:
 
 ```yaml
 version: '1'
@@ -87,7 +87,7 @@ steps:
           technique_id: "T1003.001"
           variant_axis: "command_args"
           variant_index: 0
-          source: "soc-argus-frontier-simulator"
+          source: "soc_argus_frontier_simulator"
         process:
           name: "lsass.exe"
           command_line: "procdump -ma lsass.exe out.dmp"
@@ -100,14 +100,14 @@ steps:
       document:
         "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
         event_type: argus_frontier_sim_tick
-        source: "soc-argus-frontier-simulator"
+        source: "soc_argus_frontier_simulator"
         preset_armed: "{{ steps.gate_armed.output }}"
 ```
 
 ## Validate before pushing
 
 ```bash
-python3 -c "import yaml,sys; yaml.safe_load(open('soc-simulation/workflows/soc-argus-frontier-simulator.yaml'))"
+python3 -c "import yaml,sys; yaml.safe_load(open('soc-simulation/workflows/soc_argus_frontier_simulator.yaml'))"
 python3 -m json.tool soc-simulation/workflows/_registry.json > /dev/null
 ```
 

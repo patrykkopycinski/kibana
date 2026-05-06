@@ -111,9 +111,9 @@ Point to the tactic × technique heatmap. Cells are coloured by
 
 The Playbooks tab groups entries by **user intent**:
 
-- **Investigate new CVE** → `soc-argus-exploit-to-detection` (canonical workflow)
+- **Investigate new CVE** → `soc_argus_exploit_to_detection` (canonical workflow)
 - **Triage coverage gap / scan data-source gap / tune high-FP rule /
-  actor escalation** → `soc-argus-playbook-runner` with the matching
+  actor escalation** → `soc_argus_playbook_runner` with the matching
   `playbook_id` input (`coverage-gap-triage`, `datasource-gap`,
   `high-fp-tuning`, `actor-escalation`). The old one-YAML-per-playbook
   workflows (`soc-argus-playbook-coverage-gap-triage`,

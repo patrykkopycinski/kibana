@@ -181,7 +181,7 @@ definition.
 ## Process
 
 1. **Candidate selection.** An agent (usually `soc-signal-quality-agent` or
-   `soc-deteng-agent`) emits a structured recommendation with
+   `soc_deteng-agent`) emits a structured recommendation with
    `pattern_hypothesis: true` and a reference to a candidate pattern.
 2. **Evidence gathering.** A workflow (or the reviewer) runs the four
    methods above against the candidate.

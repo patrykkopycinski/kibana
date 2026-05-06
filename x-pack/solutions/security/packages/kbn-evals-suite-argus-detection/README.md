@@ -24,7 +24,7 @@ events across four dimensions:
 
 The four evaluators feed into a gate decision (`pass` / `fail` / `marginal`)
 computed by the suite's `onEvaluationComplete` hook and persisted to
-`.soc-argus-eval-runs` with `run_kind=detection`. The `soc-detection-eval.yaml` workflow polls that
+`.soc-argus-eval-runs` with `run_kind=detection`. The `soc_detection_eval.yaml` workflow polls that
 index and propagates pass/fail signals to the ARGUS regression gate.
 
 ## Structure

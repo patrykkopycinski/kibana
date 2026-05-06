@@ -1,5 +1,5 @@
 {
-  "index_patterns": [".soc-response-actions"],
+  "index_patterns": [".soc_response-actions"],
   "data_stream": {},
   "priority": 500,
   "template": {

@@ -10,7 +10,7 @@ import path from 'path';
 
 /**
  * Structural alignment check between the TS spec (`evaluateTrustGate`) and
- * the runtime YAML at `soc-simulation/workflows/soc-argus-trust-gate.yaml`.
+ * the runtime YAML at `soc-simulation/workflows/soc_argus_trust_gate.yaml`.
  *
  * We can't run Liquid from Jest without spinning up the workflows engine,
  * but we CAN assert that the YAML's verdict and reason branches name every
@@ -21,7 +21,7 @@ import path from 'path';
 
 const YAML_PATH = path.resolve(
   __dirname,
-  '../../../../../../soc-simulation/workflows/soc-argus-trust-gate.yaml'
+  '../../../../../../soc-simulation/workflows/soc_argus_trust_gate.yaml'
 );
 
 describe('trust-gate YAML ↔ TS spec alignment', () => {

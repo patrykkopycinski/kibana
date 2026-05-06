@@ -1,5 +1,5 @@
 {
-  "description": "ARGUS Phase 3 demo seed intel. These rows are ingested by `soc-argus-intel-adapter-generic` on first tick so the demo has non-zero `mythos_signal` without requiring a live TAXII/Glasswing feed. Remove from production by clearing the seed flag in the adapter workflow.",
+  "description": "ARGUS Phase 3 demo seed intel. These rows are ingested by `soc_argus_intel_adapter_generic` on first tick so the demo has non-zero `mythos_signal` without requiring a live TAXII/Glasswing feed. Remove from production by clearing the seed flag in the adapter workflow.",
   "feed_id": "argus-demo-feed",
   "source_trust": 0.6,
   "items": [

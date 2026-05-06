@@ -3,7 +3,7 @@
 > **Owner:** `argus-governance` ·
 > **Schema version:** 1 (introduced 2026-05-05) ·
 > **Source workflow:**
-> [`soc-skill-self-adjust.yaml`](../../../workflows/soc-skill-self-adjust.yaml) ·
+> [`soc_skill_self_adjust.yaml`](../../../workflows/soc_skill_self_adjust.yaml) ·
 > **Spec:**
 > [`kbn-argus-tool-manifest/src/skill_health.ts`](../../../../x-pack/solutions/security/packages/kbn-argus-tool-manifest/src/skill_health.ts) ·
 > **RFC:** [`rfcs/B9-skill-self-adjust.md`](../rfcs/B9-skill-self-adjust.md)
@@ -29,7 +29,7 @@ of recommended actions.
 | `metrics_snapshot.success_rate_7d` | `float` | Always in `[0, 1]`. Re-derived from counts when the input field was missing or non-finite. |
 | `metrics_snapshot.last_run_ts` | `date` | Last invocation observed before the verdict. |
 | `thresholds_applied.*` | various | The exact thresholds used to produce this verdict — stamped on the doc so an audit can replay decisions without guessing. |
-| `generated_by` | `keyword` | Always `soc-skill-self-adjust` for now; future MCP-side gate may emit `argus-mcp-server`. |
+| `generated_by` | `keyword` | Always `soc_skill_self_adjust` for now; future MCP-side gate may emit `argus-mcp-server`. |
 | `generated_at` | `date` | When the workflow / gate produced the verdict. |
 | `schema_version` | `integer` | Currently `1`. Bump on any field-shape change. |
 

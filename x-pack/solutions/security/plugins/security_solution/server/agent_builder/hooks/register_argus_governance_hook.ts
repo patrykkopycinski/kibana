@@ -20,10 +20,10 @@ import {
   ARGUS_TOGGLE_KILL_SWITCH_TOOL_ID,
 } from '../tools/argus_playbooks/constants';
 
-/** Must match `consts.daily_budget_all` in soc-simulation/workflows/soc-autonomous-applier.yaml */
+/** Must match `consts.daily_budget_all` in soc-simulation/workflows/soc_autonomous_applier.yaml */
 const DAILY_MUTATION_BUDGET = 50;
 
-/** Must match `consts.cooldown_seconds` in soc-simulation/workflows/soc-autonomous-applier.yaml */
+/** Must match `consts.cooldown_seconds` in soc-simulation/workflows/soc_autonomous_applier.yaml */
 const COOLDOWN_SECONDS = 900;
 
 const KILL_SWITCH_INDEX = '.soc-kill-switch';
@@ -179,7 +179,7 @@ async function readBudgetCooldownFailure(
     query: {
       bool: {
         filter: [
-          { term: { source: 'soc-autonomous-applier' } },
+          { term: { source: 'soc_autonomous_applier' } },
           { term: { result: 'applied' } },
           { range: { '@timestamp': { gte: 'now-24h' } } },
         ],
@@ -231,7 +231,7 @@ async function readBudgetCooldownFailure(
       query: {
         bool: {
           filter: [
-            { term: { source: 'soc-autonomous-applier' } },
+            { term: { source: 'soc_autonomous_applier' } },
             { term: { result: 'applied' } },
             { term: { artifact_id: artifactId } },
             { range: { '@timestamp': { gte: `now-${COOLDOWN_SECONDS}s` } } },

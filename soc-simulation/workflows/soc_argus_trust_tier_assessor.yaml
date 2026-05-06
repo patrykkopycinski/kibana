@@ -1,0 +1,462 @@
+version: '1'
+name: ARGUS Trust Tier Assessor (Phase 3)
+description: >
+  ARGUS Phase 3 — per-actor trust-tier assessor.
+
+  For each agent/skill/tool that has produced at least one recommendation
+  or eval run in the last 7 days, this workflow computes:
+    * eval_pass_rate (from .soc-argus-eval-runs run_kind=detection where agent_id matches)
+    * avg_precision / avg_recall / avg_f1 / avg_robustness
+    * reasoning_quality (from .soc-reasoning-trace argus.decision.confidence)
+    * rejections_by_humans + rollbacks_triggered
+    * frontier_pass_rate + simulation_runs (from .soc-audit-trail)
+
+  It then assigns a tier per the design doc
+  soc-simulation/docs/argus/phase-3/trust-thresholds.md:
+
+    frontier     -> P≥0.9, R≥0.8, fp≤0.02, cov≥0.7, rq≥0.85,
+                    ≥1 frontier sim in 7d, rollback_rate≤0.05, fp_ratio≤0.05
+    trusted      -> P≥0.85, R≥0.7, fp≤0.05, rq≥0.7,
+                    rollback_rate≤0.10, fp_ratio≤0.10
+    probationary -> P≥0.7, R≥0.5, fp≤0.10, rollback_rate≤0.20
+    quarantined  -> anything below OR watchdog-triggered OR
+                    rollback_rate>0.20 OR fp_ratio>0.20
+
+  .soc-outcomes (G3) is the ground truth for real-world performance:
+  the assessor queries it per-actor to compute rollback_rate and
+  fp_ratio, which are the two strongest signals of actor drift. A
+  trusted actor that starts producing false positives downstream will
+  drop to probationary / quarantined on the NEXT hourly tick, even if
+  its static eval metrics still look good.
+
+  One doc per actor is upserted into `.soc-actor-trust-tiers` (the id is
+  the actor_id), carrying both the metrics and the derived policy that
+  `soc_argus_trust_gate` consumes.
+
+  The assessor is non-invasive: it NEVER rewrites recommendations. It
+  only publishes tier records. Enforcement lives in the trust gate.
+
+  Triggers:
+    * scheduled 1h  : tiers are reviewed hourly so the demo shows
+                      near-real-time tier movement after eval runs
+    * manual        : demo operators can force an assessment
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  tiers_index: ".soc-actor-trust-tiers"
+  eval_runs_index: ".soc-argus-eval-runs"
+  traces_index: ".soc-reasoning-trace"
+  audit_index: ".soc-audit-trail"
+  outcomes_index: ".soc-outcomes"
+  reasoning_eval_index: ".soc-argus-eval-runs"
+  window: "now-7d"
+  frontier_window: "now-7d"
+
+steps:
+  # ── Discover active actors in the last 7d ───────────────────────────
+  - name: discover_actors
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.traces_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.window }}"
+      aggregations:
+        actors:
+          terms:
+            field: agent_id
+            size: 50
+
+  - name: count_trust_tier_docs
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.tiers_index }}"
+      size: 0
+      track_total_hits: true
+      query:
+        match_all: {}
+
+  - name: gate_cold_start
+    type: console
+    with:
+      message: >-
+        {%- assign buckets = steps.discover_actors.output.aggregations.actors.buckets | default: empty -%}
+        {%- assign nb = buckets | size | default: 0 -%}
+        {%- assign nt = steps.count_trust_tier_docs.output.hits.total.value | default: 0 -%}
+        {% if nb == 0 and nt == 0 %}yes{% else %}no{% endif %}
+
+  - name: bootstrap_actor_ids
+    type: console
+    with:
+      message: '["default-security-assistant","workflow-engine","autonomous-applier","detection-engineer","triage-analyst","meta-planner"]'
+
+  - name: bootstrap_default_tiers
+    type: foreach
+    if: "steps.gate_cold_start.output: yes"
+    foreach: "{{ steps.bootstrap_actor_ids.output | json_parse }}"
+    steps:
+      - name: write_bootstrap_tier
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.tiers_index }}"
+          id: "{{ foreach.item }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            actor_id: "{{ foreach.item }}"
+            actor_kind: "agent"
+            tier: "apprentice"
+            window_days: 7
+            metrics:
+              eval_runs: 0
+              eval_pass_rate: 0
+              avg_precision: 0
+              avg_recall: 0
+              avg_f1: 0
+              avg_robustness: 0
+              reasoning_quality: 0
+              frontier_pass_rate: 0
+              simulation_runs: 0
+              rejections_by_humans: 0
+              rollbacks_triggered: 0
+              outcomes_total: 0
+              outcomes_false_positives: 0
+              rollback_rate: 0
+              fp_ratio: 0
+              avg_rollback_mttr_ms: 0
+              p50_rollback_mttr_ms: 0
+              p95_rollback_mttr_ms: 0
+              reasoning_eval_gate: "unknown"
+              reasoning_eval_mean_safety: 0
+              reasoning_eval_mean_evidence: 0
+            policy:
+              auto_apply: false
+              requires_human_approval: true
+              allow_production_targets: false
+              max_risk_score: 50
+              max_impact_radius: "canary"
+            rationale: "cold_start_bootstrap tier=apprentice for {{ foreach.item }}"
+            justification_trace_id: "argus-trust-tier-bootstrap-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+
+  - name: actors_gate
+    type: console
+    with:
+      message: "{% if steps.discover_actors.output.aggregations.actors.buckets and steps.discover_actors.output.aggregations.actors.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: process_actors
+    type: foreach
+    if: "steps.actors_gate.output: yes"
+    foreach: "{{ steps.discover_actors.output.aggregations.actors.buckets }}"
+    steps:
+      # Rolling eval metrics per actor.
+      # `passes` used to be a `filter` sub-aggregation here, but the
+      # Kibana Workflow schema validator rejects nested query DSL inside
+      # `filter` bucket aggregations, so the pass count lives in its
+      # own search (actor_eval_passes) below.
+      - name: actor_eval_metrics
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.eval_runs_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { run_kind: "detection" }
+                - term: { agent_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+          aggregations:
+            runs: { value_count: { field: "run_id" } }
+            avg_precision: { avg: { field: "scores.precision" } }
+            avg_recall:    { avg: { field: "scores.recall" } }
+            avg_f1:        { avg: { field: "scores.f1" } }
+            avg_fp:        { avg: { field: "scores.fp_rate_baseline" } }
+            avg_coverage:  { avg: { field: "scores.variant_coverage" } }
+
+      - name: actor_eval_passes
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.eval_runs_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { run_kind: "detection" }
+                - term: { agent_id: "{{ foreach.item.key }}" }
+                - term: { gate_decision: "pass" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # Reasoning-trace quality (mean confidence for this actor).
+      - name: actor_trace_quality
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.traces_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { agent_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+          aggregations:
+            reasoning_quality: { avg: { field: "argus.decision.confidence" } }
+
+      # Frontier sim runs seen in audit trail.
+      - name: actor_frontier_runs
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.audit_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: { event_type: "argus_frontier_simulator_tick" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.frontier_window }}"
+          aggregations:
+            sim_runs: { value_count: { field: "tick_id.keyword" } }
+
+      # Real-world outcomes per actor (ARGUS G3). This is the feedback
+      # signal that distinguishes actors that look good in eval from
+      # actors that are actually good in production. A rule that was
+      # rolled back by an operator or that produced a false-positive
+      # alert downstream counts against the actor that filed the
+      # originating recommendation.
+      #
+      # The Kibana Workflow schema validator rejects nested query DSL
+      # inside `filter` bucket aggregations (notably `should` and raw
+      # field names under `term`), so we split the outcome signal into
+      # three independent total-hit searches instead of a single request
+      # with sub-aggregations. Semantically identical; slightly chattier.
+      - name: outcomes_total
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { actor_id: "{{ foreach.item.key }}" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      - name: outcomes_rollbacks
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { actor_id: "{{ foreach.item.key }}" }
+                - term: { rolled_back: "true" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      - name: outcomes_false_positives
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { actor_id: "{{ foreach.item.key }}" }
+                - term: { false_positive: "true" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # ARGUS R6 — rollback MTTR aggregation.
+      # We use average + p50/p95 percentiles on `rollback_mttr_ms` so the
+      # Autonomy Feed can show a distributional metric, not a single mean
+      # that one slow rollback can skew. The assessor only publishes
+      # `avg` and `p50` into the tier doc for now (p95 is available for
+      # future dashboard panels but not acted on by policy).
+      - name: outcomes_mttr
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term:   { actor_id: "{{ foreach.item.key }}" }
+                - term:   { rolled_back: "true" }
+                - exists: { field: "rollback_mttr_ms" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+          aggregations:
+            avg_mttr: { avg: { field: "rollback_mttr_ms" } }
+            mttr_percentiles:
+              percentiles:
+                field: "rollback_mttr_ms"
+                percents: [50, 95]
+
+      # ARGUS R11 — latest reasoning eval gate signal. The reasoning eval
+      # vertical lives in @kbn/evals-suite-argus-reasoning; it writes one
+      # row per run into .soc-argus-eval-runs (reasoning|adversarial) with gate_decision in
+      # {pass, marginal, fail} and a structured `aggregate` of evidence /
+      # calibration / coherence / safety means. We pull the freshest row
+      # in the window and use its gate as a cross-cutting veto: a `fail`
+      # hard-quarantines, a `marginal` caps the actor at probationary.
+      #
+      # The eval is currently global (not per-actor) because reasoning
+      # drift almost always affects a cohort, not a single actor — but
+      # the search structure leaves room for a future per-actor filter.
+      - name: latest_reasoning_eval
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.reasoning_eval_index }}"
+          size: 1
+          sort:
+            - "@timestamp":
+                order: desc
+          query:
+            bool:
+              filter:
+                - terms:
+                    run_kind: ["reasoning", "adversarial"]
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # Compute tier + policy in liquid. The thresholds mirror the Phase 3
+      # design doc; changing them here requires updating that doc.
+      # Compute rollback_rate and fp_ratio from outcomes signal.
+      # Both default to 0 when there are no outcomes yet (cold start),
+      # so new actors aren't unfairly quarantined. They only degrade
+      # the tier once real-world signal exists.
+      - name: compute_outcome_rates
+        type: console
+        with:
+          message: >-
+            {%- assign total = steps.outcomes_total.output.hits.total.value | default: 0 -%}
+            {%- assign rb    = steps.outcomes_rollbacks.output.hits.total.value | default: 0 -%}
+            {%- assign fpc   = steps.outcomes_false_positives.output.hits.total.value | default: 0 -%}
+            rollback_rate={% if total > 0 %}{{ rb | divided_by: total }}{% else %}0{% endif %}
+            fp_ratio={% if total > 0 %}{{ fpc | divided_by: total }}{% else %}0{% endif %}
+
+      - name: compute_tier
+        type: console
+        with:
+          message: >-
+            {%- assign runs   = foreach.item.doc_count | default: 0 -%}
+            {%- assign pCount = steps.actor_eval_passes.output.hits.total.value | default: 0 -%}
+            {%- assign rCount = steps.actor_eval_metrics.output.aggregations.runs.value | default: 0 -%}
+            {%- assign prec = steps.actor_eval_metrics.output.aggregations.avg_precision.value | default: 0 -%}
+            {%- assign rec  = steps.actor_eval_metrics.output.aggregations.avg_recall.value    | default: 0 -%}
+            {%- assign f1   = steps.actor_eval_metrics.output.aggregations.avg_f1.value        | default: 0 -%}
+            {%- assign fp   = steps.actor_eval_metrics.output.aggregations.avg_fp.value        | default: 1 -%}
+            {%- assign cov  = steps.actor_eval_metrics.output.aggregations.avg_coverage.value  | default: 0 -%}
+            {%- assign rq   = steps.actor_trace_quality.output.aggregations.reasoning_quality.value | default: 0 -%}
+            {%- assign sim  = steps.actor_frontier_runs.output.aggregations.sim_runs.value     | default: 0 -%}
+            {%- assign total = steps.outcomes_total.output.hits.total.value | default: 0 -%}
+            {%- assign rb    = steps.outcomes_rollbacks.output.hits.total.value | default: 0 -%}
+            {%- assign fpc   = steps.outcomes_false_positives.output.hits.total.value | default: 0 -%}
+            {%- if total > 0 -%}
+              {%- assign rbRate = rb | divided_by: total -%}
+              {%- assign fpRate = fpc | divided_by: total -%}
+            {%- else -%}
+              {%- assign rbRate = 0 -%}
+              {%- assign fpRate = 0 -%}
+            {%- endif -%}
+            {%- comment -%}
+              G3: hard-quarantine on catastrophic outcome signal regardless
+              of eval scores. Operator-triggered rollback rate above 20%
+              or production FP rate above 20% means the actor is drifting
+              and must be isolated before the next eval cycle.
+            {%- endcomment -%}
+            {%- assign rGate = steps.latest_reasoning_eval.output.hits.hits[0]._source.gate_decision | default: 'pass' -%}
+            {%- if rGate == 'fail' -%}quarantined
+            {%- elsif rbRate > 0.2 or fpRate > 0.2 -%}quarantined
+            {%- elsif rGate == 'marginal' -%}
+              {%- if prec >= 0.7 and rec >= 0.5 and fp <= 0.1 and rbRate <= 0.2 -%}probationary
+              {%- else -%}quarantined
+              {%- endif -%}
+            {%- elsif prec >= 0.9 and rec >= 0.8 and fp <= 0.02 and cov >= 0.7 and rq >= 0.85 and sim >= 1 and rbRate <= 0.05 and fpRate <= 0.05 -%}frontier
+            {%- elsif prec >= 0.85 and rec >= 0.7 and fp <= 0.05 and rq >= 0.7 and rbRate <= 0.1 and fpRate <= 0.1 -%}trusted
+            {%- elsif prec >= 0.7 and rec >= 0.5 and fp <= 0.1 and rbRate <= 0.2 -%}probationary
+            {%- else -%}quarantined
+            {%- endif -%}
+
+      - name: upsert_tier_doc
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.tiers_index }}"
+          id: "{{ foreach.item.key }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            actor_id: "{{ foreach.item.key }}"
+            actor_kind: "agent"
+            tier: "{{ steps.compute_tier.output }}"
+            window_days: 7
+            metrics:
+              eval_runs: "{{ steps.actor_eval_metrics.output.aggregations.runs.value | default: 0 }}"
+              eval_pass_rate: "{%- assign _r = steps.actor_eval_metrics.output.aggregations.runs.value | default: 0 -%}{%- assign _p = steps.actor_eval_passes.output.hits.total.value | default: 0 -%}{% if _r > 0 %}{{ _p | divided_by: _r }}{% else %}0{% endif %}"
+              avg_precision: "{{ steps.actor_eval_metrics.output.aggregations.avg_precision.value | default: 0 }}"
+              avg_recall:    "{{ steps.actor_eval_metrics.output.aggregations.avg_recall.value    | default: 0 }}"
+              avg_f1:        "{{ steps.actor_eval_metrics.output.aggregations.avg_f1.value        | default: 0 }}"
+              avg_robustness: "{{ steps.actor_eval_metrics.output.aggregations.avg_coverage.value | default: 0 }}"
+              reasoning_quality: "{{ steps.actor_trace_quality.output.aggregations.reasoning_quality.value | default: 0 }}"
+              frontier_pass_rate: "{%- assign _r = steps.actor_eval_metrics.output.aggregations.runs.value | default: 0 -%}{%- assign _p = steps.actor_eval_passes.output.hits.total.value | default: 0 -%}{% if _r > 0 %}{{ _p | divided_by: _r }}{% else %}0{% endif %}"
+              simulation_runs: "{{ steps.actor_frontier_runs.output.aggregations.sim_runs.value | default: 0 }}"
+              rejections_by_humans: 0
+              rollbacks_triggered: "{{ steps.outcomes_rollbacks.output.hits.total.value | default: 0 }}"
+              outcomes_total: "{{ steps.outcomes_total.output.hits.total.value | default: 0 }}"
+              outcomes_false_positives: "{{ steps.outcomes_false_positives.output.hits.total.value | default: 0 }}"
+              rollback_rate: "{%- assign _t = steps.outcomes_total.output.hits.total.value | default: 0 -%}{%- assign _r = steps.outcomes_rollbacks.output.hits.total.value | default: 0 -%}{% if _t > 0 %}{{ _r | divided_by: _t }}{% else %}0{% endif %}"
+              fp_ratio: "{%- assign _t = steps.outcomes_total.output.hits.total.value | default: 0 -%}{%- assign _f = steps.outcomes_false_positives.output.hits.total.value | default: 0 -%}{% if _t > 0 %}{{ _f | divided_by: _t }}{% else %}0{% endif %}"
+              avg_rollback_mttr_ms: "{{ steps.outcomes_mttr.output.aggregations.avg_mttr.value | default: 0 }}"
+              p50_rollback_mttr_ms: "{{ steps.outcomes_mttr.output.aggregations.mttr_percentiles.values['50.0'] | default: 0 }}"
+              p95_rollback_mttr_ms: "{{ steps.outcomes_mttr.output.aggregations.mttr_percentiles.values['95.0'] | default: 0 }}"
+              reasoning_eval_gate: "{{ steps.latest_reasoning_eval.output.hits.hits[0]._source.gate_decision | default: 'unknown' }}"
+              reasoning_eval_mean_safety: "{{ steps.latest_reasoning_eval.output.hits.hits[0]._source.aggregate.mean.safety | default: 0 }}"
+              reasoning_eval_mean_evidence: "{{ steps.latest_reasoning_eval.output.hits.hits[0]._source.aggregate.mean.evidence | default: 0 }}"
+            policy:
+              auto_apply: "{% assign _t = steps.compute_tier.output %}{% if _t == 'frontier' or _t == 'trusted' %}true{% else %}false{% endif %}"
+              requires_human_approval: "{% assign _t = steps.compute_tier.output %}{% if _t == 'probationary' %}true{% else %}false{% endif %}"
+              allow_production_targets: "{% assign _t = steps.compute_tier.output %}{% if _t == 'frontier' or _t == 'trusted' %}true{% else %}false{% endif %}"
+              max_risk_score: "{% assign _t = steps.compute_tier.output %}{% if _t == 'frontier' %}100{% elsif _t == 'trusted' %}75{% elsif _t == 'probationary' %}50{% else %}0{% endif %}"
+              max_impact_radius: "{% assign _t = steps.compute_tier.output %}{% if _t == 'frontier' %}production{% elsif _t == 'trusted' %}production{% elsif _t == 'probationary' %}canary{% else %}none{% endif %}"
+            rationale: "tier={{ steps.compute_tier.output }} based on 7d eval metrics for actor {{ foreach.item.key }}"
+            justification_trace_id: "argus-trust-tier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+
+  # ── Heartbeat ───────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_trust_tier_assessor_tick
+        source: "soc_argus_trust_tier_assessor"
+        tick_id: "argus-trust-tier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        actors_processed: "{{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS trust-tier assessor complete — actors={{ steps.discover_actors.output.aggregations.actors.buckets | size | default: 0 }} tick=argus-trust-tier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

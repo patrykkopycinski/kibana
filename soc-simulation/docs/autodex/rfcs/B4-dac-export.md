@@ -12,7 +12,7 @@ Vision-doc §1.6.1 calls for a git-backed deployment path so detection
 rules become committable, reviewable, round-trippable artifacts —
 not just live state mutated in place via the Kibana detection-engine
 API. Today every mutation goes through
-`soc-recommendation-applier.yaml` / `soc-autonomous-applier.yaml`,
+`soc_recommendation_applier.yaml` / `soc_autonomous_applier.yaml`,
 both of which call the Kibana API directly — there's no git
 serialisation step, no PR review surface, and no way to reproduce
 "what's in production" from a checked-out repo.
@@ -83,7 +83,7 @@ mutation never produces two queue rows).
 
 ### 2.3 Producer workflow
 
-[`soc-argus-dac-export.yaml`](../../../workflows/soc-argus-dac-export.yaml).
+[`soc_argus_dac_export.yaml`](../../../workflows/soc_argus_dac_export.yaml).
 Every 1h + manual. Queries `.soc-mutation-intents` for
 `status: applied`, `kind: rule_create`, `argus.origin:
 synthesis_driver`, `@timestamp >= now-24h`, and not already exported

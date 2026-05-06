@@ -21,10 +21,10 @@ describe('ARGUS_TRACE_ATTR', () => {
 
   it('accepts a minimal ArgusSpanAttributes bag with only the required keys', () => {
     const minimal: ArgusSpanAttributes = {
-      [ARGUS_TRACE_ATTR.agentId]: 'soc-deteng-agent',
+      [ARGUS_TRACE_ATTR.agentId]: 'soc_deteng-agent',
       [ARGUS_TRACE_ATTR.decisionKind]: 'rule_create',
     };
-    expect(minimal[ARGUS_TRACE_ATTR.agentId]).toBe('soc-deteng-agent');
+    expect(minimal[ARGUS_TRACE_ATTR.agentId]).toBe('soc_deteng-agent');
     expect(minimal[ARGUS_TRACE_ATTR.decisionKind]).toBe('rule_create');
   });
 

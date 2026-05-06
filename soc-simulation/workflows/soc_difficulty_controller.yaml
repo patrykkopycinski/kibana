@@ -1,0 +1,199 @@
+version: '1'
+name: SOC Difficulty Controller
+description: >
+  Performance-gated difficulty escalation for Caldera adversary emulation.
+  Runs every 15 minutes (down from 30m so the system adapts faster).
+
+  Deterministic decision (no LLM -- previous LLM impl returned null 100%
+  of the time because the prompt needed fields that aren't in .soc-outcomes).
+
+  v3 (2026-04-17): strong-signal bypass + structured decision_reason.
+    The v2 gate required trust_avg>=1 agent alongside perf thresholds, which
+    made the controller wedge at Level 1 when the (now-deprecated) legacy
+    scorer emitted malformed docs (trusted_agent_count stuck at 0). v3 adds
+    a second escalation rule that bypasses the trust gate when detection
+    performance is *overwhelming* (det>=90% AND fp<=10%) -- at that point the
+    system is clearly ready for harder adversaries regardless of whether
+    trust telemetry is flowing. Every decision also emits a structured
+    `decision_reason` enum so ARGUS can surface *why* the controller chose
+    the level it did without parsing free-form `reasoning` text.
+
+    As of 2026-04: `soc-trust-scorer` is disabled in favour of the ARGUS
+    Phase 3 trust trio (tier-assessor, reasoning-watchdog, trust-gate).
+    The strong-signal bypass means this controller continues to work even
+    with no `.soc-trust-scores` docs present.
+
+  Signals (last 24h):
+    * detection_rate    = (case_created + responded + true_positive) / total
+    * fp_rate           = (false_positive + dismissed) / total
+    * avg_triage_conf   = mean of triage_classification.confidence (%)
+    * trust_avg         = mean trust_score across trusted+probationary agents
+
+  Disposition mapping (reality of the current pipeline):
+    * case_created / responded / true_positive  -> TP-equivalent (positive)
+    * false_positive / dismissed                -> FP-equivalent (negative)
+    * triaged / other                           -> in-flight, not counted
+
+  Rules (applied in order, first match wins):
+    * detection_rate >= 0.90 AND fp_rate <= 0.10
+        -> INCREASE level (cap 5)           [reason: strong_signal_bypass or normal_escalation]
+    * detection_rate >= 0.80 AND fp_rate <= 0.30 AND trusted_agent_count >= 1
+        -> INCREASE level (cap 5)           [reason: normal_escalation]
+    * detection_rate >= 0.80 AND fp_rate <= 0.30 AND trusted_agent_count < 1
+        -> MAINTAIN                         [reason: trust_stale]
+    * detection_rate <  0.50 OR fp_rate > 0.60
+        -> DECREASE level (floor 1)         [reason: performance_degraded / at_min_level]
+    * otherwise
+        -> MAINTAIN                         [reason: held_stable]
+
+  Output:
+    1. Fresh doc in .soc-difficulty-state with level + metrics + decision + decision_reason
+    2. One attack_command in .soc-attack-commands with difficulty=level so
+       the Caldera dispatcher picks up a harder/easier operation next tick
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+  - type: manual
+
+consts:
+  lookback: "now-7d"
+  min_outcomes_required: 10
+  # Normal escalation: moderate perf AND trust signal present.
+  increase_detect_threshold: 0.80
+  increase_fp_threshold: 0.30
+  increase_trust_threshold: 0.70
+  # Strong-signal bypass: overwhelming perf, trust not required.
+  # If the system is detecting at 90%+ with <=10% FP, escalating is safe
+  # even when upstream trust telemetry is missing or broken.
+  strong_detect_threshold: 0.90
+  strong_fp_threshold: 0.10
+  decrease_detect_threshold: 0.50
+  decrease_fp_threshold: 0.60
+  min_level: 1
+  max_level: 5
+
+steps:
+  # ── Current level (default to 2 = "realistic" if state missing) ─────
+  # NOTE: workflow engine strips the body: wrapper on elasticsearch.search
+  # steps. All query params MUST live directly under `with:`. To get the
+  # "latest" state, we use a `top_hits` aggregation with a nested sort
+  # (sort inside aggregations is passed through verbatim to ES).
+  - name: current_state
+    type: elasticsearch.search
+    with:
+      index: ".soc-difficulty-state"
+      size: 0
+      query:
+        bool:
+          filter:
+            - exists: { field: "level" }
+      aggregations:
+        latest:
+          top_hits:
+            size: 1
+            sort:
+              - "@timestamp":
+                  order: desc
+
+  # ── Outcome aggregations ─────────────────────────────────────────────
+  - name: outcome_stats
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.lookback }}"
+      aggregations:
+        by_disposition:
+          terms:
+            field: "disposition"
+            size: 20
+        total:
+          value_count:
+            field: "disposition"
+
+  - name: triage_stats
+    type: elasticsearch.search
+    with:
+      index: ".soc-triage-results"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.lookback }}"
+      aggregations:
+        avg_conf:
+          avg:
+            field: "triage_classification.confidence"
+
+  - name: trust_snapshot
+    type: elasticsearch.search
+    with:
+      index: ".soc-trust-scores"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term: { scope: "per_agent" }
+            - range:
+                "@timestamp":
+                  gte: "now-48h"
+            - terms:
+                trust_tier: ["trusted", "probationary"]
+
+  # ── Write state row with computed metrics + level decision ──────────
+  - name: write_difficulty_state
+    type: elasticsearch.index
+    with:
+      index: .soc-difficulty-state
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc_difficulty_controller"
+        current_level: "{{ steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 }}"
+        level: "{% assign _cur = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total < consts.min_outcomes_required %}{{ _cur }}{% else %}{% assign _det_num = _tp | times: 1000 %}{% assign _det = _det_num | divided_by: _total %}{% assign _fp_num = _fp | times: 1000 %}{% assign _fpr = _fp_num | divided_by: _total %}{% assign _tc = steps.trust_snapshot.output.hits.hits | size | default: 0 %}{% if _det >= 900 and _fpr <= 100 %}{% if _cur < consts.max_level %}{{ _cur | plus: 1 }}{% else %}{{ _cur }}{% endif %}{% elsif _det >= 800 and _fpr <= 300 and _tc >= 1 %}{% if _cur < consts.max_level %}{{ _cur | plus: 1 }}{% else %}{{ _cur }}{% endif %}{% elsif _det < 500 or _fpr > 600 %}{% if _cur > consts.min_level %}{{ _cur | minus: 1 }}{% else %}{{ _cur }}{% endif %}{% else %}{{ _cur }}{% endif %}{% endif %}"
+        detection_rate_pct: "{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total == 0 %}0{% else %}{% assign _x = _tp | times: 100 %}{{ _x | divided_by: _total }}{% endif %}"
+        fp_rate_pct: "{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total == 0 %}0{% else %}{% assign _x = _fp | times: 100 %}{{ _x | divided_by: _total }}{% endif %}"
+        total_outcomes: "{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{{ _tp | plus: _fp | plus: _other }}"
+        tp_count: "{% assign _tp = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% endif %}{% endfor %}{{ _tp }}"
+        fp_count: "{% assign _fp = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% endif %}{% endfor %}{{ _fp }}"
+        avg_triage_confidence: "{{ steps.triage_stats.output.aggregations.avg_conf.value | default: 0 }}"
+        trusted_agent_count: "{{ steps.trust_snapshot.output.hits.hits | size | default: 0 }}"
+        decision: "{% assign _cur = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total < consts.min_outcomes_required %}maintain_insufficient_data{% else %}{% assign _det_num = _tp | times: 1000 %}{% assign _det = _det_num | divided_by: _total %}{% assign _fp_num = _fp | times: 1000 %}{% assign _fpr = _fp_num | divided_by: _total %}{% assign _tc = steps.trust_snapshot.output.hits.hits | size | default: 0 %}{% if _det >= 900 and _fpr <= 100 %}{% if _cur < consts.max_level %}increase{% else %}maintain{% endif %}{% elsif _det >= 800 and _fpr <= 300 and _tc >= 1 %}{% if _cur < consts.max_level %}increase{% else %}maintain{% endif %}{% elsif _det < 500 or _fpr > 600 %}{% if _cur > consts.min_level %}decrease{% else %}maintain{% endif %}{% else %}maintain{% endif %}{% endif %}"
+        decision_reason: "{% assign _cur = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total < consts.min_outcomes_required %}insufficient_data{% else %}{% assign _det_num = _tp | times: 1000 %}{% assign _det = _det_num | divided_by: _total %}{% assign _fp_num = _fp | times: 1000 %}{% assign _fpr = _fp_num | divided_by: _total %}{% assign _tc = steps.trust_snapshot.output.hits.hits | size | default: 0 %}{% if _det >= 900 and _fpr <= 100 %}{% if _cur >= consts.max_level %}at_max_level{% elsif _tc >= 1 %}normal_escalation{% else %}strong_signal_bypass{% endif %}{% elsif _det >= 800 and _fpr <= 300 and _tc >= 1 %}{% if _cur >= consts.max_level %}at_max_level{% else %}normal_escalation{% endif %}{% elsif _det >= 800 and _fpr <= 300 %}trust_stale{% elsif _det < 500 or _fpr > 600 %}{% if _cur <= consts.min_level %}at_min_level{% else %}performance_degraded{% endif %}{% else %}held_stable{% endif %}{% endif %}"
+        reasoning: "{% assign _cur = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}detection/FP/trust-based escalation with strong-signal bypass, current level={{ _cur }}"
+
+  # ── Launch a difficulty-tagged attack command so Caldera operates at
+  #    the CURRENT level. The Caldera dispatcher polls this index.
+  - name: launch_attack
+    type: elasticsearch.index
+    with:
+      index: .soc-attack-commands
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        status: "pending"
+        source: "soc_difficulty_controller"
+        difficulty: "{% assign _cur = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}{% assign _tp = 0 %}{% assign _fp = 0 %}{% assign _other = 0 %}{% for b in steps.outcome_stats.output.aggregations.by_disposition.buckets %}{% if b.key == 'true_positive' or b.key == 'case_created' or b.key == 'responded' %}{% assign _tp = _tp | plus: b.doc_count %}{% elsif b.key == 'false_positive' or b.key == 'dismissed' %}{% assign _fp = _fp | plus: b.doc_count %}{% else %}{% assign _other = _other | plus: b.doc_count %}{% endif %}{% endfor %}{% assign _total = _tp | plus: _fp | plus: _other %}{% if _total < consts.min_outcomes_required %}{{ _cur }}{% else %}{% assign _det_num = _tp | times: 1000 %}{% assign _det = _det_num | divided_by: _total %}{% assign _fp_num = _fp | times: 1000 %}{% assign _fpr = _fp_num | divided_by: _total %}{% assign _tc = steps.trust_snapshot.output.hits.hits | size | default: 0 %}{% if _det >= 900 and _fpr <= 100 %}{% if _cur < consts.max_level %}{{ _cur | plus: 1 }}{% else %}{{ _cur }}{% endif %}{% elsif _det >= 800 and _fpr <= 300 and _tc >= 1 %}{% if _cur < consts.max_level %}{{ _cur | plus: 1 }}{% else %}{{ _cur }}{% endif %}{% elsif _det < 500 or _fpr > 600 %}{% if _cur > consts.min_level %}{{ _cur | minus: 1 }}{% else %}{{ _cur }}{% endif %}{% else %}{{ _cur }}{% endif %}{% endif %}"
+        operation_profile: "{% assign _raw = steps.current_state.output.aggregations.latest.hits.hits.0._source.level | default: 2 %}{% assign _cur = _raw | plus: 0 %}{% if _cur <= 1 %}basic_recon{% elsif _cur == 2 %}commodity_malware{% elsif _cur == 3 %}living_off_the_land{% elsif _cur == 4 %}targeted_apt{% else %}nation_state_simulation{% endif %}"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: difficulty_controller_heartbeat
+        source: "soc_difficulty_controller"
+        version: "v3-strong-signal-bypass"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Difficulty Controller v3 tick complete (strong-signal bypass + decision_reason)"

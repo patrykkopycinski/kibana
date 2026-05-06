@@ -156,7 +156,7 @@ TARGETS=(
   "ARGUS Demo 2 Runner — Polymorphic Variant Swarm"
 )
 # NOTE: SOC Triage is deliberately NOT in this list. It depends on a live
-# Inference connector and is driven by the soc-alert-sweeper pipeline on
+# Inference connector and is driven by the soc_alert_sweeper pipeline on
 # real alert input; triggering it empty from the ARGUS demo driver hangs
 # the AI agent step and is not representative of demo flow.
 

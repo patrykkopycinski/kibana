@@ -22,6 +22,7 @@ export {
   DEFAULT_HOURS_SAVED_CONSTANTS,
   type ActorTrustTiersAggsInput,
   type BuildGovernancePulseArgs,
+  type CoverageSnapshotsAggsInput,
   type GovernancePulseAggsInput,
   type MutationIntentsAggsInput,
 } from './src/builders/governance_pulse_builder';

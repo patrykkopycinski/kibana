@@ -21,7 +21,7 @@ import { DEFAULT_CISA_KEV_URL } from '../fetch_feed';
  *     (reads ES_URL / ES_USER / ES_PASS from the shell; defaults to
  *      localhost:9200 with elastic/changeme)
  *
- * The `soc-kev-ingest.yaml` workflow shells out to this CLI on a cron —
+ * The `soc_kev_ingest.yaml` workflow shells out to this CLI on a cron —
  * keeping the HTTPS fetch outside the workflow engine avoids adding a new
  * HTTP egress point to the orchestrator. The workflow then scans for the
  * freshly-indexed advisories and emits a metrics doc.

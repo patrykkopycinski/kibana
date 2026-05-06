@@ -66,7 +66,7 @@
     }
   },
   "_meta": {
-    "description": "ARGUS Phase-3 — per-actor trust tier records. Driven by soc-argus-trust-tier-assessor.yaml; consumed by soc-argus-trust-gate.yaml and soc-autonomous-applier.yaml to decide whether recommendations may auto-apply. Tiers: frontier > trusted > probationary > quarantined. schema_version=2 adds outcome-driven signals (rollback_rate, fp_ratio) from .soc-outcomes (ARGUS G3).",
+    "description": "ARGUS Phase-3 — per-actor trust tier records. Driven by soc_argus_trust_tier_assessor.yaml; consumed by soc_argus_trust_gate.yaml and soc_autonomous_applier.yaml to decide whether recommendations may auto-apply. Tiers: frontier > trusted > probationary > quarantined. schema_version=2 adds outcome-driven signals (rollback_rate, fp_ratio) from .soc-outcomes (ARGUS G3).",
     "owner": "argus-governance",
     "schema_version": 2
   }

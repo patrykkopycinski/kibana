@@ -46,7 +46,7 @@ during the F-015 boot.
 
 | Event type | Producer | Where |
 | --- | --- | --- |
-| `synthesis.tick` | `soc-argus-synthesis-driver.yaml` (tick summary step) | One row per workflow tick. |
+| `synthesis.tick` | `soc_argus_synthesis_driver.yaml` (tick summary step) | One row per workflow tick. |
 | `synthesis.advisory` | `security.argusSynthesizeAdvisory` step | One row per advisory processed. |
 | `synthesis.chat_skill` | `argus.synthesize_rule_candidate` chat tool | One row per chat-skill invocation. |
 | `kill_switch.toggle` | `argus.toggle_kill_switch` chat tool | One row per kill-switch toggle (this producer is documented elsewhere; the contract still applies). |

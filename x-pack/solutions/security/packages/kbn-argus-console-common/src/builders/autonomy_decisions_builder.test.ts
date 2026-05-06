@@ -137,7 +137,7 @@ describe('buildAutonomyDecisions', () => {
     expect(result.truncated).toBe(true);
   });
 
-  it('maps the producer-level statuses emitted by soc-autonomous-applier onto UI buckets', () => {
+  it('maps the producer-level statuses emitted by soc_autonomous_applier onto UI buckets', () => {
     const now = '2026-04-19T22:00:00.000Z';
     const make = (
       rawStatus: string,

@@ -16,7 +16,7 @@ Given a CVE advisory or threat intelligence report, can the system autonomously 
 
 | Criterion | Points | Measurement |
 |-----------|--------|-------------|
-| Rule parses without errors | 5 | `soc-deteng-agent` output validates against Kibana rule schema |
+| Rule parses without errors | 5 | `soc_deteng-agent` output validates against Kibana rule schema |
 | Rule targets correct data stream | 5 | Rule index pattern matches the threat's telemetry source |
 | MITRE ATT&CK alignment | 5 | Rule tagged with correct tactic + technique |
 | FP projection < 50 alerts/hour | 10 | Shadow executor `gate_decision = pass` |
@@ -52,7 +52,7 @@ Does the system proactively identify and close detection gaps?
 | Criterion | Points | Measurement |
 |-----------|--------|-------------|
 | Gap detection | 5 | `.soc-coverage-gaps` populated for unprotected MITRE techniques |
-| Auto-authored rules | 5 | New rules created for gap techniques by `soc-deteng-agent` |
+| Auto-authored rules | 5 | New rules created for gap techniques by `soc_deteng-agent` |
 | Prebuilt rule enablement | 5 | Coverage initializer identifies and enables relevant prebuilt rules |
 
 ### D5: Observability & Auditability (10 points)

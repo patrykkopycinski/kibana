@@ -3,7 +3,7 @@
   "name": "mythos-class-frontier-profile",
   "adversary_id": "soc-sim-mythos-class",
   "group": "all-endpoints",
-  "description": "Frontier-capability adversary simulation (ARGUS M2.4). Extends level-5 adversarial with long-dwell supply-chain entry, fileless living-off-the-land chains, behaviour-level polymorphism across 20+ variants per primitive, and agentic payloads — including adversarial prompt injection against triage/planner skills and credential-flow targeting of integration tokens. Caldera-executable techniques cover the static portion; the agentic portion is driven by soc-argus-frontier-simulator (Phase 2).",
+  "description": "Frontier-capability adversary simulation (ARGUS M2.4). Extends level-5 adversarial with long-dwell supply-chain entry, fileless living-off-the-land chains, behaviour-level polymorphism across 20+ variants per primitive, and agentic payloads — including adversarial prompt injection against triage/planner skills and credential-flow targeting of integration tokens. Caldera-executable techniques cover the static portion; the agentic portion is driven by soc_argus_frontier_simulator (Phase 2).",
   "techniques": [
     "T1195.002",
     "T1059.001",

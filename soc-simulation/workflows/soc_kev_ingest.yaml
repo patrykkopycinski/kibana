@@ -1,0 +1,149 @@
+version: '1'
+name: ARGUS KEV Ingest
+description: >
+  ARGUS R14 — CISA Known Exploited Vulnerabilities (KEV) live-feed ingest.
+
+  The actual HTTPS fetch of the CISA catalog happens out-of-band, in the
+  `@kbn/argus-kev-ingest` CLI (run by an Elastic Agent cron or a Kibana
+  Task Manager task). That CLI bulk-indexes normalised documents into
+  `.soc-cve-advisories` with `source: "cisa_kev"`, keyed `advisory_id =
+  kev-<cve>` so reruns are idempotent.
+
+  THIS workflow is the in-cluster orchestration layer. Every 30 minutes it:
+
+    1. Counts KEV advisories ingested in the last 24 h and records a
+       metrics doc in `.soc-metrics` so the demo dashboard can surface
+       "KEV freshness" without querying CISA directly.
+
+    2. Finds KEV advisories still in `status: "ingested"` (i.e. the
+       Exploit-to-Detection reconciler hasn't picked them up yet) and
+       logs them to `.soc-audit-trail` so operators can see a live
+       "CISA → ARGUS" funnel.
+
+    3. Surfaces KEV advisories whose `kev.due_date` is within 72 h but
+       still have no draft rule (`recommendation_id` missing). These are
+       fed to the reconciler on its next tick, guaranteeing regulatory
+       deadlines drive ARGUS priorities.
+
+  The reconciler (`soc_argus_exploit_to_detection`) consumes these
+  advisories exactly like human-authored ones — R14 deliberately keeps
+  KEV entries inside the existing advisory lane to avoid adding a new
+  governance path.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  advisories_index: ".soc-cve-advisories"
+  metrics_index:    ".soc-metrics"
+  audit_index:      ".soc-audit-trail"
+  window_recent:    "now-24h"
+  window_due_soon:  "now+72h"
+
+steps:
+  # ── 1. Freshness metric ─────────────────────────────────────────────
+  - name: count_recent_kev
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - term:   { source: "cisa_kev" }
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.window_recent }}"
+      aggregations:
+        by_severity:
+          terms:
+            field: "severity"
+            size: 10
+        by_ransomware:
+          terms:
+            field: "kev.known_ransomware_use"
+            size: 2
+
+  - name: write_freshness_metric
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.metrics_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "argus.kev_ingest"
+        metric: "kev_catalog_freshness"
+        source: "cisa_kev"
+        window: "{{ consts.window_recent }}"
+        ingested_24h: "{{ steps.count_recent_kev.output.hits.total.value | default: 0 }}"
+        by_severity_buckets: "{{ steps.count_recent_kev.output.aggregations.by_severity.buckets | size | default: 0 }}"
+        known_ransomware_buckets: "{{ steps.count_recent_kev.output.aggregations.by_ransomware.buckets | size | default: 0 }}"
+
+  # ── 2. Funnel: KEV still in `ingested` (reconciler hasn't run yet) ──
+  - name: find_unprocessed_kev
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term: { source: "cisa_kev" }
+            - term: { status: "ingested" }
+      sort:
+        - "@timestamp":
+            order: desc
+
+  - name: emit_unprocessed_audit
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "argus.kev_ingest"
+        event: "kev_funnel_snapshot"
+        unprocessed_count: "{{ steps.find_unprocessed_kev.output.hits.total.value | default: 0 }}"
+        sample_cves: >-
+          {%- assign cves = '' -%}
+          {%- for hit in steps.find_unprocessed_kev.output.hits.hits limit: 10 -%}
+            {%- assign cves = cves | append: hit._source.cve_id | append: ',' -%}
+          {%- endfor -%}
+          {{ cves | remove_last: ',' }}
+
+  # ── 3. Due-soon escalation: KEV whose CISA due_date < now+72h ───────
+  - name: find_due_soon_kev
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term: { source: "cisa_kev" }
+            - range:
+                "kev.due_date":
+                  lte: "{{ consts.window_due_soon }}"
+            - bool:
+                must_not:
+                  - exists: { field: "recommendation_id" }
+
+  - name: emit_due_soon_audit
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "argus.kev_ingest"
+        event: "kev_due_soon_without_rule"
+        due_soon_count: "{{ steps.find_due_soon_kev.output.hits.total.value | default: 0 }}"
+        window_due_soon: "{{ consts.window_due_soon }}"
+        sample_cves: >-
+          {%- assign cves = '' -%}
+          {%- for hit in steps.find_due_soon_kev.output.hits.hits limit: 10 -%}
+            {%- assign cves = cves | append: hit._source.cve_id | append: ',' -%}
+          {%- endfor -%}
+          {{ cves | remove_last: ',' }}

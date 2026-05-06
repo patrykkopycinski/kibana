@@ -3,18 +3,18 @@
   "description": "Authored manifest of canonical ARGUS workflow metadata. setup.sh reads this file and upserts one document per workflow into .soc-workflow-registry. Every canonical workflow file (soc-*.yaml) under this directory MUST have exactly one entry here; setup.sh fails closed otherwise. model_tier documents the intended Opus/Sonnet/Haiku tier for cost optimization; the physical connector id in YAML stays 'opus' and operators choose the model by swapping the underlying Kibana connector config.",
   "workflows": [
     {
-      "workflow_id": "soc-alert-sweeper",
+      "workflow_id": "soc_alert_sweeper",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
         "elastic_cases"
       ],
-      "summary": "Sweeps open detection-engine alerts; runs unified in-pipeline triage, tiered response, and soc-argus-case-lifecycle for investigation tiers.",
+      "summary": "Sweeps open detection-engine alerts; runs unified in-pipeline triage, tiered response, and soc_argus_case_lifecycle for investigation tiers.",
       "model_tier": "analyst",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-arch-reviewer",
+      "workflow_id": "soc_arch_reviewer",
       "automation_level": "semi_auto",
       "connectors": [
         "artifact_registry",
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "workflow_id": "soc-autonomous-applier",
+      "workflow_id": "soc_autonomous_applier",
       "automation_level": "fully_auto",
       "connectors": [
         "artifact_registry",
@@ -41,7 +41,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-caldera-dispatcher",
+      "workflow_id": "soc_caldera_dispatcher",
       "automation_level": "fully_auto",
       "connectors": [
         "caldera",
@@ -52,7 +52,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-caldera-poller",
+      "workflow_id": "soc_caldera_poller",
       "automation_level": "fully_auto",
       "connectors": [
         "caldera",
@@ -63,7 +63,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-deteng",
+      "workflow_id": "soc_deteng",
       "automation_level": "semi_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "workflow_id": "soc-detection-corpus-sync",
+      "workflow_id": "soc_detection_corpus_sync",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules"
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "workflow_id": "soc-difficulty-controller",
+      "workflow_id": "soc_difficulty_controller",
       "automation_level": "fully_auto",
       "connectors": [
         "caldera",
@@ -101,7 +101,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-gap-analyzer",
+      "workflow_id": "soc_gap_analyzer",
       "automation_level": "semi_auto",
       "connectors": [
         "artifact_registry",
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "workflow_id": "soc-meta",
+      "workflow_id": "soc_meta",
       "automation_level": "fully_auto",
       "connectors": [
         "artifact_registry",
@@ -127,7 +127,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-proactive-hunter",
+      "workflow_id": "soc_proactive_hunter",
       "automation_level": "semi_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -142,7 +142,7 @@
       ]
     },
     {
-      "workflow_id": "soc-recommendation-applier",
+      "workflow_id": "soc_recommendation_applier",
       "automation_level": "human_in_the_loop",
       "connectors": [
         "elastic_detection_rules",
@@ -154,7 +154,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-recovery",
+      "workflow_id": "soc_recovery",
       "automation_level": "fully_auto",
       "connectors": [
         "artifact_registry",
@@ -166,7 +166,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-registry-retro-tag",
+      "workflow_id": "soc_registry_retro_tag",
       "automation_level": "fully_auto",
       "connectors": [
         "artifact_registry"
@@ -176,7 +176,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-regression-gate",
+      "workflow_id": "soc_regression_gate",
       "automation_level": "fully_auto",
       "connectors": [
         "regression_gate",
@@ -188,7 +188,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-regression-harvester",
+      "workflow_id": "soc_regression_harvester",
       "automation_level": "fully_auto",
       "connectors": [
         "regression_gate",
@@ -199,7 +199,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-response",
+      "workflow_id": "soc_response",
       "automation_level": "semi_auto",
       "connectors": [
         "elastic_defend",
@@ -211,7 +211,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-shift-handover",
+      "workflow_id": "soc_shift_handover",
       "automation_level": "fully_auto",
       "connectors": [
         "evolution_log",
@@ -219,12 +219,12 @@
         "audit_trail",
         "forensic_summary"
       ],
-      "summary": "Every 8h, composes an operator-facing narrative summary of autonomous SOC activity and writes it to .soc-shift-handover.",
+      "summary": "Every 8h, composes an operator-facing narrative summary of autonomous SOC activity and writes it to .soc_shift_handover.",
       "model_tier": "bulk",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-skill-metrics-roller",
+      "workflow_id": "soc_skill_metrics_roller",
       "automation_level": "fully_auto",
       "connectors": [
         "evolution_log",
@@ -235,7 +235,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-skill-self-adjust",
+      "workflow_id": "soc_skill_self_adjust",
       "automation_level": "fully_auto",
       "connectors": [
         "skill_metrics",
@@ -249,7 +249,7 @@
       ]
     },
     {
-      "workflow_id": "soc-incident-reverse-intel",
+      "workflow_id": "soc_incident_reverse_intel",
       "automation_level": "fully_auto",
       "connectors": [
         "forensic_summary",
@@ -264,7 +264,7 @@
       ]
     },
     {
-      "workflow_id": "soc-forensic-summarizer",
+      "workflow_id": "soc_forensic_summarizer",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_cases",
@@ -276,7 +276,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-watchdog",
+      "workflow_id": "soc_watchdog",
       "automation_level": "fully_auto",
       "connectors": [
         "kill_switch",
@@ -288,7 +288,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-detection-eval",
+      "workflow_id": "soc_detection_eval",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -296,24 +296,24 @@
         "audit_trail",
         "kibana_security_solution"
       ],
-      "summary": "ARGUS M2.1 — Detection Eval Vertical. Poller that reads the latest rows from .soc-argus-eval-runs (populated by the @kbn/evals-suite-argus-detection Playwright suite) and feeds pass/fail + variant-coverage metrics into soc-regression-gate and the ARGUS Detection Eval Scorecard panel.",
+      "summary": "ARGUS M2.1 — Detection Eval Vertical. Poller that reads the latest rows from .soc-argus-eval-runs (populated by the @kbn/evals-suite-argus-detection Playwright suite) and feeds pass/fail + variant-coverage metrics into soc_regression_gate and the ARGUS Detection Eval Scorecard panel.",
       "model_tier": "none",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-reasoning-eval",
+      "workflow_id": "soc_argus_reasoning_eval",
       "automation_level": "fully_auto",
       "connectors": [
         "audit_trail",
         "reasoning_eval_runs",
         "reasoning_trace"
       ],
-      "summary": "ARGUS R11 — Reasoning Eval Reconciler. Polls .soc-reasoning-eval-runs (written by @kbn/evals-suite-argus-reasoning), emits a fast-path quarantine hint on gate_decision=fail, writes a decision.kind=reasoning_eval governance span into .soc-reasoning-trace, and marks rows reconciled. Trust-tier transitions stay with soc-argus-trust-tier-assessor.",
+      "summary": "ARGUS R11 — Reasoning Eval Reconciler. Polls .soc-reasoning-eval-runs (written by @kbn/evals-suite-argus-reasoning), emits a fast-path quarantine hint on gate_decision=fail, writes a decision.kind=reasoning_eval governance span into .soc-reasoning-trace, and marks rows reconciled. Trust-tier transitions stay with soc_argus_trust_tier_assessor.",
       "model_tier": "none",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-frontier-simulator",
+      "workflow_id": "soc_argus_frontier_simulator",
       "automation_level": "human_in_the_loop",
       "connectors": [
         "caldera",
@@ -328,7 +328,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-arm-mythos-preset",
+      "workflow_id": "soc_argus_arm_mythos_preset",
       "automation_level": "human_in_the_loop",
       "connectors": [
         "artifact_registry",
@@ -343,7 +343,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-exploit-to-detection",
+      "workflow_id": "soc_argus_exploit_to_detection",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -358,7 +358,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-synthesis-driver",
+      "workflow_id": "soc_argus_synthesis_driver",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -375,7 +375,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-trust-tier-assessor",
+      "workflow_id": "soc_argus_trust_tier_assessor",
       "automation_level": "fully_auto",
       "connectors": [
         "trust_scores",
@@ -388,7 +388,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-trust-gate",
+      "workflow_id": "soc_argus_trust_gate",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -400,19 +400,116 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-shadow-executor",
+      "workflow_id": "soc_argus_crown_jewel_gate",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "recommendations",
+        "crown_jewels",
+        "audit_trail",
+        "autonomy_decisions",
+        "reasoning_trace"
+      ],
+      "summary": "AutoDEX B5 — Non-invasive crown-jewel asset gate (12th gate, vision-doc 6.3). For every auto_apply_ready mutation_intent without a `crown_gate_decision`, calls the registered `security.argusEvaluateCrownJewelImpact` step (loads `.soc-crown-jewels`, Zod-validates, runs the deterministic helper). Demotes to pending_review with rejection_reason=crown_jewel_gate when any matched asset is gold/platinum/crown, or silver with gate_active=true. Idempotent via the `crown_gate_decision` field.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_rollback_exerciser",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "recommendations",
+        "kill_switch",
+        "audit_trail",
+        "autonomy_decisions",
+        "reasoning_trace"
+      ],
+      "summary": "AutoDEX D2.5 — Benchmark rollback exerciser. Runs every 24h + manual; gated on `.soc-kill-switch[scope=benchmark_mode].enabled`. Picks the most-recently-applied ARGUS-owned rec, posts a rollback_mutation_intent, stamps the parent rec with `status: rolled_back`. Quiet-cluster fallback emits a synthetic rolled_back row so D2.5 can verify the wire format end-to-end. Disarmed by default; never fires in production unless an operator writes the arming doc.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance",
+        "argus:benchmark"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_skill_policy_applier",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "skill_recommendations",
+        "skill_policy",
+        "audit_trail",
+        "autonomy_decisions",
+        "reasoning_trace"
+      ],
+      "summary": "AutoDEX B9 — Self-adjusting-skills CONSUMER. Every 30m reads `.soc-skill-recommendations` rows with verdict in {demote, reprompt} where applied!=true, upserts `.soc-skill-policy/{skill_id}` (enabled:false for demote / prompt_revision_required:true for reprompt), stamps the source rec as applied (dedup key), writes one autonomy-decisions row per applied verdict + reasoning trace. Closes the producer-consumer loop opened by `soc_skill_self_adjust`. RFC: rfcs/B9-skill-self-adjust.md.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_hitl_sla_watchdog",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "recommendations",
+        "audit_trail",
+        "autonomy_decisions"
+      ],
+      "summary": "ARGUS governance gap (Severity-1) — HITL pending_review SLA watchdog. Every 30m scans `.soc-recommendations` for `status: pending_review` rows in three age bands (24h ping, 72h escalation, 168h SLA-expired). Stamps `sla_pinged_at` / `sla_escalated_at` / `sla_expired_at` (idempotent dedup keys), writes one `.soc-autonomy-decisions` row per band breach with `gate: hitl_sla`. Never changes status; lifecycle manager owns closure at 7d.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_trust_tier_stabilizer",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "trust_scores",
+        "audit_trail",
+        "autonomy_decisions"
+      ],
+      "summary": "ARGUS governance gap (Severity-3) — trust-tier hysteresis. Runs every 1h after the assessor; appends one row per actor per tick to `.soc-actor-tier-history`, computes the worst tier across the last `window_size` (default 3) evaluations, and BLOCKS upgrades that haven't been sustained for that many consecutive ticks. Downgrades pass through immediately (a degrading actor must isolate fast). Audit rows in `.soc-autonomy-decisions` with `gate: tier_hysteresis`.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_cost_ledger_roller",
+      "automation_level": "fully_auto",
+      "connectors": [
+        "evolution_log",
+        "autonomy_decisions",
+        "audit_trail"
+      ],
+      "summary": "AutoDEX governance gap (Severity-3) — operator-facing LLM cost telemetry. Every 1h reads the rolling-24h count of `synthesis.advisory` rows + `halted_cost_budget` decision rows, snapshots driver-level call counts into `.soc-cost-ledger`. Pulse panel + dashboards graph the rolling-24h spend without re-running the count query. Doc id is per-driver per-hour for clean trend lines.",
+      "model_tier": "none",
+      "owner": "canonical",
+      "tags": [
+        "argus:governance"
+      ]
+    },
+    {
+      "workflow_id": "soc_argus_shadow_executor",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
         "audit_trail",
         "trust_scores"
       ],
-      "summary": "ARGUS Phase 3 (R8) — Shadow / dry-run executor. Replays every auto_apply_ready draft rule against historical telemetry and writes a verdict into .soc-rule-backtester-runs. Recs whose hit-rate exceeds the noise-cannon cap are downgraded to pending_review; passes are stamped shadow_gate=pass so the autonomous applier can pick them up.",
+      "summary": "ARGUS Phase 3 (R8) — Shadow / dry-run executor. Replays every auto_apply_ready draft rule against historical telemetry and writes a verdict into .soc_rule_backtester-runs. Recs whose hit-rate exceeds the noise-cannon cap are downgraded to pending_review; passes are stamped shadow_gate=pass so the autonomous applier can pick them up.",
       "model_tier": "none",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-kev-ingest",
+      "workflow_id": "soc_kev_ingest",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -426,7 +523,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-reasoning-watchdog",
+      "workflow_id": "soc_argus_reasoning_watchdog",
       "automation_level": "fully_auto",
       "connectors": [
         "trust_scores",
@@ -438,7 +535,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-envelope-validator",
+      "workflow_id": "soc_envelope_validator",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -449,7 +546,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-pipeline-run-telemetry",
+      "workflow_id": "soc_pipeline_run_telemetry",
       "automation_level": "fully_auto",
       "connectors": [
         "audit_trail",
@@ -460,7 +557,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-post-apply-observer",
+      "workflow_id": "soc_post_apply_observer",
       "automation_level": "fully_auto",
       "connectors": [
         "outcomes",
@@ -472,7 +569,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-rule-backtester",
+      "workflow_id": "soc_rule_backtester",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -484,7 +581,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-self-learning-loop",
+      "workflow_id": "soc_self_learning_loop",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -496,7 +593,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-demo-1-runner",
+      "workflow_id": "soc_demo_1_runner",
       "automation_level": "human_in_the_loop",
       "connectors": [
         "artifact_registry",
@@ -511,7 +608,7 @@
       ]
     },
     {
-      "workflow_id": "soc-demo-2-runner",
+      "workflow_id": "soc_demo_2_runner",
       "automation_level": "human_in_the_loop",
       "connectors": [
         "eval_corpus",
@@ -526,7 +623,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-drift-monitor",
+      "workflow_id": "soc_argus_drift_monitor",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -541,7 +638,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-playbook-learner",
+      "workflow_id": "soc_argus_playbook_learner",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -553,7 +650,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-intel-adapter-generic",
+      "workflow_id": "soc_argus_intel_adapter_generic",
       "automation_level": "fully_auto",
       "connectors": [
         "intel_feed",
@@ -564,7 +661,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-dac-export",
+      "workflow_id": "soc_argus_dac_export",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -578,7 +675,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-fp-baseline-roller",
+      "workflow_id": "soc_argus_fp_baseline_roller",
       "automation_level": "fully_auto",
       "connectors": [
         "alerts",
@@ -593,13 +690,13 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-intel-adapter-kev",
+      "workflow_id": "soc_argus_intel_adapter_kev",
       "automation_level": "fully_auto",
       "connectors": [
         "intel_feed",
         "audit_trail"
       ],
-      "summary": "AutoDEX B2 — production CTI source spike. Every 30m, fans out KEV advisories already fetched by `soc-kev-ingest` into `.soc-intel-feed` rows of `kind: exploit_availability` so the M2.3 exploit-probability mythos_signal contributor reads real CISA-curated production data instead of demo seeds. Idempotent (intel_id=kev-<cve>); zero new auth, no new HTTPS clients. RFC: rfcs/B2-production-cti.md.",
+      "summary": "AutoDEX B2 — production CTI source spike. Every 30m, fans out KEV advisories already fetched by `soc_kev_ingest` into `.soc-intel-feed` rows of `kind: exploit_availability` so the M2.3 exploit-probability mythos_signal contributor reads real CISA-curated production data instead of demo seeds. Idempotent (intel_id=kev-<cve>); zero new auth, no new HTTPS clients. RFC: rfcs/B2-production-cti.md.",
       "model_tier": "none",
       "owner": "canonical",
       "tags": [
@@ -607,7 +704,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-intel-adapter-analytics",
+      "workflow_id": "soc_argus_intel_adapter_analytics",
       "automation_level": "fully_auto",
       "connectors": [
         "intel_feed",
@@ -621,7 +718,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-intel-mythos-aggregator",
+      "workflow_id": "soc_argus_intel_mythos_aggregator",
       "automation_level": "fully_auto",
       "connectors": [
         "intel_feed",
@@ -632,7 +729,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-alert-to-hypothesis",
+      "workflow_id": "soc_argus_alert_to_hypothesis",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -648,7 +745,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-case-lifecycle",
+      "workflow_id": "soc_argus_case_lifecycle",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_cases",
@@ -659,7 +756,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-containment",
+      "workflow_id": "soc_argus_containment",
       "automation_level": "semi_auto",
       "connectors": [
         "elastic_defend",
@@ -676,7 +773,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-coverage-initializer",
+      "workflow_id": "soc_argus_coverage_initializer",
       "automation_level": "semi_auto",
       "connectors": [
         "elastic_fleet",
@@ -694,7 +791,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-coverage-native",
+      "workflow_id": "soc_argus_coverage_native",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -709,7 +806,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-coverage-snapshotter",
+      "workflow_id": "soc_argus_coverage_snapshotter",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -724,18 +821,18 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-de-health",
+      "workflow_id": "soc_argus_de_health",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
         "audit_trail"
       ],
-      "summary": "Native Detection Engine space health and per-rule execution results; writes focused .soc-argus-health docs (source=soc-argus-de-health) and audit rows.",
+      "summary": "Native Detection Engine space health and per-rule execution results; writes focused .soc-argus-health docs (source=soc_argus_de_health) and audit rows.",
       "model_tier": "none",
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-health-aggregator",
+      "workflow_id": "soc_argus_health_aggregator",
       "automation_level": "fully_auto",
       "connectors": [
         "audit_trail",
@@ -747,7 +844,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-ml-anomaly-bridge",
+      "workflow_id": "soc_argus_ml_anomaly_bridge",
       "automation_level": "fully_auto",
       "connectors": [
         "hunt_findings",
@@ -762,7 +859,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-playbook-runner",
+      "workflow_id": "soc_argus_playbook_runner",
       "automation_level": "semi_auto",
       "connectors": [
         "recommendations",
@@ -777,7 +874,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-rule-health-monitor",
+      "workflow_id": "soc_argus_rule_health_monitor",
       "automation_level": "fully_auto",
       "connectors": [
         "elastic_detection_rules",
@@ -791,7 +888,7 @@
       "owner": "canonical"
     },
     {
-      "workflow_id": "soc-argus-self-healer",
+      "workflow_id": "soc_argus_self_healer",
       "automation_level": "fully_auto",
       "connectors": [
         "audit_trail",
@@ -805,7 +902,7 @@
       ]
     },
     {
-      "workflow_id": "soc-argus-redundancy-scanner",
+      "workflow_id": "soc_argus_redundancy_scanner",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -820,7 +917,7 @@
       ]
     },
     {
-      "workflow_id": "soc-workflow-liveness-watchdog",
+      "workflow_id": "soc_workflow_liveness_watchdog",
       "automation_level": "fully_auto",
       "connectors": [
         "audit_trail",
@@ -834,7 +931,7 @@
       ]
     },
     {
-      "workflow_id": "soc-recommendation-lifecycle",
+      "workflow_id": "soc_recommendation_lifecycle",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -848,7 +945,7 @@
       ]
     },
     {
-      "workflow_id": "soc-post-deploy-accuracy",
+      "workflow_id": "soc_post_deploy_accuracy",
       "automation_level": "fully_auto",
       "connectors": [
         "recommendations",
@@ -863,7 +960,7 @@
       ]
     },
     {
-      "workflow_id": "soc-canary-graduation",
+      "workflow_id": "soc_canary_graduation",
       "automation_level": "fully_auto",
       "connectors": [
         "outcomes",

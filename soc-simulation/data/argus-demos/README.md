@@ -10,8 +10,8 @@ than duplicating it — duplication drifts.
 
 | Scenario | Pressure | Milestone(s) | Driver |
 |----------|----------|-------------|--------|
-| 1. Same-day CVE → detection | P1 (speed)    | M2.2 + M2.3 | `workflows/soc-demo-1-runner.yaml` |
-| 2. Polymorphic variant swarm | P2 (variety)  | M2.1 + M2.2 | `workflows/soc-demo-2-runner.yaml` |
+| 1. Same-day CVE → detection | P1 (speed)    | M2.2 + M2.3 | `workflows/soc_demo_1_runner.yaml` |
+| 2. Polymorphic variant swarm | P2 (variety)  | M2.1 + M2.2 | `workflows/soc_demo_2_runner.yaml` |
 | 3. Frontier-class intrusion  | P3 (reasoning)| M2.4 + M2.5 | **out of scope of this tree** — see scenario-3-frontier/README.md |
 
 ## Driving a scenario
@@ -36,7 +36,7 @@ Expected artefacts in the cluster afterwards:
 - `.soc-cve-advisories/_doc/argus-adv-lsass-dump-2026-04` (status=`detected`)
 - `.soc-eval-corpus-argus-adv-lsass-dump-2026-04/_count ≥ 10`
 - `.soc-recommendations` — one doc with `argus.origin=exploit_to_detection`
-- `.soc-detection-eval-runs` — one run row per graded rule
+- `.soc_detection_eval-runs` — one run row per graded rule
 
 ### Scenario 2 — polymorphic variant swarm
 
@@ -53,8 +53,8 @@ node x-pack/solutions/security/packages/kbn-evals-suite-argus-detection/scripts/
 
 This scenario depends on M2.4 (preset arming) + M2.5 (reasoning
 watchdog/rollback) milestones. Only the preset-arming surface
-(`workflows/soc-argus-arm-mythos-preset.yaml`,
-`workflows/soc-argus-frontier-simulator.yaml`) is validated today; see
+(`workflows/soc_argus_arm_mythos_preset.yaml`,
+`workflows/soc_argus_frontier_simulator.yaml`) is validated today; see
 `scenario-3-frontier/README.md` for the gap list.
 
 ## Data-freshness discipline

@@ -444,7 +444,7 @@ echo ""
 # 4b. Caldera adversary profiles
 #     Read soc-simulation/caldera_profiles/*.json and upsert each as a document
 #     in .soc-attack-profiles with id `level-{difficulty_level}`. The
-#     soc-caldera-dispatcher workflow reads these at dispatch time to look up
+#     soc_caldera_dispatcher workflow reads these at dispatch time to look up
 #     the Caldera adversary_id for each pending attack command.
 # ---------------------------------------------------------------------------
 
@@ -912,18 +912,18 @@ echo ""
 
 # ---------------------------------------------------------------------------
 # 9. Governance: retro-tag canonical artifacts in .soc-artifact-registry
-#    Delegated to the soc-registry-retro-tag workflow, which uses kibana.request
+#    Delegated to the soc_registry_retro_tag workflow, which uses kibana.request
 #    + elasticsearch.index steps — no Python, no sidecars. We simply trigger it
 #    once, at the tail of deploy.
 # ---------------------------------------------------------------------------
 
-echo "--- Governance: triggering soc-registry-retro-tag workflow ---"
-RETRO_WF_ID="soc-registry-retro-tag"
+echo "--- Governance: triggering soc_registry_retro_tag workflow ---"
+RETRO_WF_ID="soc_registry_retro_tag"
 retro_resp=$(kbn_curl_versioned POST "/api/workflows/workflow/${RETRO_WF_ID}/run" \
   -H "Content-Type: application/json" \
   --data '{"inputs":{}}' 2>/dev/null || true)
 if [[ -n "$retro_resp" ]]; then
-  echo "  triggered soc-registry-retro-tag (response snippet): $(echo "$retro_resp" | head -c 200)"
+  echo "  triggered soc_registry_retro_tag (response snippet): $(echo "$retro_resp" | head -c 200)"
 else
   echo "  (warning: retro-tag workflow trigger failed; rerun manually in Kibana Workflows UI)"
 fi

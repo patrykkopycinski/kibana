@@ -103,7 +103,7 @@ upserts via `op_type: index`). Per-index doc:
 
 ### 2.6 Producer workflow
 
-[`soc-argus-fp-baseline-roller.yaml`](../../../workflows/soc-argus-fp-baseline-roller.yaml).
+[`soc_argus_fp_baseline_roller.yaml`](../../../workflows/soc_argus_fp_baseline_roller.yaml).
 Every 24h + manual. Aggregates alerts by `kibana.alert.rule.uuid`
 across the last 7 days, then fans out one row per rule. The Liquid
 template mirrors the verdict matrix conservatively: today only
@@ -211,7 +211,7 @@ exist per rule with `verdict=volume_only` and a non-null
    - Counts TP/FP outcomes in `.soc-outcomes` for the window.
    - Builds either a `VolumeOnlySnapshot` or `LabelledSnapshot`.
    - Calls `estimateRuleFpBaseline` and writes the result.
-2. Update `soc-argus-fp-baseline-roller.yaml` to invoke the
+2. Update `soc_argus_fp_baseline_roller.yaml` to invoke the
    registered step per rule (replaces the conservative Liquid
    emission).
 3. Add `soc-argus-baseline-to-overrides.yaml` that reads

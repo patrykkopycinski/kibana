@@ -304,7 +304,7 @@ export const MutationsPanel: React.FC<MutationsPanelProps> = ({
           return (
             <EuiToolTip
               position="top"
-              content="Time between apply and rollback for this mutation (soc-recovery.yaml)."
+              content="Time between apply and rollback for this mutation (soc_recovery.yaml)."
             >
               <span>{formatDurationMs(row.rollback_mttr_ms)}</span>
             </EuiToolTip>

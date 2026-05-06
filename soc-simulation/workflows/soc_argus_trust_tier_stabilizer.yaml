@@ -1,0 +1,278 @@
+version: '1'
+name: ARGUS Trust Tier Stabilizer (Hysteresis)
+description: >
+  AutoDEX governance gap (Severity-3) — anti-flap hysteresis on trust-tier
+  promotions.
+
+  PROBLEM
+  -------
+  `soc_argus_trust_tier_assessor.yaml` re-evaluates per-actor tier every
+  hour from the latest 7d eval / outcomes window. A single noisy
+  evaluation cycle can flip an actor from `probationary` → `trusted`
+  → `probationary` in three consecutive ticks. The trust-gate honours
+  whatever tier is current at apply-time, so a flap can leak risky recs
+  past the gate during the brief upgrade window.
+
+  WHAT THIS DOES
+  --------------
+  Every hour, immediately after the assessor:
+
+    1. For each actor in `.soc-actor-trust-tiers`, append the current
+       (actor, tier, tier_doc_timestamp) into `.soc-actor-tier-history`.
+       Idempotent — same `tier_doc_timestamp` is skipped on retry.
+    2. Pull the actor's last `consts.window_size` history rows.
+    3. Compute the "stable tier" = the WORST tier observed across that
+       window. Worst is defined by the canonical rank:
+         quarantined < probationary < trusted < frontier
+    4. Compare the current tier to the stable tier:
+         - If current_tier == stable_tier      → no change.
+         - If current_tier rank < stable rank  → DOWNGRADE pass-through.
+                                                  Downgrades are NEVER
+                                                  blocked: a degrading
+                                                  actor must be
+                                                  isolated immediately.
+         - If current_tier rank > stable rank  → UPGRADE BLOCKED.
+                                                  Overwrite the tier doc
+                                                  with `tier: stable_tier`
+                                                  + `hysteresis_applied: true`
+                                                  + `hysteresis_window`
+                                                  + `hysteresis_reason: upgrade_requires_n_consecutive`.
+                                                  An audit row is written
+                                                  to `.soc-autonomy-decisions`.
+
+  IDEMPOTENCY
+  -----------
+  - History append is keyed on (`actor_id`, `tier_doc_timestamp`). The
+    pre-append exists check skips re-runs of the same assessor tick.
+  - Hysteresis override stamps `hysteresis_applied: true` so the next
+    tick's assessor recompute will start from the stabilized tier and
+    only re-evaluate after `consts.window_size` more consecutive ticks
+    sustain a higher tier.
+
+  TUNING
+  ------
+    consts.window_size: 3   # require 3 consecutive ticks to commit upgrade
+    consts.history_max: 50  # cap of history rows to read per actor
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  tiers_index: ".soc-actor-trust-tiers"
+  history_index: ".soc-actor-tier-history"
+  stabilizer_id: "soc_argus_trust_tier_stabilizer"
+  window_size: 3
+  history_max: 50
+  schema_version: 1
+
+steps:
+  # ── 1. Pull the latest tier doc per actor ────────────────────────────
+  - name: fetch_tier_docs
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.tiers_index }}"
+      size: 200
+      query:
+        match_all: {}
+
+  - name: gate_has_actors
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.fetch_tier_docs.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  # ── 2. Process each actor ───────────────────────────────────────────
+  - name: process_each_actor
+    type: foreach
+    foreach: "{{ steps.fetch_tier_docs.output.hits.hits }}"
+    if: "steps.gate_has_actors.output: yes"
+    steps:
+      # ── 2a. Compute the rank of the actor's current tier ──────────
+      - name: classify_current_rank
+        type: console
+        with:
+          message: >-
+            {%- assign t = foreach.item._source.tier -%}
+            {%- if t == 'quarantined' -%}0
+            {%- elsif t == 'probationary' -%}1
+            {%- elsif t == 'trusted' -%}2
+            {%- elsif t == 'frontier' -%}3
+            {%- else -%}-1
+            {%- endif -%}
+
+      # ── 2b. Has this exact (actor, tier_doc_timestamp) already been
+      #        appended? Skip if so.
+      - name: history_exists
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.history_index }}"
+          size: 1
+          query:
+            bool:
+              filter:
+                - term: { actor_id: "{{ foreach.item._source.actor_id }}" }
+                - term: { tier_doc_timestamp: "{{ foreach.item._source['@timestamp'] }}" }
+
+      - name: gate_history_already_appended
+        type: console
+        with:
+          message: >-
+            {%- assign _n = steps.history_exists.output.hits.hits | size | default: 0 -%}
+            {% if _n > 0 %}yes{% else %}no{% endif %}
+
+      # ── 2c. Append the new history row ────────────────────────────
+      - name: append_history
+        type: elasticsearch.index
+        if: "steps.gate_history_already_appended.output: no"
+        with:
+          index: "{{ consts.history_index }}"
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            actor_id: "{{ foreach.item._source.actor_id }}"
+            tier: "{{ foreach.item._source.tier }}"
+            tier_rank: "{{ steps.classify_current_rank.output }}"
+            tier_doc_timestamp: "{{ foreach.item._source['@timestamp'] }}"
+            source_workflow: "{{ consts.stabilizer_id }}"
+            schema_version: "{{ consts.schema_version }}"
+
+      # ── 2d. Read the last `window_size` history rows for this actor
+      - name: history_window
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/{{ consts.history_index }}/_search"
+          body:
+            size: "{{ consts.window_size }}"
+            query:
+              bool:
+                filter:
+                  - term: { actor_id: "{{ foreach.item._source.actor_id }}" }
+            sort:
+              - "@timestamp":
+                  order: desc
+
+      - name: gate_window_full
+        type: console
+        with:
+          message: >-
+            {%- assign _n = steps.history_window.output.hits.hits | size | default: 0 -%}
+            {%- assign _need = consts.window_size -%}
+            {% if _n >= _need %}yes{% else %}no{% endif %}
+
+      # ── 2e. Compute the stable (= worst) rank within the window ───
+      # Liquid lacks aggregations, so we walk the array.
+      - name: compute_stable_rank
+        type: console
+        if: "steps.gate_window_full.output: yes"
+        with:
+          message: >-
+            {%- assign _hits = steps.history_window.output.hits.hits -%}
+            {%- assign _min = 99 -%}
+            {%- for h in _hits -%}
+              {%- assign _r = h._source.tier_rank | default: 99 -%}
+              {%- if _r < _min -%}{%- assign _min = _r -%}{%- endif -%}
+            {%- endfor -%}
+            {{ _min }}
+
+      - name: classify_action
+        type: console
+        if: "steps.gate_window_full.output: yes"
+        with:
+          message: >-
+            {%- assign _cur = steps.classify_current_rank.output | plus: 0 -%}
+            {%- assign _stable = steps.compute_stable_rank.output | plus: 0 -%}
+            {%- if _cur > _stable -%}block_upgrade
+            {%- elsif _cur < _stable -%}allow_downgrade
+            {%- else -%}stable
+            {%- endif -%}
+
+      # ── 2f. Convert stable_rank back to a tier name ───────────────
+      - name: stable_tier_name
+        type: console
+        if: "steps.gate_window_full.output: yes"
+        with:
+          message: >-
+            {%- assign _r = steps.compute_stable_rank.output | plus: 0 -%}
+            {%- if _r == 0 -%}quarantined
+            {%- elsif _r == 1 -%}probationary
+            {%- elsif _r == 2 -%}trusted
+            {%- elsif _r == 3 -%}frontier
+            {%- else -%}probationary
+            {%- endif -%}
+
+      # ── 2g. Block upgrade: overwrite the tier doc back to stable ──
+      - name: stamp_hysteresis_block
+        type: elasticsearch.update
+        if: "steps.classify_action.output: block_upgrade"
+        with:
+          index: "{{ consts.tiers_index }}"
+          id: "{{ foreach.item._source.actor_id }}"
+          refresh: "wait_for"
+          doc:
+            tier: "{{ steps.stable_tier_name.output }}"
+            hysteresis_applied: true
+            hysteresis_window: "{{ consts.window_size }}"
+            hysteresis_reason: "upgrade_requires_n_consecutive"
+            hysteresis_proposed_tier: "{{ foreach.item._source.tier }}"
+            hysteresis_stamped_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            hysteresis_stamped_by: "{{ consts.stabilizer_id }}"
+
+      # ── 2h. Audit row for blocked upgrade ─────────────────────────
+      - name: write_decision_block_upgrade
+        type: elasticsearch.index
+        if: "steps.classify_action.output: block_upgrade"
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-trust-tier-stabilizer-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.stabilizer_id }}"
+            decision: "upgrade_blocked"
+            gate: "tier_hysteresis"
+            actor_id: "{{ foreach.item._source.actor_id }}"
+            proposed_tier: "{{ foreach.item._source.tier }}"
+            applied_tier: "{{ steps.stable_tier_name.output }}"
+            window_size: "{{ consts.window_size }}"
+            reason: "Tier upgrade blocked by hysteresis — last {{ consts.window_size }} consecutive evaluations did not all reach the proposed tier. Stabilized to {{ steps.stable_tier_name.output }}."
+
+      # ── 2i. Audit row for downgrade pass-through (visibility only) ─
+      - name: write_decision_downgrade
+        type: elasticsearch.index
+        if: "steps.classify_action.output: allow_downgrade"
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-trust-tier-stabilizer-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.stabilizer_id }}"
+            decision: "downgrade_pass_through"
+            gate: "tier_hysteresis"
+            actor_id: "{{ foreach.item._source.actor_id }}"
+            current_tier: "{{ foreach.item._source.tier }}"
+            stable_tier_window: "{{ steps.stable_tier_name.output }}"
+            window_size: "{{ consts.window_size }}"
+            reason: "Tier degraded inside the hysteresis window — passed through immediately (no hysteresis on downgrades)."
+
+  # ── 3. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_trust_tier_stabilizer_tick
+        source: "{{ consts.stabilizer_id }}"
+        tick_id: "argus-trust-tier-stabilizer-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        actors_processed: "{{ steps.fetch_tier_docs.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS trust-tier stabilizer — actors_processed={{ steps.fetch_tier_docs.output.hits.hits | size | default: 0 }} tick=argus-trust-tier-stabilizer-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

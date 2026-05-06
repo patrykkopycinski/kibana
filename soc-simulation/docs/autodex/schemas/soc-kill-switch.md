@@ -31,7 +31,7 @@ the workflow halts before any synthesis or write.
 
 ## Consumers
 
-- `soc-argus-synthesis-driver.yaml` workflow — reads the latest doc
+- `soc_argus_synthesis_driver.yaml` workflow — reads the latest doc
   on every tick. The `kill_switch_gate` step short-circuits the rest of
   the workflow on `autonomy_enabled=false`.
 - Kill-switch banner in the Autonomy dashboard.

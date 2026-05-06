@@ -74,9 +74,9 @@ describe('argusSynthesizeAdvisory step — input schema', () => {
   it('honours an explicit caller_id', () => {
     const parsed = argusSynthesizeAdvisoryInputSchema.parse({
       advisory_id: 'CVE-1',
-      caller_id: 'soc-argus-synthesis-driver',
+      caller_id: 'soc_argus_synthesis_driver',
     });
-    expect(parsed.caller_id).toBe('soc-argus-synthesis-driver');
+    expect(parsed.caller_id).toBe('soc_argus_synthesis_driver');
   });
 });
 
@@ -106,7 +106,7 @@ describe('argusSynthesizeAdvisory step — handler', () => {
     const esClient = buildEsClient();
     const context = buildContext(esClient, {
       advisory_id: advisory.advisory_id,
-      caller_id: 'soc-argus-synthesis-driver',
+      caller_id: 'soc_argus_synthesis_driver',
     });
 
     const result = await argusSynthesizeAdvisoryStepDefinition.handler(context);

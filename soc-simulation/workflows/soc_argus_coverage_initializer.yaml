@@ -1,0 +1,208 @@
+version: '1'
+name: ARGUS Coverage Initializer
+description: >
+  Discovers installed Fleet integrations, maps them to relevant Elastic prebuilt detection rules,
+  and proposes enabling critical- and high-severity rules that are not yet tracked in the ARGUS
+  detection corpus. Writes pending recommendations to `.soc-recommendations`, materializes
+  companion rows in `.soc-coverage-gaps`, and emits governance trace + audit heartbeat rows.
+
+  Based on the Dex Sprint Threat Coverage Initialization work (PR #263250).
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  recs_index: ".soc-recommendations"
+  corpus_index: ".soc-detection-corpus"
+  coverage_gaps_index: ".soc-coverage-gaps"
+  audit_index: ".soc-audit-trail"
+  trace_index: ".soc-reasoning-trace"
+
+steps:
+  # ── a. Installed Fleet integrations ───────────────────────────────
+  - name: fetch_installed_packages
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/fleet/epm/packages?prerelease=false
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  # ── b. Immutable (prebuilt) detection rules ─────────────────────────
+  - name: fetch_prebuilt_rules
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/detection_engine/rules/_find?page=1&per_page=100&filter=alert.attributes.params.immutable:true
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "2023-10-31"
+
+  # ── c. Corpus rule IDs already tracked by ARGUS ───────────────────
+  - name: fetch_existing_corpus
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.corpus_index }}"
+      size: 500
+      _source: ["rule_id"]
+      query:
+        match_all: {}
+
+  # ── d. LLM gap analysis (installed packages ∩ prebuilt rules) ─────
+  - name: analyze_coverage_gaps
+    type: ai.agent
+    connector-id: opus
+    with:
+      message: >
+        You are the ARGUS Coverage Initializer (Dex Sprint Coverage Initialization, PR #263250).
+
+        Inputs:
+
+        INSTALLED_PACKAGES_JSON:
+        {{ steps.fetch_installed_packages.output | json }}
+
+        PREBUILT_RULES_FIND_RESPONSE_JSON:
+        {{ steps.fetch_prebuilt_rules.output | json }}
+
+        EXISTING_CORPUS_HITS_JSON:
+        {{ steps.fetch_existing_corpus.output | json }}
+
+        Task:
+        1. From INSTALLED_PACKAGES_JSON, determine which Fleet integrations are installed (use the API shape as returned; prefer items that are actually installed, not just available).
+        2. From PREBUILT_RULES_FIND_RESPONSE_JSON, enumerate prebuilt (immutable) rules and read each rule's `related_integrations` (or equivalent) and severity.
+        3. Keep only rules whose related integrations overlap installed package names/integrations.
+        4. Filter to severity `critical` OR `high` (case-insensitive).
+        5. Build the set of `rule_id` values already present in EXISTING_CORPUS_HITS_JSON hits (`_source.rule_id`). Exclude any rule whose id is already in that set.
+        6. Output STRICT JSON only (no markdown, no prose) with this exact top-level shape:
+
+        {"proposals":[{"rule_id":"<string>","name":"<string>","severity":"<critical|high>","related_integration":"<string>","reason":"<concise string>"}]}
+
+        If there are no qualifying rules, return {"proposals":[]}.
+        Every proposal must include all five fields. Use `related_integration` for the single best-matching integration id or package name.
+      schema:
+        type: object
+        properties:
+          proposals:
+            type: array
+            items:
+              type: object
+              properties:
+                rule_id:
+                  type: string
+                name:
+                  type: string
+                severity:
+                  type: string
+                  enum:
+                    - critical
+                    - high
+                related_integration:
+                  type: string
+                reason:
+                  type: string
+              required:
+                - rule_id
+                - name
+                - severity
+                - related_integration
+                - reason
+        required:
+          - proposals
+    timeout: 120s
+
+  # ── e. Materialize recommendations + coverage-gap rows ────────────
+  - name: write_proposals
+    type: foreach
+    foreach: "{% if steps.analyze_coverage_gaps.output.proposals %}{{ steps.analyze_coverage_gaps.output.proposals | json }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{% if _p.proposals %}{{ _p.proposals | json }}{% else %}[]{% endif %}{% endif %}"
+    steps:
+      - name: index_recommendation
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "argus-coverage-init-{{ foreach.item.rule_id }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "argus-coverage-init-{{ foreach.item.rule_id }}"
+            type: "prebuilt_rule_enablement"
+            status: "pending_review"
+            title: "Coverage gap: enable prebuilt rule {{ foreach.item.name }}"
+            summary: "{{ foreach.item.reason }}"
+            rule_id: "{{ foreach.item.rule_id }}"
+            source: "argus.coverage-initializer"
+            argus:
+              origin: "coverage_initialization"
+              decision:
+                confidence: 0.75
+                door_class: "two_way"
+            details:
+              artifact_type: "rule"
+              artifact_id: "{{ foreach.item.rule_id }}"
+              op: "enable"
+
+      - name: index_coverage_gap
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.coverage_gaps_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "argus.coverage-initializer"
+            status: "open"
+            technique_id: "{{ foreach.item.technique_id | default: 'unmapped' }}"
+            severity: "{{ foreach.item.severity | default: 'high' }}"
+            confidence: 0.75
+            note: "{{ foreach.item.reason | default: foreach.item.name }}"
+            rule_id: "{{ foreach.item.rule_id }}"
+            rule_name: "{{ foreach.item.name }}"
+            related_integration: "{{ foreach.item.related_integration }}"
+            evidence:
+              - "prebuilt_rule:{{ foreach.item.rule_id }}"
+              - "{{ foreach.item.reason }}"
+
+  # ── f. Reasoning trace (governance) ─────────────────────────────────
+  - name: emit_trace
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.trace_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        agent_id: "default"
+        step_index: 0
+        step_type: "coverage_initialization"
+        content: >-
+          ARGUS Coverage Initializer tick — {% if steps.analyze_coverage_gaps.output.proposals %}proposed {{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposed {{ _p.proposals | size | default: 0 }}{% endif %} prebuilt rule enablement recommendation(s) from Fleet integration / prebuilt-rule overlap analysis.
+        argus:
+          agent:
+            id: "default"
+            version: "argus-coverage-init"
+          decision:
+            kind: "prebuilt_rule_enablement"
+            id: "coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            confidence: 0.75
+          correlation:
+            workflow: "soc_argus_coverage_initializer"
+
+  # ── g. Audit heartbeat ─────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_coverage_initializer_tick
+        source: "argus.coverage-initializer"
+        tick_id: "coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        proposals_count: "{% if steps.analyze_coverage_gaps.output.proposals %}{{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}{{ _p.proposals | size | default: 0 }}{% endif %}"
+        corpus_hits: "{{ steps.fetch_existing_corpus.output.hits.total.value | default: 0 }}"
+
+  # ── h. Console summary ────────────────────────────────────────────
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        ARGUS Coverage Initializer complete — tick coverage-init-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}, {% if steps.analyze_coverage_gaps.output.proposals %}proposals={{ steps.analyze_coverage_gaps.output.proposals | size | default: 0 }}{% else %}{% assign _p = steps.analyze_coverage_gaps.output.message | json_parse %}proposals={{ _p.proposals | size | default: 0 }}{% endif %}

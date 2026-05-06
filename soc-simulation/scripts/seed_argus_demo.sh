@@ -1184,7 +1184,7 @@ post_bulk_file "recommendations" \
 # community-coverage-and-playbooks scope (Coverage panel, Actors flyout,
 # Playbooks tab grouping, the `list_uncovered_techniques` /
 # `list_actor_coverage` / `export_navigator_layer` Agent Builder tools, and
-# `soc-argus-playbook-runner` with `playbook_id: datasource-gap`). Without these seeds the
+# `soc_argus_playbook_runner` with `playbook_id: datasource-gap`). Without these seeds the
 # new tools degrade to the empty-state payload and the Coverage panel renders
 # all-grey cells.
 # ---------------------------------------------------------------------------
@@ -1232,8 +1232,8 @@ fi
 #     `source: argus.demo-seed` then append. Each gap carries `technique_id`,
 #     `severity`, `confidence`, `status`, `data_sources[]`, and a short
 #     human-readable `note` — the canonical shape consumed by
-#     `soc-argus-playbook-runner` (coverage-gap-triage / datasource-gap inputs),
-#     `soc-meta`, `soc-deteng`, and related coverage tooling.
+#     `soc_argus_playbook_runner` (coverage-gap-triage / datasource-gap inputs),
+#     `soc_meta`, `soc_deteng`, and related coverage tooling.
 # ---------------------------------------------------------------------------
 
 echo "[argus-seed] seeding .soc-coverage-gaps demo rows"

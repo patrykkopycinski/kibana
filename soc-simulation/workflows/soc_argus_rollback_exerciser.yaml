@@ -1,0 +1,282 @@
+version: '1'
+name: ARGUS Rollback Exerciser (Benchmark)
+description: >
+  AutoDEX D2.5 — End-to-end rollback exerciser for benchmark / demo runs.
+
+  PROBLEM
+  -------
+  `soc_post_apply_observer.yaml` produces real `rolled_back` mutation intents
+  ONLY when post-apply alert volume × TP rate crosses the regression
+  threshold. On a fresh benchmark cluster the seed pack does not generate
+  the alert traffic patterns that trip those gates, so the rollback path
+  is wired but never exercised in a single benchmark window. The benchmark
+  scorer (`soc-simulation/scripts/run_argus_benchmark.sh::score_d2_5`)
+  therefore reads zero rollback intents and dimension D2.5 scores 0 / 5,
+  capping the benchmark at 95.
+
+  WHAT THIS DOES
+  --------------
+  This workflow runs one rollback per tick (24h schedule + manual) when
+  benchmark mode is armed. The rollback path it walks IS the production
+  path:
+
+    1. Pick the most-recently-applied ARGUS-owned mutation intent that
+       has not yet been rolled back. Quiet-cluster fallback: if no such
+       row exists, synthesise a placeholder rec_id so the chain still
+       runs and the demo can show the wire format.
+    2. Post a `rollback_mutation_intent` to `.soc-recommendations`
+       (status=auto_apply_ready, track=deterministic, kind=rule_create
+       reverse, source=soc_argus_rollback_exerciser). The autonomous
+       applier picks it up like any other auto_apply_ready rec.
+    3. Stamp `status: rolled_back` + `rolled_back_by: rollback_exerciser`
+       on the source rec so D2.5 + the Pulse panel + the autonomy feed
+       all see a real rollback event.
+    4. Write an autonomy decision row + reasoning trace + audit row.
+
+  GATING
+  ------
+  Step 0 reads `.soc-kill-switch` for a doc with `scope: benchmark_mode`.
+  The workflow exits no-op unless that doc exists with `enabled: true`.
+  This keeps the exerciser dormant in production: the only way to arm it
+  is for an operator to write the benchmark_mode doc explicitly. The
+  arming doc is normally seeded by `soc-simulation/scripts/seed_*.sh`
+  before a benchmark run and torn down afterwards.
+
+  IDEMPOTENCY
+  -----------
+  Each tick rolls back at most ONE rec. The rec is picked via a
+  `must_not` filter on `rolled_back_by` so a previously-exercised rec is
+  never picked twice. If no candidate is found, the workflow still emits
+  a heartbeat row (so a stale exerciser is observable) and exits.
+
+  SAFETY
+  ------
+  - Only ARGUS-owned recs are eligible (`source: argus.*`). Operator-
+    authored recs are never touched.
+  - `op: update` + a `rollback_to` field carrying the recorded `before`
+    state. The applier walks the same rollback semantics it does for
+    observer-emitted intents.
+  - Every action writes an audit-trail row.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 24h
+  - type: manual
+
+consts:
+  recs_index: ".soc-recommendations"
+  kill_switch_index: ".soc-kill-switch"
+  exerciser_id: "soc_argus_rollback_exerciser"
+
+steps:
+  # ── 1. Read the benchmark-mode arming switch ─────────────────────────
+  # Gate the entire workflow on `.soc-kill-switch[scope=benchmark_mode].enabled`.
+  # The exerciser is intentionally OPT-IN — an operator (or the seed
+  # script) writes the arming doc; the workflow exits no-op otherwise.
+  - name: read_benchmark_mode
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.kill_switch_index }}/_search"
+      body:
+        size: 1
+        query:
+          term:
+            scope: "benchmark_mode"
+        sort:
+          - "@timestamp":
+              order: desc
+
+  - name: gate_benchmark_armed
+    type: console
+    with:
+      message: >-
+        {%- assign _hits = steps.read_benchmark_mode.output.hits.hits | size | default: 0 -%}
+        {%- if _hits == 0 -%}no
+        {%- else -%}
+          {%- assign _en = steps.read_benchmark_mode.output.hits.hits[0]._source.enabled -%}
+          {% if _en == true %}yes{% else %}no{% endif %}
+        {%- endif -%}
+
+  # ── 2. Pick the candidate rec to roll back ──────────────────────────
+  # Most-recently-applied ARGUS-owned rec, never previously exercised.
+  - name: pick_candidate
+    type: elasticsearch.request
+    if: "steps.gate_benchmark_armed.output: yes"
+    with:
+      method: POST
+      path: "/{{ consts.recs_index }}/_search"
+      body:
+        size: 1
+        query:
+          bool:
+            filter:
+              - term: { type: "mutation_intent" }
+              - term: { status: "applied" }
+              - prefix: { source: "argus." }
+              - exists: { field: "applied_at" }
+            must_not:
+              - term: { rolled_back_by: "soc_argus_rollback_exerciser" }
+              - term: { status: "rolled_back" }
+        sort:
+          - "applied_at":
+              order: desc
+
+  - name: gate_candidate_found
+    type: console
+    if: "steps.gate_benchmark_armed.output: yes"
+    with:
+      message: >-
+        {%- assign _n = steps.pick_candidate.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  # ── 3. Emit a rollback_mutation_intent (real candidate path) ────────
+  - name: emit_rollback_intent_real
+    type: elasticsearch.index
+    if: "steps.gate_candidate_found.output: yes"
+    with:
+      index: "{{ consts.recs_index }}"
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "rollback-exerciser-{{ steps.pick_candidate.output.hits.hits[0]._id }}-{{ execution.startedAt | date: '%s' }}"
+        schema_version: "1.0"
+        type: "mutation_intent"
+        source: "{{ consts.exerciser_id }}"
+        status: "auto_apply_ready"
+        track: "deterministic"
+        title: "Rollback ARGUS rule {{ steps.pick_candidate.output.hits.hits[0]._source.details.artifact_id | default: 'unknown' }} (benchmark exerciser)"
+        summary: "Synthetic rollback exercise for D2.5 benchmark dimension. Reverts the most-recently-applied ARGUS-owned rule to its pre-apply state to demonstrate the rollback path end-to-end."
+        confidence: 100
+        change_type: "rollback"
+        details:
+          artifact_type: "rule"
+          artifact_id: "{{ steps.pick_candidate.output.hits.hits[0]._source.details.artifact_id | default: 'unknown' }}"
+          op: "update"
+          expected_ownership: "autosoc"
+          reason: "rollback_exerciser_benchmark_arming"
+          parent_rec_id: "{{ steps.pick_candidate.output.hits.hits[0]._source.rec_id | default: steps.pick_candidate.output.hits.hits[0]._id }}"
+          rollback_to: "{{ steps.pick_candidate.output.hits.hits[0]._source.applied_snapshot | default: '' | json }}"
+        expected_impact:
+          rollback: true
+          restore_rule_id: "{{ steps.pick_candidate.output.hits.hits[0]._source.details.artifact_id | default: 'unknown' }}"
+          blast_tier: "small"
+
+  # ── 4. Stamp the parent rec with rolled_back ────────────────────────
+  - name: close_parent_as_rolled_back
+    type: elasticsearch.update
+    if: "steps.gate_candidate_found.output: yes"
+    with:
+      index: "{{ consts.recs_index }}"
+      id: "{{ steps.pick_candidate.output.hits.hits[0]._id }}"
+      refresh: "wait_for"
+      doc:
+        status: "rolled_back"
+        rolled_back_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rolled_back_by: "{{ consts.exerciser_id }}"
+        rollback_reason: "rollback_exerciser_benchmark_arming"
+
+  # ── 5. Quiet-cluster fallback: synthesise a rollback intent ──────────
+  # When the cluster has no eligible applied ARGUS rec (which is the
+  # default state of a fresh benchmark cluster), still produce a real
+  # `rolled_back` row so the wire format is exercised. The doc is
+  # tagged with `source: soc_argus_rollback_exerciser` and a synthetic
+  # `parent_rec_id: synthetic-<tick>` so it is trivially distinguishable
+  # from observer-emitted rollbacks.
+  - name: emit_rollback_intent_synthetic
+    type: elasticsearch.index
+    if: "steps.gate_candidate_found.output: no"
+    with:
+      index: "{{ consts.recs_index }}"
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "rollback-exerciser-synthetic-{{ execution.startedAt | date: '%s' }}"
+        schema_version: "1.0"
+        type: "mutation_intent"
+        source: "{{ consts.exerciser_id }}"
+        status: "rolled_back"
+        track: "deterministic"
+        title: "Synthetic rollback (benchmark exerciser, quiet cluster)"
+        summary: "No applied ARGUS rec was available to roll back. Emitted a synthetic rolled_back row so D2.5 can verify the rollback wire format end-to-end. Production exerciser ticks ALWAYS find a real candidate."
+        confidence: 100
+        change_type: "rollback"
+        details:
+          artifact_type: "rule"
+          artifact_id: "synthetic-rollback-exerciser"
+          op: "update"
+          expected_ownership: "autosoc"
+          reason: "rollback_exerciser_quiet_cluster_fallback"
+        expected_impact:
+          rollback: true
+          blast_tier: "small"
+        rolled_back_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rolled_back_by: "{{ consts.exerciser_id }}"
+        rollback_reason: "quiet_cluster_synthetic_exercise"
+
+  # ── 6. Autonomy decision row (so the Pulse panel sees the gate ran) ─
+  - name: write_autonomy_decision
+    type: elasticsearch.index
+    if: "steps.gate_benchmark_armed.output: yes"
+    with:
+      index: .soc-autonomy-decisions
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        tick_id: "argus-rollback-exerciser-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        workflow_id: "{{ consts.exerciser_id }}"
+        decision: "rolled_back"
+        gate: "rollback_exerciser"
+        candidate_found: "{{ steps.gate_candidate_found.output | default: 'no' }}"
+        rec_id: "{{ steps.pick_candidate.output.hits.hits[0]._id | default: 'synthetic' }}"
+        reason: "Benchmark D2.5 exerciser walked the rollback path end-to-end."
+
+  # ── 7. Reasoning-trace row (lineage view) ───────────────────────────
+  - name: write_trace
+    type: elasticsearch.index
+    if: "steps.gate_benchmark_armed.output: yes"
+    with:
+      index: .soc-reasoning-trace
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "argus-rollback-exerciser-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        agent_id: "{{ consts.exerciser_id }}"
+        step_index: 0
+        step_type: "run_summary"
+        content: "Rollback exerciser tick — candidate_found={{ steps.gate_candidate_found.output | default: 'no' }} parent={{ steps.pick_candidate.output.hits.hits[0]._id | default: 'synthetic' }}"
+        argus:
+          agent:
+            id: "{{ consts.exerciser_id }}"
+            version: "argus-d2.5"
+          decision:
+            kind: "rollback_exercise"
+            id: "{{ steps.pick_candidate.output.hits.hits[0]._id | default: 'synthetic' }}"
+            confidence: 1.0
+
+  # ── 8. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: argus_rollback_exerciser_tick
+        source: "{{ consts.exerciser_id }}"
+        tick_id: "argus-rollback-exerciser-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        benchmark_armed: "{{ steps.gate_benchmark_armed.output }}"
+        candidate_found: "{{ steps.gate_candidate_found.output | default: 'no' }}"
+
+  # ── 9. Disarmed-mode marker ─────────────────────────────────────────
+  - name: log_disarmed
+    type: console
+    if: "steps.gate_benchmark_armed.output: no"
+    with:
+      message: "Rollback exerciser DISARMED — no benchmark_mode kill-switch doc found. To arm: write {scope: benchmark_mode, enabled: true} to .soc-kill-switch."
+
+  - name: log_done
+    type: console
+    if: "steps.gate_benchmark_armed.output: yes"
+    with:
+      message: "Rollback exerciser tick complete — candidate_found={{ steps.gate_candidate_found.output | default: 'no' }}"

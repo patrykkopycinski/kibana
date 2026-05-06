@@ -38,7 +38,7 @@
     }
   },
   "_meta": {
-    "description": "AutoDEX B9 — self-adjusting skills loop. Each row records a single skill-health verdict produced by the soc-skill-self-adjust workflow from the latest .soc-skill-metrics snapshot. The verdict is one of healthy / review / reprompt / demote / insufficient_data. The verdict logic is mirrored 1:1 in evaluateSkillHealth (kbn-argus-tool-manifest/skill_health.ts) so MCP-side gates and the YAML workflow stay aligned.",
+    "description": "AutoDEX B9 — self-adjusting skills loop. Each row records a single skill-health verdict produced by the soc_skill_self_adjust workflow from the latest .soc-skill-metrics snapshot. The verdict is one of healthy / review / reprompt / demote / insufficient_data. The verdict logic is mirrored 1:1 in evaluateSkillHealth (kbn-argus-tool-manifest/skill_health.ts) so MCP-side gates and the YAML workflow stay aligned.",
     "owner": "argus-governance",
     "schema_version": 1,
     "verdicts": ["healthy", "review", "reprompt", "demote", "insufficient_data"],

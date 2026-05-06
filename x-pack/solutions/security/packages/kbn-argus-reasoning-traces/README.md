@@ -37,7 +37,7 @@ const sdk = new NodeSDK({
 
 // later, inside an agent tool call:
 span.setAttributes({
-  [ARGUS_TRACE_ATTR.agentId]: 'soc-deteng-agent',
+  [ARGUS_TRACE_ATTR.agentId]: 'soc_deteng-agent',
   [ARGUS_TRACE_ATTR.decisionKind]: 'rule_create',
   [ARGUS_TRACE_ATTR.confidence]: 0.82,
   [ARGUS_TRACE_ATTR.trustTier]: 'scoped',

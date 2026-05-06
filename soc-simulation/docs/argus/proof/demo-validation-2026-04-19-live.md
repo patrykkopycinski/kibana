@@ -86,7 +86,7 @@ GET /.soc-eval-corpus-argus-corpus-mythos-2026-04-live/_search?size=1
       "variant_index": 0,
       "should_fire": true,
       "is_simulation_emission": true,
-      "source": "soc-argus-frontier-simulator",
+      "source": "soc_argus_frontier_simulator",
       "emission_id": "1776626435-T1003.001"
     }
   }
@@ -102,7 +102,7 @@ Audit heartbeat written:
 ```json
 { "@timestamp": "2026-04-19T21:20:35Z",
   "event_type": "argus_frontier_simulator_tick",
-  "source": "soc-argus-frontier-simulator",
+  "source": "soc_argus_frontier_simulator",
   "primitive_id": "T1003.001",
   "emission_id": "1776626435-T1003.001" }
 ```
@@ -224,17 +224,17 @@ Most recent events:
 
 | `@timestamp` | `event_type` | `source` |
 |---|---|---|
-| 2026-04-19T21:22:35.797Z | `argus_detection_eval_tick`        | `soc-detection-eval`            |
-| 2026-04-19T21:22:35.795Z | `argus_trust_gate_tick`            | `soc-argus-trust-gate`          |
-| 2026-04-19T21:22:05.355Z | `argus_demo_run`                   | `soc-demo-2-runner`             |
-| 2026-04-19T21:21:55.365Z | `argus_demo_run`                   | `soc-demo-1-runner`             |
-| 2026-04-19T21:21:45.416Z | `argus_exploit_to_detection_tick`  | `soc-argus-exploit-to-detection`|
-| 2026-04-19T21:21:35.349Z | `argus_trust_gate_tick`            | `soc-argus-trust-gate`          |
-| 2026-04-19T21:21:25.353Z | `argus_trust_tier_assessor_tick`   | `soc-argus-trust-tier-assessor` |
-| 2026-04-19T21:21:15.337Z | `argus_detection_eval_tick`        | `soc-detection-eval`            |
-| 2026-04-19T21:20:56.117Z | `argus_exploit_to_detection_tick`  | `soc-argus-exploit-to-detection`|
-| 2026-04-19T21:20:55.354Z | `argus_exploit_to_detection_tick`  | `soc-argus-exploit-to-detection`|
-| 2026-04-19T21:20:35Z     | `argus_frontier_simulator_tick`    | `soc-argus-frontier-simulator`  |
+| 2026-04-19T21:22:35.797Z | `argus_detection_eval_tick`        | `soc_detection_eval`            |
+| 2026-04-19T21:22:35.795Z | `argus_trust_gate_tick`            | `soc_argus_trust_gate`          |
+| 2026-04-19T21:22:05.355Z | `argus_demo_run`                   | `soc_demo_2_runner`             |
+| 2026-04-19T21:21:55.365Z | `argus_demo_run`                   | `soc_demo_1_runner`             |
+| 2026-04-19T21:21:45.416Z | `argus_exploit_to_detection_tick`  | `soc_argus_exploit_to_detection`|
+| 2026-04-19T21:21:35.349Z | `argus_trust_gate_tick`            | `soc_argus_trust_gate`          |
+| 2026-04-19T21:21:25.353Z | `argus_trust_tier_assessor_tick`   | `soc_argus_trust_tier_assessor` |
+| 2026-04-19T21:21:15.337Z | `argus_detection_eval_tick`        | `soc_detection_eval`            |
+| 2026-04-19T21:20:56.117Z | `argus_exploit_to_detection_tick`  | `soc_argus_exploit_to_detection`|
+| 2026-04-19T21:20:55.354Z | `argus_exploit_to_detection_tick`  | `soc_argus_exploit_to_detection`|
+| 2026-04-19T21:20:35Z     | `argus_frontier_simulator_tick`    | `soc_argus_frontier_simulator`  |
 
 Both demo runners' `argus_demo_run` heartbeats are present with the
 correct `source`, and every upstream ARGUS workflow they observe has a
@@ -258,13 +258,13 @@ the `_argus.corpus_id` tag.
 
 | File | Why the change was required |
 |---|---|
-| `soc-argus-frontier-simulator.yaml` | Replaced `elasticsearch.index` emitter with a `_reindex + inline Painless` step so nested ECS fields (`host`, `process`, `event`) stop being Liquid-stringified. Added dedicated `emissions_index` (`…-live`) to sidestep ES's read-from/write-to same-index guard. `refresh=true` (not `wait_for`). |
-| `soc-detection-eval.yaml` | Migrated `fetch_new_eval_runs` to `elasticsearch.request` so object-form `sort: [{ "@timestamp": { order: asc } }]` and `must_not: term.reconciled` go through raw — the engine's `.search` schema was rejecting both. |
-| `soc-argus-trust-tier-assessor.yaml` | Added `actors_gate` + `if` guard around the `process_actors` foreach; previously failed at runtime with `"Foreach expression … resolved to undefined"` when `aggregations.actors.buckets` was absent on a cold cluster. |
-| `soc-argus-trust-gate.yaml` | `find_actor_tier` → `elasticsearch.request` to use object-form `sort: [{ "@timestamp": { order: desc } }]`. |
-| `soc-demo-1-runner.yaml` | Removed the two `workflow.execute` calls (engine could not resolve targets by display name reliably). Runner now **observes** the E2D and trust-gate heartbeats; driver kicks the workflows explicitly. `fetch_scenario_recommendation` → `elasticsearch.request`. |
-| `soc-demo-2-runner.yaml` | Same observer-pattern refactor for the E2D dependency. `fetch_latest_eval_run` → `elasticsearch.request`. |
-| `soc-triage.yaml` | *(Historical.)* Removed empty `consts:` block that failed YAML schema validation. The `soc-triage` workflow was later removed; triage is handled by `soc-alert-sweeper.yaml`. |
+| `soc_argus_frontier_simulator.yaml` | Replaced `elasticsearch.index` emitter with a `_reindex + inline Painless` step so nested ECS fields (`host`, `process`, `event`) stop being Liquid-stringified. Added dedicated `emissions_index` (`…-live`) to sidestep ES's read-from/write-to same-index guard. `refresh=true` (not `wait_for`). |
+| `soc_detection_eval.yaml` | Migrated `fetch_new_eval_runs` to `elasticsearch.request` so object-form `sort: [{ "@timestamp": { order: asc } }]` and `must_not: term.reconciled` go through raw — the engine's `.search` schema was rejecting both. |
+| `soc_argus_trust_tier_assessor.yaml` | Added `actors_gate` + `if` guard around the `process_actors` foreach; previously failed at runtime with `"Foreach expression … resolved to undefined"` when `aggregations.actors.buckets` was absent on a cold cluster. |
+| `soc_argus_trust_gate.yaml` | `find_actor_tier` → `elasticsearch.request` to use object-form `sort: [{ "@timestamp": { order: desc } }]`. |
+| `soc_demo_1_runner.yaml` | Removed the two `workflow.execute` calls (engine could not resolve targets by display name reliably). Runner now **observes** the E2D and trust-gate heartbeats; driver kicks the workflows explicitly. `fetch_scenario_recommendation` → `elasticsearch.request`. |
+| `soc_demo_2_runner.yaml` | Same observer-pattern refactor for the E2D dependency. `fetch_latest_eval_run` → `elasticsearch.request`. |
+| `soc-triage.yaml` | *(Historical.)* Removed empty `consts:` block that failed YAML schema validation. The `soc-triage` workflow was later removed; triage is handled by `soc_alert_sweeper.yaml`. |
 | `scripts/argus_live_demo.sh` | Removed `SOC Triage` from the live-demo target list — it is not an ARGUS workflow, depends on a live Inference connector, and stalls the driver when triggered without real alert input. Documented inline. |
 
 Schema/runtime discrepancy summary: any step that needs object-form

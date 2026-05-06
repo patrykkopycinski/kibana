@@ -49,7 +49,7 @@ trail is informational; the canonical write is the mutation intent).
 
 - Mutation Detail flyout — `Variant Trace` tab.
 - Benchmark runner D5.* queries.
-- Reasoning-trace dashboard (`.soc-self-learning-loop` workflow audit).
+- Reasoning-trace dashboard (`.soc_self_learning_loop` workflow audit).
 
 ## Drift history
 

@@ -1,0 +1,246 @@
+version: '1'
+name: ARGUS HITL SLA Watchdog
+description: >
+  AutoDEX governance gap (Severity-1) — the HITL `pending_review` queue
+  has no SLA today. A rec demoted by the trust-gate, the crown-jewel-gate,
+  or the shadow executor lands on the operator queue and stays there
+  silently until either an operator picks it up OR the recommendation-
+  lifecycle manager closes it stale at 7 days. There is no signal in
+  between, so the queue can drift unchecked for days and the autonomy
+  KPIs cannot tell whether HITL throughput is keeping up.
+
+  This watchdog ticks every 30m and emits structured queue-health signals
+  on three age thresholds:
+
+    1. age ≥ 24h   → first SLA ping. Stamps `sla_pinged_at` on the rec
+                     + writes one autonomy-decision row tagged
+                     `gate: hitl_sla` and `decision: sla_breach_24h`.
+                     Idempotent: subsequent ticks skip recs that
+                     already carry `sla_pinged_at`.
+    2. age ≥ 72h   → escalation. Stamps `sla_escalated_at` and writes
+                     `decision: sla_breach_72h`. The autonomy-decision
+                     row carries `escalation: true` so the Pulse panel
+                     can light up an "escalation" tile.
+    3. age ≥ 168h  → SLA expired. Stamps `sla_expired_at` and writes
+                     `decision: sla_expired`. The recommendation-
+                     lifecycle manager will close the rec stale on its
+                     own at 7d; this row makes the SLA breach an
+                     explicit, queryable event before that happens.
+
+  The audit trail (`.soc-autonomy-decisions` + `.soc-audit-trail`) is
+  the load-bearing surface — the HITL UI and Pulse panel can subscribe
+  to it without needing additional schema changes. Future productionization
+  steps can add a notifier (email / Slack / Cases) downstream of these
+  decisions; the wire format is final.
+
+  THRESHOLDS (operator-tunable)
+  -----------------------------
+    consts.sla_ping_after_h:     24    # first SLA ping
+    consts.sla_escalate_after_h: 72    # escalation
+    consts.sla_expire_after_h:   168   # 7d, matches lifecycle close
+
+  IDEMPOTENCY
+  -----------
+  Each SLA stamp doubles as a dedup key. A rec that already has
+  `sla_pinged_at` is skipped by the 24h query (`must_not exists`),
+  same for the 72h and 168h queries. Once the rec leaves
+  `status: pending_review` (operator approves / the lifecycle manager
+  stales it) all three queries naturally skip it.
+
+  SAFETY
+  ------
+  - The watchdog NEVER changes a rec's status. It only stamps SLA
+    timestamps and writes audit rows.
+  - The watchdog NEVER deletes a rec. The 168h "expired" path stamps a
+    flag; the existing recommendation-lifecycle manager owns closure.
+  - Write-rate is bounded by `consts.batch_size_per_band`. On a
+    well-tended queue the watchdog's tick is essentially a heartbeat.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  recs_index: ".soc-recommendations"
+  watchdog_id: "soc_argus_hitl_sla_watchdog"
+  sla_ping_after_h: 24
+  sla_escalate_after_h: 72
+  sla_expire_after_h: 168
+  batch_size_per_band: 100
+
+steps:
+  # ── 1. Find recs in the 24h SLA breach band ─────────────────────────
+  - name: fetch_24h_breaches
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: "{{ consts.batch_size_per_band }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "pending_review" }
+            - range:
+                "@timestamp":
+                  lte: "now-{{ consts.sla_ping_after_h }}h"
+          must_not:
+            - exists: { field: "sla_pinged_at" }
+
+  # ── 2. Find recs in the 72h escalation band ─────────────────────────
+  - name: fetch_72h_breaches
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: "{{ consts.batch_size_per_band }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "pending_review" }
+            - range:
+                "@timestamp":
+                  lte: "now-{{ consts.sla_escalate_after_h }}h"
+          must_not:
+            - exists: { field: "sla_escalated_at" }
+
+  # ── 3. Find recs in the 168h SLA-expired band ───────────────────────
+  - name: fetch_168h_breaches
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: "{{ consts.batch_size_per_band }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "pending_review" }
+            - range:
+                "@timestamp":
+                  lte: "now-{{ consts.sla_expire_after_h }}h"
+          must_not:
+            - exists: { field: "sla_expired_at" }
+
+  # ── 4. Apply 24h pings ─────────────────────────────────────────────
+  - name: apply_24h_pings
+    type: foreach
+    foreach: "{{ steps.fetch_24h_breaches.output.hits.hits }}"
+    steps:
+      - name: stamp_pinged_at
+        type: elasticsearch.update
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            sla_pinged_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            sla_pinged_by: "{{ consts.watchdog_id }}"
+            sla_band: "ping_24h"
+
+      - name: write_autonomy_decision_24h
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-hitl-sla-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.watchdog_id }}"
+            decision: "sla_breach_24h"
+            gate: "hitl_sla"
+            sla_band: "ping_24h"
+            escalation: false
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            recommendation_id: "{{ foreach.item._id }}"
+            rec_status: "pending_review"
+            rec_timestamp: "{{ foreach.item._source['@timestamp'] }}"
+            rejection_reason: "{{ foreach.item._source.rejection_reason | default: 'unknown' }}"
+            reason: "Recommendation has been in pending_review for >= 24h. First SLA ping emitted."
+
+  # ── 5. Apply 72h escalations ───────────────────────────────────────
+  - name: apply_72h_escalations
+    type: foreach
+    foreach: "{{ steps.fetch_72h_breaches.output.hits.hits }}"
+    steps:
+      - name: stamp_escalated_at
+        type: elasticsearch.update
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            sla_escalated_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            sla_escalated_by: "{{ consts.watchdog_id }}"
+            sla_band: "escalate_72h"
+
+      - name: write_autonomy_decision_72h
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-hitl-sla-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.watchdog_id }}"
+            decision: "sla_breach_72h"
+            gate: "hitl_sla"
+            sla_band: "escalate_72h"
+            escalation: true
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            recommendation_id: "{{ foreach.item._id }}"
+            rec_status: "pending_review"
+            rec_timestamp: "{{ foreach.item._source['@timestamp'] }}"
+            rejection_reason: "{{ foreach.item._source.rejection_reason | default: 'unknown' }}"
+            reason: "Recommendation has been in pending_review for >= 72h. Escalation emitted."
+
+  # ── 6. Apply 168h expiry markers ───────────────────────────────────
+  - name: apply_168h_expiries
+    type: foreach
+    foreach: "{{ steps.fetch_168h_breaches.output.hits.hits }}"
+    steps:
+      - name: stamp_expired_at
+        type: elasticsearch.update
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            sla_expired_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            sla_expired_by: "{{ consts.watchdog_id }}"
+            sla_band: "expired_168h"
+
+      - name: write_autonomy_decision_168h
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-hitl-sla-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.watchdog_id }}"
+            decision: "sla_expired"
+            gate: "hitl_sla"
+            sla_band: "expired_168h"
+            escalation: true
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            recommendation_id: "{{ foreach.item._id }}"
+            rec_status: "pending_review"
+            rec_timestamp: "{{ foreach.item._source['@timestamp'] }}"
+            rejection_reason: "{{ foreach.item._source.rejection_reason | default: 'unknown' }}"
+            reason: "Recommendation has been in pending_review for >= 168h. SLA expired; lifecycle manager will close stale at 7d."
+
+  # ── 7. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_hitl_sla_watchdog_tick
+        source: "{{ consts.watchdog_id }}"
+        tick_id: "argus-hitl-sla-watchdog-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        breaches_24h: "{{ steps.fetch_24h_breaches.output.hits.hits | size | default: 0 }}"
+        breaches_72h: "{{ steps.fetch_72h_breaches.output.hits.hits | size | default: 0 }}"
+        breaches_168h: "{{ steps.fetch_168h_breaches.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS HITL SLA watchdog — pinged_24h={{ steps.fetch_24h_breaches.output.hits.hits | size | default: 0 }} escalated_72h={{ steps.fetch_72h_breaches.output.hits.hits | size | default: 0 }} expired_168h={{ steps.fetch_168h_breaches.output.hits.hits | size | default: 0 }}"

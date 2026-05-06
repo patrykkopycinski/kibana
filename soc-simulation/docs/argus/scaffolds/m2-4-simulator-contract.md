@@ -1,17 +1,17 @@
 # M2.4 — Frontier Simulator Contract
 
-How `soc-argus-frontier-simulator` composes with the Phase 1 arming workflow and the
+How `soc_argus_frontier_simulator` composes with the Phase 1 arming workflow and the
 existing Caldera dispatcher without duplicating responsibilities.
 
 ## 1. Trigger + safety rails
 
 ```
-[operator] -> soc-argus-arm-mythos-preset  (writes .soc-attack-commands doc difficulty=6)
-           -> soc-caldera-dispatcher        (POSTs Caldera operation for static techniques)
-           -> soc-argus-frontier-simulator  (NEW; observes the claimed command, augments with agentic layer)
+[operator] -> soc_argus_arm_mythos_preset  (writes .soc-attack-commands doc difficulty=6)
+           -> soc_caldera_dispatcher        (POSTs Caldera operation for static techniques)
+           -> soc_argus_frontier_simulator  (NEW; observes the claimed command, augments with agentic layer)
 ```
 
-`soc-argus-frontier-simulator` runs on a short interval (`every: 1m`) and processes
+`soc_argus_frontier_simulator` runs on a short interval (`every: 1m`) and processes
 each `.soc-attack-commands` doc where `difficulty == 6` AND
 `argus.simulation.agentic_done != true`. Every run:
 
@@ -102,7 +102,7 @@ only responsibility is to *plant* them cleanly, one injection per generated aler
 
 ## 7. Minimum reviewable deliverable
 
-- Workflow `soc-argus-frontier-simulator.yaml` with staging + kill-switch gates.
+- Workflow `soc_argus_frontier_simulator.yaml` with staging + kill-switch gates.
 - 30-entry curated injection corpus covering all three intents.
 - Fixture technique set (12) with ≥ 5 axes × ≥ 4 variants each checked in.
 - Scenario-3 demo runnable end-to-end.

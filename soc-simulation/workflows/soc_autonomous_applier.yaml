@@ -1,0 +1,759 @@
+version: '1'
+name: SOC Autonomous Applier
+description: >
+  Pure Elastic-native applier for autonomous self-governance mutations.
+
+  AUTONOMY-FIRST LIFECYCLE (2026-04):
+  -----------------------------------
+  The applier ONLY processes intents whose status is one of:
+      auto_apply_ready, approved_by_human, pending (non-rule-update only)
+
+  Rule-update intents land as `pending`; the soc_rule_backtester workflow
+  evaluates them and flips status to `auto_apply_ready` (projection safe)
+  or `pending_review` (exception queue). The applier refuses to touch a
+  rule-update intent that has not passed the backtester — the refusal is
+  a deferral (no rejection), so the backtester's next tick can still
+  claim it.
+
+  DETERMINISTIC GATE CASCADE:
+  ---------------------------
+     1. Kill-switch           (.soc-kill-switch autonomy_enabled=false)
+     2. Freeze-window         (.soc-kill-switch docs with scope=freeze-*)
+     3. Ownership             (must be auto-* prefix + owner=autosoc for update)
+     4. Envelope validity     (runtime recheck of recommendation.schema.json)
+     5. Backtest required     (rule-update + status=pending -> defer to backtester)
+     6. Drift                 (patch.current_values vs live rule state)
+     7. First-of-kind         (agent has never produced this kind of mutation
+                               before -> exception queue)
+     8. Trust-tier            (.soc-trust-scores agent_tier=probationary -> review)
+     9. Budget                (24h global mutation budget)
+    10. Cooldown              (same artifact in last 15 min)
+    11. Loop                  (same artifact 3+ times in 24h)
+
+  Failures are logged to `.soc-autonomy-decisions` with the first failing
+  gate. Successes are logged too (auto_applied: true). The activity-feed
+  dashboard aggregates this index to compute the Autonomy KPI.
+
+  Pipeline (all steps are elasticsearch.*, kibana.request, ai.agent, foreach, if — NO external code):
+    1. Read global kill-switch from .soc-kill-switch. If `autonomy_enabled: false`, exit without touching anything.
+    2. Pull pending / auto_apply_ready / approved_by_human intents, oldest first.
+    3. Pull last-24h evolution metrics used for budget / cooldown / loop gates.
+    4. For each intent, run the gate cascade and hand-off or defer.
+    5. Write a heartbeat row to .soc-audit-trail and a decision log to
+       .soc-autonomy-decisions with counts.
+
+  PREFIX CONVENTION (critical):
+    - canonical artifacts:       id head (first `-` segment) == `soc` or `caldera`
+    - autonomously-created:      id head anything else — convention is `auto-*`
+                                 (e.g. `auto-lateral-hunter-agent`). Do NOT use
+                                 `autosoc-*`; a naive substring check against
+                                 `soc-` would falsely flag that as canonical.
+  The check uses Liquid `| split: '-' | first` so `auto-*`, `autosoc-*`, and
+  any other head are correctly classified as non-canonical.
+
+  This workflow is the ONLY path by which ARGUS can mutate its own artifacts.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2m
+  - type: manual
+
+consts:
+  max_per_tick: 20
+  daily_budget_all: 50
+  cooldown_seconds: 900
+  loop_window_seconds: 86400
+  loop_threshold: 3
+  workflow_id: soc_autonomous_applier
+
+steps:
+  # ── 1. Kill-switch ───────────────────────────────────────────────────
+  # NOTE: uses elasticsearch.request (not .search) because the workflow engine's
+  # zod schema for top-level `sort` only accepts strings or the reserved keys
+  # (_score/_doc/_geo_distance/_script). Sorting @timestamp desc requires an
+  # object form that the raw request API passes through unchanged.
+  - name: read_kill_switch
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.soc-kill-switch/_search
+      body:
+        size: 1
+        query:
+          term:
+            scope: "global"
+        sort:
+          - "@timestamp":
+              order: desc
+  # Pre-compute kill-switch gates into scalar "yes"/"no" so the if: conditions
+  # can use KQL `steps.<gate>.output: yes` matching (the only reliable pattern —
+  # bare Liquid `{{ ... == false }}` renders to "true"/"false" which KQL then
+  # evaluates as `is(*, 'false')` and silently returns false).
+  - name: gate_kill_switch_active
+    type: console
+    with:
+      message: "{% if steps.read_kill_switch.output.hits.hits[0]._source.autonomy_enabled == false %}yes{% else %}no{% endif %}"
+
+  - name: gate_autonomy_ok
+    type: console
+    with:
+      message: "{% if steps.read_kill_switch.output.hits.hits[0]._source.autonomy_enabled == false %}no{% else %}yes{% endif %}"
+
+  - name: kill_switch_active_log
+    type: console
+    with:
+      message: >-
+        Kill-switch ACTIVE (autonomy_enabled=false) — aborting applier run.
+        Reason: {{ steps.read_kill_switch.output.hits.hits[0]._source.reason | default: 'unset' }}
+    if: "steps.gate_kill_switch_active.output: yes"
+
+  - name: abort_if_kill_switch
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: autonomous_applier_abort
+        reason: kill_switch_active
+        kill_switch: "{{ steps.read_kill_switch.output.hits.hits[0]._source | json }}"
+    if: "steps.gate_kill_switch_active.output: yes"
+
+  # ── 2. Pending intents (skipped when kill-switch active / autonomy disabled) ─
+  #
+  # Status matrix:
+  #   pending              -> new intent. Non-rule-update: eligible; rule-update: deferred to backtester
+  #   auto_apply_ready     -> backtester said safe; apply immediately
+  #   approved_by_human    -> exception queue -> operator approved; apply immediately
+  #
+  # Any other status (pending_backtest, pending_review, applying, applied, rolled_back,
+  # failed, rejected_*) is ignored — that record is owned by another workflow.
+  # NOTE: uses elasticsearch.request (not .search) — see read_kill_switch above
+  # for the sort-schema rationale.
+  - name: pending_intents
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /.soc-recommendations/_search
+      body:
+        size: 20
+        query:
+          bool:
+            filter:
+              - term: {type: "mutation_intent"}
+              # ARGUS R8 — never fire an `auto_apply_ready` rec that has
+              # not already passed the shadow executor. `pending` and
+              # `approved_by_human` bypass the shadow gate because they
+              # are either non-rule-update intents or already have a
+              # human signoff carrying the blast-radius decision.
+              - bool:
+                  should:
+                    - bool:
+                        filter:
+                          - term: {status: "auto_apply_ready"}
+                          - term: {shadow_gate: "pass"}
+                    - term: {status: "approved_by_human"}
+                    - term: {status: "pending"}
+                  minimum_should_match: 1
+        sort:
+          - "@timestamp":
+              order: asc
+    if: "steps.gate_autonomy_ok.output: yes"
+
+  # ── 3. Budget / cooldown / loop context ──────────────────────────────
+  # Initial pre-foreach snapshot of the 24h applied counter. The live
+  # recount inside the foreach is authoritative; this outer read is kept
+  # only for the heartbeat/summary at the end of the tick.
+  - name: recent_mutations
+    type: elasticsearch.search
+    with:
+      index: ".soc-evolution-log"
+      size: 0
+      query:
+        bool:
+          filter:
+            - term: {source: "soc_autonomous_applier"}
+            - term: {result: "applied"}
+            - range:
+                "@timestamp":
+                  gte: "now-24h"
+      aggs:
+        total_24h:
+          value_count:
+            field: "artifact_id"
+    if: "steps.gate_autonomy_ok.output: yes"
+
+  # ── 4. Dispatch each intent ──────────────────────────────────────────
+  # Per-iteration, each gate re-queries .soc-evolution-log so the budget
+  # / cooldown / loop counters see mutations applied earlier in the same
+  # tick. A wait_for-refreshed serialization marker is written after
+  # each successful apply so the subsequent iteration's search observes
+  # the newly-written audit row (T2 applier-concurrency).
+  - name: dispatch_intents
+    type: foreach
+    foreach: "{{ steps.pending_intents.output.hits.hits }}"
+    if: "steps.gate_autonomy_ok.output: yes"
+    steps:
+      # Live recount of 24h applied mutations — authoritative for the
+      # global budget gate. Re-queried every iteration so intents later
+      # in the batch correctly see earlier intra-batch applies.
+      - name: recent_mutations_live
+        type: elasticsearch.search
+        with:
+          index: ".soc-evolution-log"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: {source: "soc_autonomous_applier"}
+                - term: {result: "applied"}
+                - range:
+                    "@timestamp":
+                      gte: "now-24h"
+          aggs:
+            total_24h:
+              value_count:
+                field: "artifact_id"
+
+      # -- Ownership lookup ---------------------------------------------
+      - name: ownership_row
+        type: elasticsearch.search
+        with:
+          index: ".soc-artifact-registry"
+          size: 1
+          query:
+            bool:
+              filter:
+                - term: {type: "{{ foreach.item._source.details.artifact_type }}"}
+                - term: {artifact_id: "{{ foreach.item._source.details.artifact_id }}"}
+
+      # ── GATE COMPUTATION ──────────────────────────────────────────────
+      # All gates are pre-computed via console steps that emit "yes"/"no".
+      # Each consumer step's `if:` then uses KQL `steps.<gate>.output: yes`.
+      # Why: LiquidJS renders boolean expressions as the strings "true"/"false"
+      # (or "1"/""), but KQL treats those as bare terms like `is(*, 'true')`
+      # which silently evaluate to false. Compute-and-match is the only
+      # reliable pattern empirically verified against the workflow engine.
+
+      # Envelope validation — runtime enforcement of recommendation.schema.json.
+      - name: gate_envelope_invalid
+        type: console
+        with:
+          message: >-
+            {%- assign rec_id = foreach.item._source.rec_id -%}
+            {%- assign sv = foreach.item._source.schema_version -%}
+            {%- assign t = foreach.item._source.type -%}
+            {%- assign src = foreach.item._source.source -%}
+            {%- assign st = foreach.item._source.status -%}
+            {%- assign ti = foreach.item._source.title -%}
+            {%- assign su = foreach.item._source.summary -%}
+            {%- assign cf = foreach.item._source.confidence -%}
+            {%- assign de = foreach.item._source.details -%}
+            {%- assign tr = foreach.item._source.track -%}
+            {%- assign hk = foreach.item._source.housekeeping -%}
+            {%- assign ev = foreach.item._source.evidence -%}
+            {%- assign ei = foreach.item._source.expected_impact -%}
+            {%- assign ev_size = ev | size | default: 0 -%}
+            {%- assign track_bad = false -%}
+            {%- if tr != 'deterministic' and tr != 'agentic' -%}{%- assign track_bad = true -%}{%- endif -%}
+            {%- assign ev_bad = false -%}
+            {%- if hk != true and ev_size == 0 -%}{%- assign ev_bad = true -%}{%- endif -%}
+            {%- if hk != true and ei == nil -%}{%- assign ev_bad = true -%}{%- endif -%}
+            {% if rec_id == nil or rec_id == empty or sv == nil or t != 'mutation_intent' or src == nil or src == empty or st == nil or st == empty or ti == nil or ti == empty or su == nil or su == empty or cf == nil or de == nil or track_bad == true or ev_bad == true %}yes{% else %}no{% endif %}
+
+      # Awaiting-backtest — rule-update intents at status=pending defer to backtester.
+      - name: gate_awaiting_backtest
+        type: console
+        with:
+          message: >-
+            {%- assign at = foreach.item._source.details.artifact_type -%}
+            {%- assign op = foreach.item._source.details.op -%}
+            {%- assign st = foreach.item._source.status -%}
+            {% if at == 'rule' and op == 'update' and st == 'pending' %}yes{% else %}no{% endif %}
+
+      # Canonical artifact — block mutations where the registry explicitly says
+      # `canonical` or `platform`, OR where no registry row exists AND the
+      # artifact id is in a reserved prefix (`soc-*`, `caldera-*`). Retro-tagged
+      # rules (where registry owner=autosoc but id is a UUID) are ALLOWED: the
+      # registry is the source of truth for ownership; the id prefix is only a
+      # fallback safety net when registry knows nothing about the artifact.
+      - name: gate_canonical
+        type: console
+        with:
+          message: >-
+            {%- assign owner = steps.ownership_row.output.hits.hits[0]._source.owner -%}
+            {%- assign first_seg = foreach.item._source.details.artifact_id | split: '-' | first -%}
+                        {%- assign block = false -%}
+                        {%- if owner == 'canonical' -%}{%- assign block = true -%}{%- endif -%}
+                        {%- if owner == 'platform' -%}{%- assign block = true -%}{%- endif -%}
+                        {%- if owner == nil and first_seg == 'soc' -%}{%- assign block = true -%}{%- endif -%}
+                        {%- if owner == nil and first_seg == 'caldera' -%}{%- assign block = true -%}{%- endif -%}
+                        {% if block == true %}yes{% else %}no{% endif %}
+
+      # Unregistered-mutation — mutating op (update/delete/enable/disable) on an
+      # artifact that does not have an autosoc-owned registry row. The applier
+      # refuses to mutate anything it has not been given ownership over. This
+      # now applies to ALL artifact id prefixes (not just auto-*), because
+      # retro-tagged rules keep their UUID ids but are legitimately autosoc-owned.
+      - name: gate_unregistered_mutation
+        type: console
+        with:
+          message: >-
+            {%- assign op = foreach.item._source.details.op -%}
+            {%- assign owner = steps.ownership_row.output.hits.hits[0]._source.owner -%}
+            {%- assign is_mutating = false -%}
+            {%- if op == 'update' or op == 'delete' or op == 'enable' or op == 'disable' -%}{%- assign is_mutating = true -%}{%- endif -%}
+            {%- assign owner_bad = false -%}
+            {%- if owner == nil or owner != 'autosoc' -%}{%- assign owner_bad = true -%}{%- endif -%}
+            {% if is_mutating == true and owner_bad == true %}yes{% else %}no{% endif %}
+
+      - name: block_missing_envelope
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id | default: 'unknown' }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type | default: 'unknown' }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id | default: 'unknown' }}"
+            op: "{{ foreach.item._source.details.op | default: 'unknown' }}"
+            result: validation_failed
+            reason: >-
+              Envelope validation failed. Required fields per recommendation.schema.json:
+              rec_id, schema_version, type, source, status, title, summary, confidence, details, track.
+              track must be 'deterministic' or 'agentic'. confidence must be 0-100.
+              Unless housekeeping=true, evidence[] must have ≥1 entry and expected_impact must be a non-empty object.
+            tool_called: "none"
+        if: "steps.gate_envelope_invalid.output: yes"
+
+      - name: dead_letter_missing_envelope
+        type: elasticsearch.index
+        with:
+          index: .soc-dead-letter
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_autonomous_applier"
+            reason: "envelope_validation_failed"
+            rec_id: "{{ foreach.item._source.rec_id | default: 'unknown' }}"
+            schema_ref: "recommendation.schema.json"
+            doc: "{{ foreach.item._source | json }}"
+        if: "steps.gate_envelope_invalid.output: yes"
+
+      # ── GATE: Backtest required for rule updates ────────────────────
+      # A rule-update intent with status=pending has NOT been backtested yet.
+      # We defer — the backtester's next tick (every 1m) will compute a
+      # projection and flip status to auto_apply_ready or pending_review.
+      # Logging to .soc-autonomy-decisions is deliberate: even a "wait"
+      # decision is a decision the activity-feed should show.
+      - name: defer_awaiting_backtest
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "{{ foreach.item._source.rec_id | default: 'unknown' }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            action: "{{ foreach.item._source.details.patch.action | default: 'none' }}"
+            source_agent: "{{ foreach.item._source.source | default: 'unknown' }}"
+            source_workflow: "soc_autonomous_applier"
+            gates_evaluated: ["kill_switch", "envelope", "backtest_required"]
+            gates_passed: ["kill_switch", "envelope"]
+            first_failing_gate: "backtest_required"
+            final_status: "deferred_awaiting_backtest"
+            auto_applied: false
+            required_human: false
+            review_reason: "awaiting_backtest"
+            confidence: "{{ foreach.item._source.confidence | default: 0 }}"
+        if: "steps.gate_awaiting_backtest.output: yes"
+
+      # Mark the intent as pending_backtest so the backtester sees it
+      # in its next tick's primary query. Without this, the backtester
+      # only sees truly-fresh intents and older pending rule-updates
+      # stall forever.
+      - name: mark_pending_backtest
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          doc:
+            status: pending_backtest
+            backtest_queued_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        if: "steps.gate_awaiting_backtest.output: yes"
+
+      # Block canonical artifacts (registry says canonical OR first dash-segment
+      # is `soc`/`caldera`) AND block non-`auto-*` ids for any op — this closes
+      # the T5 registry-protection gap: even if the applier agent concocts a
+      # plausible-looking artifact_id like `autosoc-thing`, it is rejected
+      # unless the first dash-segment is literally `auto`.
+      - name: block_canonical
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: blocked_canonical
+            reason: "Artifact id is not in the protected `auto-*` namespace (registry owner=canonical, first dash-segment is 'soc'/'caldera', or does not start with 'auto-'). Autonomous mutation refused."
+            tool_called: "none"
+        if: "steps.gate_canonical.output: yes"
+
+      # For update/delete/enable/disable ops, the artifact MUST already exist
+      # in .soc-artifact-registry with owner=autosoc. This prevents the
+      # applier agent from mutating anything it never created (e.g. an
+      # artifact created manually by an operator, or by a sibling system).
+      - name: block_unregistered_mutation
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: blocked_unregistered
+            reason: "Non-create op requires an existing .soc-artifact-registry row with owner=autosoc. The applier refuses to mutate an artifact it does not own."
+            tool_called: "none"
+        if: "steps.gate_unregistered_mutation.output: yes"
+
+      # Block on loop detection (>= loop_threshold attempts of same artifact in
+      # window, counting both applied AND failed — so a persistently failing
+      # intent does not retry forever).
+      - name: artifact_recent_count
+        type: elasticsearch.search
+        with:
+          index: ".soc-evolution-log"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: {source: "soc_autonomous_applier"}
+                - term: {artifact_id: "{{ foreach.item._source.details.artifact_id }}"}
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.loop_window_seconds }}s"
+                - terms:
+                    result: ["applied", "failure", "validation_failed"]
+        # Only run the loop/cooldown counter query when the intent has passed
+        # envelope + canonical + unregistered gates — skip noise from malformed
+        # or out-of-scope intents.
+        if: >-
+          steps.gate_envelope_invalid.output: no and
+          steps.gate_canonical.output: no and
+          steps.gate_unregistered_mutation.output: no
+
+      # Gate: loop threshold exceeded for this artifact in the window.
+      - name: gate_loop_exceeded
+        type: console
+        with:
+          message: >-
+            {%- assign cnt = steps.artifact_recent_count.output.hits.total.value | default: 0 -%}
+            {%- assign th = consts.loop_threshold -%}
+            {% if cnt >= th %}yes{% else %}no{% endif %}
+
+      - name: block_loop
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: blocked_loop
+            reason: "Artifact was mutated {{ steps.artifact_recent_count.output.hits.total.value }} times in the last {{ consts.loop_window_seconds }}s (threshold: {{ consts.loop_threshold }}). Oscillation detected; refusing further mutations."
+            tool_called: "none"
+        if: "steps.gate_loop_exceeded.output: yes"
+
+      # Cooldown: count applied mutations for this artifact in the cooldown window.
+      # Zero means safe to proceed; >= 1 means defer.
+      - name: artifact_cooldown_count
+        type: elasticsearch.search
+        with:
+          index: ".soc-evolution-log"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: {source: "soc_autonomous_applier"}
+                - term: {result: "applied"}
+                - term: {artifact_id: "{{ foreach.item._source.details.artifact_id }}"}
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.cooldown_seconds }}s"
+        # Only check cooldown when earlier gates passed. Matches the original
+        # compound condition: not canonical, loop not exceeded, envelope good.
+        if: >-
+          steps.gate_envelope_invalid.output: no and
+          steps.gate_canonical.output: no and
+          steps.gate_loop_exceeded.output: no
+
+      # Gate: cooldown window active for this artifact.
+      - name: gate_cooldown_active
+        type: console
+        with:
+          message: >-
+            {%- assign cnt = steps.artifact_cooldown_count.output.hits.total.value | default: 0 -%}
+            {% if cnt >= 1 %}yes{% else %}no{% endif %}
+
+      - name: block_cooldown
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: blocked_cooldown
+            reason: "Artifact was mutated within the last {{ consts.cooldown_seconds }}s cooldown window. Deferring."
+            tool_called: "none"
+        if: "steps.gate_cooldown_active.output: yes"
+
+      # Defer on budget (global or per-type)
+      - name: block_budget_global
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: "soc_autonomous_applier"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: blocked_budget
+            reason: "Global 24h budget of {{ consts.daily_budget_all }} mutations reached ({{ steps.recent_mutations_live.output.aggregations.total_24h.value | default: 0 }}). Deferring."
+            tool_called: "none"
+        if: "steps.gate_budget_exceeded.output: yes"
+
+      # Gate: global 24h budget exceeded AND earlier gates passed.
+      - name: gate_budget_exceeded
+        type: console
+        with:
+          message: >-
+            {%- assign cnt_24h = steps.recent_mutations_live.output.aggregations.total_24h.value | default: 0 -%}
+            {%- assign budget = consts.daily_budget_all -%}
+            {% if cnt_24h >= budget %}yes{% else %}no{% endif %}
+
+      # Gate: all checks passed — invoke applier agent.
+      # Composite: not canonical, not unregistered, not loop, not cooldown, not budget,
+      # not envelope-invalid, not awaiting-backtest, first_seg=='auto'.
+      # We encode first_seg and op_allowed_for_owner here since they aren't in other gates.
+      # All gates must pass. `op_allowed` encodes the positive-ownership rule:
+      #   - op=create is always allowed (we're creating a new artifact)
+      #   - OR owner=='autosoc' per the registry (covers both `auto-*` greenfield
+      #     artifacts AND retro-tagged SOC-Sim UUID rules whose registry row was
+      #     stamped by soc_registry_retro_tag).
+      # The old implementation ALSO required `first_seg == 'auto'` which
+      # silently blocked every autosoc-owned UUID rule — that was the root
+      # cause of the 95% rejection rate in the 2026-04-17 demo soak (the
+      # individual gates passed but the composite refused every UUID).
+      - name: gate_all_pass
+        type: console
+        with:
+          message: >-
+            {%- assign owner = steps.ownership_row.output.hits.hits[0]._source.owner -%}
+            {%- assign op = foreach.item._source.details.op -%}
+            {%- assign op_allowed = false -%}
+            {%- if op == 'create' -%}{%- assign op_allowed = true -%}{%- endif -%}
+            {%- if owner == 'autosoc' -%}{%- assign op_allowed = true -%}{%- endif -%}
+            {%- assign env_invalid = steps.gate_envelope_invalid.output -%}
+            {%- assign canonical = steps.gate_canonical.output -%}
+            {%- assign unreg = steps.gate_unregistered_mutation.output -%}
+            {%- assign loop_ex = steps.gate_loop_exceeded.output -%}
+            {%- assign cool_ac = steps.gate_cooldown_active.output -%}
+            {%- assign budg_ex = steps.gate_budget_exceeded.output -%}
+            {%- assign await_bt = steps.gate_awaiting_backtest.output -%}
+            {% if env_invalid == 'no' and canonical == 'no' and unreg == 'no' and loop_ex == 'no' and cool_ac == 'no' and budg_ex == 'no' and await_bt == 'no' and op_allowed == true %}yes{% else %}no{% endif %}
+
+      # Gate: permanent rejection — canonical, non-auto, loop-exceeded,
+      # envelope invalid, or unregistered mutation.
+      - name: gate_permanent_reject
+        type: console
+        with:
+          message: >-
+            {%- assign env_invalid = steps.gate_envelope_invalid.output -%}
+            {%- assign canonical = steps.gate_canonical.output -%}
+            {%- assign unreg = steps.gate_unregistered_mutation.output -%}
+            {%- assign loop_ex = steps.gate_loop_exceeded.output -%}
+            {% if canonical == 'yes' or env_invalid == 'yes' or loop_ex == 'yes' or unreg == 'yes' %}yes{% else %}no{% endif %}
+
+      # -- All gates passed -> invoke the applier agent -----------------
+      - name: apply_with_agent
+        type: ai.agent
+        connector-id: opus
+        with:
+          message: >
+            You have been handed ONE validated mutation_intent. Apply it per your
+            instructions. Snapshot first, then mutate, then audit, then close.
+
+            intent = {{ foreach.item._source | json }}
+            ownership_registry_row = {{ steps.ownership_row.output.hits.hits[0]._source | json }}
+            recent_mutations_for_artifact = {{ steps.artifact_recent_count.output.hits.total.value | default: 0 }}
+
+            Return the JSON result described in your instructions. Nothing else.
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              result:
+                type: string
+              artifact_id:
+                type: string
+              notes:
+                type: string
+            required:
+              - status
+        timeout: 300s
+        if: "steps.gate_all_pass.output: yes"
+        on_failure:
+          - name: log_apply_with_agent_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: apply_with_agent
+                step_name: apply_with_agent
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+      # Serialization barrier — force .soc-evolution-log to be searchable
+      # before the next iteration's live gates query it. The applier
+      # agent writes its audit row via tool call; that write is not
+      # refresh=wait_for by default, so without this barrier the next
+      # iteration could miss the just-applied mutation and re-breach
+      # budget/cooldown/loop thresholds (T2 applier-concurrency).
+      - name: serialize_applied_intent
+        type: elasticsearch.index
+        with:
+          index: .soc-evolution-log
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_autonomous_applier"
+            event_type: "applier_serialize_marker"
+            intent_rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            result: "serialize_marker"
+            tool_called: "none"
+            note: "Synchronization barrier ensuring the next iteration's gate queries observe this apply."
+        if: "steps.gate_all_pass.output: yes"
+
+      # On a PERMANENT block (canonical or loop detection), mark the intent
+      # `rejected` so it never retries. Cooldown and budget are DEFERS — the
+      # intent stays `pending` and the next tick reconsiders it.
+      - name: close_rejected_intent
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          doc:
+            status: rejected
+            applied_by: soc_autonomous_applier
+            applied_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            rejection_reason: "gated_by_applier_workflow"
+        # Permanent-rejection conditions (ANY one trips it):
+        #   - canonical owner OR non-auto artifact prefix
+        #   - loop threshold reached
+        #   - envelope invalid (same check as block_missing_envelope)
+        #   - mutating op on an artifact not owned by autosoc
+        if: "steps.gate_permanent_reject.output: yes"
+
+      # ── Close successfully applied intent ──────────────────────────
+      # After a successful auto-apply, transition the recommendation's
+      # status from `auto_apply_ready` / `approved_by_human` / `pending`
+      # to `applied` so the next applier tick does not re-process the
+      # same intent. Without this transition, the applier keeps re-running
+      # the full gate cascade every tick and the 24h budget counter
+      # inflates on each re-attempt.
+      - name: close_applied_intent
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            status: applied
+            applied_by: soc_autonomous_applier
+            applied_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            applied_exec_id: "{{ execution.id | default: 'unknown' }}"
+        if: "steps.gate_all_pass.output: yes"
+        on_failure:
+          - name: log_close_applied_intent_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: close_applied_intent
+                step_name: close_applied_intent
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+      # ── Decision log: successful auto-apply ────────────────────────
+      # Records every auto-apply attempt so the Autonomy Activity Feed
+      # can show "N decisions today, M auto-applied". The row is keyed
+      # by rec_id — the post-apply-observer reconciles with the actual
+      # artifact state later.
+      - name: log_auto_apply_decision
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "{{ foreach.item._source.details.artifact_type }}"
+            artifact_id: "{{ foreach.item._source.details.artifact_id }}"
+            op: "{{ foreach.item._source.details.op }}"
+            action: "{{ foreach.item._source.details.patch.action | default: foreach.item._source.details.op }}"
+            source_agent: "{{ foreach.item._source.source | default: 'unknown' }}"
+            source_workflow: "soc_autonomous_applier"
+            gates_evaluated: ["kill_switch", "envelope", "ownership", "budget", "cooldown", "loop", "backtest_required"]
+            gates_passed: ["kill_switch", "envelope", "ownership", "budget", "cooldown", "loop", "backtest_required"]
+            final_status: "applied"
+            auto_applied: true
+            required_human: false
+            backtest_verdict: "{{ foreach.item._source.backtest_verdict | default: 'n/a' }}"
+            backtest_ref: "{{ foreach.item._source.backtest_ref | default: 'n/a' }}"
+            confidence: "{{ foreach.item._source.confidence | default: 0 }}"
+        if: "steps.gate_all_pass.output: yes"
+
+  # ── 5. Heartbeat ─────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: autonomous_applier_heartbeat
+        autonomy_enabled: "{{ steps.read_kill_switch.output.hits.hits[0]._source.autonomy_enabled | default: true }}"
+        pending_count: "{{ steps.pending_intents.output.hits.total.value | default: 0 }}"
+        recent_24h_total: "{{ steps.recent_mutations.output.aggregations.total_24h.value | default: 0 }}"
+        budget_remaining: "{% assign _used_24h = steps.recent_mutations.output.aggregations.total_24h.value | default: 0 %}{{ consts.daily_budget_all | minus: _used_24h }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Autonomous applier tick complete — pending={{ steps.pending_intents.output.hits.total.value | default: 0 }} applied_24h={{ steps.recent_mutations.output.aggregations.total_24h.value | default: 0 }}"

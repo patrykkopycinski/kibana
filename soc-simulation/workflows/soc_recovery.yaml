@@ -1,0 +1,152 @@
+version: '1'
+name: SOC Recovery
+description: >
+  Dead-letter recovery + rollback MTTR instrumentation (ARGUS R6).
+
+  Two responsibilities in one workflow:
+
+    1. Stalled-entry recovery — unchanged pre-R6 behavior. Find rows in
+       `.soc-dead-letter` flagged `failed` in the last hour and log them
+       for manual review.
+
+    2. Rollback MTTR emission (ARGUS R6) — for every rec in
+       `.soc-recommendations` whose status is `rolled_back` and which does
+       not yet have a corresponding `.soc-outcomes` row, compute
+       `rollback_mttr_ms = rolled_back_at - applied_at` and write an
+       outcome doc keyed by `rec_id`. The trust-tier assessor reads these
+       outcomes on its next tick and uses the median MTTR per actor as a
+       second-order governance signal alongside rollback rate and FP rate.
+
+  Runs every 10 minutes so MTTR surfaces close to real time.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 10m
+  - type: manual
+
+consts:
+  recs_index: ".soc-recommendations"
+  outcomes_index: ".soc-outcomes"
+
+steps:
+  # ── 1. Classic dead-letter recovery (pre-R6 behavior) ───────────────
+  - name: find_stalled
+    type: elasticsearch.search
+    with:
+      index: ".soc-dead-letter"
+      query:
+        bool:
+          must:
+            - term:
+                status: "failed"
+            - range:
+                "@timestamp":
+                  gte: "now-1h"
+      size: 20
+
+  - name: log_stalled_count
+    type: console
+    with:
+      message: "Recovery found {{ steps.find_stalled.output.hits.total.value }} stalled entries"
+
+  - name: write_recovery_log
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: "dead_letter_recovery"
+        source: "soc_recovery"
+        stalled_count: "{{ steps.find_stalled.output.hits.total.value }}"
+        details: "Recovery scan complete. Stalled entries logged for review."
+
+  # ── 2. Rollback MTTR instrumentation (ARGUS R6) ────────────────────
+  # Find recs that rolled back recently. We only consider recs that have
+  # both `applied_at` and a `rolled_back` status — this filters out
+  # orphaned rollbacks from pre-apply rejections (which have no meaningful
+  # MTTR to measure).
+  - name: find_rolled_back_recs
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term:   { status: "rolled_back" }
+            - exists: { field: "applied_at" }
+          must_not:
+            # Skip recs we've already written an MTTR outcome for. The
+            # foreach below writes a deterministic outcome ID so a second
+            # pass would be idempotent, but skipping here avoids the
+            # re-write round-trip on every 10-minute tick.
+            - exists: { field: "rollback_mttr_emitted_at" }
+
+  - name: emit_mttr_outcomes
+    type: foreach
+    foreach: "{{ steps.find_rolled_back_recs.output.hits.hits }}"
+    steps:
+      # elasticsearch.request lets us use painless on-the-fly to compute
+      # the MTTR in milliseconds from the two date fields. We avoid
+      # letting the workflow engine do date math (Liquid's `date` filter
+      # doesn't expose ms-since-epoch reliably).
+      - name: compute_mttr
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/_scripts/painless/_execute"
+          body:
+            script:
+              source: >-
+                long applied = Instant.parse(params.applied).toEpochMilli();
+                long rolled  = params.rolled != null
+                  ? Instant.parse(params.rolled).toEpochMilli()
+                  : System.currentTimeMillis();
+                return rolled - applied;
+              params:
+                applied: "{{ foreach.item._source.applied_at }}"
+                rolled:  "{{ foreach.item._source.rolled_back_at | default: foreach.item._source['@timestamp'] }}"
+
+      - name: write_mttr_outcome
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.outcomes_index }}"
+          # Deterministic id so re-emitting on a second pass is a no-op.
+          id: "mttr-{{ foreach.item._id }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            pipeline: "argus.rollback_mttr"
+            stage: "rollback"
+            disposition: "rolled_back"
+            actor_id: "{{ foreach.item._source.source | default: 'unknown' }}"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            rolled_back: true
+            rollback_reason: "{{ foreach.item._source.rejection_reason | default: 'unspecified' }}"
+            rollback_source: "soc_recovery"
+            rollback_mttr_ms: "{{ steps.compute_mttr.output.result | default: 0 }}"
+            applied_at: "{{ foreach.item._source.applied_at }}"
+            rolled_back_at: "{{ foreach.item._source.rolled_back_at | default: foreach.item._source['@timestamp'] }}"
+            false_positive: "{{ foreach.item._source.review_decision == 'false_positive' }}"
+
+      # Stamp the rec so the next tick skips it.
+      - name: mark_rec_emitted
+        type: elasticsearch.update
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            rollback_mttr_emitted_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rollback_mttr_ms: "{{ steps.compute_mttr.output.result | default: 0 }}"
+
+  - name: log_mttr_done
+    type: console
+    with:
+      message: "ARGUS R6 MTTR scan: emitted={{ steps.find_rolled_back_recs.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "SOC Recovery scan complete"

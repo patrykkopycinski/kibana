@@ -73,7 +73,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
           // pre-M2.5 clusters) can't take down the whole Pulse tile. The
           // fourth (coverage-snapshots) is the vision-doc 4.2 trend tile —
           // its index doesn't exist on stacks that haven't yet enabled
-          // `soc-argus-coverage-snapshotter`, so the section degrades to
+          // `soc_argus_coverage_snapshotter`, so the section degrades to
           // `coverage_trend: null` rather than 503'ing the route.
           const [outcomesSettled, mutationSettled, trustSettled, coverageSettled] =
             await Promise.allSettled([
@@ -288,7 +288,7 @@ export const registerGovernancePulseRoute = ({ router, logger }: ArgusRoutesDeps
               // oldest + latest snapshot in the window so the builder can
               // compute the trend in TS. `ignore_unavailable: true` is the
               // critical degradation lever — clusters that haven't yet
-              // enabled `soc-argus-coverage-snapshotter` get
+              // enabled `soc_argus_coverage_snapshotter` get
               // `coverage_trend: null`, not a 404.
               esClient.search({
                 index: ARGUS_SOC_INDICES.coverageSnapshots,

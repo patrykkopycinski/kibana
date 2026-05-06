@@ -1,0 +1,126 @@
+version: '1'
+name: SOC Recommendation Lifecycle Manager
+description: >
+  Auto-closes stale recommendations that have remained in `open` or `pending` status
+  for more than 7 days without a recent `@timestamp`, transitioning them to
+  `closed_stale` and recording each closure in `.soc-audit-trail`.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  stale_age: "7d"
+  batch_size: 50
+
+steps:
+  - name: stale_open
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: "{{ consts.batch_size }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "open" }
+            - range:
+                "@timestamp":
+                  lte: "now-{{ consts.stale_age }}"
+
+  - name: stale_pending
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: "{{ consts.batch_size }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "pending" }
+            - range:
+                "@timestamp":
+                  lte: "now-{{ consts.stale_age }}"
+
+  - name: gate_has_stale_recommendations
+    type: console
+    with:
+      message: >-
+        {%- assign o = steps.stale_open.output.hits.total.value | default: 0 -%}
+        {%- assign p = steps.stale_pending.output.hits.total.value | default: 0 -%}
+        {% if o > 0 or p > 0 %}yes{% else %}no{% endif %}
+
+  - name: close_stale_open
+    type: foreach
+    foreach: "{{ steps.stale_open.output.hits.hits }}"
+    if: "steps.gate_has_stale_recommendations.output: yes"
+    steps:
+      - name: update_open_rec
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            status: closed_stale
+            closed_stale_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            closed_stale_by: "soc_recommendation_lifecycle"
+            closure_reason: "no_activity_exceeds_7d"
+
+      - name: audit_open_close
+        type: elasticsearch.index
+        with:
+          index: .soc-audit-trail
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            event_type: "recommendation_closed_stale"
+            source: "soc_recommendation_lifecycle"
+            prior_status: "open"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            recommendation_id: "{{ foreach.item._id }}"
+
+  - name: close_stale_pending
+    type: foreach
+    foreach: "{{ steps.stale_pending.output.hits.hits }}"
+    if: "steps.gate_has_stale_recommendations.output: yes"
+    steps:
+      - name: update_pending_rec
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            status: closed_stale
+            closed_stale_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            closed_stale_by: "soc_recommendation_lifecycle"
+            closure_reason: "no_activity_exceeds_7d"
+
+      - name: audit_pending_close
+        type: elasticsearch.index
+        with:
+          index: .soc-audit-trail
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            event_type: "recommendation_closed_stale"
+            source: "soc_recommendation_lifecycle"
+            prior_status: "pending"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            recommendation_id: "{{ foreach.item._id }}"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: recommendation_lifecycle_heartbeat
+        source: "soc_recommendation_lifecycle"
+        stale_open_batch: "{{ steps.stale_open.output.hits.hits | size | default: 0 }}"
+        stale_pending_batch: "{{ steps.stale_pending.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Recommendation lifecycle tick — open_batch={{ steps.stale_open.output.hits.hits | size | default: 0 }} pending_batch={{ steps.stale_pending.output.hits.hits | size | default: 0 }}"

@@ -29,7 +29,7 @@ it before the live demo.
 | Kibana + Elasticsearch running | — | `curl -u elastic:$ES_PASS http://localhost:19200/_cluster/health` returns `"status":"green"` or `"yellow"` |
 | ARGUS stack bootstrapped | `./soc-simulation/setup.sh` | Last line prints `Setup complete` |
 | Detection rules loaded | (included in `setup.sh`) | `GET kbn:/api/detection_engine/rules/_find?per_page=1` returns ≥ 1 rule |
-| `.soc-*` index templates installed | (included in `setup.sh`) | `GET .soc-detection-eval-runs` returns the index (auto-created on first write) |
+| `.soc-*` index templates installed | (included in `setup.sh`) | `GET .soc_detection_eval-runs` returns the index (auto-created on first write) |
 | Labelled corpus seeded | (included in `setup.sh`, pulls from `scripts/argus-variant-bank/`) | `GET .soc-eval-corpus-argus-corpus-mythos-2026-04/_count` returns ≥ 13 |
 | ARGUS Console imported | (included in `setup.sh`) | Kibana → Dashboards → "ARGUS Console — Mythos-Resilience Invariants" |
 | (Optional) ARGUS React app-route | `argusConsoleEnabled: true` in Kibana config | Kibana side-nav → Security → **ARGUS**; deep-links from alert flyouts |
@@ -109,11 +109,11 @@ only unconditional red flags). A run where every rule evaluates `fail`
 with zero recall usually means a corpus/rule mismatch — re-run `setup.sh`
 and re-seed the corpus before investigating the rules themselves.
 
-The CLI writes one document per rule into `.soc-detection-eval-runs`. Confirm:
+The CLI writes one document per rule into `.soc_detection_eval-runs`. Confirm:
 
 ```bash
 curl -s -u "$ES_USER:$ES_PASS" \
-  "$ES_URL/.soc-detection-eval-runs/_search?size=3&sort=@timestamp:desc" \
+  "$ES_URL/.soc_detection_eval-runs/_search?size=3&sort=@timestamp:desc" \
   -H 'Content-Type: application/json' \
   | jq '.hits.hits[]._source | {rule_id, gate_decision, scores}'
 ```
@@ -175,16 +175,16 @@ curl -s -u "$ES_USER:$ES_PASS" \
   | jq '.hits.hits[0]._source | {"@timestamp", _argus}'
 ```
 
-The document's `_argus.emission_source` is `soc-argus-frontier-simulator` and
+The document's `_argus.emission_source` is `soc_argus_frontier_simulator` and
 `_argus.is_simulation_emission` is `true`. A heartbeat row also lands in
-`.soc-audit-trail` with `source: "soc-argus-frontier-simulator"`.
+`.soc-audit-trail` with `source: "soc_argus_frontier_simulator"`.
 
 > If the workflow is disabled on your stack, first `PUT /api/workflows/{id}`
 > with `{"enabled": true}` — fresh imports default to disabled.
 
-## 4. Re-run the eval poller (soc-detection-eval)
+## 4. Re-run the eval poller (soc_detection_eval)
 
-`soc-detection-eval.yaml` polls `.soc-detection-eval-runs` every 2 minutes
+`soc_detection_eval.yaml` polls `.soc_detection_eval-runs` every 2 minutes
 and reconciles any unreconciled rows back onto `.soc-recommendations`,
 emitting an ARGUS governance trace per reconciled run. Trigger it manually
 to avoid waiting for the scheduler:
@@ -207,7 +207,7 @@ cumulative across reruns):
 
 ```bash
 curl -s -u "$ES_USER:$ES_PASS" \
-  "$ES_URL/.soc-detection-eval-runs/_count?q=reconciled:true"
+  "$ES_URL/.soc_detection_eval-runs/_count?q=reconciled:true"
 ```
 
 ## 5. Observe the reasoning-trace governance signal (M2.5)
@@ -348,14 +348,14 @@ a time-to-rollback measurement that flows all the way to the Pulse tile.
 
 The emission chain:
 
-1. **`soc-recovery.yaml`** (10 min tick) — finds `.soc-recommendations` rows with
+1. **`soc_recovery.yaml`** (10 min tick) — finds `.soc-recommendations` rows with
    `status: rolled_back` and `applied_at` set but no `rollback_mttr_emitted_at`.
    For each, computes `rolled_back_at - applied_at` via a painless one-liner and
    writes a deterministic `mttr-<rec_id>` row into `.soc-outcomes` carrying
    `rollback_mttr_ms`, `actor_id`, `rollback_reason`, and `false_positive`. The
    rec is stamped so the next tick is a no-op (idempotent by design).
 
-2. **`soc-argus-trust-tier-assessor.yaml`** (1h tick) — aggregates
+2. **`soc_argus_trust_tier_assessor.yaml`** (1h tick) — aggregates
    `rollback_mttr_ms` per actor into `.soc-actor-trust-tiers.metrics` as
    `avg_rollback_mttr_ms`, `p50_rollback_mttr_ms`, and `p95_rollback_mttr_ms`
    alongside the existing rollback_rate / fp_ratio signals.
@@ -459,7 +459,7 @@ and re-seeds the labelled corpus from `scripts/argus-variant-bank/`. Plan for
 | CLI runner exits with `ERR_MODULE_NOT_FOUND` on `@kbn/babel-register/install` | You used `--import` (ESM) or dropped the `.js` suffix | Use `--require @kbn/babel-register/install.js` (see §2) |
 | CLI runner exits with `loadCorpusLabels found zero documents` | Corpus index empty | Re-run `setup.sh` to re-ingest the variant bank |
 | Gate pass-rate is `0` | No eval runs in the last 24h | Trigger step 2; wait for the poller or trigger step 4 |
-| ARGUS Console panels are empty (dashboard) | Data views missing | `GET kbn:/api/data_views` should include `.soc-reasoning-trace`, `.soc-detection-eval-runs`, `.soc-eval-corpus-*`; re-run `setup.sh` if missing |
+| ARGUS Console panels are empty (dashboard) | Data views missing | `GET kbn:/api/data_views` should include `.soc-reasoning-trace`, `.soc_detection_eval-runs`, `.soc-eval-corpus-*`; re-run `setup.sh` if missing |
 | React app-route link not visible in side nav | `argusConsoleEnabled` flag off or user lacks `siem.show` | Enable the flag in `kibana.yml`: `xpack.securitySolution.enableExperimental: ['argusConsoleEnabled']` and re-login |
 | Eval poller reports "0 new eval-run row(s)" | All runs already reconciled | Trigger step 2 again to create new rows |
 | `argus.decision.confidence` missing on a span | Workflow used an older template | Re-run `setup.sh` to re-apply the `.soc-reasoning-trace` index template and regenerate traces |
@@ -538,7 +538,7 @@ this index directly.
 
 ### 10.3 Drive the drift monitor
 
-The drift monitor scans `.soc-detection-eval-runs` for rule-level eval-score
+The drift monitor scans `.soc_detection_eval-runs` for rule-level eval-score
 drift and `.soc-actor-trust-tiers` for actor-trust trajectory, then files a
 `mutation_intent` rec for any entity that moved past its threshold.
 
@@ -561,7 +561,7 @@ stack):
 
 ```bash
 curl -s -u "$ES_USER:$ES_PASS" \
-  "$ES_URL/.soc-recommendations/_search?size=5&sort=@timestamp:desc&q=source:soc-argus-drift-monitor" \
+  "$ES_URL/.soc-recommendations/_search?size=5&sort=@timestamp:desc&q=source:soc_argus_drift_monitor" \
   | jq '.hits.hits[]._source | {title, status, "origin": .argus.origin, "drift": .argus.drift}'
 ```
 
@@ -588,7 +588,7 @@ curl -s -u "$KBN_USER:$KBN_PASS" \
 
 ```bash
 curl -s -u "$ES_USER:$ES_PASS" \
-  "$ES_URL/.soc-recommendations/_search?size=5&sort=@timestamp:desc&q=source:soc-argus-playbook-learner" \
+  "$ES_URL/.soc-recommendations/_search?size=5&sort=@timestamp:desc&q=source:soc_argus_playbook_learner" \
   | jq '.hits.hits[]._source | {title, status, "patch": .details.patch}'
 ```
 
@@ -638,10 +638,10 @@ one-by-one with the expected envelope:
 
 ```bash
 for f in \
-  soc-simulation/workflows/soc-argus-drift-monitor.yaml \
-  soc-simulation/workflows/soc-argus-playbook-learner.yaml \
-  soc-simulation/workflows/soc-argus-intel-adapter-generic.yaml \
-  soc-simulation/workflows/soc-argus-intel-mythos-aggregator.yaml; do
+  soc-simulation/workflows/soc_argus_drift_monitor.yaml \
+  soc-simulation/workflows/soc_argus_playbook_learner.yaml \
+  soc-simulation/workflows/soc_argus_intel_adapter_generic.yaml \
+  soc-simulation/workflows/soc_argus_intel_mythos_aggregator.yaml; do
   python3 -c "
 import json, sys
 with open('$f') as fh: y = fh.read()

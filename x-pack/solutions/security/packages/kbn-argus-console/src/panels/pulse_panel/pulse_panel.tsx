@@ -240,7 +240,7 @@ const mttrTile = (mttr: GovernancePulseMttr | null): PulseMetric => {
       tone: 'subdued',
       tooltip:
         'Median time between a mutation being applied and rolled back, measured ' +
-        'across .soc-outcomes. Instrumented by soc-recovery.yaml (ARGUS R6).',
+        'across .soc-outcomes. Instrumented by soc_recovery.yaml (ARGUS R6).',
     };
   }
 
@@ -258,7 +258,7 @@ const mttrTile = (mttr: GovernancePulseMttr | null): PulseMetric => {
     tone: mttrTone(mttr.p50_ms),
     tooltip:
       'Median time between apply and rollback across all actors in the window. ' +
-      'Emitted by soc-recovery.yaml (.soc-outcomes.rollback_mttr_ms) and aggregated ' +
+      'Emitted by soc_recovery.yaml (.soc-outcomes.rollback_mttr_ms) and aggregated ' +
       'by the trust-tier assessor.',
   };
 };
@@ -470,9 +470,9 @@ const triggerToRuleTile = (lag: GovernancePulseTriggerToRule | null): PulseMetri
         'mutation_intent built). Vision-doc 4.1 success metric.',
     };
   }
-  const desc =
-    `${lag.lag_count_under_60s}/${lag.lag_count} runs <1m` +
-    (lag.p50_ms !== null ? ` · p50 ${formatDuration(lag.p50_ms)}` : '');
+  const desc = `${lag.lag_count_under_60s}/${lag.lag_count} runs <1m${
+    lag.p50_ms !== null ? ` · p50 ${formatDuration(lag.p50_ms)}` : ''
+  }`;
   return {
     id: 'trigger-to-rule',
     label: 'Trigger-to-rule (<1m compliance)',
@@ -511,7 +511,7 @@ const coverageTrendTile = (trend: GovernancePulseCoverageTrend | null): PulseMet
       tooltip:
         'Latest ATT&CK coverage % from .soc-coverage-snapshots, with delta ' +
         'vs the oldest snapshot in the window. Producer: ' +
-        'soc-argus-coverage-snapshotter (1h cadence). Vision-doc 4.2.',
+        'soc_argus_coverage_snapshotter (1h cadence). Vision-doc 4.2.',
     };
   }
   const delta = trend.delta_pp;

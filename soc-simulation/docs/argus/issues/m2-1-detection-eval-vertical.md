@@ -32,8 +32,8 @@ a scorecard with four numbers per detection-rule candidate:
 
 ### In scope
 
-- `soc-detection-eval` workflow (ARGUS-owned) that composes an existing `@kbn/evals`
-  suite and pipes results into `.soc-detection-eval-runs`.
+- `soc_detection_eval` workflow (ARGUS-owned) that composes an existing `@kbn/evals`
+  suite and pipes results into `.soc_detection_eval-runs`.
 - Evaluator contract: `detection_rule_evaluator.ts` implementing the standard
   `@kbn/evals` evaluator interface, reading rule metadata from
   `.kibana-security-solution-rules` and labelled events from
@@ -41,7 +41,7 @@ a scorecard with four numbers per detection-rule candidate:
 - Corpus format spec: `corpus-format.md` describing labelled event documents and
   expected-fire metadata.
 - Regression affordance: every `.soc-backtests` row gets a paired
-  `.soc-detection-eval-runs` row for cross-comparison.
+  `.soc_detection_eval-runs` row for cross-comparison.
 - Dashboard panel under Security Solution → ARGUS → "Detection Eval Scorecard."
 
 ### Out of scope
@@ -55,17 +55,17 @@ a scorecard with four numbers per detection-rule candidate:
 - [ ] `@kbn/evals` suite `detection-rule-vertical.evals.ts` exists and runs in CI.
 - [ ] A minimum 3-rule corpus (one per Scenario 1/2/3 in the demo storyboard) is
       checked in under `x-pack/solutions/security/plugins/security_solution/server/lib/argus/eval_corpus/`.
-- [ ] Running the suite produces `.soc-detection-eval-runs` rows with all four scoring
+- [ ] Running the suite produces `.soc_detection_eval-runs` rows with all four scoring
       fields populated and a stable `snapshot_id`.
-- [ ] `soc-detection-eval` workflow is registered in `_registry.json` and passes
+- [ ] `soc_detection_eval` workflow is registered in `_registry.json` and passes
       setup-verification.
-- [ ] A failing eval **blocks** apply via `soc-regression-gate` — the existing gate
-      consumes `.soc-detection-eval-runs` as one of its signals.
+- [ ] A failing eval **blocks** apply via `soc_regression_gate` — the existing gate
+      consumes `.soc_detection_eval-runs` as one of its signals.
 - [ ] Dashboard panel renders against the staged cluster with at least one run visible.
 
 ## Data model
 
-`.soc-detection-eval-runs` row (minimum):
+`.soc_detection_eval-runs` row (minimum):
 
 ```json
 {
@@ -93,10 +93,10 @@ a scorecard with four numbers per detection-rule candidate:
 
 1. **Corpus bootstrapping** (1 wk): codify corpus format, seed 3 rules × 30 events each.
 2. **Evaluator implementation** (1 wk): `detection_rule_evaluator.ts` + unit tests.
-3. **Workflow + registry wiring** (0.5 wk): `soc-detection-eval.yaml`, registry entry,
+3. **Workflow + registry wiring** (0.5 wk): `soc_detection_eval.yaml`, registry entry,
    setup-verify assertions.
-4. **Regression-gate integration** (0.5 wk): teach `soc-regression-gate` to consume
-   `.soc-detection-eval-runs` alongside `.soc-regression-runs`.
+4. **Regression-gate integration** (0.5 wk): teach `soc_regression_gate` to consume
+   `.soc_detection_eval-runs` alongside `.soc-regression-runs`.
 5. **Dashboard panel** (0.5 wk): ARGUS → Detection Eval Scorecard.
 
 Est. total: 3.5 weeks.
@@ -113,4 +113,4 @@ Est. total: 3.5 weeks.
 - Anchor: [`security-team#16546`][s1]
 - ARGUS threat model: `../threat-model.html`
 - ARGUS capability map: `../capability-map.md`
-- Scaffold workflow: `../../workflows/soc-detection-eval.yaml` (lands in this milestone)
+- Scaffold workflow: `../../workflows/soc_detection_eval.yaml` (lands in this milestone)

@@ -7,8 +7,8 @@
 # ARGUS — mirror-mode validation for two workflows that the local Kibana
 # workflow runtime does not expose:
 #
-#   * soc-argus-arm-mythos-preset.yaml
-#   * soc-argus-frontier-simulator.yaml
+#   * soc_argus_arm_mythos_preset.yaml
+#   * soc_argus_frontier_simulator.yaml
 #
 # The script executes the exact ES data contract of each workflow (same
 # indices, same queries, same document shapes) and prints a compact,
@@ -51,8 +51,8 @@ def section(title: str):
 
 
 def arm_mythos_preset() -> dict:
-    """Mirror of soc-argus-arm-mythos-preset.yaml — idempotent."""
-    section("soc-argus-arm-mythos-preset (mirror)")
+    """Mirror of soc_argus_arm_mythos_preset.yaml — idempotent."""
+    section("soc_argus_arm_mythos_preset (mirror)")
 
     # 1. verify_profile_seeded
     try:
@@ -72,7 +72,7 @@ def arm_mythos_preset() -> dict:
         cmd_doc = {
             "@timestamp": ts,
             "status": "pending",
-            "source": "soc-argus-arm-mythos-preset",
+            "source": "soc_argus_arm_mythos_preset",
             "difficulty": "6",
             "operation_profile": "mythos_class_frontier",
             "argus": {
@@ -94,7 +94,7 @@ def arm_mythos_preset() -> dict:
     audit_doc = {
         "@timestamp": now_iso(),
         "event_type": "argus_mythos_preset_armed",
-        "source": "soc-argus-arm-mythos-preset",
+        "source": "soc_argus_arm_mythos_preset",
         "difficulty": "6",
         "operation_profile": "mythos_class_frontier",
         "profile_found": found,
@@ -128,12 +128,12 @@ def arm_preset_armed_flag() -> None:
 
 
 def frontier_simulator_tick() -> dict:
-    """Mirror of soc-argus-frontier-simulator.yaml."""
-    section("soc-argus-frontier-simulator (mirror, single tick)")
+    """Mirror of soc_argus_frontier_simulator.yaml."""
+    section("soc_argus_frontier_simulator (mirror, single tick)")
 
     corpus_id = "argus-corpus-mythos-2026-04"
     corpus_index = ".soc-eval-corpus-argus-corpus-mythos-2026-04"
-    emission_source = "soc-argus-frontier-simulator"
+    emission_source = "soc_argus_frontier_simulator"
 
     # 1. preset_state + gate_preset_armed
     try:
@@ -266,7 +266,7 @@ def post_checks() -> dict:
         "/.soc-attack-commands/_search",
         {
             "size": 1,
-            "query": {"term": {"source": "soc-argus-arm-mythos-preset"}},
+            "query": {"term": {"source": "soc_argus_arm_mythos_preset"}},
             "sort": [{"@timestamp": {"order": "desc"}}],
         },
     )

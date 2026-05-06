@@ -69,8 +69,8 @@ truth.
 | Artifact | Location |
 | --- | --- |
 | Mythos-class Caldera profile (level-6) | [`../../caldera_profiles/level6-mythos-class.json`](../../caldera_profiles/level6-mythos-class.json) |
-| Manual-arming workflow for the preset | [`../../workflows/soc-argus-arm-mythos-preset.yaml`](../../workflows/soc-argus-arm-mythos-preset.yaml) |
-| M2.1 Detection-eval workflow | [`../../workflows/soc-detection-eval.yaml`](../../workflows/soc-detection-eval.yaml) |
+| Manual-arming workflow for the preset | [`../../workflows/soc_argus_arm_mythos_preset.yaml`](../../workflows/soc_argus_arm_mythos_preset.yaml) |
+| M2.1 Detection-eval workflow | [`../../workflows/soc_detection_eval.yaml`](../../workflows/soc_detection_eval.yaml) |
 | Workflow registry (canonical) | [`../../workflows/_registry.json`](../../workflows/_registry.json) |
 | GitHub issue creation helper | [`../../scripts/create-argus-issues.sh`](../../scripts/create-argus-issues.sh) |
 
@@ -82,7 +82,7 @@ truth.
   `../../scripts/seed_argus_demo.sh` → `/app/security/argus`.
 - **Demo operator (full session):** `demo-storyboard.md` →
   `demo-runbook.md` → `mythos-preset-spec.md` →
-  `../../workflows/soc-argus-arm-mythos-preset.yaml`.
+  `../../workflows/soc_argus_arm_mythos_preset.yaml`.
 - **Implementer on a specific milestone:** `issues/m2-X-*.md` →
   `scaffolds/m2-X-*.md` → the relevant plugin code paths referenced in those
   docs.
@@ -105,7 +105,7 @@ Concretely, what the current worktree ships:
 - **Tier 3 — Agent-native playbooks**: new Agent Builder tools
   (`list_uncovered_techniques`, `export_navigator_layer`,
   `get_mutation_detail`, `list_actor_coverage`) + parameterized workflow
-  `soc-argus-playbook-runner.yaml` (inputs: `coverage-gap-triage`,
+  `soc_argus_playbook_runner.yaml` (inputs: `coverage-gap-triage`,
   `datasource-gap`, `high-fp-tuning`, `actor-escalation`). The former
   per-intent playbook YAMLs (`soc-argus-playbook-datasource-gap`, etc.)
   were removed in favor of this single runner. Canonical playbooks
@@ -145,5 +145,5 @@ Two rules are shared by every artifact here and must not drift:
    plane.
 2. **Mythos-class (level-6) is always operator-armed.** The difficulty
    controller auto-escalates through L1–L5. Reaching L6 requires an explicit
-   human decision via `soc-argus-arm-mythos-preset` and every arm emits an
+   human decision via `soc_argus_arm_mythos_preset` and every arm emits an
    `.soc-audit-trail` row. This is a one-way door by design.

@@ -13,7 +13,7 @@
  * Originally this file housed TaskManager-task constants too (timeout,
  * scope, schedule). When the driver was moved onto the workflow engine
  * those settings became workflow YAML responsibilities — see
- * `soc-simulation/workflows/soc-argus-synthesis-driver.yaml`.
+ * `soc-simulation/workflows/soc_argus_synthesis_driver.yaml`.
  */
 
 /** Index AutoDEX advisories live in. Owned by the CTI ingestion path (B2). */
@@ -44,7 +44,7 @@ export const SYNTHESIS_REJECTION_RATE_DEAD_LETTER_THRESHOLD = 0.6;
 /**
  * Provider name written to `.soc-mutation-intents` envelopes when the
  * autonomous workflow step produced the doc. Matches the convention in
- * `soc-deteng.yaml` / `argus.exploit_to_detection`.
+ * `soc_deteng.yaml` / `argus.exploit_to_detection`.
  */
 export const SYNTHESIS_DRIVER_AGENT_ID = 'argus.synthesis.driver';
 

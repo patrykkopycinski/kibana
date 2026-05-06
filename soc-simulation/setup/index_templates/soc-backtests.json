@@ -70,7 +70,7 @@
     }
   },
   "_meta": {
-    "description": "Backtest projections for proposed mutations. Populated by soc-rule-backtester before the applier sees the mutation. Autonomous gate cascade reads `verdict` to decide auto-apply vs human review.",
+    "description": "Backtest projections for proposed mutations. Populated by soc_rule_backtester before the applier sees the mutation. Autonomous gate cascade reads `verdict` to decide auto-apply vs human review.",
     "owner": "argus-governance",
     "schema_version": 1,
     "verdicts": ["projection_safe", "projection_concerning", "projection_unsafe", "projection_unknown"]

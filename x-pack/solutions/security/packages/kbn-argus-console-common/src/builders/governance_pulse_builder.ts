@@ -174,7 +174,7 @@ export interface CoverageSnapshotsAggsInput {
  * Loose shape of a `.soc-coverage-snapshots` source document.
  *
  * The numeric fields are typed as `number | string` because the producer
- * (`soc-argus-coverage-snapshotter` workflow) emits them via Liquid, which
+ * (`soc_argus_coverage_snapshotter` workflow) emits them via Liquid, which
  * stringifies all values. The TS-side path that writes the same document
  * (chat-tool / direct API) emits proper numbers. `toCount` /
  * `toFiniteNumber` accept both shapes so the builder stays agnostic.
@@ -396,7 +396,7 @@ const buildHoursSaved = (
  * Coerce a doc_count-shaped agg value to a non-negative integer count.
  *
  * Accepts `number | string | null | undefined` because Liquid-emitted
- * fields (e.g. coverage snapshots written by `soc-argus-coverage-snapshotter`)
+ * fields (e.g. coverage snapshots written by `soc_argus_coverage_snapshotter`)
  * land as strings on the wire even when the dashboard treats them as
  * counts. `parseFloat` is intentionally lenient — anything that doesn't
  * parse to a finite number degrades to `0` so leadership sees a clean

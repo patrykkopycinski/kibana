@@ -64,7 +64,7 @@ CTI-REALM (Microsoft, 2025) benchmarks AI systems on their ability to generate d
 
 | CTI-REALM Dimension | What it measures | ARGUS Implementation | Score |
 |---------------------|------------------|----------------------|-------|
-| **Rule Quality** | Syntactic correctness of generated rules | SOC Detection Engineering workflow generates rules via `soc-deteng-agent`; rules are validated against mapping, checked for catch-all patterns, and backtested | **High** — 159 backtests run, validation gates enforce syntax |
+| **Rule Quality** | Syntactic correctness of generated rules | SOC Detection Engineering workflow generates rules via `soc_deteng-agent`; rules are validated against mapping, checked for catch-all patterns, and backtested | **High** — 159 backtests run, validation gates enforce syntax |
 | **Threat Coverage** | MITRE ATT&CK alignment of rules | Coverage Gap Mapper tracks 15 unique techniques across 501 gap entries; rules are tagged with tactic/technique | **High** — Automated technique-gap closure |
 | **False Positive Rate** | Noise from generated rules | Rule Health Monitor caps at 50 alerts/hour; backtester projects FP impact before deployment; 6 rules rolled back due to high volume | **High** — Multi-gate FP prevention (shadow test, backtest, health monitor) |
 | **Autonomy** | Human intervention required | 811 autonomy decisions; 26 rules applied without human intervention; 11-gate cascade governs auto-apply | **Very High** — Full autonomous loop with kill-switch override |

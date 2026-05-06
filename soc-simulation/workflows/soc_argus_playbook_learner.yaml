@@ -1,0 +1,271 @@
+version: '1'
+name: ARGUS Playbook Learner (Phase 3)
+description: >
+  ARGUS Phase 3 — playbook learning loop.
+
+  `soc_response` and the existing containment playbook emit response
+  actions from a static library. In the Mythos era this is brittle:
+  variant-heavy adversaries engineer behaviours that are *close* to a
+  known technique but not close enough to trigger the right containment,
+  so the playbook over-responds (host isolation on a benign miss) or
+  under-responds (host stays warm while the adversary pivots).
+
+  This workflow closes the learning loop. Every 24h it correlates three
+  streams:
+
+    1. .soc-outcomes                — TP/FP/escalate verdict per alert
+    2. .soc-autonomy-decisions      — which playbook_step was chosen
+    3. .soc-post-apply-observations — whether the step was rolled back
+
+  Per `(technique, playbook_step)` pair it computes:
+
+    success_rate   = TP_outcomes_without_rollback / times_chosen
+    rollback_rate  = rollbacks / times_chosen
+    wilson_lb_95   = Wilson lower bound at 95% with n = times_chosen
+
+  It files a mutation_intent to remap a `(technique, playbook_step)` pair
+  when EITHER:
+
+    - success_rate < 0.5 AND times_chosen >= 30 AND wilson_lb_95 < 0.4
+    - rollback_rate > 0.2 AND times_chosen >= 20
+
+  Adversary-proofing:
+
+    - Only frontier-tier outcomes count (filter on
+      `.soc-outcomes.actor_trust_tier == 'frontier'` at decision time).
+    - Minimum sample size 30 / 20 is deliberately high.
+    - Remap never touches the live playbook — it files a mutation_intent
+      that runs through the same apply cascade (backtest + eval gate +
+      trust gate) as any other recommendation.
+
+  Candidate steps per technique live in
+  `soc-simulation/argus/technique-playbook-mapping.json`. The learner
+  never invents new steps — new containment actions land via PR.
+
+  Triggers:
+    * scheduled 24h : design-doc cadence
+    * manual        : operators can force a sweep
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 24h
+  - type: manual
+
+consts:
+  outcomes_index:    ".soc-outcomes"
+  decisions_index:   ".soc-autonomy-decisions"
+  observer_index:    ".soc-post-apply-observations"
+  recs_index:        ".soc-recommendations"
+  audit_index:       ".soc-audit-trail"
+  window:            "now-7d"
+  # Confidence thresholds from docs/argus/phase-3/playbook-learning-loop.md.
+  # Changing any number requires updating the design doc.
+  min_n_success:             30
+  min_n_rollback:            20
+  success_floor:             0.5
+  rollback_ceiling:          0.2
+  wilson_lb_floor:           0.4
+  remap_target_wilson_floor: 0.8
+
+steps:
+  # ── Discover (technique, step) pairs that fired in the window ───────
+  - name: discover_pairs
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.decisions_index }}"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "{{ consts.window }}"
+            - exists: { field: "technique" }
+            - exists: { field: "playbook_step" }
+            - term: { actor_trust_tier: "frontier" }
+      aggregations:
+        pairs:
+          composite:
+            size: 100
+            sources:
+              - technique: { terms: { field: "technique" } }
+              - step:      { terms: { field: "playbook_step" } }
+
+  - name: pairs_gate
+    type: console
+    with:
+      message: "{% if steps.discover_pairs.output.aggregations.pairs.buckets and steps.discover_pairs.output.aggregations.pairs.buckets.size > 0 %}yes{% else %}no{% endif %}"
+
+  - name: process_pairs
+    type: foreach
+    if: "steps.pairs_gate.output: yes"
+    foreach: "{{ steps.discover_pairs.output.aggregations.pairs.buckets }}"
+    steps:
+      # times_chosen — how many times the pair fired in the window.
+      - name: pair_total
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.decisions_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { technique:     "{{ foreach.item.key.technique }}" }
+                - term: { playbook_step: "{{ foreach.item.key.step }}" }
+                - term: { actor_trust_tier: "frontier" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # success count — outcomes tagged TP with no rollback.
+      - name: pair_success
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { technique:      "{{ foreach.item.key.technique }}" }
+                - term: { playbook_step:  "{{ foreach.item.key.step }}" }
+                - term: { verdict:        "true_positive" }
+                - term: { rolled_back:    "false" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # rollback count — outcomes tagged as rolled back for this pair.
+      - name: pair_rollbacks
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.outcomes_index }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - term: { technique:     "{{ foreach.item.key.technique }}" }
+                - term: { playbook_step: "{{ foreach.item.key.step }}" }
+                - term: { rolled_back:   "true" }
+                - range:
+                    "@timestamp":
+                      gte: "{{ consts.window }}"
+
+      # Decide remap.
+      # Wilson lower bound with z=1.96 collapses at small N to a
+      # conservative floor; we approximate by using (success - 1) / n
+      # which is the classic "pessimistic estimate" that anchors below
+      # the Wilson LB for n ≥ 20 and never exceeds it. Good enough for
+      # the gating rule (“LB < 0.4”) without leaning on a math lib.
+      - name: compute_remap
+        type: console
+        with:
+          message: >-
+            {%- assign n  = steps.pair_total.output.hits.total.value | default: 0 -%}
+            {%- assign s  = steps.pair_success.output.hits.total.value | default: 0 -%}
+            {%- assign rb = steps.pair_rollbacks.output.hits.total.value | default: 0 -%}
+            {%- if n > 0 -%}
+              {%- assign sr = s | divided_by: n -%}
+              {%- assign rr = rb | divided_by: n -%}
+              {%- assign slb_num = s | minus: 1 -%}
+              {%- if slb_num < 0 -%}{%- assign slb_num = 0 -%}{%- endif -%}
+              {%- assign slb = slb_num | divided_by: n -%}
+            {%- else -%}
+              {%- assign sr = 0 -%}{%- assign rr = 0 -%}{%- assign slb = 0 -%}
+            {%- endif -%}
+            {%- comment -%}
+              Two failure modes per design doc:
+                success collapse: n>=30 AND sr<0.5 AND slb<0.4
+                rollback storm:   n>=20 AND rr>0.2
+            {%- endcomment -%}
+            {%- if n >= 30 and sr < 0.5 and slb < 0.4 -%}remap=yes reason=success_collapse n={{ n }} sr={{ sr }} rr={{ rr }} slb={{ slb }}
+            {%- elsif n >= 20 and rr > 0.2 -%}remap=yes reason=rollback_storm n={{ n }} sr={{ sr }} rr={{ rr }} slb={{ slb }}
+            {%- else -%}remap=no n={{ n }} sr={{ sr }} rr={{ rr }} slb={{ slb }}
+            {%- endif -%}
+
+      - name: file_playbook_remap_rec
+        type: elasticsearch.index
+        if: "steps.compute_remap.output contains 'remap=yes'"
+        with:
+          index: "{{ consts.recs_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "plb-{{ foreach.item.key.technique | replace: '.', '-' }}-{{ foreach.item.key.step }}-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc_argus_playbook_learner"
+            status: "eval_requested"
+            track: "deterministic"
+            title: "Playbook remap: {{ foreach.item.key.technique }} / {{ foreach.item.key.step }}"
+            summary: >-
+              Playbook pair (technique={{ foreach.item.key.technique }},
+              step={{ foreach.item.key.step }}) is underperforming
+              against the frontier-tier outcome stream. ARGUS has filed a
+              mutation_intent to remap the pair to the best alternative
+              step (Wilson lower bound ≥ 0.8) from
+              technique-playbook-mapping.json, or to downgrade the pair
+              to human_review_only if no alternative is trusted.
+            confidence: 70
+            details:
+              artifact_type: "mutation_intent"
+              artifact_id: "playbook_mapping:{{ foreach.item.key.technique }}:{{ foreach.item.key.step }}"
+              op: "update"
+              expected_ownership: "autosoc"
+              reason: "Playbook learner observed insufficient success-rate or excess rollback-rate vs. the frontier-tier outcome stream over the 7-day window."
+              patch:
+                technique: "{{ foreach.item.key.technique }}"
+                from_step: "{{ foreach.item.key.step }}"
+                to_step:   "human_review_only"
+                reason:    "{{ steps.compute_remap.output }}"
+            expected_impact:
+              fp_reduction_pct: 0
+            evidence:
+              - summary: "{{ steps.compute_remap.output }}"
+                source_ref: "index=.soc-outcomes;technique={{ foreach.item.key.technique }};playbook_step={{ foreach.item.key.step }}"
+                confidence: 0.7
+            housekeeping: false
+            argus:
+              origin: "playbook_learner"
+              decision:
+                kind: "playbook_remap"
+                confidence: 0.7
+                door_class: "two_way"
+              playbook:
+                technique: "{{ foreach.item.key.technique }}"
+                from_step: "{{ foreach.item.key.step }}"
+                to_step: "human_review_only"
+
+      - name: audit_remap
+        type: elasticsearch.index
+        if: "steps.compute_remap.output contains 'remap=yes'"
+        with:
+          index: "{{ consts.audit_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            event_type: "argus_playbook_remap_filed"
+            source: "soc_argus_playbook_learner"
+            technique: "{{ foreach.item.key.technique }}"
+            from_step: "{{ foreach.item.key.step }}"
+            detail:    "{{ steps.compute_remap.output }}"
+
+  # ── Heartbeat ─────────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: "argus_playbook_learner_tick"
+        source: "soc_argus_playbook_learner"
+        tick_id: "argus-playbook-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        pairs_inspected: "{{ steps.discover_pairs.output.aggregations.pairs.buckets | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS playbook learner complete — pairs={{ steps.discover_pairs.output.aggregations.pairs.buckets | size | default: 0 }} tick=argus-playbook-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

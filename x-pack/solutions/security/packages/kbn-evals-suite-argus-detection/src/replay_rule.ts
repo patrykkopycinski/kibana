@@ -46,7 +46,7 @@ export interface ReplayRuleResult {
 
 /**
  * Deterministic variant document identifier shared by `setup.sh`,
- * `soc-argus-frontier-simulator.yaml`, and the replay client.
+ * `soc_argus_frontier_simulator.yaml`, and the replay client.
  *
  * Keeping the format frozen here — instead of letting each producer invent
  * its own — means the eval can round-trip `_id`s back to the variant bank

@@ -51,7 +51,7 @@ writing — catch drift at write-time, not boot-time. The schema rejects:
 | Consumer | What it does |
 | --- | --- |
 | `evaluateCrownJewelImpact` helper | Pure function. Given `MutationTargets` + a snapshot of `.soc-crown-jewels`, returns a `CrownJewelAssessment` with the affected assets, max tier, and a `recommended_action` (`proceed` / `pending_review`). |
-| `soc-autonomous-applier.yaml` (12th gate — wiring is a follow-up) | Calls a server-side workflow step that wraps `evaluateCrownJewelImpact`; if the assessment recommends `pending_review`, the applier defers and writes a `.soc-autonomy-decisions` row with `failing_gate: 'crown_jewel'`. |
+| `soc_autonomous_applier.yaml` (12th gate — wiring is a follow-up) | Calls a server-side workflow step that wraps `evaluateCrownJewelImpact`; if the assessment recommends `pending_review`, the applier defers and writes a `.soc-autonomy-decisions` row with `failing_gate: 'crown_jewel'`. |
 | Audit dashboards | Read every applier decision row's `crown_jewel_assessment` payload and chart "intents that grazed crown jewels". |
 | Reviewer UI (HITL) | Surfaces the matched asset list + tier so a reviewer sees *why* an intent was parked. |
 
@@ -223,7 +223,7 @@ production:
    `mutation_intent_id`), loads `.soc-crown-jewels` via the workflow's
    scoped ES client, calls `evaluateCrownJewelImpact`, and returns the
    `CrownJewelAssessment`.
-2. Insert a step in `soc-autonomous-applier.yaml` between the trust-tier
+2. Insert a step in `soc_autonomous_applier.yaml` between the trust-tier
    gate (gate 8) and the budget gate (gate 9):
 
    ```yaml

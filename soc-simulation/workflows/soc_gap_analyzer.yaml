@@ -1,0 +1,343 @@
+version: '1'
+name: SOC Capability Gap Analyzer
+description: >
+  Proactive capability gap detection. Inventories all available tools, data sources,
+  detection rules, and SOC metrics, then uses the meta-agent with the capability-gap-analyzer
+  skill to discover opportunities the system isn't exploiting.
+
+  Outputs (all from the same analyzer pass):
+    * one aggregate `capability_gap` doc in `.soc-recommendations` for the
+      human reviewer (preserved for backwards compatibility);
+    * zero or more concrete `mutation_intent` docs in `.soc-recommendations`
+      for the autonomous applier;
+    * zero or more `coverage_gap` docs in `.soc-coverage-gaps` in the
+      canonical triage-playbook shape
+      (`status=open`, `technique_id`, `severity`, `confidence`, `note`,
+      `evidence`). This closes the producer/consumer gap with
+      `soc_argus_playbook_runner` (playbook_id=coverage-gap-triage) and
+      `soc_deteng`, both of which already read `.soc-coverage-gaps` but
+      previously received no properly-shaped input from this analyzer.
+
+consts:
+  soc_indices_wildcard: ".soc-*"
+  triage_results_index: ".soc-triage-results"
+  outcomes_index: ".soc-outcomes"
+  response_actions_index: ".soc_response-actions"
+  recommendations_index: ".soc-recommendations"
+  coverage_gaps_index: ".soc-coverage-gaps"
+  evolution_log_index: ".soc-evolution-log"
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 4h
+  - type: manual
+
+steps:
+  # ── Inventory available data sources (lightweight queries) ────────
+  - name: get_soc_indices
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.soc_indices_wildcard }}"
+      size: 0
+      aggs:
+        indices:
+          terms:
+            field: "_index"
+            size: 50
+
+  - name: get_log_indices
+    type: elasticsearch.search
+    with:
+      index: "logs-*"
+      size: 0
+      aggs:
+        indices:
+          terms:
+            field: "_index"
+            size: 20
+
+  # ── Gather SOC performance data ──────────────────────────────────
+  - name: get_triage_results
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.triage_results_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 50
+  - name: get_outcomes
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.outcomes_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 50
+  - name: get_response_actions
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.response_actions_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 50
+  - name: get_recommendations_stats
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recommendations_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 0
+      aggs:
+        by_type:
+          terms:
+            field: "type"
+            size: 20
+          aggs:
+            statuses:
+              terms:
+                field: "status"
+                size: 10
+        rejected_reasons:
+          filter:
+            term:
+              status: rejected
+          aggs:
+            by_source:
+              terms:
+                field: "source"
+                size: 10
+
+  - name: get_coverage_gaps
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.coverage_gaps_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 20
+  - name: log_start
+    type: console
+    with:
+      message: "Gap Analyzer: starting proactive capability gap analysis"
+
+  # ── Run gap analysis ─────────────────────────────────────────────
+  - name: analyze_gaps
+    type: ai.agent
+    connector-id: opus
+    with:
+      message: >
+        Perform a proactive capability gap analysis using your capability-gap-analyzer skill.
+
+        Your task is to discover things ARGUS COULD do but DOESN'T. Analyze unused tools,
+        untapped data sources, kill chain coverage gaps, response gaps, confidence calibration
+        drift, and stale baselines.
+
+        AVAILABLE DATA (summaries only — use your tools to query details):
+
+        SOC indices (aggregated doc counts):
+        {{ steps.get_soc_indices.output.aggregations | json }}
+
+        Log indices (aggregated doc counts):
+        {{ steps.get_log_indices.output.aggregations | json }}
+
+        Triage results count (7d): {{ steps.get_triage_results.output.hits.total.value }}
+        Outcomes count (7d): {{ steps.get_outcomes.output.hits.total.value }}
+        Response actions count (7d): {{ steps.get_response_actions.output.hits.total.value }}
+
+        Recommendation statistics (7d):
+        {{ steps.get_recommendations_stats.output.aggregations | json }}
+
+        Coverage gaps count: {{ steps.get_coverage_gaps.output.hits.total.value }}
+
+        KNOWN REGISTERED TOOLS (from Agent Builder allow list):
+        security: alerts, entity_risk_score, attack_discovery_search, security_labs_search,
+          get_entity, search_entities, create_detection_rule
+        platform.core: execute_esql, generate_esql, search, list_indices, get_index_mapping,
+          get_document_by_id, create_visualization, product_documentation, integration_knowledge,
+          cases, sml_search, sml_attach, index_explorer
+        management: create_agent, update_agent, manage_skills, manage_detection_rules
+        workflows: deploy_workflow, validate_workflow, get_step_definitions, list_workflows
+
+        CURRENT SOC AGENTS: default, default, default (Principal DetEng — rule authoring),
+          default (FP/TP tuning), default agent
+        CURRENT SOC SKILLS: soc-health-check, soc-difficulty-evaluation, soc-architecture-and-gaps,
+          soc-attack-chain-analysis, soc-proactive-hunt, soc-containment-playbook
+
+        Use your tools (search, execute_esql, list_indices) to query specific details as needed.
+        Compare which registered tools are used by agents vs which are available but unused.
+        Identify the highest-impact gaps and produce structured findings AND concrete mutation intents.
+
+        Self-validate: every finding must include metrics-based justification.
+
+        Respond with JSON:
+        {
+          "findings":        [ { "gap": "...", "severity": "low|med|high", "evidence": [...] } ],
+          "summary":         "...",
+          "top_3_priorities": [ ... ],
+          "intents":         [ /* ZERO or more mutation_intent objects — SAME envelope as soc_meta (title, summary, reasoning, confidence, track, housekeeping, expected_impact, evidence, details{artifact_type, artifact_id (auto-*), op, expected_ownership, reason, new_definition?, patch?, dependencies:[]}) */ ],
+          "coverage_gaps":   [ /* ZERO or more kill-chain coverage gap objects for `.soc-coverage-gaps` — shape MUST match the triage-playbook reader: { technique_id: "T1059.003", severity: "low|med|high", confidence: 0..1, note: "short human-readable summary", evidence: [ "..." ] } — only emit one per distinct uncovered technique */ ]
+        }
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              properties:
+                gap:
+                  type: string
+                severity:
+                  type: string
+                  enum:
+                    - low
+                    - med
+                    - high
+                evidence:
+                  type: array
+                  items: {}
+          summary:
+            type: string
+          top_3_priorities:
+            type: array
+            items: {}
+          intents:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          coverage_gaps:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        required:
+          - findings
+          - summary
+          - top_3_priorities
+          - intents
+          - coverage_gaps
+    timeout: 600s
+
+  # ── Write results ────────────────────────────────────────────────
+  - name: write_evolution_log
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc_gap_analyzer"
+        event_type: "capability_gap_analysis"
+        analysis_output: "{{ steps.analyze_gaps.output | json }}"
+
+  - name: write_recommendation
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.recommendations_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "gap-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        type: "capability_gap"
+        source: "soc_gap_analyzer"
+        source_doc_id: "{{ steps.write_evolution_log.output._id }}"
+        status: "pending"
+        title: "Capability Gap Analysis - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
+        summary: "{{ steps.analyze_gaps.output.summary | default: steps.analyze_gaps.output.message }}"
+        details: "{{ steps.analyze_gaps.output | json }}"
+        reasoning: "Proactive capability gap detection"
+        confidence: 75
+        track: "deterministic"
+        expected_impact: "{{ steps.analyze_gaps.output.expected_impact }}"
+        evidence: "{{ steps.analyze_gaps.output.evidence | default: [] }}"
+
+  # ── Fan out concrete mutation intents (if any) ───────────────────
+  # The aggregate `capability_gap` doc above is analyst-facing. Any concrete
+  # intents from the planning step are materialized here as individual
+  # mutation_intent recommendations for soc_autonomous_applier.
+  - name: gate_has_gap_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.analyze_gaps.output.intents | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: write_mutation_intents
+    type: foreach
+    foreach: "{{ steps.analyze_gaps.output.intents }}"
+    if: "steps.gate_has_gap_intents.output: yes"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recommendations_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "gap-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc_gap_analyzer"
+            source_doc_id: "{{ steps.write_evolution_log.output._id }}"
+            status: "pending"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            reasoning: "{{ foreach.item.reasoning | default: 'Capability gap auto-remediation' }}"
+            confidence: "{{ foreach.item.confidence | default: 75 }}"
+            track: "{{ foreach.item.track | default: 'agentic' }}"
+            housekeeping: "{{ foreach.item.housekeeping | default: false }}"
+            expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+            details: "{{ foreach.item.details }}"
+
+  # ── Fan out kill-chain coverage gaps to .soc-coverage-gaps ─────────
+  # Any concrete per-technique coverage gaps from the planning step are
+  # materialized here in the canonical triage-playbook shape so that
+  # `soc_argus_playbook_runner`, `soc_deteng`, and `soc_meta`
+  # (all of which already read `.soc-coverage-gaps`) see real, actionable
+  # rows instead of the aggregate health-report blobs written by
+  # `soc_watchdog`. The triage playbook filters on `status=open` and sorts
+  # by `severity` / `confidence`, so every doc here must carry those
+  # fields.
+  - name: gate_has_coverage_gaps
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.analyze_gaps.output.coverage_gaps | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: write_coverage_gaps
+    type: foreach
+    foreach: "{{ steps.analyze_gaps.output.coverage_gaps }}"
+    if: "steps.gate_has_coverage_gaps.output: yes"
+    steps:
+      - name: write_coverage_gap_doc
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.coverage_gaps_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_gap_analyzer"
+            source_doc_id: "{{ steps.write_evolution_log.output._id }}"
+            status: "open"
+            technique_id: "{{ foreach.item.technique_id }}"
+            severity: "{{ foreach.item.severity | default: 'med' }}"
+            confidence: "{{ foreach.item.confidence | default: 0.55 }}"
+            note: "{{ foreach.item.note | default: foreach.item.summary | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        Gap Analyzer: analysis complete — findings written,
+        {{ steps.analyze_gaps.output.intents | size | default: 0 }} mutation intent(s) dispatched,
+        {{ steps.analyze_gaps.output.coverage_gaps | size | default: 0 }} coverage gap(s) indexed.

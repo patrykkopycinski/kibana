@@ -23,7 +23,7 @@ dimensions, aggregates them, and persists a single run row into
 
 Aggregate math (mean, p5, gate decision) lives in `src/evaluators.ts`.
 The gate decision (`pass` / `marginal` / `fail`) is consumed by the
-`soc-argus-trust-tier-assessor` workflow to drive an actor's tier.
+`soc_argus_trust_tier_assessor` workflow to drive an actor's tier.
 
 ## Runner modes
 

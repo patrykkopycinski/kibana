@@ -27,7 +27,7 @@
  *
  * Notes:
  * - The extractor is intentionally a pure function. The workflow
- *   `soc-incident-reverse-intel.yaml` (and any future server-side
+ *   `soc_incident_reverse_intel.yaml` (and any future server-side
  *   driver) is responsible for fetching incidents/outcomes and
  *   bulk-indexing emissions; this module just maps inputs → emissions
  *   with no side effects.
@@ -100,7 +100,7 @@ export interface ReverseIntelEvidence {
 export interface ReverseIntelEmission {
   readonly intel_id: string;
   readonly feed_id: 'soc.incident.observed';
-  readonly adapter: 'soc-incident-reverse-intel';
+  readonly adapter: 'soc_incident_reverse_intel';
   readonly kind: 'ttp_observed';
   readonly reference: {
     readonly technique_ids: readonly string[];
@@ -404,7 +404,7 @@ export const extractReverseIntel = (input: ExtractReverseIntelInput): ExtractRev
     emissions.push({
       intel_id: intelId,
       feed_id: 'soc.incident.observed',
-      adapter: 'soc-incident-reverse-intel',
+      adapter: 'soc_incident_reverse_intel',
       kind: 'ttp_observed',
       reference: {
         technique_ids: [techniqueId],

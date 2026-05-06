@@ -1,0 +1,250 @@
+version: '1'
+name: ARGUS Skill Policy Applier (B9 consumer)
+description: >
+  AutoDEX B9 — closes the self-adjusting-skills loop.
+
+  PROBLEM
+  -------
+  `soc_skill_self_adjust.yaml` is the PRODUCER side of the B9 loop: it
+  reads `.soc-skill-metrics` and writes per-skill verdicts (healthy /
+  review / reprompt / demote / insufficient_data) into
+  `.soc-skill-recommendations`. Until this workflow shipped, the
+  recommendations index had no consumer — verdicts were observable but
+  nothing acted on them. The autonomy benchmark therefore counted B9
+  as half-shipped: producer ✅, consumer ❌.
+
+  WHAT THIS DOES
+  --------------
+  Every 30 minutes (and on manual trigger) the applier:
+
+    1. Pulls the most-recent `.soc-skill-recommendations` rows whose
+       `verdict` is `demote` or `reprompt` and that have NOT yet been
+       applied (`applied != true`). The producer keys recommendations
+       by `skill_id`, so by reading top_hits sorted by `@timestamp desc`
+       per skill we always act on the freshest verdict.
+    2. For each, upserts `.soc-skill-policy/{skill_id}` with the runtime
+       policy decision:
+         - `verdict: demote`   → `enabled: false` + `policy_action: freeze_skill`.
+                                  The MCP / chat-runtime layer reads this
+                                  index and refuses to invoke a skill with
+                                  `enabled: false`.
+         - `verdict: reprompt` → `enabled: true` + `prompt_revision_required: true`
+                                  + `policy_action: request_prompt_revision`.
+                                  The skill stays callable, but the
+                                  governance UI surfaces the revision request
+                                  to the skill maintainer.
+       Doc id is `skill_id` so the policy state is always the most-recent
+       decision per skill.
+    3. Stamps the source recommendation with `applied: true`,
+       `applied_at`, and `policy_action_taken` so subsequent ticks skip it.
+    4. Writes one `.soc-autonomy-decisions` row per applied verdict so the
+       Pulse panel + activity feed surface the closed loop.
+    5. Heartbeat + reasoning-trace for lineage.
+
+  IDEMPOTENCY
+  -----------
+  The `applied` flag on the source recommendation is the dedup key. The
+  policy index is upsert-by-skill_id, so a healthy verdict landing later
+  does NOT clobber a freeze decision unless the producer explicitly emits
+  a verdict change. (The producer's spec mirror — `kbn-argus-tool-manifest/
+  src/skill_health.ts` — guarantees that "healthy" only flips when metrics
+  rise above the review floor for ≥1 evaluation window.)
+
+  SAFETY
+  ------
+  - `verdict: healthy` and `verdict: insufficient_data` are NEVER applied.
+    The applier explicitly filters them out so a transient metric blip
+    cannot accidentally re-enable a frozen skill.
+  - Only emits decisions for recommendations carrying a non-empty
+    `recommended_actions` set. Empty / malformed recs are skipped (logged
+    via the heartbeat row's `skipped_count`).
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  recs_index: ".soc-skill-recommendations"
+  policy_index: ".soc-skill-policy"
+  applier_id: "soc_argus_skill_policy_applier"
+  schema_version: 1
+
+steps:
+  # ── 1. Pull pending verdicts (demote OR reprompt, not yet applied) ──
+  - name: fetch_pending
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: 100
+      query:
+        bool:
+          filter:
+            - terms: { verdict: ["demote", "reprompt"] }
+          must_not:
+            - term: { applied: true }
+      sort:
+        - "@timestamp": "desc"
+
+  - name: gate_has_pending
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.fetch_pending.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  # ── 2. Apply each pending verdict ───────────────────────────────────
+  - name: apply_each
+    type: foreach
+    foreach: "{{ steps.fetch_pending.output.hits.hits }}"
+    if: "steps.gate_has_pending.output: yes"
+    steps:
+      # Compute the policy fields once, in a single Liquid render. We
+      # pipe the result through the same yes/no idiom the trust-gate
+      # uses so subsequent if: clauses stay KQL-compatible.
+      - name: classify_verdict
+        type: console
+        with:
+          message: >-
+            {%- assign v = foreach.item._source.verdict -%}
+            {% if v == 'demote' %}freeze{% elsif v == 'reprompt' %}reprompt{% else %}skip{% endif %}
+
+      # ── 2a. Demote path → freeze the skill ─────────────────────────
+      - name: upsert_policy_freeze
+        type: elasticsearch.index
+        if: "steps.classify_verdict.output: freeze"
+        with:
+          index: "{{ consts.policy_index }}"
+          id: "{{ foreach.item._source.skill_id }}"
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            skill_id: "{{ foreach.item._source.skill_id }}"
+            enabled: false
+            prompt_revision_required: false
+            verdict_consumed: "demote"
+            policy_reason: "B9 self-adjust verdict=demote: success_rate_7d below demote floor with sufficient failure count. Skill frozen pending operator review."
+            policy_action: "freeze_skill"
+            recommendation_id: "{{ foreach.item._id }}"
+            applied_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            applied_by: "{{ consts.applier_id }}"
+            schema_version: "{{ consts.schema_version }}"
+
+      # ── 2b. Reprompt path → flag prompt revision needed ────────────
+      - name: upsert_policy_reprompt
+        type: elasticsearch.index
+        if: "steps.classify_verdict.output: reprompt"
+        with:
+          index: "{{ consts.policy_index }}"
+          id: "{{ foreach.item._source.skill_id }}"
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            skill_id: "{{ foreach.item._source.skill_id }}"
+            enabled: true
+            prompt_revision_required: true
+            verdict_consumed: "reprompt"
+            policy_reason: "B9 self-adjust verdict=reprompt: success_rate_7d below review floor with sufficient failure count. Skill remains callable; prompt revision requested."
+            policy_action: "request_prompt_revision"
+            recommendation_id: "{{ foreach.item._id }}"
+            applied_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            applied_by: "{{ consts.applier_id }}"
+            schema_version: "{{ consts.schema_version }}"
+
+      # ── 2c. Stamp the source rec as applied (dedup key) ────────────
+      - name: stamp_recommendation_applied
+        type: elasticsearch.update
+        if: "steps.classify_verdict.output != skip"
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            applied: true
+            applied_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            applied_by: "{{ consts.applier_id }}"
+            policy_action_taken: >-
+              {%- if steps.classify_verdict.output == 'freeze' -%}freeze_skill
+              {%- elsif steps.classify_verdict.output == 'reprompt' -%}request_prompt_revision
+              {%- else -%}log_only
+              {%- endif -%}
+
+      # ── 2d. Audit row: one per applied verdict ─────────────────────
+      - name: write_autonomy_decision
+        type: elasticsearch.index
+        if: "steps.classify_verdict.output != skip"
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-skill-policy-applier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "{{ consts.applier_id }}"
+            decision: >-
+              {%- if steps.classify_verdict.output == 'freeze' -%}skill_frozen
+              {%- elsif steps.classify_verdict.output == 'reprompt' -%}skill_reprompt_requested
+              {%- else -%}log_only
+              {%- endif -%}
+            gate: "skill_self_adjust"
+            skill_id: "{{ foreach.item._source.skill_id }}"
+            verdict: "{{ foreach.item._source.verdict }}"
+            recommendation_id: "{{ foreach.item._id }}"
+            recommended_actions: "{{ foreach.item._source.recommended_actions | json }}"
+            metrics_snapshot: "{{ foreach.item._source.metrics_snapshot | json }}"
+            reason: "B9 self-adjust closed loop — applier consumed producer verdict and emitted a runtime policy decision."
+
+      # ── 2e. Reasoning-trace row (lineage view) ─────────────────────
+      - name: write_trace
+        type: elasticsearch.index
+        if: "steps.classify_verdict.output != skip"
+        with:
+          index: .soc-reasoning-trace
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "argus-skill-policy-applier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            agent_id: "{{ consts.applier_id }}"
+            step_index: 0
+            step_type: "run_summary"
+            content: "skill={{ foreach.item._source.skill_id }} verdict={{ foreach.item._source.verdict }} action={{ steps.classify_verdict.output }}"
+            argus:
+              agent:
+                id: "{{ consts.applier_id }}"
+                version: "argus-b9-consumer"
+              decision:
+                kind: "skill_policy"
+                id: "{{ foreach.item._source.skill_id }}"
+                confidence: 1.0
+                verdict: "{{ foreach.item._source.verdict }}"
+                action: "{{ steps.classify_verdict.output }}"
+            attributes:
+              argus.agent.id: "{{ consts.applier_id }}"
+              argus.decision.kind: "skill_policy"
+              argus.decision.id: "{{ foreach.item._source.skill_id }}"
+              argus.decision.action: "{{ steps.classify_verdict.output }}"
+            gen_ai:
+              system: "argus"
+              operation:
+                name: "argus.skill_policy.apply"
+              agent:
+                id: "{{ consts.applier_id }}"
+                name: "ARGUS Skill Policy Applier"
+                description: "Consumer for B9 self-adjusting-skill verdicts. Converts demote/reprompt verdicts into runtime policy decisions in .soc-skill-policy."
+
+  # ── 3. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_skill_policy_applier_tick
+        source: "{{ consts.applier_id }}"
+        tick_id: "argus-skill-policy-applier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        applied_count: "{{ steps.fetch_pending.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS skill-policy applier — applied {{ steps.fetch_pending.output.hits.hits | size | default: 0 }} pending verdict(s) tick=argus-skill-policy-applier-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

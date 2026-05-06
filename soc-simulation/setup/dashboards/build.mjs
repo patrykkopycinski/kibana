@@ -722,11 +722,11 @@ panels.push(
   barPanel({
     id: 'soc-gov-mutations-time',
     title: 'Autonomous mutations (24h) — by result',
-    description: 'Every attempt made by soc-autonomous-applier in the last 24h, stacked by result.',
+    description: 'Every attempt made by soc_autonomous_applier in the last 24h, stacked by result.',
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
-      '| WHERE source == "soc-autonomous-applier" AND @timestamp > NOW() - 24 hours',
+      '| WHERE source == "soc_autonomous_applier" AND @timestamp > NOW() - 24 hours',
       '| STATS count = COUNT(*) BY result, bucket = BUCKET(@timestamp, 1 hour)',
       '| SORT bucket ASC',
     ].join(' '),
@@ -764,11 +764,11 @@ panels.push(
   metricPanel({
     id: 'soc-gov-budget',
     title: 'Daily budget used',
-    description: 'Applied mutations today vs. daily_budget_all=50 from soc-autonomous-applier.',
+    description: 'Applied mutations today vs. daily_budget_all=50 from soc_autonomous_applier.',
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
-      '| WHERE source == "soc-autonomous-applier" AND result == "applied"',
+      '| WHERE source == "soc_autonomous_applier" AND result == "applied"',
       '  AND @timestamp > NOW() - 24 hours',
       '| STATS applied_24h = COUNT(*)',
       '| EVAL pct = TO_INTEGER(applied_24h * 100 / 50)',
@@ -790,7 +790,7 @@ panels.push(
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
-      '| WHERE source == "soc-autonomous-applier"',
+      '| WHERE source == "soc_autonomous_applier"',
       '  AND result IN ("applied","failure","validation_failed")',
       '  AND @timestamp > NOW() - 24 hours',
       '| STATS attempts = COUNT(*) BY artifact_id',
@@ -813,7 +813,7 @@ panels.push(
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
-      '| WHERE source == "soc-autonomous-applier" AND result == "applied"',
+      '| WHERE source == "soc_autonomous_applier" AND result == "applied"',
       '  AND @timestamp > NOW() - 7 days',
       '| STATS count = COUNT(*) BY artifact_type',
       '| SORT count DESC',
@@ -832,12 +832,12 @@ panels.push(
     id: 'soc-gov-recent-mutations',
     title: 'Recent applier activity',
     description:
-      'Every row soc-autonomous-applier has written to .soc-evolution-log, most recent first. ' +
+      'Every row soc_autonomous_applier has written to .soc-evolution-log, most recent first. ' +
       'This is the tamper-evident audit trail.',
     index: '.soc-evolution-log',
     esql: [
       'FROM .soc-evolution-log',
-      '| WHERE source == "soc-autonomous-applier"',
+      '| WHERE source == "soc_autonomous_applier"',
       '| SORT @timestamp DESC',
       '| LIMIT 25',
       '| KEEP @timestamp, artifact_type, artifact_id, op, result, reason',
@@ -1044,7 +1044,7 @@ panels.push(
   metricPanel({
     id: 'soc-learn-regression-last',
     title: 'Last regression gate',
-    description: 'Result of the most recent soc-regression-gate run.',
+    description: 'Result of the most recent soc_regression_gate run.',
     index: '.soc-regression-runs',
     esql: [
       'FROM .soc-regression-runs',
@@ -1170,7 +1170,7 @@ panels.push(
     markdown: [
       '### Shift handover inbox',
       '',
-      'Every 8 hours `soc-shift-handover` composes a narrative summary of ' +
+      'Every 8 hours `soc_shift_handover` composes a narrative summary of ' +
         'what the autonomous SOC did while you were away. The most recent ' +
         'narrative is below; earlier handovers are in the table.',
     ].join('\n'),
@@ -1182,11 +1182,10 @@ panels.push(
   tablePanel({
     id: 'soc-handover-latest',
     title: 'Most recent shift narrative',
-    description:
-      'Most recent shift-handover document. Narrative is markdown authored by default.',
-    index: '.soc-shift-handover',
+    description: 'Most recent shift-handover document. Narrative is markdown authored by default.',
+    index: '.soc_shift_handover',
     esql: [
-      'FROM .soc-shift-handover',
+      'FROM .soc_shift_handover',
       '| SORT generated_at DESC',
       '| LIMIT 1',
       '| KEEP shift_id, shift_start_ts, shift_end_ts, narrative_markdown',
@@ -1206,9 +1205,9 @@ panels.push(
     id: 'soc-handover-history',
     title: 'Previous shift handovers',
     description: 'All handovers in the window, newest first.',
-    index: '.soc-shift-handover',
+    index: '.soc_shift_handover',
     esql: [
-      'FROM .soc-shift-handover',
+      'FROM .soc_shift_handover',
       '| SORT generated_at DESC',
       '| LIMIT 10',
       '| KEEP shift_id, shift_end_ts, counters.cases_opened, counters.cases_closed, counters.kill_switch_events, counters.mutations_applied, counters.mutations_blocked',
@@ -1240,7 +1239,7 @@ panels.push(
     markdown: [
       '### Skills ROI',
       '',
-      'Rolled up hourly by `soc-skill-metrics-roller`. ' +
+      'Rolled up hourly by `soc_skill_metrics_roller`. ' +
         'Values are **estimates** (`estimate=true`) — baseline is 25 minutes ' +
         'saved per successful autonomous action at $90/hr analyst rate. Use ' +
         'these as operational order-of-magnitude signals, not CFO-grade receipts.',
@@ -1288,7 +1287,7 @@ panels.push(
       '### Reasoning trace',
       '',
       'Indexed record of what agents actually did on each run. ' +
-        'Currently pilot-wired to `soc-alert-sweeper`; additional workflows will ' +
+        'Currently pilot-wired to `soc_alert_sweeper`; additional workflows will ' +
         'emit `run_summary` records here over time.',
     ].join('\n'),
     grid: { x: 0, y, w: 48, h: 3 },
@@ -1337,7 +1336,7 @@ panels.push(
       '### Forensic summaries',
       '',
       'One immutable document per closed Kibana case (produced by ' +
-        '`soc-forensic-summarizer`). Consolidates verdict, IOCs, YARA rules, ' +
+        '`soc_forensic_summarizer`). Consolidates verdict, IOCs, YARA rules, ' +
         'attribution, and rule exceptions — durable evidence for any ' +
         'retrospective or audit.',
     ].join('\n'),

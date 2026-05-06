@@ -21,7 +21,7 @@ export type ArgusPlaybookKind = 'workflow' | 'skill';
  * playbook serves, independent of whether the entry is a workflow or a
  * skill. Multiple entries can share the same `user_intent` — the ARGUS
  * Console Playbooks tab groups them so operators don't see near-duplicates
- * (e.g. `argus_assess_cve` skill + `soc-argus-exploit-to-detection`
+ * (e.g. `argus_assess_cve` skill + `soc_argus_exploit_to_detection`
  * workflow both serve `user_intent: 'new_cve'`).
  */
 export type ArgusPlaybookUserIntent =

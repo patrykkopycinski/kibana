@@ -146,7 +146,7 @@ describe('extractReverseIntel', () => {
     );
     expect(result.emissions).toHaveLength(1);
     const [emission] = result.emissions;
-    expect(emission.adapter).toBe('soc-incident-reverse-intel');
+    expect(emission.adapter).toBe('soc_incident_reverse_intel');
     expect(emission.feed_id).toBe('soc.incident.observed');
     expect(emission.kind).toBe('ttp_observed');
     expect(emission.reference.technique_ids).toEqual(['T1059.001']);

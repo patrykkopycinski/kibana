@@ -1,0 +1,147 @@
+version: '1'
+name: ARGUS Playbook — Redundancy Scanner
+description: >
+  Scan `.soc-detection-corpus` for techniques covered by many overlapping
+  rules (by default three or more independent source families). For each
+  redundant group, file a `consolidation` mutation intent for the ARGUS-
+  authored rule(s) in the group so reviewers can pick a dominant rule and
+  retire the rest. Intents carry a Pareto `argus.synthesis` block with
+  alternatives pulled from `.soc-detection-patterns`.
+enabled: true
+
+triggers:
+  - type: manual
+  - type: scheduled
+    config:
+      every: "24h"
+
+inputs:
+  - name: redundancy_threshold
+    type: number
+    required: false
+    default: 3
+    description: "Minimum number of distinct source families that must cover a technique before it's flagged as redundant."
+  - name: profile_id
+    type: string
+    required: false
+    description: "Optional threat profile id — limits scan to techniques in this profile."
+  - name: auto_file
+    type: boolean
+    required: false
+    default: true
+
+consts:
+  corpus_index: ".soc-detection-corpus"
+  patterns_index: ".soc-detection-patterns"
+  profiles_index: ".soc-threat-profiles"
+  recommendations_index: ".soc-recommendations"
+  audit_index: ".soc-audit-trail"
+
+steps:
+  - name: aggregate_redundancy
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.corpus_index }}"
+      size: 0
+      query:
+        match_all: {}
+      aggs:
+        techniques:
+          terms:
+            field: "mitre_technique"
+            size: 200
+          aggs:
+            sources:
+              cardinality:
+                field: "source"
+            redundant:
+              bucket_selector:
+                buckets_path:
+                  sources: "sources"
+                script: "params.sources >= params.threshold"
+                gatherable_params:
+                  threshold: "{{ inputs.redundancy_threshold }}"
+
+  - name: fetch_argus_rules
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.corpus_index }}"
+      size: 500
+      _source: ["rule_id", "source", "mitre_technique"]
+      query:
+        bool:
+          filter:
+            - term: { source: "argus" }
+
+  - name: log_scan
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        kind: "playbook_dispatch"
+        playbook: "soc_argus_redundancy_scanner"
+        redundancy_threshold: "{{ inputs.redundancy_threshold }}"
+        redundant_technique_count: "{{ steps.aggregate_redundancy.output.aggregations.techniques.buckets | size }}"
+
+  - name: file_consolidation_intents
+    type: foreach
+    if: "{{ inputs.auto_file == true }}"
+    foreach: "{{ steps.aggregate_redundancy.output.aggregations.techniques.buckets }}"
+    steps:
+      - name: fetch_pattern
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.patterns_index }}"
+          size: 3
+          query:
+            bool:
+              filter:
+                - term: { technique_id: "{{ foreach.item.key }}" }
+
+      - name: write_consolidation
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recommendations_index }}"
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            type: "mutation_intent"
+            schema_version: 2
+            rec_id: "arg-cons-{{ foreach.item.key }}"
+            source: "argus.redundancy_scanner"
+            status: "pending"
+            track: "agentic"
+            title: "Consolidate rules covering {{ foreach.item.key }}"
+            summary: "{{ foreach.item.sources.value }} source families cover {{ foreach.item.key }} (threshold {{ inputs.redundancy_threshold }}). Consolidate overlapping rules."
+            confidence: 60
+            kind: "rule_consolidate"
+            argus:
+              origin: "consolidation"
+              decision:
+                kind: "rule_consolidate"
+                confidence: 0.60
+                door_class: "two_way"
+              agent:
+                id: "argus.redundancy_scanner"
+                version: "1.0.0"
+              actor:
+                trust_tier: "frontier"
+              procedure_clusters:
+                - "redundant:{{ foreach.item.key }}"
+              synthesis:
+                chosen:
+                  pattern_id: "{{ steps.fetch_pattern.output.hits.hits.0._source.pattern_id }}"
+                  technique_id: "{{ foreach.item.key }}"
+                frontier: "{{ steps.fetch_pattern.output.hits.hits }}"
+                dominated: []
+                weights:
+                  precision: 0.4
+                  recall: 0.3
+                  fp_rate: 0.2
+                  axis_fn: 0.1
+
+outputs:
+  - name: redundant_techniques
+    value: "{{ steps.aggregate_redundancy.output.aggregations.techniques.buckets }}"
+  - name: filed_count
+    value: "{{ steps.file_consolidation_intents.output | size }}"

@@ -22,7 +22,7 @@ with no stubs. Each artifact is a snapshot of live state captured during the
 | `pulse-payload.json` | The raw `/internal/security_solution/argus/governance_pulse` response that powers the Pulse panel. Includes the three vision-doc KPIs (4.1 trigger-to-rule, 4.2 coverage trend, 1.6.8 signal-to-noise) plus MTTD, hours-saved (B12), throughput, drift, tier mix. | All numeric fields are real cluster aggregates over `now-24h`. `null` sections degrade gracefully (no synthetic backfill). |
 | `pulse-panel-live-final.png` | Browser screenshot of the rendered Pulse panel showing all KPI tiles populated with real numbers. Captured after fix to `useArgusQuery` removed an infinite render→abort loop (commit message tagged `fix(argus-console): stabilise transform/body in useArgusQuery`). | Look at the badge — "live" means the React hook reached `success`. The three new tiles (Signal-to-noise / Trigger-to-rule / ATT&CK coverage) read 50% / 30% / 100.00% with breakdowns. |
 | `coverage-route.json` | Live response from `/internal/security_solution/argus/coverage` — the ATT&CK technique coverage rollup that backs the coverage trend tile. | `total_techniques`, `covered_techniques`, `coverage_pct` plus per-tactic and per-technique drill-down. |
-| `coverage-snapshots-history.json` | The `.soc-coverage-snapshots` index sorted by `@timestamp` desc — the trend backing dataset that the Pulse panel correlates oldest vs latest to compute `delta_pp`. | Producer: `soc-argus-coverage-snapshotter` (1h cadence). Confirm two distinct snapshot timestamps to verify the trend signal. |
+| `coverage-snapshots-history.json` | The `.soc-coverage-snapshots` index sorted by `@timestamp` desc — the trend backing dataset that the Pulse panel correlates oldest vs latest to compute `delta_pp`. | Producer: `soc_argus_coverage_snapshotter` (1h cadence). Confirm two distinct snapshot timestamps to verify the trend signal. |
 | `sample-mutation-intents.json` | Three real `.soc-mutation-intents` documents with the `synthesis_lag_ms` field populated. | These are the rows that drive vision-doc 4.1 trigger-to-rule. `synthesis_lag_ms` is computed as `mutation_intent.@timestamp - advisory.ingested_at`. |
 | `sample-advisories.json` | Three real `.soc-cve-advisories` documents — the upstream CVE rows that the synthesis driver picked up and turned into mutation intents. | The `ingested_at` field is the lower bound for the `synthesis_lag_ms` calculation. |
 | `sample-outcomes.json` | Three real `.soc-outcomes` documents with `verdict: true_positive` and `verdict: false_positive` labels — the rows the signal-to-noise tile aggregates. | Filter aggs in `governance_pulse.ts` count `verdict: true_positive` (TP) and `verdict: false_positive` (FP); 5 each in this snapshot. |
@@ -57,9 +57,9 @@ producer + a contract:
 
 | Vision § | Pulse tile | Producer | Source index | Field(s) |
 | --- | --- | --- | --- | --- |
-| 1.6.8 | Signal-to-noise | analyst labels + `soc-recovery` | `.soc-outcomes` | `verdict ∈ {true_positive, false_positive}` |
-| 4.1 | Trigger-to-rule | `soc-argus-synthesis-driver` | `.soc-mutation-intents` | `synthesis_lag_ms`, `@timestamp` |
-| 4.2 | ATT&CK coverage trend | `soc-argus-coverage-snapshotter` | `.soc-coverage-snapshots` | `total_techniques`, `covered_techniques`, `coverage_pct` |
+| 1.6.8 | Signal-to-noise | analyst labels + `soc_recovery` | `.soc-outcomes` | `verdict ∈ {true_positive, false_positive}` |
+| 4.1 | Trigger-to-rule | `soc_argus_synthesis_driver` | `.soc-mutation-intents` | `synthesis_lag_ms`, `@timestamp` |
+| 4.2 | ATT&CK coverage trend | `soc_argus_coverage_snapshotter` | `.soc-coverage-snapshots` | `total_techniques`, `covered_techniques`, `coverage_pct` |
 | 4.3 | Hours-saved (B12) | `.soc-outcomes` aggregator + tunable minute constants | `.soc-outcomes` | `pipeline_complete`, `rolled_back`, `rollback_source` |
 | 4.4 | Detection MTTD | `.soc-outcomes.time_to_detect` aggregator | `.soc-outcomes` | `time_to_detect` |
 

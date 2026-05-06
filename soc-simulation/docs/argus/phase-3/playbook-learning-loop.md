@@ -4,7 +4,7 @@ Status: **Draft**
 
 ## Problem
 
-`soc-response` and the existing containment playbook emit response actions from a
+`soc_response` and the existing containment playbook emit response actions from a
 static library. In the Mythos era this is brittle: variant-heavy adversaries
 engineer behaviours that are *close* to a known technique but not close enough to
 trigger the right containment, so the playbook either over-responds (host isolation
@@ -16,12 +16,12 @@ outcomes — **without** letting the adversary steer it.
 
 ## Decision
 
-Add `soc-argus-playbook-learner`, a periodic workflow that correlates three
+Add `soc_argus_playbook_learner`, a periodic workflow that correlates three
 streams:
 
 1. `.soc-outcomes` — the outcome (TP/FP/escalate) of each triaged alert.
 2. `.soc-autonomy-decisions` — which playbook step was chosen.
-3. `.soc-post-apply-observer` outputs — whether the chosen step was later rolled
+3. `.soc_post_apply_observer` outputs — whether the chosen step was later rolled
    back.
 
 Every 24h, the learner computes per-`(technique, playbook_step)` pair:
@@ -75,7 +75,7 @@ New `mutation_intent` shape:
 
 ## Dependencies
 
-- `soc-post-apply-observer` must reliably tag rollbacks by the originating
+- `soc_post_apply_observer` must reliably tag rollbacks by the originating
   mutation.
 - M2.5 trust-tier-at-decision on reasoning traces (so the learner can exclude
   probationary-tier outcomes).

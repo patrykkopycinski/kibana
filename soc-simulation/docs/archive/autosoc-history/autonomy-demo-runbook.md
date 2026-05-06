@@ -72,7 +72,7 @@ technique `T1018`, confidence 0.88.
 
 **What the system is doing:**
 `soc-triage-agent` reads signals, attaches MITRE mapping, and writes to
-`.soc-triage-results`. Output flows through `soc-meta.yaml`, which can emit
+`.soc-triage-results`. Output flows through `soc_meta.yaml`, which can emit
 `mutation_intent` for detection engineering.
 
 **Live check:**
@@ -135,7 +135,7 @@ Switch to the **Autonomy Feed** tab. This is the autonomy-first story in one pla
 - Decision feed receives a new row with status `auto_apply_ready` and a `backtest: projection_safe` badge.
 
 **What the system is doing:**
-`soc-rule-backtester.yaml` ran when the recommendation hit `pending_backtest`.
+`soc_rule_backtester.yaml` ran when the recommendation hit `pending_backtest`.
 It pulls historical alert + outcome data from `.soc-outcomes`, applies the
 proposed patch mathematically, computes the delta, and writes a verdict to
 `.soc-backtests`. The recommendation's status is promoted to
@@ -230,7 +230,7 @@ Switch to a prepared scenario where a prior applied patch over-tuned a rule
 - "Auto-rolled back by observer" KPI increments.
 
 **What the system is doing:**
-- `soc-post-apply-observer.yaml` runs every 5 minutes.
+- `soc_post_apply_observer.yaml` runs every 5 minutes.
 - For each `applied` decision in the last window, it compares post-apply KPIs
   against the snapshot baseline (from `.soc-snapshots`): alert volume, TP rate
   from `.soc-outcomes`, confidence drift.
@@ -261,7 +261,7 @@ Still on **Autonomy Feed**. Scroll to the **Per-agent trust tiers** table.
 |-------|------|-------|---------------|
 | `soc-signal-quality-agent` | trusted | 0.94 | 0 |
 | `soc-triage-agent` | probationary | 0.81 | 0 |
-| `soc-deteng-agent` | probationary | 0.78 | 1 |
+| `soc_deteng-agent` | probationary | 0.78 | 1 |
 | `soc-meta-agent` | observing | 0.62 | 1 |
 | `experimental-tuner-v3` | **quarantined** | 0.35 | 3 |
 
@@ -320,11 +320,11 @@ already-seeded data:
 | Schema | `soc-simulation/setup/index_templates/soc-trust-scores.json` | Per-agent trust history |
 | Schema | `soc-simulation/setup/index_templates/soc-recommendations.json` | `mutation_intent` source of truth |
 | Pipeline | `soc-simulation/setup/ingest_pipelines/soc-mutation-intent-envelope-validator.json` | Write-time schema enforcement |
-| Workflow | `soc-simulation/workflows/soc-rule-backtester.yaml` | Projects impact of rule patches |
-| Workflow | `soc-simulation/workflows/soc-autonomous-applier.yaml` | Gate cascade + apply |
-| Workflow | `soc-simulation/workflows/soc-post-apply-observer.yaml` | Rollback watchdog |
+| Workflow | `soc-simulation/workflows/soc_rule_backtester.yaml` | Projects impact of rule patches |
+| Workflow | `soc-simulation/workflows/soc_autonomous_applier.yaml` | Gate cascade + apply |
+| Workflow | `soc-simulation/workflows/soc_post_apply_observer.yaml` | Rollback watchdog |
 | Workflow | `soc-simulation/workflows/soc-trust-scorer.yaml` | Per-agent trust computation |
-| Agent | `soc-simulation/agents/soc-autonomous-applier-agent.json` | Executes the patch (drift-check + merge) |
+| Agent | `soc-simulation/agents/soc_autonomous_applier-agent.json` | Executes the patch (drift-check + merge) |
 | Agent | `soc-simulation/agents/soc-signal-quality-agent.json` | Emits structured rule patches |
 | UI | `x-pack/solutions/security/plugins/security_solution/public/autonomous_soc/pages/autonomy_feed_panel.tsx` | In-Kibana Autonomy Feed |
 | Seeder | `soc-simulation/scripts/seed/seed_autonomy_demo.py` | Reproducible demo data |

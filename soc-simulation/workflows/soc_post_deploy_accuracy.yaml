@@ -1,0 +1,128 @@
+version: '1'
+name: SOC Post-Deploy Accuracy Validator
+description: >
+  For each `applied` recommendation from the last 48h that has not yet been
+  post-deploy validated, measures alert volume in `.alerts-security.alerts-*` and
+  false-positive volume in `.soc-outcomes`, writes a `.soc-backtests` record with
+  `simulator_used: post_deploy_v1`, and stamps `post_deploy_validated` on the
+  recommendation.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  max_per_tick: 20
+  alerts_index: ".alerts-security.alerts-*"
+  outcomes_index: ".soc-outcomes"
+
+steps:
+  - name: applied_need_validation
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: "{{ consts.max_per_tick }}"
+      query:
+        bool:
+          filter:
+            - term: { status: "applied" }
+            - range:
+                applied_at:
+                  gte: "now-48h"
+          must_not:
+            - exists: { field: "post_deploy_validated" }
+
+  - name: gate_has_candidates
+    type: console
+    with:
+      message: >-
+        {%- assign n = steps.applied_need_validation.output.hits.total.value | default: 0 -%}
+        {% if n > 0 %}yes{% else %}no{% endif %}
+
+  - name: validate_each
+    type: foreach
+    foreach: "{{ steps.applied_need_validation.output.hits.hits }}"
+    if: "steps.gate_has_candidates.output: yes"
+    steps:
+      - name: count_alerts_24h
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/{{ consts.alerts_index }}/_count"
+          body:
+            query:
+              bool:
+                filter:
+                  - term:
+                      "kibana.alert.rule.rule_id": "{{ foreach.item._source.details.artifact_id }}"
+                  - range:
+                      "@timestamp":
+                        gte: "now-24h"
+
+      - name: count_fp_outcomes_24h
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: "/{{ consts.outcomes_index }}/_count"
+          body:
+            query:
+              bool:
+                filter:
+                  - term: { disposition: "auto_closed_fp" }
+                  - term: { rule_id: "{{ foreach.item._source.details.artifact_id }}" }
+                  - range:
+                      "@timestamp":
+                        gte: "now-24h"
+
+      - name: volume_verdict
+        type: console
+        with:
+          message: >-
+            {%- assign ac = steps.count_alerts_24h.output.count | default: 0 -%}
+            {% if ac > 200 %}high_volume{% else %}normal{% endif %}
+
+      - name: write_post_deploy_backtest
+        type: elasticsearch.index
+        with:
+          index: .soc-backtests
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            rule_id: "{{ foreach.item._source.details.artifact_id }}"
+            simulator_used: "post_deploy_v1"
+            window: "now-24h"
+            alert_count: "{{ steps.count_alerts_24h.output.count | default: 0 }}"
+            fp_outcome_count: "{{ steps.count_fp_outcomes_24h.output.count | default: 0 }}"
+            volume_verdict: "{{ steps.volume_verdict.output }}"
+            source_workflow: "soc_post_deploy_accuracy"
+            recommendation_doc_id: "{{ foreach.item._id }}"
+
+      - name: stamp_validated
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            post_deploy_validated: true
+            post_deploy_validated_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            post_deploy_backtest_verdict: "{{ steps.volume_verdict.output }}"
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: post_deploy_accuracy_heartbeat
+        source: "soc_post_deploy_accuracy"
+        batch: "{{ steps.applied_need_validation.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Post-deploy accuracy tick — candidates={{ steps.applied_need_validation.output.hits.hits | size | default: 0 }}"

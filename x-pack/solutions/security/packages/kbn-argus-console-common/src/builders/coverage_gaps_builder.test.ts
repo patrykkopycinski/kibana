@@ -19,7 +19,7 @@ const critical: RawCoverageHit = {
     technique_name: 'PowerShell',
     occurrences: 120,
     avg_confidence: 0.3,
-    source: 'soc-gap-analyzer',
+    source: 'soc_gap_analyzer',
   },
 };
 

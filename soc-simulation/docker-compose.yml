@@ -164,7 +164,7 @@ services:
     restart: unless-stopped
 
   # Caldera command dispatch and polling is now done by two native workflows —
-  # soc-caldera-dispatcher and soc-caldera-poller — which use elasticsearch.*,
+  # soc_caldera_dispatcher and soc_caldera_poller — which use elasticsearch.*,
   # http, and foreach steps. No Python bridge is required. The former
   # caldera-bridge service was removed; this file now contains ONLY:
   #   - elasticsearch  (stack)

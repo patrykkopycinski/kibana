@@ -28,7 +28,7 @@ standard of evidence, including a recent adversarial simulation.
 
 ## Apply-cascade wiring
 
-`soc-autonomous-applier` consults `.soc-trust-scores` for the actor that produced
+`soc_autonomous_applier` consults `.soc-trust-scores` for the actor that produced
 the recommendation:
 
 ```

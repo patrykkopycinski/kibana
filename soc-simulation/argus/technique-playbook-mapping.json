@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://argus.local/argus/technique-playbook-mapping.json",
-  "description": "MITRE ATT&CK technique → playbook-step mapping consumed by soc-argus-playbook-learner. Each entry lists the candidate steps the learner is allowed to remap between. New techniques land via PR; the learner never invents mappings.",
+  "description": "MITRE ATT&CK technique → playbook-step mapping consumed by soc_argus_playbook_learner. Each entry lists the candidate steps the learner is allowed to remap between. New techniques land via PR; the learner never invents mappings.",
   "version": 1,
   "mappings": [
     {

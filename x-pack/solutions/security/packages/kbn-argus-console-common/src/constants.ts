@@ -115,11 +115,17 @@ export const ARGUS_SOC_INDICES = {
   // autonomy ledger used by the `argus.decision_graph` read.
   decisionGraph: '.soc-decision-graph',
   // Vision-doc 4.2 — once-per-hour ATT&CK coverage rollup the
-  // `soc-argus-coverage-snapshotter` workflow writes. Stores
+  // `soc_argus_coverage_snapshotter` workflow writes. Stores
   // {total_techniques, covered_techniques, coverage_pct} so the Pulse panel
   // can compute a trend (current vs window-baseline) without re-aggregating
   // .soc-coverage-gaps + .soc-detection-corpus on every page-load.
   coverageSnapshots: '.soc-coverage-snapshots',
+  // B5 — operator-curated high-business-value asset register. Read by the
+  // `soc_argus_crown_jewel_gate` workflow (12th gate in the autonomy
+  // cascade) to decide whether a mutation that would otherwise auto-apply
+  // should be routed to `pending_review` because its target list
+  // intersects a crown-jewel asset.
+  crownJewels: '.soc-crown-jewels',
 } as const;
 
 /**

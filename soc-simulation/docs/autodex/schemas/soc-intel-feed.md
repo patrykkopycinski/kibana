@@ -24,7 +24,7 @@ breaks the Mythos aggregator.
 | `@timestamp` | `date` | When the row was indexed. |
 | `intel_id` | `keyword` | Doc id and dedup key. Must be stable per logical signal so re-emission upserts cleanly (e.g. `kev-CVE-2024-30100`, `incident-rev-T1059.001-2026-05-04T11:11:11Z`). |
 | `feed_id` | `keyword` | Logical feed identifier. Examples: `argus-demo-feed` (generic), `mythos.aggregator` (Mythos), `soc.incident.observed` (B10 reverse-intel). |
-| `adapter` | `keyword` | Adapter that produced the row. Examples: `argus_intel_adapter_generic`, `argus_intel_mythos_aggregator`, `soc-incident-reverse-intel`. |
+| `adapter` | `keyword` | Adapter that produced the row. Examples: `argus_intel_adapter_generic`, `argus_intel_mythos_aggregator`, `soc_incident_reverse_intel`. |
 | `kind` | `keyword` | Signal taxonomy. See [§2](#2-signal-taxonomy-kind) below. |
 | `reference.cve` | `keyword` | Optional CVE ID. Set when the signal is CVE-bound. |
 | `reference.technique_ids` | `keyword[]` | ATT&CK technique IDs the signal applies to. |
@@ -46,7 +46,7 @@ Adapters tag rows with one of these keys. Consumers branch on `kind` to apply ki
 | `exploit_availability` | A weaponised exploit / PoC is observable. | generic adapter, KEV adapter |
 | `campaign` | Coordinated activity across multiple targets. | generic adapter, Glasswing |
 | `mythos_signal` | Aggregated Mythos-class signal. | Mythos aggregator |
-| **`ttp_observed`** | **B10** — the org's own confirmed incidents observed this technique. The strongest possible evidence the technique is in scope for *this environment*. | `soc-incident-reverse-intel` |
+| **`ttp_observed`** | **B10** — the org's own confirmed incidents observed this technique. The strongest possible evidence the technique is in scope for *this environment*. | `soc_incident_reverse_intel` |
 
 ## 3. The B10 `ttp_observed` extension (evidence block)
 
@@ -70,11 +70,11 @@ on top of the canonical envelope. Other adapters do not populate
 
 | Adapter | Workflow | Doc |
 |---|---|---|
-| Generic / STIX-TAXII | [`soc-argus-intel-adapter-generic.yaml`](../../../workflows/soc-argus-intel-adapter-generic.yaml) | (this file) |
-| Analytics adapter | [`soc-argus-intel-adapter-analytics.yaml`](../../../workflows/soc-argus-intel-adapter-analytics.yaml) | (this file) |
-| Mythos aggregator | [`soc-argus-intel-mythos-aggregator.yaml`](../../../workflows/soc-argus-intel-mythos-aggregator.yaml) | (this file) |
-| **Incident reverse-intel (B10)** | [`soc-incident-reverse-intel.yaml`](../../../workflows/soc-incident-reverse-intel.yaml) | [`rfcs/B10-incident-reverse-intel.md`](../rfcs/B10-incident-reverse-intel.md) |
-| **CISA KEV adapter (B2)** | [`soc-argus-intel-adapter-kev.yaml`](../../../workflows/soc-argus-intel-adapter-kev.yaml) | [`rfcs/B2-production-cti.md`](../rfcs/B2-production-cti.md) |
+| Generic / STIX-TAXII | [`soc_argus_intel_adapter_generic.yaml`](../../../workflows/soc_argus_intel_adapter_generic.yaml) | (this file) |
+| Analytics adapter | [`soc_argus_intel_adapter_analytics.yaml`](../../../workflows/soc_argus_intel_adapter_analytics.yaml) | (this file) |
+| Mythos aggregator | [`soc_argus_intel_mythos_aggregator.yaml`](../../../workflows/soc_argus_intel_mythos_aggregator.yaml) | (this file) |
+| **Incident reverse-intel (B10)** | [`soc_incident_reverse_intel.yaml`](../../../workflows/soc_incident_reverse_intel.yaml) | [`rfcs/B10-incident-reverse-intel.md`](../rfcs/B10-incident-reverse-intel.md) |
+| **CISA KEV adapter (B2)** | [`soc_argus_intel_adapter_kev.yaml`](../../../workflows/soc_argus_intel_adapter_kev.yaml) | [`rfcs/B2-production-cti.md`](../rfcs/B2-production-cti.md) |
 
 ## 5. Consumers
 
@@ -98,7 +98,7 @@ on top of the canonical envelope. Other adapters do not populate
 ```bash
 # All rows from the reverse-intel adapter
 GET .soc-intel-feed/_search
-{ "query": { "term": { "adapter": "soc-incident-reverse-intel" } } }
+{ "query": { "term": { "adapter": "soc_incident_reverse_intel" } } }
 
 # Strongest reverse-intel signals in the last 24h
 GET .soc-intel-feed/_search
@@ -106,7 +106,7 @@ GET .soc-intel-feed/_search
   "query": {
     "bool": {
       "must": [
-        { "term": { "adapter": "soc-incident-reverse-intel" } },
+        { "term": { "adapter": "soc_incident_reverse_intel" } },
         { "range": { "@timestamp": { "gte": "now-24h" } } }
       ]
     }
@@ -120,7 +120,7 @@ GET .soc-intel-feed/_search
   "query": {
     "bool": {
       "must": [
-        { "term": { "adapter": "soc-incident-reverse-intel" } },
+        { "term": { "adapter": "soc_incident_reverse_intel" } },
         { "exists": { "field": "evidence.distinct_rule_ids" } }
       ]
     }

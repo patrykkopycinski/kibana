@@ -448,7 +448,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     // ARGUS autonomous synthesis driver runs on the workflow engine — see
-    // `soc-simulation/workflows/soc-argus-synthesis-driver.yaml`. The
+    // `soc-simulation/workflows/soc_argus_synthesis_driver.yaml`. The
     // workflow invokes the `security.argusSynthesizeAdvisory` step
     // registered via `registerWorkflowSteps`; no TaskManager wiring is
     // needed here.

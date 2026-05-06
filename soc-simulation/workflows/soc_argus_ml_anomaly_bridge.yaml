@@ -1,0 +1,161 @@
+version: '1'
+name: ARGUS ML Anomaly Bridge
+description: >
+  Scheduled bridge from Elastic ML anomaly records to ARGUS hunt hypotheses.
+  Every 15 minutes, pulls high-severity anomaly records from the ARGUS ML jobs
+  (`argus-alert-volume`, `argus-entity-behavior`), correlates each with recent
+  security alerts in `.alerts-security.alerts-*`, and writes uncorrelated anomalies
+  to `.soc-hunt-findings` as `ml_anomaly_hypothesis` rows for analyst / ARGUS
+  follow-up. Complements soc_argus_alert_to_hypothesis (alert-driven) with
+  telemetry-driven coverage gaps.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 15m
+  - type: manual
+
+consts:
+  alerts_index: ".alerts-security.alerts-*"
+  score_floor: 75
+  poll_window: "now-6h"
+  audit_index: ".soc-audit-trail"
+
+steps:
+  - name: ml_records_alert_volume
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /_ml/anomaly_detectors/argus-alert-volume/results/records/_search
+      body:
+        size: 50
+        sort:
+          - "timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - range:
+                  record_score:
+                    gt: 75
+              - range:
+                  timestamp:
+                    gte: "now-6h"
+
+  - name: ml_records_entity_behavior
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: /_ml/anomaly_detectors/argus-entity-behavior/results/records/_search
+      body:
+        size: 50
+        sort:
+          - "timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - range:
+                  record_score:
+                    gt: 75
+              - range:
+                  timestamp:
+                    gte: "now-6h"
+
+  - name: bridge_alert_volume
+    type: foreach
+    foreach: "{{ steps.ml_records_alert_volume.output.hits.hits }}"
+    steps:
+      - name: correlate_partition_to_alerts
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.alerts_index }}"
+          size: 1
+          query:
+            bool:
+              filter:
+                - range:
+                    "@timestamp":
+                      gte: "now-2h"
+                - term:
+                    "kibana.alert.rule.name": "{{ foreach.item._source.partition_field_value | default: '__none__' }}"
+
+      - name: has_correlated_alert
+        type: console
+        with:
+          message: >-
+            {%- assign n = steps.correlate_partition_to_alerts.output.hits.total.value | default: steps.correlate_partition_to_alerts.output.hits.total | default: 0 -%}
+            {% if n > 0 %}yes{% else %}no{% endif %}
+
+      - name: emit_hypothesis_alert_volume
+        type: elasticsearch.index
+        if: "steps.has_correlated_alert.output: no"
+        with:
+          index: .soc-hunt-findings
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: soc_argus_ml_anomaly_bridge
+            hunt_type: ml_anomaly_hypothesis
+            status: open
+            hunt_output: >-
+              {"ml_job":"argus-alert-volume","record_score":{{ foreach.item._source.record_score | default: 0 }},"timestamp":"{{ foreach.item._source.timestamp }}","partition":"{{ foreach.item._source.partition_field_name | default: 'n/a' }}={{ foreach.item._source.partition_field_value | default: 'n/a' }}","detector_index":{{ foreach.item._source.detector_index | default: 0 }},"summary":"High-volume ML anomaly with no matching open alerts in the last 2h — candidate proactive hunt."}
+            findings_count: 1
+            techniques_hunted: []
+
+  - name: bridge_entity_behavior
+    type: foreach
+    foreach: "{{ steps.ml_records_entity_behavior.output.hits.hits }}"
+    steps:
+      - name: correlate_host_user
+        type: elasticsearch.search
+        with:
+          index: "{{ consts.alerts_index }}"
+          size: 1
+          query:
+            bool:
+              filter:
+                - range:
+                    "@timestamp":
+                      gte: "now-2h"
+              should:
+                - term:
+                    "host.name": "{{ foreach.item._source.partition_field_value | default: '__none__' }}"
+                - term:
+                    "user.name": "{{ foreach.item._source.partition_field_value | default: '__none__' }}"
+              minimum_should_match: 1
+
+      - name: has_correlated_alert_entity
+        type: console
+        with:
+          message: >-
+            {%- assign n = steps.correlate_host_user.output.hits.total.value | default: steps.correlate_host_user.output.hits.total | default: 0 -%}
+            {% if n > 0 %}yes{% else %}no{% endif %}
+
+      - name: emit_hypothesis_entity
+        type: elasticsearch.index
+        if: "steps.has_correlated_alert_entity.output: no"
+        with:
+          index: .soc-hunt-findings
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            source: soc_argus_ml_anomaly_bridge
+            hunt_type: ml_anomaly_hypothesis
+            status: open
+            hunt_output: >-
+              {"ml_job":"argus-entity-behavior","record_score":{{ foreach.item._source.record_score | default: 0 }},"timestamp":"{{ foreach.item._source.timestamp }}","partition":"{{ foreach.item._source.partition_field_name | default: 'n/a' }}={{ foreach.item._source.partition_field_value | default: 'n/a' }}","by_field":"{{ foreach.item._source.by_field_name | default: 'n/a' }}={{ foreach.item._source.by_field_value | default: 'n/a' }}","summary":"Rare entity-behavior ML anomaly with no correlated alert in the last 2h — candidate hunt."}
+            findings_count: 1
+            techniques_hunted: []
+
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: argus_ml_anomaly_bridge_heartbeat
+        source: soc_argus_ml_anomaly_bridge
+        status: ok
+        reason: >-
+          alert_volume_hits={{ steps.ml_records_alert_volume.output.hits.total.value | default: steps.ml_records_alert_volume.output.hits.total | default: 0 }} entity_hits={{ steps.ml_records_entity_behavior.output.hits.total.value | default: steps.ml_records_entity_behavior.output.hits.total | default: 0 }}

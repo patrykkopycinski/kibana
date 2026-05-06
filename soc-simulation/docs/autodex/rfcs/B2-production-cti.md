@@ -12,19 +12,19 @@ the conformance matrix, all flag the same thing: AutoDEX has
 threat-intel lane. Three observable symptoms today:
 
 1. **`.soc-intel-feed` only contains demo seeds.** The
-   `soc-argus-intel-adapter-generic` workflow ships four hardcoded
+   `soc_argus_intel_adapter_generic` workflow ships four hardcoded
    `seed-cve-2025-M100x-*` rows on first tick. The Mythos aggregator
-   (`soc-argus-intel-mythos-aggregator`) reads these, computes a
+   (`soc_argus_intel_mythos_aggregator`) reads these, computes a
    trust-weighted bounded-[0,1] signal, and surfaces it on the
    ARGUS console — but the input is fiction.
 2. **The analytics-cluster adapter is a stub.** The
-   `soc-argus-intel-adapter-analytics` workflow's documented purpose is
+   `soc_argus_intel_adapter_analytics` workflow's documented purpose is
    "Daily ETL pipeline that queries `ia-cti_enrichment` index from the
    analytics SDE cluster", but there's no cross-cluster client, no
    auth handshake, no transformation pipeline, and no production
    tenant configured.
 3. **KEV ingest is wired to advisories, not intel-feed.** The
-   `@kbn/argus-kev-ingest` package + `soc-kev-ingest.yaml` workflow
+   `@kbn/argus-kev-ingest` package + `soc_kev_ingest.yaml` workflow
    already pull the CISA Known Exploited Vulnerabilities catalog every
    30 minutes and write to `.soc-cve-advisories` — the **advisory
    lane** Path A consumes. The **intel-feed lane** the
@@ -37,7 +37,7 @@ authorisation decision that hasn't been made.
 
 ## 2. The Phase 1 spike (this RFC)
 
-`soc-argus-intel-adapter-kev.yaml` is a **batch-ETL fan-out workflow**
+`soc_argus_intel_adapter_kev.yaml` is a **batch-ETL fan-out workflow**
 that closes the symptom #3 gap with zero new auth and no new HTTPS
 clients:
 
@@ -56,7 +56,7 @@ clients:
 - **Sink**: `.soc-intel-feed` with deterministic `intel_id =
   kev-<cve_id>` so reruns are idempotent (`op_type: index` overwrites
   the same docs).
-- **Cadence**: every 30 minutes (matches `soc-kev-ingest`'s cadence so
+- **Cadence**: every 30 minutes (matches `soc_kev_ingest`'s cadence so
   the lag between catalog publication and intel-feed visibility stays
   below an hour).
 
@@ -76,9 +76,9 @@ problem (what if the two fetches see different catalog versions?).
 Fanning out from the already-canonical advisory writer keeps a
 single fetch, single source-of-truth, single audit trail.
 
-### 3.2 Why a separate workflow instead of a step inside `soc-kev-ingest`
+### 3.2 Why a separate workflow instead of a step inside `soc_kev_ingest`
 
-`soc-kev-ingest` already does three things (freshness metric, unprocessed
+`soc_kev_ingest` already does three things (freshness metric, unprocessed
 funnel, due-soon escalation). Adding a fourth step that writes to a
 different index would couple the advisory lane and the intel-feed lane —
 if the fan-out logic ever needs to change cadence, batching, or trust
@@ -109,7 +109,7 @@ tenant SLA could legitimately rate higher. Reserving `source_trust =
 
 ## 4. Phase 2 — Cross-cluster analytics adapter (deferred)
 
-The `soc-argus-intel-adapter-analytics` workflow's documented intent
+The `soc_argus_intel_adapter_analytics` workflow's documented intent
 is to query the analytics SDE cluster's `ia-cti_enrichment` index and
 fan that into `.soc-intel-feed`. That's a higher-fidelity signal than
 KEV (it includes per-tenant exploitation attempts, not just the public
@@ -179,7 +179,7 @@ ES search. End-to-end coverage comes from:
 A dedicated workflow-execution test (writing fixture KEV rows,
 running the workflow, asserting the fanned-out intel-feed rows) is a
 follow-up — the workflow harness for in-cluster YAML execution is
-shared with B1's `soc-argus-synthesis-driver` and can be reused.
+shared with B1's `soc_argus_synthesis_driver` and can be reused.
 
 ## 8. Risks & mitigations
 

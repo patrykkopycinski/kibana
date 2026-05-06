@@ -388,7 +388,7 @@ export const KillSwitchDocSchema = z
     autonomy_enabled: z
       .boolean()
       .describe(
-        'Cluster-wide autonomy flag. The `soc-argus-synthesis-driver.yaml` ' +
+        'Cluster-wide autonomy flag. The `soc_argus_synthesis_driver.yaml` ' +
           'workflow halts when the most-recent kill-switch document has `autonomy_enabled=false`.'
       ),
     reason: z.string().optional(),

@@ -1,0 +1,152 @@
+version: '1'
+name: SOC Skill Self-Adjust
+description: >
+  AutoDEX B9 — closed loop from .soc-skill-metrics to .soc-skill-recommendations.
+  Reads the latest per-skill success/failure rollup, runs the
+  evaluateSkillHealth verdict matrix (mirrored 1:1 from
+  kbn-argus-tool-manifest/src/skill_health.ts), and upserts a recommendation
+  per skill into .soc-skill-recommendations. Verdicts: healthy / review /
+  reprompt / demote / insufficient_data. The MCP-side admission gate (when
+  wired) imports the same TS spec so a skill's verdict is the same on
+  whichever surface evaluates it.
+  IMPORTANT: any change to the threshold logic here must be made in
+  skill_health.ts (and vice versa) in the same commit, or the
+  spec_alignment test will fail.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  # Mirror DEFAULT_SKILL_HEALTH_THRESHOLDS in kbn-argus-tool-manifest.
+  min_invocations_for_verdict: 5
+  success_rate_floor_demote: 0.5
+  success_rate_floor_review: 0.7
+  min_failures_for_reprompt: 5
+  schema_version: 1
+
+steps:
+  - name: read_metrics
+    type: elasticsearch.search
+    with:
+      index: ".soc-skill-metrics"
+      size: 500
+      track_total_hits: false
+      query:
+        match_all: {}
+
+  - name: gate_has_metrics
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.read_metrics.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: emit_recommendations
+    type: foreach
+    foreach: "{{ steps.read_metrics.output.hits.hits }}"
+    if: "steps.gate_has_metrics.output: yes"
+    steps:
+      - name: classify
+        type: console
+        # Compute the verdict in Liquid. The output of this step is a JSON
+        # payload that the next step reads via a parse-then-index pattern;
+        # we keep the whole verdict matrix in a single render so the spec
+        # mirror is easy to diff against the TS module.
+        with:
+          message: >-
+            {%- assign m = foreach.item._source -%}
+            {%- assign invocations = m.invocations_7d | default: 0 -%}
+            {%- assign successes   = m.success_count_7d | default: 0 -%}
+            {%- assign failures    = m.failure_count_7d | default: 0 -%}
+            {%- assign rate_input  = m.success_rate_7d | default: nil -%}
+            {%- assign rate_denom  = successes | plus: failures -%}
+            {%- if invocations > rate_denom -%}{%- assign rate_denom = invocations -%}{%- endif -%}
+            {%- if rate_input == nil or rate_input == 0.0 and rate_denom > 0 -%}
+              {%- if rate_denom > 0 -%}
+                {%- assign rate = successes | times: 1.0 | divided_by: rate_denom -%}
+              {%- else -%}
+                {%- assign rate = 0 -%}
+              {%- endif -%}
+            {%- else -%}
+              {%- assign rate = rate_input -%}
+            {%- endif -%}
+            {%- if rate < 0 -%}{%- assign rate = 0 -%}{%- endif -%}
+            {%- if rate > 1 -%}{%- assign rate = 1 -%}{%- endif -%}
+
+            {%- if invocations < consts.min_invocations_for_verdict -%}
+              {%- assign verdict = "insufficient_data" -%}
+              {%- assign actions = "log_only" -%}
+            {%- elsif rate <= consts.success_rate_floor_demote -%}
+              {%- if failures >= consts.min_failures_for_reprompt -%}
+                {%- assign verdict = "demote" -%}
+                {%- assign actions = "demote_actor,open_review_case" -%}
+              {%- else -%}
+                {%- assign verdict = "review" -%}
+                {%- assign actions = "open_review_case" -%}
+              {%- endif -%}
+            {%- elsif rate <= consts.success_rate_floor_review -%}
+              {%- if failures >= consts.min_failures_for_reprompt -%}
+                {%- assign verdict = "reprompt" -%}
+                {%- assign actions = "reprompt_skill,open_review_case" -%}
+              {%- else -%}
+                {%- assign verdict = "review" -%}
+                {%- assign actions = "open_review_case" -%}
+              {%- endif -%}
+            {%- else -%}
+              {%- assign verdict = "healthy" -%}
+              {%- assign actions = "log_only" -%}
+            {%- endif -%}
+
+            {{ verdict }}|{{ actions }}|{{ invocations }}|{{ successes }}|{{ failures }}|{{ rate }}|{{ m.last_run_ts | default: '' }}
+
+      - name: write_recommendation
+        type: elasticsearch.index
+        with:
+          index: .soc-skill-recommendations
+          id: "{{ foreach.item._source.skill_id }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            skill_id: "{{ foreach.item._source.skill_id }}"
+            verdict: >-
+              {%- assign parts = steps.classify.output | split: '|' -%}
+              {{ parts[0] }}
+            recommended_actions: >-
+              {%- assign parts = steps.classify.output | split: '|' -%}
+              {{ parts[1] | split: ',' | join: ',' }}
+            reasons:
+              - >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                computed verdict={{ parts[0] }} from invocations_7d={{ parts[2] }} success_count_7d={{ parts[3] }} failure_count_7d={{ parts[4] }} success_rate_7d={{ parts[5] }}
+            metrics_snapshot:
+              invocations_7d: >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                {{ parts[2] }}
+              success_count_7d: >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                {{ parts[3] }}
+              failure_count_7d: >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                {{ parts[4] }}
+              success_rate_7d: >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                {{ parts[5] }}
+              last_run_ts: >-
+                {%- assign parts = steps.classify.output | split: '|' -%}
+                {{ parts[6] | default: null }}
+            thresholds_applied:
+              min_invocations_for_verdict: "{{ consts.min_invocations_for_verdict }}"
+              success_rate_floor_demote: "{{ consts.success_rate_floor_demote }}"
+              success_rate_floor_review: "{{ consts.success_rate_floor_review }}"
+              min_invocations_for_reprompt: "{{ consts.min_failures_for_reprompt }}"
+            generated_by: "soc_skill_self_adjust"
+            generated_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            schema_version: "{{ consts.schema_version }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Skill self-adjust evaluated {{ steps.read_metrics.output.hits.hits | size | default: 0 }} skill(s)."

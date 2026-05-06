@@ -10,10 +10,10 @@ changing any YAML.
 
 | Tier       | Typical model   | When to use                                                           | Example workflows                                                   |
 |------------|-----------------|-----------------------------------------------------------------------|---------------------------------------------------------------------|
-| `planner`  | Claude Opus     | Strategic reasoning, multi-hop causal analysis, architecture review.  | `soc-meta`, `soc-arch-reviewer`, `soc-gap-analyzer`, `soc-deteng`   |
-| `analyst`  | Claude Sonnet   | Routine, schema-driven analysis with a well-defined output contract.  | `soc-alert-sweeper` *(replaces removed `soc-triage`)*, `soc-autonomous-applier`, `soc-watchdog`, `soc-response`, `soc-proactive-hunter`, `soc-recommendation-applier`, `soc-regression-gate` |
-| `bulk`     | Claude Haiku    | High-volume summarization, narrative writing, stale-detection polling.| `soc-shift-handover`, `soc-forensic-summarizer`, `soc-regression-harvester`, `soc-difficulty-controller`, `soc-trust-scorer` |
-| `none`     | —               | Workflow has no LLM steps (pure Elastic / Kibana orchestration).      | `soc-caldera-dispatcher`, `soc-caldera-poller`, `soc-argus-case-lifecycle` *(replaces removed `soc-case-creation`)*, `soc-recovery`, `soc-registry-retro-tag`, `soc-skill-metrics-roller` |
+| `planner`  | Claude Opus     | Strategic reasoning, multi-hop causal analysis, architecture review.  | `soc_meta`, `soc_arch_reviewer`, `soc_gap_analyzer`, `soc_deteng`   |
+| `analyst`  | Claude Sonnet   | Routine, schema-driven analysis with a well-defined output contract.  | `soc_alert_sweeper` *(replaces removed `soc-triage`)*, `soc_autonomous_applier`, `soc_watchdog`, `soc_response`, `soc_proactive_hunter`, `soc_recommendation_applier`, `soc_regression_gate` |
+| `bulk`     | Claude Haiku    | High-volume summarization, narrative writing, stale-detection polling.| `soc_shift_handover`, `soc_forensic_summarizer`, `soc_regression_harvester`, `soc_difficulty_controller`, `soc-trust-scorer` |
+| `none`     | —               | Workflow has no LLM steps (pure Elastic / Kibana orchestration).      | `soc_caldera_dispatcher`, `soc_caldera_poller`, `soc_argus_case_lifecycle` *(replaces removed `soc-case-creation`)*, `soc_recovery`, `soc_registry_retro_tag`, `soc_skill_metrics_roller` |
 
 The tier for every workflow is declared in
 `soc-simulation/workflows/_registry.json` under the `model_tier` key and is
@@ -67,15 +67,15 @@ To apply tiering in a single pass, replace `connector-id:` values:
 
 ```bash
 # Analyst tier: routine analysis workflows → sonnet
-for f in soc-alert-sweeper.yaml soc-autonomous-applier.yaml \
-         soc-watchdog.yaml soc-response.yaml soc-proactive-hunter.yaml \
-         soc-recommendation-applier.yaml soc-regression-gate.yaml; do
+for f in soc_alert_sweeper.yaml soc_autonomous_applier.yaml \
+         soc_watchdog.yaml soc_response.yaml soc_proactive_hunter.yaml \
+         soc_recommendation_applier.yaml soc_regression_gate.yaml; do
   sed -i '' 's/connector-id: opus/connector-id: sonnet/' "soc-simulation/workflows/$f"
 done
 
 # Bulk tier: high-volume summarization → haiku
-for f in soc-shift-handover.yaml soc-forensic-summarizer.yaml \
-         soc-regression-harvester.yaml; do
+for f in soc_shift_handover.yaml soc_forensic_summarizer.yaml \
+         soc_regression_harvester.yaml; do
   sed -i '' 's/connector-id: opus/connector-id: haiku/' "soc-simulation/workflows/$f"
 done
 ```
@@ -84,12 +84,12 @@ Then reinstall workflows via `setup.sh` or the Kibana workflows API.
 
 ## Related rails
 
-- The `soc-watchdog` workflow already trips the global kill-switch on
+- The `soc_watchdog` workflow already trips the global kill-switch on
   budget breach; that budget is model-agnostic.
 - The `soc-trust-scorer` outputs per-artifact trust and can be used as a
   signal for a future "auto-downgrade" policy ("if trust ≥ 0.9, downgrade
   tier by one").
-- The `soc-workflow-liveness-watchdog` monitors heartbeat freshness
+- The `soc_workflow_liveness_watchdog` monitors heartbeat freshness
   across all tiers, ensuring stale workflows are detected regardless
   of the connector used.
 
@@ -99,9 +99,9 @@ With the zero-agent architecture, model tiering happens at the workflow step lev
 
 | Workflow Step | Connector | Rationale |
 |---|---|---|
-| Rule synthesis (`ai.agent` in `soc-deteng.yaml`) | `opus` | Deep reasoning about attack chains and ECS field selection |
-| Triage reasoning (`ai.agent` in `soc-alert-sweeper.yaml`) | `opus` | Complex classification with entity correlation |
-| Mutation planning (`ai.agent` in `soc-meta.yaml`) | `opus` | Strategic planning with governance envelope construction |
+| Rule synthesis (`ai.agent` in `soc_deteng.yaml`) | `opus` | Deep reasoning about attack chains and ECS field selection |
+| Triage reasoning (`ai.agent` in `soc_alert_sweeper.yaml`) | `opus` | Complex classification with entity correlation |
+| Mutation planning (`ai.agent` in `soc_meta.yaml`) | `opus` | Strategic planning with governance envelope construction |
 | Backtesting (`security.backtestRule`) | N/A | Pure ES query — no LLM |
 | Shadow execution (`security.shadowExecuteRule`) | N/A | Pure ES query — no LLM |
 | Corpus sync (`security.syncDetectionCorpus`) | N/A | Pure ES query — no LLM |

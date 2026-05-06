@@ -53,7 +53,7 @@ Tests:       16 passed, 16 total
 `soc-simulation/setup.sh` runs to completion:
 
 - Index templates deployed: `.soc-cve-advisories`, `.soc-recommendations`,
-  `.soc-actor-trust-tiers`, `.soc-reasoning-trace`, `.soc-detection-eval-runs`,
+  `.soc-actor-trust-tiers`, `.soc-reasoning-trace`, `.soc_detection_eval-runs`,
   `.soc-audit-trail`, `.soc-eval-corpus-*`.
 - Ingest pipelines deployed: `soc-mutation-intent-envelope-validator`,
   `argus-exploit-probability-enricher`.
@@ -69,7 +69,7 @@ Tests:       16 passed, 16 total
   ".soc-recommendations": 259,
   ".soc-actor-trust-tiers": 2,
   ".soc-argus-vuln-demo": 3,
-  ".soc-detection-eval-runs": 4,
+  ".soc_detection_eval-runs": 4,
   ".soc-reasoning-trace": 9,
   ".soc-eval-corpus-argus-corpus-mythos-2026-04": 13,
   ".soc-audit-trail": 17148
@@ -131,7 +131,7 @@ ES_URL=http://localhost:19200 ES_USER=elastic ES_PASS=changeme \
  info [argus-deteng] rule=mythos.powershell.iex-downloader gate=fail precision=1.00 recall=0.22 fp_rate=0.000 coverage=0.33 (tp=2, fp=0, fn=7, tn=4)
  info [argus-deteng] rule=mythos.powershell.encoded-cmd gate=fail precision=1.00 recall=0.22 fp_rate=0.000 coverage=0.33 (tp=2, fp=0, fn=7, tn=4)
  info [argus-deteng] rule=mythos.dns.c2-tool gate=fail precision=1.00 recall=0.22 fp_rate=0.000 coverage=0.33 (tp=2, fp=0, fn=7, tn=4)
- info [argus-deteng] persisted 4 run row(s) to .soc-detection-eval-runs
+ info [argus-deteng] persisted 4 run row(s) to .soc_detection_eval-runs
  info [argus-deteng-cli] run complete — run_id=argus-deteng-1776621654549-36l233ci, rules=4
  info [argus-deteng-cli] gate summary: pass=0 marginal=0 fail=4
 ```
@@ -282,7 +282,7 @@ soc-experimental-agent     — tier=probationary   auto_apply=false
 
 Source: `tiers.json` (this directory).
 
-### 5b. Trust gate execution (direct ES, mirroring `soc-argus-trust-gate.yaml`)
+### 5b. Trust gate execution (direct ES, mirroring `soc_argus_trust_gate.yaml`)
 
 Two seeded `auto_apply_ready` recommendations routed through the gate's
 decision tree:
@@ -358,7 +358,7 @@ cleanly into the live Kibana instance. A reviewer can open it at
 ## 7. Mythos preset + Frontier simulator — mirror-mode validation
 
 The two workflows that drive scenario-3 (frontier) —
-`soc-argus-arm-mythos-preset.yaml` and `soc-argus-frontier-simulator.yaml` —
+`soc_argus_arm_mythos_preset.yaml` and `soc_argus_frontier_simulator.yaml` —
 cannot be invoked through the Kibana runtime on this build (§1 limitation).
 Their data contracts were validated with `validate_mythos_workflows.py`
 (this directory), which is a **line-for-line Python mirror** of each
@@ -374,7 +374,7 @@ ES_URL=http://localhost:19200 ES_USER=elastic ES_PASS=changeme \
 ### Verbatim output (excerpt)
 
 ```
-=== soc-argus-arm-mythos-preset (mirror) ===
+=== soc_argus_arm_mythos_preset (mirror) ===
 step=verify_profile_seeded profile_found=True
 step=arm_attack_command _id=... result=created index=.soc-attack-commands
 step=audit_arm _id=... result=created
@@ -382,7 +382,7 @@ step=audit_arm _id=... result=created
 === prep: .soc-difficulty-state/current preset_armed=level-6 ===
 update result=updated _id=current
 
-=== soc-argus-frontier-simulator (mirror, single tick) ===
+=== soc_argus_frontier_simulator (mirror, single tick) ===
 step=preset_state armed=True preset_armed=level-6
 step=pick_variant primitive_id=T1003.001 axis=encoding_layers idx=...
 step=emit_variant _id=... result=created emission_id=...
@@ -411,7 +411,7 @@ in particular is covered).
 |--------------------------------------|--------------------------------------------|----------------------------------------------------|--------|
 | Build health — lint/type/test        | 48 unit tests across 3 packages            | §0                                                 | ✅ |
 | Setup — indices, pipelines, corpus   | 9 indices populated, 2 pipelines installed | §1 (index-counts.json)                             | ✅ |
-| M2.1 — detection eval gate CLI       | `.soc-detection-eval-runs`, gate decisions | §2 (m21-detection-eval.log, m21-eval-runs.json)    | ✅ |
+| M2.1 — detection eval gate CLI       | `.soc_detection_eval-runs`, gate decisions | §2 (m21-detection-eval.log, m21-eval-runs.json)    | ✅ |
 | M2.2 — exploit→detection CLI         | valid `mutation_intent` envelope in recs   | §3 (m22-cli.log, recs-latest.json)                 | ✅ |
 | M2.3 — exploit probability enricher  | `vulnerability.argus.*` v1.0.0 contract    | §4a (m23-retrofill-demo.json)                      | ✅ |
 | M2.3 — TS ↔ Painless parity          | byte-identical scores + ordering           | §4b (m23-ts-parity.log)                            | ✅ |
@@ -425,8 +425,8 @@ in particular is covered).
 1. **Kibana Workflow runtime not exposed on this build.** The Workflow
    Management REST API accepts definitions and schedules but does not run
    them end-to-end. We compensate by running each workflow's logic
-   directly against Elasticsearch (`soc-argus-exploit-to-detection.yaml`
-   via the M2.2 CLI; `soc-argus-trust-gate.yaml` via a direct ES query
+   directly against Elasticsearch (`soc_argus_exploit_to_detection.yaml`
+   via the M2.2 CLI; `soc_argus_trust_gate.yaml` via a direct ES query
    loop that mirrors the YAML decision tree line-for-line). The YAML
    files on disk remain the contract; the CLIs and the direct-ES
    runners are stand-in executors.

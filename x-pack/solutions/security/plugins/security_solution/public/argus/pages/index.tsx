@@ -184,7 +184,7 @@ const ArgusPageComponent: React.FC = () => {
   // The Workflows Management URL convention is `/app/workflows/<id>` where
   // `<id>` is the Kibana saved-object id (typically `workflow-<uuid>`).
   // ARGUS surfaces workflows keyed by their registry slug (e.g.
-  // `soc-argus-exploit-to-detection`), so navigating with the slug alone
+  // `soc_argus_exploit_to_detection`), so navigating with the slug alone
   // 404s the detail page. We therefore prefer the resolved
   // `kibana_workflow_id` carried alongside each entry and fall back to the
   // list page filtered by the display name so the operator still lands on

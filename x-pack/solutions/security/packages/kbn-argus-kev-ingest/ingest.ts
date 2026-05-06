@@ -47,7 +47,7 @@ export interface IngestKevResult {
 
 /**
  * Fetch the KEV feed, map it to `.soc-cve-advisories` documents, and bulk-
- * index. Returns a summary the CLI and the `soc-kev-ingest.yaml` workflow
+ * index. Returns a summary the CLI and the `soc_kev_ingest.yaml` workflow
  * can log and persist.
  */
 export const ingestKev = async ({

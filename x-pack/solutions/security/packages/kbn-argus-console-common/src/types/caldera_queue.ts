@@ -71,7 +71,7 @@ export interface ArgusCalderaDifficultyState {
    * chose this `decision`. Stable enum-ish values the UI can i18n/colour
    * on — unlike the free-form `reasoning` field which is a human string.
    *
-   * Known values (emitted by `soc-difficulty-controller` v3):
+   * Known values (emitted by `soc_difficulty_controller` v3):
    *  - `normal_escalation`        — det+fp+trust all satisfied
    *  - `strong_signal_bypass`     — det≥90% AND fp≤10% (trust was stale/missing but
    *                                  performance was overwhelming enough to escalate anyway)

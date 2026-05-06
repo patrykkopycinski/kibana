@@ -1,0 +1,32 @@
+{
+  "index_patterns": [".soc-skill-policy"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":              { "type": "date" },
+        "skill_id":                { "type": "keyword" },
+        "enabled":                 { "type": "boolean" },
+        "prompt_revision_required":{ "type": "boolean" },
+        "verdict_consumed":        { "type": "keyword" },
+        "policy_reason":           { "type": "keyword" },
+        "policy_action":           { "type": "keyword" },
+        "recommendation_id":       { "type": "keyword" },
+        "applied_at":              { "type": "date" },
+        "applied_by":              { "type": "keyword" },
+        "schema_version":          { "type": "integer" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "AutoDEX B9 consumer — runtime skill policy decisions. The soc_argus_skill_policy_applier workflow reads .soc-skill-recommendations rows with verdict in {demote, reprompt} and upserts one row per skill_id into this index. Doc id == skill_id so the policy state is always the most-recent decision per skill. Read by future MCP-side admission gates that refuse to invoke `enabled: false` skills and surface `prompt_revision_required: true` to skill maintainers.",
+    "owner": "argus-governance",
+    "schema_version": 1,
+    "policy_actions": ["freeze_skill", "request_prompt_revision", "log_only"]
+  }
+}

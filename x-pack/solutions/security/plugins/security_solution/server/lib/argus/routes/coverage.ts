@@ -305,7 +305,7 @@ const computeRedundancySummary = async (
   // An active consolidation intent is one filed by the redundancy-scanner
   // workflow that has not yet been approved or rolled back. We use
   // `argus.origin: consolidation` as the selector (written by
-  // `soc-argus-redundancy-scanner.yaml`) and exclude any intent whose
+  // `soc_argus_redundancy_scanner.yaml`) and exclude any intent whose
   // outcome is terminal (applied or rolled_back).
   const res = await esClient.search<Record<string, unknown>>({
     index: ARGUS_SOC_INDICES.mutationIntents,

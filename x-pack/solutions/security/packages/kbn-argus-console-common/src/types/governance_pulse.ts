@@ -110,7 +110,7 @@ export interface GovernancePulse {
   /**
    * ATT&CK coverage trend — vision-doc 4.2 success metric ("ATT&CK coverage
    * % continuous improvement"). Reads `.soc-coverage-snapshots` (the
-   * once-per-hour rollup workflow `soc-argus-coverage-snapshotter` writes).
+   * once-per-hour rollup workflow `soc_argus_coverage_snapshotter` writes).
    * Returns the latest snapshot plus the delta vs the oldest snapshot in
    * the window — that delta is what the tile renders as "trend". Null when
    * the snapshot index has fewer than two rows in the window (no trend
@@ -383,7 +383,7 @@ export interface GovernancePulseTriggerToRule {
  * ATT&CK coverage trend — vision-doc 4.2.
  *
  * Sourced from `.soc-coverage-snapshots` (the rollup index the
- * `soc-argus-coverage-snapshotter` workflow writes once per hour). The
+ * `soc_argus_coverage_snapshotter` workflow writes once per hour). The
  * builder returns the latest snapshot plus the delta vs the oldest
  * snapshot inside the window so the UI can render "+3.2pp last 24h" or
  * "-1.1pp last 24h" honestly.

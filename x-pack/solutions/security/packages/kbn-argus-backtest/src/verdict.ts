@@ -10,14 +10,14 @@
  * classifier and the downstream mutation-intent status transition.
  *
  * The authoritative runtime implementation is Liquid inside
- * `soc-simulation/workflows/soc-rule-backtester.yaml`. This module is
+ * `soc-simulation/workflows/soc_rule_backtester.yaml`. This module is
  * the spec: it's unit-tested and the YAML MUST mirror it. Any change
  * to the matrix on one side must be made on the other in the same
  * commit, or the `verdict.spec_alignment.test.ts` drift detector will
  * fail.
  *
  * R8 invariant: "every auto_apply goes through a dry-run" —
- *   - The applier (`soc-autonomous-applier.yaml`) refuses rule-update
+ *   - The applier (`soc_autonomous_applier.yaml`) refuses rule-update
  *     intents that lack a backtest_verdict.
  *   - The backtester is the ONLY producer of `backtest_verdict`.
  *   - `flipIntentStatus(v)` is the sole transition function from a
@@ -133,7 +133,7 @@ export const classifyBacktest = (input: BacktestInput): BacktestClassification =
     };
   }
 
-  // UPDATE — action-dependent. Mirrors the Liquid in soc-rule-backtester.yaml.
+  // UPDATE — action-dependent. Mirrors the Liquid in soc_rule_backtester.yaml.
   const action = input.action;
   if (!action) {
     return {

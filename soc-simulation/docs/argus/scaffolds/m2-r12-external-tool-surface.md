@@ -41,7 +41,7 @@ credentials** (API key scope for MCP, agent card for A2A). It is never trusted
 from user-controlled payload fields.
 
 New principals start in the `probationary` trust tier. They climb or fall
-through the same `soc-argus-trust-tier-assessor.yaml` outcomes loop that
+through the same `soc_argus_trust_tier_assessor.yaml` outcomes loop that
 governs native ARGUS actors — there is no fast path for external callers.
 
 ---
@@ -173,8 +173,8 @@ Computed from the skill's tool_ids set:
  (agent builder tool call)    │                            │
         │                     │ 4) if write intent:        │
         ▼                     │    POST to                 │
- soc-argus-trust-gate         │    .soc-recommendations    │
- (2m scheduled; honors tier,  │    → soc-argus-trust-gate  │
+ soc_argus_trust_gate         │    .soc-recommendations    │
+ (2m scheduled; honors tier,  │    → soc_argus_trust_gate  │
   door_class, blast_tier)     │      decides applied or    │
         │                     │      pending_review        │
         ▼                     │                            │
@@ -258,7 +258,7 @@ follow-up commit.
 - Skill JSONs under `soc-simulation/skills/` — same schema, no new fields.
 - `mutation_intent.schema.json` — unchanged. External callers emit the same
   intent shape as native ARGUS agents.
-- `soc-argus-trust-gate.yaml` — unchanged. The gate does not know or care
+- `soc_argus_trust_gate.yaml` — unchanged. The gate does not know or care
   that the caller came over MCP.
 - Agent Builder tool registry — unchanged. We consume it; we do not redefine
   it.

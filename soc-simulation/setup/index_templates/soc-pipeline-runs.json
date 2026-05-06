@@ -38,7 +38,7 @@
     }
   },
   "_meta": {
-    "description": "Materialized SOC pipeline run telemetry from soc-pipeline-run-telemetry (event-log rollup rows). Legacy per-run flat fields retained for backward compatibility.",
+    "description": "Materialized SOC pipeline run telemetry from soc_pipeline_run_telemetry (event-log rollup rows). Legacy per-run flat fields retained for backward compatibility.",
     "owner": "argus-ops",
     "schema_version": 2
   }

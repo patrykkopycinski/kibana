@@ -167,7 +167,7 @@ export const AutonomyDecisionsPanel: React.FC<AutonomyDecisionsPanelProps> = ({
           // detection rules — the former comes from older/synthesis paths
           // and the latter from the live update-rule action path. Treating
           // only `rule` as rule-like used to strand the 327+ live
-          // `soc-post-apply-observer` decisions as plain text. Keep the two
+          // `soc_post_apply_observer` decisions as plain text. Keep the two
           // bucketed together so they both become deep-links.
           const isCustomRule =
             row.artifact_type === 'rule' || row.artifact_type === 'detection_rule';
@@ -509,10 +509,7 @@ const AutonomyDecisionDetailsFlyout: React.FC<{
       <>
         <AutonomyDecisionSummary decision={decision} />
         <EuiSpacer size="m" />
-        <DocumentNarrativeSummary
-          details={details}
-          dataTestSubj="argusConsoleAutonomyNarrative"
-        />
+        <DocumentNarrativeSummary details={details} dataTestSubj="argusConsoleAutonomyNarrative" />
       </>
     ),
     [decision]

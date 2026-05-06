@@ -1,0 +1,28 @@
+{
+  "index_patterns": [".soc-actor-tier-history"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":              { "type": "date" },
+        "actor_id":                { "type": "keyword" },
+        "tier":                    { "type": "keyword" },
+        "tier_rank":               { "type": "integer" },
+        "tier_doc_timestamp":      { "type": "date" },
+        "source_workflow":         { "type": "keyword" },
+        "schema_version":          { "type": "integer" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "AutoDEX hysteresis foundation. Append-only history of per-actor trust tier evaluations, one row per actor per assessor tick. Read by `soc_argus_trust_tier_stabilizer.yaml` to compute hysteresis-stable tier (consecutive-evaluations rule) so a single noisy eval cannot promote an actor.",
+    "owner": "argus-governance",
+    "schema_version": 1,
+    "tier_ranks": { "quarantined": 0, "probationary": 1, "trusted": 2, "frontier": 3 }
+  }
+}

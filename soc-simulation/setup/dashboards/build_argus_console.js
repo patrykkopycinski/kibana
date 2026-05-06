@@ -335,24 +335,24 @@ const phase3Banner = markdownPanel(
   `## Phase 3 — Adaptive Argus\n\n` +
     `Argus is no longer a static detector. The panels below show the three ` +
     `adaptive loops keeping Argus ahead of a Mythos-tier adversary:\n\n` +
-    `1. **Drift detection** (\`soc-argus-drift-monitor\`) — rule precision and actor ` +
+    `1. **Drift detection** (\`soc_argus_drift_monitor\`) — rule precision and actor ` +
     `trust drift emit \`mutation_intent\` recommendations for re-evaluation.\n` +
-    `2. **Playbook learning** (\`soc-argus-playbook-learner\`) — (technique, step) ` +
+    `2. **Playbook learning** (\`soc_argus_playbook_learner\`) — (technique, step) ` +
     `pairs that underperform get remapped to safer candidates.\n` +
-    `3. **Intel ingestion** (\`soc-argus-intel-adapter-generic\` + ` +
-    `\`soc-argus-intel-mythos-aggregator\`) — Mythos-era feeds feed the ` +
+    `3. **Intel ingestion** (\`soc_argus_intel_adapter_generic\` + ` +
+    `\`soc_argus_intel_mythos_aggregator\`) — Mythos-era feeds feed the ` +
     `per-CVE \`mythos_signal\` used by exploit-probability scoring.\n`
 );
 
 const driftIntentsCount = esqlMetric({
   title: 'Drift intents (24h)',
   description:
-    'Count of `mutation_intent` recs emitted by `soc-argus-drift-monitor` in the last 24h.',
+    'Count of `mutation_intent` recs emitted by `soc_argus_drift_monitor` in the last 24h.',
   dv: DV_RECS,
   esql:
     'FROM .soc-recommendations ' +
     '| WHERE @timestamp > NOW() - 24 HOURS ' +
-    '| WHERE source == "soc-argus-drift-monitor" ' +
+    '| WHERE source == "soc_argus_drift_monitor" ' +
     '| STATS drift_intents = COUNT(*)',
   column: { id: 'drift_intents', field: 'drift_intents', type: 'number' },
   color: '#F583B7',
@@ -361,12 +361,12 @@ const driftIntentsCount = esqlMetric({
 const playbookRemapCount = esqlMetric({
   title: 'Playbook remap intents (24h)',
   description:
-    'Count of `mutation_intent` recs emitted by `soc-argus-playbook-learner` in the last 24h.',
+    'Count of `mutation_intent` recs emitted by `soc_argus_playbook_learner` in the last 24h.',
   dv: DV_RECS,
   esql:
     'FROM .soc-recommendations ' +
     '| WHERE @timestamp > NOW() - 24 HOURS ' +
-    '| WHERE source == "soc-argus-playbook-learner" ' +
+    '| WHERE source == "soc_argus_playbook_learner" ' +
     '| STATS remap_intents = COUNT(*)',
   column: { id: 'remap_intents', field: 'remap_intents', type: 'number' },
   color: '#FEC514',
@@ -412,7 +412,7 @@ const recentDriftIntents = esqlDatatable({
   dv: DV_RECS,
   esql:
     'FROM .soc-recommendations ' +
-    '| WHERE source IN ("soc-argus-drift-monitor", "soc-argus-playbook-learner") ' +
+    '| WHERE source IN ("soc_argus_drift_monitor", "soc_argus_playbook_learner") ' +
     '| SORT @timestamp DESC ' +
     '| LIMIT 20 ' +
     '| KEEP @timestamp, source, title, status',

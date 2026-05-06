@@ -31,7 +31,7 @@
 - **Alerts Triaged**: 268
 - **Classification breakdown**: TRUE_POSITIVE 271 (71%), SUSPICIOUS 109 (29%)
 - **MITRE techniques detected**: T1059.004 (266), T1033 (114), T1059 (28), T1496 (21)
-- **Agent Workload**: soc-alert-sweeper 267, seed 1
+- **Agent Workload**: soc_alert_sweeper 267, seed 1
 - **Evolution Events**: 168
 - **Audit Entries**: 2628
 
@@ -43,7 +43,7 @@
 - **Blocked at gate**: 7
 - **Deferred to backtester**: 24
 - **Total decisions (7d)**: 545
-- **Per-agent trust tiers**: soc-signal-quality-agent (trusted, 0.84), soc-triage-agent (probationary, 0.81), soc-deteng-agent (probationary, 0.78), soc-meta-agent (observing, 0.62), experimental-tuner-v3 (quarantined, 0.35)
+- **Per-agent trust tiers**: soc-signal-quality-agent (trusted, 0.84), soc-triage-agent (probationary, 0.81), soc_deteng-agent (probationary, 0.78), soc-meta-agent (observing, 0.62), experimental-tuner-v3 (quarantined, 0.35)
 - **Why did the system stop?**: Passed all gates 522, backtest_required 6, post_apply_tp_regression 4, backtest_verdict 4, trust_tier 4, drift_check 3
 
 ### Recommendations tab
@@ -73,7 +73,7 @@
 | `.soc-evolution-log` | 168 | agent evolution events |
 | `.soc-snapshots` | 35 | pre/post-apply rollback snapshots |
 | `.soc-triage-results` | 268 | classified alerts |
-| `.soc-response-actions` | 230 | actions taken |
+| `.soc_response-actions` | 230 | actions taken |
 
 ---
 
@@ -83,16 +83,16 @@
 1. **Bedrock connector `temperature` stripping** — `x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/{utils,bedrock,get_temperature}.ts` — conditionally omits `temperature` for Anthropic Claude Opus 4.7. Required running Kibana from source on the host.
 
 ### Workflow-level (deployed via `PUT /api/workflows/workflow/{id}`)
-2. **`soc-autonomous-applier.yaml`**:
+2. **`soc_autonomous_applier.yaml`**:
    - Ownership gate: rewrote `gate_canonical` / `gate_unregistered_mutation` to trust `owner=autosoc` in `.soc-artifact-registry` (not just naming convention).
    - Removed Liquid `or`-range parse error in multi-prefix check.
    - `gate_all_pass`: dropped redundant `first_seg=='auto'` requirement that silently rejected retro-tagged UUID rules.
-3. **`soc-alert-sweeper.yaml`**:
+3. **`soc_alert_sweeper.yaml`**:
    - `write_triage_flattened`: `foreach` now falls back to `[]` when `classifications` missing — prevents "must evaluate to an array" errors.
    - `if:` conditional syntax: all guards use native workflow `key: value` match (not Liquid `{{ }} == 0`) for the no-alerts path.
    - `evict_stale_locks` TTL reduced from 10m → 3m.
    - New `gate_has_alerts` console step; every alert-dependent step (including final `release_lock`) guarded with `if: "steps.gate_has_alerts.output: yes"`. Prevents 400 on empty `ids` arrays and the spurious `release_lock not_found` 404 that was marking successful no-alerts runs as failed.
-4. **`soc-caldera-poller.yaml`**: `caldera_url` changed from `http://caldera:8888` (Docker network) to `http://localhost:18888` (OrbStack-forwarded host port). Eliminated the 46/53 `ENOTFOUND caldera` failures since Kibana now runs natively on the host.
+4. **`soc_caldera_poller.yaml`**: `caldera_url` changed from `http://caldera:8888` (Docker network) to `http://localhost:18888` (OrbStack-forwarded host port). Eliminated the 46/53 `ENOTFOUND caldera` failures since Kibana now runs natively on the host.
 
 ### Data / index fixes
 5. **`.soc-artifact-registry`**: seeded with 113 entries (31 `owner=autosoc` / `tag=autosoc-owned` UUID rules) so ownership gate starts passing.

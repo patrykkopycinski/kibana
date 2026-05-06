@@ -9,7 +9,7 @@
  * ARGUS R7 — pure TypeScript spec for the trust-gate verdict matrix.
  *
  * The authoritative runtime implementation is Liquid inside
- * `soc-simulation/workflows/soc-argus-trust-gate.yaml`. This module is the
+ * `soc-simulation/workflows/soc_argus_trust_gate.yaml`. This module is the
  * spec: it's exhaustively unit-tested and the YAML Liquid MUST mirror it
  * one-for-one. Any change to one side must be made on the other in the
  * same commit or the `trust_gate_liquid_matches_spec` consistency test
@@ -108,7 +108,7 @@ const FRONTIER_ONLY_ORIGINS: ReadonlySet<string> = new Set([
 /**
  * Pure trust-gate verdict. Deterministic — never hits the network,
  * never reads clocks, never mutates input. Matches the Liquid in
- * `soc-argus-trust-gate.yaml` verdict-for-verdict.
+ * `soc_argus_trust_gate.yaml` verdict-for-verdict.
  */
 export const evaluateTrustGate = (input: TrustGateInput): TrustGateResult => {
   const door: DoorClass = input.door_class ?? 'two_way';

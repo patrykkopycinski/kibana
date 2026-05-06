@@ -4,8 +4,8 @@
 
 The Mythos-class preset (`level-6`, `mythos_class_frontier`) is the canonical stress-test
 adversary for the Mythos era. It is the **only** difficulty level that is not reachable
-via the auto-escalation rules in `soc-difficulty-controller.yaml`. It must be armed
-manually via `soc-argus-arm-mythos-preset.yaml`.
+via the auto-escalation rules in `soc_difficulty_controller.yaml`. It must be armed
+manually via `soc_argus_arm_mythos_preset.yaml`.
 
 This doc is the contract between the preset and the rest of ARGUS: what the preset
 exercises, what it is allowed to do, and what it deliberately does *not* do.
@@ -64,7 +64,7 @@ setup.sh seeds it into `.soc-attack-profiles/_doc/level-6`, keyed by
 ### 2.2 Dynamic (agentic) portion — delivered in M2.4
 
 The static portion is what Caldera can run today. The agentic portion is what the
-**ARGUS Frontier Simulator** (`soc-argus-frontier-simulator`, M2.4) will add:
+**ARGUS Frontier Simulator** (`soc_argus_frontier_simulator`, M2.4) will add:
 
 - **Behaviour polymorphism.** ≥ 20 mutations per primitive along the five mutation
   axes declared in `argus_metadata.polymorphism.mutation_axes`.
@@ -79,7 +79,7 @@ The static portion is what Caldera can run today. The agentic portion is what th
 
 ### 2.3 Arming affordance
 
-`soc-argus-arm-mythos-preset` (Phase 1, manual-only):
+`soc_argus_arm_mythos_preset` (Phase 1, manual-only):
 
 1. Verifies `/.soc-attack-profiles/_doc/level-6` exists and is seeded.
 2. Gates on the profile being present; no-ops if missing.
@@ -99,9 +99,9 @@ Every ARGUS layer must know how to react when a Mythos-class arm lands.
 |---|---|
 | **01 Sensing** | Dispatcher claims the command and POSTs a Caldera operation using the level-6 profile. Frontier simulator (M2.4) layers agentic behaviours on top. |
 | **02 Hypothesis** | Skills (triage, deteng, hunter, meta) are assumed to be targeted by injections. Input sanitisation and instruction-drift detection must be active. |
-| **03 Validation** | `soc-rule-backtester` and `soc-regression-gate` run as normal. The Detection Eval Vertical (M2.1) records Mythos-class runs as a separate corpus. |
-| **04 Action** | `soc-autonomous-applier` evaluates each proposed mutation against the (tightened) trust thresholds from `phase-3/trust-thresholds.md`. Mythos-class runs SHOULD NOT routinely auto-apply. |
-| **05 Governance** | OTLP reasoning traces (M2.5) are captured at 100 % sampling. Trust scorer is expected to detect and penalise any skill that accepts an injection. `soc-watchdog` kill-switch thresholds are *not* lowered — the preset's whole purpose is to see the existing thresholds under pressure. |
+| **03 Validation** | `soc_rule_backtester` and `soc_regression_gate` run as normal. The Detection Eval Vertical (M2.1) records Mythos-class runs as a separate corpus. |
+| **04 Action** | `soc_autonomous_applier` evaluates each proposed mutation against the (tightened) trust thresholds from `phase-3/trust-thresholds.md`. Mythos-class runs SHOULD NOT routinely auto-apply. |
+| **05 Governance** | OTLP reasoning traces (M2.5) are captured at 100 % sampling. Trust scorer is expected to detect and penalise any skill that accepts an injection. `soc_watchdog` kill-switch thresholds are *not* lowered — the preset's whole purpose is to see the existing thresholds under pressure. |
 
 ---
 

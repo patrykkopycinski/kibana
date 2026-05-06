@@ -5,7 +5,7 @@
 # Workflows Management plugin assigns each workflow a random saved-object id
 # of the form `workflow-<uuid>`. That id is what the Workflows Management
 # detail page expects at `/app/workflows/<id>` — the slug we use everywhere
-# else in soc-simulation (e.g. `soc-argus-exploit-to-detection`) is NOT a
+# else in soc-simulation (e.g. `soc_argus_exploit_to_detection`) is NOT a
 # valid saved-object id and 404s the detail page.
 #
 # This resolver closes the gap:

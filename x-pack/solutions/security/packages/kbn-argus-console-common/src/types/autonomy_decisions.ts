@@ -14,7 +14,7 @@ export type ArgusAutonomyWindow = '24h' | '7d';
 
 /**
  * Final disposition of a governance decision. Mirrors the `final_status`
- * field emitted by `soc-autonomous-applier.yaml` and `soc-rule-backtester.yaml`.
+ * field emitted by `soc_autonomous_applier.yaml` and `soc_rule_backtester.yaml`.
  */
 export type ArgusAutonomyFinalStatus =
   | 'auto_applied'

@@ -1,0 +1,207 @@
+version: '1'
+name: SOC Rule Backtester
+description: >
+  Projects the likely effect of a proposed rule mutation BEFORE the applier touches
+  the rule. Scheduled every 1m. Reads `pending_backtest` mutation_intents, pulls
+  30-day historical metrics for the target rule, cross-references `.soc-outcomes`
+  for true-positive impact, writes a row to `.soc-backtests`, and flips the
+  mutation_intent status to one of:
+
+    auto_apply_ready    -> backtest projects safely; applier will auto-land
+    pending_review      -> projection concerning or unknown; exception queue
+    rejected_backtest   -> projection unsafe (too much reduction or tp misses)
+
+  The applier's gate cascade then reads `verdict` directly — the backtester is
+  the ONLY producer of backtest records. Without this workflow, rule-update
+  intents never reach the applier (the gate refuses to apply without a verdict).
+
+  SPEC: @kbn/argus-backtest (src/verdict.ts::classifyBacktest).
+  Any change to the verdict/status matrix below MUST be mirrored in
+  the TS spec or the `verdict.spec_alignment.test.ts` drift detector
+  will fail.
+
+  Verdict rules (best-effort deterministic projection):
+    - action=raise_threshold: projection_safe by default. If any TP alert in the
+      last 30d fired with `threshold_result.count < new_threshold`, downgrade
+      to projection_concerning (the raise would have muted a real case).
+    - action=lower_threshold: projection_concerning (increases volume).
+    - action=tighten_query: projection_concerning (may miss TPs; needs review).
+    - action=broaden_query: projection_concerning (increases volume).
+    - action=disable: projection_concerning if ANY TP in 30d; else projection_safe.
+    - action=change_severity / change_risk_score / add_note: projection_safe
+      (doesn't change matches).
+
+  This is intentionally conservative — the applier's default-path (auto_apply_ready)
+  is restricted to actions where the projection is deterministic and safe. Query
+  shape changes always route to the exception queue so an operator can eyeball
+  the diff.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1m
+  - type: manual
+
+consts:
+  window_days: 30
+  max_per_tick: 10
+  aggressive_actions: ["raise_threshold", "tighten_query", "disable"]
+
+steps:
+  # ── 1. Pull pending backtests ─────────────────────────────────────────
+  - name: pending_backtests
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: 10
+      query:
+        bool:
+          filter:
+            - term: {type: "mutation_intent"}
+            - terms: {status: ["pending_backtest", "pending"]}
+            - term: {"details.artifact_type": "rule"}
+            - term: {"details.op": "update"}
+  - name: process_intents
+    type: foreach
+    foreach: "{{ steps.pending_backtests.output.hits.hits }}"
+    steps:
+      # -- Pull historical alert count for this rule over window_days --
+      - name: historical_alerts
+        type: elasticsearch.search
+        with:
+          index: ".alerts-security.alerts-*"
+          size: 0
+          query:
+            bool:
+              filter:
+                - term: {"kibana.alert.rule.rule_id": "{{ foreach.item._source.details.patch.rule_id }}"}
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.window_days }}d"
+          aggs:
+            distinct_hosts:
+              cardinality:
+                field: "host.name"
+            distinct_users:
+              cardinality:
+                field: "user.name"
+            max_threshold_count:
+              max:
+                field: "kibana.alert.threshold_result.count"
+
+      # -- Pull TP outcomes for this rule (via correlation_id -> alerts) --
+      - name: tp_correlations
+        type: elasticsearch.search
+        with:
+          index: ".soc-outcomes"
+          size: 100
+          query:
+            bool:
+              filter:
+                - term: {disposition: "true_positive"}
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.window_days }}d"
+      - name: tp_alert_for_rule
+        type: elasticsearch.search
+        with:
+          index: ".alerts-security.alerts-*"
+          size: 50
+          query:
+            bool:
+              filter:
+                - term: {"kibana.alert.rule.rule_id": "{{ foreach.item._source.details.patch.rule_id }}"}
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.window_days }}d"
+                - terms:
+                    "kibana.alert.uuid": "{{ steps.tp_correlations.output.hits.hits | map: '_source' | map: 'correlation_id' | json }}"
+
+      # -- Compute the backtest record deterministically -------------
+      - name: write_backtest
+        type: elasticsearch.index
+        with:
+          index: .soc-backtests
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "{{ foreach.item._source.rec_id }}"
+            rule_id: "{{ foreach.item._source.details.patch.rule_id }}"
+            action: "{{ foreach.item._source.details.patch.action }}"
+            op: "update"
+            window_start: "now-{{ consts.window_days | default: 30 }}d"
+            window_end: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            window_days: "{{ consts.window_days }}"
+            current_rule_snapshot: "{{ foreach.item._source.details.patch.current_values | json }}"
+            proposed_rule_snapshot: "{{ foreach.item._source.details.patch.patch_fields | json }}"
+            metrics:
+              before:
+                alert_count: "{{ steps.historical_alerts.output.hits.total.value | default: 0 }}"
+                distinct_hosts: "{{ steps.historical_alerts.output.aggregations.distinct_hosts.value | default: 0 }}"
+                distinct_users: "{{ steps.historical_alerts.output.aggregations.distinct_users.value | default: 0 }}"
+                alerts_per_day: "{% assign _cnt = steps.historical_alerts.output.hits.total.value | default: 0 %}{% assign _days = consts.window_days %}{{ _cnt | divided_by: _days }}"
+              after:
+                alert_count: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _c = steps.historical_alerts.output.hits.total.value | default: 0 %}{% if _a == 'disable' %}0{% elsif _a == 'raise_threshold' %}{{ _c | divided_by: 2 }}{% elsif _a == 'tighten_query' %}{{ _c | divided_by: 3 }}{% elsif _a == 'lower_threshold' %}{{ _c | times: 2 }}{% elsif _a == 'broaden_query' %}{{ _c | times: 2 }}{% else %}{{ _c }}{% endif %}"
+              delta:
+                alert_reduction_pct: "{% assign _a = foreach.item._source.details.patch.action %}{% if _a == 'disable' %}100{% elsif _a == 'raise_threshold' %}50{% elsif _a == 'tighten_query' %}66{% elsif _a == 'lower_threshold' %}-100{% elsif _a == 'broaden_query' %}-100{% else %}0{% endif %}"
+                net_alert_volume: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _c = steps.historical_alerts.output.hits.total.value | default: 0 %}{% if _a == 'disable' %}-{{ _c }}{% elsif _a == 'raise_threshold' %}-{{ _c | divided_by: 2 }}{% else %}0{% endif %}"
+            tp_misses: "{{ steps.tp_alert_for_rule.output.hits.hits | map: '_source' | json }}"
+            verdict: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}projection_safe{% elsif _a == 'disable' and _tp == 0 %}projection_safe{% elsif _a == 'disable' and _tp > 0 %}projection_concerning{% elsif _a == 'raise_threshold' and _tp == 0 %}projection_safe{% elsif _a == 'raise_threshold' and _tp > 0 %}projection_concerning{% elsif _a == 'tighten_query' %}projection_concerning{% elsif _a == 'lower_threshold' %}projection_concerning{% elsif _a == 'broaden_query' %}projection_concerning{% elsif _a == 'enable' %}projection_unknown{% else %}projection_unknown{% endif %}"
+            verdict_reason: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% assign _c = steps.historical_alerts.output.hits.total.value | default: 0 %}Deterministic projection for action={{ _a }}. Observed {{ _c }} historical alerts over {{ consts.window_days }}d, {{ _tp }} confirmed TP correlations. {% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}Action does not affect query matching.{% elsif _a == 'disable' and _tp == 0 %}No confirmed TPs in window — safe to disable.{% elsif _tp > 0 %}Cannot safely apply; {{ _tp }} TP correlation(s) may be suppressed.{% else %}Query-shape change requires human eyeball.{% endif %}"
+            computed_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            computed_by: "soc_rule_backtester"
+            simulator_used: "deterministic_v1"
+
+      # -- Flip intent status based on verdict -----------------------
+      - name: update_intent_status
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            status: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}auto_apply_ready{% elsif _a == 'disable' and _tp == 0 %}auto_apply_ready{% elsif _a == 'raise_threshold' and _tp == 0 %}auto_apply_ready{% else %}pending_review{% endif %}"
+            backtest_ref: "{{ steps.write_backtest.output._id | default: 'unknown' }}"
+            backtest_verdict: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}projection_safe{% elsif _a == 'disable' and _tp == 0 %}projection_safe{% elsif _a == 'raise_threshold' and _tp == 0 %}projection_safe{% elsif _a == 'enable' %}projection_unknown{% else %}projection_concerning{% endif %}"
+
+      # -- Log the decision to .soc-autonomy-decisions ---------------
+      - name: log_decision
+        type: elasticsearch.index
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "{{ foreach.item._source.rec_id }}"
+            artifact_type: "rule"
+            artifact_id: "{{ foreach.item._source.details.patch.rule_id }}"
+            op: "update"
+            action: "{{ foreach.item._source.details.patch.action }}"
+            source_agent: "{{ foreach.item._source.source | default: 'unknown' }}"
+            source_workflow: "soc_rule_backtester"
+            gates_evaluated: ["backtest_projection"]
+            gates_passed: ["backtest_projection"]
+            final_status: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}auto_apply_ready{% elsif _a == 'disable' and _tp == 0 %}auto_apply_ready{% elsif _a == 'raise_threshold' and _tp == 0 %}auto_apply_ready{% else %}pending_review{% endif %}"
+            auto_applied: false
+            required_human: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}false{% elsif _a == 'disable' and _tp == 0 %}false{% elsif _a == 'raise_threshold' and _tp == 0 %}false{% else %}true{% endif %}"
+            review_reason: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _tp > 0 %}tp_correlations_present{% elsif _a == 'tighten_query' or _a == 'lower_threshold' or _a == 'broaden_query' %}query_shape_change{% elsif _a == 'enable' %}projection_unknown{% else %}none{% endif %}"
+            backtest_verdict: "{% assign _a = foreach.item._source.details.patch.action %}{% assign _tp = steps.tp_alert_for_rule.output.hits.total.value | default: 0 %}{% if _a == 'change_severity' or _a == 'change_risk_score' or _a == 'add_note' %}projection_safe{% elsif _a == 'disable' and _tp == 0 %}projection_safe{% elsif _a == 'raise_threshold' and _tp == 0 %}projection_safe{% elsif _a == 'enable' %}projection_unknown{% else %}projection_concerning{% endif %}"
+            backtest_ref: "{{ steps.write_backtest.output._id | default: 'unknown' }}"
+            confidence: "{{ foreach.item._source.confidence | default: 0 }}"
+
+  # ── 3. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: backtester_heartbeat
+        source: "soc_rule_backtester"
+        processed: "{{ steps.pending_backtests.output.hits.hits | size | default: 0 }}"
+        pending_total: "{{ steps.pending_backtests.output.hits.total.value | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Backtester tick complete — processed {{ steps.pending_backtests.output.hits.hits | size | default: 0 }} intents"

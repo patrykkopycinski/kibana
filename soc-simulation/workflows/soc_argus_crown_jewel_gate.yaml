@@ -1,0 +1,207 @@
+version: '1'
+name: ARGUS Crown-Jewel Gate (B5)
+description: >
+  AutoDEX B5 — non-invasive crown-jewel impact gate. Closes vision-doc clause
+  6.3 ("the autonomous applier consults the crown-jewel index as the 12th gate
+  in the cascade") by intercepting mutation_intent rows after the trust gate
+  but BEFORE the autonomous applier processes them.
+
+  The gate runs every 2m. For each `auto_apply_ready` rec without a
+  `crown_gate_decision`, it:
+
+    1. Extracts the affected-target axes the workflow can reliably read off
+       the canonical M2.2 envelope:
+         - draft_rule.tags (tag matcher kind)
+         - details.new_definition.tags (mirror; tolerates legacy shapes)
+       Future iterations will add host_names / index_patterns once the
+       synthesis driver starts attaching them to the envelope.
+    2. Calls the registered server step `security.argusEvaluateCrownJewelImpact`,
+       which loads `.soc-crown-jewels`, Zod-validates each row, and runs the
+       deterministic `evaluateCrownJewelImpact` helper.
+    3. Annotates the rec with `crown_gate_decision` ('proceed' / 'pending_review')
+       + `crown_gate_max_tier` + `crown_gate_affected_count`.
+    4. Demotes the rec to `status: pending_review` with
+       `rejection_reason: crown_jewel_gate` when the helper returned
+       `pending_review`. The applier filter (`status in
+       [auto_apply_ready, approved_by_human, pending]`) then naturally skips it.
+    5. Writes a reasoning-trace span + audit heartbeat for the Pulse panel.
+
+  IDEMPOTENCY: the `crown_gate_decision` field itself is the dedup key — once
+  a rec carries any value the gate's must_not filter excludes it. To
+  re-evaluate, callers (e.g. an operator forcing a sweep) clear the field.
+
+  COMPOSITION: this gate is intentionally non-invasive — it only adds fields
+  + flips status. The applier still owns ownership, budget, kill switch,
+  cooldown, loop, and snapshot gating. Trust gate runs upstream; crown-jewel
+  gate runs after it. Stacking them is safe because both gates only ever
+  demote (never promote).
+
+  RFC: docs/autodex/rfcs/B5-crown-jewel-gate.md (see also conformance-matrix
+  row B5).
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2m
+  - type: manual
+
+consts:
+  recs_index: ".soc-recommendations"
+
+steps:
+  # ── Fetch auto_apply_ready recs the gate has not yet scored ─────────
+  - name: fetch_candidates
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recs_index }}"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term: { status: "auto_apply_ready" }
+            - term: { type: "mutation_intent" }
+          must_not:
+            - exists: { field: "crown_gate_decision" }
+
+  - name: gate_each_rec
+    type: foreach
+    foreach: "{{ steps.fetch_candidates.output.hits.hits }}"
+    steps:
+      # ── Run the registered step against the rec's affected targets ─
+      # The step itself is responsible for loading `.soc-crown-jewels` +
+      # running the Zod-validated matcher. The workflow's job is to
+      # gather the target axes it can extract from the canonical M2.2
+      # envelope (passthrough fields permitted by Zod).
+      - name: evaluate_crown_jewel_impact
+        type: security.argusEvaluateCrownJewelImpact
+        with:
+          rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+          caller_id: "soc_argus_crown_jewel_gate"
+          targets:
+            tags: "{{ foreach.item._source.draft_rule.tags | default: foreach.item._source.details.new_definition.tags }}"
+
+      # Convert the helper's `recommended_action` into a yes/no flag the
+      # subsequent if: clauses can match against (KQL idiom).
+      - name: gate_should_demote
+        type: console
+        with:
+          message: >-
+            {%- assign action = steps.evaluate_crown_jewel_impact.output.recommended_action -%}
+            {% if action == 'pending_review' %}yes{% else %}no{% endif %}
+
+      # ── Demote path: flip status + annotate ────────────────────────
+      - name: demote_rec
+        type: elasticsearch.update
+        if: "steps.gate_should_demote.output: yes"
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            status: "pending_review"
+            rejection_reason: "crown_jewel_gate"
+            crown_gate_decision: "pending_review"
+            crown_gate_max_tier: "{{ steps.evaluate_crown_jewel_impact.output.max_tier }}"
+            crown_gate_crown_match: "{{ steps.evaluate_crown_jewel_impact.output.crown_match }}"
+            crown_gate_affected_count: "{{ steps.evaluate_crown_jewel_impact.output.affected_count }}"
+            crown_gate_affected: "{{ steps.evaluate_crown_jewel_impact.output.affected | json }}"
+            crown_gate_reason: "{{ steps.evaluate_crown_jewel_impact.output.reason }}"
+            crown_gate_checked_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            crown_gate_tick: "argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+
+      # ── Allow path: stamp the decision so the gate skips next tick ──
+      - name: allow_rec
+        type: elasticsearch.update
+        if: "steps.gate_should_demote.output: no"
+        with:
+          index: "{{ consts.recs_index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            crown_gate_decision: "proceed"
+            crown_gate_max_tier: "{{ steps.evaluate_crown_jewel_impact.output.max_tier }}"
+            crown_gate_crown_match: "{{ steps.evaluate_crown_jewel_impact.output.crown_match }}"
+            crown_gate_affected_count: "{{ steps.evaluate_crown_jewel_impact.output.affected_count }}"
+            crown_gate_reason: "{{ steps.evaluate_crown_jewel_impact.output.reason }}"
+            crown_gate_checked_at: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            crown_gate_tick: "argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+
+      # ── Audit row to .soc-autonomy-decisions ───────────────────────
+      # Every demotion is also logged as an autonomy decision so the
+      # Pulse panel and the conformance matrix can prove the gate ran.
+      # We only write the row on demote — proceed paths are visible
+      # via the rec's own `crown_gate_decision: proceed` field and
+      # would otherwise dominate the autonomy-decisions index.
+      - name: write_autonomy_decision
+        type: elasticsearch.index
+        if: "steps.gate_should_demote.output: yes"
+        with:
+          index: .soc-autonomy-decisions
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            tick_id: "argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            workflow_id: "soc_argus_crown_jewel_gate"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            decision: "pending_review"
+            gate: "crown_jewel"
+            max_tier: "{{ steps.evaluate_crown_jewel_impact.output.max_tier }}"
+            crown_match: "{{ steps.evaluate_crown_jewel_impact.output.crown_match }}"
+            affected_count: "{{ steps.evaluate_crown_jewel_impact.output.affected_count }}"
+            affected: "{{ steps.evaluate_crown_jewel_impact.output.affected | json }}"
+            reason: "{{ steps.evaluate_crown_jewel_impact.output.reason }}"
+
+      # ── Reasoning-trace row so the lineage view sees the gate ──────
+      - name: write_gate_trace
+        type: elasticsearch.index
+        with:
+          index: .soc-reasoning-trace
+          document:
+            "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+            agent_id: "soc_argus_crown_jewel_gate"
+            step_index: 0
+            step_type: "run_summary"
+            content: "rec {{ foreach.item._id }} crown_gate={{ steps.evaluate_crown_jewel_impact.output.recommended_action }} max_tier={{ steps.evaluate_crown_jewel_impact.output.max_tier }} affected={{ steps.evaluate_crown_jewel_impact.output.affected_count }} reason={{ steps.evaluate_crown_jewel_impact.output.reason }}"
+            argus:
+              agent:
+                id: "soc_argus_crown_jewel_gate"
+                version: "argus-b5"
+              decision:
+                kind: "crown_jewel_gate"
+                id: "{{ foreach.item._id }}"
+                confidence: 1.0
+                max_tier: "{{ steps.evaluate_crown_jewel_impact.output.max_tier }}"
+                crown_match: "{{ steps.evaluate_crown_jewel_impact.output.crown_match }}"
+                affected_count: "{{ steps.evaluate_crown_jewel_impact.output.affected_count }}"
+            attributes:
+              argus.agent.id: "soc_argus_crown_jewel_gate"
+              argus.agent.version: "argus-b5"
+              argus.decision.kind: "crown_jewel_gate"
+              argus.decision.id: "{{ foreach.item._id }}"
+              argus.decision.confidence: 1.0
+              argus.decision.max_tier: "{{ steps.evaluate_crown_jewel_impact.output.max_tier }}"
+            gen_ai:
+              system: "argus"
+              operation:
+                name: "argus.crown_jewel_gate.evaluate"
+              agent:
+                id: "soc_argus_crown_jewel_gate"
+                name: "ARGUS Crown-Jewel Gate"
+                description: "Non-invasive crown-jewel asset impact gate for ARGUS recommendations"
+
+  # ── Heartbeat ───────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_crown_jewel_gate_tick
+        source: "soc_argus_crown_jewel_gate"
+        tick_id: "argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        gated_count: "{{ steps.fetch_candidates.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS crown-jewel gate complete — gated={{ steps.fetch_candidates.output.hits.hits | size | default: 0 }} tick=argus-crown-jewel-gate-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"

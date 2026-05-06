@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Documentation-oriented setup: create a Kibana connector for the Workflows action
-# type (`.workflows`) and wire it to run `soc-alert-sweeper` when detection rules fire.
+# type (`.workflows`) and wire it to run `soc_alert_sweeper` when detection rules fire.
 #
 # Prerequisites:
 #   - curl, jq
@@ -17,7 +17,7 @@ set -euo pipefail
 
 KIBANA_URL="${KIBANA_URL:-http://localhost:${KIBANA_PORT:-15601}}"
 CONNECTOR_NAME="${WORKFLOWS_CONNECTOR_NAME:-ARGUS SOC — Workflows}"
-TARGET_WORKFLOW_ID="${WORKFLOWS_TARGET_ID:-soc-alert-sweeper}"
+TARGET_WORKFLOW_ID="${WORKFLOWS_TARGET_ID:-soc_alert_sweeper}"
 
 hdr_auth=()
 if [[ -n "${KIBANA_AUTH:-}" ]]; then
@@ -46,7 +46,7 @@ fi
 
 echo "    connector id: ${connector_id}"
 
-echo "==> Example action params for a detection rule (run soc-alert-sweeper)"
+echo "==> Example action params for a detection rule (run soc_alert_sweeper)"
 jq -nc \
   --arg wf "${TARGET_WORKFLOW_ID}" \
   '{

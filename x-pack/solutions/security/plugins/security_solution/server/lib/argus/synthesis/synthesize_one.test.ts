@@ -67,11 +67,11 @@ describe('synthesizeOne — happy path', () => {
       advisory: advisory0,
       logger: newLogger(),
       now: NOW,
-      callerId: 'workflow-soc-argus-synthesis-driver',
+      callerId: 'workflow-soc_argus_synthesis_driver',
     });
 
     expect(outcome.mutation_intent?.variant_corpus_id).toContain(
-      'workflow-soc-argus-synthesis-driver'
+      'workflow-soc_argus_synthesis_driver'
     );
     expect(outcome.mutation_intent?.variant_corpus_id).toContain(advisory0.advisory_id);
   });

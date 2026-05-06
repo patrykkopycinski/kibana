@@ -57,7 +57,7 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
     name: 'Emulate actor',
     description:
       'Actor-focused coverage review. Correlates MITRE techniques against recent telemetry and optionally opens a case.',
-    canonical_of: 'soc-argus-playbook-runner',
+    canonical_of: 'soc_argus_playbook_runner',
     user_intent: 'actor_escalation',
   },
   {
@@ -75,7 +75,7 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
     description:
       'Check whether a specific CVE is on ARGUS’s radar, has coverage, and optionally trigger the Exploit→Detection pipeline.',
     origin: 'cti_ingest',
-    canonical_of: 'soc-argus-exploit-to-detection',
+    canonical_of: 'soc_argus_exploit_to_detection',
     user_intent: 'new_cve',
   },
   {
@@ -105,19 +105,19 @@ const ARGUS_PLAYBOOK_SKILLS: readonly ArgusPlaybook[] = [
  * list still works for workflows added after this map was last edited.
  */
 const WORKFLOW_DISPLAY_NAMES: Readonly<Record<string, string>> = {
-  'soc-argus-playbook-runner': 'ARGUS playbook runner',
-  'soc-argus-exploit-to-detection': 'Exploit → Detection reconciler',
-  'soc-gap-analyzer': 'Gap analyzer',
-  'soc-argus-drift-monitor': 'Drift monitor',
-  'soc-argus-redundancy-scanner': 'Redundancy scanner',
-  'soc-proactive-hunter': 'Proactive hunter',
-  'soc-argus-frontier-simulator': 'Frontier simulator',
-  'soc-argus-arm-mythos-preset': 'Arm Mythos preset',
-  'soc-demo-1-runner': 'Demo · Same-day CVE → Detection',
-  'soc-demo-2-runner': 'Demo · Polymorphic variant swarm',
-  'soc-deteng': 'Detection engineering',
-  'soc-arch-reviewer': 'Architecture reviewer',
-  'soc-kev-ingest': 'KEV advisory ingest',
+  soc_argus_playbook_runner: 'ARGUS playbook runner',
+  soc_argus_exploit_to_detection: 'Exploit → Detection reconciler',
+  soc_gap_analyzer: 'Gap analyzer',
+  soc_argus_drift_monitor: 'Drift monitor',
+  soc_argus_redundancy_scanner: 'Redundancy scanner',
+  soc_proactive_hunter: 'Proactive hunter',
+  soc_argus_frontier_simulator: 'Frontier simulator',
+  soc_argus_arm_mythos_preset: 'Arm Mythos preset',
+  soc_demo_1_runner: 'Demo · Same-day CVE → Detection',
+  soc_demo_2_runner: 'Demo · Polymorphic variant swarm',
+  soc_deteng: 'Detection engineering',
+  soc_arch_reviewer: 'Architecture reviewer',
+  soc_kev_ingest: 'KEV advisory ingest',
 };
 
 /**
@@ -125,10 +125,10 @@ const WORKFLOW_DISPLAY_NAMES: Readonly<Record<string, string>> = {
  * meaningful. Not every workflow has a clean origin; those return undefined.
  */
 const WORKFLOW_ORIGIN_BADGES: Readonly<Record<string, string>> = {
-  'soc-argus-exploit-to-detection': 'cti_ingest',
-  'soc-gap-analyzer': 'gap_analysis',
-  'soc-argus-redundancy-scanner': 'consolidation',
-  'soc-kev-ingest': 'cti_ingest',
+  soc_argus_exploit_to_detection: 'cti_ingest',
+  soc_gap_analyzer: 'gap_analysis',
+  soc_argus_redundancy_scanner: 'consolidation',
+  soc_kev_ingest: 'cti_ingest',
 };
 
 /**
@@ -138,10 +138,10 @@ const WORKFLOW_ORIGIN_BADGES: Readonly<Record<string, string>> = {
  * single row.
  */
 const WORKFLOW_USER_INTENTS: Readonly<Record<string, ArgusPlaybookUserIntent>> = {
-  'soc-argus-exploit-to-detection': 'new_cve',
-  'soc-gap-analyzer': 'coverage_gap',
-  'soc-argus-redundancy-scanner': 'redundancy_scan',
-  'soc-argus-drift-monitor': 'drift_monitor',
+  soc_argus_exploit_to_detection: 'new_cve',
+  soc_gap_analyzer: 'coverage_gap',
+  soc_argus_redundancy_scanner: 'redundancy_scan',
+  soc_argus_drift_monitor: 'drift_monitor',
 };
 
 interface RawWorkflowRegistryDoc {

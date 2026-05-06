@@ -1,7 +1,7 @@
 # `.soc-dac-export-queue` — DaC export message bus (B4)
 
 > **Schema version**: 1
-> **Producers**: `soc-argus-dac-export.yaml` (B4)
+> **Producers**: `soc_argus_dac_export.yaml` (B4)
 > **Consumers**: out-of-cluster DaC sidecar agent (deferred; the
 > sidecar is the only component that holds git credentials and opens
 > PRs)
@@ -104,7 +104,7 @@ source-of-truth.
 
 ## Producer
 
-[`soc-argus-dac-export.yaml`](../../../workflows/soc-argus-dac-export.yaml)
+[`soc_argus_dac_export.yaml`](../../../workflows/soc_argus_dac_export.yaml)
 runs every 1h (manual trigger also supported). It queries
 `.soc-mutation-intents` for `kind: rule_create`, `status: applied`,
 `argus.origin: synthesis_driver`, `@timestamp >= now-24h`, `not

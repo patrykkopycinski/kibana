@@ -1,0 +1,165 @@
+version: '1'
+name: ARGUS Intel Adapter — Analytics
+description: >
+  ARGUS analytics-cluster CTI enrichment adapter.
+
+  This workflow extracts CTI enrichment data from the production analytics
+  cluster (`ia-cti_enrichment` index) and populates `.soc-cve-advisories`
+  to feed the exploit-to-detection advisory pipeline.
+
+  Design (docs/argus/phase-3/glasswing-ingestion.md): batch ETL pipeline
+  that periodically extracts anonymized production data and lands it into
+  ARGUS's existing corpus and advisory infrastructure.
+
+  What this workflow does:
+    1. Query the analytics cluster's `ia-cti_enrichment` index for new
+       CTI data (last 24h by default)
+    2. Apply PII scrubbing protocol: strip customer_account_name,
+       cloud_org_email_domain, cluster_name, cluster_uuid, hash agent.id,
+       remove IP addresses from host.ip and source.ip
+    3. Transform CTI enrichment data into advisory documents
+    4. Upsert advisory documents into `.soc-cve-advisories` with
+       source=analytics_cluster provenance
+    5. Emit audit-trail heartbeat for liveness monitoring
+
+  PII Scrubbing Protocol:
+    - Strip: customer_account_name, cloud_org_email_domain, cluster_name, cluster_uuid
+    - Hash: agent.id (with salt from ~/.argus/secrets/agent_id_salt)
+    - Remove: host.ip, source.ip fields
+
+  Triggers:
+    * scheduled 1d : daily sync of new CTI enrichment data
+    * manual       : operator can force re-sync
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+consts:
+  advisory_index:        ".soc-cve-advisories"
+  audit_index:           ".soc-audit-trail"
+  analytics_cluster_url: "{{ env.ANALYTICS_CLUSTER_URL }}"
+  analytics_api_key:     "{{ env.ANALYTICS_CLUSTER_API_KEY }}"
+  adapter:               "argus_intel_adapter_analytics"
+  lookback_hours:        24
+
+steps:
+  # ── Query analytics cluster for new CTI enrichment data ──────────────
+  - name: query_cti_enrichment
+    type: elasticsearch.search
+    with:
+      # Note: This would normally be a cross-cluster search or HTTP request
+      # to the analytics cluster. For now, we use a placeholder search that
+      # would be replaced with actual remote cluster search config.
+      index: "ia-cti_enrichment"
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.lookback_hours }}h"
+            - exists:
+                field: "cve.id"
+      size: 1000
+      _source:
+        includes:
+          - "@timestamp"
+          - "cve.*"
+          - "threat.*"
+          - "vulnerability.*"
+          - "mitre.*"
+        excludes:
+          - "customer_account_name"
+          - "cloud_org_email_domain"
+          - "cluster_name"
+          - "cluster_uuid"
+          - "host.ip"
+          - "source.ip"
+          - "destination.ip"
+      sort:
+        - "@timestamp": "desc"
+    output: cti_results
+
+  # ── Transform and upsert advisories ──────────────────────────────────
+  - name: transform_and_upsert
+    type: javascript
+    with:
+      script: |
+        const results = steps.cti_results.hits?.hits || [];
+        const advisories = [];
+
+        for (const hit of results) {
+          const source = hit._source;
+
+          // Skip if no CVE ID
+          if (!source.cve?.id) continue;
+
+          const cveId = source.cve.id;
+          const advisoryId = `analytics-${cveId}-${hit._id}`;
+
+          const advisory = {
+            "@timestamp": source["@timestamp"] || new Date().toISOString(),
+            advisory_id: advisoryId,
+            cve_id: cveId,
+            source: "analytics_cluster",
+            adapter: consts.adapter,
+
+            // Threat intelligence data
+            threat_actor: source.threat?.actor?.name,
+            threat_technique_ids: source.mitre?.technique?.id || [],
+            threat_tactic_ids: source.mitre?.tactic?.id || [],
+
+            // Vulnerability metadata
+            vulnerability_severity: source.vulnerability?.severity,
+            vulnerability_score: source.vulnerability?.score?.base,
+
+            // Enrichment metadata
+            enrichment_timestamp: source["@timestamp"],
+            enrichment_source: "ia-cti_enrichment",
+
+            // Advisory status
+            status: "pending_synthesis",
+            synthesis_ready: true
+          };
+
+          advisories.push({
+            index: consts.advisory_index,
+            id: advisoryId,
+            document: advisory
+          });
+        }
+
+        return { advisories, count: advisories.length };
+    output: transformed
+
+  # ── Bulk upsert advisories ───────────────────────────────────────────
+  - name: upsert_advisories
+    type: elasticsearch.bulk
+    with:
+      operations: "{{ steps.transformed.advisories }}"
+      refresh: true
+    when: "{{ steps.transformed.count > 0 }}"
+
+  # ── Heartbeat ─────────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: "argus_intel_adapter_tick"
+        source: "soc_argus_intel_adapter_analytics"
+        tick_id: "argus-intel-analytics-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        adapter: "{{ consts.adapter }}"
+        lookback_hours: "{{ consts.lookback_hours }}"
+        advisories_upserted: "{{ steps.transformed.count || 0 }}"
+        execution_status: "success"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS analytics intel adapter complete — adapter={{ consts.adapter }} advisories_upserted={{ steps.transformed.count || 0 }}"

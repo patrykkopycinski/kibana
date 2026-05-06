@@ -1,0 +1,366 @@
+version: '1'
+name: SOC Meta Agent
+description: >
+  Autonomous evolution planner. The meta-agent ANALYZES system state and emits
+  structured `mutation_intent` recommendations into .soc-recommendations. It does
+  NOT mutate the platform directly — the soc_autonomous_applier workflow
+  performs all execution under governance gates (kill-switch, ownership, budget,
+  cooldown, loop-detection). This enforces a single control plane for
+  self-governance: every change flows through the applier, every change is
+  audited, every change can be rolled back.
+
+  Signal gate: the cycle short-circuits when there is nothing new to evolve on
+  (no fresh outcomes, no new coverage gaps, no agent errors since the previous
+  cycle). This is the T3 cost optimization — an expensive Opus call is only
+  made when there is actual SOC signal to reason about.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 30m
+  - type: manual
+
+consts:
+  signal_window: "now-35m"
+  cycle_window: "now-24h"
+  outcomes_index: ".soc-outcomes"
+  coverage_gaps_index: ".soc-coverage-gaps"
+  evolution_log_index: ".soc-evolution-log"
+  agent_registry_index: ".soc-agent-registry"
+  artifact_registry_index: ".soc-artifact-registry"
+  recommendations_index: ".soc-recommendations"
+  audit_index: ".soc-audit-trail"
+
+steps:
+  # ── Signal gate ─────────────────────────────────────────────────────
+  # Short-circuit when there is no fresh SOC signal since the previous cycle.
+  # Cheaper than paying for an Opus call just to conclude "no_action".
+  - name: new_outcomes_count
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.outcomes_index }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
+
+  - name: new_gaps_count
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.coverage_gaps_index }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
+
+  - name: new_evolution_count
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      size: 0
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.signal_window }}"
+
+  - name: signal_gate_log
+    type: console
+    with:
+      message: >-
+        Meta cycle signals — outcomes={{ steps.new_outcomes_count.output.hits.total.value | default: 0 }}
+        gaps={{ steps.new_gaps_count.output.hits.total.value | default: 0 }}
+        evolution={{ steps.new_evolution_count.output.hits.total.value | default: 0 }}
+
+  # Compute-and-match gate: did the cycle see any new signals?
+  - name: gate_no_new_signals
+    type: console
+    with:
+      message: >-
+        {%- assign _o = steps.new_outcomes_count.output.hits.total.value | default: 0 -%}
+        {%- assign _g = steps.new_gaps_count.output.hits.total.value | default: 0 -%}
+        {%- assign _e = steps.new_evolution_count.output.hits.total.value | default: 0 -%}
+        {% if _o == 0 and _g == 0 and _e == 0 %}yes{% else %}no{% endif %}
+
+  - name: signal_gate_heartbeat
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        workflow_id: "soc_meta"
+        event_type: meta_cycle_skipped
+        source: soc_meta
+        reason: no_new_signal
+        recent_outcomes: "{{ steps.new_outcomes_count.output.hits.total.value | default: 0 }}"
+        recent_gaps: "{{ steps.new_gaps_count.output.hits.total.value | default: 0 }}"
+        recent_evolution: "{{ steps.new_evolution_count.output.hits.total.value | default: 0 }}"
+    if: "steps.gate_no_new_signals.output: yes"
+
+  - name: signal_gate_skip
+    type: console
+    with:
+      message: "Meta cycle: no new signals in last 35m — skipping (cost optimization)."
+    end: true
+    if: "steps.gate_no_new_signals.output: yes"
+
+  # ── 1. Context gather ───────────────────────────────────────────────
+  - name: get_outcomes
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.outcomes_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 50
+  - name: get_evolution_log
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 30
+  - name: get_coverage_gaps
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.coverage_gaps_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "{{ consts.cycle_window }}"
+      size: 20
+  - name: get_agent_registry
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.agent_registry_index }}"
+      query:
+        bool:
+          must_not:
+            - term:
+                agent_id: seed
+      size: 50
+  - name: get_artifact_registry
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.artifact_registry_index }}"
+      size: 200
+  - name: get_rejected_recs
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recommendations_index }}"
+      query:
+        bool:
+          filter:
+            - term:
+                source: soc_meta
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+          should:
+            - term:
+                status: rejected
+            - term:
+                status: failed
+          minimum_should_match: 1
+      size: 20
+      _source:
+        - rec_id
+        - title
+        - summary
+        - rejection_reason
+        - reviewed_at
+        - type
+        - details
+
+  - name: get_existing_skills
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/agent_builder/skills
+
+  - name: log_start
+    type: console
+    with:
+      message: "Meta Agent: starting tiered evolution planning (read-only analysis)"
+
+  # ── 2. Plan mutations (LLM plan, NO direct writes) ──────────────────
+  - name: plan
+    type: ai.agent
+    connector-id: opus
+    with:
+      message: >
+        You are the Meta Agent. Analyze SOC state and PROPOSE mutations as
+        structured `mutation_intent` objects. You MUST NOT call any write tool
+        in this turn — the soc_autonomous_applier workflow performs every
+        platform mutation under governance gates. Your job is planning only.
+
+        TIERED PLANNING (in preference order):
+        - Tier 1: deterministic workflow  → emit `{artifact_type:"workflow", op:"create"}` with full `new_definition.yaml`
+        - Tier 2a: new/updated skill      → emit `{artifact_type:"skill",    op:"create"|"update"}`
+        - Tier 2b: agent instruction patch → emit `{artifact_type:"agent",   op:"update", patch:{instruction_patch:"..."}}`
+        - Tier 3 (last resort): new agent → emit `{artifact_type:"agent",    op:"create"}`
+
+        RESPONSE SHAPE (respond with ONLY this JSON — no prose):
+        {
+          "intents": [
+            {
+              "title":   "<<=200 char title>",
+              "summary": "<10-2000 char explanation>",
+              "reasoning": "<why now, what signal drives this>",
+              "confidence": 0-100,
+              "track": "deterministic" | "agentic",
+              "housekeeping": false,
+              "expected_impact": {
+                "fp_reduction_pct": 0,
+                "tp_gain_pct": 0,
+                "mttr_reduction_minutes": 0,
+                "hours_saved_per_week": 0,
+                "coverage_delta_pct": 0
+              },
+              "evidence": [
+                { "summary": "<500 char observation>",
+                  "source_ref": "<ES|QL query or .soc-* doc id>",
+                  "confidence": 0.0-1.0 }
+              ],
+              "details": {
+                "artifact_type": "workflow" | "skill" | "agent" | "rule" | "exception",
+                "artifact_id":   "auto-<kebab-id>",
+                "op":            "create" | "update" | "delete" | "enable" | "disable",
+                "expected_ownership": "autosoc",
+                "reason": "<20+ char rationale stored in intent>",
+                "new_definition": { ... optional for create/update ... },
+                "patch":          { ... optional for update ... },
+                "parent_recommendation_id": null,
+                "dependencies": []
+              }
+            }
+          ]
+        }
+
+        RULES:
+        - Artifact id MUST start with `auto-` (e.g. `auto-lateral-hunter-workflow`). NEVER `soc-*` or `caldera-*` — those prefixes are reserved for canonical artifacts and the applier will reject mutations on them (result=blocked_canonical).
+        - At least one `evidence[]` entry is REQUIRED unless `housekeeping: true`.
+        - `expected_impact` must be populated with realistic numbers for the proposed change — it is used by the review UI to rank and by trust-scoring to grade outcomes. Zero-padding is fine; placeholders like `null` or `{}` are rejected unless housekeeping=true.
+        - If you have nothing to propose this cycle, respond `{"intents": []}`.
+        - Rejected/failed prior proposals are listed below — DO NOT repeat them.
+
+        Existing core agents (enrich these before creating new ones):
+        - default, default, default, default
+
+        Existing skills (avoid duplicating):
+        {{ steps.get_existing_skills.output | json }}
+
+        Recent outcomes (24h):
+        {{ steps.get_outcomes.output.hits.hits | json }}
+
+        Evolution log (recent decisions — avoid oscillation):
+        {{ steps.get_evolution_log.output.hits.hits | json }}
+
+        Coverage gaps:
+        {{ steps.get_coverage_gaps.output.hits.hits | json }}
+
+        Artifact registry (for ownership/dependency awareness):
+        {{ steps.get_artifact_registry.output.hits.hits | json }}
+
+        Previously rejected recommendations (learn from these):
+        {{ steps.get_rejected_recs.output.hits.hits | json }}
+
+        Respond with JSON only.
+      schema:
+        type: object
+        properties:
+          intents:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        required:
+          - intents
+    timeout: 600s
+
+  # ── 3. Persist evolution-decision audit row ─────────────────────────
+  - name: write_evolution_decision
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        source: "soc_meta"
+        event_type: "meta_cycle_plan"
+        result: "planned"
+        reason: "Meta agent produced planning output; intents dispatched to soc_autonomous_applier."
+        evolution_output: "{{ steps.plan.output | json }}"
+
+  # ── 4. Fan out: one mutation_intent per plan entry ──────────────────
+  #     These are the documents soc_autonomous_applier picks up (type=mutation_intent,
+  #     status=pending). The applier runs deterministic gates, then dispatches
+  #     validated intents to the autonomous applier workflow.
+  #
+  #     The AI agent may return no intents this cycle (steady-state). Guard the
+  #     foreach with a compute-and-match gate so the workflow doesn't fail the
+  #     tick with "foreach expression must evaluate to an array".
+  - name: gate_has_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.plan.output.intents | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
+  - name: write_mutation_intents
+    type: foreach
+    foreach: "{{ steps.plan.output.intents }}"
+    if: "steps.gate_has_intents.output: yes"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recommendations_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "meta-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc_meta"
+            source_doc_id: "{{ steps.write_evolution_decision.output._id }}"
+            status: "pending"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            reasoning: "{{ foreach.item.reasoning | default: 'Autonomous evolution proposal' }}"
+            confidence: "{{ foreach.item.confidence | default: 80 }}"
+            track: "{{ foreach.item.track | default: 'agentic' }}"
+            housekeeping: "{{ foreach.item.housekeeping | default: false }}"
+            expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+            details: "{{ foreach.item.details }}"
+
+  # ── 5. If nothing was proposed, log a no_action audit row ───────────
+  - name: gate_no_intents
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.plan.output.intents | size | default: 0 -%}
+        {% if _n == 0 %}yes{% else %}no{% endif %}
+
+  - name: log_no_intents
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        workflow_id: "soc_meta"
+        event_type: meta_cycle_no_action
+        source: soc_meta
+        reason: "Meta agent produced zero intents — nothing new to evolve this cycle."
+    if: "steps.gate_no_intents.output: yes"
+
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        Meta cycle complete — intents={{ steps.plan.output.intents | size | default: 0 }}
+        (dispatched to soc_autonomous_applier for governance-gated execution).

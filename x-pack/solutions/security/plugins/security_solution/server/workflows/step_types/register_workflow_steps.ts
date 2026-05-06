@@ -16,6 +16,7 @@ import { resolveEntityContextStepDefinition } from './resolve_entity_context_ste
 import { evaluateRuleDriftStepDefinition } from './evaluate_rule_drift_step';
 import { retryWithBackoffStepDefinition } from './retry_with_backoff_step';
 import { argusSynthesizeAdvisoryStepDefinition } from './argus_synthesize_advisory_step';
+import { argusEvaluateCrownJewelImpactStepDefinition } from './argus_evaluate_crown_jewel_impact_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
@@ -54,5 +55,6 @@ export const registerWorkflowSteps = async (
     workflowsExtensions.registerStepDefinition(evaluateRuleDriftStepDefinition);
     workflowsExtensions.registerStepDefinition(retryWithBackoffStepDefinition);
     workflowsExtensions.registerStepDefinition(argusSynthesizeAdvisoryStepDefinition);
+    workflowsExtensions.registerStepDefinition(argusEvaluateCrownJewelImpactStepDefinition);
   }
 };

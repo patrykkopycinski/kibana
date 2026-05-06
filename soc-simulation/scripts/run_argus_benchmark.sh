@@ -276,7 +276,7 @@ JSON
 
 # D1 Detection Synthesis (30 pts) ------------------------------------------------
 # All D1 criteria query .soc-mutation-intents, the canonical rule-mutation
-# index produced by soc-argus-exploit-to-detection. Note: prefix "argus" used
+# index produced by soc_argus_exploit_to_detection. Note: prefix "argus" used
 # to be "soc-argus-*" — schema convergence is a live productionization concern.
 
 score_d1_1() {

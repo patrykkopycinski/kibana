@@ -72,7 +72,7 @@ Full contract in `../scaffolds/m2-5-trace-schema.md`. Minimum ARGUS-mapped field
   "parent_span_id": "otlp-<hex>|null",
   "argus": {
     "kind": "skill|agent|tool",
-    "actor_id": "soc-alert-sweeper-skill",
+    "actor_id": "soc_alert_sweeper-skill",
     "invocation_id": "<uuid>",
     "decision": { "kind": "triage_verdict|rule_draft|tool_choice", "value": "..." },
     "confidence": 0.0,

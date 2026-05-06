@@ -31,7 +31,7 @@
     }
   },
   "_meta": {
-    "description": "AutoDEX B4 — Detection-as-code (DaC) export queue. Each row is one rule artifact pending export to git. Producer: `soc-argus-dac-export.yaml`. Consumer (deferred): a sidecar agent (e.g. an Elastic Agent integration or external CI runner) that reads `status: pending` rows, runs `git checkout -b argus-rule/<rule_id>-v<version>`, writes `artifact_json` to `rules/<rule_id>.json`, opens a PR, and updates `status: pr_opened` + `git_status.pr_url`. This index is the message bus between in-cluster ARGUS and the out-of-cluster git runner — keeping git auth out of the Kibana cluster. Pure-logic core: `lib/argus/dac/rule_artifact.ts` (23 unit tests).",
+    "description": "AutoDEX B4 — Detection-as-code (DaC) export queue. Each row is one rule artifact pending export to git. Producer: `soc_argus_dac_export.yaml`. Consumer (deferred): a sidecar agent (e.g. an Elastic Agent integration or external CI runner) that reads `status: pending` rows, runs `git checkout -b argus-rule/<rule_id>-v<version>`, writes `artifact_json` to `rules/<rule_id>.json`, opens a PR, and updates `status: pr_opened` + `git_status.pr_url`. This index is the message bus between in-cluster ARGUS and the out-of-cluster git runner — keeping git auth out of the Kibana cluster. Pure-logic core: `lib/argus/dac/rule_artifact.ts` (23 unit tests).",
     "owner": "argus-governance",
     "schema_version": 1
   }

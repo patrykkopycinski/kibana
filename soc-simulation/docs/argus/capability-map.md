@@ -29,9 +29,9 @@ next section extend them rather than replace.
 | 02 | P1 | Vulnerability Checker rule type | [`elastic/kibana#258041`][k2] | in-flight | Continuous CVE detection + enrichment + remediation. M2.3 extends. |
 | 02 | P1·P2 | deteng skill | [`elastic/kibana#258362`][k3] | in-flight | Principal-detection-engineer agent surface. M2.2 extends with exploit→detection tool. |
 | 03 | P2 | `@kbn/evals` + AESOP + online evals | [`elastic/security-team#16546`][s1] | in-flight | Unified skill evaluation platform. M2.1 adds the detection-rule vertical. |
-| 03 | all | `soc-rule-backtester` · `soc-regression-gate` | this repo | shipped | Backtest + regression cascade for every mutation. |
-| 04 | all | `soc-autonomous-applier` · `soc-post-apply-observer` · `soc-recovery` | this repo | shipped | Snapshot → apply → observe → rollback. The reversibility contract. |
-| 05 | all | `soc-trust-scorer` · `soc-watchdog` · `soc-self-learning-loop` | this repo | shipped | Governance primitives. M2.5 adds OTLP traces as the missing link. |
+| 03 | all | `soc_rule_backtester` · `soc_regression_gate` | this repo | shipped | Backtest + regression cascade for every mutation. |
+| 04 | all | `soc_autonomous_applier` · `soc_post_apply_observer` · `soc_recovery` | this repo | shipped | Snapshot → apply → observe → rollback. The reversibility contract. |
+| 05 | all | `soc-trust-scorer` · `soc_watchdog` · `soc_self_learning_loop` | this repo | shipped | Governance primitives. M2.5 adds OTLP traces as the missing link. |
 
 [i1]: https://github.com/elastic/integrations/pull/18123
 [k1]: https://github.com/elastic/kibana/pull/257949
@@ -52,7 +52,7 @@ existing PR or issue and named after the pressure it absorbs.
 | **M2.1** | Detection Eval Vertical | P2 | 03 | new sub-issue under [`security-team#16546`][s1] | [`issues/m2-1-detection-eval-vertical.md`](./issues/m2-1-detection-eval-vertical.md) |
 | **M2.2** | Exploit-to-Detection Synthesis | P1 | 02 | extends [`kibana#258362`][k3] (deteng skill) | [`issues/m2-2-exploit-to-detection.md`](./issues/m2-2-exploit-to-detection.md) |
 | **M2.3** | Mythos-era Exploit Probability | P1 | 01 → 02 | extends [`kibana#258041`][k2] (vuln checker) | [`issues/m2-3-exploit-probability.md`](./issues/m2-3-exploit-probability.md) |
-| **M2.4** | Frontier-Adversary Simulation Mode | P3 | 01 (telemetry gen) | extends `soc-difficulty-controller.yaml` | [`issues/m2-4-frontier-simulation.md`](./issues/m2-4-frontier-simulation.md) |
+| **M2.4** | Frontier-Adversary Simulation Mode | P3 | 01 (telemetry gen) | extends `soc_difficulty_controller.yaml` | [`issues/m2-4-frontier-simulation.md`](./issues/m2-4-frontier-simulation.md) |
 | **M2.5** | Reasoning-Trace Governance | P3 | 05 | new (OTLP → ES) | [`issues/m2-5-reasoning-trace-governance.md`](./issues/m2-5-reasoning-trace-governance.md) |
 
 Each milestone links to a sub-issue body ready to file under `elastic/security-team`.
@@ -68,15 +68,15 @@ gaps to track.
 |:------------|:-----------------------|:-------------------------|:-------------------------|:----------------------------|
 | **01 Sensing** | M2.3 · `kibana#258041` | — | M2.4 frontier preset | `integrations#18123` (Shadow AI) |
 | **02 Hypothesis** | M2.2 · `kibana#258362` | M2.2 (draft rules) | `kibana#259559` skills · `kibana#257949` correlation | ARGUS planner-agent mesh |
-| **03 Validation** | — | **M2.1** detection eval vertical | `soc-regression-gate` | — |
-| **04 Action** | `soc-autonomous-applier` | `soc-autonomous-applier` | `soc-response` · `soc-containment-playbook` | — |
-| **05 Governance** | — | `soc-self-learning-loop` | **M2.5** OTLP traces | `soc-trust-scorer` · `soc-watchdog` |
+| **03 Validation** | — | **M2.1** detection eval vertical | `soc_regression_gate` | — |
+| **04 Action** | `soc_autonomous_applier` | `soc_autonomous_applier` | `soc_response` · `soc-containment-playbook` | — |
+| **05 Governance** | — | `soc_self_learning_loop` | **M2.5** OTLP traces | `soc-trust-scorer` · `soc_watchdog` |
 
 Gaps surfaced by this matrix (reasonable to punt to Phase 3):
 
 1. **P2 × 01 Sensing** — no mutation dataset captured from live telemetry. Phase-3 goal: feed observed evasions back into the mutation set.
 2. **P4 × 03 Validation** — no built-in way to measure *our reasoner against theirs*. Phase-3 goal: adversarial eval suites where the agent-under-test faces an adversarial prompt-injection regime.
-3. ~~**P1 × 05 Governance** — no formal Mean-Time-to-Rollback measurement.~~ ✅ **landed 2026-04-20.** `soc-recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` every 10 min; trust-tier assessor rolls up `avg / p50 / p95` per actor; Pulse tile surfaces tenant-wide p50 via `/internal/security_solution/argus/governance_pulse`.
+3. ~~**P1 × 05 Governance** — no formal Mean-Time-to-Rollback measurement.~~ ✅ **landed 2026-04-20.** `soc_recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` every 10 min; trust-tier assessor rolls up `avg / p50 / p95` per actor; Pulse tile surfaces tenant-wide p50 via `/internal/security_solution/argus/governance_pulse`.
 
 ---
 
@@ -87,10 +87,10 @@ demo-ready — see `docs/argus/demo-runbook.md` section 10.
 
 | Capability | Builds on | Status | Design sketch | Artifact |
 |---|---|---|---|---|
-| Drift detection | `soc-self-learning-loop` + M2.1 eval scores | landed | [`phase-3/drift-detection.md`](./phase-3/drift-detection.md) | `workflows/soc-argus-drift-monitor.yaml` |
-| Trust-tier thresholds for frontier-class mutations | `soc-trust-scorer` | landed | [`phase-3/trust-thresholds.md`](./phase-3/trust-thresholds.md) | `workflows/soc-argus-trust-tier-assessor.yaml` + `soc-argus-trust-gate.yaml` |
-| Playbook learning loop | `soc-containment-playbook` + `.soc-outcomes` | landed | [`phase-3/playbook-learning-loop.md`](./phase-3/playbook-learning-loop.md) | `workflows/soc-argus-playbook-learner.yaml` + `argus/technique-playbook-mapping.json` |
-| Glasswing-compatible ingestion | `.soc-intel-feed` (new) → Sensing | landed (demo adapter; TAXII poller deferred) | [`phase-3/glasswing-ingestion.md`](./phase-3/glasswing-ingestion.md) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc-argus-intel-adapter-generic.yaml` + `soc-argus-intel-mythos-aggregator.yaml`, `argus/intel-feed-seed.json` |
+| Drift detection | `soc_self_learning_loop` + M2.1 eval scores | landed | [`phase-3/drift-detection.md`](./phase-3/drift-detection.md) | `workflows/soc_argus_drift_monitor.yaml` |
+| Trust-tier thresholds for frontier-class mutations | `soc-trust-scorer` | landed | [`phase-3/trust-thresholds.md`](./phase-3/trust-thresholds.md) | `workflows/soc_argus_trust_tier_assessor.yaml` + `soc_argus_trust_gate.yaml` |
+| Playbook learning loop | `soc-containment-playbook` + `.soc-outcomes` | landed | [`phase-3/playbook-learning-loop.md`](./phase-3/playbook-learning-loop.md) | `workflows/soc_argus_playbook_learner.yaml` + `argus/technique-playbook-mapping.json` |
+| Glasswing-compatible ingestion | `.soc-intel-feed` (new) → Sensing | landed (demo adapter; TAXII poller deferred) | [`phase-3/glasswing-ingestion.md`](./phase-3/glasswing-ingestion.md) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc_argus_intel_adapter_generic.yaml` + `soc_argus_intel_mythos_aggregator.yaml`, `argus/intel-feed-seed.json` |
 | ARGUS Console | Security Solution plugin | landed (extended the existing dashboard) | [`phase-3/argus-console.md`](./phase-3/argus-console.md) | `setup/dashboards/build_argus_console.js` (Phase 3 panel section) |
 
 ---

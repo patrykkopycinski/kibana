@@ -15,7 +15,7 @@ import type { ReasoningSpan } from './load_trace';
  * The unit tests in `judge.test.ts` and `evaluators.test.ts` cover the
  * deterministic scoring math in isolation. This suite closes the loop by
  * proving the full wiring produces the row shape the trust-tier assessor
- * workflow (`soc-argus-trust-tier-assessor.yaml`) expects to read from
+ * workflow (`soc_argus_trust_tier_assessor.yaml`) expects to read from
  * `.soc-argus-eval-runs` (run_kind=reasoning).
  *
  * The trust-tier assessor fields under test here:

@@ -390,7 +390,7 @@
     <td><strong>#3 — Workflow-driven provisioner</strong></td>
     <td>Failure #4</td>
     <td>Agent recommends rules; user approves blind</td>
-    <td>Deterministic Elastic workflow (<code>soc-autonomous-applier</code>) creates DISABLED rules via native Kibana APIs; dashboard links to real Kibana rules</td>
+    <td>Deterministic Elastic workflow (<code>soc_autonomous_applier</code>) creates DISABLED rules via native Kibana APIs; dashboard links to real Kibana rules</td>
     <td>Side-effects belong in deterministic pipelines (workflows), not LLM tool calls or custom sidecars</td>
   </tr>
   <tr>
@@ -430,7 +430,7 @@
     <div class="vs-title good">✓ &nbsp;Hybrid (current)</div>
     <ul class="vs-list">
       <li>Agent recommends with structured output</li>
-      <li>Write operations via deterministic Elastic workflows (FE + <code>soc-autonomous-applier</code>)</li>
+      <li>Write operations via deterministic Elastic workflows (FE + <code>soc_autonomous_applier</code>)</li>
       <li>Success is verified via API response + UI state</li>
       <li>Human reviews each recommendation individually (or full autonomy for <code>auto-*</code> artifacts — registry owner <code>autosoc</code>)</li>
       <li>Rules pre-created as DISABLED by workflow; user sees native Kibana UI</li>
@@ -576,7 +576,7 @@
 <div class="card" style="margin-bottom: 12px;">
   <h3 style="margin-top:0;">6. Bridge the provision gap with workflows, not sidecars</h3>
   <p style="margin:0;">There's often a gap between "agent recommends X" and "X exists in the system for review."
-  A deterministic Elastic workflow (<code>soc-autonomous-applier</code>) polls for pending recommendations and
+  A deterministic Elastic workflow (<code>soc_autonomous_applier</code>) polls for pending recommendations and
   provisions resources via native Kibana APIs &mdash; no Python sidecars. This closes the gap while keeping
   all governance (kill-switch, ownership, budgets, cooldowns, loop detection) in the same engine that
   runs everything else in the stack.</p>
@@ -718,7 +718,7 @@
     <thead><tr><th>Before (9 agents)</th><th>After (4 agents)</th><th>Mechanism</th></tr></thead>
     <tbody>
       <tr><td>soc-triage-agent + soc-entity-agent + soc-hunt-agent</td><td>soc-triage-agent (unified)</td><td>Merged: entity enrichment is Phase 2, investigation is Phase 3 within triage</td></tr>
-      <tr><td>soc-watchdog-agent</td><td>soc-health-check <em>(skill)</em></td><td>Converted to skill on meta-agent + deterministic health-check workflow</td></tr>
+      <tr><td>soc_watchdog-agent</td><td>soc-health-check <em>(skill)</em></td><td>Converted to skill on meta-agent + deterministic health-check workflow</td></tr>
       <tr><td>soc-difficulty-evaluator</td><td>soc-difficulty-evaluation <em>(skill)</em></td><td>Converted to skill on meta-agent + deterministic difficulty workflow</td></tr>
       <tr><td>soc-case-agent</td><td><em>(removed)</em></td><td>Case creation already deterministic (<code>kibana.request</code> in sweeper)</td></tr>
       <tr><td>—</td><td>soc-architecture-review <em>(skill)</em></td><td>New: periodic architecture audit every 6h</td></tr>
@@ -799,7 +799,7 @@
     <li><strong>Intelligence-driven:</strong> When Security Labs returns new IOCs, sweep all logs
       for matches.</li>
   </ul>
-  <p>The <code>soc-proactive-hunter</code> workflow runs every 2 hours, and findings go to
+  <p>The <code>soc_proactive_hunter</code> workflow runs every 2 hours, and findings go to
     <code>.soc-hunt-findings</code>.</p>
 </div>
 
@@ -863,7 +863,7 @@
       gated step.</li>
   </ul>
   <p style="margin-top:6px;">Retro-tagging at deploy time is done by the
-    <code>soc-registry-retro-tag</code> workflow (pure Elastic-native — no Python). The deterministic
+    <code>soc_registry_retro_tag</code> workflow (pure Elastic-native — no Python). The deterministic
     rule is: first dash-segment of <code>artifact_id</code> is <code>soc</code> or
     <code>caldera</code> → <code>owner=canonical</code>; anything else → <code>owner=autosoc</code>.
     The convention for AutoSOC-created artifacts is the <code>auto-*</code> prefix (e.g.
@@ -874,7 +874,7 @@
 <div class="card" style="margin-top:12px">
   <div class="card-title"><span class="dot" style="background:var(--amber)"></span>Five Deterministic Gates (the Rails)</div>
   <p>Before any agent-proposed mutation is applied, five deterministic gates run in
-    <code>soc-autonomous-applier</code>. Each is an Elasticsearch query or <code>if</code>
+    <code>soc_autonomous_applier</code>. Each is an Elasticsearch query or <code>if</code>
     step — no LLM reasoning is permitted at this layer.</p>
   <table>
     <thead><tr><th>Gate</th><th>Check</th><th>Rejection record</th></tr></thead>
@@ -887,19 +887,19 @@
     </tbody>
   </table>
   <p style="margin-top:6px;">Only when all five pass is the <code>mutation_intent</code> dispatched to
-    <code>soc-autonomous-applier-agent</code>, which snapshots the target to
+    <code>soc_autonomous_applier-agent</code>, which snapshots the target to
     <code>.soc-snapshots</code>, calls the native mutation tool, updates the registry, and closes the
     intent. Every transition is mirrored into <code>.soc-evolution-log</code>.</p>
 </div>
 
 <div class="card" style="margin-top:12px">
   <div class="card-title"><span class="dot" style="background:var(--green)"></span>DetEng Split — Principal vs Signal Quality</div>
-  <p>Autonomy requires clear blast-radius ownership. The single <code>soc-deteng-agent</code> is split
+  <p>Autonomy requires clear blast-radius ownership. The single <code>soc_deteng-agent</code> is split
     into two focused agents with non-overlapping scope:</p>
   <table>
     <thead><tr><th>Agent</th><th>Owns</th><th>Does NOT own</th></tr></thead>
     <tbody>
-      <tr><td><strong>soc-deteng-agent</strong> (Principal DetEng)</td><td>New rules from coverage gaps · rule redesigns · deprecating stale rules · MITRE mapping</td><td>FP/TP tuning · adding exceptions · threshold tweaks</td></tr>
+      <tr><td><strong>soc_deteng-agent</strong> (Principal DetEng)</td><td>New rules from coverage gaps · rule redesigns · deprecating stale rules · MITRE mapping</td><td>FP/TP tuning · adding exceptions · threshold tweaks</td></tr>
       <tr><td><strong>soc-signal-quality-agent</strong></td><td>Adding exceptions · raising/lowering thresholds · environment-wide exceptions · last-resort disables · <code>redesign_required</code> flags</td><td>Creating new rules · writing new queries · MITRE authoring</td></tr>
     </tbody>
   </table>
@@ -911,10 +911,10 @@
 
 <div class="card" style="margin-top:12px">
   <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Regression Harness</div>
-  <p>The <code>soc-regression-harvester</code> workflow snapshots high-signal <code>.soc-outcomes</code>
+  <p>The <code>soc_regression_harvester</code> workflow snapshots high-signal <code>.soc-outcomes</code>
     cases into <code>.soc-regression-dataset</code> (rejected recommendations are kept as
     <em>negative</em> regression cases — they capture what the system should <strong>not</strong> do
-    again). The <code>soc-regression-gate</code> workflow re-runs the dataset against the current
+    again). The <code>soc_regression_gate</code> workflow re-runs the dataset against the current
     triage model after every applier cycle; any regression blocks further autonomous mutations until
     a human acknowledges it.</p>
 </div>
@@ -928,10 +928,10 @@
   <table>
     <thead><tr><th>Removed (Python)</th><th>Replacement (Elastic workflow)</th><th>What it does</th></tr></thead>
     <tbody>
-      <tr><td><code>autosoc_governance.py</code> + <code>applier.py</code></td><td><code>soc-autonomous-applier</code> + <code>soc-autonomous-applier-agent</code></td><td>Governance gates + snapshot + apply + audit</td></tr>
-      <tr><td><code>retro_tag.py</code></td><td><code>soc-registry-retro-tag</code></td><td>Classify legacy artifacts on first deploy</td></tr>
-      <tr><td><code>caldera_bridge.py</code> (dispatch side)</td><td><code>soc-caldera-dispatcher</code></td><td>Claim pending <code>.soc-attack-commands</code> w/ optimistic concurrency, look up profile, POST operation</td></tr>
-      <tr><td><code>caldera_bridge.py</code> (poll side)</td><td><code>soc-caldera-poller</code></td><td>Poll running operations, write <code>techniques_executed</code> back on completion</td></tr>
+      <tr><td><code>autosoc_governance.py</code> + <code>applier.py</code></td><td><code>soc_autonomous_applier</code> + <code>soc_autonomous_applier-agent</code></td><td>Governance gates + snapshot + apply + audit</td></tr>
+      <tr><td><code>retro_tag.py</code></td><td><code>soc_registry_retro_tag</code></td><td>Classify legacy artifacts on first deploy</td></tr>
+      <tr><td><code>caldera_bridge.py</code> (dispatch side)</td><td><code>soc_caldera_dispatcher</code></td><td>Claim pending <code>.soc-attack-commands</code> w/ optimistic concurrency, look up profile, POST operation</td></tr>
+      <tr><td><code>caldera_bridge.py</code> (poll side)</td><td><code>soc_caldera_poller</code></td><td>Poll running operations, write <code>techniques_executed</code> back on completion</td></tr>
       <tr><td><code>meta_bridge.py</code></td><td>Native Agent Builder tools (<code>platform.core.*</code>, <code>platform.workflows.*</code>)</td><td>Agent/skill/workflow/rule CRUD directly from the meta agent</td></tr>
     </tbody>
   </table>

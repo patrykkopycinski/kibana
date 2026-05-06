@@ -231,12 +231,12 @@ describe('B16 contracts — .soc-evolution-log', () => {
     expect(checkContract(EvolutionLogRowSchema, canonicalAdvisoryRow()).ok).toBe(true);
   });
 
-  it('parses a tick-summary row produced by the soc-argus-synthesis-driver workflow', () => {
+  it('parses a tick-summary row produced by the soc_argus_synthesis_driver workflow', () => {
     const tickRow = {
       '@timestamp': new Date(NOW).toISOString(),
       event_type: 'synthesis.tick',
       agent_id: SYNTHESIS_DRIVER_AGENT_ID,
-      source: 'soc-argus-synthesis-driver',
+      source: 'soc_argus_synthesis_driver',
       actor: SYNTHESIS_DRIVER_AGENT_ID,
       trust_tier: SYNTHESIS_DRIVER_INITIAL_TRUST_TIER,
       result: 'ok',

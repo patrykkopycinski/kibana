@@ -1,0 +1,274 @@
+version: '1'
+name: SOC Proactive Hunter
+description: >
+  Scheduled proactive threat hunting workflow. Runs every 2 hours to:
+  1. Gather recent triage results and identify observed MITRE techniques
+  2. Run hypothesis-driven hunts for expected next-stage techniques
+  3. Run anomaly detection queries for behavioral deviations
+  4. Write findings to .soc-hunt-findings for dashboard and case creation
+
+consts:
+  triage_results_index: ".soc-triage-results"
+  hunt_findings_index: ".soc-hunt-findings"
+  audit_index: ".soc-audit-trail"
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 2h
+  - type: manual
+
+consts:
+  workflow_id: soc_proactive_hunter
+
+steps:
+  # ── Gather context for hunt planning ─────────────────────────────
+  - name: get_recent_triage
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.triage_results_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      size: 30
+  - name: get_recent_alerts
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-*"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-24h"
+      size: 0
+      aggs:
+        techniques:
+          terms:
+            field: "kibana.alert.rule.threat.technique.id"
+            size: 30
+        by_host:
+          terms:
+            field: "host.name"
+            size: 20
+          aggs:
+            techniques:
+              terms:
+                field: "kibana.alert.rule.threat.technique.id"
+                size: 10
+        by_severity:
+          terms:
+            field: "kibana.alert.severity"
+            size: 5
+
+  - name: get_previous_hunts
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.hunt_findings_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-48h"
+      size: 10
+  - name: log_start
+    type: console
+    with:
+      message: "Proactive Hunter: starting hunt cycle with {{ steps.get_recent_alerts.output.aggregations.techniques.buckets | size }} observed techniques"
+
+  # Branch: full hypothesis+anomaly hunt when alerts exist, anomaly-only when not.
+  - name: check_has_alerts
+    type: if
+    condition: "steps.get_recent_alerts.output.hits.total.value > 0"
+    steps:
+      - name: run_hunt
+        type: ai.agent
+        connector-id: opus
+        with:
+          message: >
+            You are conducting a proactive threat hunt using your proactive-hunt skill.
+            This is NOT alert triage — you are hunting for threats that have NOT triggered alerts.
+
+            CONTEXT:
+
+            Observed MITRE techniques in last 24h (by host):
+            {{ steps.get_recent_alerts.output.aggregations.by_host.buckets | json }}
+
+            Alert severity distribution:
+            {{ steps.get_recent_alerts.output.aggregations.by_severity.buckets | json }}
+
+            Recent triage results count: {{ steps.get_recent_triage.output.hits.total.value }}
+            (Use your search tools to query specific triage details as needed.)
+
+            Previous hunts count: {{ steps.get_previous_hunts.output.hits.total.value }}
+            (Use your search tools to check .soc-hunt-findings for recent hunts to avoid repeating.)
+
+            INSTRUCTIONS:
+
+            1. HYPOTHESIS-DRIVEN HUNTS:
+               For each observed technique, identify the expected next-stage techniques using the
+               ATT&CK chaining templates. Build ES|QL queries scoped to the same hosts/users
+               where the original technique was observed.
+
+            2. ANOMALY DETECTION:
+               Run the standard anomaly queries:
+               - New login sources (country/IP not seen in 30 days)
+               - First-time process-parent relationships
+               - Unusual outbound connections to new destinations
+               - Data staging indicators (large files in temp directories)
+               - Service account interactive logins
+
+            3. SELF-VALIDATE:
+               - Every hypothesis must have a query and result
+               - Negative results are valuable — report them
+               - Findings must reference specific entities and timeframes
+
+            Respond with JSON:
+            {"hunt_id": "hunt-<timestamp>", "hunt_type": "combined",
+             "hypotheses": [{"technique_observed": "Txxxx", "technique_hunted": "Tyyyy",
+               "host": "...", "query": "...", "result": "positive|negative", "evidence": "..."}],
+             "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
+             "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
+               "finding": "...", "entities_involved": [], "recommended_action": "..."}],
+             "coverage_update": {"techniques_hunted": ["Txxxx"], "data_sources_used": []}}
+          schema:
+            type: object
+            properties:
+              hunt_id:
+                type: string
+              hunt_type:
+                type: string
+              hypotheses:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              anomaly_findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              coverage_update:
+                type: object
+                additionalProperties: true
+            required:
+              - hunt_id
+              - hunt_type
+              - hypotheses
+              - anomaly_findings
+              - findings
+              - coverage_update
+        timeout: 600s
+        on_failure:
+          - name: log_run_hunt_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: run_hunt
+                step_name: run_hunt
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+    else:
+      - name: run_anomaly_only
+        type: ai.agent
+        connector-id: opus
+        with:
+          message: >
+            You are conducting a proactive anomaly detection hunt using your proactive-hunt skill.
+            There are no recent alerts, so focus on data-driven anomaly detection:
+
+            1. New login sources (country/IP not seen in 30 days)
+            2. First-time process-parent relationships on production hosts
+            3. Unusual outbound connections to never-seen destinations
+            4. Data staging indicators (large files in temp directories)
+            5. Service account interactive logins
+
+            Previous hunts (avoid repeating):
+            {{ steps.get_previous_hunts.output.hits.hits | json }}
+
+            Self-validate: every query must produce a result (even if zero findings).
+
+            Respond with JSON:
+            {"hunt_id": "hunt-<timestamp>", "hunt_type": "anomaly_detection",
+             "anomaly_findings": [{"query_name": "...", "result_count": N, "findings": "..."}],
+             "findings": [{"severity": "CRITICAL|HIGH|MEDIUM|LOW|INFO",
+               "finding": "...", "entities_involved": [], "recommended_action": "..."}],
+             "coverage_update": {"data_sources_used": []}}
+          schema:
+            type: object
+            properties:
+              hunt_id:
+                type: string
+              hunt_type:
+                type: string
+              anomaly_findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              findings:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              coverage_update:
+                type: object
+                additionalProperties: true
+            required:
+              - hunt_id
+              - hunt_type
+              - anomaly_findings
+              - findings
+              - coverage_update
+        timeout: 300s
+        on_failure:
+          - name: log_run_anomaly_only_failure
+            type: elasticsearch.request
+            with:
+              method: POST
+              path: /.soc-audit-trail/_doc
+              body:
+                event_type: workflow_step_failure
+                workflow_id: "{{ consts.workflow_id }}"
+                step_id: run_anomaly_only
+                step_name: run_anomaly_only
+                error: "{{ error.message }}"
+                "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+
+  # ── Write findings ───────────────────────────────────────────────
+  # Only one of run_hunt / run_anomaly_only runs; the other is undefined.
+  # Liquid `| default:` falls through to the populated branch.
+  - name: write_findings
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.hunt_findings_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc_proactive_hunter"
+        hunt_output: "{% if steps.run_hunt.output.message %}{{ steps.run_hunt.output.message }}{% elsif steps.run_anomaly_only.output.message %}{{ steps.run_anomaly_only.output.message }}{% elsif steps.run_hunt.output %}{{ steps.run_hunt.output | json }}{% else %}{{ steps.run_anomaly_only.output | json }}{% endif %}"
+        status: "completed"
+
+  - name: write_audit
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        workflow_id: "soc_proactive_hunter"
+        event_type: "proactive_hunt"
+        source: "soc_proactive_hunter"
+        details: "Proactive threat hunt completed"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Proactive Hunter: hunt cycle complete, findings written to .soc-hunt-findings"

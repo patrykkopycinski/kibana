@@ -1,5 +1,5 @@
 {
-  "index_patterns": [".soc-shift-handover"],
+  "index_patterns": [".soc_shift_handover"],
   "priority": 500,
   "template": {
     "settings": {

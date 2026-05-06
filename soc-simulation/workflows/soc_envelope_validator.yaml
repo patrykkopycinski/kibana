@@ -1,0 +1,113 @@
+version: '1'
+name: SOC Envelope Validator
+description: >
+  Post-write sweep for .soc-recommendations. Catches any mutation_intent doc that
+  slipped past the soc-mutation-intent-envelope-validator ingest pipeline — e.g.
+  bulk writes that explicitly disabled pipelines, docs indexed before the pipeline
+  was deployed, or producer writes that bypassed the default_pipeline via
+  `?pipeline=_none`. Belt-and-suspenders validation: the ingest pipeline is the
+  primary gate at write time; this workflow is the periodic audit that guarantees
+  the queue only ever contains valid mutation_intents in `pending` state.
+
+  Behavior per tick:
+    1. Query .soc-recommendations for `type=mutation_intent AND status=pending`
+       docs missing ANY required envelope field, or with `type != mutation_intent`.
+       (The query uses pure Elasticsearch bool/should/must_not so validation logic
+       lives in the query itself — no fragile Liquid-as-KQL conditions.)
+    2. For each violating doc:
+       a. Write a structured row to .soc-dead-letter (producer debuggability).
+       b. Update the doc to status=rejected with rejection_reason=envelope_invalid
+          so the applier skips it.
+    3. Emit a heartbeat row to .soc-audit-trail with the invalid count so the
+       System Health panel can surface it.
+
+  This workflow does NOT duplicate the applier's ownership / budget / cooldown /
+  loop gates. Envelope validity is strictly a shape concern; the applier's gates
+  are policy concerns.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1m
+  - type: manual
+
+consts:
+  max_per_tick: 50
+
+steps:
+  # ── 1. Find envelope-invalid docs via pure ES query ─────────────────
+  # The `should` clauses enumerate every way a doc can be invalid. `minimum_should_match: 1`
+  # turns the list into OR semantics. We intentionally do NOT encode enum-value checks
+  # here (track ∈ {deterministic, agentic}, confidence ∈ [0,100], etc.) because enum
+  # violations mean the ingest pipeline was bypassed entirely — catching "missing field"
+  # is a superset check that catches the common producer bugs. The ingest pipeline
+  # remains the authoritative enum validator.
+  - name: invalid_docs
+    type: elasticsearch.search
+    with:
+      index: ".soc-recommendations"
+      size: 50
+      query:
+        bool:
+          filter:
+            - term: { status: "pending" }
+            - term: { type: "mutation_intent" }
+          should:
+            - bool: { must_not: [ { exists: { field: "rec_id" } } ] }
+            - bool: { must_not: [ { exists: { field: "schema_version" } } ] }
+            - bool: { must_not: [ { exists: { field: "source" } } ] }
+            - bool: { must_not: [ { exists: { field: "title" } } ] }
+            - bool: { must_not: [ { exists: { field: "summary" } } ] }
+            - bool: { must_not: [ { exists: { field: "confidence" } } ] }
+            - bool: { must_not: [ { exists: { field: "track" } } ] }
+            - bool: { must_not: [ { exists: { field: "details" } } ] }
+          minimum_should_match: 1
+
+  # ── 2. Per-doc DLQ write + reject ────────────────────────────────────
+  - name: dispatch_invalid
+    type: foreach
+    foreach: "{{ steps.invalid_docs.output.hits.hits }}"
+    steps:
+      - name: dlq_write
+        type: elasticsearch.index
+        with:
+          index: .soc-dead-letter
+          refresh: "wait_for"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            source: "soc_envelope_validator"
+            rec_id: "{{ foreach.item._source.rec_id | default: foreach.item._id }}"
+            original_type: "{{ foreach.item._source.type | default: 'unknown' }}"
+            error: "envelope_validation_failed_post_write_sweep: this doc bypassed the soc-mutation-intent-envelope-validator ingest pipeline. Check the producer for missing `?pipeline` param or explicit `?pipeline=_none`."
+            validation_errors: ["post_write_sweep_detected_invalid_envelope"]
+            original_doc: "{{ foreach.item._source | json }}"
+
+      - name: mark_rejected
+        type: elasticsearch.update
+        with:
+          index: .soc-recommendations
+          id: "{{ foreach.item._id }}"
+          refresh: "wait_for"
+          doc:
+            status: rejected
+            applied_by: "soc_envelope_validator"
+            applied_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+            rejection_reason: "envelope_invalid_post_write_sweep"
+
+  # ── 3. Heartbeat ─────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        event_type: envelope_validator_heartbeat
+        source: "soc_envelope_validator"
+        invalid_count: "{{ steps.invalid_docs.output.hits.total.value | default: 0 }}"
+        message: "Post-write envelope sweep complete. Invalid docs rerouted to .soc-dead-letter and marked rejected."
+
+  - name: log_done
+    type: console
+    with:
+      message: "Envelope-validator tick complete — invalid={{ steps.invalid_docs.output.hits.total.value | default: 0 }}"

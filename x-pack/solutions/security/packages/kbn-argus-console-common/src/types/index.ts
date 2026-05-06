@@ -53,14 +53,18 @@ export type {
 export { CANONICAL_STAGE_ORDER } from './mutation_lineage';
 
 export type {
+  GovernanceCoverageSnapshot,
   GovernancePulse,
   GovernancePulseBuildResult,
+  GovernancePulseCoverageTrend,
   GovernancePulseDrift,
   GovernancePulseHoursSaved,
   GovernancePulseMttd,
   GovernancePulseMttr,
+  GovernancePulseSignalToNoise,
   GovernancePulseThroughput,
   GovernancePulseTierMix,
+  GovernancePulseTriggerToRule,
   HoursSavedConstants,
 } from './governance_pulse';
 

@@ -11,7 +11,7 @@
 ## 1. The gap
 
 `.soc-skill-metrics` is the per-skill rollup index produced every hour by
-[`soc-skill-metrics-roller.yaml`](../../workflows/soc-skill-metrics-roller.yaml).
+[`soc_skill_metrics_roller.yaml`](../../workflows/soc_skill_metrics_roller.yaml).
 It carries `invocations_7d`, `success_count_7d`, `failure_count_7d`,
 `success_rate_7d`, and ROI estimates. Until B9, it fed dashboards but
 **did not feed back** into governance — there was no closed loop that
@@ -31,7 +31,7 @@ insufficient_data | healthy | review | reprompt | demote
 The verdict is computed by a pure-logic spec in
 `kbn-argus-tool-manifest/src/skill_health.ts`
 (`evaluateSkillHealth`) and mirrored 1:1 in Liquid inside
-`soc-skill-self-adjust.yaml`. The workflow runs hourly, reads the latest
+`soc_skill_self_adjust.yaml`. The workflow runs hourly, reads the latest
 `.soc-skill-metrics` snapshot, applies the matrix, and upserts a
 recommendation per skill into a new `.soc-skill-recommendations` index.
 
@@ -84,7 +84,7 @@ the data is there for them to consume.
 |---|---|---|
 | `.soc-skill-recommendations` index template | `soc-simulation/setup/index_templates/soc-skill-recommendations.json` | — |
 | Verdict matrix spec | `kbn-argus-tool-manifest/src/skill_health.ts` | 21 |
-| Workflow (Liquid mirror of the spec) | `soc-simulation/workflows/soc-skill-self-adjust.yaml` | — |
+| Workflow (Liquid mirror of the spec) | `soc-simulation/workflows/soc_skill_self_adjust.yaml` | — |
 | Schema doc | `soc-simulation/docs/autodex/schemas/soc-skill-recommendations.md` | — |
 | Conformance-matrix update | `soc-simulation/docs/autodex/conformance-matrix.md` | — |
 | **Total** | | **21 ✅** |
@@ -92,7 +92,7 @@ the data is there for them to consume.
 ## 5. Spec / Liquid alignment
 
 The TS spec is the source of truth. The Liquid mirror inside
-`soc-skill-self-adjust.yaml` MUST stay 1:1 with the matrix — the two
+`soc_skill_self_adjust.yaml` MUST stay 1:1 with the matrix — the two
 constants blocks at the top of each file (`DEFAULT_SKILL_HEALTH_THRESHOLDS`
 and the workflow's `consts`) are deliberately authored in the same numeric
 order so a diff is easy to read.
@@ -123,4 +123,4 @@ in the same PR as the trust-tier-assessor wiring (above).
 - conformance-matrix §1.1 + §7 (B9 row)
 - `kbn-argus-trust-policy/src/gate.ts` — the spec/Liquid mirror pattern
   this RFC follows
-- `soc-skill-metrics-roller.yaml` — the upstream rollup that feeds B9
+- `soc_skill_metrics_roller.yaml` — the upstream rollup that feeds B9

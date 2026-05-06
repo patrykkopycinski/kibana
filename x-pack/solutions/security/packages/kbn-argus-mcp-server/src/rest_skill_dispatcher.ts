@@ -23,7 +23,7 @@ export interface RestSkillDispatcherConfig {
 /**
  * v1 REST dispatcher — wires an MCP/A2A skill call into the Kibana Agent
  * Builder `converse` endpoint, then writes the resulting recommendation to
- * `.soc-recommendations` so the `soc-argus-trust-gate` workflow can pick it
+ * `.soc-recommendations` so the `soc_argus_trust_gate` workflow can pick it
  * up on its next 2m tick.
  *
  * The Agent Builder endpoint already emits to `.soc-reasoning-trace` with

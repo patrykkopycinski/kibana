@@ -240,7 +240,7 @@
   <div class="principle-num">3</div>
   <div>
     <div class="principle-title">Every action is reversible</div>
-    <div class="principle-body"><code>.soc-snapshots</code> captures the pre-mutation artifact state before any apply. <code>soc-post-apply-observer</code> watches KPIs and restores the snapshot if TP regression, alert spike, or suspicious silence is detected. <strong class="amber">6 rollbacks</strong> successfully executed this week.</div>
+    <div class="principle-body"><code>.soc-snapshots</code> captures the pre-mutation artifact state before any apply. <code>soc_post_apply_observer</code> watches KPIs and restores the snapshot if TP regression, alert spike, or suspicious silence is detected. <strong class="amber">6 rollbacks</strong> successfully executed this week.</div>
   </div>
 </div>
 <div class="principle">
@@ -284,13 +284,13 @@
   </div>
   <div class="loop-step">
     <h4>3. Backtest</h4>
-    <div class="mono accent">soc-rule-backtester</div>
+    <div class="mono accent">soc_rule_backtester</div>
     <p>Projects FP/TP delta against <code>.soc-outcomes</code> history before apply.</p>
     <p class="mono" style="margin-top:8px;color:var(--text3);">77 projections (39 safe / 10 concerning / 4 unsafe)</p>
   </div>
   <div class="loop-step">
     <h4>4. Gate</h4>
-    <div class="mono accent">soc-autonomous-applier</div>
+    <div class="mono accent">soc_autonomous_applier</div>
     <p>Cascade: backtest verdict → drift check → trust tier → auto-apply.</p>
     <p class="mono" style="margin-top:8px;color:var(--text3);">136/159 passed all gates</p>
   </div>
@@ -340,7 +340,7 @@
           <td>Artifact mutation committed to Kibana.</td></tr>
       <tr><td><span class="tag warn">pending_backtest</span></td><td class="mono">24</td>
           <td><div class="bar"><div class="bar-fill amber" style="width:15%"></div></div></td>
-          <td>Deferred by applier until <code>soc-rule-backtester</code> returns a verdict.</td></tr>
+          <td>Deferred by applier until <code>soc_rule_backtester</code> returns a verdict.</td></tr>
       <tr><td><span class="tag bad">rolled_back</span></td><td class="mono">6</td>
           <td><div class="bar"><div class="bar-fill red" style="width:4%"></div></div></td>
           <td>Observer reverted the apply via snapshot restore.</td></tr>
@@ -395,7 +395,7 @@
 
 <!-- ========================================================== -->
 <h2>Backtester Evidence</h2>
-<p>Before applying any rule change, <code>soc-rule-backtester</code> projects the delta in FP/TP against <code>.soc-outcomes</code>. Aggregate across 77 backtests this week:</p>
+<p>Before applying any rule change, <code>soc_rule_backtester</code> projects the delta in FP/TP against <code>.soc-outcomes</code>. Aggregate across 77 backtests this week:</p>
 
 <div class="grid grid-3">
   <div class="card">
@@ -460,7 +460,7 @@
         <td class="blue">Observing; insufficient apply volume for trusted tier</td>
       </tr>
       <tr>
-        <td class="mono">soc-deteng-agent</td>
+        <td class="mono">soc_deteng-agent</td>
         <td><span class="tag blue">probationary</span></td>
         <td class="mono blue">0.78</td>
         <td class="mono">8</td>
@@ -496,7 +496,7 @@
     <thead><tr><th>Index / DS</th><th>Docs</th><th>Type</th><th>Role</th></tr></thead>
     <tbody>
       <tr><td class="mono accent">.soc-recommendations</td><td class="mono">59</td><td>Index</td><td>Source of truth for <code>mutation_intent</code>s. Pipeline-validated on write.</td></tr>
-      <tr><td class="mono accent">.soc-backtests</td><td class="mono">77</td><td>Index</td><td>FP/TP projections produced by <code>soc-rule-backtester</code> before apply.</td></tr>
+      <tr><td class="mono accent">.soc-backtests</td><td class="mono">77</td><td>Index</td><td>FP/TP projections produced by <code>soc_rule_backtester</code> before apply.</td></tr>
       <tr><td class="mono accent">.soc-autonomy-decisions</td><td class="mono">140</td><td>Data Stream</td><td>Append-only audit trail of every gate decision.</td></tr>
       <tr><td class="mono accent">.soc-snapshots</td><td class="mono">35</td><td>Index</td><td>Immutable pre-mutation artifact state for reversibility.</td></tr>
       <tr><td class="mono accent">.soc-trust-scores</td><td class="mono">6</td><td>Index</td><td>Per-agent trust score history; drives tiering.</td></tr>

@@ -131,9 +131,9 @@ Close with:
 
 - [x] Each scenario has a seeded dataset checked into the branch — `setup.sh`
       seeds `.soc-cve-advisories`, `.soc-eval-corpus-argus-corpus-mythos-2026-04`,
-      `.soc-detection-eval-runs`, `.soc-actor-trust-tiers` on a clean cluster.
-- [x] Scenarios 1 and 2 have runnable workflows (`soc-demo-1-runner.yaml`,
-      `soc-demo-2-runner.yaml`) driven end-to-end without manual steps —
+      `.soc_detection_eval-runs`, `.soc-actor-trust-tiers` on a clean cluster.
+- [x] Scenarios 1 and 2 have runnable workflows (`soc_demo_1_runner.yaml`,
+      `soc_demo_2_runner.yaml`) driven end-to-end without manual steps —
       live-runtime validated 2026-04-19, see
       [`proof/demo-validation-2026-04-19-live.md`](./proof/demo-validation-2026-04-19-live.md).
       Scenario 3 remains a scripted teaser (no dedicated watchdog workflow

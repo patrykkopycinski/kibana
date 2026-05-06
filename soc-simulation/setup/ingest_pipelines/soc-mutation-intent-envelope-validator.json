@@ -1,7 +1,7 @@
 {
-  "description": "Write-time envelope validator for .soc-recommendations. Enforces the mutation_intent contract defined in soc-simulation/schemas/mutation_intent.schema.json and recommendation.schema.json. For rule-update mutations, also enforces rule_patch.schema.json — prose-only patches are rejected. Docs that violate the contract are rerouted to .soc-dead-letter with the validation errors attached, so the producer workflow is immediately debuggable. In envelope-validator-v4 the pipeline also admits informational analyst-facing types (capability_gap, rule_tuning, rule_authoring) with minimal validation — they land in .soc-recommendations for the Autonomy Feed UI but are ignored by soc-autonomous-applier because it filters by `type=mutation_intent`.",
+  "description": "Write-time envelope validator for .soc-recommendations. Enforces the mutation_intent contract defined in soc-simulation/schemas/mutation_intent.schema.json and recommendation.schema.json. For rule-update mutations, also enforces rule_patch.schema.json — prose-only patches are rejected. Docs that violate the contract are rerouted to .soc-dead-letter with the validation errors attached, so the producer workflow is immediately debuggable. In envelope-validator-v4 the pipeline also admits informational analyst-facing types (capability_gap, rule_tuning, rule_authoring) with minimal validation — they land in .soc-recommendations for the Autonomy Feed UI but are ignored by soc_autonomous_applier because it filters by `type=mutation_intent`.",
   "_meta": {
-    "owner": "soc-autonomous-applier",
+    "owner": "soc_autonomous_applier",
     "contract_schema": "mutation_intent.schema.json",
     "introduced_in": "envelope-validator-v1",
     "structured_patch_enforced_in": "envelope-validator-v2",
@@ -46,7 +46,7 @@
     },
     {
       "script": {
-        "description": "Auto-stamp final_status=no_action for valid docs that carry no actionable payload. Agent findings reports (source=soc-deteng-agent, soc-signal-quality-agent, soc-gap-analyzer) often land here without a patch/new_definition when the agent correctly decided 'nothing to act on this cycle'. Without this processor they accumulate as untagged 'pending' forever. ALSO mirrors details.action='no_action' so downstream recommendation filters correctly hide them from the 'pending' count. Only runs when envelope validation passed AND producer did not set final_status itself.",
+        "description": "Auto-stamp final_status=no_action for valid docs that carry no actionable payload. Agent findings reports (source=soc_deteng-agent, soc-signal-quality-agent, soc_gap_analyzer) often land here without a patch/new_definition when the agent correctly decided 'nothing to act on this cycle'. Without this processor they accumulate as untagged 'pending' forever. ALSO mirrors details.action='no_action' so downstream recommendation filters correctly hide them from the 'pending' count. Only runs when envelope validation passed AND producer did not set final_status itself.",
         "if": "!ctx.containsKey('validation_errors') && !ctx.containsKey('final_status')",
         "lang": "painless",
         "tag": "autostamp_no_action_on_findings_reports",

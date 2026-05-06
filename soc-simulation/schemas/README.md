@@ -16,7 +16,7 @@ How they are used (Elastic-native; no external code):
 1. Every ARGUS agent is given the relevant schema inline in its `instructions`
    and is told to emit a single JSON object shaped like it. This is the
    contract — no regex, no free-text scraping.
-2. The `soc-recommendation-applier` and `soc-autonomous-applier` workflows
+2. The `soc_recommendation_applier` and `soc_autonomous_applier` workflows
    read the structured `details.*` fields directly from `.soc-recommendations`
    documents and call the matching Kibana API (`kibana.request` step) to
    execute the decision.

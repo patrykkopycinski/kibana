@@ -160,7 +160,7 @@
 <p>
   <span class="chip trusted">trusted</span> soc-signal-quality-agent · 0.84 &nbsp;&nbsp;
   <span class="chip probationary">probationary</span> soc-triage-agent · 0.81 &nbsp;&nbsp;
-  <span class="chip probationary">probationary</span> soc-deteng-agent · 0.78 &nbsp;&nbsp;
+  <span class="chip probationary">probationary</span> soc_deteng-agent · 0.78 &nbsp;&nbsp;
   <span class="chip observing">observing</span> soc-meta-agent · 0.62 &nbsp;&nbsp;
   <span class="chip quarantined">quarantined</span> experimental-tuner-v3 · 0.35
 </p>
@@ -191,7 +191,7 @@
     <tr><td><code>.soc-evolution-log</code></td><td class="num">168</td><td>Agent self-learning events</td></tr>
     <tr><td><code>.soc-snapshots</code></td><td class="num">35</td><td>Pre/post-apply rollback snapshots</td></tr>
     <tr><td><code>.soc-triage-results</code></td><td class="num">268</td><td>Classified alerts (cases source)</td></tr>
-    <tr><td><code>.soc-response-actions</code></td><td class="num">230</td><td>Actions taken by responder agents</td></tr>
+    <tr><td><code>.soc_response-actions</code></td><td class="num">230</td><td>Actions taken by responder agents</td></tr>
   </tbody>
 </table>
 
@@ -206,14 +206,14 @@
 </ul>
 <p>Verified clean: <code>node scripts/eslint</code> (0 errors) · <code>tsc -b tsconfig.type_check.json</code> (0 errors on both projects).</p>
 
-<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc-autonomous-applier.yaml</h3></div>
+<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc_autonomous_applier.yaml</h3></div>
 <ul class="clean">
   <li>Ownership gate: rewrote <code>gate_canonical</code> / <code>gate_unregistered_mutation</code> to trust <code>owner=autosoc</code> in <code>.soc-artifact-registry</code> (not just naming convention).</li>
   <li>Removed LiquidJS <code>or</code>-range parse error in multi-prefix check.</li>
   <li><code>gate_all_pass</code>: dropped redundant <code>first_seg=='auto'</code> requirement that silently rejected retro-tagged UUID rules.</li>
 </ul>
 
-<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc-alert-sweeper.yaml</h3></div>
+<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc_alert_sweeper.yaml</h3></div>
 <ul class="clean">
   <li><code>write_triage_flattened</code>: <code>foreach</code> now falls back to <code>[]</code> when <code>classifications</code> missing (prevents "must evaluate to an array" crashes).</li>
   <li><code>if:</code> guards rewritten from Liquid <code>{{ }} == 0</code> to native workflow <code>key: value</code> match for the no-alerts path.</li>
@@ -221,7 +221,7 @@
   <li>New <code>gate_has_alerts</code> console step; every alert-dependent step (incl. final <code>release_lock</code>) now guarded with <code>if: steps.gate_has_alerts.output: yes</code>. Fixes the 400 on empty <code>ids</code> arrays and eliminates the spurious <code>release_lock not_found</code> 404 that marked successful no-alerts runs as failed.</li>
 </ul>
 
-<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc-caldera-poller.yaml</h3></div>
+<div class="fix-header"><span class="num">WORKFLOW</span><h3>soc_caldera_poller.yaml</h3></div>
 <ul class="clean">
   <li><code>caldera_url</code>: <code>http://caldera:8888</code> → <code>http://localhost:18888</code> (OrbStack-forwarded host port). Kibana now runs natively on the host and cannot resolve the Docker-network hostname. Eliminated 46/53 <code>ENOTFOUND caldera</code> failures.</li>
 </ul>

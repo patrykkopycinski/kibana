@@ -31,7 +31,7 @@ incident history, and AutoDEX was throwing that signal away.
    shape (intel_id stable per technique × observed_at).
 
 2. **Workflow** —
-   [`soc-simulation/workflows/soc-incident-reverse-intel.yaml`](../../../workflows/soc-incident-reverse-intel.yaml).
+   [`soc-simulation/workflows/soc_incident_reverse_intel.yaml`](../../../workflows/soc_incident_reverse_intel.yaml).
    Reads `.soc-forensic-summary` + `.soc-outcomes` over the last
    hour, emits one `.soc-intel-feed` row per technique observed, and
    heartbeats on `.soc-audit-trail`. Hourly cadence + manual trigger.
@@ -181,7 +181,7 @@ x-pack/solutions/security/plugins/security_solution/server/lib/argus/intel/
 └── reverse_intel_extractor.test.ts     ← 24 jest unit tests
 
 soc-simulation/workflows/
-└── soc-incident-reverse-intel.yaml     ← workflow
+└── soc_incident_reverse_intel.yaml     ← workflow
 
 soc-simulation/docs/autodex/
 ├── rfcs/B10-incident-reverse-intel.md  ← THIS DOC
@@ -196,6 +196,6 @@ soc-simulation/docs/autodex/
 - YAML linting handled by the workflow engine on import; smoke-test
   is "import the workflow against a stack with the canonical seed
   pack and look for `.soc-intel-feed` rows with `adapter:
-  soc-incident-reverse-intel`".
+  soc_incident_reverse_intel`".
 - Live re-validation of the loop closing is queued behind the next
   benchmark run; the spec-level proof is the unit-test suite.

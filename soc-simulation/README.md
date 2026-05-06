@@ -59,7 +59,7 @@ slide-ready version.
    production control plane.
 2. **Mythos-class (level-6) is always operator-armed.** The difficulty
    controller auto-escalates through L1–L5. Reaching L6 requires an explicit
-   human decision via `soc-argus-arm-mythos-preset`, and every arm emits a
+   human decision via `soc_argus_arm_mythos_preset`, and every arm emits a
    `.soc-audit-trail` row. One-way door, by design.
 3. **Pure-TS specs own governance logic.** Trust-gate (`@kbn/argus-trust-policy`),
    shadow-execution verdicts (`@kbn/argus-backtest`), and reasoning evaluators
@@ -98,7 +98,7 @@ the product, the story, and the narrative everywhere else is **ARGUS**.
 | Elasticsearch index templates | [`setup/index_templates/`](./setup/index_templates/) |
 | Schemas (source of truth for envelopes) | [`schemas/`](./schemas/) |
 | Skills (Agent Builder / default assistant JSON) | [`skills/`](./skills/) |
-| Mythos-class adversary preset + Caldera profile | [`caldera_profiles/level6-mythos-class.json`](./caldera_profiles/level6-mythos-class.json), [`workflows/soc-argus-arm-mythos-preset.yaml`](./workflows/soc-argus-arm-mythos-preset.yaml) |
+| Mythos-class adversary preset + Caldera profile | [`caldera_profiles/level6-mythos-class.json`](./caldera_profiles/level6-mythos-class.json), [`workflows/soc_argus_arm_mythos_preset.yaml`](./workflows/soc_argus_arm_mythos_preset.yaml) |
 | Pre-ARGUS historical artifacts (read-only) | [`docs/archive/autosoc-history/`](./docs/archive/autosoc-history/) |
 
 ## The governance packages

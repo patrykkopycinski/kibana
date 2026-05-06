@@ -1,0 +1,153 @@
+version: '1'
+name: ARGUS Cost Ledger Roller
+description: >
+  AutoDEX governance gap (Severity-3) — operator-facing LLM cost telemetry.
+
+  PROBLEM
+  -------
+  The synthesis driver enforces a per-tick cost gate today
+  (`daily_synthesis_call_budget` in `soc_argus_synthesis_driver.yaml`)
+  by reading the last-24h count of `synthesis.advisory` rows from
+  `.soc-evolution-log`. That gate is correct but invisible — operators
+  can't see "we spent X / Y calls this window" without writing the
+  same query themselves.
+
+  WHAT THIS DOES
+  --------------
+  Every hour, the roller:
+
+    1. Counts `synthesis.advisory` rows produced by
+       `argus.synthesis.driver` in the rolling 24h window.
+    2. Counts `decision: halted_cost_budget` rows in the same window —
+       i.e. how many times the gate actually tripped.
+    3. Writes one snapshot row to `.soc-cost-ledger` with the budget,
+       used, remaining, and pct-of-budget fields the Pulse panel can
+       graph directly. Doc id is `<driver>-<window-end-rounded-to-hour>`
+       so the index trends a clean per-hour series without duplicates.
+
+  Driver coverage starts with `argus.synthesis.driver` only — the
+  variant generator is the dominant cost path. Future iterations can
+  add additional drivers (chat-tool synthesis, gap-driven synthesis)
+  without changing the schema.
+
+  FAILURE MODES
+  -------------
+  - The gate value (`synthesis_calls_budget`) is hard-coded to mirror
+    the driver YAML's `consts.daily_synthesis_call_budget`. If the
+    operator patches the driver YAML, they should patch this YAML
+    in the same commit. The reasoning_trace row records the snapshot's
+    declared budget so drift is auditable.
+  - On a fresh cluster `.soc-evolution-log` returns `count: 0` and the
+    roller writes a row with `synthesis_calls: 0`, `synthesis_pct_budget: 0`.
+    This is the correct steady state for an idle cluster.
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+consts:
+  evolution_log_index: ".soc-evolution-log"
+  decisions_index: ".soc-autonomy-decisions"
+  ledger_index: ".soc-cost-ledger"
+  driver: "argus.synthesis.driver"
+  daily_synthesis_call_budget: 100
+  cost_window: "now-24h"
+  schema_version: 1
+  roller_id: "soc_argus_cost_ledger_roller"
+
+steps:
+  # ── 1. Count synthesis calls in the rolling 24h ─────────────────────
+  - name: count_synthesis_calls
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.evolution_log_index }}/_count"
+      body:
+        query:
+          bool:
+            filter:
+              - term: { event_type: "synthesis.advisory" }
+              - term: { source: "{{ consts.driver }}" }
+              - range:
+                  "@timestamp":
+                    gte: "{{ consts.cost_window }}"
+
+  # ── 2. Count gate trips in the same window ──────────────────────────
+  - name: count_gate_trips
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.decisions_index }}/_count"
+      body:
+        query:
+          bool:
+            filter:
+              - term: { decision: "halted_cost_budget" }
+              - term: { workflow_id: "soc_argus_synthesis_driver" }
+              - range:
+                  "@timestamp":
+                    gte: "{{ consts.cost_window }}"
+
+  # ── 3. Compute remaining + pct ──────────────────────────────────────
+  - name: compute_pct
+    type: console
+    with:
+      message: >-
+        {%- assign _used = steps.count_synthesis_calls.output.count | default: 0 -%}
+        {%- assign _budget = consts.daily_synthesis_call_budget -%}
+        {%- assign _remaining = _budget | minus: _used -%}
+        {%- if _remaining < 0 -%}{%- assign _remaining = 0 -%}{%- endif -%}
+        {%- if _budget > 0 -%}
+          {%- assign _pct_x100 = _used | times: 100 | divided_by: _budget -%}
+        {%- else -%}
+          {%- assign _pct_x100 = 0 -%}
+        {%- endif -%}
+        used={{ _used }}|budget={{ _budget }}|remaining={{ _remaining }}|pct={{ _pct_x100 }}
+
+  # ── 4. Write the rolling snapshot ───────────────────────────────────
+  - name: write_ledger_row
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.ledger_index }}"
+      id: "{{ consts.driver }}-{{ execution.startedAt | date: '%Y%m%d%H' }}"
+      refresh: "wait_for"
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        ledger_window: "rolling_24h"
+        ledger_window_start: "{{ execution.startedAt | date: '%s' | minus: 86400 | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        ledger_window_end: "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        driver: "{{ consts.driver }}"
+        synthesis_calls: "{{ steps.count_synthesis_calls.output.count | default: 0 }}"
+        synthesis_calls_budget: "{{ consts.daily_synthesis_call_budget }}"
+        synthesis_calls_remaining: >-
+          {%- assign parts = steps.compute_pct.output | split: '|' -%}
+          {%- for p in parts -%}{%- if p contains 'remaining=' -%}{{ p | remove: 'remaining=' }}{%- endif -%}{%- endfor -%}
+        synthesis_pct_budget: >-
+          {%- assign parts = steps.compute_pct.output | split: '|' -%}
+          {%- for p in parts -%}{%- if p contains 'pct=' -%}{{ p | remove: 'pct=' }}{%- endif -%}{%- endfor -%}
+        trip_count: "{{ steps.count_gate_trips.output.count | default: 0 }}"
+        rolled_by: "{{ consts.roller_id }}"
+        schema_version: "{{ consts.schema_version }}"
+
+  # ── 5. Heartbeat ────────────────────────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_cost_ledger_roller_tick
+        source: "{{ consts.roller_id }}"
+        tick_id: "argus-cost-ledger-roller-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        synthesis_calls: "{{ steps.count_synthesis_calls.output.count | default: 0 }}"
+        budget: "{{ consts.daily_synthesis_call_budget }}"
+        trip_count: "{{ steps.count_gate_trips.output.count | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "ARGUS cost-ledger rolled — driver={{ consts.driver }} used={{ steps.count_synthesis_calls.output.count | default: 0 }}/{{ consts.daily_synthesis_call_budget }} trips={{ steps.count_gate_trips.output.count | default: 0 }}"

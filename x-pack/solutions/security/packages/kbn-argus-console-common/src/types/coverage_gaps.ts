@@ -23,7 +23,7 @@ export interface ArgusCoverageGap {
   readonly avg_confidence: number;
   readonly severity: ArgusCoverageSeverity;
   /**
-   * Producer of the doc (`soc-gap-analyzer`, `soc-watchdog`). Used to route
+   * Producer of the doc (`soc_gap_analyzer`, `soc_watchdog`). Used to route
    * deep-links into the right Discover saved search.
    */
   readonly source?: string;

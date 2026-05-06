@@ -25,7 +25,7 @@ import { MYTHOS_CORPUS_2026_04 } from '../datasets/mythos_corpus_2026_04';
  *     (reads ES_URL / ES_USER / ES_PASS from the shell, defaults to
  *      localhost:9200 with elastic/changeme)
  *
- * The CLI is also what the `soc-detection-eval.yaml` workflow can shell out
+ * The CLI is also what the `soc_detection_eval.yaml` workflow can shell out
  * to from an Elastic Agent cron job in environments without Scout.
  */
 

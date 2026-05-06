@@ -104,5 +104,5 @@ node scripts/jest x-pack/solutions/security/plugins/security_solution/server/lib
 ## Day-2 next steps
 
 1. Replace the fixed `0.5` with a real scorer driven by CVE + published-at + (future) intel feed.
-2. Wire the M2.1 evaluator to emit an `exploit_probability` delta into `.soc-detection-eval-runs`.
+2. Wire the M2.1 evaluator to emit an `exploit_probability` delta into `.soc_detection_eval-runs`.
 3. Consume the score in the trust-tier threshold logic (`phase-3/trust-thresholds.md`).

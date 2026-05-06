@@ -43,7 +43,7 @@ follow-up applier workflow that maps baselines into B6's
 
 | Workflow | Cadence | Source |
 |---|---|---|
-| [`soc-argus-fp-baseline-roller.yaml`](../../../workflows/soc-argus-fp-baseline-roller.yaml) | every 24h + manual | `.alerts-security.alerts-default` (and `.soc-outcomes` once the registered step lands per RFC §6) |
+| [`soc_argus_fp_baseline_roller.yaml`](../../../workflows/soc_argus_fp_baseline_roller.yaml) | every 24h + manual | `.alerts-security.alerts-default` (and `.soc-outcomes` once the registered step lands per RFC §6) |
 
 The pure-logic core is
 [`x-pack/.../server/lib/argus/governance/fp_baseline_estimator.ts`](../../../../x-pack/solutions/security/plugins/security_solution/server/lib/argus/governance/fp_baseline_estimator.ts) —

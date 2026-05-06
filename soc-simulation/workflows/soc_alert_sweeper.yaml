@@ -1,0 +1,856 @@
+version: '1'
+name: SOC Alert Sweeper
+description: >
+  Full autonomous pipeline orchestrator. Sweeps untriaged alerts every 5 minutes,
+  then runs unified triage (classify + enrich + investigate in a single triage step) →
+  Tiered Response → Case Creation.
+
+  Reliability invariants (T2 hardening):
+  - Atomic pipeline lock via `elasticsearch.create` on a deterministic document id.
+    Two concurrent runs cannot both succeed (version conflict = skip).
+  - on_failure release: the pipeline lock is released whether the run succeeds or fails.
+  - ai.agent steps have on_failure routing to .soc-dead-letter with run_id + stage.
+  - ms-precision timestamps + run_id salt on every document so docs never collide
+    inside the same wall-clock second.
+
+  Data-model invariants (T1):
+  - Dispositions are DERIVED from the triage step output, never hardcoded
+    ("case_created" is not a disposition — it is a pipeline state).
+  - Per-alert triage fields (classification, confidence, disposition, kill_chain_stage,
+    threat_category) are FLATTENED at the top level of `.soc-triage-results`
+    (one doc per alert) so dashboards can aggregate without reaching into
+    triage_output.*.
+
+  Correctness invariants:
+  - attach_alerts groups alerts by rule.uuid so a heterogeneous batch of alerts
+    produces one case-comment per rule (previously assumed homogeneous batch).
+enabled: true
+
+triggers:
+  - type: alert
+  - type: scheduled
+    with:
+      every: 5m
+  - type: manual
+
+consts:
+  # ms-precision + run-id salt. Used as lock id AND correlation_id.
+  cycle_id:   "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+  pipeline_id: "soc_alert_sweeper"
+  now_iso:    "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+  alert_index: ".alerts-security.alerts-default"
+  audit_index: ".soc-audit-trail"
+  metrics_index: ".soc-metrics"
+  trust_index: ".soc-trust-scores"
+  kill_switch_index: ".soc-kill-switch"
+  pipeline_lock_index: ".soc-pipeline-lock"
+  dead_letter_index: ".soc-dead-letter"
+  triage_results_index: ".soc-triage-results"
+  outcomes_index: ".soc-outcomes"
+  response_actions_index: ".soc_response-actions"
+  max_alerts_per_sweep: 100
+  triage_budget_per_hour: 50
+  fp_threshold: 0.3
+
+steps:
+  # ── Stage -2: Evict stale locks ────────────────────────────────────
+  # A crashed cycle or a Kibana restart can leave a lock doc behind. Before we
+  # try to acquire, sweep any lock for this pipeline whose acquired_at is older
+  # than the TTL. This is idempotent: a fresh lock is never old enough to match.
+  # Without this the pipeline can hang forever on a single stuck cycle -- which
+  # is exactly what happened in the 2026-04-17 demo soak (5h dead-lock).
+  - name: evict_stale_locks
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.pipeline_lock_index }}/_delete_by_query?refresh=true"
+      body:
+        query:
+          bool:
+            filter:
+              - term: { pipeline: "soc_alert_sweeper" }
+              - range:
+                  acquired_at:
+                    # TTL must be SHORTER than the cron cadence (5m) or a crashed
+                    # cycle wedges the next tick. 3m gives the current run time to
+                    # finish (most cycles < 60s) while still guaranteeing the next
+                    # tick evicts a dead lock.
+                    lt: "now-3m"
+    on_failure:
+      - name: log_evict_failed
+        type: console
+        with:
+          message: "Stale-lock eviction failed (non-fatal) — acquire will still TOCTOU-guard via op_type=create."
+
+  # ── Stage -1: Atomic pipeline lock ─────────────────────────────────
+  # `elasticsearch.create` uses op_type=create, so if a doc with the same id
+  # already exists, it fails with version_conflict_engine_exception. That is
+  # our atomic "someone else holds the lock" signal — no TOCTOU race.
+  - name: acquire_lock
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.pipeline_lock_index }}"
+      id: "{{ consts.pipeline_id }}"
+      op_type: create
+      document:
+        pipeline: "{{ consts.pipeline_id }}"
+        cycle_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        status: active
+        acquired_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+    on_failure:
+      - name: lock_held_metric
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.metrics_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            pipeline: "{{ consts.pipeline_id }}"
+            cycle_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+            alerts_processed: 0
+            stages_completed: ""
+            case_created: false
+            status: "skipped_locked"
+      - name: log_lock_held
+        type: console
+        with:
+          message: "Pipeline: another instance holds the lock (cycle_id=cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}) — skipping."
+      - name: end_locked
+        type: console
+        with:
+          message: "Pipeline locked — exiting cleanly."
+        end: true
+
+  # ── Stage 0: Find untriaged alerts ─────────────────────────────────
+  # NOTE: workflow engine strips body: wrapper — keep ES params flat under with:
+  - name: get_open_alerts
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.alert_index }}"
+      size: "{{ consts.max_alerts_per_sweep }}"
+      query:
+        bool:
+          must:
+            - term:
+                kibana.alert.workflow_status: open
+            - range:
+                "@timestamp":
+                  gte: "now-6m"
+          must_not:
+            - term:
+                kibana.alert.workflow_tags: soc-triaged
+      _source:
+        - kibana.alert.rule.name
+        - kibana.alert.rule.uuid
+        - kibana.alert.severity
+        - kibana.alert.rule.threat
+        - host.hostname
+        - host.name
+        - process.name
+        - process.args
+        - user.name
+        - event.action
+        - source.ip
+        - destination.ip
+        - "@timestamp"
+
+  - name: log_alert_count
+    type: console
+    with:
+      message: "Pipeline: found {{ steps.get_open_alerts.output.hits.total.value }} untriaged alerts (cycle_id=cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }})."
+
+  # Gate: has_alerts? Must emit 'yes' or 'no' and be consumed by every
+  # downstream alert-dependent step. The older `if: ... value: 0` + `end: true`
+  # pattern was load-bearing for ~3mo but `end: true` does NOT actually halt
+  # the workflow; subsequent steps kept firing with empty inputs (notably
+  # `tag_triaged`, which POSTs ids=[] and is rejected HTTP 400 by
+  # /api/detection_engine/signals/tags). The explicit gate is the only
+  # reliable way to express "skip the rest of the pipeline" in the
+  # current workflow engine (verified 2026-04-17 soak).
+  - name: gate_has_alerts
+    type: console
+    with:
+      message: >-
+        {% if steps.get_open_alerts.output.hits.total.value == 0 %}no{% else %}yes{% endif %}
+
+  # Early-exit branch when there are no open alerts. Each step is guarded
+  # independently because `end: true` is not load-bearing.
+  - name: write_metrics_no_alerts
+    type: elasticsearch.index
+    if: "steps.get_open_alerts.output.hits.total.value: 0"
+    with:
+      index: "{{ consts.metrics_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "{{ consts.pipeline_id }}"
+        cycle_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        alerts_processed: 0
+        stages_completed: ""
+        case_created: false
+        status: "skipped_no_alerts"
+
+  - name: release_lock_no_alerts
+    type: elasticsearch.request
+    if: "steps.get_open_alerts.output.hits.total.value: 0"
+    with:
+      method: DELETE
+      path: "/{{ consts.pipeline_lock_index }}/_doc/{{ consts.pipeline_id }}"
+    on_failure:
+      - name: log_release_failed_no_alerts
+        type: console
+        with:
+          message: "Warning: failed to release pipeline lock on no-alerts path (cycle_id=cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}). Next cycle will overwrite on acquire."
+
+  - name: log_no_alerts
+    type: console
+    if: "steps.get_open_alerts.output.hits.total.value: 0"
+    with:
+      message: "Pipeline: no untriaged alerts found — lock released, exiting."
+    end: true
+
+  # ── Stage 0b: Pre-triage correlation (group related alerts) ───────
+  - name: correlate_alerts
+    type: elasticsearch.search
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.alert_index }}"
+      size: "{{ consts.max_alerts_per_sweep }}"
+      query:
+        bool:
+          must:
+            - terms:
+                _id: "${{ steps.get_open_alerts.output.hits.hits | map: '_id' }}"
+      aggregations:
+        by_host:
+          terms:
+            field: "host.name"
+            size: 10
+          aggs:
+            techniques:
+              terms:
+                field: "kibana.alert.rule.threat.technique.id"
+                size: 20
+            time_range:
+              stats:
+                field: "@timestamp"
+        by_user:
+          terms:
+            field: "user.name"
+            size: 10
+          aggs:
+            techniques:
+              terms:
+                field: "kibana.alert.rule.threat.technique.id"
+                size: 20
+        by_source_ip:
+          terms:
+            field: "source.ip"
+            size: 10
+
+  - name: log_correlation
+    type: console
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: "Pipeline: pre-triage correlation complete."
+
+  # ── Stage 0c: Alert entity graph + narrative + entity context (per alert, pre-triage) ──
+  # Parallel + merge are not yet expanded by the workflow execution graph builder (they would
+  # compile as opaque atomic steps). These three enrichments run sequentially here; all outputs
+  # are merged into stash_alert_context and referenced from deep triage.
+  - name: enrich_open_alerts
+    type: foreach
+    if: "steps.gate_has_alerts.output: yes"
+    foreach: "{{ steps.get_open_alerts.output.hits.hits }}"
+    steps:
+      - name: build_entity_graph
+        type: security.buildAlertEntityGraph
+        with:
+          alertId: "{{ foreach.item._id }}"
+          alertIndex: "{{ foreach.item._index }}"
+          seed_window: "1h"
+          expand_window: "1h"
+          max_depth: 3
+          max_alerts: 300
+          entity_fields:
+            - field: "process.entity_id"
+              score: 5
+            - field: "host.name"
+              score: 2
+            - field: "user.name"
+              score: 2
+            - field: "source.ip"
+              score: 1
+              aliases:
+                - field: "destination.ip"
+                  score: 4
+          min_entity_score: 2
+          ignore_entities:
+            - field: "user.name"
+              values: ["root", "SYSTEM", "Administrator"]
+
+      - name: render_narrative
+        type: security.renderAlertNarrative
+        with:
+          alertId: "{{ foreach.item._id }}"
+          alertIndex: "{{ foreach.item._index }}"
+
+      - name: resolve_entities
+        type: security.resolveEntityContext
+        with:
+          alert_document: "{{ foreach.item._source }}"
+
+      - name: stash_alert_context
+        type: data.set
+        with:
+          "alert_context_{{ foreach.index }}":
+            alert_id: "{{ foreach.item._id }}"
+            alert_index: "{{ foreach.item._index }}"
+            entity_graph: "{{ steps.build_entity_graph.output | json }}"
+            narrative: "{{ steps.render_narrative.output.message }}"
+            entity_context: "{{ steps.resolve_entities.output | json }}"
+
+  # ── Stage 1a: Fast classify (routes routine alerts away from deep triage) ──
+  - name: quick_classify
+    type: ai.classify
+    connector-id: sonnet
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      input: "{{ steps.enrich_open_alerts.output | json }}"
+      categories:
+        - benign
+        - suspicious_routine
+        - novel_complex
+      instructions: >
+        benign: routine alert with known-benign pattern (test activity, expected scanner, maintenance).
+        suspicious_routine: suspicious but matches known attack patterns with existing rule coverage.
+        novel_complex: novel pattern, multi-stage attack, or complex alert requiring deep analysis.
+      includeRationale: true
+
+  - name: gate_novel_complex
+    type: console
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: >-
+        {% if steps.quick_classify.output.category == 'novel_complex' %}yes{% else %}no{% endif %}
+
+  # ── Stage 1b: Deep triage (full agent — novel/complex only) ────────
+  - name: deep_triage
+    type: ai.agent
+    connector-id: opus
+    if: "steps.gate_novel_complex.output: yes"
+    with:
+      message: >
+        Run the full triage pipeline on these security alerts. Execute ALL applicable phases:
+
+        **Phase 1 — Classification**: For EACH alert classify as TRUE_POSITIVE, FALSE_POSITIVE,
+        or SUSPICIOUS with confidence 0-100. Use ES|QL to check for related alerts from the same
+        hosts/users/IPs within a 30-minute window.
+
+        **Phase 2 — Entity Enrichment**: For alerts with confidence >= 40, enrich with entity
+        context. Query 7-day behavioral baselines, entity risk scores, and relationships.
+        Adjust confidence based on entity context.
+
+        **Phase 3 — Deep Investigation**: For alerts still ambiguous (confidence 40-69) after
+        enrichment, conduct structured threat hunts. Formulate hypotheses, run ES|QL queries
+        for process trees, network timelines, lateral movement. Search Security Labs for IOC intel.
+
+        **Phase 4 — Attack Chain Correlation**: For TRUE_POSITIVE or SUSPICIOUS alerts with
+        confidence >= 50, use security.attack_discovery_search to check for attack discoveries.
+        Look for kill chain progression across alerts sharing the same host/user/IP.
+
+        Pre-triage correlation data:
+        {{ steps.correlate_alerts.output.aggregations | json }}
+
+        Entity graph: {{ steps.build_entity_graph.output | json }}
+        Narrative: {{ steps.render_narrative.output.message }}
+        Entity context (Entity Store): {{ steps.resolve_entities.output | json }}
+
+        Per-alert Security Solution context (entity graph + narrative + entity context for each alert; from enrich_open_alerts):
+        {{ variables | json }}
+
+        Final next_step per alert:
+        - confidence >= 40 → "response" (create case)
+        - confidence < 40 → "close" (likely FP)
+
+        **Self-validation**: Verify every input alert has a classification, confidence is 0-100,
+        disposition is one of the enumerated values (NEVER "case_created" or "triaged" — those are
+        pipeline states, not dispositions), and all required fields are populated.
+
+        Alerts:
+        {{ steps.get_open_alerts.output.hits.hits | json }}
+
+        Respond ONLY with JSON:
+        {"classifications": [{"alert_id": "<_id>",
+          "classification": "TRUE_POSITIVE|FALSE_POSITIVE|SUSPICIOUS",
+          "confidence": N,
+          "next_step": "response|close",
+          "reasoning": "...",
+          "mitre_techniques": ["Txxxx"],
+          "disposition": "TRUE_POSITIVE|BENIGN_TRUE_POSITIVE|FALSE_POSITIVE|POLICY_VIOLATION|INCONCLUSIVE|DUPLICATE",
+          "threat_category": "commodity_malware|targeted_attack|insider_threat|misuse|unauthorized_access|data_exfiltration|lateral_movement|persistence|reconnaissance|unknown",
+          "kill_chain_stage": "reconnaissance|weaponization|delivery|exploitation|installation|c2|actions_on_objectives|unknown",
+          "business_impact": {"data_at_risk": [], "systems_at_risk": 0, "criticality": "low|medium|high|critical"},
+          "attack_chain": {"chain_id": "...", "position_in_chain": 0, "chain_length": 0, "related_alert_ids": []},
+          "entities_enriched": [{"entity_id": "...", "risk_score": 0, "behavioral_anomalies": []}],
+          "hypotheses_tested": [{"hypothesis": "...", "verdict": "CORROBORATED|REFUTED|INCONCLUSIVE"}],
+          "confidence_history": [{"phase": "classification", "confidence": N}],
+          "evidence_summary": "key findings"}],
+        "validation_errors": []}
+      schema:
+        type: object
+        properties:
+          classifications:
+            type: array
+            items:
+              type: object
+              properties:
+                alert_id:
+                  type: string
+                classification:
+                  type: string
+                  enum:
+                    - TRUE_POSITIVE
+                    - FALSE_POSITIVE
+                    - SUSPICIOUS
+                confidence:
+                  type: number
+                next_step:
+                  type: string
+                  enum:
+                    - response
+                    - close
+                reasoning:
+                  type: string
+                mitre_techniques:
+                  type: array
+                  items:
+                    type: string
+                disposition:
+                  type: string
+                threat_category:
+                  type: string
+                kill_chain_stage:
+                  type: string
+                business_impact:
+                  type: object
+                attack_chain:
+                  type: object
+                entities_enriched:
+                  type: array
+                hypotheses_tested:
+                  type: array
+                confidence_history:
+                  type: array
+                evidence_summary:
+                  type: string
+              required:
+                - alert_id
+                - classification
+                - confidence
+                - next_step
+                - reasoning
+                - disposition
+                - threat_category
+                - kill_chain_stage
+          validation_errors:
+            type: array
+            items:
+              type: string
+        required:
+          - classifications
+          - validation_errors
+    timeout: 600s
+    on_failure:
+      - name: dlq_triage
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.dead_letter_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            stage: triage
+            pipeline: "{{ consts.pipeline_id }}"
+            cycle_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+            error: "{{ workflow.last_error | default: 'unknown' }}"
+            input_alerts: "{{ steps.get_open_alerts.output.hits.hits | json }}"
+      - name: release_lock_triage_failed
+        type: elasticsearch.request
+        with:
+          method: DELETE
+          path: "/{{ consts.pipeline_lock_index }}/_doc/{{ consts.pipeline_id }}"
+      - name: end_triage_failed
+        type: console
+        with:
+          message: "Pipeline: triage failed, DLQ written, lock released — exiting."
+        end: true
+
+  - name: routine_triage_stub
+    type: data.set
+    if: "steps.gate_novel_complex.output: no"
+    with:
+      message: >-
+        {% assign cat = steps.quick_classify.output.category %}{% assign hits = steps.get_open_alerts.output.hits.hits %}{
+        "classifications":[
+        {% for a in hits %}{% unless forloop.first %},{% endunless %}
+        {"alert_id":"{{ a._id }}","classification":{% if cat == 'benign' %}"FALSE_POSITIVE"{% else %}"SUSPICIOUS"{% endif %},"confidence":{% if cat == 'benign' %}35{% else %}55{% endif %},"next_step":{% if cat == 'benign' %}"close"{% else %}"response"{% endif %},"reasoning":"Fast-path triage ({{ cat }} via ai.classify); rationale: {{ steps.quick_classify.output.rationale | default: 'n/a' }}","mitre_techniques":[],"disposition":{% if cat == 'benign' %}"FALSE_POSITIVE"{% else %}"INCONCLUSIVE"{% endif %},"threat_category":{% if cat == 'benign' %}"misuse"{% else %}"unknown"{% endif %},"kill_chain_stage":"unknown","business_impact":{"data_at_risk":[],"systems_at_risk":0,"criticality":"low"},"attack_chain":{"chain_id":"","position_in_chain":0,"chain_length":0,"related_alert_ids":[]},"entities_enriched":[],"hypotheses_tested":[],"confidence_history":[{"phase":"quick_classify","confidence":{% if cat == 'benign' %}35{% else %}55{% endif %} }],"evidence_summary":"quick_classify={{ cat }}"}
+        {% endfor %}
+        ],"validation_errors":[]}
+
+  - name: triage
+    type: data.set
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: "{% if steps.gate_novel_complex.output == 'yes' %}{% assign dt = steps.deep_triage.output %}{% if dt.message %}{{ dt.message }}{% else %}{{ dt | json }}{% endif %}{% else %}{{ steps.routine_triage_stub.output.message }}{% endif %}"
+
+  # Write the RAW triage output once (for reasoning-trace/dashboard).
+  # NOTE: The unified triage step returns `{ message: "<raw-JSON-string>" }` — the
+  # JSON body is in `.message`, not at the root of `.output`. We must
+  # unwrap it via `| json_parse` before writing, otherwise the dashboard sees
+  # `{"message":"{\"classifications\":[...]}"}` and parsing fails downstream.
+  - name: write_triage_batch
+    type: elasticsearch.index
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.triage_results_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        source: "soc_alert_sweeper"
+        stage: "unified_triage_batch"
+        pipeline: "{{ consts.pipeline_id }}"
+        batch_size: "{{ steps.get_open_alerts.output.hits.total.value }}"
+        triage_output: "{{ steps.triage.output.message | json_parse | json }}"
+
+  # Fan out one flattened per-alert triage doc. Dashboards filter/aggregate on
+  # the top-level fields without reaching into triage_output.*.
+  # The `{% assign %}` tag parses the triage message envelope once so we can iterate
+  # over `.classifications`; the `| json` at the end lets the foreach driver
+  # JSON.parse the rendered template back into a JS array.
+  # NOTE on the `| default: empty` -> `[]` fix:
+  # LiquidJS's `empty` drop is an empty-object sentinel, not an empty array. When
+  # `_parsed_triage.classifications` is missing or null, `default: empty` hands
+  # the foreach driver `{}`, which fails with "Foreach expression must evaluate
+  # to an array." This crashed the sweeper mid-cycle in the 2026-04-17 soak and
+  # kept the pipeline lock held until the TTL-evict step fired (10m later).
+  # The explicit `{% if %}{% else %}[]{% endif %}` branch guarantees an array.
+  - name: write_triage_flattened
+    type: foreach
+    if: "steps.gate_has_alerts.output: yes"
+    foreach: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{% if _parsed_triage.classifications %}{{ _parsed_triage.classifications | json }}{% else %}[]{% endif %}"
+    steps:
+      - name: write_per_alert
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.triage_results_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            run_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+            source: "soc_alert_sweeper"
+            stage: "unified_triage"
+            pipeline: "{{ consts.pipeline_id }}"
+            alert_id: "{{ foreach.item.alert_id }}"
+            classification: "{{ foreach.item.classification | default: 'SUSPICIOUS' }}"
+            confidence: "{{ foreach.item.confidence | default: 0 }}"
+            disposition: "{{ foreach.item.disposition | default: 'INCONCLUSIVE' }}"
+            threat_category: "{{ foreach.item.threat_category | default: 'unknown' }}"
+            kill_chain_stage: "{{ foreach.item.kill_chain_stage | default: 'unknown' }}"
+            mitre_techniques: "{{ foreach.item.mitre_techniques | default: empty }}"
+            business_impact: "{{ foreach.item.business_impact | default: empty }}"
+            attack_chain: "{{ foreach.item.attack_chain | default: empty }}"
+            reasoning: "{{ foreach.item.reasoning | default: null }}"
+            evidence_summary: "{{ foreach.item.evidence_summary | default: null }}"
+
+  # Per-alert outcome materializer — writes one `.soc-outcomes` row per triaged
+  # alert carrying rule_id + verdict so downstream analytics can produce
+  # grounded FP evidence by grouping outcomes on rule_id.
+  #
+  # Why iterate over alerts (not classifications)? Alerts carry `_source.kibana.alert.rule.rule_id`
+  # and `_id`, which is the join key for correlating classifications.
+  # The matching classification
+  # is resolved via `data.find` on the parsed triage classifications. If triage
+  # omitted an alert from its classifications array, we still emit a row
+  # with verdict=inconclusive so the grouping never loses the alert.
+  - name: write_outcomes_per_alert
+    type: foreach
+    if: "steps.gate_has_alerts.output: yes"
+    foreach: "{{ steps.get_open_alerts.output.hits.hits }}"
+    steps:
+      - name: find_class_for_outcome
+        type: data.find
+        items: "{% assign _p = steps.triage.output.message | json_parse %}{% if _p.classifications %}{{ _p.classifications | json }}{% else %}[]{% endif %}"
+        with:
+          condition: 'item.alert_id: "${{ foreach.item._id }}"'
+
+      - name: write_outcome_row
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.outcomes_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            correlation_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+            pipeline: "{{ consts.pipeline_id }}"
+            stage: "per_alert_verdict"
+            alert_id: "{{ foreach.item._id }}"
+            rule_id: "{{ foreach.item._source.kibana.alert.rule.rule_id | default: 'unknown' }}"
+            rule_uuid: "{{ foreach.item._source.kibana.alert.rule.uuid | default: 'unknown' }}"
+            rule_name: "{{ foreach.item._source.kibana.alert.rule.name | default: 'unknown' }}"
+            agents_involved: ["default"]
+            classification: "{{ steps.find_class_for_outcome.output.item.classification | default: 'SUSPICIOUS' }}"
+            confidence: "{{ steps.find_class_for_outcome.output.item.confidence | default: 0 }}"
+            disposition: "{{ steps.find_class_for_outcome.output.item.disposition | default: 'INCONCLUSIVE' }}"
+            threat_category: "{{ steps.find_class_for_outcome.output.item.threat_category | default: 'unknown' }}"
+            kill_chain_stage: "{{ steps.find_class_for_outcome.output.item.kill_chain_stage | default: 'unknown' }}"
+            verdict: "{% assign _c = steps.find_class_for_outcome.output.item.classification | default: 'UNKNOWN' %}{% if _c == 'TRUE_POSITIVE' %}true_positive{% elsif _c == 'FALSE_POSITIVE' %}false_positive{% elsif _c == 'BENIGN_POSITIVE' %}benign_positive{% elsif _c == 'SUSPICIOUS' %}suspicious{% else %}inconclusive{% endif %}"
+
+  - name: dedupe_open_alert_hits
+    type: data.dedupe
+    if: "steps.gate_has_alerts.output: yes"
+    items: "{{ steps.get_open_alerts.output.hits.hits }}"
+    with:
+      keys:
+        - "_id"
+
+  - name: tag_triaged
+    type: kibana.request
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      method: POST
+      path: /api/detection_engine/signals/tags
+      body:
+        ids: "${{ steps.dedupe_open_alert_hits.output | map: '_id' }}"
+        tags:
+          tags_to_add:
+            - soc-triaged
+          tags_to_remove: []
+
+  - name: log_triage
+    type: console
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: "Pipeline: triage complete — {% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications | size | default: 0 }} verdicts flattened."
+
+  # ── Stage 2: Tiered Response ──────────────────────────────────────
+  - name: parse_triage_for_response
+    type: data.parseJson
+    if: "steps.gate_has_alerts.output: yes"
+    source: "{{ steps.triage.output.message }}"
+
+  - name: map_classification_tiers
+    type: data.map
+    if: "steps.gate_has_alerts.output: yes"
+    items: "{% if steps.parse_triage_for_response.output.classifications %}{{ steps.parse_triage_for_response.output.classifications | json }}{% else %}[]{% endif %}"
+    with:
+      fields:
+        agg_key: "batch"
+        confidence: "{{ item.confidence | default: 0 }}"
+        tier_num: >-
+          {% assign conf = item.confidence | default: 0 %}
+          {% assign cls = item.classification | default: 'UNKNOWN' %}
+          {% assign tier_num = 1 %}
+          {% if conf < 40 %}
+          {% assign tier_num = 0 %}
+          {% elsif conf >= 70 and cls == 'TRUE_POSITIVE' %}
+          {% assign tier_num = 3 %}
+          {% elsif conf >= 50 and cls == 'SUSPICIOUS' %}
+          {% assign tier_num = 2 %}
+          {% endif %}
+          {{ tier_num }}
+        tier_name: >-
+          {% assign conf = item.confidence | default: 0 %}
+          {% assign cls = item.classification | default: 'UNKNOWN' %}
+          {% assign tier_num = 1 %}
+          {% assign tnm = 'monitor' %}
+          {% if conf < 40 %}
+          {% assign tier_num = 0 %}
+          {% assign tnm = 'close' %}
+          {% elsif conf >= 70 and cls == 'TRUE_POSITIVE' %}
+          {% assign tier_num = 3 %}
+          {% assign tnm = 'containment' %}
+          {% elsif conf >= 50 and cls == 'SUSPICIOUS' %}
+          {% assign tier_num = 2 %}
+          {% assign tnm = 'investigation' %}
+          {% endif %}
+          {{ tnm }}
+
+  - name: aggregate_response_tier
+    type: data.aggregate
+    if: "steps.gate_has_alerts.output: yes"
+    items: "{{ steps.map_classification_tiers.output }}"
+    with:
+      group_by:
+        - agg_key
+      metrics:
+        - name: highest_tier
+          operation: max
+          field: tier_num
+        - name: max_confidence
+          operation: max
+          field: confidence
+
+  - name: evaluate_response_tier
+    type: data.set
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      response_plan: "{{ steps.parse_triage_for_response.output.classifications | json }}"
+      highest_tier: "{% assign rows = steps.aggregate_response_tier.output %}{% if rows.size > 0 %}{{ rows.first.highest_tier | default: 0 }}{% else %}0{% endif %}"
+      requires_human_approval: "{% assign rows = steps.aggregate_response_tier.output %}{% assign ht = 0 %}{% if rows.size > 0 %}{% assign ht = rows.first.highest_tier | default: 0 %}{% endif %}{% if ht >= 3 %}true{% else %}false{% endif %}"
+      tier: "{% assign class = steps.parse_triage_for_response.output.classifications %}{% assign rows = steps.aggregate_response_tier.output %}{% assign ht = 0 %}{% if rows.size > 0 %}{% assign ht = rows.first.highest_tier | default: 0 %}{% endif %}{% if class.size == 0 %}monitor{% elsif ht == 0 %}monitor{% elsif ht == 1 %}monitor{% elsif ht == 2 %}investigation{% elsif ht == 3 %}containment{% else %}monitor{% endif %}"
+      reason: "Deterministic tier from triage classifications (confidence + classification; batch uses max numeric tier via data.aggregate)."
+
+  - name: materialize_tier_codes
+    type: data.set
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      pipeline_tier_code: "{% assign t = steps.evaluate_response_tier.output.tier %}{% if t == 'close' %}tier_0_close{% elsif t == 'monitor' %}tier_1_monitor{% elsif t == 'investigation' %}tier_2_investigate{% elsif t == 'containment' %}tier_3_escalate{% else %}tier_1_monitor{% endif %}"
+      max_confidence: "{% assign rows = steps.aggregate_response_tier.output %}{% if rows.size > 0 %}{{ rows.first.max_confidence | default: 0 }}{% else %}0{% endif %}"
+
+  - name: gate_open_case
+    type: console
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: >-
+        {% assign code = steps.materialize_tier_codes.output.pipeline_tier_code %}{% if code == 'tier_2_investigate' %}yes{% elsif code == 'tier_3_escalate' %}yes{% else %}no{% endif %}
+
+  - name: write_response
+    type: elasticsearch.index
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.response_actions_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        run_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        source: "soc_alert_sweeper"
+        pipeline: "{{ consts.pipeline_id }}"
+        stage: "tiered_response"
+        response_plan: "{{ steps.evaluate_response_tier.output | json }}"
+        highest_tier: "{{ steps.evaluate_response_tier.output.highest_tier | default: 0 }}"
+        requires_human_approval: "{{ steps.evaluate_response_tier.output.requires_human_approval | default: false }}"
+        status: "completed"
+
+  - name: write_audit
+    type: elasticsearch.index
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.audit_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        workflow_id: "soc_alert_sweeper"
+        run_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        pipeline: "{{ consts.pipeline_id }}"
+        event_type: "response_action"
+        source: "soc_alert_sweeper"
+        stage: "tiered_response"
+        status: "completed"
+        reason: "Tiered response plan generated"
+
+  - name: log_response
+    type: console
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      message: "Pipeline: tiered response plan generated (highest_tier={{ steps.evaluate_response_tier.output.highest_tier | default: 0 }})."
+
+  # ── Stage 3: Case lifecycle (sub-workflow — tier 2/3 only) ────────
+  - name: create_timeline
+    type: kibana.request
+    if: "steps.gate_open_case.output: yes"
+    with:
+      method: POST
+      path: /api/timeline
+      body:
+        timeline:
+          title: "[ARGUS] {{ steps.get_open_alerts.output.hits.hits.first._source.kibana.alert.rule.name | default: 'Alert batch' }} - {{ 'now' | date: '%Y-%m-%d %H:%M' }}"
+          description: "Auto-created by ARGUS for {{ steps.materialize_tier_codes.output.pipeline_tier_code }} alert batch"
+          timelineType: default
+          status: active
+        timelineId: null
+        version: null
+
+  - name: invoke_case_lifecycle
+    type: workflow.execute
+    if: "steps.gate_open_case.output: yes"
+    with:
+      workflow-id: soc_argus_case_lifecycle
+      inputs:
+        alert_id: "{{ steps.dedupe_open_alert_hits.output[0]._id }}"
+        alert_summary: "{{ steps.triage.output.message }}"
+        triage_tier: "{{ steps.materialize_tier_codes.output.pipeline_tier_code }}"
+        triage_confidence: "{{ steps.materialize_tier_codes.output.max_confidence }}"
+        technique: "unknown"
+        mutation_id: ""
+        rule_id: "{{ steps.dedupe_open_alert_hits.output[0]._source.kibana.alert.rule.rule_id | default: 'unknown' }}"
+        rule_name: "{{ steps.dedupe_open_alert_hits.output[0]._source.kibana.alert.rule.name | default: 'Unknown Rule' }}"
+        assignee_uid: ""
+
+  - name: log_case
+    type: console
+    if: "steps.gate_open_case.output: yes"
+    with:
+      message: "Pipeline: case lifecycle completed (case_id={{ steps.invoke_case_lifecycle.output.id | default: 'unknown' }})."
+
+  # ── Stage 4: Cycle Metrics ─────────────────────────────────────────
+  - name: write_metrics
+    type: elasticsearch.index
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.metrics_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        pipeline: "{{ consts.pipeline_id }}"
+        cycle_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        alerts_processed: "{{ steps.get_open_alerts.output.hits.total.value }}"
+        stages_completed: "{% if steps.gate_open_case.output == 'yes' %}unified_triage,response,case_creation{% else %}unified_triage,response{% endif %}"
+        case_created: "{% if steps.gate_open_case.output == 'yes' %}true{% else %}false{% endif %}"
+        case_id: "{{ steps.invoke_case_lifecycle.output.id | default: null }}"
+        status: "success"
+
+  # ── Stage 5: Final Outcome + Release Lock ──────────────────────────
+  # The outcome is DERIVED from the triage output's highest-severity disposition —
+  # never hardcoded to "case_created" (that is a pipeline state, not a disposition).
+  - name: write_final_outcome
+    type: elasticsearch.index
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      index: "{{ consts.outcomes_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        correlation_id: "cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}"
+        pipeline: "{{ consts.pipeline_id }}"
+        stage: "pipeline_complete"
+        agents_involved: ["default"]
+        alerts_processed: "{{ steps.get_open_alerts.output.hits.total.value }}"
+        case_created: "{% if steps.gate_open_case.output == 'yes' %}true{% else %}false{% endif %}"
+        case_id: "{{ steps.invoke_case_lifecycle.output.id | default: null }}"
+        # `disposition`, `classification`, `confidence` here are the pipeline-level
+        # aggregate — first classification is used as an anchor; per-alert dispositions
+        # live on per-alert docs in .soc-triage-results.
+        # Unified triage returns `{ message: "<JSON>" }`; unwrap it the same way the
+        # write_triage_batch / foreach paths do.
+        classification: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications.first.classification | default: 'SUSPICIOUS' }}"
+        confidence: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications.first.confidence | default: 0 }}"
+        disposition: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications.first.disposition | default: 'INCONCLUSIVE' }}"
+        threat_category: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications.first.threat_category | default: 'unknown' }}"
+        kill_chain_stage: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{{ _parsed_triage.classifications.first.kill_chain_stage | default: 'unknown' }}"
+        verdict: "{% assign _parsed_triage = steps.triage.output.message | json_parse %}{% assign _c = _parsed_triage.classifications.first.classification | default: 'UNKNOWN' %}{% if _c == 'TRUE_POSITIVE' %}true_positive{% elsif _c == 'FALSE_POSITIVE' %}false_positive{% elsif _c == 'BENIGN_POSITIVE' %}benign_positive{% elsif _c == 'SUSPICIOUS' %}suspicious{% else %}inconclusive{% endif %}"
+        highest_tier: "{{ steps.evaluate_response_tier.output.highest_tier | default: 0 }}"
+        pipeline_complete: true
+
+  # Final release_lock is ONLY for the has-alerts branch.
+  # The no-alerts branch releases the lock earlier via `release_lock_no_alerts`.
+  # Running this unconditionally produces a 404 (lock already deleted) which the
+  # workflow engine marks as step=failed -> execution=failed, even though the
+  # on_failure handler fires. Guard it with the same gate that fanout the rest
+  # of the has-alerts pipeline.
+  - name: release_lock
+    type: elasticsearch.request
+    if: "steps.gate_has_alerts.output: yes"
+    with:
+      method: DELETE
+      path: "/{{ consts.pipeline_lock_index }}/_doc/{{ consts.pipeline_id }}"
+    on_failure:
+      - name: log_release_failed
+        type: console
+        with:
+          message: "Warning: failed to release pipeline lock (cycle_id=cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}). Next cycle will overwrite on acquire."
+
+  - name: log_done
+    type: console
+    with:
+      message: "Pipeline: COMPLETE (cycle_id=cycle-{{ 'now' | date: '%Y%m%d%H%M' }}-{{ workflow.run_id | default: 'run' }}). Lock released."

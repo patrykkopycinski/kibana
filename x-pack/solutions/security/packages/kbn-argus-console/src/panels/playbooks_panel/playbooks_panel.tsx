@@ -94,14 +94,14 @@ export interface PlaybooksPanelProps {
 
 const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
   {
-    id: 'soc-argus-playbook-runner',
+    id: 'soc_argus_playbook_runner',
     kind: 'workflow',
     name: 'ARGUS playbook runner',
     description:
       'Parameterized runner for coverage-gap-triage, datasource-gap, high-fp-tuning, and actor-escalation: ES query, threshold gate, optional mutation intents, audit row. Set workflow input playbook_id when executing.',
   },
   {
-    id: 'soc-argus-exploit-to-detection',
+    id: 'soc_argus_exploit_to_detection',
     kind: 'workflow',
     name: 'Exploit \u2192 Detection reconciler',
     description:
@@ -110,7 +110,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     user_intent: 'new_cve',
   },
   {
-    id: 'soc-gap-analyzer',
+    id: 'soc_gap_analyzer',
     kind: 'workflow',
     name: 'Gap analyzer',
     description:
@@ -119,7 +119,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     user_intent: 'coverage_gap',
   },
   {
-    id: 'soc-argus-drift-monitor',
+    id: 'soc_argus_drift_monitor',
     kind: 'workflow',
     name: 'Drift monitor',
     description:
@@ -127,7 +127,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     user_intent: 'drift_monitor',
   },
   {
-    id: 'soc-argus-redundancy-scanner',
+    id: 'soc_argus_redundancy_scanner',
     kind: 'workflow',
     name: 'Redundancy scanner',
     description:
@@ -136,49 +136,49 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     user_intent: 'redundancy_scan',
   },
   {
-    id: 'soc-proactive-hunter',
+    id: 'soc_proactive_hunter',
     kind: 'workflow',
     name: 'Proactive hunter',
     description:
       'Run threat-hunting queries against recent telemetry to surface candidate TTPs before detections land.',
   },
   {
-    id: 'soc-argus-frontier-simulator',
+    id: 'soc_argus_frontier_simulator',
     kind: 'workflow',
     name: 'Frontier simulator',
     description:
       'Replay frontier attack scenarios end-to-end so the stack can be stress-tested against unseen TTPs.',
   },
   {
-    id: 'soc-argus-arm-mythos-preset',
+    id: 'soc_argus_arm_mythos_preset',
     kind: 'workflow',
     name: 'Arm Mythos preset',
     description:
       'One-shot setup of the Mythos demo environment: seed telemetry, enable rules, and prime coverage snapshots.',
   },
   {
-    id: 'soc-demo-1-runner',
+    id: 'soc_demo_1_runner',
     kind: 'workflow',
     name: 'Demo \u00b7 Same-day CVE \u2192 Detection',
     description:
       'Scripted demo: ingest a fresh KEV advisory, synthesize a rule, backtest it, and approve the mutation intent.',
   },
   {
-    id: 'soc-demo-2-runner',
+    id: 'soc_demo_2_runner',
     kind: 'workflow',
     name: 'Demo \u00b7 Polymorphic variant swarm',
     description:
       'Scripted demo: emulate a polymorphic variant swarm and walk through ARGUS redundancy + consolidation handling.',
   },
   {
-    id: 'soc-deteng',
+    id: 'soc_deteng',
     kind: 'workflow',
     name: 'Detection engineering',
     description:
       'Guided detection engineering loop: propose a rule, evaluate it, and iterate based on backtest signal.',
   },
   {
-    id: 'soc-arch-reviewer',
+    id: 'soc_arch_reviewer',
     kind: 'workflow',
     name: 'Architecture reviewer',
     description:
@@ -198,7 +198,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     name: 'Emulate actor',
     description:
       'Actor-focused coverage review. Correlates MITRE techniques against recent telemetry and optionally opens a case.',
-    canonical_of: 'soc-argus-playbook-runner',
+    canonical_of: 'soc_argus_playbook_runner',
     user_intent: 'actor_escalation',
   },
   {
@@ -215,7 +215,7 @@ const DEFAULT_PLAYBOOKS: readonly ArgusPlaybookEntry[] = [
     name: 'Assess CVE',
     description:
       'Check whether a specific CVE is on ARGUS\u2019s radar, has coverage, and optionally trigger the Exploit\u2192Detection pipeline.',
-    canonical_of: 'soc-argus-exploit-to-detection',
+    canonical_of: 'soc_argus_exploit_to_detection',
     user_intent: 'new_cve',
   },
   {

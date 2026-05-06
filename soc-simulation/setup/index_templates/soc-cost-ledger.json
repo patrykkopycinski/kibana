@@ -1,0 +1,33 @@
+{
+  "index_patterns": [".soc-cost-ledger"],
+  "priority": 500,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "soc-default"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp":              { "type": "date" },
+        "ledger_window":           { "type": "keyword" },
+        "ledger_window_start":     { "type": "date" },
+        "ledger_window_end":       { "type": "date" },
+        "driver":                  { "type": "keyword" },
+        "synthesis_calls":         { "type": "long" },
+        "synthesis_calls_budget":  { "type": "long" },
+        "synthesis_calls_remaining": { "type": "long" },
+        "synthesis_pct_budget":    { "type": "float" },
+        "trip_count":              { "type": "long" },
+        "rolled_by":               { "type": "keyword" },
+        "schema_version":          { "type": "integer" }
+      }
+    }
+  },
+  "_meta": {
+    "description": "AutoDEX Loop-5 cost telemetry. The cost-ledger-roller workflow snapshots driver-level call counts every hour into this index. Operators query rolling-24h `synthesis_calls` to track LLM spend trends; the synthesis driver itself enforces the per-tick gate from `.soc-evolution-log` directly.",
+    "owner": "argus-governance",
+    "schema_version": 1,
+    "drivers": ["argus.synthesis.driver"]
+  }
+}

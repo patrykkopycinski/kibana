@@ -226,7 +226,7 @@ const buildTitleSubtitle = (
       // (or carry the placeholder "unknown") and don't fit the apply/rollback
       // shape below. Surface the verdict + disposition instead of the
       // useless "Response action — unknown" fallback.
-      if (pipeline === 'soc-alert-sweeper' || stage === 'per_alert_verdict') {
+      if (pipeline === 'soc_alert_sweeper' || stage === 'per_alert_verdict') {
         const classification = readString(source.classification);
         const verdict = readString(source.verdict);
         const disposition = readString(source.disposition);

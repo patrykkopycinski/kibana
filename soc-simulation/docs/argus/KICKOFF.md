@@ -17,7 +17,7 @@ Phase 1 artifacts are code-complete and demoable today:
 | Architecture one-pager | [`architecture.html`](./architecture.html) | Yes |
 | Demo storyboard (3 scenarios) | [`demo-storyboard.md`](./demo-storyboard.md) | Script only — scenarios need M2.x |
 | Mythos-class Caldera profile | [`../../caldera_profiles/level6-mythos-class.json`](../../caldera_profiles/level6-mythos-class.json) | Yes (static techniques) |
-| Operator-armed preset workflow | [`../../workflows/soc-argus-arm-mythos-preset.yaml`](../../workflows/soc-argus-arm-mythos-preset.yaml) | Yes |
+| Operator-armed preset workflow | [`../../workflows/soc_argus_arm_mythos_preset.yaml`](../../workflows/soc_argus_arm_mythos_preset.yaml) | Yes |
 | Registry entries | [`../../workflows/_registry.json`](../../workflows/_registry.json) | Yes |
 
 **First thing every implementer does on Day 0:** run
@@ -55,7 +55,7 @@ per hour."
 **Must wait:**
 - **M2.2** depends on M2.1's evaluator contract being stable (not landed — just
   the contract frozen and mocked).
-- **M2.3** depends on M2.1's `.soc-detection-eval-runs` schema for scoring
+- **M2.3** depends on M2.1's `.soc_detection_eval-runs` schema for scoring
   feedback; contract is frozen, so it can start on mock data.
 
 ---
@@ -162,7 +162,7 @@ should be rejected at review.
    plane.
 2. **Mythos-class (L6) is always operator-armed.** The difficulty controller
    auto-escalates L1–L5. Reaching L6 requires an explicit human arm via
-   `soc-argus-arm-mythos-preset`. Every arm must emit an `.soc-audit-trail`
+   `soc_argus_arm_mythos_preset`. Every arm must emit an `.soc-audit-trail`
    row.
 
 ---

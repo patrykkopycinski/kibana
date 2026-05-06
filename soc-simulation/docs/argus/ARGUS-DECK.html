@@ -1008,7 +1008,7 @@
         <h4>Validation — no mutation ships unscored</h4>
         <p>Backtester, regression gate, Detection-Eval vertical, mutation-robustness scorer, trust scorer.</p>
       </div>
-      <div class="layer-key">.soc-detection-eval-runs</div>
+      <div class="layer-key">.soc_detection_eval-runs</div>
     </div>
     <div class="layer-item l4">
       <div class="layer-num">04</div>
@@ -1110,7 +1110,7 @@
 
       <rect x="380" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
       <text x="437" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Triage</text>
-      <text x="437" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-alert-sweeper</text>
+      <text x="437" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc_alert_sweeper</text>
       <text x="437" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">5m sweep</text>
 
       <rect x="510" y="170" width="115" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
@@ -1130,7 +1130,7 @@
 
       <rect x="900" y="170" width="130" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
       <text x="965" y="188" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Meta</text>
-      <text x="965" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-meta</text>
+      <text x="965" y="204" text-anchor="middle" fill="#8DA0BE" font-size="9">soc_meta</text>
       <text x="965" y="220" text-anchor="middle" fill="#5A7198" font-size="8" font-family="JetBrains Mono">mutation_intent</text>
 
       <rect x="1045" y="170" width="160" height="66" rx="8" fill="#17223E" stroke="#7C4DFF" stroke-width="0.9"/>
@@ -1260,7 +1260,7 @@
       <div class="card" style="padding: 14px 18px;">
         <div class="kv-row"><span class="kv-key">M2.2</span><span class="kv-val"><code>.soc-cve-advisories</code></span><span class="kv-tag">inbox</span></div>
         <div class="kv-row"><span class="kv-key">spine</span><span class="kv-val"><code>.soc-recommendations</code></span><span class="kv-tag">259 recs</span></div>
-        <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val"><code>.soc-detection-eval-runs</code></span><span class="kv-tag">per-gate</span></div>
+        <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val"><code>.soc_detection_eval-runs</code></span><span class="kv-tag">per-gate</span></div>
         <div class="kv-row"><span class="kv-key">M2.1</span><span class="kv-val"><code>.soc-eval-corpus-argus-corpus-*</code></span><span class="kv-tag">30+ variants</span></div>
         <div class="kv-row"><span class="kv-key">M2.5</span><span class="kv-val"><code>.soc-reasoning-trace</code></span><span class="kv-tag">OTEL-GenAI</span></div>
         <div class="kv-row"><span class="kv-key">govern</span><span class="kv-val"><code>.soc-actor-trust-tiers</code></span><span class="kv-tag">live</span></div>
@@ -1332,13 +1332,13 @@ aggregate → {
   <span class="p">gate_decision</span>: <span class="s">"pass"</span> | <span class="s">"marginal"</span> | <span class="s">"fail"</span>
 }
 
-<span class="c">// → .soc-detection-eval-runs keyed by (rule_id, snapshot_id)</span></pre>
+<span class="c">// → .soc_detection_eval-runs keyed by (rule_id, snapshot_id)</span></pre>
 
       <div style="margin-top: 14px;">
         <div class="section-title">Artifacts</div>
         <div class="card" style="padding: 12px 16px;">
           <div class="kv-row"><span class="kv-key">pkg</span><span class="kv-val"><code>@kbn/evals-suite-argus-detection</code></span><span class="kv-tag">+adv sub-suite</span></div>
-          <div class="kv-row"><span class="kv-key">wf</span><span class="kv-val"><code>soc-detection-eval.yaml</code></span><span class="kv-tag">2m poll</span></div>
+          <div class="kv-row"><span class="kv-key">wf</span><span class="kv-val"><code>soc_detection_eval.yaml</code></span><span class="kv-tag">2m poll</span></div>
           <div class="kv-row"><span class="kv-key">cli</span><span class="kv-val"><code>run_detection_eval.js</code></span><span class="kv-tag">laptop-grade</span></div>
           <div class="kv-row"><span class="kv-key">bank</span><span class="kv-val"><code>scripts/argus-variant-bank/</code></span><span class="kv-tag">30+ + ER7</span></div>
         </div>
@@ -1415,8 +1415,8 @@ aggregate → {
 
     <div class="card accent-purple">
       <div class="card-label">Reconciler</div>
-      <h3><code>soc-argus-exploit-to-detection.yaml</code></h3>
-      <p>Promotes advisories, counts positives/negatives in the labelled corpus, writes a synthetic <code>.soc-detection-eval-runs</code> row. Existing M2.1 poller flips the rec to <code>auto_apply_ready</code> within 2m.</p>
+      <h3><code>soc_argus_exploit_to_detection.yaml</code></h3>
+      <p>Promotes advisories, counts positives/negatives in the labelled corpus, writes a synthetic <code>.soc_detection_eval-runs</code> row. Existing M2.1 poller flips the rec to <code>auto_apply_ready</code> within 2m.</p>
     </div>
 
     <div class="card accent-green">
@@ -1575,13 +1575,13 @@ Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ ident
       <div class="section-title">Two-workflow handshake</div>
       <div class="card accent-purple">
         <div class="card-label">Step 1 · Arm preset</div>
-        <h3><code>soc-argus-arm-mythos-preset.yaml</code></h3>
+        <h3><code>soc_argus_arm_mythos_preset.yaml</code></h3>
         <p>Operator (or automation) arms a difficulty level + technique. Indexes a pending <code>attack-command</code>.</p>
       </div>
 
       <div class="card accent-green" style="margin-top: 14px;">
         <div class="card-label">Step 2 · Emit variant</div>
-        <h3><code>soc-argus-frontier-simulator.yaml</code></h3>
+        <h3><code>soc_argus_frontier_simulator.yaml</code></h3>
         <p>When preset is armed, emits a polymorphic variant into <code>.soc-eval-corpus-*</code> via <code>_reindex</code> + inline Painless, preserving nested ECS.</p>
       </div>
     </div>
@@ -1631,7 +1631,7 @@ Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ ident
   <span class="p">"gen_ai"</span>: {
     <span class="p">"system"</span>: <span class="s">"argus"</span>,
     <span class="p">"operation"</span>: <span class="s">"triage"</span>,
-    <span class="p">"agent"</span>: <span class="s">"soc-deteng"</span>,
+    <span class="p">"agent"</span>: <span class="s">"soc_deteng"</span>,
     <span class="p">"request"</span>: { ... },
     <span class="p">"response"</span>: { ... },
     <span class="p">"usage"</span>: { ... },
@@ -1658,13 +1658,13 @@ Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ ident
 
       <div class="card accent-mythos" style="margin-top: 12px;">
         <div class="card-label">Reasoning watchdog</div>
-        <h3><code>soc-argus-reasoning-watchdog.yaml</code></h3>
+        <h3><code>soc_argus_reasoning_watchdog.yaml</code></h3>
         <p>Every 5m, computes 15-min mean confidence per actor vs 24h baseline. Trigger: <code>short &lt; 0.5</code> or <code>(baseline − short) &gt; 0.2</code> → tier=<code>quarantined</code>.</p>
       </div>
 
       <div class="card accent-amber" style="margin-top: 12px;">
         <div class="card-label">Hourly · Trust-tier assessor</div>
-        <h3><code>soc-argus-trust-tier-assessor.yaml</code></h3>
+        <h3><code>soc_argus_trust_tier_assessor.yaml</code></h3>
         <p>Aggregates eval + outcome (rollback_rate, fp_ratio) + reasoning signals. <strong>Hard-quarantines</strong> any actor above 20% on either outcome signal.</p>
       </div>
     </div>
@@ -1766,7 +1766,7 @@ Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ ident
     <div class="card accent-cyan">
       <div class="card-label">Enforcement</div>
       <p style="font-size: 14px;">
-        <code>soc-argus-trust-gate.yaml</code> is <strong>non-invasive</strong> —
+        <code>soc_argus_trust_gate.yaml</code> is <strong>non-invasive</strong> —
         it <em>downgrades</em> a recommendation's status, it never edits the mutation body.
         The actor still authored the intent; the gate just caps what the actor is
         allowed to apply autonomously.
@@ -1790,10 +1790,10 @@ Painless ingest-pipeline score     = <span class="n">0.722000</span>   ✓ ident
       <pre class="code">auto_apply_ready rec
       │
       ▼
-<span class="p">soc-autonomous-applier.yaml</span>
+<span class="p">soc_autonomous_applier.yaml</span>
       │  <span class="c">// defers every auto_apply</span>
       ▼
-<span class="p">soc-rule-backtester.yaml</span>
+<span class="p">soc_rule_backtester.yaml</span>
       │  <span class="c">// projects rule-hit delta</span>
       │  <span class="c">// against historical traffic</span>
       ▼
@@ -1874,7 +1874,7 @@ action:        block · re-route to <span class="s">"exploit_to_detection"</span
     <div class="slide-brand"><div class="brand-mark">A</div><div class="brand-txt">ARGUS</div></div>
   </div>
   <h1 class="slide-title">Every auto-apply is a canary, not a cutover.</h1>
-  <div class="slide-sub">Spec: <code>soc-post-apply-observer.yaml</code> · 2-min tick · regression gate = (spike ∨ silence) ∧ tp_drop · rollback rides the same applier path as any other mutation.</div>
+  <div class="slide-sub">Spec: <code>soc_post_apply_observer.yaml</code> · 2-min tick · regression gate = (spike ∨ silence) ∧ tp_drop · rollback rides the same applier path as any other mutation.</div>
 
   <div class="split">
     <div>
@@ -1888,7 +1888,7 @@ baseline window         =  <span class="n">60m</span> pre-apply
 cooldown between ticks  =  <span class="n">5m</span>
       │
       ▼
-<span class="p">soc-post-apply-observer</span> · every <span class="n">2m</span>
+<span class="p">soc_post_apply_observer</span> · every <span class="n">2m</span>
   • <span class="s">spike</span>     post &gt; <span class="n">3×</span> pre
   • <span class="s">silence</span>   post == <span class="n">0</span> &amp;&amp; pre &gt; <span class="n">0</span>
   • <span class="s">tp_drop</span>   pre_tp &gt; <span class="n">0</span> &amp;&amp; post_tp == <span class="n">0</span>
@@ -2053,7 +2053,7 @@ drift_significant =
 
       <div class="card accent-amber" style="margin-top: 14px;">
         <div class="card-label">Workflow</div>
-        <p><code>soc-argus-drift-monitor.yaml</code> · 6h cadence · files to <code>.soc-recommendations</code></p>
+        <p><code>soc_argus_drift_monitor.yaml</code> · 6h cadence · files to <code>.soc-recommendations</code></p>
       </div>
     </div>
   </div>
@@ -2138,7 +2138,7 @@ rollback_rate = rollbacks          / total_applies
 
       <div class="card accent-green" style="margin-top: 14px;">
         <div class="card-label">Workflow</div>
-        <p><code>soc-argus-playbook-learner.yaml</code> · 6h cadence</p>
+        <p><code>soc_argus_playbook_learner.yaml</code> · 6h cadence</p>
       </div>
     </div>
   </div>
@@ -2241,7 +2241,7 @@ per_cve_signal = min(1.0,
 2026-04-16  feed=<span class="s">"vendor-x"</span>    kind=<span class="s">"exploit_availability"</span>
             cve=<span class="s">"CVE-2025-23142"</span>   signal_strength=<span class="n">0.55</span>   source_trust=<span class="n">0.5</span>
 
-<span class="c">// soc-argus-intel-mythos-aggregator (30m) · per-CVE, trust-weighted</span>
+<span class="c">// soc_argus_intel_mythos_aggregator (30m) · per-CVE, trust-weighted</span>
 per_cve_signal = min(<span class="n">1.0</span>,
     <span class="n">0.82</span> × <span class="n">0.9</span>          <span class="c">// glasswing contribution</span>
   + <span class="n">0.55</span> × <span class="n">0.5</span>          <span class="c">// vendor-x contribution</span>
@@ -2439,10 +2439,10 @@ per_cve_signal = min(<span class="n">1.0</span>,
 ./scripts/argus_live_demo.sh <span class="c"># scenarios 1 + 2, live runtime</span>
 
 <span class="c"># Phase 3 beats — kick workflows manually</span>
-curl ... soc-argus-intel-adapter-generic <span class="s">{"force_seed": true}</span>
-curl ... soc-argus-intel-mythos-aggregator
-curl ... soc-argus-drift-monitor
-curl ... soc-argus-playbook-learner</pre>
+curl ... soc_argus_intel_adapter_generic <span class="s">{"force_seed": true}</span>
+curl ... soc_argus_intel_mythos_aggregator
+curl ... soc_argus_drift_monitor
+curl ... soc_argus_playbook_learner</pre>
   </div>
 </section>
 
@@ -2470,7 +2470,7 @@ curl ... soc-argus-playbook-learner</pre>
 
       <div class="card accent-green" style="margin-top: 12px;">
         <div class="card-label">Governance pulse · R6</div>
-        <p><strong>MTTR-rollback</strong> — <code>soc-recovery.yaml</code> emits <code>rollback_mttr_ms</code> to <code>.soc-outcomes</code> every 10 min; the trust-tier assessor aggregates <code>avg / p50 / p95</code> per actor into <code>.soc-actor-trust-tiers</code>; the ARGUS Console Pulse tile reads it via <code>/internal/security_solution/argus/governance_pulse</code>.</p>
+        <p><strong>MTTR-rollback</strong> — <code>soc_recovery.yaml</code> emits <code>rollback_mttr_ms</code> to <code>.soc-outcomes</code> every 10 min; the trust-tier assessor aggregates <code>avg / p50 / p95</code> per actor into <code>.soc-actor-trust-tiers</code>; the ARGUS Console Pulse tile reads it via <code>/internal/security_solution/argus/governance_pulse</code>.</p>
       </div>
     </div>
 
@@ -2550,7 +2550,7 @@ curl ... soc-argus-playbook-learner</pre>
       <pre class="code" style="font-size: 11.5px; line-height: 1.45;">{
   <span class="p">"artifact_type"</span>: <span class="s">"mutation_intent"</span>,
   <span class="p">"status"</span>:        <span class="s">"eval_requested"</span>,
-  <span class="p">"source"</span>:        <span class="s">"soc-argus-drift-monitor"</span>,
+  <span class="p">"source"</span>:        <span class="s">"soc_argus_drift_monitor"</span>,
 
   <span class="p">"argus"</span>: {
     <span class="p">"origin"</span>:   <span class="s">"drift_detected"</span>,
@@ -2603,12 +2603,12 @@ curl ... soc-argus-playbook-learner</pre>
       <div class="card-label">Reconcilers</div>
       <h3>poll → act · every 1–2m</h3>
       <ul>
-        <li><code>soc-argus-exploit-to-detection</code></li>
-        <li><code>soc-detection-eval</code></li>
-        <li><code>soc-argus-trust-gate</code></li>
-        <li><code>soc-autonomous-applier</code></li>
-        <li><code>soc-rule-backtester</code></li>
-        <li><code>soc-post-apply-observer</code></li>
+        <li><code>soc_argus_exploit_to_detection</code></li>
+        <li><code>soc_detection_eval</code></li>
+        <li><code>soc_argus_trust_gate</code></li>
+        <li><code>soc_autonomous_applier</code></li>
+        <li><code>soc_rule_backtester</code></li>
+        <li><code>soc_post_apply_observer</code></li>
       </ul>
     </div>
 
@@ -2616,12 +2616,12 @@ curl ... soc-argus-playbook-learner</pre>
       <div class="card-label">Scheduled loops</div>
       <h3>hourly / 6h / daily</h3>
       <ul>
-        <li><code>soc-argus-trust-tier-assessor</code> · 1h</li>
-        <li><code>soc-argus-reasoning-watchdog</code> · 5m</li>
-        <li><code>soc-argus-drift-monitor</code> · 6h</li>
-        <li><code>soc-argus-playbook-learner</code> · 6h</li>
-        <li><code>soc-argus-intel-mythos-aggregator</code> · 30m</li>
-        <li><code>soc-kev-ingest</code> · 24h</li>
+        <li><code>soc_argus_trust_tier_assessor</code> · 1h</li>
+        <li><code>soc_argus_reasoning_watchdog</code> · 5m</li>
+        <li><code>soc_argus_drift_monitor</code> · 6h</li>
+        <li><code>soc_argus_playbook_learner</code> · 6h</li>
+        <li><code>soc_argus_intel_mythos_aggregator</code> · 30m</li>
+        <li><code>soc_kev_ingest</code> · 24h</li>
       </ul>
     </div>
 
@@ -2629,12 +2629,12 @@ curl ... soc-argus-playbook-learner</pre>
       <div class="card-label">Event-driven / manual</div>
       <h3>on demand</h3>
       <ul>
-        <li><code>soc-argus-arm-mythos-preset</code></li>
-        <li><code>soc-argus-frontier-simulator</code></li>
-        <li><code>soc-argus-intel-adapter-generic</code></li>
-        <li><code>soc-recovery</code></li>
-        <li><code>soc-demo-1-runner</code></li>
-        <li><code>soc-demo-2-runner</code></li>
+        <li><code>soc_argus_arm_mythos_preset</code></li>
+        <li><code>soc_argus_frontier_simulator</code></li>
+        <li><code>soc_argus_intel_adapter_generic</code></li>
+        <li><code>soc_recovery</code></li>
+        <li><code>soc_demo_1_runner</code></li>
+        <li><code>soc_demo_2_runner</code></li>
       </ul>
     </div>
   </div>
@@ -2677,12 +2677,12 @@ curl ... soc-argus-playbook-learner</pre>
       </tr>
       <tr>
         <td><strong>Add a trust signal</strong></td>
-        <td>Extend <code>soc-argus-trust-tier-assessor</code> inputs</td>
+        <td>Extend <code>soc_argus_trust_tier_assessor</code> inputs</td>
         <td>Trust-gate policy</td>
       </tr>
       <tr>
         <td><strong>Add a drift axis</strong></td>
-        <td>New step in <code>soc-argus-drift-monitor</code></td>
+        <td>New step in <code>soc_argus_drift_monitor</code></td>
         <td>M2.1, recommendations</td>
       </tr>
       <tr>
@@ -2798,11 +2798,11 @@ curl ... soc-argus-playbook-learner</pre>
 ./scripts/argus_live_demo.sh    <span class="c"># scenarios 1 + 2</span>
 
 <span class="c"># Manual Phase-3 beats</span>
-curl ... soc-argus-intel-adapter-generic \
+curl ... soc_argus_intel_adapter_generic \
      <span class="s">'{"force_seed": true}'</span>
-curl ... soc-argus-intel-mythos-aggregator
-curl ... soc-argus-drift-monitor
-curl ... soc-argus-playbook-learner</pre>
+curl ... soc_argus_intel_mythos_aggregator
+curl ... soc_argus_drift_monitor
+curl ... soc_argus_playbook_learner</pre>
 
       <div style="margin-top: 12px;">
         <div class="card accent-amber">

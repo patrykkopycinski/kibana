@@ -1,11 +1,11 @@
 # M2.4 — Frontier-Adversary Simulation Mode
 
-**ARGUS layer:** 01 Sensing (telemetry generation) · **Pressure:** P3 agentic adversary · **Extends:** `soc-difficulty-controller.yaml` + Phase 1 preset
+**ARGUS layer:** 01 Sensing (telemetry generation) · **Pressure:** P3 agentic adversary · **Extends:** `soc_difficulty_controller.yaml` + Phase 1 preset
 
 ## Context
 
 Phase 1 declared the Mythos-class adversary preset (`level-6`,
-`mythos_class_frontier`) and the arming workflow (`soc-argus-arm-mythos-preset`). The
+`mythos_class_frontier`) and the arming workflow (`soc_argus_arm_mythos_preset`). The
 static Caldera abilities are seeded and runnable today. What is **not** yet runnable
 is the *agentic* portion: the part of the frontier adversary that reasons about ARGUS
 and crafts adversarial inputs.
@@ -14,7 +14,7 @@ M2.4 delivers that layer.
 
 ## Goal
 
-A new workflow `soc-argus-frontier-simulator` augments a Mythos-class Caldera operation
+A new workflow `soc_argus_frontier_simulator` augments a Mythos-class Caldera operation
 with agentic behaviours:
 
 - **Polymorphism**: ≥ 20 behavioural variants per primitive technique, emitted into
@@ -31,7 +31,7 @@ a realistic Mythos-class run.
 
 ### In scope
 
-- Workflow `soc-argus-frontier-simulator.yaml` (manual + triggered by the arming
+- Workflow `soc_argus_frontier_simulator.yaml` (manual + triggered by the arming
   workflow via `.soc-attack-commands`).
 - Polymorphism generator: produces variant event documents that replay against the
   staged fleet through `osquery` / `elastic-agent-generator`.
@@ -52,7 +52,7 @@ a realistic Mythos-class run.
 
 ## Acceptance criteria
 
-- [ ] `soc-argus-frontier-simulator` workflow registered in `_registry.json`, gated on
+- [ ] `soc_argus_frontier_simulator` workflow registered in `_registry.json`, gated on
       staging sentinel.
 - [ ] On a fresh arm-and-run, polymorphism generator emits ≥ 20 variants for each of
       the 12 techniques in `level6-mythos-class.json`.
@@ -116,7 +116,7 @@ Est. total: 4 weeks.
 ## Links
 
 - Anchor Phase-1 profile: `../../caldera_profiles/level6-mythos-class.json`
-- Anchor Phase-1 workflow: `../../workflows/soc-argus-arm-mythos-preset.yaml`
+- Anchor Phase-1 workflow: `../../workflows/soc_argus_arm_mythos_preset.yaml`
 - Phase-1 spec: `../mythos-preset-spec.md`
 - Consumer: M2.1 (`m2-1-detection-eval-vertical.md`), M2.5 (`m2-5-reasoning-trace-governance.md`)
 - Scaffold: `../scaffolds/m2-4-simulator-contract.md`

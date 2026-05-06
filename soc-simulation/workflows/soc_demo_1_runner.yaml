@@ -1,0 +1,160 @@
+version: '1'
+name: ARGUS Demo 1 Runner — Same-day CVE → Detection
+description: >
+  End-to-end demo runner for Scenario 1 of the ARGUS demo storyboard
+  (soc-simulation/docs/argus/demo-storyboard.md):
+
+    "A fresh CVE advisory lands. Within one tick ARGUS has a draft
+     detection rule, a labelled variant corpus, and a mutation_intent
+     recommendation sitting in front of the human."
+
+  This workflow is the **thin orchestrator** that chains the demo beats
+  without any manual copy/paste on demo day. The heavy lifting — advisory
+  parsing, rule synthesis, variant generation, `mutation_intent`
+  construction — lives in the deterministic TypeScript package
+  `@kbn/argus-exploit-to-detection` and is exercised by its CLI
+  (`scripts/run_exploit_to_detection.js`). The eval sweep lives in the
+  `@kbn/evals-suite-argus-detection` CLI. The workflow engine cannot
+  invoke those CLIs directly, so this runner:
+
+    1. Asserts preconditions (the demo advisory is present and that the
+       synthesized artifacts have already been populated by the CLIs).
+    2. Invokes the M2.2 reconciler (soc_argus_exploit_to_detection) to
+       promote the advisory `ingested -> detected` and reflect the eval
+       verdict.
+    3. Invokes the Phase-3 trust gate (soc_argus_trust_gate) to enforce
+       the actor trust tier on the emitted recommendation.
+    4. Emits a demo-run marker heartbeat so the dashboard can draw a
+       "Scenario 1 ran @ T+0" annotation.
+
+  Preconditions on demo day:
+    * The two CLIs above must have been run against the cluster at least
+      once so that `argus-adv-lsass-dump-2026-04` is in
+      `.soc-cve-advisories` with `draft_rule_id` and `recommendation_id`
+      populated.
+
+enabled: true
+
+triggers:
+  - type: manual
+  - type: scheduled
+    with:
+      every: 1h
+
+consts:
+  advisory_id: "argus-adv-lsass-dump-2026-04"
+  advisories_index: ".soc-cve-advisories"
+  recs_index: ".soc-recommendations"
+
+steps:
+  # ── 1. Precondition: advisory has been synthesized by the CLI ────────
+  - name: fetch_demo_advisory
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.advisories_index }}"
+      size: 1
+      query:
+        bool:
+          filter:
+            - term: { _id: "{{ consts.advisory_id }}" }
+            - exists: { field: "draft_rule_id" }
+            - exists: { field: "recommendation_id" }
+
+  - name: precondition_gate
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.fetch_demo_advisory.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}ok{% else %}missing{% endif %}
+
+  - name: log_precondition_missing
+    type: console
+    if: "steps.precondition_gate.output: missing"
+    with:
+      message: >-
+        Scenario-1 precondition unmet: run
+        `node x-pack/solutions/security/packages/kbn-argus-exploit-to-detection/scripts/run_exploit_to_detection.js --advisory {{ consts.advisory_id }}`
+        before triggering this runner.
+
+  # ── 2. Observe reconciler state via audit trail ─────────────────────
+  # The ARGUS M2.2 reconciler + Phase-3 trust gate run on their own
+  # scheduled triggers and are also kicked explicitly by the live-demo
+  # driver (scripts/argus_live_demo.sh). The runner simply verifies
+  # that their heartbeats are present so the dashboard can confirm the
+  # chain completed.
+  - name: fetch_e2d_heartbeat
+    type: elasticsearch.request
+    if: "steps.precondition_gate.output: ok"
+    with:
+      method: POST
+      path: /.soc-audit-trail/_search
+      body:
+        size: 1
+        query:
+          bool:
+            filter:
+              - term: { event_type: "argus_e2d_reconcile_tick" }
+              - range:
+                  "@timestamp":
+                    gte: "now-24h"
+        sort:
+          - "@timestamp":
+              order: desc
+
+  - name: fetch_trust_gate_heartbeat
+    type: elasticsearch.request
+    if: "steps.precondition_gate.output: ok"
+    with:
+      method: POST
+      path: /.soc-audit-trail/_search
+      body:
+        size: 1
+        query:
+          bool:
+            filter:
+              - term: { event_type: "argus_trust_gate_tick" }
+              - range:
+                  "@timestamp":
+                    gte: "now-24h"
+        sort:
+          - "@timestamp":
+              order: desc
+
+  # ── 3. Collect the resulting recommendation for the demo read-out ───
+  - name: fetch_scenario_recommendation
+    type: elasticsearch.request
+    if: "steps.precondition_gate.output: ok"
+    with:
+      method: POST
+      path: "/{{ consts.recs_index }}/_search"
+      body:
+        size: 1
+        sort:
+          - "@timestamp":
+              order: desc
+        query:
+          bool:
+            filter:
+              - term: { "argus.origin": "exploit_to_detection" }
+              - term: { "evidence.advisory_id": "{{ consts.advisory_id }}" }
+
+  # ── 5. Heartbeat / demo-run marker ──────────────────────────────────
+  - name: heartbeat
+    type: elasticsearch.index
+    with:
+      index: .soc-audit-trail
+      document:
+        "@timestamp": "{{ execution.startedAt | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+        event_type: argus_demo_run
+        source: "soc_demo_1_runner"
+        run_id: "argus-demo-1-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }}"
+        scenario: "1-cve-to-detection"
+        advisory_id: "{{ consts.advisory_id }}"
+        precondition_state: "{{ steps.precondition_gate.output }}"
+        recommendation_found: "{{ steps.fetch_scenario_recommendation.output.hits.hits | size | default: 0 }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        ARGUS demo-1 run_id=argus-demo-1-{{ execution.startedAt | date: '%Y%m%d%H%M%S' }} precond={{ steps.precondition_gate.output }} recs_found={{ steps.fetch_scenario_recommendation.output.hits.hits | size | default: 0 }}

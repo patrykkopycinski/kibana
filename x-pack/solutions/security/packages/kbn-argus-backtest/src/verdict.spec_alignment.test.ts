@@ -11,8 +11,8 @@ import path from 'path';
 /**
  * Alignment check between the TS spec (`classifyBacktest`) and the two
  * runtime YAMLs that consume its verdicts:
- *   - `soc-simulation/workflows/soc-rule-backtester.yaml` (verdict producer)
- *   - `soc-simulation/workflows/soc-autonomous-applier.yaml` (verdict consumer)
+ *   - `soc-simulation/workflows/soc_rule_backtester.yaml` (verdict producer)
+ *   - `soc-simulation/workflows/soc_autonomous_applier.yaml` (verdict consumer)
  *
  * The YAML files encode the same matrix in Liquid. This test checks the
  * Liquid mentions every verdict / status the TS spec can emit. This is
@@ -21,8 +21,8 @@ import path from 'path';
  */
 
 const REPO_ROOT = path.resolve(__dirname, '../../../../../..');
-const BACKTESTER_YAML = path.join(REPO_ROOT, 'soc-simulation/workflows/soc-rule-backtester.yaml');
-const APPLIER_YAML = path.join(REPO_ROOT, 'soc-simulation/workflows/soc-autonomous-applier.yaml');
+const BACKTESTER_YAML = path.join(REPO_ROOT, 'soc-simulation/workflows/soc_rule_backtester.yaml');
+const APPLIER_YAML = path.join(REPO_ROOT, 'soc-simulation/workflows/soc_autonomous_applier.yaml');
 
 describe('backtest spec ↔ YAML alignment', () => {
   let backtester: string;

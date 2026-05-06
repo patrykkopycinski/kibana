@@ -155,7 +155,7 @@ AGENTS = {
     "experimental-tuner-v3": {"tier": "quarantined", "trust_score": 0.35, "rollbacks_24h": 3},
 }
 
-EXECUTOR = "soc-autonomous-applier-agent"
+EXECUTOR = "soc_autonomous_applier-agent"
 
 
 # ---------------------------------------------------------------------------
@@ -342,7 +342,7 @@ def build_backtest(*, rec_id: str, rule: dict, patch: dict, verdict: str, timest
             ),
         }.get(verdict, "unknown"),
         "computed_at": iso(timestamp),
-        "computed_by": "soc-rule-backtester",
+        "computed_by": "soc_rule_backtester",
         "compute_duration_ms": random.randint(420, 1800),
         "simulator_used": "historical_alerts_window_7d",
     }
@@ -378,7 +378,7 @@ def build_decision(
         "op": "update",
         "action": action,
         "source_agent": source_agent,
-        "source_workflow": "soc-autonomous-applier",
+        "source_workflow": "soc_autonomous_applier",
         "gates_evaluated": gates_evaluated,
         "gates_passed": gates_passed,
         "first_failing_gate": first_failing_gate,
@@ -403,7 +403,7 @@ def build_snapshot(*, rec_id: str, rule: dict, timestamp: datetime) -> dict:
         "artifact_type": "detection_rule",
         "artifact_id": rule["id"],
         "reason": "pre_mutation_snapshot",
-        "captured_by": "soc-autonomous-applier",
+        "captured_by": "soc_autonomous_applier",
         "snapshot": {
             "rule_id": rule["id"],
             "name": rule["name"],
@@ -684,7 +684,7 @@ def gen_rolled_back(seq: int, hours_back: float) -> dict:
             rec_id=rec_id,
             timestamp=ts_observed + timedelta(seconds=3),
             rule=rule,
-            source_agent="soc-post-apply-observer",
+            source_agent="soc_post_apply_observer",
             gates_evaluated=["post_apply_tp_regression"],
             gates_passed=[],
             first_failing_gate="post_apply_tp_regression",

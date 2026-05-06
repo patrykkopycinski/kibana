@@ -1,0 +1,203 @@
+version: '1'
+name: SOC Architecture Reviewer
+description: >
+  Scheduled architectural review of the ARGUS mesh. Inventories all agents, skills,
+  and workflows, gathers metrics, and uses the meta-agent with the architecture-review
+  skill to identify consolidation opportunities and anti-patterns. Writes recommendations
+  to .soc-recommendations for human review.
+
+consts:
+  evolution_log_index: ".soc-evolution-log"
+  metrics_index: ".soc-metrics"
+  recommendations_index: ".soc-recommendations"
+
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+steps:
+  # ── Inventory current components ─────────────────────────────────
+  - name: get_agents
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/agent_builder/agents
+
+  - name: get_skills
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/agent_builder/skills
+
+  - name: get_evolution_log
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 50
+  - name: get_metrics
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.metrics_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 100
+  - name: get_recommendations
+    type: elasticsearch.search
+    with:
+      index: "{{ consts.recommendations_index }}"
+      query:
+        range:
+          "@timestamp":
+            gte: "now-7d"
+      size: 0
+      aggs:
+        by_source:
+          terms:
+            field: "source"
+            size: 20
+          aggs:
+            statuses:
+              terms:
+                field: "status"
+                size: 10
+
+  - name: log_start
+    type: console
+    with:
+      message: "Architecture Reviewer: starting periodic review"
+
+  # ── Run architectural analysis ───────────────────────────────────
+  - name: review
+    type: ai.agent
+    connector-id: opus
+    with:
+      message: >
+        Perform an architectural review of the ARGUS mesh using your architecture-review skill.
+
+        Analyze the current inventory for consolidation opportunities, anti-patterns,
+        and structural improvements.
+
+        INVENTORY:
+        Agents: {{ steps.get_agents.output | json }}
+        Skills: {{ steps.get_skills.output | json }}
+
+        METRICS (7 days):
+        Evolution log: {{ steps.get_evolution_log.output.hits.hits | json }}
+        Pipeline metrics: {{ steps.get_metrics.output.hits.hits | json }}
+        Recommendation stats: {{ steps.get_recommendations.output.aggregations | json }}
+
+        IDEAL ARCHITECTURE:
+        - default: Unified classification + enrichment + investigation
+        - default: Principal Detection Engineer — strategic rule authoring + coverage-gap closure + redesign of irredeemable rules
+        - default: Tactical FP/TP tuning (exceptions, thresholds, last-resort disables)
+        - default: System evolution brain (skills for health-check, difficulty, arch-review)
+        - default: Elastic Security AI Assistant — governance-gated applier for ARGUS-managed mutations (registry owner=autosoc)
+        - default: Elastic Security AI Assistant — recommendation execution
+        - Everything else: Deterministic workflows
+
+        Evaluate all components against this ideal. Identify any meta-agent-created agents
+        that should be converted to skills or workflows.
+
+        Self-validate: every finding must include metrics-based justification.
+
+        Respond with JSON:
+        {
+          "findings": [ { "area": "agents|skills|workflows|registries", "issue": "...", "severity": "low|med|high", "evidence": [...] } ],
+          "summary":  "...",
+          "intents":  [ /* ZERO or more mutation_intent objects — SAME envelope as soc_meta (title, summary, reasoning, confidence, track, housekeeping, expected_impact, evidence, details{artifact_type, artifact_id (auto-*), op, expected_ownership, reason, new_definition?, patch?, dependencies:[]}) */ ]
+        }
+      schema:
+        type: object
+        properties:
+          findings:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          summary:
+            type: string
+          intents:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+        required:
+          - findings
+          - summary
+          - intents
+    timeout: 600s
+
+  # ── Write results ────────────────────────────────────────────────
+  - name: write_evolution_log
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.evolution_log_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        source: "soc_arch_reviewer"
+        event_type: "architecture_review"
+        review_output: "{{ steps.review.output | json }}"
+
+  - name: write_recommendation
+    type: elasticsearch.index
+    with:
+      index: "{{ consts.recommendations_index }}"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        rec_id: "arch-review-{{ 'now' | date: '%Y%m%d%H%M%S' }}"
+        type: "architecture_review"
+        source: "soc_arch_reviewer"
+        source_doc_id: "{{ steps.write_evolution_log.output._id }}"
+        status: "pending"
+        title: "Architecture Review - {{ 'now' | date: '%Y-%m-%dT%H:%M' }}"
+        summary: "{{ steps.review.output.summary | default: steps.review.output.message }}"
+        details: "{{ steps.review.output | json }}"
+        reasoning: "Periodic architectural review for consolidation opportunities"
+        confidence: 70
+        track: "agentic"
+        expected_impact: "{{ steps.review.output.expected_impact }}"
+        evidence: "{{ steps.review.output.evidence | default: [] }}"
+
+  # ── Fan out concrete mutation intents (if any) ───────────────────
+  - name: write_mutation_intents
+    type: foreach
+    foreach: "{{ steps.review.output.intents }}"
+    steps:
+      - name: write_intent
+        type: elasticsearch.index
+        with:
+          index: "{{ consts.recommendations_index }}"
+          document:
+            "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.%LZ' }}"
+            rec_id: "arch-mi-{{ 'now' | date: '%Y%m%d%H%M%S' }}-{{ foreach.index }}"
+            schema_version: 2
+            type: "mutation_intent"
+            source: "soc_arch_reviewer"
+            source_doc_id: "{{ steps.write_evolution_log.output._id }}"
+            status: "pending"
+            title: "{{ foreach.item.title }}"
+            summary: "{{ foreach.item.summary }}"
+            reasoning: "{{ foreach.item.reasoning | default: 'Architectural consolidation' }}"
+            confidence: "{{ foreach.item.confidence | default: 70 }}"
+            track: "{{ foreach.item.track | default: 'agentic' }}"
+            housekeeping: "{{ foreach.item.housekeeping | default: false }}"
+            expected_impact: "{{ foreach.item.expected_impact | default: empty }}"
+            evidence: "{{ foreach.item.evidence | default: empty }}"
+            details: "{{ foreach.item.details }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: >-
+        Architecture Reviewer: review complete; findings written and
+        {{ steps.review.output.intents | size | default: 0 }} mutation intent(s) dispatched.

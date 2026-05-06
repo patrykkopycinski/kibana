@@ -362,7 +362,7 @@
 
       <div class="module">
         <div class="head"><h4>@kbn/argus-kev-ingest</h4><span class="meta">L1 / L2 · 2 suites · 11 tests · ✓</span></div>
-        <p>CISA Known Exploited Vulnerabilities adapter. Fetches the upstream JSON feed, normalises every entry into the canonical advisory shape, and writes idempotent rows into <code>.soc-cve-advisories</code>. Triggered hourly by <code>soc-kev-ingest</code> + <code>soc-argus-intel-adapter-kev</code>.</p>
+        <p>CISA Known Exploited Vulnerabilities adapter. Fetches the upstream JSON feed, normalises every entry into the canonical advisory shape, and writes idempotent rows into <code>.soc-cve-advisories</code>. Triggered hourly by <code>soc_kev_ingest</code> + <code>soc_argus_intel_adapter_kev</code>.</p>
         <div class="tags"><span class="tag">CISA KEV</span><span class="tag">B2</span></div>
       </div>
 
@@ -376,7 +376,7 @@
 
       <div class="module">
         <div class="head"><h4>@kbn/argus-backtest</h4><span class="meta">L3 · 2 suites · 24 tests · ✓</span></div>
-        <p>Replays a draft rule against historical events and emits a verdict (<code>noise_cannon</code>, <code>healthy</code>, <code>under_baseline</code>, <code>insufficient_data</code>) plus the alert volume distribution. Used by <code>soc-rule-backtester</code> and the shadow executor before any auto-apply.</p>
+        <p>Replays a draft rule against historical events and emits a verdict (<code>noise_cannon</code>, <code>healthy</code>, <code>under_baseline</code>, <code>insufficient_data</code>) plus the alert volume distribution. Used by <code>soc_rule_backtester</code> and the shadow executor before any auto-apply.</p>
         <div class="tags"><span class="tag">backtest verdict</span><span class="tag">noise-cannon guard</span></div>
       </div>
 
@@ -394,7 +394,7 @@
 
       <div class="module">
         <div class="head"><h4>@kbn/evals-suite-argus-detection</h4><span class="meta">L3 · 3 suites · 39 tests · ✓</span></div>
-        <p>The detection eval vertical (M2.1). Playwright-driven evaluator that ingests a corpus of labelled events, runs each candidate rule against them, and emits an eval verdict (precision, recall, gate_decision) into <code>.soc-argus-eval-runs</code>. Required pass-gate before <code>soc-detection-eval</code> reconciler will mark a draft <code>auto_apply_ready</code>.</p>
+        <p>The detection eval vertical (M2.1). Playwright-driven evaluator that ingests a corpus of labelled events, runs each candidate rule against them, and emits an eval verdict (precision, recall, gate_decision) into <code>.soc-argus-eval-runs</code>. Required pass-gate before <code>soc_detection_eval</code> reconciler will mark a draft <code>auto_apply_ready</code>.</p>
         <div class="tags"><span class="tag">M2.1</span><span class="tag">precision / recall</span></div>
       </div>
 
@@ -449,16 +449,16 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-kev-ingest</code></td><td>CISA KEV live feed orchestrator</td><td>30m</td></tr>
-              <tr><td><code>soc-argus-intel-adapter-kev</code></td><td>KEV → <code>.soc-intel-feed</code> exploit_availability rows (B2)</td><td>30m</td></tr>
-              <tr><td><code>soc-argus-intel-adapter-generic</code></td><td>Demo-grade intel-feed seed</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-intel-adapter-analytics</code></td><td>Analytics-cluster CTI enrichment ETL</td><td>24h</td></tr>
-              <tr><td><code>soc-argus-intel-mythos-aggregator</code></td><td>Per-CVE bounded mythos_signal</td><td>30m</td></tr>
-              <tr><td><code>soc-detection-corpus-sync</code></td><td>Hourly sync of enabled rules → <code>.soc-detection-corpus</code></td><td>1h</td></tr>
-              <tr><td><code>soc-argus-coverage-snapshotter</code></td><td>ATT&amp;CK coverage rollup → <code>.soc-coverage-snapshots</code> (vision §4.2)</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-coverage-native</code></td><td>Detection Engine coverage diffs</td><td>1h</td></tr>
-              <tr><td><code>soc-alert-sweeper</code></td><td>Open-alert sweep → triage + tiered response</td><td>continuous</td></tr>
-              <tr><td><code>soc-argus-de-health</code></td><td>Detection Engine health + per-rule execution metrics</td><td>5m</td></tr>
+              <tr><td><code>soc_kev_ingest</code></td><td>CISA KEV live feed orchestrator</td><td>30m</td></tr>
+              <tr><td><code>soc_argus_intel_adapter_kev</code></td><td>KEV → <code>.soc-intel-feed</code> exploit_availability rows (B2)</td><td>30m</td></tr>
+              <tr><td><code>soc_argus_intel_adapter_generic</code></td><td>Demo-grade intel-feed seed</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_intel_adapter_analytics</code></td><td>Analytics-cluster CTI enrichment ETL</td><td>24h</td></tr>
+              <tr><td><code>soc_argus_intel_mythos_aggregator</code></td><td>Per-CVE bounded mythos_signal</td><td>30m</td></tr>
+              <tr><td><code>soc_detection_corpus_sync</code></td><td>Hourly sync of enabled rules → <code>.soc-detection-corpus</code></td><td>1h</td></tr>
+              <tr><td><code>soc_argus_coverage_snapshotter</code></td><td>ATT&amp;CK coverage rollup → <code>.soc-coverage-snapshots</code> (vision §4.2)</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_coverage_native</code></td><td>Detection Engine coverage diffs</td><td>1h</td></tr>
+              <tr><td><code>soc_alert_sweeper</code></td><td>Open-alert sweep → triage + tiered response</td><td>continuous</td></tr>
+              <tr><td><code>soc_argus_de_health</code></td><td>Detection Engine health + per-rule execution metrics</td><td>5m</td></tr>
             </tbody>
           </table>
         </div>
@@ -470,14 +470,14 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-argus-synthesis-driver</code></td><td>Per-advisory synthesis run; calls the registered <code>security.argusSynthesizeAdvisory</code> step</td><td>5m</td></tr>
-              <tr><td><code>soc-argus-exploit-to-detection</code></td><td>Reconciles advisory state with eval verdicts</td><td>5m</td></tr>
-              <tr><td><code>soc-deteng</code></td><td>Detection-engineering loop — proposes rule patches / new rules with evidence</td><td>30m</td></tr>
-              <tr><td><code>soc-gap-analyzer</code></td><td>Coverage-gap analysis + capability_gap recommendations</td><td>1h</td></tr>
-              <tr><td><code>soc-proactive-hunter</code></td><td>Multi-source proactive hunt → candidate detections</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-alert-to-hypothesis</code></td><td>Alerts without CVE coverage → advisory + synthesis trigger</td><td>15m</td></tr>
-              <tr><td><code>soc-argus-coverage-initializer</code></td><td>Discover Fleet integrations; propose missing prebuilt rules</td><td>24h</td></tr>
-              <tr><td><code>soc-argus-ml-anomaly-bridge</code></td><td>ML anomalies → <code>.soc-hunt-findings</code> hypotheses</td><td>10m</td></tr>
+              <tr><td><code>soc_argus_synthesis_driver</code></td><td>Per-advisory synthesis run; calls the registered <code>security.argusSynthesizeAdvisory</code> step</td><td>5m</td></tr>
+              <tr><td><code>soc_argus_exploit_to_detection</code></td><td>Reconciles advisory state with eval verdicts</td><td>5m</td></tr>
+              <tr><td><code>soc_deteng</code></td><td>Detection-engineering loop — proposes rule patches / new rules with evidence</td><td>30m</td></tr>
+              <tr><td><code>soc_gap_analyzer</code></td><td>Coverage-gap analysis + capability_gap recommendations</td><td>1h</td></tr>
+              <tr><td><code>soc_proactive_hunter</code></td><td>Multi-source proactive hunt → candidate detections</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_alert_to_hypothesis</code></td><td>Alerts without CVE coverage → advisory + synthesis trigger</td><td>15m</td></tr>
+              <tr><td><code>soc_argus_coverage_initializer</code></td><td>Discover Fleet integrations; propose missing prebuilt rules</td><td>24h</td></tr>
+              <tr><td><code>soc_argus_ml_anomaly_bridge</code></td><td>ML anomalies → <code>.soc-hunt-findings</code> hypotheses</td><td>10m</td></tr>
             </tbody>
           </table>
         </div>
@@ -489,12 +489,12 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-rule-backtester</code></td><td>Replay drafts against historic alert data</td><td>continuous</td></tr>
-              <tr><td><code>soc-argus-shadow-executor</code></td><td>Dry-run all <code>auto_apply_ready</code> drafts; downgrade noise cannons</td><td>30m</td></tr>
-              <tr><td><code>soc-regression-gate</code></td><td>Replay regression dataset against any proposed change</td><td>continuous</td></tr>
-              <tr><td><code>soc-detection-eval</code></td><td>Reads <code>.soc-argus-eval-runs</code>; feeds verdicts into the regression gate</td><td>15m</td></tr>
-              <tr><td><code>soc-argus-trust-gate</code></td><td>Per-recommendation trust-tier check before auto-apply</td><td>5m</td></tr>
-              <tr><td><code>soc-argus-fp-baseline-roller</code></td><td>Per-rule FP baseline → <code>.soc-rule-fp-baseline</code></td><td>24h</td></tr>
+              <tr><td><code>soc_rule_backtester</code></td><td>Replay drafts against historic alert data</td><td>continuous</td></tr>
+              <tr><td><code>soc_argus_shadow_executor</code></td><td>Dry-run all <code>auto_apply_ready</code> drafts; downgrade noise cannons</td><td>30m</td></tr>
+              <tr><td><code>soc_regression_gate</code></td><td>Replay regression dataset against any proposed change</td><td>continuous</td></tr>
+              <tr><td><code>soc_detection_eval</code></td><td>Reads <code>.soc-argus-eval-runs</code>; feeds verdicts into the regression gate</td><td>15m</td></tr>
+              <tr><td><code>soc_argus_trust_gate</code></td><td>Per-recommendation trust-tier check before auto-apply</td><td>5m</td></tr>
+              <tr><td><code>soc_argus_fp_baseline_roller</code></td><td>Per-rule FP baseline → <code>.soc-rule-fp-baseline</code></td><td>24h</td></tr>
             </tbody>
           </table>
         </div>
@@ -506,14 +506,14 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-autonomous-applier</code></td><td>Governance-gated applier (ownership, budget, cooldown, kill-switch, snapshot-before-mutate)</td><td>5m</td></tr>
-              <tr><td><code>soc-recommendation-applier</code></td><td>Operator-approved deterministic patches → DE</td><td>continuous</td></tr>
-              <tr><td><code>soc-recovery</code></td><td>Restore snapshots on kill-switch / regression failure</td><td>on-event</td></tr>
-              <tr><td><code>soc-response</code></td><td>Containment playbook (host isolate, process kill, user notify)</td><td>on-event</td></tr>
-              <tr><td><code>soc-argus-containment</code></td><td>Governance-gated Defend response (kill-switch + trust + budget + cooldown)</td><td>on-event</td></tr>
-              <tr><td><code>soc-canary-graduation</code></td><td>Canary-mode rule graduation + flag-for-rollback</td><td>4h</td></tr>
-              <tr><td><code>soc-argus-rule-health-monitor</code></td><td>High-volume rule monitor → autonomy decisions</td><td>5m</td></tr>
-              <tr><td><code>soc-argus-case-lifecycle</code></td><td>Find-or-create investigation case + alert attach</td><td>on-event</td></tr>
+              <tr><td><code>soc_autonomous_applier</code></td><td>Governance-gated applier (ownership, budget, cooldown, kill-switch, snapshot-before-mutate)</td><td>5m</td></tr>
+              <tr><td><code>soc_recommendation_applier</code></td><td>Operator-approved deterministic patches → DE</td><td>continuous</td></tr>
+              <tr><td><code>soc_recovery</code></td><td>Restore snapshots on kill-switch / regression failure</td><td>on-event</td></tr>
+              <tr><td><code>soc_response</code></td><td>Containment playbook (host isolate, process kill, user notify)</td><td>on-event</td></tr>
+              <tr><td><code>soc_argus_containment</code></td><td>Governance-gated Defend response (kill-switch + trust + budget + cooldown)</td><td>on-event</td></tr>
+              <tr><td><code>soc_canary_graduation</code></td><td>Canary-mode rule graduation + flag-for-rollback</td><td>4h</td></tr>
+              <tr><td><code>soc_argus_rule_health_monitor</code></td><td>High-volume rule monitor → autonomy decisions</td><td>5m</td></tr>
+              <tr><td><code>soc_argus_case_lifecycle</code></td><td>Find-or-create investigation case + alert attach</td><td>on-event</td></tr>
             </tbody>
           </table>
         </div>
@@ -525,22 +525,22 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-watchdog</code></td><td>Trip kill-switch on budget / regression / loop thresholds</td><td>1m</td></tr>
-              <tr><td><code>soc-argus-trust-tier-assessor</code></td><td>Per-actor tier (frontier / trusted / probationary / quarantined)</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-reasoning-watchdog</code></td><td>Short-window confidence dropout watchdog</td><td>5m</td></tr>
-              <tr><td><code>soc-argus-drift-monitor</code></td><td>EMA-baseline rule eval drift + actor trajectory</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-self-healer</code></td><td>workflows.failed subscriber → retry / dead-letter / alert</td><td>on-event</td></tr>
-              <tr><td><code>soc-skill-self-adjust</code></td><td>B9 evaluateSkillHealth verdict → reprompt / demote / freeze (self-tuning skills)</td><td>1h</td></tr>
-              <tr><td><code>soc-skill-metrics-roller</code></td><td>Per-skill rollup → <code>.soc-skill-metrics</code></td><td>1h</td></tr>
-              <tr><td><code>soc-shift-handover</code></td><td>8h operator-facing summary</td><td>8h</td></tr>
-              <tr><td><code>soc-forensic-summarizer</code></td><td>Closed-case immutable summaries → <code>.soc-forensic-summary</code></td><td>15m</td></tr>
-              <tr><td><code>soc-incident-reverse-intel</code></td><td>B10 incident TTPs → <code>.soc-intel-feed</code> reverse loop</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-redundancy-scanner</code></td><td>Consolidation intents for overlapping rules</td><td>24h</td></tr>
-              <tr><td><code>soc-recommendation-lifecycle</code></td><td>Auto-close stale recommendations &gt; 7d</td><td>24h</td></tr>
-              <tr><td><code>soc-argus-dac-export</code></td><td>B4 detection-as-code export queue</td><td>1h</td></tr>
-              <tr><td><code>soc-argus-health-aggregator</code></td><td>Subsystem signals → single .soc-argus-health doc</td><td>5m</td></tr>
-              <tr><td><code>soc-workflow-liveness-watchdog</code></td><td>Heartbeat freshness across the workflow fleet</td><td>10m</td></tr>
-              <tr><td><code>soc-pipeline-run-telemetry</code></td><td>Workflow-fleet cadence + success / failure counts</td><td>5m</td></tr>
+              <tr><td><code>soc_watchdog</code></td><td>Trip kill-switch on budget / regression / loop thresholds</td><td>1m</td></tr>
+              <tr><td><code>soc_argus_trust_tier_assessor</code></td><td>Per-actor tier (frontier / trusted / probationary / quarantined)</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_reasoning_watchdog</code></td><td>Short-window confidence dropout watchdog</td><td>5m</td></tr>
+              <tr><td><code>soc_argus_drift_monitor</code></td><td>EMA-baseline rule eval drift + actor trajectory</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_self_healer</code></td><td>workflows.failed subscriber → retry / dead-letter / alert</td><td>on-event</td></tr>
+              <tr><td><code>soc_skill_self_adjust</code></td><td>B9 evaluateSkillHealth verdict → reprompt / demote / freeze (self-tuning skills)</td><td>1h</td></tr>
+              <tr><td><code>soc_skill_metrics_roller</code></td><td>Per-skill rollup → <code>.soc-skill-metrics</code></td><td>1h</td></tr>
+              <tr><td><code>soc_shift_handover</code></td><td>8h operator-facing summary</td><td>8h</td></tr>
+              <tr><td><code>soc_forensic_summarizer</code></td><td>Closed-case immutable summaries → <code>.soc-forensic-summary</code></td><td>15m</td></tr>
+              <tr><td><code>soc_incident_reverse_intel</code></td><td>B10 incident TTPs → <code>.soc-intel-feed</code> reverse loop</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_redundancy_scanner</code></td><td>Consolidation intents for overlapping rules</td><td>24h</td></tr>
+              <tr><td><code>soc_recommendation_lifecycle</code></td><td>Auto-close stale recommendations &gt; 7d</td><td>24h</td></tr>
+              <tr><td><code>soc_argus_dac_export</code></td><td>B4 detection-as-code export queue</td><td>1h</td></tr>
+              <tr><td><code>soc_argus_health_aggregator</code></td><td>Subsystem signals → single .soc-argus-health doc</td><td>5m</td></tr>
+              <tr><td><code>soc_workflow_liveness_watchdog</code></td><td>Heartbeat freshness across the workflow fleet</td><td>10m</td></tr>
+              <tr><td><code>soc_pipeline_run_telemetry</code></td><td>Workflow-fleet cadence + success / failure counts</td><td>5m</td></tr>
             </tbody>
           </table>
         </div>
@@ -552,11 +552,11 @@
           <table>
             <thead><tr><th>Workflow</th><th>Purpose</th><th>Trigger</th></tr></thead>
             <tbody>
-              <tr><td><code>soc-argus-arm-mythos-preset</code></td><td>Manual-only arming switch for the Mythos-class adversary preset</td><td>operator</td></tr>
-              <tr><td><code>soc-argus-frontier-simulator</code></td><td>Variant-bank-driven labelled events into the eval corpus (M2.4)</td><td>30m while armed</td></tr>
-              <tr><td><code>soc-caldera-dispatcher</code></td><td>Dispatch Caldera operations against the lab fleet</td><td>operator</td></tr>
-              <tr><td><code>soc-caldera-poller</code></td><td>Poll Caldera for op status → evolution log</td><td>5m</td></tr>
-              <tr><td><code>soc-demo-1-runner</code></td><td>Demo Scenario 1 — Same-day CVE → detection</td><td>operator</td></tr>
+              <tr><td><code>soc_argus_arm_mythos_preset</code></td><td>Manual-only arming switch for the Mythos-class adversary preset</td><td>operator</td></tr>
+              <tr><td><code>soc_argus_frontier_simulator</code></td><td>Variant-bank-driven labelled events into the eval corpus (M2.4)</td><td>30m while armed</td></tr>
+              <tr><td><code>soc_caldera_dispatcher</code></td><td>Dispatch Caldera operations against the lab fleet</td><td>operator</td></tr>
+              <tr><td><code>soc_caldera_poller</code></td><td>Poll Caldera for op status → evolution log</td><td>5m</td></tr>
+              <tr><td><code>soc_demo_1_runner</code></td><td>Demo Scenario 1 — Same-day CVE → detection</td><td>operator</td></tr>
             </tbody>
           </table>
         </div>
@@ -573,7 +573,7 @@
           <tr><td><code>soc-mutation-planning</code></td><td>"plan a mutation for rule R…", "what should we change about this rule?"</td><td>Mutation intent shape + governance gate matrix + trust-tier consequences.</td></tr>
           <tr><td>(B7 trigger) <code>soc-argus-rule-tuning</code></td><td>"tune this noisy rule"</td><td><code>evaluateRuleTuning</code> verdict matrix; mirrors logic in <code>kbn-argus-trust-policy</code>.</td></tr>
           <tr><td>(B8 trigger) <code>soc-argus-prebuilt-lifecycle</code></td><td>"manage this prebuilt rule's lifecycle"</td><td><code>evaluatePrebuiltLifecycle</code> matrix.</td></tr>
-          <tr><td>(B9 trigger) <code>soc-argus-skill-health</code></td><td>self-invoked by <code>soc-skill-self-adjust</code></td><td><code>evaluateSkillHealth</code> verdict matrix → recommended_actions.</td></tr>
+          <tr><td>(B9 trigger) <code>soc-argus-skill-health</code></td><td>self-invoked by <code>soc_skill_self_adjust</code></td><td><code>evaluateSkillHealth</code> verdict matrix → recommended_actions.</td></tr>
         </tbody>
       </table>
     </section>
@@ -587,7 +587,7 @@
         <div class="score-row"><span class="label">.soc-coverage-snapshots</span><span class="reason">Hourly ATT&amp;CK coverage rollups (vision §4.2)</span><span class="pts">L1 · W</span></div>
         <div class="score-row"><span class="label">.soc-mutation-intents</span><span class="reason">Draft mutations (advisory → rule patch / creation / disable)</span><span class="pts">L2 · W</span></div>
         <div class="score-row"><span class="label">.soc-recommendations</span><span class="reason">Operator-visible mutation queue (validated mutation_intent envelopes)</span><span class="pts">L2/L3 · W</span></div>
-        <div class="score-row"><span class="label">.soc-rule-backtester-runs</span><span class="reason">Backtest verdicts; gate for auto-apply</span><span class="pts">L3 · W</span></div>
+        <div class="score-row"><span class="label">.soc_rule_backtester-runs</span><span class="reason">Backtest verdicts; gate for auto-apply</span><span class="pts">L3 · W</span></div>
         <div class="score-row"><span class="label">.soc-argus-eval-runs</span><span class="reason">Detection eval suite verdicts</span><span class="pts">L3 · W</span></div>
         <div class="score-row"><span class="label">.soc-rule-fp-baseline</span><span class="reason">B3 production-grounded FP baseline per rule</span><span class="pts">L3 · W</span></div>
         <div class="score-row"><span class="label">.soc-actor-trust-tiers</span><span class="reason">Per-actor tier (frontier/trusted/probationary/quarantined)</span><span class="pts">L5 · W</span></div>
@@ -597,7 +597,7 @@
         <div class="score-row"><span class="label">.soc-evolution-log</span><span class="reason">All ARGUS-managed artifact changes</span><span class="pts">L5 · W</span></div>
         <div class="score-row"><span class="label">.soc-kill-switch</span><span class="reason">Cluster autonomy on/off + budget tripwires</span><span class="pts">L5 · R/W</span></div>
         <div class="score-row"><span class="label">.soc-workflow-registry</span><span class="reason">Slug ↔ Kibana saved-object id mapping</span><span class="pts">L5 · R/W</span></div>
-        <div class="score-row"><span class="label">.soc-shift-handover</span><span class="reason">8h operator narrative</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc_shift_handover</span><span class="reason">8h operator narrative</span><span class="pts">L5 · W</span></div>
         <div class="score-row"><span class="label">.soc-forensic-summary</span><span class="reason">Closed-case immutable summaries</span><span class="pts">L5 · W</span></div>
         <div class="score-row"><span class="label">.soc-skill-metrics</span><span class="reason">Per-skill invocation + success rate rollup</span><span class="pts">L5 · W</span></div>
         <div class="score-row"><span class="label">.soc-skill-recommendations</span><span class="reason">B9 verdict per skill (healthy / review / reprompt / demote)</span><span class="pts">L5 · W</span></div>

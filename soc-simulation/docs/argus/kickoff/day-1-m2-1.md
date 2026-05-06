@@ -194,6 +194,6 @@ which surfaces the first time someone runs the Playwright suite locally with
 
 1. Implement `replay_rule.ts` against a mocked Detection Engine rule runner — return deterministic fires/no-fires.
 2. Replace the mock with the real rule runner wiring (Detection Engine + Scout fixture).
-3. Add the `onEvaluationComplete` hook that writes per-`(rule_id, run_id)` summaries to `.soc-detection-eval-runs`.
-4. Reposition `workflows/soc-detection-eval.yaml` as a poller of `.soc-detection-eval-runs` (it currently assumes a synchronous POST route — update the description + remove the `kibana.request` step).
+3. Add the `onEvaluationComplete` hook that writes per-`(rule_id, run_id)` summaries to `.soc_detection_eval-runs`.
+4. Reposition `workflows/soc_detection_eval.yaml` as a poller of `.soc_detection_eval-runs` (it currently assumes a synchronous POST route — update the description + remove the `kibana.request` step).
 5. Hand the `DetectionRuleTaskOutput` contract to Pair B so M2.2 can plug its synthesized rules straight into the same evaluator set.

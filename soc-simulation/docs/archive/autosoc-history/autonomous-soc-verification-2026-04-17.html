@@ -280,7 +280,7 @@
       <tr>
         <td><strong>Response Actions</strong></td>
         <td class="ok">Renders</td>
-        <td>213 actions surfaced — matches <code>.soc-response-actions</code> (212 docs).</td>
+        <td>213 actions surfaced — matches <code>.soc_response-actions</code> (212 docs).</td>
       </tr>
       <tr>
         <td><strong>MITRE Coverage &amp; Rule Tuning</strong></td>
@@ -305,7 +305,7 @@
       <tr>
         <td><strong>Audit Trail</strong></td>
         <td class="ok">Renders + functional</td>
-        <td>31 rows visible on first paint. Latest entry: <code>recommendation_applied</code> from <code>soc-recommendation-applier</code> at <code>13:52:58</code> today — with <code>applied: []</code> and <code>skipped: [...with reasons]</code>, proving the T5 governance gates are actively filtering intents.</td>
+        <td>31 rows visible on first paint. Latest entry: <code>recommendation_applied</code> from <code>soc_recommendation_applier</code> at <code>13:52:58</code> today — with <code>applied: []</code> and <code>skipped: [...with reasons]</code>, proving the T5 governance gates are actively filtering intents.</td>
       </tr>
     </tbody>
   </table>
@@ -344,7 +344,7 @@
   <h3>Legacy document shape (pre-T1)</h3>
 <pre>{
   "@timestamp": "2026-04-17T11:49:40Z",
-  "source":     "soc-alert-sweeper",
+  "source":     "soc_alert_sweeper",
   "stage":      "triage",
   "batch_size": "3016",
   "triage_output": "{\"message\":\"{\\\"classifications\\\":[
@@ -377,7 +377,7 @@
   <h2><span class="num">6</span> Governance gates — live proof</h2>
   <div class="callout callout-ok">
     <strong>T5 gates are executing.</strong> The Audit Trail shows a <code>recommendation_applied</code> event
-    emitted today by <code>soc-recommendation-applier</code> with <code>applied: []</code> and
+    emitted today by <code>soc_recommendation_applier</code> with <code>applied: []</code> and
     <code>skipped: [ { doc_id: "5O7Kmp0BHolJD3Chxn7j", reason: "parent …" } ]</code>. This is exactly the behaviour
     the T5 rules require: any <code>mutation_intent</code> whose <code>artifact_id</code> does not start with
     <code>auto-</code>, or which targets an artifact not owned by <code>autosoc</code>, is rejected instead of applied.
@@ -407,7 +407,7 @@
     <tbody>
       <tr>
         <td><span class="badge badge-info">P1</span></td>
-        <td>Trigger one fresh sweeper→triage cycle (<code>soc-alert-sweeper</code>). No code change required.</td>
+        <td>Trigger one fresh sweeper→triage cycle (<code>soc_alert_sweeper</code>). No code change required.</td>
         <td>~5 min</td>
         <td>Overview KPIs (Automation / TP / FP / Avg Confidence / Total Processed / Alerts Triaged) and Triage Results table light up with real post-T1 flat docs. Cleanest path.</td>
       </tr>

@@ -14,12 +14,12 @@ force a re-run of the detection-eval vertical before an adversary notices.
 
 ## Decision
 
-Introduce `soc-argus-drift-monitor`, a fully-auto workflow that scans two streams
+Introduce `soc_argus_drift_monitor`, a fully-auto workflow that scans two streams
 on a 6-hour cadence and emits drift events into `.soc-recommendations`.
 
 ### Sources
 
-1. `.soc-detection-eval-runs` (M2.1) — score trajectory per `rule_id`.
+1. `.soc_detection_eval-runs` (M2.1) — score trajectory per `rule_id`.
 2. `.soc-trust-scores` — trust trajectory per actor.
 
 ### Detection
@@ -48,7 +48,7 @@ routes to human review.
 
 ## Why this design
 
-- **No new primitives.** Reuses `.soc-detection-eval-runs`, `.soc-trust-scores`,
+- **No new primitives.** Reuses `.soc_detection_eval-runs`, `.soc-trust-scores`,
   `mutation_intent`, existing applier cascade.
 - **Deterministic.** EMA + simple thresholds. No LLM.
 - **Falsifiable.** Every drift event produces a verifiable eval-run row with the

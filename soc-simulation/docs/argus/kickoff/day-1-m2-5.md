@@ -81,7 +81,7 @@ node scripts/jest x-pack/solutions/security/plugins/security_solution/server/lib
 curl -s "$ES_URL/.soc-reasoning-traces-*/_search?size=1" | jq '.hits.hits[0]._source'
 ```
 
-Expected: at least one span document, with `argus.agent.id = "soc-deteng-agent"`
+Expected: at least one span document, with `argus.agent.id = "soc_deteng-agent"`
 and a non-empty `argus.decision.id`.
 
 ## You are not stuck if…

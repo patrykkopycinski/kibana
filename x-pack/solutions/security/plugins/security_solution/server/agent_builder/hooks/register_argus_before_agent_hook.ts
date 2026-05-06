@@ -12,13 +12,13 @@ import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
-/** Must match `consts.daily_budget_all` in soc-simulation/workflows/soc-autonomous-applier.yaml */
+/** Must match `consts.daily_budget_all` in soc-simulation/workflows/soc_autonomous_applier.yaml */
 const DAILY_MUTATION_BUDGET = 50;
 
 const KILL_SWITCH_INDEX = '.soc-kill-switch';
 const TRUST_SCORES_INDEX = '.soc-trust-scores';
 const EVOLUTION_LOG_INDEX = '.soc-evolution-log';
-const SHIFT_HANDOVER_INDEX = '.soc-shift-handover';
+const SHIFT_HANDOVER_INDEX = '.soc_shift_handover';
 const AUTONOMY_DECISIONS_INDEX = '.soc-autonomy-decisions';
 
 const ARGUS_SKILL_SUBSTRINGS: readonly string[] = [
@@ -147,7 +147,7 @@ const readBudgetRemaining = async (es: {
     query: {
       bool: {
         filter: [
-          { term: { source: 'soc-autonomous-applier' } },
+          { term: { source: 'soc_autonomous_applier' } },
           { term: { result: 'applied' } },
           { range: { '@timestamp': { gte: 'now-24h' } } },
         ],

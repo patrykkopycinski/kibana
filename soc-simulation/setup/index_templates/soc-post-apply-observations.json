@@ -42,7 +42,7 @@
     }
   },
   "_meta": {
-    "description": "Post-apply observation records emitted by soc-post-apply-observer. One row per mutation snapshot evaluated against its observation window. Feeds KPI dashboard and trust-scoring. Observer ALSO writes heartbeat/regression rows to .soc-audit-trail for the audit narrative.",
+    "description": "Post-apply observation records emitted by soc_post_apply_observer. One row per mutation snapshot evaluated against its observation window. Feeds KPI dashboard and trust-scoring. Observer ALSO writes heartbeat/regression rows to .soc-audit-trail for the audit narrative.",
     "owner": "argus-governance",
     "schema_version": 1
   }

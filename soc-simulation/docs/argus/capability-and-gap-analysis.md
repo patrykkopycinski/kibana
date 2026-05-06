@@ -52,11 +52,11 @@
 >   transaction.
 >
 >   * **G1 closed-loop eval synthesis** — the M2.2 reconciler now emits
->     an inline `.soc-detection-eval-runs` row per promoted advisory,
+>     an inline `.soc_detection_eval-runs` row per promoted advisory,
 >     so recs flip `pending → auto_apply_ready` within a single tick.
 >   * **G2 reset + seed hygiene** — `setup.sh --reset-recommendations`
 >     wipes `.soc-recommendations`, `.soc-cve-advisories`, and
->     `.soc-detection-eval-runs` atomically; `--seed-all` seeds every
+>     `.soc_detection_eval-runs` atomically; `--seed-all` seeds every
 >     advisory fixture in one pass.
 >   * **G3 outcome-driven trust tiers** — the Phase-3 assessor now
 >     aggregates `rollback_rate` and `fp_ratio` from `.soc-outcomes`
@@ -73,7 +73,7 @@
 >   * **R9 OTEL-GenAI-1.x** — `.soc-reasoning-trace` has first-class
 >     `gen_ai.*` mappings and every ARGUS workflow emits the
 >     semantic-convention envelope (system, operation, agent).
->   * **R10 reasoning watchdog** — new `soc-argus-reasoning-watchdog.yaml`
+>   * **R10 reasoning watchdog** — new `soc_argus_reasoning_watchdog.yaml`
 >     freezes actors on 15-minute confidence dropout against the 24h
 >     baseline, bypassing the hourly assessor cadence.
 
@@ -104,13 +104,13 @@ the live runtime run in
 |--------------------|---------|--------------|-----------------|
 | `.soc-cve-advisories` | CVE/advisory inbox + per-advisory synthesis state | `run_exploit_to_detection.js`, reconciler workflow | 1 fixture advisory (lsass) |
 | `.soc-recommendations` | `mutation_intent` envelope (v2 schema) — the durable write surface for autonomous actions | M2.2 CLI + envelope-validator pipeline | 259 recs, all pass envelope validator |
-| `.soc-detection-eval-runs` | Per-(rule × run) gate decisions with per-axis firing | M2.1 CLI / Playwright suite | 4 rows, one per in-tree Mythos rule |
+| `.soc_detection_eval-runs` | Per-(rule × run) gate decisions with per-axis firing | M2.1 CLI / Playwright suite | 4 rows, one per in-tree Mythos rule |
 | `.soc-eval-corpus-argus-corpus-mythos-2026-04` | Labelled variant bank (positive/negative, per-axis) | `setup.sh` bulk-load from `scripts/argus-variant-bank/` | 13 labelled variants |
 | `.soc-reasoning-trace` | OTEL-GenAI spans for every ARGUS decision | M2.2 CLI, trust-gate workflow, reconciler | 9 spans so far |
-| `.soc-actor-trust-tiers` | Per-actor trust tier + auto-apply allowance | `soc-argus-trust-tier-assessor.yaml` | 2 seeded actors (frontier + probationary) |
+| `.soc-actor-trust-tiers` | Per-actor trust tier + auto-apply allowance | `soc_argus_trust_tier_assessor.yaml` | 2 seeded actors (frontier + probationary) |
 | `.soc-audit-trail` | Heartbeats + governance events | every ARGUS workflow | 17k+ events after setup + demo runs |
 | `.soc-argus-vuln-demo` | M2.3 retrofill target — vulnerability docs with `vulnerability.argus.*` enrichment | `argus-exploit-probability-enricher` ingest pipeline | 3 demo vulns, contracted TS↔Painless parity |
-| `.soc-attack-commands`, `.soc-difficulty-state`, `.soc-eval-corpus-*` | M2.4 simulation surfaces | `soc-argus-arm-mythos-preset` + `soc-argus-frontier-simulator` (mirror-validated) | 1 pending command, state=level-6 armed, 2 simulated emissions |
+| `.soc-attack-commands`, `.soc-difficulty-state`, `.soc-eval-corpus-*` | M2.4 simulation surfaces | `soc_argus_arm_mythos_preset` + `soc_argus_frontier_simulator` (mirror-validated) | 1 pending command, state=level-6 armed, 2 simulated emissions |
 
 ### 1.3 Ingest pipelines
 
@@ -123,18 +123,18 @@ the live runtime run in
 
 | Workflow | Layer | Runtime proof |
 |----------|-------|---------------|
-| `soc-argus-exploit-to-detection.yaml` | M2.2 reconciler — promote advisories, reflect eval verdict, heartbeat | **live-runtime validated** (`proof/demo-validation-2026-04-19-live.md` §2.3) |
-| `soc-argus-trust-tier-assessor.yaml` | Phase-3 — assign tiers from governance signals | **live-runtime validated** (§2.5) + `proof/tiers.json` |
-| `soc-argus-trust-gate.yaml` | Phase-3 — non-invasive downgrade of recs by actor tier | **live-runtime validated** (§2.6) + `proof/m3-gate-result.json` |
-| `soc-argus-arm-mythos-preset.yaml` | M2.4 — index pending frontier attack-command | **live-runtime validated** (§2.1) |
-| `soc-argus-frontier-simulator.yaml` | M2.4 — emit a polymorphic variant when preset armed via `_reindex` + inline Painless, preserving nested ECS | **live-runtime validated** (§2.2), emission landed in `.soc-eval-corpus-argus-corpus-mythos-2026-04-live` |
-| `soc-detection-eval.yaml` | M2.1 detection-eval reconciler polling `.soc-detection-eval-runs` | **live-runtime validated** (§2.4) |
-| `soc-demo-1-runner.yaml` / `soc-demo-2-runner.yaml` | Demo orchestrator — observes reconciler + trust-gate heartbeats, emits `argus_demo_run` | **live-runtime validated** (§2.7 / §2.8) |
+| `soc_argus_exploit_to_detection.yaml` | M2.2 reconciler — promote advisories, reflect eval verdict, heartbeat | **live-runtime validated** (`proof/demo-validation-2026-04-19-live.md` §2.3) |
+| `soc_argus_trust_tier_assessor.yaml` | Phase-3 — assign tiers from governance signals | **live-runtime validated** (§2.5) + `proof/tiers.json` |
+| `soc_argus_trust_gate.yaml` | Phase-3 — non-invasive downgrade of recs by actor tier | **live-runtime validated** (§2.6) + `proof/m3-gate-result.json` |
+| `soc_argus_arm_mythos_preset.yaml` | M2.4 — index pending frontier attack-command | **live-runtime validated** (§2.1) |
+| `soc_argus_frontier_simulator.yaml` | M2.4 — emit a polymorphic variant when preset armed via `_reindex` + inline Painless, preserving nested ECS | **live-runtime validated** (§2.2), emission landed in `.soc-eval-corpus-argus-corpus-mythos-2026-04-live` |
+| `soc_detection_eval.yaml` | M2.1 detection-eval reconciler polling `.soc_detection_eval-runs` | **live-runtime validated** (§2.4) |
+| `soc_demo_1_runner.yaml` / `soc_demo_2_runner.yaml` | Demo orchestrator — observes reconciler + trust-gate heartbeats, emits `argus_demo_run` | **live-runtime validated** (§2.7 / §2.8) |
 
 ### 1.5 Dashboard
 
 `ARGUS Console` saved object + 3 data views import cleanly
-(`proof/dashboard-import.json`). Panels bind to `.soc-detection-eval-runs`,
+(`proof/dashboard-import.json`). Panels bind to `.soc_detection_eval-runs`,
 `.soc-recommendations`, `.soc-reasoning-trace`.
 
 ---
@@ -148,15 +148,15 @@ the live runtime run in
 | **G-demo-1** | ~~Local Kibana build does not expose the Workflows runtime executor, so every workflow runs via mirror scripts instead of end-to-end clicks.~~ | Resolved 2026-04-19. All eight ARGUS demo workflows run end-to-end on the live runtime; the driver `scripts/argus_live_demo.sh` completes with `completed=8 failed/other=0`. Several step-level schema gaps had to be worked around by using `elasticsearch.request` for object-form `sort` and for `_reindex` with inline Painless — documented in `proof/demo-validation-2026-04-19-live.md` §4. | ✅ resolved |
 | **G-demo-2** | All four Mythos rules `fail` the M2.1 gate today. | Intentional — it is the demo narrative ("ARGUS closes the gap"). No action needed; narrative emphasises this is the starting state. | ✅ intentional |
 | **G-demo-3** | Scenario-3 (frontier reasoning) is not executable end-to-end — it needs M2.4 red-team operator + M2.5 reasoning watchdog. | Demo covers scenarios 1 + 2 fully; scenario 3 is a 30-second teaser using `arm-mythos-preset` + `frontier-simulator` (both live-runtime validated in `proof/demo-validation-2026-04-19-live.md` §2.1 / §2.2). | ⚠ scoped out |
-| **G-demo-4** | `SOC Triage` is excluded from the ARGUS demo driver because it depends on a live Inference connector and stalls without real alert input. | No impact on the ARGUS narrative; `soc-alert-sweeper` drives triage on real alerts in production. Documented in `scripts/argus_live_demo.sh`. | ✅ documented |
+| **G-demo-4** | `SOC Triage` is excluded from the ARGUS demo driver because it depends on a live Inference connector and stalls without real alert input. | No impact on the ARGUS narrative; `soc_alert_sweeper` drives triage on real alerts in production. Documented in `scripts/argus_live_demo.sh`. | ✅ documented |
 
 ### 2.2 P1 — fix during or immediately after demo
 
 | # | Gap | Where | Status |
 |---|-----|-------|--------|
-| **G1** | ~~No closed-loop "synthesized rule → re-run eval → flip advisory to `eval_pass`"~~ | `soc-argus-exploit-to-detection.yaml` | ✅ resolved 2026-04-20. The reconciler counts positives/negatives in the advisory's own labelled corpus and writes a synthetic `.soc-detection-eval-runs` row per promoted advisory. The existing `soc-detection-eval.yaml` poller picks it up within one 2-minute tick and flips the linked recommendation to `auto_apply_ready` without waiting for a Playwright replay. |
-| **G2** | ~~`.soc-recommendations` has 259 rows — most are scratch from earlier validation.~~ | dev cluster only | ✅ resolved 2026-04-20. `setup.sh --reset-recommendations` wipes `.soc-recommendations`, `.soc-cve-advisories`, and `.soc-detection-eval-runs` atomically before seeding; `--no-seed-advisories` skips the CLI seed when you want to reset alone. |
-| **G3** | ~~Trust-tier assessor emits static tiers~~ | `soc-argus-trust-tier-assessor.yaml` | ✅ resolved 2026-04-20. Assessor now aggregates `rollback_rate` and `fp_ratio` per actor from `.soc-outcomes` (7d window) and hard-quarantines any actor above 20% on either signal, even if eval scores still look good. New fields land in `.soc-actor-trust-tiers.metrics` for dashboard binding. |
+| **G1** | ~~No closed-loop "synthesized rule → re-run eval → flip advisory to `eval_pass`"~~ | `soc_argus_exploit_to_detection.yaml` | ✅ resolved 2026-04-20. The reconciler counts positives/negatives in the advisory's own labelled corpus and writes a synthetic `.soc_detection_eval-runs` row per promoted advisory. The existing `soc_detection_eval.yaml` poller picks it up within one 2-minute tick and flips the linked recommendation to `auto_apply_ready` without waiting for a Playwright replay. |
+| **G2** | ~~`.soc-recommendations` has 259 rows — most are scratch from earlier validation.~~ | dev cluster only | ✅ resolved 2026-04-20. `setup.sh --reset-recommendations` wipes `.soc-recommendations`, `.soc-cve-advisories`, and `.soc_detection_eval-runs` atomically before seeding; `--no-seed-advisories` skips the CLI seed when you want to reset alone. |
+| **G3** | ~~Trust-tier assessor emits static tiers~~ | `soc_argus_trust_tier_assessor.yaml` | ✅ resolved 2026-04-20. Assessor now aggregates `rollback_rate` and `fp_ratio` per actor from `.soc-outcomes` (7d window) and hard-quarantines any actor above 20% on either signal, even if eval scores still look good. New fields land in `.soc-actor-trust-tiers.metrics` for dashboard binding. |
 | **G4** | ~~Only one advisory is seeded as a scenario-1 fixture.~~ | `ARGUS_DEMO_ADVISORIES` | ✅ resolved 2026-04-20. Four fixtures (T1003.001, T1059.001, T1071.004, T1562.001) seeded by default via `run_exploit_to_detection.js --seed-all`. |
 | **G5** | ~~Variant bank is 13 docs — below the "30+" claim.~~ | `scripts/argus-variant-bank/` | ✅ resolved 2026-04-20. 30+ labelled variants across four techniques plus two additional negatives in `_negatives/baseline.ndjson`. |
 
@@ -167,11 +167,11 @@ All five Phase 3 gaps are now shipped locally and demo-ready (see
 
 | # | Gap | Status | Landing artifact |
 |---|-----|--------|------------------|
-| Drift detection over eval scores | ✅ landed | `workflows/soc-argus-drift-monitor.yaml` — EMA of rule precision + actor-trust trajectory, files `mutation_intent` on drift, 48h cooldown. |
-| Playbook learning loop | ✅ landed | `workflows/soc-argus-playbook-learner.yaml` + `argus/technique-playbook-mapping.json` — correlates outcomes × autonomy decisions × post-apply observations per (technique, step), remaps underperforming pairs on frontier-tier outcomes only. |
+| Drift detection over eval scores | ✅ landed | `workflows/soc_argus_drift_monitor.yaml` — EMA of rule precision + actor-trust trajectory, files `mutation_intent` on drift, 48h cooldown. |
+| Playbook learning loop | ✅ landed | `workflows/soc_argus_playbook_learner.yaml` + `argus/technique-playbook-mapping.json` — correlates outcomes × autonomy decisions × post-apply observations per (technique, step), remaps underperforming pairs on frontier-tier outcomes only. |
 | ARGUS Console feature surfaces | ✅ landed (extended existing dashboard) | `setup/dashboards/build_argus_console.js` — Phase 3 panel section: drift intents, playbook remap intents, intel rows, top CVE mythos, recent intents, actor tier distribution. |
-| Glasswing-style intel ingestion (`.soc-intel-feed`) | ✅ landed (demo-grade generic adapter) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc-argus-intel-adapter-generic.yaml` (seed upsert + heartbeat), `soc-argus-intel-mythos-aggregator.yaml` (per-CVE trust-weighted signal), `argus/intel-feed-seed.json` (seed reference). Swapping the seed-upsert for a TAXII poller is a drop-in replacement. |
-| MTTR-rollback metric on the scorecard | ✅ landed (R6) | `workflows/soc-recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` (10m tick); `soc-argus-trust-tier-assessor.yaml` aggregates `avg_rollback_mttr_ms` / `p50_rollback_mttr_ms` / `p95_rollback_mttr_ms` per actor; ARGUS Console Pulse tile surfaces the tenant-wide p50 via `/internal/security_solution/argus/governance_pulse` (backed by `@kbn/argus-console-common` `buildGovernancePulse`). |
+| Glasswing-style intel ingestion (`.soc-intel-feed`) | ✅ landed (demo-grade generic adapter) | `setup/index_templates/soc-intel-feed.json` + `soc-intel-mythos-signals.json`, `workflows/soc_argus_intel_adapter_generic.yaml` (seed upsert + heartbeat), `soc_argus_intel_mythos_aggregator.yaml` (per-CVE trust-weighted signal), `argus/intel-feed-seed.json` (seed reference). Swapping the seed-upsert for a TAXII poller is a drop-in replacement. |
+| MTTR-rollback metric on the scorecard | ✅ landed (R6) | `workflows/soc_recovery.yaml` emits `rollback_mttr_ms` to `.soc-outcomes` (10m tick); `soc_argus_trust_tier_assessor.yaml` aggregates `avg_rollback_mttr_ms` / `p50_rollback_mttr_ms` / `p95_rollback_mttr_ms` per actor; ARGUS Console Pulse tile surfaces the tenant-wide p50 via `/internal/security_solution/argus/governance_pulse` (backed by `@kbn/argus-console-common` `buildGovernancePulse`). |
 
 ---
 
@@ -195,18 +195,18 @@ alignment (A), both on a 1–5 scale.
 
 | # | Idea | E | A | Landing site |
 |---|------|---|---|--------------|
-| R5 | ~~**One-way vs two-way door classification per mutation.**~~ ✅ **landed 2026-04-20.** `argus.decision.door_class ∈ {one_way, two_way}` on every `mutation_intent`. Trust gate forces `pending_review` for one-way doors regardless of actor tier. rule_create is pinned two_way (detection-only rules are rollback-safe). | 2 | 5 | `mutation_intent.ts`, `soc-argus-trust-gate.yaml` |
-| R6 | ~~**Rollback MTTR metric.**~~ ✅ **landed 2026-04-20.** `soc-recovery.yaml` computes `rolled_back_at - applied_at` per rollback via an inline painless call and upserts `.soc-outcomes` rows keyed `mttr-<rec_id>` (idempotent; `rollback_mttr_emitted_at` stamps the rec so subsequent ticks skip). `soc-argus-trust-tier-assessor.yaml` rolls up per-actor `avg_rollback_mttr_ms`, `p50_rollback_mttr_ms`, `p95_rollback_mttr_ms` into `.soc-actor-trust-tiers.metrics`. `/internal/security_solution/argus/governance_pulse` + the Pulse tile (`@kbn/argus-console` / `@kbn/argus-console-common`) surface the tenant-wide p50 + tail to demo operators. | 2 | 4 | `soc-recovery.yaml` + `soc-argus-trust-tier-assessor.yaml` + `@kbn/argus-console-common` `buildGovernancePulse` |
-| R7 | ~~**Blast-radius estimate per recommendation.**~~ ✅ **landed 2026-04-17.** `mutation_intent.ts` stamps `expected_impact.blast_radius` (hosts / tenants / rules) + derived `blast_tier` on every recommendation; `@kbn/argus-trust-policy` (27 tests, including a 160-combo exhaustive matrix and a YAML↔TS drift detector) is the authoritative spec consumed by `soc-argus-trust-gate.yaml` to cap auto-apply per actor trust tier. `[ext]` | 3 | 5 | `mutation_intent.ts` + `@kbn/argus-trust-policy` + `soc-argus-trust-gate.yaml` |
-| R8 | ~~**Shadow execution**~~ ✅ **landed 2026-04-17.** `soc-autonomous-applier.yaml` defers every `auto_apply` to `soc-rule-backtester.yaml`, which projects the likely rule-hit delta against historical traffic and classifies a verdict (`safe` / `noisy` / `silent` / `dangerous`). `@kbn/argus-backtest` (24 tests, including YAML↔TS drift detector across applier + backtester) is the authoritative spec for the classification rubric and the `flipIntentStatus` mapping back onto `.soc-mutation-intents`. | 3 | 4 | `soc-rule-backtester.yaml` + applier + `@kbn/argus-backtest` |
+| R5 | ~~**One-way vs two-way door classification per mutation.**~~ ✅ **landed 2026-04-20.** `argus.decision.door_class ∈ {one_way, two_way}` on every `mutation_intent`. Trust gate forces `pending_review` for one-way doors regardless of actor tier. rule_create is pinned two_way (detection-only rules are rollback-safe). | 2 | 5 | `mutation_intent.ts`, `soc_argus_trust_gate.yaml` |
+| R6 | ~~**Rollback MTTR metric.**~~ ✅ **landed 2026-04-20.** `soc_recovery.yaml` computes `rolled_back_at - applied_at` per rollback via an inline painless call and upserts `.soc-outcomes` rows keyed `mttr-<rec_id>` (idempotent; `rollback_mttr_emitted_at` stamps the rec so subsequent ticks skip). `soc_argus_trust_tier_assessor.yaml` rolls up per-actor `avg_rollback_mttr_ms`, `p50_rollback_mttr_ms`, `p95_rollback_mttr_ms` into `.soc-actor-trust-tiers.metrics`. `/internal/security_solution/argus/governance_pulse` + the Pulse tile (`@kbn/argus-console` / `@kbn/argus-console-common`) surface the tenant-wide p50 + tail to demo operators. | 2 | 4 | `soc_recovery.yaml` + `soc_argus_trust_tier_assessor.yaml` + `@kbn/argus-console-common` `buildGovernancePulse` |
+| R7 | ~~**Blast-radius estimate per recommendation.**~~ ✅ **landed 2026-04-17.** `mutation_intent.ts` stamps `expected_impact.blast_radius` (hosts / tenants / rules) + derived `blast_tier` on every recommendation; `@kbn/argus-trust-policy` (27 tests, including a 160-combo exhaustive matrix and a YAML↔TS drift detector) is the authoritative spec consumed by `soc_argus_trust_gate.yaml` to cap auto-apply per actor trust tier. `[ext]` | 3 | 5 | `mutation_intent.ts` + `@kbn/argus-trust-policy` + `soc_argus_trust_gate.yaml` |
+| R8 | ~~**Shadow execution**~~ ✅ **landed 2026-04-17.** `soc_autonomous_applier.yaml` defers every `auto_apply` to `soc_rule_backtester.yaml`, which projects the likely rule-hit delta against historical traffic and classifies a verdict (`safe` / `noisy` / `silent` / `dangerous`). `@kbn/argus-backtest` (24 tests, including YAML↔TS drift detector across applier + backtester) is the authoritative spec for the classification rubric and the `flipIntentStatus` mapping back onto `.soc-mutation-intents`. | 3 | 4 | `soc_rule_backtester.yaml` + applier + `@kbn/argus-backtest` |
 
 ### 3.3 Reasoning traces & observability
 
 | # | Idea | E | A | Landing site |
 |---|------|---|---|--------------|
 | R9 | ~~**OTEL-GenAI-1.x alignment** of `.soc-reasoning-trace`~~ ✅ **landed 2026-04-20.** `gen_ai.*` top-level mapping (system, request, response, usage, operation, agent, tool) added to `soc-reasoning-trace.json` + emission from reconciler, trust-gate, detection-eval, and watchdog workflows. Traces are now portable across any OTEL-compliant viewer (Phoenix, Langfuse, etc.). | 2 | 5 | `soc-reasoning-trace.json` + 4 workflows |
-| R10 | ~~**Watchdog on reasoning confidence dropout**~~ ✅ **landed 2026-04-20.** `soc-argus-reasoning-watchdog.yaml` runs every 5 min. Computes 15-min mean `argus.decision.confidence` per actor and compares against 24h baseline; if `short_mean < 0.5` OR `(baseline − short) > 0.2`, the actor is frozen (tier=quarantined, `watchdog_frozen=true`). Recovery is cleared on next tick; actual tier re-derivation is handed back to the hourly assessor. | 3 | 5 | `soc-argus-reasoning-watchdog.yaml` |
-| R11 | ~~**Trace-level evals**~~ ✅ **landed 2026-04-17.** `@kbn/evals-suite-argus-reasoning` scores `.soc-reasoning-trace` spans across evidence / calibration / coherence / safety, aggregates (mean, p5), and writes a `gate_decision` (`pass` / `marginal` / `fail`) into `.soc-reasoning-eval-runs`. The hourly `soc-argus-trust-tier-assessor` reads the freshest row and quarantines actors on `fail` (marginal caps at probationary). The new `soc-argus-reasoning-eval.yaml` poller (every 2m) emits fast-path quarantine hints and governance traces for near-real-time visibility. Two runner modes: Playwright suite (LLM-as-judge via `@kbn/evals`) and standalone `run_reasoning_eval.ts` CLI (heuristic judge for demo laptops). 25 tests across judge + evaluators + full-flow integration. `[ext]` | 4 | 4 | `@kbn/evals-suite-argus-reasoning` + `soc-argus-reasoning-eval.yaml` + `soc-argus-trust-tier-assessor.yaml` |
+| R10 | ~~**Watchdog on reasoning confidence dropout**~~ ✅ **landed 2026-04-20.** `soc_argus_reasoning_watchdog.yaml` runs every 5 min. Computes 15-min mean `argus.decision.confidence` per actor and compares against 24h baseline; if `short_mean < 0.5` OR `(baseline − short) > 0.2`, the actor is frozen (tier=quarantined, `watchdog_frozen=true`). Recovery is cleared on next tick; actual tier re-derivation is handed back to the hourly assessor. | 3 | 5 | `soc_argus_reasoning_watchdog.yaml` |
+| R11 | ~~**Trace-level evals**~~ ✅ **landed 2026-04-17.** `@kbn/evals-suite-argus-reasoning` scores `.soc-reasoning-trace` spans across evidence / calibration / coherence / safety, aggregates (mean, p5), and writes a `gate_decision` (`pass` / `marginal` / `fail`) into `.soc-reasoning-eval-runs`. The hourly `soc_argus_trust_tier_assessor` reads the freshest row and quarantines actors on `fail` (marginal caps at probationary). The new `soc_argus_reasoning_eval.yaml` poller (every 2m) emits fast-path quarantine hints and governance traces for near-real-time visibility. Two runner modes: Playwright suite (LLM-as-judge via `@kbn/evals`) and standalone `run_reasoning_eval.ts` CLI (heuristic judge for demo laptops). 25 tests across judge + evaluators + full-flow integration. `[ext]` | 4 | 4 | `@kbn/evals-suite-argus-reasoning` + `soc_argus_reasoning_eval.yaml` + `soc_argus_trust_tier_assessor.yaml` |
 
 ### 3.4 Interop & data sources
 
@@ -214,7 +214,7 @@ alignment (A), both on a 1–5 scale.
 |---|------|---|---|--------------|
 | R12 | ~~**MCP / A2A support** for the ARGUS skill surface.~~ ✅ **landed 2026-04-20.** Three new packages project ARGUS skills through principal-scoped policy bundles with full governance integration: `@kbn/argus-tool-manifest` (27 tests) projects raw skills with adversarial/reasoning/trust-tier gating and `propose_only` enforcement; `@kbn/argus-mcp-server` (16 tests) serves the projection over MCP with a `RestGovernanceClient`; `@kbn/argus-a2a-server` (20 tests) exposes the same surface as A2A tasks with an `InMemoryTaskStore` and cross-actor access checks. Governance snapshot is consulted on every `list_tools` and `tools/call`, never bypassed. 63 tests green, zero lint errors, zero R12 type errors. `[ext]` | 3 | 3 | `@kbn/argus-tool-manifest` + `@kbn/argus-mcp-server` + `@kbn/argus-a2a-server` |
 | R13 | ~~**Shadow-AI telemetry as a Mythos signal.**~~ ✅ **landed 2026-04-20.** `integrations#18123` (Shadow AI Discovery) wired into `exploit_probability.mythos_signal`; AI-tool presence on a host now raises exploit likelihood in the scorer. `[ext]` | 2 | 4 | `@kbn/argus-exploit-probability` inputs |
-| R14 | ~~**CISA KEV live feed.**~~ ✅ **landed 2026-04-20.** `soc-kev-ingest.yaml` pulls CISA KEV daily and indexes into `.soc-cve-advisories`; KEV is no longer a hard-coded boolean in the scorer — it's a live, dated enrichment. | 2 | 4 | `soc-kev-ingest.yaml` |
+| R14 | ~~**CISA KEV live feed.**~~ ✅ **landed 2026-04-20.** `soc_kev_ingest.yaml` pulls CISA KEV daily and indexes into `.soc-cve-advisories`; KEV is no longer a hard-coded boolean in the scorer — it's a live, dated enrichment. | 2 | 4 | `soc_kev_ingest.yaml` |
 
 ---
 
@@ -231,10 +231,10 @@ has been executed, plus the R3/R4 detection-engineering spine added on
 - ~~R4 — LLM + axis-aware variant generation (`@kbn/argus-exploit-to-detection/llm_variant_provider.ts`, 14 tests)~~ ✅
 - ~~R7 — blast-radius per recommendation (`@kbn/argus-trust-policy`, 27 tests)~~ ✅
 - ~~R8 — shadow execution (`@kbn/argus-backtest`, 24 tests)~~ ✅
-- ~~R11 — trace-level evals (`@kbn/evals-suite-argus-reasoning` + `soc-argus-reasoning-eval.yaml`, 25 tests)~~ ✅
+- ~~R11 — trace-level evals (`@kbn/evals-suite-argus-reasoning` + `soc_argus_reasoning_eval.yaml`, 25 tests)~~ ✅
 - ~~R12 — MCP / A2A tool surface (tool-manifest + mcp-server + a2a-server, 63 tests)~~ ✅
 - ~~R13 — Shadow-AI telemetry as Mythos signal~~ ✅
-- ~~R14 — CISA KEV live feed (`soc-kev-ingest.yaml`)~~ ✅
+- ~~R14 — CISA KEV live feed (`soc_kev_ingest.yaml`)~~ ✅
 
 No remaining items from the R1–R14 `[ext]` backlog. Newly-surfaced ideas
 continue to live in `docs/argus/phase-3/` and the `docs/argus/issues/`

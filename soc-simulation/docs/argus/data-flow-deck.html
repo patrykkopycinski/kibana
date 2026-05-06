@@ -335,7 +335,7 @@
       <div class="card accent-cyan">
         <div class="card-label">03 · Validate</div>
         <ul>
-          <li><code>.soc-detection-eval-runs</code></li>
+          <li><code>.soc_detection_eval-runs</code></li>
           <li><code>.soc-backtest-results</code></li>
           <li><code>.soc-quality-score-history</code></li>
           <li>Gate write-back on <code>.soc-mutation-intents</code></li>
@@ -446,12 +446,12 @@
 
   <rect x="445" y="86" width="180" height="60" rx="7" fill="#17223E" stroke="#7C4DFF"/>
   <text x="535" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Triage agent</text>
-  <text x="535" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-alert-sweeper</text>
+  <text x="535" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc_alert_sweeper</text>
   <text x="535" y="132" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">per_alert_verdict →</text>
 
   <rect x="445" y="158" width="180" height="60" rx="7" fill="#17223E" stroke="#7C4DFF"/>
   <text x="535" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">DetEng agent</text>
-  <text x="535" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-deteng-agent</text>
+  <text x="535" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">soc_deteng-agent</text>
   <text x="535" y="204" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">draft_rule, query,</text>
   <text x="535" y="215" text-anchor="middle" fill="#7C4DFF" font-size="9" font-family="JetBrains Mono,monospace">justification</text>
 
@@ -477,13 +477,13 @@
 
   <rect x="685" y="86" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
   <text x="775" y="104" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Backtester</text>
-  <text x="775" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc-rule-backtester</text>
+  <text x="775" y="118" text-anchor="middle" fill="#8DA0BE" font-size="9">soc_rule_backtester</text>
   <text x="775" y="132" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-backtest-results</text>
 
   <rect x="685" y="158" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
   <text x="775" y="176" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">@kbn/evals</text>
   <text x="775" y="190" text-anchor="middle" fill="#8DA0BE" font-size="9">detection-eval vertical</text>
-  <text x="775" y="205" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc-detection-eval-runs</text>
+  <text x="775" y="205" text-anchor="middle" fill="#00E5FF" font-size="9" font-family="JetBrains Mono,monospace">.soc_detection_eval-runs</text>
 
   <rect x="685" y="230" width="180" height="60" rx="7" fill="#17223E" stroke="#00E5FF"/>
   <text x="775" y="248" text-anchor="middle" fill="#E8EDF5" font-size="11" font-weight="700">Regression gate</text>
@@ -599,7 +599,7 @@
           </div>
         </div>
         <div class="flow-consumer">
-          <div class="who">soc-alert-sweeper</div><div class="what">per_alert_verdict sweep, 5 min</div>
+          <div class="who">soc_alert_sweeper</div><div class="what">per_alert_verdict sweep, 5 min</div>
         </div>
       </div>
 
@@ -616,7 +616,7 @@
           </div>
         </div>
         <div class="flow-consumer">
-          <div class="who">soc-deteng-agent</div><div class="what">exploit probability + synthesis</div>
+          <div class="who">soc_deteng-agent</div><div class="what">exploit probability + synthesis</div>
         </div>
       </div>
 
@@ -633,7 +633,7 @@
           </div>
         </div>
         <div class="flow-consumer">
-          <div class="who">Activity feed + hunter</div><div class="what">Console · soc-proactive-hunter</div>
+          <div class="who">Activity feed + hunter</div><div class="what">Console · soc_proactive_hunter</div>
         </div>
       </div>
 
@@ -718,7 +718,7 @@
   <span class="k">"mutation_intent_id"</span>: <span class="s">"mut-e2d-dnsc2"</span>,
   <span class="k">"trace_id"</span>: <span class="s">"5b1e...a7"</span>,                                 <span class="c">// joins .soc-reasoning-trace</span>
   <span class="k">"status"</span>: <span class="s">"queued_for_eval"</span>,
-  <span class="k">"actor"</span>: { <span class="k">"id"</span>: <span class="s">"soc-deteng-agent"</span>, <span class="k">"trust_tier"</span>: <span class="s">"probationary"</span> },
+  <span class="k">"actor"</span>: { <span class="k">"id"</span>: <span class="s">"soc_deteng-agent"</span>, <span class="k">"trust_tier"</span>: <span class="s">"probationary"</span> },
   <span class="k">"draft_rule"</span>: {
     <span class="k">"rule_id"</span>: <span class="s">"argus.command-and-control.t1071_004.argus-adv-dns-c2-2026-04"</span>,
     <span class="k">"severity"</span>: <span class="s">"medium"</span>,
@@ -759,7 +759,7 @@
         <h3>@kbn/evals vertical</h3>
         <p>Runs the rule against <code>logs-argus_eval.scenarios-*</code> —
         Caldera + synthesized mutation scenarios — via the rule preview API.</p>
-        <p><strong>Writes</strong> <code>.soc-detection-eval-runs</code> with
+        <p><strong>Writes</strong> <code>.soc_detection_eval-runs</code> with
         <code>scores.precision</code>, <code>scores.recall</code>,
         <code>variant_coverage</code>, <code>mutation_robust</code>.</p>
       </div>
@@ -806,7 +806,7 @@
 
     <div class="flow-wrap">
       <div class="flow-row">
-        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">reads gated intent</div></div>
+        <div class="flow-producer"><div class="who">soc_autonomous_applier</div><div class="what">reads gated intent</div></div>
         <div class="flow-arrow act">
           <div class="payload">1 · Snapshot</div>
           <div class="payload-sub">
@@ -819,7 +819,7 @@
       </div>
 
       <div class="flow-row">
-        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">consulted kill-switch</div></div>
+        <div class="flow-producer"><div class="who">soc_autonomous_applier</div><div class="what">consulted kill-switch</div></div>
         <div class="flow-arrow act">
           <div class="payload">2 · Autonomy decision</div>
           <div class="payload-sub">
@@ -833,7 +833,7 @@
       </div>
 
       <div class="flow-row">
-        <div class="flow-producer"><div class="who">soc-autonomous-applier</div><div class="what">only if kill-switch = off</div></div>
+        <div class="flow-producer"><div class="who">soc_autonomous_applier</div><div class="what">only if kill-switch = off</div></div>
         <div class="flow-arrow act">
           <div class="payload">3 · Apply</div>
           <div class="payload-sub">
@@ -846,7 +846,7 @@
       </div>
 
       <div class="flow-row">
-        <div class="flow-producer"><div class="who">soc-post-apply-observer</div><div class="what">60s–10m window</div></div>
+        <div class="flow-producer"><div class="who">soc_post_apply_observer</div><div class="what">60s–10m window</div></div>
         <div class="flow-arrow act">
           <div class="payload">4 · Observe</div>
           <div class="payload-sub">
@@ -859,7 +859,7 @@
       </div>
 
       <div class="flow-row">
-        <div class="flow-producer"><div class="who">soc-post-apply-observer</div><div class="what">if FP burst &gt; threshold</div></div>
+        <div class="flow-producer"><div class="who">soc_post_apply_observer</div><div class="what">if FP burst &gt; threshold</div></div>
         <div class="flow-arrow" style="border-color: var(--mythos);">
           <div class="payload" style="color:var(--mythos)">5 · Rollback</div>
           <div class="payload-sub">
@@ -894,7 +894,7 @@
           <li><code>.soc-outcomes</code> — per-rule TP/FP, rollback events</li>
           <li><code>.soc-reasoning-trace</code> — per-decision latency and tool use</li>
           <li><code>.soc-autonomy-decisions</code> — volume, confidence spread</li>
-          <li><code>.soc-backtest-results</code> + <code>.soc-detection-eval-runs</code> — trending quality</li>
+          <li><code>.soc-backtest-results</code> + <code>.soc_detection_eval-runs</code> — trending quality</li>
         </ul>
       </div>
       <div class="card accent-amber">
@@ -959,7 +959,7 @@
   <span class="k">"trace_id"</span>: <span class="s">"5b1e...a7"</span>,
   <span class="k">"span_id"</span>: <span class="s">"3c09"</span>,
   <span class="k">"parent_span_id"</span>: <span class="s">"0c4a"</span>,
-  <span class="k">"agent"</span>: <span class="s">"soc-deteng-agent"</span>,
+  <span class="k">"agent"</span>: <span class="s">"soc_deteng-agent"</span>,
   <span class="k">"tool"</span>: <span class="s">"rule_preview"</span>,
   <span class="k">"input"</span>: { <span class="k">"query"</span>: <span class="s">"event.dataset:dns..."</span> },
   <span class="k">"output"</span>: { <span class="k">"precision"</span>: <span class="n">0.94</span>, <span class="k">"recall"</span>: <span class="n">0.82</span> },
@@ -971,7 +971,7 @@
         <h3>Every doc carries trace_id</h3>
         <p>Because <code>trace_id</code> is stamped on every hop
         (<code>.soc-recommendations</code>, <code>.soc-mutation-intents</code>,
-        <code>.soc-detection-eval-runs</code>, <code>.soc-outcomes</code>,
+        <code>.soc_detection_eval-runs</code>, <code>.soc-outcomes</code>,
         <code>.soc-autonomy-decisions</code>), a single ES join reconstructs
         the graph.</p>
         <p><strong>Decision-graph builder</strong> reads all five indices,
@@ -1013,14 +1013,14 @@
         <tr><td><code>.soc-cve-advisories</code></td><td>Advisory ingest pipeline</td><td>DetEng · E2D builder</td><td><code>cve_id</code>, <code>severity</code>, <code>kev</code>, <code>mitre_techniques</code></td></tr>
         <tr><td><code>.soc-recommendations</code></td><td>Meta + DetEng agents</td><td>Pareto UI · applier</td><td><code>rec_id</code>, <code>status</code>, <code>confidence</code>, <code>procedure_clusters</code></td></tr>
         <tr><td><code>.soc-mutation-intents</code></td><td>Meta + DetEng agents</td><td>Validators · applier</td><td><code>mutation_intent_id</code>, <code>draft_rule</code>, <code>governance_gate</code>, <code>trace_id</code></td></tr>
-        <tr><td><code>.soc-detection-eval-runs</code></td><td>@kbn/evals vertical</td><td>Gate · trust scorer</td><td><code>scores.*</code>, <code>gate_decision</code>, <code>gate_reason</code></td></tr>
-        <tr><td><code>.soc-backtest-results</code></td><td>soc-rule-backtester</td><td>Gate · applier</td><td><code>windows_tested</code>, <code>true_positives</code>, <code>false_positives</code></td></tr>
-        <tr><td><code>.soc-autonomy-decisions</code></td><td>soc-autonomous-applier</td><td>Audit · observer</td><td><code>op</code>, <code>pre_state</code>, <code>trust_tier</code>, <code>trace_id</code></td></tr>
+        <tr><td><code>.soc_detection_eval-runs</code></td><td>@kbn/evals vertical</td><td>Gate · trust scorer</td><td><code>scores.*</code>, <code>gate_decision</code>, <code>gate_reason</code></td></tr>
+        <tr><td><code>.soc-backtest-results</code></td><td>soc_rule_backtester</td><td>Gate · applier</td><td><code>windows_tested</code>, <code>true_positives</code>, <code>false_positives</code></td></tr>
+        <tr><td><code>.soc-autonomy-decisions</code></td><td>soc_autonomous_applier</td><td>Audit · observer</td><td><code>op</code>, <code>pre_state</code>, <code>trust_tier</code>, <code>trace_id</code></td></tr>
         <tr><td><code>.soc-outcomes</code></td><td>Post-apply observer · sweeper</td><td>Trust · console · corpus</td><td><code>rolled_back</code>, <code>applied_at</code>, <code>rollback_mttr_ms</code></td></tr>
         <tr><td><code>.soc-reasoning-trace</code></td><td>Every agent step (OTLP)</td><td>Decision graph · flyout</td><td><code>trace_id</code>, <code>span_id</code>, <code>parent_span_id</code>, <code>tool</code></td></tr>
         <tr><td><code>.soc-decision-graph</code></td><td>Graph builder</td><td>Console decision-graph tab</td><td><code>nodes[]</code>, <code>edges[]</code>, <code>root_kind</code></td></tr>
         <tr><td><code>.soc-actor-trust-tiers</code></td><td>soc-trust-scorer</td><td>Applier · audit</td><td><code>actor_id</code>, <code>tier</code>, <code>reason</code></td></tr>
-        <tr><td><code>.soc-kill-switch</code></td><td>soc-watchdog</td><td>Applier · recovery</td><td><code>enabled</code>, <code>tripped_at</code>, <code>reason</code></td></tr>
+        <tr><td><code>.soc-kill-switch</code></td><td>soc_watchdog</td><td>Applier · recovery</td><td><code>enabled</code>, <code>tripped_at</code>, <code>reason</code></td></tr>
         <tr><td><code>.soc-audit-trail</code></td><td>Every console write · applier</td><td>Compliance · history</td><td><code>actor</code>, <code>op</code>, <code>target</code>, <code>before/after</code></td></tr>
       </tbody>
     </table>

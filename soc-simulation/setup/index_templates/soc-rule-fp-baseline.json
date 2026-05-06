@@ -36,7 +36,7 @@
     }
   },
   "_meta": {
-    "description": "AutoDEX B3 — production-grounded per-rule FP baseline. Each row is the latest baseline snapshot for a single detection rule, written by `soc-argus-fp-baseline-roller.yaml`. Doc id = rule_id so each rule has a single most-recent baseline. Consumed by a future workflow that maps baselines into B6's `gate_overrides.max_fp_rate` per rule. `verdict` indicates telemetry maturity (cold_start / volume_only / labelled / insufficient_labels) — NOT rule health (that's B7's `evaluateRuleTuning`). `expected_alerts_per_hour = alert_count / window_hours`. `fp_rate_estimate` is Laplace-smoothed `(fp+1)/(tp+fp+2)` only when `tp+fp >= min_labels_for_fp_rate`, otherwise null and consumers fall back to `default_fp_rate`.",
+    "description": "AutoDEX B3 — production-grounded per-rule FP baseline. Each row is the latest baseline snapshot for a single detection rule, written by `soc_argus_fp_baseline_roller.yaml`. Doc id = rule_id so each rule has a single most-recent baseline. Consumed by a future workflow that maps baselines into B6's `gate_overrides.max_fp_rate` per rule. `verdict` indicates telemetry maturity (cold_start / volume_only / labelled / insufficient_labels) — NOT rule health (that's B7's `evaluateRuleTuning`). `expected_alerts_per_hour = alert_count / window_hours`. `fp_rate_estimate` is Laplace-smoothed `(fp+1)/(tp+fp+2)` only when `tp+fp >= min_labels_for_fp_rate`, otherwise null and consumers fall back to `default_fp_rate`.",
     "owner": "argus-governance",
     "schema_version": 1
   }

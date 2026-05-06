@@ -67,7 +67,7 @@ Producers MUST NOT enforce strict equality on the doc.
 
 | Producer | File | Notes |
 | --- | --- | --- |
-| Autonomous synthesis workflow | `soc-simulation/workflows/soc-argus-synthesis-driver.yaml` → `security.argusSynthesizeAdvisory` step | Primary loop. Writes through workflow-execution credentials. |
+| Autonomous synthesis workflow | `soc-simulation/workflows/soc_argus_synthesis_driver.yaml` → `security.argusSynthesizeAdvisory` step | Primary loop. Writes through workflow-execution credentials. |
 | Chat-skill tool | `argus.synthesize_rule_candidate` (see `synthesize_rule_candidate_tool.ts`) | Same `synthesizeOne` core; writes via `asCurrentUser`. |
 | CLI | `run_exploit_to_detection.ts` | Used for replay / fixture seeding. Writes through `kbn/elasticsearch` client. |
 

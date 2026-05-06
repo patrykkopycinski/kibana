@@ -96,7 +96,7 @@ export const precisionEvaluator: Evaluator<DetectionRuleExample, DetectionRuleTa
 The `gate_decision` (`pass | fail | marginal`) is no longer an evaluator output —
 it is computed *outside* the evaluators by the M2.1 spec's `onEvaluationComplete`
 hook, which aggregates the four scores per `rule_id+corpus_id+run_id` tuple and
-writes one row to `.soc-detection-eval-runs`.
+writes one row to `.soc_detection_eval-runs`.
 
 ## 2. Gate thresholds
 
@@ -186,8 +186,8 @@ rule-runner — no new server-side route required for M2.1.
 
 ## 5. Side-channel persistence
 
-Scoring summaries are written to `.soc-detection-eval-runs` from the spec's
-`onEvaluationComplete` fixture. The `soc-detection-eval.yaml` workflow is
+Scoring summaries are written to `.soc_detection_eval-runs` from the spec's
+`onEvaluationComplete` fixture. The `soc_detection_eval.yaml` workflow is
 repositioned (M2.1 phase 2) as a **poller** of that index, not a trigger of
 the suite. This keeps the eval harness as the source of truth for scoring and
 the workflow as the source of truth for downstream propagation (regression-gate,

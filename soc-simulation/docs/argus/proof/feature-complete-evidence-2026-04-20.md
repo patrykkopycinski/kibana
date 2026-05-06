@@ -30,11 +30,11 @@ Source index: `.workflows-workflows-000001`.
 
 ## 1. F1 / G1 — Closed-loop eval synthesis
 
-The M2.2 reconciler now emits a synthetic `.soc-detection-eval-runs` row
+The M2.2 reconciler now emits a synthetic `.soc_detection_eval-runs` row
 per promoted advisory so the detection-eval poller can flip the linked
 recommendation to `auto_apply_ready` inside a single tick.
 
-Live index state (`.soc-detection-eval-runs`):
+Live index state (`.soc_detection_eval-runs`):
 
 | Field | Value |
 |------|------|
@@ -79,7 +79,7 @@ filter/bool query DSL inside aggregation buckets.
 
 ## 3. F3 / R10 — Reasoning watchdog
 
-New `soc-argus-reasoning-watchdog.yaml` runs every 5 min, computes
+New `soc_argus_reasoning_watchdog.yaml` runs every 5 min, computes
 15-min mean `argus.decision.confidence` per actor, and freezes any
 actor whose short-window mean falls below the absolute floor (0.5)
 *or* drops 0.2+ from the 24h baseline.
@@ -99,7 +99,7 @@ Governance trace emitted into `.soc-reasoning-trace`:
 
 | Field | Value |
 |------|------|
-| `agent_id` | `soc-argus-reasoning-watchdog` |
+| `agent_id` | `soc_argus_reasoning_watchdog` |
 | `argus.decision.kind` | `reasoning_watchdog` |
 | `argus.decision.id` | `argus.experimental_synth_agent` |
 | `argus.decision.confidence` | 0.349 |
@@ -153,10 +153,10 @@ Operation breakdown:
 
 | `gen_ai.operation.name` | count | source workflow |
 |------|------|------|
-| `argus.reasoning_watchdog.evaluate` | 5 | `soc-argus-reasoning-watchdog` |
-| `argus.detection_eval.reconcile` | 4 | `soc-detection-eval` |
-| `argus.trust_gate.evaluate` | 4 | `soc-argus-trust-gate` |
-| `exploit_to_detection.synthesize` | 4 | `soc-argus-exploit-to-detection` |
+| `argus.reasoning_watchdog.evaluate` | 5 | `soc_argus_reasoning_watchdog` |
+| `argus.detection_eval.reconcile` | 4 | `soc_detection_eval` |
+| `argus.trust_gate.evaluate` | 4 | `soc_argus_trust_gate` |
+| `exploit_to_detection.synthesize` | 4 | `soc_argus_exploit_to_detection` |
 
 All 4 canonical decision-emitting workflows produce OTEL-GenAI traces,
 making ARGUS decision history portable to any OTEL-compliant viewer
@@ -176,7 +176,7 @@ Captured in `capability-and-gap-analysis.md` §2.2:
   (`scripts/argus-variant-bank/`).
 - **G2**: `setup.sh --reset-recommendations` atomically wipes
   `.soc-recommendations`, `.soc-cve-advisories`, and
-  `.soc-detection-eval-runs` before seeding.
+  `.soc_detection_eval-runs` before seeding.
 
 ---
 

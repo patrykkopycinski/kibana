@@ -151,7 +151,7 @@ specification.
 1. **Caldera generates test telemetry only.** All production-ready
    capabilities are built on the Elastic Stack.
 2. **Mythos-class (L6) is always operator-armed.** Auto-escalation stops at L5;
-   L6 requires an explicit arm via `soc-argus-arm-mythos-preset` and an
+   L6 requires an explicit arm via `soc_argus_arm_mythos_preset` and an
    `.soc-audit-trail` row per arm.
 
 ## Definition of Done

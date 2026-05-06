@@ -544,7 +544,7 @@
         <em>proposed mutations</em>, not autonomous actions.
       </div>
       <div class="layer-tech">
-        soc-alert-sweeper · soc-deteng · soc-proactive-hunter<br/>
+        soc_alert_sweeper · soc_deteng · soc_proactive_hunter<br/>
         kibana#257949 (XDR correlation) · kibana#259559 (default skills)<br/>
         <span class="pill pill-mythos" style="margin-top:4px">Δ exploit→detection synth · zero-day hypothesizer</span>
       </div>
@@ -558,7 +558,7 @@
         FPR-on-benign measurement. The heart of the "detection eval vertical."
       </div>
       <div class="layer-tech">
-        soc-rule-backtester · soc-regression-gate · @kbn/evals<br/>
+        soc_rule_backtester · soc_regression_gate · @kbn/evals<br/>
         security-team#16546 (AESOP + online evals)<br/>
         <span class="pill pill-mythos" style="margin-top:4px">Δ M2.1 · detection eval vertical</span>
       </div>
@@ -572,8 +572,8 @@
         Nothing irreversible without explicit operator approval.
       </div>
       <div class="layer-tech">
-        soc-autonomous-applier · soc-post-apply-observer<br/>
-        soc-recovery · soc-response · soc-containment-playbook<br/>
+        soc_autonomous_applier · soc_post_apply_observer<br/>
+        soc_recovery · soc_response · soc-containment-playbook<br/>
         <span class="pill pill-mythos" style="margin-top:4px">Δ trust-tier thresholds for frontier-class mutations</span>
       </div>
     </div>
@@ -586,7 +586,7 @@
         narratives, evolution log, dead-letter routing.
       </div>
       <div class="layer-tech">
-        soc-trust-scorer · soc-watchdog · soc-self-learning-loop<br/>
+        soc-trust-scorer · soc_watchdog · soc_self_learning_loop<br/>
         .soc-autonomy-decisions · .soc-evolution-log · .soc-audit-trail<br/>
         <span class="pill pill-mythos" style="margin-top:4px">Δ M2.5 · reasoning-trace governance (OTLP→ES)</span>
       </div>
@@ -653,7 +653,7 @@
           <td class="name"><span class="pill pill-mythos">#3 Agentic adversary</span></td>
           <td><strong>Frontier-Adversary Simulation Mode</strong> — <code>mythos_class_adversary</code> preset in the difficulty controller with goal-directed chained TTPs.</td>
           <td><span class="pill pill-argus">M2.4</span></td>
-          <td>Sensing (telemetry gen) · <code>soc-difficulty-controller</code></td>
+          <td>Sensing (telemetry gen) · <code>soc_difficulty_controller</code></td>
           <td><span class="pill pill-green">New preset</span></td>
         </tr>
         <tr>
@@ -720,7 +720,7 @@
       </div>
       <div>
         <ul class="feature-list">
-          <li><strong>M2.1 · Detection Eval Vertical</strong> — new sub-issue under <code>security-team#16546</code>. Evaluators: <code>detection.precision</code>, <code>.recall</code>, <code>.mutation_robust</code>, <code>.fpr_on_benign</code>, <code>.latency_p95</code>. Data stream <code>logs-argus_eval.scenarios-*</code>. Workflow <code>soc-detection-eval.yaml</code> wired to the rule preview API.</li>
+          <li><strong>M2.1 · Detection Eval Vertical</strong> — new sub-issue under <code>security-team#16546</code>. Evaluators: <code>detection.precision</code>, <code>.recall</code>, <code>.mutation_robust</code>, <code>.fpr_on_benign</code>, <code>.latency_p95</code>. Data stream <code>logs-argus_eval.scenarios-*</code>. Workflow <code>soc_detection_eval.yaml</code> wired to the rule preview API.</li>
           <li><strong>M2.2 · Exploit-to-Detection Synthesis</strong> — extends <code>kibana#258362</code> (deteng skill) with a <code>synthesize_detection_from_exploit</code> tool: CVE + PoC → draft rule → auto-backtest → <code>pending_review</code>.</li>
           <li><strong>M2.3 · Mythos-era Exploit Probability</strong> — extends <code>kibana#258041</code> (vuln checker) with a <code>mythos_era.exploit_probability_24h</code> field enriched from KEV / EPSS / SSVC / public PoC availability.</li>
           <li><strong>M2.4 · Frontier-Adversary Simulation Mode</strong> — level-6 preset in the difficulty controller; goal-directed chained profile emulating planner-class adversary behavior. Caldera-only, sandboxed.</li>

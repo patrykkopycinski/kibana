@@ -27,7 +27,7 @@ const approveRejectSchema = z.object({
 /**
  * Skill/tool parity for the Approve/Reject row actions on the Mutations panel.
  * Writes a verdict outcome and an audit-trail breadcrumb. The
- * `soc-autonomous-applier` workflow polls outcomes, so an approved verdict
+ * `soc_autonomous_applier` workflow polls outcomes, so an approved verdict
  * will pick up the next tick and dispatch the apply.
  */
 export function argusApproveRejectMutationTool(

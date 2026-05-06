@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 /**
  * Path A end-to-end synthesis for a single CVE advisory, exposed as a
  * workflow step. Replaces the old TaskManager-driven autonomous loop —
- * the workflow `soc-argus-synthesis-driver.yaml` schedules ticks, reads
+ * the workflow `soc_argus_synthesis_driver.yaml` schedules ticks, reads
  * the kill switch, and iterates advisories; this step handles the
  * heavy lift per advisory (Pareto frontier, variant generation /
  * validation, mutation-intent assembly, write).
@@ -68,7 +68,7 @@ export const argusSynthesizeAdvisoryStepCommonDefinition: BaseStepDefinition<
     'xpack.securitySolution.workflows.steps.argusSynthesizeAdvisory.description',
     {
       defaultMessage:
-        'Run Path A end-to-end on a single CVE advisory: pick the Pareto-optimal draft rule, generate and validate the polymorphic variant corpus, and write the canonical mutation intent + reasoning trace. The workflow that wraps this step (e.g. soc-argus-synthesis-driver.yaml) handles scheduling, kill-switch checks, and advisory selection.',
+        'Run Path A end-to-end on a single CVE advisory: pick the Pareto-optimal draft rule, generate and validate the polymorphic variant corpus, and write the canonical mutation intent + reasoning trace. The workflow that wraps this step (e.g. soc_argus_synthesis_driver.yaml) handles scheduling, kill-switch checks, and advisory selection.',
     }
   ),
   category: StepCategory.Kibana,
@@ -90,7 +90,7 @@ export const argusSynthesizeAdvisoryStepCommonDefinition: BaseStepDefinition<
   type: security.argusSynthesizeAdvisory
   with:
     advisory_id: "{{ foreach.item._source.advisory_id }}"
-    caller_id: "soc-argus-synthesis-driver"
+    caller_id: "soc_argus_synthesis_driver"
 \`\`\``,
     ],
   },

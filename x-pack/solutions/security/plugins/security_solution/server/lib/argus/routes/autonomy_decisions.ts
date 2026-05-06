@@ -214,8 +214,8 @@ const enrichWithKibanaRuleIds = async ({
  * should therefore resolve to a deep-link on the Autonomy panel:
  *
  * - `rule`           — ARGUS-authored custom rules. Live SOC workflows
- *                      (soc-post-apply-observer, soc-signal-quality-agent,
- *                      soc-deteng-agent, …) populate `artifact_id` with the
+ *                      (soc_post_apply_observer, soc-signal-quality-agent,
+ *                      soc_deteng-agent, …) populate `artifact_id` with the
  *                      *Kibana saved-object UUID* when they update an
  *                      existing rule.
  * - `detection_rule` — Same family as `rule`, emitted by the update-rule
@@ -270,12 +270,12 @@ const resolveRuleArtifactIds = async ({
   //      (the UUID assigned by the Elastic prebuilt rules catalogue), and
   //      some ARGUS-authored custom rules also emit the logical id.
   //   2. The Kibana saved-object UUID (`alert.id`) — the live SOC update
-  //      workflows (soc-post-apply-observer, soc-signal-quality-agent,
-  //      soc-deteng-agent) write the SO UUID because they look the rule up
+  //      workflows (soc_post_apply_observer, soc-signal-quality-agent,
+  //      soc_deteng-agent) write the SO UUID because they look the rule up
   //      by saved-object id before updating it.
   //
   // Resolving only (1) — as the route used to — left every live
-  // `soc-post-apply-observer` / `soc-signal-quality-agent` decision
+  // `soc_post_apply_observer` / `soc-signal-quality-agent` decision
   // stranded with a "not in Kibana" pill even when the rule was sitting
   // one click away in `/app/security/rules`. We now run the two lookups
   // independently and merge the results: `findRules` with the `ruleIds`
@@ -335,9 +335,7 @@ const resolveRuleArtifactIds = async ({
   // `params.ruleId`. Covers prebuilt rules and any custom rule whose
   // decision writer emits the logical id instead of the SO UUID.
   try {
-    const quotedLogicalIds = ruleArtifactIds
-      .map((id) => `"${escapeKqlQuoted(id)}"`)
-      .join(' OR ');
+    const quotedLogicalIds = ruleArtifactIds.map((id) => `"${escapeKqlQuoted(id)}"`).join(' OR ');
     const logicalResult = await findRules({
       rulesClient,
       perPage: ruleArtifactIds.length,

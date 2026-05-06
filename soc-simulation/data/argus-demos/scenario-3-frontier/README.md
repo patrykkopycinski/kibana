@@ -6,9 +6,9 @@ watchdog + rollback) which are not yet fully implemented.
 
 ## What exists today (validated)
 
-- `workflows/soc-argus-arm-mythos-preset.yaml` — arms the `level-6`
+- `workflows/soc_argus_arm_mythos_preset.yaml` — arms the `level-6`
   mythos-class preset and indexes a pending attack command.
-- `workflows/soc-argus-frontier-simulator.yaml` — re-emits a random
+- `workflows/soc_argus_frontier_simulator.yaml` — re-emits a random
   labelled variant from the `.soc-eval-corpus-argus-corpus-mythos-2026-04`
   corpus once the preset is armed.
 

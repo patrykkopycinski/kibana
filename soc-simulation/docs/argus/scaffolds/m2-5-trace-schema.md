@@ -13,7 +13,7 @@ Document shape:
   "parent_span_id": "0a11...|null",
 
   "otlp": {                             // preserved raw passthrough for forensics
-    "name": "skill.soc-alert-sweeper.invoke",
+    "name": "skill.soc_alert_sweeper.invoke",
     "kind": "internal|client|server",
     "status_code": "ok|error",
     "attributes": { "...": "..." }
@@ -21,7 +21,7 @@ Document shape:
 
   "argus": {
     "kind": "skill|agent|tool",
-    "actor_id": "soc-alert-sweeper-skill", // tool/skill/agent id (triage merged into alert sweeper)
+    "actor_id": "soc_alert_sweeper-skill", // tool/skill/agent id (triage merged into alert sweeper)
     "actor_version": "1.4.2",
     "invocation_id": "<uuid>",          // one per skill turn; groups spans
     "turn": 3,                          // 1-based turn counter within the invocation

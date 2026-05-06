@@ -8,14 +8,14 @@
 /**
  * AutoDEX B9 — self-adjusting skills loop.
  *
- * The `soc-skill-metrics-roller` workflow already aggregates per-skill
+ * The `soc_skill_metrics_roller` workflow already aggregates per-skill
  * invocation, success, and ROI counts into `.soc-skill-metrics`. Until B9,
  * those metrics fed dashboards but did not feed back into actor / skill
  * governance — there was no closed loop from "skill X is misbehaving" to
  * "actor Y gets demoted" or "skill X gets re-prompted".
  *
  * This module is the pure-logic spec for the verdict matrix. The
- * `soc-skill-self-adjust.yaml` workflow runs the same matrix in Liquid; the
+ * `soc_skill_self_adjust.yaml` workflow runs the same matrix in Liquid; the
  * MCP-side admission gate (when wired) imports `evaluateSkillHealth`
  * directly. Both surfaces use the same constants so a skill's verdict is
  * the same no matter which transport observes it.
@@ -197,7 +197,7 @@ export interface EvaluateSkillHealthInput {
 
 /**
  * Pure verdict function. Same input → same output. The Liquid mirror in
- * `soc-skill-self-adjust.yaml` MUST stay one-for-one with this matrix;
+ * `soc_skill_self_adjust.yaml` MUST stay one-for-one with this matrix;
  * the spec-alignment test in `skill_health.spec_alignment.test.ts` asserts
  * the canonical input set produces the same verdict on both sides.
  */

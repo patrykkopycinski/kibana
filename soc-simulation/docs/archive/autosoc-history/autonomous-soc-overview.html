@@ -499,7 +499,7 @@
       <text x="877" y="718" text-anchor="middle" fill="#FFD740" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-trust-scores</text>
 
       <rect x="945" y="704" width="120" height="20" rx="4" fill="rgba(255,82,82,0.1)" stroke="rgba(255,82,82,0.2)"/>
-      <text x="1005" y="718" text-anchor="middle" fill="#FF5252" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-response-actions</text>
+      <text x="1005" y="718" text-anchor="middle" fill="#FF5252" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc_response-actions</text>
 
       <rect x="1075" y="704" width="100" height="20" rx="4" fill="rgba(240,98,146,0.1)" stroke="rgba(240,98,146,0.2)"/>
       <text x="1125" y="718" text-anchor="middle" fill="#F06292" font-size="8" font-weight="600" font-family="JetBrains Mono,monospace">.soc-audit-trail</text>
@@ -530,7 +530,7 @@
       <span class="arch-arrow">→</span>
       <div class="arch-node"><span>Detection Rules</span><small>7 custom rules</small></div>
       <span class="arch-arrow">→</span>
-      <div class="arch-node" style="border-color:var(--accent)"><span>Alert Sweeper</span><small>soc-alert-sweeper</small></div>
+      <div class="arch-node" style="border-color:var(--accent)"><span>Alert Sweeper</span><small>soc_alert_sweeper</small></div>
       <span class="arch-arrow">→</span>
       <div class="arch-node" style="border-color:var(--accent)"><span>Triage</span><small>TP / FP / Susp</small></div>
       <span class="arch-arrow">→</span>
@@ -661,7 +661,7 @@
       <thead><tr><th>Workflow</th><th>Trigger</th><th>Steps</th><th>Agent</th><th>Timeout</th><th>Reads</th><th>Writes</th></tr></thead>
       <tbody>
         <tr>
-          <td class="name">soc-alert-sweeper</td>
+          <td class="name">soc_alert_sweeper</td>
           <td><span class="pill pill-cyan">5m</span></td>
           <td>21 steps</td>
           <td>triage × 2, entity, hunt</td>
@@ -670,7 +670,7 @@
           <td><code>.soc-triage-results</code>, <code>entity-enrichment</code>, <code>investigation-findings</code>, <code>response-actions</code>, <code>audit-trail</code>, <code>outcomes</code> + <code>kibana.request</code> (tags, cases, alert attach)</td>
         </tr>
         <tr>
-          <td class="name">soc-recommendation-applier</td>
+          <td class="name">soc_recommendation_applier</td>
           <td><span class="pill pill-cyan">5m</span></td>
           <td>5 steps</td>
           <td>rec-applier</td>
@@ -679,7 +679,7 @@
           <td><code>.soc-audit-trail</code></td>
         </tr>
         <tr>
-          <td class="name">soc-recovery</td>
+          <td class="name">soc_recovery</td>
           <td><span class="pill pill-green">10m</span></td>
           <td>4 steps</td>
           <td>—</td>
@@ -688,7 +688,7 @@
           <td><code>.soc-audit-trail</code></td>
         </tr>
         <tr>
-          <td class="name">soc-watchdog</td>
+          <td class="name">soc_watchdog</td>
           <td><span class="pill pill-green">15m</span></td>
           <td>6 steps</td>
           <td>watchdog</td>
@@ -697,7 +697,7 @@
           <td><code>.soc-coverage-gaps</code>, <code>audit-trail</code></td>
         </tr>
         <tr>
-          <td class="name">soc-meta</td>
+          <td class="name">soc_meta</td>
           <td><span class="pill pill-amber">30m</span></td>
           <td>10 steps</td>
           <td>meta</td>
@@ -706,7 +706,7 @@
           <td><code>.soc-evolution-log</code>, <code>recommendations</code></td>
         </tr>
         <tr>
-          <td class="name">soc-deteng</td>
+          <td class="name">soc_deteng</td>
           <td><span class="pill pill-amber">30m</span></td>
           <td>7 steps</td>
           <td>deteng</td>
@@ -724,7 +724,7 @@
           <td><code>.soc-trust-scores</code></td>
         </tr>
         <tr>
-          <td class="name">soc-difficulty-controller</td>
+          <td class="name">soc_difficulty_controller</td>
           <td><span class="pill pill-amber">30m</span></td>
           <td>6 steps</td>
           <td>difficulty-evaluator</td>
@@ -760,16 +760,16 @@
           <td><code>.soc-investigation-findings</code>, <code>outcomes</code></td>
         </tr>
         <tr>
-          <td class="name">soc-response</td>
+          <td class="name">soc_response</td>
           <td><span class="pill pill-pink">manual</span></td>
           <td>5 steps</td>
           <td>—</td>
           <td>—</td>
           <td>—</td>
-          <td><code>.soc-response-actions</code>, <code>audit-trail</code>, <code>outcomes</code></td>
+          <td><code>.soc_response-actions</code>, <code>audit-trail</code>, <code>outcomes</code></td>
         </tr>
         <tr>
-          <td class="name">soc-gap-analyzer</td>
+          <td class="name">soc_gap_analyzer</td>
           <td><span class="pill pill-amber">4h</span></td>
           <td>9 steps</td>
           <td>meta (gap-analyzer skill)</td>
@@ -778,7 +778,7 @@
           <td><code>.soc-evolution-log</code>, <code>.soc-recommendations</code> (type: capability_gap)</td>
         </tr>
         <tr>
-          <td class="name">soc-proactive-hunter</td>
+          <td class="name">soc_proactive_hunter</td>
           <td><span class="pill pill-cyan">2h</span></td>
           <td>8 steps</td>
           <td>triage (proactive-hunt skill)</td>
@@ -820,7 +820,7 @@
           <td>Validate workflows before deploy. Verify agent exists before patching. Max 1 action/cycle, oscillation guard.</td>
         </tr>
         <tr>
-          <td class="name">soc-deteng-agent</td>
+          <td class="name">soc_deteng-agent</td>
           <td>Detection engineering: rule tuning, exception management, threshold changes, new rule creation with tiered rule types (ES|QL, EQL, Threshold, KQL)</td>
           <td><code>security.alerts</code>, <code>execute_esql</code>, <code>generate_esql</code>, <code>search</code>, <code>get_index_mapping</code>, <code>sml_*</code>, <code>manage_detection_rules</code></td>
           <td>JSON: rules_tuned (with patch_fields), rules_created (with reasoning), rules_disabled</td>
@@ -869,10 +869,10 @@
           <tr><td class="name">.soc-entity-enrichment</td><td>entities_enriched (nested), enrichment_summary, confidence_delta</td><td>enrichment, sweeper</td></tr>
           <tr><td class="name">.soc-hunt-findings</td><td>iocs_discovered, hypotheses_tested (nested), investigation_summary</td><td>investigation</td></tr>
           <tr><td class="name">.soc-outcomes</td><td>disposition, case_id, confidence_history (nested), time_to_detect/respond, agents_involved</td><td>all pipeline workflows</td></tr>
-          <tr><td class="name">.soc-response-actions</td><td>action_type, target, status, workflow_execution_id, confidence_at_response</td><td>response, sweeper</td></tr>
+          <tr><td class="name">.soc_response-actions</td><td>action_type, target, status, workflow_execution_id, confidence_at_response</td><td>response, sweeper</td></tr>
           <tr><td class="name">.soc-coverage-gaps</td><td>technique_id, occurrences, avg_confidence</td><td>watchdog</td></tr>
           <tr><td class="name">.soc-agent-health</td><td>agent_id, status, throughput, latency_p50/p95, error_rate</td><td>watchdog</td></tr>
-          <tr><td class="name">.soc-evolution-log</td><td>action_type, agent_id, reasoning, before, after; applier writes source, artifact_id, artifact_type, op, result (applied/failure/blocked_canonical/blocked_budget/blocked_cooldown/blocked_loop), reason</td><td>meta, deteng, soc-autonomous-applier</td></tr>
+          <tr><td class="name">.soc-evolution-log</td><td>action_type, agent_id, reasoning, before, after; applier writes source, artifact_id, artifact_type, op, result (applied/failure/blocked_canonical/blocked_budget/blocked_cooldown/blocked_loop), reason</td><td>meta, deteng, soc_autonomous_applier</td></tr>
           <tr><td class="name">.soc-metrics</td><td>pipeline, cycle_id, alerts_processed, classifications, cycle_duration_ms, tokens_used, estimated_cost_usd, status</td><td>sweeper</td></tr>
           <tr><td class="name">.soc-connector-health</td><td>connector_id, connector_name, status, latency_ms, consecutive_failures, fallback_connector_id</td><td>watchdog</td></tr>
           <tr><td class="name">.soc-detection-metrics</td><td>attack_id, technique_id, time_to_detect_ms, time_to_triage_ms, triage_classification, triage_correct</td><td>attack sim</td></tr>
@@ -951,7 +951,7 @@
           <tr><td class="name">Overview</td><td>KPI Hero Row, sparklines (hourly), classification breakdown, MITRE panel, pipeline grid, agent workload</td><td>All <code>.soc-*</code> indices, aggregated client-side</td></tr>
           <tr><td class="name">Recommendations</td><td>EuiBasicTable with per-sub-item approve/reject, rejection reason modal, one-click Apply for exceptions, rule detail links</td><td><code>.soc-recommendations</code></td></tr>
           <tr><td class="name">Triage Results</td><td>Table: timestamp, classification badge, confidence, MITRE, source, reasoning</td><td><code>.soc-triage-results</code></td></tr>
-          <tr><td class="name">Response Actions</td><td>ResponseActionsPanel with action types, targets, status</td><td><code>.soc-response-actions</code></td></tr>
+          <tr><td class="name">Response Actions</td><td>ResponseActionsPanel with action types, targets, status</td><td><code>.soc_response-actions</code></td></tr>
           <tr><td class="name">MITRE Coverage</td><td>MitreTechniquePanel, MitreTacticGrid, CoverageGapsPanel</td><td><code>.soc-coverage-gaps</code>, triage classifications</td></tr>
           <tr><td class="name">Evolution Log</td><td>EvolutionLogPanel: timeline of all agent/workflow changes</td><td><code>.soc-evolution-log</code></td></tr>
           <tr><td class="name">Agent Health</td><td>PipelineStatusGrid, outcomes table (disposition, agents involved)</td><td><code>.soc-outcomes</code>, <code>agent-health</code></td></tr>

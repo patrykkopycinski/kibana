@@ -1,0 +1,184 @@
+version: '1'
+name: SOC Shift Handover
+description: >
+  Every 8 hours, synthesize a narrative summary of autonomous SOC activity
+  for the previous shift and write it to .soc_shift_handover. The narrative
+  is produced by the AI assistant from deterministic counters aggregated
+  against .soc-evolution-log, .soc-audit-trail, and .soc-outcomes. This is
+  the operator's "what happened while I was away" inbox.
+enabled: true
+
+triggers:
+  - type: scheduled
+    with:
+      every: 8h
+  - type: manual
+
+consts:
+  window_hours: 8
+
+steps:
+  # ─── Deterministic counters from the last 8h ────────────────────────
+  - name: evolution_counters
+    type: elasticsearch.search
+    with:
+      index: ".soc-evolution-log"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+      aggs:
+        by_result:
+          terms:
+            field: "result"
+            size: 20
+        by_source:
+          terms:
+            field: "source"
+            size: 20
+
+  - name: cases_opened_count
+    type: elasticsearch.search
+    with:
+      index: ".soc-outcomes"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - term: {disposition: "case_created"}
+
+  - name: cases_closed_count
+    type: elasticsearch.search
+    with:
+      index: ".soc-forensic-summary"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                closed_at:
+                  gte: "now-{{ consts.window_hours }}h"
+
+  - name: kill_switch_events_count
+    type: elasticsearch.search
+    with:
+      index: ".soc-audit-trail"
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - term: {event_type: "autonomous_applier_abort"}
+
+  # ─── Top highlights for the narrative ──────────────────────────────
+  - name: top_mutations
+    type: elasticsearch.search
+    with:
+      index: ".soc-evolution-log"
+      size: 10
+      query:
+        bool:
+          filter:
+            - term: {source: "soc_autonomous_applier"}
+            - range:
+                "@timestamp":
+                  gte: "now-{{ consts.window_hours }}h"
+            - terms:
+                result: ["applied", "blocked_canonical", "blocked_loop", "blocked_cooldown", "blocked_budget", "validation_failed", "failure"]
+  - name: compose_narrative
+    type: ai.agent
+    connector-id: opus
+    with:
+      message: >
+        Produce a SHIFT HANDOVER narrative (<= 6 short paragraphs, Markdown)
+        for the SOC analyst taking over. Tone: concise, human, no corporate
+        filler. Every concrete claim must be anchored to one of the counters
+        or highlights below. Prefer numbers over adjectives.
+
+        Counters (deterministic, already aggregated):
+          evolution_by_result    = {{ steps.evolution_counters.output.aggregations.by_result.buckets | json }}
+          evolution_by_source    = {{ steps.evolution_counters.output.aggregations.by_source.buckets | json }}
+          cases_opened           = {{ steps.cases_opened_count.output.hits.total.value | default: 0 }}
+          cases_closed           = {{ steps.cases_closed_count.output.hits.total.value | default: 0 }}
+          kill_switch_events     = {{ steps.kill_switch_events_count.output.hits.total.value | default: 0 }}
+
+        Highlights (most recent applier decisions, oldest to newest):
+          {{ steps.top_mutations.output.hits.hits | json }}
+
+        Return ONLY a JSON object:
+        {
+          "narrative_markdown": "<markdown string starting with a greeting line>",
+          "highlights": [
+            {"category": "mutation_applied|mutation_blocked|case_opened|case_closed|kill_switch_event|rule_change|skill_run|budget_breach|regression_failure",
+             "summary": "<<=500 chars>",
+             "doc_ref": "<.soc-evolution-log doc id or null>",
+             "severity": "info|warn|critical"}
+          ]
+        }
+      schema:
+        type: object
+        properties:
+          narrative_markdown:
+            type: string
+          highlights:
+            type: array
+            items:
+              type: object
+              properties:
+                category:
+                  type: string
+                summary:
+                  type: string
+                doc_ref:
+                  type: string
+                severity:
+                  type: string
+                  enum:
+                    - info
+                    - warn
+                    - critical
+              required:
+                - category
+                - summary
+                - severity
+        required:
+          - narrative_markdown
+          - highlights
+    timeout: 120s
+
+  # ─── Persist the shift-handover doc ───────────────────────────────
+  - name: write_handover
+    type: elasticsearch.index
+    with:
+      index: .soc_shift_handover
+      id: "shift-{{ 'now' | date: '%Y-%m-%dT%H' }}-{{ consts.window_hours }}h"
+      document:
+        "@timestamp": "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        shift_id: "shift-{{ 'now' | date: '%Y-%m-%dT%H' }}-{{ consts.window_hours }}h"
+        shift_start_ts: "{{ 'now' | date: '%s' | minus: 28800 | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        shift_end_ts: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+        narrative_markdown: "{{ steps.compose_narrative.output.narrative_markdown }}"
+        highlights: "{{ steps.compose_narrative.output.highlights | default: [] }}"
+        counters:
+          skill_runs: 0
+          rules_changed: 0
+          cases_opened: "{{ steps.cases_opened_count.output.hits.total.value | default: 0 }}"
+          cases_closed: "{{ steps.cases_closed_count.output.hits.total.value | default: 0 }}"
+          kill_switch_events: "{{ steps.kill_switch_events_count.output.hits.total.value | default: 0 }}"
+          budget_breaches: 0
+          mutations_applied: 0
+          mutations_blocked: 0
+        generated_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"
+
+  - name: log_done
+    type: console
+    with:
+      message: "Shift handover written for shift ending {{ 'now' | date: '%Y-%m-%dT%H:%M:%SZ' }}"

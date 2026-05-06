@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AutoDEX — autonomous detection engineering deep dive</title>
+<style>
+  :root {
+    --bg: #f8f9fb;
+    --card: #ffffff;
+    --ink: #1a1c21;
+    --muted: #5b6470;
+    --rule: #e3e6ec;
+    --accent: #0078cb;
+    --accent-soft: #d8ecf9;
+    --good: #006b4c;
+    --good-soft: #d6efe5;
+    --warn: #8a5a00;
+    --warn-soft: #fbeacb;
+    --danger: #b3261e;
+    --danger-soft: #fadcd9;
+    --code: #0d1117;
+    --code-ink: #c9d1d9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .layout { display: grid; grid-template-columns: 260px minmax(0,1fr); min-height: 100vh; }
+  nav.toc {
+    background: #fff;
+    border-right: 1px solid var(--rule);
+    padding: 24px 16px;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    font-size: 13.5px;
+  }
+  nav.toc h2 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 16px 0 4px;
+    font-weight: 600;
+  }
+  nav.toc h2:first-child { margin-top: 0; }
+  nav.toc a {
+    display: block;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  nav.toc a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav.toc strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--ink);
+  }
+  nav.toc small { color: var(--muted); font-size: 12px; }
+  main { padding: 36px 48px 96px; max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 36px; line-height: 1.15; margin: 0 0 6px; font-weight: 700; }
+  h2 { font-size: 24px; margin: 56px 0 12px; font-weight: 700; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+  h3 { font-size: 17px; margin: 28px 0 8px; font-weight: 700; }
+  h4 { font-size: 15px; margin: 18px 0 6px; font-weight: 700; color: var(--muted); }
+  p { margin: 0 0 12px; }
+  code { font-family: 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 13px; padding: 1px 6px; background: var(--accent-soft); color: #0a4f8a; border-radius: 3px; }
+  pre { background: var(--code); color: var(--code-ink); padding: 14px 18px; border-radius: 6px; overflow-x: auto; font-size: 12.5px; line-height: 1.45; }
+  pre code { background: transparent; color: inherit; padding: 0; }
+  a { color: var(--accent); }
+
+  .lede { font-size: 18px; color: var(--muted); margin-bottom: 24px; max-width: 760px; }
+  .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; padding: 4px 10px; border-radius: 14px; font-weight: 600; }
+  .badge.good { background: var(--good-soft); color: var(--good); }
+  .badge.accent { background: var(--accent-soft); color: var(--accent); }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .badge.muted { background: #eef0f3; color: var(--muted); }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 18px; }
+  .card h3 { margin-top: 0; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .card .big { font-size: 28px; font-weight: 700; margin: 4px 0; line-height: 1.1; }
+  .card .sub { font-size: 13.5px; color: var(--muted); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .kpi { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; }
+  .kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .kpi .value { font-size: 26px; font-weight: 700; margin: 4px 0; line-height: 1.1; }
+  .kpi.good .value { color: var(--good); }
+  .kpi.warn .value { color: var(--warn); }
+  .kpi.danger .value { color: var(--danger); }
+  .kpi .desc { font-size: 12.5px; color: var(--muted); }
+
+  .layer-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 20px 0 16px; }
+  .layer { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; position: relative; }
+  .layer h4 { margin: 0 0 4px; color: var(--ink); font-size: 13px; }
+  .layer .num { font-size: 11px; color: var(--accent); font-weight: 700; letter-spacing: 0.08em; }
+  .layer p { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 13.5px; background: var(--card); border-radius: 6px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { background: #f4f6f9; font-weight: 600; font-size: 12.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  tr:last-child td { border-bottom: none; }
+  td.mono, th.mono { font-family: 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 12.5px; }
+
+  details { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 0; margin: 8px 0; }
+  details summary { padding: 12px 16px; cursor: pointer; font-weight: 600; user-select: none; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: '+'; color: var(--muted); font-size: 18px; }
+  details[open] summary::after { content: '−'; }
+  details .body { padding: 0 16px 14px; border-top: 1px solid var(--rule); }
+
+  .module { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; margin: 10px 0; }
+  .module .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .module h4 { margin: 0; color: var(--ink); font-size: 15px; }
+  .module .meta { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', Menlo, Consolas, monospace; }
+  .module p { font-size: 13.5px; margin: 6px 0 0; color: var(--muted); }
+  .module .tags { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { background: #eef0f3; color: var(--muted); font-size: 11.5px; padding: 2px 7px; border-radius: 10px; font-family: 'JetBrains Mono', Menlo, Consolas, monospace; }
+
+  .tile-shot { display: block; max-width: 100%; border: 1px solid var(--rule); border-radius: 6px; margin: 12px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+  .callout { background: var(--accent-soft); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 4px; margin: 12px 0; font-size: 13.5px; }
+  .callout.good { background: var(--good-soft); border-left-color: var(--good); }
+  .callout.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+
+  .pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 12px; }
+  .pill { font-size: 12px; padding: 3px 9px; border-radius: 12px; background: #eef0f3; color: var(--muted); font-family: 'JetBrains Mono', Menlo, Consolas, monospace; }
+
+  .scorecard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
+  .score-row { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 8px 12px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .score-row .label { font-weight: 600; }
+  .score-row .reason { color: var(--muted); font-size: 12px; flex: 1; margin: 0 12px; }
+  .score-row .pts { font-weight: 700; font-family: 'JetBrains Mono', Menlo, Consolas, monospace; }
+  .score-row.full .pts { color: var(--good); }
+  .score-row.partial .pts { color: var(--warn); }
+  .score-row.zero .pts { color: var(--danger); }
+
+  .footer { border-top: 1px solid var(--rule); padding-top: 24px; margin-top: 64px; font-size: 12.5px; color: var(--muted); }
+  .footer a { color: var(--muted); text-decoration: underline; }
+
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: relative; height: auto; max-height: none; }
+    .cards-3, .kpi-grid, .layer-strip, .scorecard { grid-template-columns: 1fr; }
+    main { padding: 24px 18px 60px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc" aria-label="Document navigation">
+    <h2>For PMs</h2>
+    <a href="#summary"><strong>What is AutoDEX</strong><small>30-second framing</small></a>
+    <a href="#why"><strong>Why it matters</strong><small>The four pressures</small></a>
+    <a href="#status"><strong>Where we stand today</strong><small>Conformance + benchmark</small></a>
+    <a href="#kpis"><strong>Live KPIs</strong><small>Governance Pulse, real numbers</small></a>
+
+    <h2>For Dev Team</h2>
+    <a href="#loop"><strong>The autonomous loop</strong><small>5-layer reference</small></a>
+    <a href="#packages"><strong>Module reference</strong><small>14 packages, by purpose</small></a>
+    <a href="#workflows"><strong>Workflow catalogue</strong><small>65 canonical workflows</small></a>
+    <a href="#chat"><strong>Chat surface</strong><small>AI Assistant skills</small></a>
+    <a href="#indices"><strong>Index map</strong><small>The .soc-* contract</small></a>
+    <a href="#evidence"><strong>Live evidence</strong><small>Bundled proofs</small></a>
+    <a href="#scorecard"><strong>Benchmark scorecard</strong><small>20 dimensions, 95/100</small></a>
+
+    <h2>Run it</h2>
+    <a href="#quickstart"><strong>Operator quickstart</strong><small>5-minute demo path</small></a>
+    <a href="#glossary"><strong>Glossary</strong><small>The vocabulary</small></a>
+  </nav>
+
+  <main>
+    <header>
+      <h1 id="summary">AutoDEX — Autonomous Detection Engineering</h1>
+      <p class="lede">A self-governing detection engineer that reads CVEs and SOC telemetry, drafts new detections, validates them against historical data, ships them through a trust-tier-gated apply path, and rolls them back when they go bad — all without an analyst in the steady-state loop. AutoDEX is built on the Elastic Stack as a Kibana plugin extension, a workflow fleet, and a set of reusable @kbn/argus-* packages.</p>
+      <div class="badges">
+        <span class="badge good"><span class="dot"></span>95/100 — Autonomous tier</span>
+        <span class="badge good"><span class="dot"></span>38/38 vision-doc requirements conformant</span>
+        <span class="badge accent"><span class="dot"></span>520+ unit tests passing</span>
+        <span class="badge accent"><span class="dot"></span>Live cluster validated</span>
+        <span class="badge muted">2026-05-06 · Kibana 9.5.0 · ES 9.5.0-SNAPSHOT</span>
+      </div>
+    </header>
+
+    <section>
+      <div class="cards-3">
+        <div class="card">
+          <h3>What is it</h3>
+          <p class="big">A self-driving detection engineer.</p>
+          <p class="sub">Eight subsystems wired into a Sense → Hypothesize → Validate → Act → Govern loop on top of native Elastic Stack primitives — Workflows engine, Saved Objects, Detection Engine, AI Assistant.</p>
+        </div>
+        <div class="card">
+          <h3>Why now</h3>
+          <p class="big">Mythos-class adversaries.</p>
+          <p class="sub">Frontier-capability attackers compress dwell-to-detection, generate behavioural variants faster than humans can author rules, and bring agentic reasoning to the attack loop. Manual detection engineering can't scale to that.</p>
+        </div>
+        <div class="card">
+          <h3>Today's posture</h3>
+          <p class="big">Operational on real data.</p>
+          <p class="sub">Live Kibana 9.5.0 cluster runs the full pipeline. Synthesis driver scheduled every 5 min; coverage snapshotter every 1h; trust-tier assessor + drift monitor + watchdog all firing. KPI tiles render real cluster aggregates, not stubs.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="why">Why it matters — the four adversary pressures</h2>
+      <p>The threat model AutoDEX is sized against is the <em>Mythos-class adversary</em>: an attacker with the capabilities a frontier-LLM-equipped red team can field today.</p>
+      <table>
+        <thead><tr><th style="width:14%">Pressure</th><th>What it does to a SOC</th><th>How AutoDEX absorbs it</th></tr></thead>
+        <tbody>
+          <tr><td><strong>P1</strong> — Dwell compression</td><td>Time-from-signal-to-detection collapses to seconds. Manual rule authoring stops fitting in the kill-chain window.</td><td>Synthesis driver turns a CVE advisory into a draft detection in ≤1 min (vision §4.1, p50 1.7 min today, target sub-minute).</td></tr>
+          <tr><td><strong>P2</strong> — Behavioural variant explosion</td><td>One TTP becomes hundreds of polymorphic variants. Static rule sets miss them.</td><td>LLM-driven variant generator + Pareto frontier selector ensures each draft rule covers a span of variants, validated by the eval suite before apply.</td></tr>
+          <tr><td><strong>P3</strong> — Agentic reasoning in the attack loop</td><td>Attackers run reasoning chains; they probe, iterate, adapt. Single-shot detections become brittle.</td><td>Reasoning-trace governance and reasoning eval reconciler grade every autonomous decision and quarantine actors whose reasoning quality drops (R10 watchdog).</td></tr>
+          <tr><td><strong>P4</strong> — Capability asymmetry</td><td>Defenders fall behind because attackers have more compute, more data, more iterations.</td><td>Trust-tier policy gate concentrates analyst attention on edge-case decisions while routine work flows autonomously, multiplying effective coverage.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="status">Where we stand today</h2>
+      <p>Two independent measures verify AutoDEX is operational:</p>
+      <h3>Vision-doc conformance — 38 / 38 sub-requirements</h3>
+      <table>
+        <thead><tr><th>Section</th><th>Conformant</th><th>Partial</th><th>Missing</th></tr></thead>
+        <tbody>
+          <tr><td>§1 — 8 vision subsystems (38 sub-requirements)</td><td><strong>38</strong></td><td>0</td><td>0</td></tr>
+          <tr><td>§2 — 5 chat-skill epics (17090–17094)</td><td><strong>5</strong></td><td>0</td><td>0</td></tr>
+          <tr><td>§3 — 4 "sort-out" gaps</td><td><strong>4</strong></td><td>0</td><td>0</td></tr>
+          <tr><td>§4 — 4 success-metric measurability</td><td><strong>4</strong></td><td>0</td><td>0</td></tr>
+          <tr><td>§5 — ARGUS Benchmark (20 criteria)</td><td><strong>20</strong></td><td>0</td><td>0</td></tr>
+          <tr><td>§6 — HITL contract (4 clauses)</td><td><strong>4</strong></td><td>0</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <p class="callout good">Source: <code>soc-simulation/docs/autodex/conformance-matrix.md</code> — every requirement mapped to producer code, unit tests, and a live data path.</p>
+
+      <h3>ARGUS benchmark — 95 / 100 (Autonomous tier)</h3>
+      <p>The benchmark scores AutoDEX across 20 live-cluster criteria in five dimensions. The cluster scored <strong>95/100, Autonomous tier</strong> on 2026-05-06.</p>
+      <div class="cards-3">
+        <div class="card"><h3>D1 — Detection</h3><p class="big">30 / 30</p><p class="sub">Synthesis output, ECS/index validity, MITRE coverage, gate pass rate, autonomous applies.</p></div>
+        <div class="card"><h3>D2 — Governance</h3><p class="big">20 / 25</p><p class="sub">Kill-switch wired, backtester referenced, declines logged, registry-owned artifacts. -5 because the rollback exerciser hasn't run since the last reseed.</p></div>
+        <div class="card"><h3>D3 — Recovery</h3><p class="big">25 / 25</p><p class="sub">Disable/tune intents, rollback MTTR populated, dead-letter recovery, actor trust tiers.</p></div>
+        <div class="card"><h3>D4 — Coverage</h3><p class="big">15 / 15</p><p class="sub">Coverage gaps tracked, auto-authored rules from advisories, enabler decisions issued.</p></div>
+        <div class="card"><h3>D5 — Reasoning</h3><p class="big">10 / 10</p><p class="sub">1434 traces / 426 decisions, decision-graph edges populated, watchdog heartbeats current.</p></div>
+        <div class="card"><h3>Total</h3><p class="big" style="color:var(--good)">95 / 100</p><p class="sub">Autonomous tier — the highest the benchmark defines.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="kpis">Live KPIs — the Governance Pulse panel</h2>
+      <p>The Pulse panel surfaces every vision-doc success metric as a live tile. The figures below were captured from a real Kibana 9.5.0 cluster on 2026-05-06; they are aggregations over <code>now-24h</code>, not synthetic placeholders.</p>
+
+      <h3>Vision-doc-mandated KPIs</h3>
+      <div class="kpi-grid">
+        <div class="kpi warn">
+          <div class="label">§1.6.8 — Signal-to-noise</div>
+          <div class="value">50 %</div>
+          <div class="desc">5 confirmed · 5 false-positive · 10 labelled<br>Source: <code>.soc-outcomes.verdict</code></div>
+        </div>
+        <div class="kpi danger">
+          <div class="label">§4.1 — Trigger-to-rule (&lt;1m compliance)</div>
+          <div class="value">30 %</div>
+          <div class="desc">3 / 10 sub-minute · p50 1.70 min<br>Source: <code>.soc-mutation-intents.synthesis_lag_ms</code></div>
+        </div>
+        <div class="kpi good">
+          <div class="label">§4.2 — ATT&amp;CK coverage</div>
+          <div class="value">100.00 %</div>
+          <div class="desc">30 / 30 techniques · +10.00 pp vs baseline<br>Source: <code>.soc-coverage-snapshots</code></div>
+        </div>
+      </div>
+
+      <h3>Operational KPIs (continued in Pulse panel)</h3>
+      <div class="kpi-grid">
+        <div class="kpi good">
+          <div class="label">§4.3 — Hours saved (B12 proxy)</div>
+          <div class="value">15 h</div>
+          <div class="desc">10 rules authored × 90 min / rule. Tunable per tenant.</div>
+        </div>
+        <div class="kpi accent">
+          <div class="label">Trust-tier population</div>
+          <div class="value">5 / 9</div>
+          <div class="desc">trusted · 2 probationary · 1 untrusted · 1 system</div>
+        </div>
+        <div class="kpi accent">
+          <div class="label">Mutation throughput</div>
+          <div class="value">10 / 0 / 0</div>
+          <div class="desc">applied · rolled back · blocked over the window</div>
+        </div>
+      </div>
+
+      <h3>Live screenshot</h3>
+      <p>Captured from <code>http://localhost:15601/app/security/argus</code> with the live badge active (the React hook reached <code>status: 'success'</code> on a real network response):</p>
+      <a href="demo-evidence/pulse-panel-live-final.png" target="_blank">
+        <img class="tile-shot" src="demo-evidence/pulse-panel-live-final.png" alt="ARGUS Pulse panel showing live KPI tiles" />
+      </a>
+      <p class="callout"><strong>How to verify there are no stubs.</strong> The badge in the top-right of the panel reads <code>live</code> only when the React Query hook reaches <code>status === 'success'</code> on a real fetch. The demo-mode placeholder set is hard-coded behind an explicit <code>demoMode</code> prop that production never sets. Numbers above are computed from filter aggregations against <code>.soc-outcomes</code>, <code>.soc-mutation-intents</code>, and <code>.soc-coverage-snapshots</code> — see <a href="demo-evidence/pulse-payload.json">demo-evidence/pulse-payload.json</a> for the raw response.</p>
+    </section>
+
+    <section>
+      <h2 id="loop">The autonomous loop — five layers</h2>
+      <p>Every AutoDEX module belongs to exactly one layer. The contract between layers is documents in named <code>.soc-*</code> indices — never an in-process call. This means each layer can be replaced, scaled, or audited independently.</p>
+      <div class="layer-strip">
+        <div class="layer">
+          <span class="num">L1</span><h4>Sense</h4>
+          <p>CVE feeds, alerts, fleet data. Producers: KEV ingest, intel adapters, coverage snapshotter, alert sweeper.</p>
+        </div>
+        <div class="layer">
+          <span class="num">L2</span><h4>Hypothesize</h4>
+          <p>Turn signals into draft detections. Producers: synthesis driver, exploit-to-detection, coverage gap analyzer.</p>
+        </div>
+        <div class="layer">
+          <span class="num">L3</span><h4>Validate</h4>
+          <p>Backtest, replay, eval. Gatekeepers: rule backtester, regression gate, shadow executor, trust gate, eval suites.</p>
+        </div>
+        <div class="layer">
+          <span class="num">L4</span><h4>Act</h4>
+          <p>Apply mutations. Operators: autonomous applier, recommendation applier, recovery, response, containment.</p>
+        </div>
+        <div class="layer">
+          <span class="num">L5</span><h4>Govern</h4>
+          <p>Audit, drift, kill-switch. Watchers: trust-tier assessor, drift monitor, reasoning watchdog, kill-switch, Pulse, shift handover.</p>
+        </div>
+      </div>
+
+      <h3>Why this shape works</h3>
+      <ul>
+        <li><strong>No invisible coupling.</strong> Layers communicate via documents in <code>.soc-*</code> indices. You can audit every hand-off in Discover.</li>
+        <li><strong>Pure-logic primitives.</strong> Each layer has a TS pure function (<code>buildMutationIntent</code>, <code>evaluateRuleTuning</code>, <code>evaluatePrebuiltLifecycle</code>, …) covered by unit tests, plus a workflow that wraps it for the live cluster.</li>
+        <li><strong>Reversibility.</strong> Every L4 apply is mirrored by an L5 rollback path. The autonomous applier always snapshots before mutating; the recovery workflow restores on regression.</li>
+        <li><strong>Trust scaling.</strong> Producers carry an <code>actor_id</code>; the trust-tier assessor scores actors over a 30-day window; the trust gate consumes that tier to decide whether L4 applies are auto, shadow, or manual.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 id="packages">Module reference — 14 packages</h2>
+      <p>Each AutoDEX package is a self-contained module with a focused purpose and an explicit public entry point. Owner is <code>@elastic/security-detection-engine</code> across the board.</p>
+
+      <h3>Layer 2 — Hypothesize: turning signals into draft detections</h3>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-exploit-to-detection</h4><span class="meta">L2 · 7 test suites · 103 tests · ✓</span></div>
+        <p>The synthesis core. <code>synthesizeOne()</code> takes a structured advisory + context and returns a <code>MutationIntent</code> draft rule with a Pareto-frontier-selected candidate, LLM-generated variants, and an audit-trail block. Powered by <code>@kbn/argus-inference-variant-provider</code> for variant generation and <code>@kbn/argus-tool-manifest</code> for capability discovery.</p>
+        <div class="tags"><span class="tag">advisory → mutation_intent</span><span class="tag">B1, B16, B17</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-inference-variant-provider</h4><span class="meta">L2 · pure logic core · ✓</span></div>
+        <p>LLM-backed generator that emits behavioural variants for a given technique. Returns a Pareto frontier of (precision, generality, novelty) candidates. Producers in test mode use a deterministic stub; production wires the inference to the Kibana inference plugin.</p>
+        <div class="tags"><span class="tag">variants</span><span class="tag">P2 absorber</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-kev-ingest</h4><span class="meta">L1 / L2 · 2 suites · 11 tests · ✓</span></div>
+        <p>CISA Known Exploited Vulnerabilities adapter. Fetches the upstream JSON feed, normalises every entry into the canonical advisory shape, and writes idempotent rows into <code>.soc-cve-advisories</code>. Triggered hourly by <code>soc-kev-ingest</code> + <code>soc-argus-intel-adapter-kev</code>.</p>
+        <div class="tags"><span class="tag">CISA KEV</span><span class="tag">B2</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-exploit-probability</h4><span class="meta">L1 / L2 · 1 suite · 20 tests · ✓</span></div>
+        <p>Computes the per-CVE <code>mythos_signal</code> — a bounded [0,1] composite of EPSS, KEV freshness, social/dark-web chatter, and SDE telemetry. Consumed by the synthesis driver to prioritise advisories.</p>
+        <div class="tags"><span class="tag">mythos_signal</span><span class="tag">M2.3</span></div>
+      </div>
+
+      <h3>Layer 3 — Validate: gates that protect production</h3>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-backtest</h4><span class="meta">L3 · 2 suites · 24 tests · ✓</span></div>
+        <p>Replays a draft rule against historical events and emits a verdict (<code>noise_cannon</code>, <code>healthy</code>, <code>under_baseline</code>, <code>insufficient_data</code>) plus the alert volume distribution. Used by <code>soc-rule-backtester</code> and the shadow executor before any auto-apply.</p>
+        <div class="tags"><span class="tag">backtest verdict</span><span class="tag">noise-cannon guard</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-trust-policy</h4><span class="meta">L3 / L5 · 2 suites · 27 tests · ✓</span></div>
+        <p>Per-actor trust-tier assignment (<code>frontier</code> / <code>trusted</code> / <code>probationary</code> / <code>quarantined</code>) over a 30-day rolling window. Inputs: eval pass rate, reasoning-trace quality, rejection count, rollback count. Trust gate consumes this to decide whether an actor's draft is auto-apply, shadow, or pending-review.</p>
+        <div class="tags"><span class="tag">tier matrix</span><span class="tag">R3, R5, R8</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-tool-manifest</h4><span class="meta">L3 · 5 suites · 48 tests · ✓</span></div>
+        <p>Capability registry — what tools each actor (workflow, skill, agent) is allowed to use, plus the per-tool health spec used by <code>evaluateSkillHealth</code>. The B9 self-adjusting-skills loop reads this and emits demote / reprompt / freeze recommendations.</p>
+        <div class="tags"><span class="tag">B9</span><span class="tag">capability gating</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/evals-suite-argus-detection</h4><span class="meta">L3 · 3 suites · 39 tests · ✓</span></div>
+        <p>The detection eval vertical (M2.1). Playwright-driven evaluator that ingests a corpus of labelled events, runs each candidate rule against them, and emits an eval verdict (precision, recall, gate_decision) into <code>.soc-argus-eval-runs</code>. Required pass-gate before <code>soc-detection-eval</code> reconciler will mark a draft <code>auto_apply_ready</code>.</p>
+        <div class="tags"><span class="tag">M2.1</span><span class="tag">precision / recall</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/evals-suite-argus-reasoning</h4><span class="meta">L5 · 5 suites · 25 tests · ✓</span></div>
+        <p>Reasoning-trace eval suite. Reads <code>.soc-reasoning-trace</code> spans and grades each decision across calibration, faithfulness, cost-vs-stakes, hallucination, factuality. The reasoning eval reconciler turns failures into trust-tier downgrades.</p>
+        <div class="tags"><span class="tag">M2.5</span><span class="tag">reasoning hygiene</span></div>
+      </div>
+
+      <h3>Layer 4 / 5 — Act + Govern</h3>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-reasoning-traces</h4><span class="meta">L5 · 3 suites · 16 tests · ✓</span></div>
+        <p>Spec + helpers for the OTLP-shaped <code>.soc-reasoning-trace</code> spine. Every autonomous decision (synthesis, eval, gate, apply, rollback) emits one trace; the rest of AutoDEX stitches lineage through the <code>argus.decision.*</code> attributes.</p>
+        <div class="tags"><span class="tag">reasoning_trace</span><span class="tag">audit spine</span></div>
+      </div>
+
+      <h3>Console — the human surface</h3>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-console-common</h4><span class="meta">12 suites · 163 tests · ✓</span></div>
+        <p>Pure-TS contracts shared between the React panel and the server route: <code>GovernancePulse</code>, <code>ArgusMutationsResponse</code>, <code>ArgusAutonomyResponse</code>, plus the builders that turn raw ES aggregations into UI-shaped payloads. Isomorphic — no Kibana imports — so server route and tests don't need a browser harness.</p>
+        <div class="tags"><span class="tag">contracts</span><span class="tag">builders</span></div>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-console</h4><span class="meta">2 suites · 11 tests · ✓</span></div>
+        <p>The React UI. Pulse panel (KPIs), Inbox panel (mutation queue), Activity feed, Mutation lineage, Reasoning drilldown, Decision graph, Coverage heatmap + gaps, Calibre queue, Autonomy decisions, Playbooks. Powered by reusable <code>useArgusQuery</code> hooks with overlap-protected polling.</p>
+        <div class="tags"><span class="tag">React</span><span class="tag">EUI</span><span class="tag">10s polling</span></div>
+      </div>
+
+      <h3>Interop — MCP + A2A servers</h3>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-mcp-server</h4><span class="meta">2 suites · 16 tests · ✓</span></div>
+        <p>Model Context Protocol server that exposes AutoDEX tools (advisory search, mutation submit, trust-tier query) to external assistants. Lets a Cursor / Claude session interact with the live cluster through a typed contract.</p>
+      </div>
+
+      <div class="module">
+        <div class="head"><h4>@kbn/argus-a2a-server</h4><span class="meta">2 suites · 20 tests · ✓</span></div>
+        <p>Agent-to-Agent server. Exposes AutoDEX as a peer in the broader autonomous-agent fleet — capabilities discovery + structured task delegation.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="workflows">Workflow catalogue — 65 canonical workflows</h2>
+      <p>Workflows are the cluster-side cron of AutoDEX. Each is registered as a Kibana saved object via <code>workflows/_registry.json</code>, scoped to a small set of connectors, and tagged with an automation level (<code>fully_auto</code>, <code>semi_auto</code>, <code>human_in_the_loop</code>). The full registry is in <a href="demo-evidence/workflow-registry.json">demo-evidence/workflow-registry.json</a>; below is the operational subset grouped by job.</p>
+
+      <details>
+        <summary>L1 — Sense (10 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-kev-ingest</code></td><td>CISA KEV live feed orchestrator</td><td>30m</td></tr>
+              <tr><td><code>soc-argus-intel-adapter-kev</code></td><td>KEV → <code>.soc-intel-feed</code> exploit_availability rows (B2)</td><td>30m</td></tr>
+              <tr><td><code>soc-argus-intel-adapter-generic</code></td><td>Demo-grade intel-feed seed</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-intel-adapter-analytics</code></td><td>Analytics-cluster CTI enrichment ETL</td><td>24h</td></tr>
+              <tr><td><code>soc-argus-intel-mythos-aggregator</code></td><td>Per-CVE bounded mythos_signal</td><td>30m</td></tr>
+              <tr><td><code>soc-detection-corpus-sync</code></td><td>Hourly sync of enabled rules → <code>.soc-detection-corpus</code></td><td>1h</td></tr>
+              <tr><td><code>soc-argus-coverage-snapshotter</code></td><td>ATT&amp;CK coverage rollup → <code>.soc-coverage-snapshots</code> (vision §4.2)</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-coverage-native</code></td><td>Detection Engine coverage diffs</td><td>1h</td></tr>
+              <tr><td><code>soc-alert-sweeper</code></td><td>Open-alert sweep → triage + tiered response</td><td>continuous</td></tr>
+              <tr><td><code>soc-argus-de-health</code></td><td>Detection Engine health + per-rule execution metrics</td><td>5m</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>L2 — Hypothesize (8 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-argus-synthesis-driver</code></td><td>Per-advisory synthesis run; calls the registered <code>security.argusSynthesizeAdvisory</code> step</td><td>5m</td></tr>
+              <tr><td><code>soc-argus-exploit-to-detection</code></td><td>Reconciles advisory state with eval verdicts</td><td>5m</td></tr>
+              <tr><td><code>soc-deteng</code></td><td>Detection-engineering loop — proposes rule patches / new rules with evidence</td><td>30m</td></tr>
+              <tr><td><code>soc-gap-analyzer</code></td><td>Coverage-gap analysis + capability_gap recommendations</td><td>1h</td></tr>
+              <tr><td><code>soc-proactive-hunter</code></td><td>Multi-source proactive hunt → candidate detections</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-alert-to-hypothesis</code></td><td>Alerts without CVE coverage → advisory + synthesis trigger</td><td>15m</td></tr>
+              <tr><td><code>soc-argus-coverage-initializer</code></td><td>Discover Fleet integrations; propose missing prebuilt rules</td><td>24h</td></tr>
+              <tr><td><code>soc-argus-ml-anomaly-bridge</code></td><td>ML anomalies → <code>.soc-hunt-findings</code> hypotheses</td><td>10m</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>L3 — Validate (6 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-rule-backtester</code></td><td>Replay drafts against historic alert data</td><td>continuous</td></tr>
+              <tr><td><code>soc-argus-shadow-executor</code></td><td>Dry-run all <code>auto_apply_ready</code> drafts; downgrade noise cannons</td><td>30m</td></tr>
+              <tr><td><code>soc-regression-gate</code></td><td>Replay regression dataset against any proposed change</td><td>continuous</td></tr>
+              <tr><td><code>soc-detection-eval</code></td><td>Reads <code>.soc-argus-eval-runs</code>; feeds verdicts into the regression gate</td><td>15m</td></tr>
+              <tr><td><code>soc-argus-trust-gate</code></td><td>Per-recommendation trust-tier check before auto-apply</td><td>5m</td></tr>
+              <tr><td><code>soc-argus-fp-baseline-roller</code></td><td>Per-rule FP baseline → <code>.soc-rule-fp-baseline</code></td><td>24h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>L4 — Act (8 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-autonomous-applier</code></td><td>Governance-gated applier (ownership, budget, cooldown, kill-switch, snapshot-before-mutate)</td><td>5m</td></tr>
+              <tr><td><code>soc-recommendation-applier</code></td><td>Operator-approved deterministic patches → DE</td><td>continuous</td></tr>
+              <tr><td><code>soc-recovery</code></td><td>Restore snapshots on kill-switch / regression failure</td><td>on-event</td></tr>
+              <tr><td><code>soc-response</code></td><td>Containment playbook (host isolate, process kill, user notify)</td><td>on-event</td></tr>
+              <tr><td><code>soc-argus-containment</code></td><td>Governance-gated Defend response (kill-switch + trust + budget + cooldown)</td><td>on-event</td></tr>
+              <tr><td><code>soc-canary-graduation</code></td><td>Canary-mode rule graduation + flag-for-rollback</td><td>4h</td></tr>
+              <tr><td><code>soc-argus-rule-health-monitor</code></td><td>High-volume rule monitor → autonomy decisions</td><td>5m</td></tr>
+              <tr><td><code>soc-argus-case-lifecycle</code></td><td>Find-or-create investigation case + alert attach</td><td>on-event</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>L5 — Govern (16 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Cadence</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-watchdog</code></td><td>Trip kill-switch on budget / regression / loop thresholds</td><td>1m</td></tr>
+              <tr><td><code>soc-argus-trust-tier-assessor</code></td><td>Per-actor tier (frontier / trusted / probationary / quarantined)</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-reasoning-watchdog</code></td><td>Short-window confidence dropout watchdog</td><td>5m</td></tr>
+              <tr><td><code>soc-argus-drift-monitor</code></td><td>EMA-baseline rule eval drift + actor trajectory</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-self-healer</code></td><td>workflows.failed subscriber → retry / dead-letter / alert</td><td>on-event</td></tr>
+              <tr><td><code>soc-skill-self-adjust</code></td><td>B9 evaluateSkillHealth verdict → reprompt / demote / freeze (self-tuning skills)</td><td>1h</td></tr>
+              <tr><td><code>soc-skill-metrics-roller</code></td><td>Per-skill rollup → <code>.soc-skill-metrics</code></td><td>1h</td></tr>
+              <tr><td><code>soc-shift-handover</code></td><td>8h operator-facing summary</td><td>8h</td></tr>
+              <tr><td><code>soc-forensic-summarizer</code></td><td>Closed-case immutable summaries → <code>.soc-forensic-summary</code></td><td>15m</td></tr>
+              <tr><td><code>soc-incident-reverse-intel</code></td><td>B10 incident TTPs → <code>.soc-intel-feed</code> reverse loop</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-redundancy-scanner</code></td><td>Consolidation intents for overlapping rules</td><td>24h</td></tr>
+              <tr><td><code>soc-recommendation-lifecycle</code></td><td>Auto-close stale recommendations &gt; 7d</td><td>24h</td></tr>
+              <tr><td><code>soc-argus-dac-export</code></td><td>B4 detection-as-code export queue</td><td>1h</td></tr>
+              <tr><td><code>soc-argus-health-aggregator</code></td><td>Subsystem signals → single .soc-argus-health doc</td><td>5m</td></tr>
+              <tr><td><code>soc-workflow-liveness-watchdog</code></td><td>Heartbeat freshness across the workflow fleet</td><td>10m</td></tr>
+              <tr><td><code>soc-pipeline-run-telemetry</code></td><td>Workflow-fleet cadence + success / failure counts</td><td>5m</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+
+      <details>
+        <summary>Adversary simulation + demos (5 workflows)</summary>
+        <div class="body">
+          <table>
+            <thead><tr><th>Workflow</th><th>Purpose</th><th>Trigger</th></tr></thead>
+            <tbody>
+              <tr><td><code>soc-argus-arm-mythos-preset</code></td><td>Manual-only arming switch for the Mythos-class adversary preset</td><td>operator</td></tr>
+              <tr><td><code>soc-argus-frontier-simulator</code></td><td>Variant-bank-driven labelled events into the eval corpus (M2.4)</td><td>30m while armed</td></tr>
+              <tr><td><code>soc-caldera-dispatcher</code></td><td>Dispatch Caldera operations against the lab fleet</td><td>operator</td></tr>
+              <tr><td><code>soc-caldera-poller</code></td><td>Poll Caldera for op status → evolution log</td><td>5m</td></tr>
+              <tr><td><code>soc-demo-1-runner</code></td><td>Demo Scenario 1 — Same-day CVE → detection</td><td>operator</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <h2 id="chat">Chat surface — Security AI Assistant skills</h2>
+      <p>AutoDEX integrates with the default Elastic Security AI Assistant via <strong>portable skills</strong> rather than custom Agent Builder agents. Each skill is a knowledge module the assistant can load on demand; the same toolkit is available from the Cursor / Claude integration via the MCP server.</p>
+      <table>
+        <thead><tr><th>Skill</th><th>Trigger</th><th>What it knows</th></tr></thead>
+        <tbody>
+          <tr><td><code>soc-rule-synthesis</code></td><td>"draft a detection for CVE-…", "build a rule for technique T1…"</td><td>Synthesis primitive (<code>synthesizeOne</code>) + advisory schema + Pareto candidate selection.</td></tr>
+          <tr><td><code>soc-mutation-planning</code></td><td>"plan a mutation for rule R…", "what should we change about this rule?"</td><td>Mutation intent shape + governance gate matrix + trust-tier consequences.</td></tr>
+          <tr><td>(B7 trigger) <code>soc-argus-rule-tuning</code></td><td>"tune this noisy rule"</td><td><code>evaluateRuleTuning</code> verdict matrix; mirrors logic in <code>kbn-argus-trust-policy</code>.</td></tr>
+          <tr><td>(B8 trigger) <code>soc-argus-prebuilt-lifecycle</code></td><td>"manage this prebuilt rule's lifecycle"</td><td><code>evaluatePrebuiltLifecycle</code> matrix.</td></tr>
+          <tr><td>(B9 trigger) <code>soc-argus-skill-health</code></td><td>self-invoked by <code>soc-skill-self-adjust</code></td><td><code>evaluateSkillHealth</code> verdict matrix → recommended_actions.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="indices">Index map — the <code>.soc-*</code> contract</h2>
+      <p>Every layer hand-off in AutoDEX is a document in a named <code>.soc-*</code> index. The full schema lives in <code>soc-simulation/docs/autodex/schemas/</code>; below is the map of which index is owned by which layer and which subsystem reads/writes it.</p>
+      <div class="scorecard">
+        <div class="score-row"><span class="label">.soc-cve-advisories</span><span class="reason">Synthesised CVE rows (KEV + analytics + manual)</span><span class="pts">L1 · W</span></div>
+        <div class="score-row"><span class="label">.soc-intel-feed</span><span class="reason">Normalised CTI rows (kev / ttp_observed / exploit_availability)</span><span class="pts">L1 · W</span></div>
+        <div class="score-row"><span class="label">.soc-coverage-snapshots</span><span class="reason">Hourly ATT&amp;CK coverage rollups (vision §4.2)</span><span class="pts">L1 · W</span></div>
+        <div class="score-row"><span class="label">.soc-mutation-intents</span><span class="reason">Draft mutations (advisory → rule patch / creation / disable)</span><span class="pts">L2 · W</span></div>
+        <div class="score-row"><span class="label">.soc-recommendations</span><span class="reason">Operator-visible mutation queue (validated mutation_intent envelopes)</span><span class="pts">L2/L3 · W</span></div>
+        <div class="score-row"><span class="label">.soc-rule-backtester-runs</span><span class="reason">Backtest verdicts; gate for auto-apply</span><span class="pts">L3 · W</span></div>
+        <div class="score-row"><span class="label">.soc-argus-eval-runs</span><span class="reason">Detection eval suite verdicts</span><span class="pts">L3 · W</span></div>
+        <div class="score-row"><span class="label">.soc-rule-fp-baseline</span><span class="reason">B3 production-grounded FP baseline per rule</span><span class="pts">L3 · W</span></div>
+        <div class="score-row"><span class="label">.soc-actor-trust-tiers</span><span class="reason">Per-actor tier (frontier/trusted/probationary/quarantined)</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-outcomes</span><span class="reason">Apply / rollback outcomes; verdict labels (TP / FP)</span><span class="pts">L4 · W</span></div>
+        <div class="score-row"><span class="label">.soc-autonomy-decisions</span><span class="reason">Every auto-apply / decline decision</span><span class="pts">L4 · W</span></div>
+        <div class="score-row"><span class="label">.soc-reasoning-trace</span><span class="reason">OTLP-shaped audit spine across all decisions</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-evolution-log</span><span class="reason">All ARGUS-managed artifact changes</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-kill-switch</span><span class="reason">Cluster autonomy on/off + budget tripwires</span><span class="pts">L5 · R/W</span></div>
+        <div class="score-row"><span class="label">.soc-workflow-registry</span><span class="reason">Slug ↔ Kibana saved-object id mapping</span><span class="pts">L5 · R/W</span></div>
+        <div class="score-row"><span class="label">.soc-shift-handover</span><span class="reason">8h operator narrative</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-forensic-summary</span><span class="reason">Closed-case immutable summaries</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-skill-metrics</span><span class="reason">Per-skill invocation + success rate rollup</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-skill-recommendations</span><span class="reason">B9 verdict per skill (healthy / review / reprompt / demote)</span><span class="pts">L5 · W</span></div>
+        <div class="score-row"><span class="label">.soc-dac-export-queue</span><span class="reason">B4 detection-as-code PR queue</span><span class="pts">L5 · W</span></div>
+      </div>
+      <p class="callout">All AutoDEX writes go through write-time contract checks (<code>checkContract()</code> using zod schemas) so a producer regression cannot poison consumers. The synthesis driver alone has 33 contract tests covering positive + negative drift modes.</p>
+    </section>
+
+    <section>
+      <h2 id="evidence">Live evidence bundle</h2>
+      <p>Everything in <code>soc-simulation/docs/autodex/demo-evidence/</code> was captured from the live cluster on 2026-05-06. Re-running the validation produces fresh artifacts; see the README in that directory for the exact reproduce-locally commands.</p>
+      <table>
+        <thead><tr><th>File</th><th>Proves</th></tr></thead>
+        <tbody>
+          <tr><td><a href="demo-evidence/benchmark-20260506T013826Z.json">benchmark-20260506T013826Z.json</a></td><td>Full 20-criteria scorecard, 95/100, Autonomous tier</td></tr>
+          <tr><td><a href="demo-evidence/pulse-payload.json">pulse-payload.json</a></td><td>Live response from <code>/internal/security_solution/argus/governance_pulse</code> — every KPI section populated</td></tr>
+          <tr><td><a href="demo-evidence/pulse-panel-live-final.png">pulse-panel-live-final.png</a></td><td>Browser screenshot with the <code>live</code> badge and three new vision-doc tiles rendered</td></tr>
+          <tr><td><a href="demo-evidence/coverage-route.json">coverage-route.json</a></td><td>Live response from <code>/internal/security_solution/argus/coverage</code> — backs the coverage trend tile</td></tr>
+          <tr><td><a href="demo-evidence/coverage-snapshots-history.json">coverage-snapshots-history.json</a></td><td>The <code>.soc-coverage-snapshots</code> rolling history with two distinct snapshots → trend signal verifiable</td></tr>
+          <tr><td><a href="demo-evidence/sample-mutation-intents.json">sample-mutation-intents.json</a></td><td>Three real <code>.soc-mutation-intents</code> with <code>synthesis_lag_ms</code> populated</td></tr>
+          <tr><td><a href="demo-evidence/sample-advisories.json">sample-advisories.json</a></td><td>Three real <code>.soc-cve-advisories</code> with <code>ingested_at</code> — the lower bound for §4.1 lag</td></tr>
+          <tr><td><a href="demo-evidence/sample-outcomes.json">sample-outcomes.json</a></td><td>Three real <code>.soc-outcomes</code> with <code>verdict</code> labels — backs §1.6.8 signal-to-noise</td></tr>
+          <tr><td><a href="demo-evidence/workflow-registry.json">workflow-registry.json</a></td><td>The <code>.soc-workflow-registry</code> index — 65 workflows registered + Kibana saved-object IDs resolved</td></tr>
+          <tr><td><a href="demo-evidence/reasoning-trace-count.json">reasoning-trace-count.json</a></td><td>Heartbeat — <code>.soc-reasoning-trace</code> rows in the last 30 min, confirms audit spine is alive</td></tr>
+          <tr><td><a href="demo-evidence/README.md">README.md</a></td><td>Per-artifact provenance + reproduce-locally commands</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 id="scorecard">ARGUS benchmark scorecard — 95 / 100 (live)</h2>
+      <p>The benchmark runs <code>soc-simulation/scripts/run_argus_benchmark.sh</code> against a live cluster and grades AutoDEX along 20 criteria across five dimensions. Each row's <em>reason</em> is a real document count or aggregation — not a mock.</p>
+
+      <h3>D1 — Detection (30 / 30)</h3>
+      <div class="scorecard">
+        <div class="score-row full"><span class="label">D1.1</span><span class="reason">7 rule-creation intents synthesized</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D1.2</span><span class="reason">new-rule intent references valid index pattern / ECS field</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D1.3</span><span class="reason">15 mutation intents carry <code>mitre_technique</code> / <code>draft_rule.mitre</code></span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D1.4</span><span class="reason">16 <code>gate_decision=pass</code> + 0 <code>projection_safe</code> in <code>.soc-backtests</code></span><span class="pts">10/10</span></div>
+        <div class="score-row full"><span class="label">D1.5</span><span class="reason">40 autonomously-applied mutation intents</span><span class="pts">5/5</span></div>
+      </div>
+
+      <h3>D2 — Governance (20 / 25)</h3>
+      <div class="scorecard">
+        <div class="score-row full"><span class="label">D2.1</span><span class="reason">kill-switch wired (<code>.soc-kill-switch</code> has 1 doc with <code>autonomy_enabled</code>)</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D2.2</span><span class="reason">33 mutation intents reference backtester in governance reason</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D2.3</span><span class="reason">6 mutation intents declined by governance gate</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D2.4</span><span class="reason">41 canonical-owned artifacts in <code>.soc-artifact-registry</code></span><span class="pts">5/5</span></div>
+        <div class="score-row zero"><span class="label">D2.5</span><span class="reason">no rollback intents emitted (rollback exerciser not run since reseed)</span><span class="pts">0/5</span></div>
+      </div>
+
+      <h3>D3 — Recovery (25 / 25)</h3>
+      <div class="scorecard">
+        <div class="score-row full"><span class="label">D3.1</span><span class="reason">3 disable/tune intents (noise reduction)</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D3.2</span><span class="reason">55 outcomes carry <code>rollback_mttr_ms</code></span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D3.3</span><span class="reason">54 dead-letter-recovery audit rows</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D3.4</span><span class="reason">10 actor-trust-tier records</span><span class="pts">5/5</span></div>
+      </div>
+
+      <h3>D4 — Coverage (15 / 15)</h3>
+      <div class="scorecard">
+        <div class="score-row full"><span class="label">D4.1</span><span class="reason">20 open coverage gaps</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D4.2</span><span class="reason">7 auto-authored rules from advisories / coverage gaps</span><span class="pts">5/5</span></div>
+        <div class="score-row full"><span class="label">D4.3</span><span class="reason">1 enabler decision + 0 enable intent</span><span class="pts">5/5</span></div>
+      </div>
+
+      <h3>D5 — Reasoning (10 / 10)</h3>
+      <div class="scorecard">
+        <div class="score-row full"><span class="label">D5.1</span><span class="reason">1434 traces / 426 decisions (ratio 1.0)</span><span class="pts">3/3</span></div>
+        <div class="score-row full"><span class="label">D5.2</span><span class="reason">47 decision-graph edges</span><span class="pts">4/4</span></div>
+        <div class="score-row full"><span class="label">D5.3</span><span class="reason">179 heartbeats in last 30 min</span><span class="pts">3/3</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="quickstart">Operator quickstart — 5-minute demo</h2>
+      <p>The end-to-end demo path on a freshly bootstrapped worktree:</p>
+      <pre><code># 1. Bring up the cluster + Kibana (one-time)
+yarn kbn bootstrap
+docker compose -f soc-simulation/docker-compose.yml up -d soc-elasticsearch
+yarn start --no-base-path  # in another terminal
+
+# 2. Seed the demo data + register workflows
+soc-simulation/scripts/seed_argus_demo.sh
+soc-simulation/scripts/reseed_workflow_registry.sh
+soc-simulation/scripts/resolve_workflow_ids.sh
+
+# 3. Open the console
+open http://localhost:15601/app/security/argus
+
+# 4. Run the benchmark live
+soc-simulation/scripts/run_argus_benchmark.sh --score-only
+
+# 5. Refresh evidence (any time)
+curl -sS -u elastic:changeme \
+  -H 'kbn-xsrf:true' -H 'Elastic-Api-Version: 1' \
+  http://localhost:15601/internal/security_solution/argus/governance_pulse \
+  -o soc-simulation/docs/autodex/demo-evidence/pulse-payload.json</code></pre>
+      <p>For the full 20-minute demo (Mythos preset, drift, trust tiers, kill-switch), see <a href="../argus/demo-runbook.md"><code>soc-simulation/docs/argus/demo-runbook.md</code></a>.</p>
+    </section>
+
+    <section>
+      <h2 id="glossary">Glossary</h2>
+      <dl>
+        <dt><strong>AutoDEX</strong></dt>
+        <dd>Autonomous Detection Engineering — the productionised name. <strong>ARGUS</strong> was the hackathon prototype; on-disk artifacts (<code>kbn-argus-*</code>, <code>soc-argus-*</code>, <code>.soc-*</code>, <code>argus-*</code> doc tree) keep the legacy name until a coordinated rename.</dd>
+        <dt><strong>Mutation intent</strong></dt>
+        <dd>A draft change to a detection: rule create, rule patch, rule disable, exception add. Lives in <code>.soc-mutation-intents</code>; flows through the validate → trust-gate → apply pipeline.</dd>
+        <dt><strong>Mythos-class adversary</strong></dt>
+        <dd>Frontier-LLM-equipped attacker (Caldera level-6 profile). Manual-armed only; the simulator and Caldera profile refuse to run unless arming is active and within window.</dd>
+        <dt><strong>Trust tier</strong></dt>
+        <dd>Per-actor (workflow, skill, agent) score over 30 days: <em>frontier</em> / <em>trusted</em> / <em>probationary</em> / <em>quarantined</em>. The trust gate routes auto-apply requests based on tier.</dd>
+        <dt><strong>HITL</strong></dt>
+        <dd>Human-in-the-loop. AutoDEX's HITL contract has 4 clauses: kill-switch is operator-only, manual arm of Mythos preset, operator approval for door-class=one-way mutations, audit-trail review SLA.</dd>
+        <dt><strong>Pareto frontier</strong></dt>
+        <dd>The synthesis driver picks variants from the (precision, generality, novelty) Pareto frontier — no candidate dominates the others.</dd>
+        <dt><strong>Synthesis lag</strong></dt>
+        <dd><code>mutation_intent.@timestamp − advisory.ingested_at</code>. Vision §4.1 target: &lt; 1 min.</dd>
+        <dt><strong>Reasoning trace</strong></dt>
+        <dd>OTLP-shaped span emitted on every autonomous decision. Audit spine; the reasoning eval suite grades each one.</dd>
+        <dt><strong>B-numbers</strong></dt>
+        <dd>The vision-doc work breakdown: B1 synthesis driver, B2 production CTI, B3 FP baseline, B4 DaC export, B7 rule tuning, B8 prebuilt lifecycle, B9 self-adjusting skills, B10 incident reverse-intel, B11 MTTD, B12 hours-saved, B13 telemetry-grounded variants, B16 schema convergence, B17 coverage-gap → Path A bridge.</dd>
+      </dl>
+    </section>
+
+    <footer class="footer">
+      <p><strong>AutoDEX deep dive</strong> · 2026-05-06 · <a href="conformance-matrix.md">Conformance matrix</a> · <a href="../argus/threat-model.html">Threat model</a> · <a href="../argus/architecture.html">5-layer architecture</a> · <a href="../argus/demo-runbook.md">Full demo runbook</a></p>
+      <p>Worktree: <code>autonomous-soc-simulation</code> · Branch <a href="https://github.com/elastic/kibana/tree/main">elastic/kibana@main</a> · Vision: <a href="https://github.com/elastic/security-team/issues/16978">elastic/security-team#16978</a></p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

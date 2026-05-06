@@ -76277,6 +76277,7 @@ paths:
           name: product_name
   /api/security/role:
     get:
+      description: Retrieve all Kibana roles.
       operationId: get-security-role
       parameters:
         - description: If `true` and the response contains any privileges that are associated with deprecated features, they are omitted in favor of details about the appropriate replacement feature privileges.
@@ -76287,6 +76288,36 @@ paths:
             type: boolean
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                getAllRolesResponse:
+                  value:
+                    - _unrecognized_applications: []
+                      description: My custom Kibana role.
+                      elasticsearch:
+                        cluster:
+                          - monitor
+                        indices:
+                          - names:
+                              - logs-*
+                            privileges:
+                              - read
+                        run_as: []
+                      kibana:
+                        - base:
+                            - read
+                          feature: {}
+                          spaces:
+                            - default
+                      metadata: {}
+                      name: my_kibana_role
+                      transient_metadata:
+                        enabled: true
+              schema:
+                items:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_response'
+                type: array
           description: Indicates a successful call.
       summary: Get all roles
       tags:
@@ -76296,6 +76327,7 @@ paths:
           name: product_name
   /api/security/role/_query:
     post:
+      description: Query Kibana roles with optional filters, paging, and sorting.
       operationId: post-security-role-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -76308,10 +76340,50 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              queryRolesRequest:
+                value:
+                  from: 0
+                  query: kibana
+                  size: 25
+                  sort:
+                    direction: asc
+                    field: name
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_security_query_roles_body'
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                queryRolesResponse:
+                  value:
+                    count: 1
+                    roles:
+                      - _unrecognized_applications: []
+                        description: My custom Kibana role.
+                        elasticsearch:
+                          cluster:
+                            - monitor
+                          indices:
+                            - names:
+                                - logs-*
+                              privileges:
+                                - read
+                          run_as: []
+                        kibana:
+                          - base:
+                              - read
+                            feature: {}
+                            spaces:
+                              - default
+                        metadata: {}
+                        name: my_kibana_role
+                        transient_metadata:
+                          enabled: true
+                    total: 1
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_security_query_roles_response'
           description: Indicates a successful call.
       summary: Query roles
       tags: []
@@ -76320,6 +76392,7 @@ paths:
           name: product_name
   /api/security/role/{name}:
     delete:
+      description: Delete a Kibana role by its name.
       operationId: delete-security-role-name
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -76346,6 +76419,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      description: Retrieve a Kibana role by its name.
       operationId: get-security-role-name
       parameters:
         - description: The role name.
@@ -76363,6 +76437,34 @@ paths:
             type: boolean
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                getRoleResponse:
+                  value:
+                    _unrecognized_applications: []
+                    description: My custom Kibana role.
+                    elasticsearch:
+                      cluster:
+                        - monitor
+                      indices:
+                        - names:
+                            - logs-*
+                          privileges:
+                            - read
+                      run_as: []
+                    kibana:
+                      - base:
+                          - read
+                        feature: {}
+                        spaces:
+                          - default
+                    metadata: {}
+                    name: my_kibana_role
+                    transient_metadata:
+                      enabled: true
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_response'
           description: Indicates a successful call.
       summary: Get a role
       tags:
@@ -76399,6 +76501,24 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createOrUpdateRoleRequest:
+                value:
+                  description: My custom Kibana role.
+                  elasticsearch:
+                    cluster:
+                      - monitor
+                    indices:
+                      - names:
+                          - logs-*
+                        privileges:
+                          - read
+                  kibana:
+                    - base:
+                        - read
+                      feature: {}
+                      spaces:
+                        - default
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_put_payload'
       responses:
@@ -76412,6 +76532,7 @@ paths:
           name: product_name
   /api/security/roles:
     post:
+      description: Create or update multiple Kibana roles in a single request.
       operationId: post-security-roles
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -76424,10 +76545,40 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkCreateOrUpdateRoles:
+                value:
+                  roles:
+                    my_kibana_role:
+                      elasticsearch:
+                        cluster:
+                          - monitor
+                        indices:
+                          - names:
+                              - logs-*
+                            privileges:
+                              - read
+                      kibana:
+                        - base:
+                            - read
+                          feature: {}
+                          spaces:
+                            - default
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_security_roles_bulk_create_or_update_payload'
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                bulkCreateOrUpdateRolesResponse:
+                  value:
+                    created:
+                      - my_kibana_role
+                    noop: []
+                    updated: []
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_security_bulk_create_or_update_roles_response'
           description: Indicates a successful call.
       summary: Create or update roles
       tags:
@@ -97172,6 +97323,46 @@ components:
             type: array
           - $ref: '#/components/schemas/Kibana_HTTP_APIs_RecursiveRecord'
       type: object
+    Kibana_HTTP_APIs_security_bulk_create_or_update_roles_response:
+      additionalProperties: false
+      description: The response payload for the bulk create-or-update roles API.
+      properties:
+        created:
+          items:
+            description: The name of a role that was created.
+            type: string
+          type: array
+        errors:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_bulk_roles_error_detail'
+          type: object
+        noop:
+          items:
+            description: The name of a role that was unchanged by the request.
+            type: string
+          type: array
+        updated:
+          items:
+            description: The name of a role that was updated.
+            type: string
+          type: array
+      title: security_bulk_create_or_update_roles_response
+      type: object
+    Kibana_HTTP_APIs_security_bulk_roles_error_detail:
+      additionalProperties: false
+      description: Error information for a single role in a bulk create-or-update request.
+      properties:
+        reason:
+          description: A human readable error reason.
+          type: string
+        type:
+          description: The error type.
+          type: string
+      required:
+        - type
+        - reason
+      title: security_bulk_roles_error_detail
+      type: object
     Kibana_HTTP_APIs_security_query_roles_body:
       additionalProperties: false
       description: The request body for querying roles.
@@ -97198,6 +97389,26 @@ components:
       title: security_query_roles_filters
       type: object
       x-oas-optional: true
+    Kibana_HTTP_APIs_security_query_roles_response:
+      additionalProperties: false
+      description: The response payload for a roles query.
+      properties:
+        count:
+          description: The number of roles returned in this response page.
+          type: number
+        roles:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_response'
+          type: array
+        total:
+          description: The total number of roles that match the query.
+          type: number
+      required:
+        - roles
+        - count
+        - total
+      title: security_query_roles_response
+      type: object
     Kibana_HTTP_APIs_security_query_roles_sort:
       additionalProperties: false
       description: The sort criteria for the query.
@@ -97285,6 +97496,26 @@ components:
         - privileges
       title: security_role_indices_privileges
       type: object
+    Kibana_HTTP_APIs_security_role_kibana_application:
+      additionalProperties: false
+      description: A raw Elasticsearch application privilege entry tied to Kibana.
+      properties:
+        application:
+          type: string
+        privileges:
+          items:
+            type: string
+          type: array
+        resources:
+          items:
+            type: string
+          type: array
+      required:
+        - application
+        - privileges
+        - resources
+      title: security_role_kibana_application
+      type: object
     Kibana_HTTP_APIs_security_role_kibana_privilege:
       additionalProperties: false
       description: The Kibana privilege entry for the role.
@@ -97336,6 +97567,38 @@ components:
       required:
         - base
       title: security_role_kibana_privilege
+      type: object
+    Kibana_HTTP_APIs_security_role_kibana_privilege_response:
+      additionalProperties: false
+      description: A Kibana privilege entry returned for a role.
+      properties:
+        _reserved:
+          items:
+            description: A reserved Kibana privilege granted globally.
+            type: string
+          type: array
+        base:
+          items:
+            description: A base Kibana privilege.
+            type: string
+          type: array
+        feature:
+          additionalProperties:
+            items:
+              description: A privilege the role member has for the feature.
+              type: string
+            type: array
+          type: object
+        spaces:
+          items:
+            description: A space that the privilege applies to. The wildcard `*` indicates all spaces.
+            type: string
+          type: array
+      required:
+        - spaces
+        - base
+        - feature
+      title: security_role_kibana_privilege_response
       type: object
     Kibana_HTTP_APIs_security_role_put_payload:
       additionalProperties: false
@@ -97426,6 +97689,60 @@ components:
         - names
         - privileges
       title: security_role_remote_indices_privileges
+      type: object
+    Kibana_HTTP_APIs_security_role_response:
+      additionalProperties: false
+      description: A Kibana role definition returned by the Roles API.
+      properties:
+        _transform_error:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_transform_error'
+          type: array
+        _unrecognized_applications:
+          items:
+            description: Application names found on the role that are not recognized by Kibana.
+            type: string
+          type: array
+        description:
+          description: A description for the role.
+          type: string
+        elasticsearch:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_elasticsearch'
+        kibana:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_kibana_privilege_response'
+          type: array
+        metadata:
+          additionalProperties:
+            nullable: true
+          type: object
+        name:
+          description: The role name.
+          type: string
+        transient_metadata:
+          additionalProperties:
+            nullable: true
+          type: object
+      required:
+        - name
+        - elasticsearch
+        - kibana
+      title: security_role_response
+      type: object
+    Kibana_HTTP_APIs_security_role_transform_error:
+      additionalProperties: false
+      description: Diagnostic information about a role whose Kibana privileges could not be transformed.
+      properties:
+        reason:
+          description: The reason the role could not be fully transformed.
+          type: string
+        state:
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_kibana_application'
+          type: array
+      required:
+        - reason
+      title: security_role_transform_error
       type: object
     Kibana_HTTP_APIs_security_roles_bulk_create_or_update_payload:
       additionalProperties: false

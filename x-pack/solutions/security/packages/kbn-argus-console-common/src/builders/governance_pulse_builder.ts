@@ -108,12 +108,12 @@ export interface GovernancePulseAggsInput {
    */
   readonly human_rollbacks?: { readonly doc_count?: number | null } | null;
   /**
-   * Vision-doc 1.6.8 — outcomes labelled `disposition: confirmed`
-   * (true positives) in the window. Filter agg → `doc_count`.
+   * Vision-doc 1.6.8 — outcomes labelled `verdict: true_positive`
+   * (analyst-confirmed) in the window. Filter agg → `doc_count`.
    */
   readonly tp_count?: { readonly doc_count?: number | null } | null;
   /**
-   * Vision-doc 1.6.8 — outcomes labelled `disposition: false_positive` in
+   * Vision-doc 1.6.8 — outcomes labelled `verdict: false_positive` in
    * the window. Filter agg → `doc_count`.
    */
   readonly fp_count?: { readonly doc_count?: number | null } | null;
@@ -170,12 +170,20 @@ export interface CoverageSnapshotsAggsInput {
   } | null;
 }
 
-/** Loose shape of a `.soc-coverage-snapshots` source document. */
+/**
+ * Loose shape of a `.soc-coverage-snapshots` source document.
+ *
+ * The numeric fields are typed as `number | string` because the producer
+ * (`soc-argus-coverage-snapshotter` workflow) emits them via Liquid, which
+ * stringifies all values. The TS-side path that writes the same document
+ * (chat-tool / direct API) emits proper numbers. `toCount` /
+ * `toFiniteNumber` accept both shapes so the builder stays agnostic.
+ */
 export interface CoverageSnapshotSource {
   readonly ['@timestamp']?: string | null;
-  readonly total_techniques?: number | null;
-  readonly covered_techniques?: number | null;
-  readonly coverage_pct?: number | null;
+  readonly total_techniques?: number | string | null;
+  readonly covered_techniques?: number | string | null;
+  readonly coverage_pct?: number | string | null;
 }
 
 /**
@@ -384,11 +392,22 @@ const buildHoursSaved = (
  * Unlike `toFiniteNumber` (which returns `null`), this returns `0` so the
  * builder can do straightforward arithmetic without null-checks.
  */
-const toCount = (value: number | null | undefined): number => {
+/**
+ * Coerce a doc_count-shaped agg value to a non-negative integer count.
+ *
+ * Accepts `number | string | null | undefined` because Liquid-emitted
+ * fields (e.g. coverage snapshots written by `soc-argus-coverage-snapshotter`)
+ * land as strings on the wire even when the dashboard treats them as
+ * counts. `parseFloat` is intentionally lenient — anything that doesn't
+ * parse to a finite number degrades to `0` so leadership sees a clean
+ * "0" rather than a NaN tile.
+ */
+const toCount = (value: number | string | null | undefined): number => {
   if (value === null || value === undefined) return 0;
-  if (!Number.isFinite(value)) return 0;
-  if (value < 0) return 0;
-  return Math.floor(value);
+  const num = typeof value === 'number' ? value : Number.parseFloat(value);
+  if (!Number.isFinite(num)) return 0;
+  if (num < 0) return 0;
+  return Math.floor(num);
 };
 
 const roundTo = (value: number, decimals: number): number => {
@@ -509,9 +528,16 @@ const buildTierMix = (
   };
 };
 
-const toFiniteNumber = (value: number | null | undefined): number | null => {
+/**
+ * Coerce a numeric-ish value to a finite `number` (or `null`).
+ *
+ * Accepts `number | string | null | undefined` for the same reason
+ * `toCount` does — Liquid producers emit numbers as strings.
+ */
+const toFiniteNumber = (value: number | string | null | undefined): number | null => {
   if (value === null || value === undefined) return null;
-  return Number.isFinite(value) ? value : null;
+  const num = typeof value === 'number' ? value : Number.parseFloat(value);
+  return Number.isFinite(num) ? num : null;
 };
 
 /**

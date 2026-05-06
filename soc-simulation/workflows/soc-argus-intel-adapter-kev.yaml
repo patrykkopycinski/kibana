@@ -90,11 +90,19 @@ steps:
         - "@timestamp":
             order: desc
 
+  # ── 1b. Compute a gate flag the workflow `if` operator can read ──────
+  - name: gate_has_kev_rows
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.find_recent_kev.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   # ── 2. Fan-out: one .soc-intel-feed row per CVE ──────────────────────
   - name: fanout_intel_rows
     type: foreach
     foreach: "{{ steps.find_recent_kev.output.hits.hits }}"
-    if: "steps.find_recent_kev.output.hits.hits | size | default: 0 > 0"
+    if: "steps.gate_has_kev_rows.output: yes"
     steps:
       - name: write_intel_row
         type: elasticsearch.index

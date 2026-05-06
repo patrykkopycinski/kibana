@@ -69,6 +69,16 @@ steps:
         - "@timestamp":
             order: desc
 
+  # ── 1b. Compute a gate flag the workflow `if` operator can read ──────
+  # Workflow `if:` uses KQL-equality, not Liquid. Land arithmetic checks
+  # in a console step's output, then match on the resulting "yes"/"no".
+  - name: gate_has_rules
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.find_applied_argus_rules.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   # ── 2. Queue an export per rule ──────────────────────────────────────
   # NOTE: This Liquid emission is the conservative shape. The full
   # round-trip-safe artifact (with sorted labels/annotations,
@@ -81,7 +91,7 @@ steps:
   - name: queue_exports
     type: foreach
     foreach: "{{ steps.find_applied_argus_rules.output.hits.hits }}"
-    if: "steps.find_applied_argus_rules.output.hits.hits | size | default: 0 > 0"
+    if: "steps.gate_has_rules.output: yes"
     steps:
       - name: write_queue_row
         type: elasticsearch.index

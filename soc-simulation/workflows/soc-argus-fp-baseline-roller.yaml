@@ -84,6 +84,18 @@ steps:
         window_from: "{{ consts.window_from }}"
         window_hours: "{{ consts.window_hours }}"
 
+  # ── 2b. Compute a gate flag the workflow `if` operator can read ──────
+  # The workflow engine's `if:` field uses KQL-equality, NOT Liquid filter
+  # comparisons (the `>` operator is reserved as a KQL token), so the
+  # arithmetic check has to land in a console step's output and the `if:`
+  # then matches on string equality.
+  - name: gate_has_rules
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.aggregate_alerts_per_rule.output.aggregations.rules.buckets | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   # ── 3. Fan-out: one baseline row per rule (volume-only verdict) ──────
   # NOTE: This is the conservative emission. The full verdict matrix
   # (labelled / insufficient_labels) needs a registered server-side step
@@ -96,7 +108,7 @@ steps:
   - name: fanout_baselines
     type: foreach
     foreach: "{{ steps.aggregate_alerts_per_rule.output.aggregations.rules.buckets }}"
-    if: "steps.aggregate_alerts_per_rule.output.aggregations.rules.buckets | size | default: 0 > 0"
+    if: "steps.gate_has_rules.output: yes"
     steps:
       - name: write_baseline_row
         type: elasticsearch.index

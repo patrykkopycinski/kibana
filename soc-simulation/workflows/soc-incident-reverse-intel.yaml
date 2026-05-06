@@ -130,6 +130,17 @@ steps:
         outcome_hits:  "{{ steps.read_outcomes.output.hits.hits | size | default: 0 }}"
         window_minutes: "{{ consts.window_minutes }}"
 
+  # ── Compute a gate flag the workflow `if` operator can read ─────────
+  # Workflow `if:` operates as KQL-equality, not Liquid. Land the
+  # arithmetic check in a console-step output and the `if:` matches on
+  # the resulting "yes"/"no" string.
+  - name: gate_has_forensic_hits
+    type: console
+    with:
+      message: >-
+        {%- assign _n = steps.read_forensic_summaries.output.hits.hits | size | default: 0 -%}
+        {% if _n > 0 %}yes{% else %}no{% endif %}
+
   # ── Aggregate per-technique using a Painless inline scripted step ────
   # The pure-logic spec (`extractReverseIntel`) does the heavy lifting in
   # the server-side `security.argusReverseIntelExtract` step type. The
@@ -148,7 +159,7 @@ steps:
   - name: emit_forensic_signals
     type: foreach
     foreach: "{{ steps.read_forensic_summaries.output.hits.hits }}"
-    if: "steps.read_forensic_summaries.output.hits.hits | size | default: 0 > 0"
+    if: "steps.gate_has_forensic_hits.output: yes"
     steps:
       - name: maybe_index_per_technique
         type: foreach

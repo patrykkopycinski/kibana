@@ -27,6 +27,9 @@ steps:
     with:
       method: GET
       path: /internal/security_solution/argus/coverage
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
 
   - name: write_snapshot
     type: elasticsearch.index

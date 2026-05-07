@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { hasLibraryItemWithTitle } from './has_library_item_with_title';
-export { dashboardClient } from './dashboard_client';
-export { findService } from './find_service';
-export { searchAction } from './search_action';
-export { getDashboardsByIdsAction } from './get_dashboard_by_id_action';
+import { linksClient } from './links_content_management_client';
 
-export type { FindDashboardsByIdResponse, FindDashboardsService } from './types';
+export const hasLibraryItemWithTitle = async (title: string) => {
+  const { hits } = await linksClient.search(
+    {
+      text: `"${title}"`,
+      limit: 10,
+    },
+    { onlyTitle: true }
+  );
+
+  return hits.some((obj) => obj.attributes.title?.toLowerCase() === title.toLowerCase());
+};

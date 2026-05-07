@@ -39741,7 +39741,6 @@
     "xpack.securitySolution.containers.detectionEngine.alerts.readListsPrivileges.errorDescription": "Die Listenberechtigungen konnten nicht abgerufen werden",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunErrorTitle": "Fehler beim Planen der manuellen Ausführung",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunSuccessTitle": "Manuelle Ausführung für {numRules, plural, =1 {# rule} other {# rules}} erfolgreich geplant",
-    "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure": "Vordefinierte Regeln konnten nicht initialisiert werden",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "Regelfilter konnte nicht abgerufen werden",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "Regeln und Zeitpläne konnten nicht abgerufen werden",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "Details anzeigen",

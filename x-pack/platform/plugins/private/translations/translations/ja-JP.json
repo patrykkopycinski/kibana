@@ -39869,7 +39869,6 @@
     "xpack.securitySolution.containers.detectionEngine.alerts.readListsPrivileges.errorDescription": "リスト権限を取得できませんでした",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunErrorTitle": "手動実行のスケジュール中のエラー",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunSuccessTitle": "{numRules, plural, =1 {# rule} other {#個のルール}}の手動実行が正常にスケジュールされました",
-    "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure": "事前構築されたルールのブートストラップに失敗しました",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "ルールフィルターを取得できませんでした",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "ルールとタイムラインを取得できませんでした",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "詳細を表示",

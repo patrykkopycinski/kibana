@@ -39873,7 +39873,6 @@
     "xpack.securitySolution.containers.detectionEngine.alerts.readListsPrivileges.errorDescription": "无法检索列表权限",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunErrorTitle": "计划手动运行时出错",
     "xpack.securitySolution.containers.detectionEngine.backfillSchedule.scheduleRuleRunSuccessTitle": "已成功为 {numRules, plural, =1 {# 个规则} other {# 个规则}}安排手动运行",
-    "xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure": "启动预构建规则失败",
     "xpack.securitySolution.containers.detectionEngine.ruleManagementFiltersFetchFailure": "无法提取规则筛选",
     "xpack.securitySolution.containers.detectionEngine.rulesAndTimelines": "无法提取规则和时间线",
     "xpack.securitySolution.contextMenuItemByRouter.viewDetails": "查看详情",

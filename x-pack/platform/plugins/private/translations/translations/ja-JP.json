@@ -50985,7 +50985,6 @@
     "xpack.stackConnectors.slack.params.textLabel": "Text",
     "xpack.stackConnectors.slack.unexpectedHttpResponseErrorMessage": "slack からの予期せぬ http 応答：{httpStatus} {httpStatusText}",
     "xpack.stackConnectors.slack.unexpectedNullResponseErrorMessage": "Slack から予期せぬ null 応答",
-    "xpack.stackConnectors.slackApi.title": "Slack API",
     "xpack.stackConnectors.swimlane.configuration.apiAllowedHostsError": "コネクターアクションの構成エラー：{message}",
     "xpack.stackConnectors.teams.configurationError": "Teams アクションの設定エラー：{message}",
     "xpack.stackConnectors.teams.configurationErrorNoHostname": "Teams アクションの構成エラー：Web フック URL からホスト名をパースできません",

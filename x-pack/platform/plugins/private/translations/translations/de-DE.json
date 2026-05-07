@@ -50795,7 +50795,6 @@
     "xpack.stackConnectors.slack.params.textLabel": "Text",
     "xpack.stackConnectors.slack.unexpectedHttpResponseErrorMessage": "unerwartete HTTP-Reaktion von Slack: {httpStatus} {httpStatusText}",
     "xpack.stackConnectors.slack.unexpectedNullResponseErrorMessage": "unerwartete Null-Reaktion von Slack",
-    "xpack.stackConnectors.slackApi.title": "Slack API",
     "xpack.stackConnectors.swimlane.configuration.apiAllowedHostsError": "Fehler beim Konfigurieren der Connector-Aktion: {message}",
     "xpack.stackConnectors.teams.configurationError": "Fehler beim Konfigurieren der Teams-Aktion: {message}",
     "xpack.stackConnectors.teams.configurationErrorNoHostname": "Fehler beim Konfigurieren der Teams-Aktion: Der Hostname konnte nicht aus der webhookUrl geparst werden",

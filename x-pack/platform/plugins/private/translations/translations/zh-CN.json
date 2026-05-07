@@ -50977,7 +50977,6 @@
     "xpack.stackConnectors.slack.params.textLabel": "文本",
     "xpack.stackConnectors.slack.unexpectedHttpResponseErrorMessage": "来自 slack 的非预期 http 响应：{httpStatus} {httpStatusText}",
     "xpack.stackConnectors.slack.unexpectedNullResponseErrorMessage": "来自 slack 的异常空响应",
-    "xpack.stackConnectors.slackApi.title": "Slack API",
     "xpack.stackConnectors.swimlane.configuration.apiAllowedHostsError": "配置连接器操作时出错：{message}",
     "xpack.stackConnectors.teams.configurationError": "配置 Teams 操作时出错：{message}",
     "xpack.stackConnectors.teams.configurationErrorNoHostname": "配置 Teams 操作时出错：无法解析 webhookUrl 中的主机名",

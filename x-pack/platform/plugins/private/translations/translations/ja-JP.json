@@ -32882,7 +32882,6 @@
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.managingHeap": "#start_linkManaging ES Heap#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.resizeYourDeployment": "#start_linkデプロイのサイズを変更（ECE）#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.tuneThreadPools": "#start_linkスレッドプールの微調整#end_link",
-    "xpack.monitoring.alerts.migrate.manageAction.requiredFieldError": "{field} は必須フィールドです。",
     "xpack.monitoring.alerts.missingData.actionVariables.node": "ノードには監視データがありません。",
     "xpack.monitoring.alerts.missingData.description": "監視データが見つからない場合にアラートを発行します。",
     "xpack.monitoring.alerts.missingData.firing.internalFullMessage": "クラスター{clusterName}では、ノード{nodeName}の監視データが検出されませんでした。{action}",

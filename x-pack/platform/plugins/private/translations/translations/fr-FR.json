@@ -32703,7 +32703,6 @@
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.managingHeap": "#start_linkManaging ES Heap#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.resizeYourDeployment": "#start_linkResize your deployment (ECE)#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.tuneThreadPools": "#start_linkTune thread pools#end_link",
-    "xpack.monitoring.alerts.migrate.manageAction.requiredFieldError": "{field} est un champ requis.",
     "xpack.monitoring.alerts.missingData.actionVariables.node": "Nœud sans données de monitoring.",
     "xpack.monitoring.alerts.missingData.description": "Alerte lorsque les données de monitoring sont manquantes.",
     "xpack.monitoring.alerts.missingData.firing.internalFullMessage": "Nous n'avons détecté aucune donnée de monitoring pour le nœud {nodeName} dans le cluster : {clusterName}. {action}",

@@ -32766,7 +32766,6 @@
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.managingHeap": "#start_linkManaging ES Heap#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.resizeYourDeployment": "#start_linkPassen Sie die Größe Ihres Deployments (ECE) an#end_link",
     "xpack.monitoring.alerts.memoryUsage.ui.nextSteps.tuneThreadPools": "#start_linkThread-Pools abstimmen#end_link",
-    "xpack.monitoring.alerts.migrate.manageAction.requiredFieldError": "{field} ist ein Pflichtfeld.",
     "xpack.monitoring.alerts.missingData.actionVariables.node": "Dem Knoten fehlen Monitoring-Daten.",
     "xpack.monitoring.alerts.missingData.description": "Alert bei fehlenden Monitoring-Daten auslösen.",
     "xpack.monitoring.alerts.missingData.firing.internalFullMessage": "Wir haben keine Monitoring-Daten für den Knoten {nodeName} im Cluster: {clusterName} erkannt. {action}",

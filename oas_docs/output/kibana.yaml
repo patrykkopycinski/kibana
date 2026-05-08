@@ -1488,6 +1488,13 @@ paths:
                   description: Configuration settings for the agent.
                   type: object
                   properties:
+                    connector_ids:
+                      description: Array of connector IDs to associate with the agent.
+                      items:
+                        description: Connector ID to associate with the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     enable_elastic_capabilities:
                       description: When true, enables built-in Elastic capabilities for the agent.
                       type: boolean
@@ -1976,6 +1983,13 @@ paths:
                   description: Updated configuration settings for the agent.
                   type: object
                   properties:
+                    connector_ids:
+                      description: Array of connector IDs to associate with the agent.
+                      items:
+                        description: Connector ID to associate with the agent.
+                        type: string
+                      maxItems: 100
+                      type: array
                     enable_elastic_capabilities:
                       description: When true, enables built-in Elastic capabilities for the agent.
                       type: boolean

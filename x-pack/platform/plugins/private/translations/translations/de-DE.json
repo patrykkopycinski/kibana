@@ -51804,7 +51804,6 @@
     "xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel": "Aufbewahrung vererben",
     "xpack.streams.streamDetailOverview.ingestionRatePerDay": "{perDay} / Tag",
     "xpack.streams.streamDetailOverview.ingestionRatePerDayPerMonth": "{perDay} / Tag ({perMonth} / Monat )",
-    "xpack.streams.streamDetailRouting.add": "Speichern",
     "xpack.streams.streamDetailRouting.cancel": "Abbrechen",
     "xpack.streams.streamDetailRouting.change": "Routing ändern",
     "xpack.streams.streamDetailRouting.childStreamList.allDataPartitionedDescription": "Gute Nachrichten: Alle stichprobenartig erfassten Logs im ausgewählten Zeitraum stimmen bereits mit vorhandenen untergeordneten Streams überein. Weitere Vorschläge sind nicht nötig.",

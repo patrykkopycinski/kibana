@@ -51625,7 +51625,6 @@
     "xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel": "Hériter de la conservation",
     "xpack.streams.streamDetailOverview.ingestionRatePerDay": "{perDay} / Jour",
     "xpack.streams.streamDetailOverview.ingestionRatePerDayPerMonth": "{perDay}/jour ({perMonth}/mois)",
-    "xpack.streams.streamDetailRouting.add": "Enregistrer",
     "xpack.streams.streamDetailRouting.cancel": "Annuler",
     "xpack.streams.streamDetailRouting.change": "Changer le routage",
     "xpack.streams.streamDetailRouting.childStreamList.allDataPartitionedDescription": "Bonne nouvelle : tous les logs échantillonnés dans la période sélectionnée correspondent déjà aux flux enfants existants. Aucune suggestion supplémentaire n'est nécessaire.",

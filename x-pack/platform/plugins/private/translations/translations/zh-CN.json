@@ -51985,7 +51985,6 @@
     "xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel": "继承保留",
     "xpack.streams.streamDetailOverview.ingestionRatePerDay": "{perDay}/日",
     "xpack.streams.streamDetailOverview.ingestionRatePerDayPerMonth": "{perDay} / 天 ({perMonth} / 月)",
-    "xpack.streams.streamDetailRouting.add": "保存",
     "xpack.streams.streamDetailRouting.cancel": "取消",
     "xpack.streams.streamDetailRouting.change": "更改路由",
     "xpack.streams.streamDetailRouting.childStreamList.allDataPartitionedDescription": "好消息：在选定的时间范围内，所有采样日志已经匹配现有的子流。无需额外建议。",

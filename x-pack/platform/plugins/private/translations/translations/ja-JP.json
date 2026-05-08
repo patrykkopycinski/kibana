@@ -51994,7 +51994,6 @@
     "xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel": "保持を継承",
     "xpack.streams.streamDetailOverview.ingestionRatePerDay": "{perDay} / 日",
     "xpack.streams.streamDetailOverview.ingestionRatePerDayPerMonth": "{perDay}/日（{perMonth}/月）",
-    "xpack.streams.streamDetailRouting.add": "保存",
     "xpack.streams.streamDetailRouting.cancel": "キャンセル",
     "xpack.streams.streamDetailRouting.change": "ルーティングを変更",
     "xpack.streams.streamDetailRouting.childStreamList.allDataPartitionedDescription": "朗報です。選択した時間範囲内でサンプリングされたすべてのログは、既存の子ストリームと既に一致しています。追加の提案は必要ありません。",

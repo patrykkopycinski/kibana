@@ -35168,8 +35168,6 @@
     "xpack.observabilityAiAssistant.eisKnowledgeBase.dismissButton": "Rejeter",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.learnMoreButton": "En savoir plus",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.title": "Elastic Inference Service (EIS) désormais disponible",
-    "xpack.observabilityAiAssistant.experimentalTitle": "Version d'évaluation technique",
-    "xpack.observabilityAiAssistant.experimentalTooltip": "Cette fonctionnalité est en version d'évaluation technique et pourra être modifiée ou retirée complètement dans une future version. Elastic s'efforcera de corriger tout problème, mais les fonctionnalités des versions d'évaluation technique ne sont pas soumises aux SLA de support des fonctionnalités officielles en disponibilité générale.",
     "xpack.observabilityAiAssistant.failedLoadingResponseText": "Échec de chargement de la réponse",
     "xpack.observabilityAiAssistant.failedToLoadResponse": "Échec du chargement d'une réponse de l'assistant d'intelligence artificielle",
     "xpack.observabilityAiAssistant.featureRegistry.featureName": "Assistant d'intelligence artificielle d'Observability",

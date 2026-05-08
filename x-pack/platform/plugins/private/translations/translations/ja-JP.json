@@ -35351,8 +35351,6 @@
     "xpack.observabilityAiAssistant.eisKnowledgeBase.dismissButton": "閉じる",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.learnMoreButton": "詳しくはこちら",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.title": "Elastic Inference Service（EIS）が利用可能になりました",
-    "xpack.observabilityAiAssistant.experimentalTitle": "テクニカルプレビュー",
-    "xpack.observabilityAiAssistant.experimentalTooltip": "この機能はテクニカルプレビュー中であり、将来のリリースでは変更されたり完全に削除されたりする場合があります。Elasticはすべての問題の修正に努めますが、テクニカルプレビュー中の機能には正式なGA機能のサポートSLAが適用されません。",
     "xpack.observabilityAiAssistant.failedLoadingResponseText": "応答の読み込みに失敗しました",
     "xpack.observabilityAiAssistant.failedToLoadResponse": "AIアシスタントからの応答を読み込めませんでした",
     "xpack.observabilityAiAssistant.featureRegistry.featureName": "オブザーバビリティAI Assistant",

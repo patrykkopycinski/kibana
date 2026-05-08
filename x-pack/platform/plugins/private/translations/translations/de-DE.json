@@ -35231,8 +35231,6 @@
     "xpack.observabilityAiAssistant.eisKnowledgeBase.dismissButton": "Verwerfen",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.learnMoreButton": "Weitere Informationen",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.title": "Elastic Inference Service (EIS) ist jetzt verfügbar",
-    "xpack.observabilityAiAssistant.experimentalTitle": "Technische Vorschau",
-    "xpack.observabilityAiAssistant.experimentalTooltip": "Diese Funktionalität befindet sich in der technischen Vorschau und kann in einer zukünftigen Version geändert oder vollständig entfernt werden. Elastic wird sich bemühen, alle Probleme zu beheben, aber die Features in der technischen Vorschau unterliegen nicht dem Support-SLA der offiziellen GA-Features.",
     "xpack.observabilityAiAssistant.failedLoadingResponseText": "Antwort konnte nicht geladen werden",
     "xpack.observabilityAiAssistant.failedToLoadResponse": "Antwort vom KI-Assistenten konnte nicht geladen werden",
     "xpack.observabilityAiAssistant.featureRegistry.featureName": "KI-Assistent für Observability",

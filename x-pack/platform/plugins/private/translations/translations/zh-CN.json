@@ -35353,8 +35353,6 @@
     "xpack.observabilityAiAssistant.eisKnowledgeBase.dismissButton": "关闭",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.learnMoreButton": "了解详情",
     "xpack.observabilityAiAssistant.eisKnowledgeBase.title": "Elastic Inference Service (EIS) 现已推出",
-    "xpack.observabilityAiAssistant.experimentalTitle": "技术预览",
-    "xpack.observabilityAiAssistant.experimentalTooltip": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将努力修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.observabilityAiAssistant.failedLoadingResponseText": "无法加载响应",
     "xpack.observabilityAiAssistant.failedToLoadResponse": "无法加载来自 AI 助手的响应",
     "xpack.observabilityAiAssistant.featureRegistry.featureName": "Observability AI 助手",

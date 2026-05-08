@@ -38878,7 +38878,6 @@
     "xpack.securitySolution.artifactCard.policyEffectScope.title": "已应用于以下 {count, plural, one {policy} other {策略}}",
     "xpack.securitySolution.artifactCardGrid.assignmentColumn": "分配",
     "xpack.securitySolution.artifactCardGrid.DescriptionColumn": "描述",
-    "xpack.securitySolution.artifactCardGrid.expandCollapseLabel": "{action}所有卡片",
     "xpack.securitySolution.artifactCardGrid.nameColumn": "名称",
     "xpack.securitySolution.artifactExpandableCard.collpase": "折叠",
     "xpack.securitySolution.artifactExpandableCard.expand": "展开",

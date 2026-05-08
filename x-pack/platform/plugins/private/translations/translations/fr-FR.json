@@ -38674,7 +38674,6 @@
     "xpack.securitySolution.artifactCard.policyEffectScope": "Appliqué à {count} {count, plural, one {policy} other {politiques}}",
     "xpack.securitySolution.artifactCardGrid.assignmentColumn": "Affectation",
     "xpack.securitySolution.artifactCardGrid.DescriptionColumn": "Description",
-    "xpack.securitySolution.artifactCardGrid.expandCollapseLabel": "{action} toutes les cartes",
     "xpack.securitySolution.artifactCardGrid.nameColumn": "Nom",
     "xpack.securitySolution.artifactExpandableCard.collpase": "Réduire",
     "xpack.securitySolution.artifactExpandableCard.expand": "Développer",

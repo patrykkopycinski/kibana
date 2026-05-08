@@ -38752,7 +38752,6 @@
     "xpack.securitySolution.artifactCard.policyEffectScope.title": "Angewendet auf die folgenden {count, plural, one {policy} other {Richtlinien}}",
     "xpack.securitySolution.artifactCardGrid.assignmentColumn": "Zuordnung",
     "xpack.securitySolution.artifactCardGrid.DescriptionColumn": "Beschreibung",
-    "xpack.securitySolution.artifactCardGrid.expandCollapseLabel": "{action} alle Karten",
     "xpack.securitySolution.artifactCardGrid.nameColumn": "Name",
     "xpack.securitySolution.artifactExpandableCard.collpase": "Minimieren",
     "xpack.securitySolution.artifactExpandableCard.expand": "Erweitern",

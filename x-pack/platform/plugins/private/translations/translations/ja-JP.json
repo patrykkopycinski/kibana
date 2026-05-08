@@ -38872,7 +38872,6 @@
     "xpack.securitySolution.artifactCard.policyEffectScope.title": "次の{count, plural, one {policy} other {件のポリシー}}に適用",
     "xpack.securitySolution.artifactCardGrid.assignmentColumn": "割り当て",
     "xpack.securitySolution.artifactCardGrid.DescriptionColumn": "説明",
-    "xpack.securitySolution.artifactCardGrid.expandCollapseLabel": "すべてのカードを{action}",
     "xpack.securitySolution.artifactCardGrid.nameColumn": "名前",
     "xpack.securitySolution.artifactExpandableCard.collpase": "折りたたみ",
     "xpack.securitySolution.artifactExpandableCard.expand": "展開",

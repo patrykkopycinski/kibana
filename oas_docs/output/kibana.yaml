@@ -73110,6 +73110,10 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    excludedIndexPatterns:
+                      items:
+                        type: string
+                      type: array
                     fieldHistoryLength:
                       maximum: 9007199254740991
                       minimum: -9007199254740991
@@ -73124,6 +73128,9 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    maxTimeWindowSize:
+                      pattern: '[smdh]$'
+                      type: string
               required:
                 - logExtraction
       responses:
@@ -80739,6 +80746,11 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    excludedIndexPatterns:
+                      default: []
+                      items:
+                        type: string
+                      type: array
                     fieldHistoryLength:
                       default: 10
                       maximum: 9007199254740991
@@ -80757,6 +80769,10 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    maxTimeWindowSize:
+                      default: 15m
+                      pattern: '[smdh]$'
+                      type: string
       responses:
         '200':
           content:

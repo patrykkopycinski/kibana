@@ -10798,24 +10798,36 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/APM_UI_error_403_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_403_response'
           description: Forbidden response
         '500':
           content:
             application/json:
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/APM_UI_error_500_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_500_response'
           description: Internal Server Error response
@@ -10843,6 +10855,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              saveApmServerSchemaRequest:
+                description: An example request payload for `POST /api/apm/fleet/apm_server_schema`.
+                value:
+                  schema:
+                    foo: bar
             schema:
               type: object
               properties:
@@ -10868,24 +10886,36 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/APM_UI_error_403_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_403_response'
           description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -10937,24 +10967,36 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/APM_UI_error_403_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_403_response'
           description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11024,24 +11066,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAnnotationResponse1:
+                  $ref: '#/components/examples/APM_UI_annotation_search_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_annotation_search_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '500':
           content:
             application/json:
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/APM_UI_error_500_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_500_response'
           description: Internal Server Error response
@@ -11087,24 +11141,36 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/APM_UI_error_403_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_403_response'
           description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11139,18 +11205,27 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11202,24 +11277,36 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '403':
           content:
             application/json:
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/APM_UI_error_403_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_403_response'
           description: Forbidden response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11253,24 +11340,36 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                getAgentNameForServiceResponse1:
+                  $ref: '#/components/examples/APM_UI_service_agent_name_get_200_response1'
               schema:
                 $ref: '#/components/schemas/APM_UI_service_agent_name_response'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11312,18 +11411,27 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11370,18 +11478,27 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -11429,18 +11546,27 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/APM_UI_error_400_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_400_response'
           description: Bad Request response
         '401':
           content:
             application/json:
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/APM_UI_error_401_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_401_response'
           description: Unauthorized response
         '404':
           content:
             application/json:
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/APM_UI_error_404_response'
               schema:
                 $ref: '#/components/schemas/APM_UI_404_response'
           description: Not found response
@@ -83866,9 +83992,61 @@ components:
         tags:
           - apm
           - deployment
+    APM_UI_annotation_search_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/services/{serviceName}/annotation/search`, which returns the annotations associated with a service over the given time range.
+      value:
+        annotations:
+          - '@timestamp': 1735689600000
+            id: opbeans-node@2.0.0
+            text: opbeans-node@2.0.0
+            type: version
+          - '@timestamp': 1736294400000
+            id: opbeans-node@2.1.0
+            text: opbeans-node@2.1.0
+            type: version
+    APM_UI_error_400_response:
+      description: An example of a 400 Bad Request response, returned when the request payload or query parameters fail validation.
+      value:
+        error: Bad Request
+        message: '[request body]: expected value of type [string] but got [undefined]'
+        statusCode: 400
+    APM_UI_error_401_response:
+      description: An example of a 401 Unauthorized response, returned when the request is missing valid authentication credentials.
+      value:
+        error: Unauthorized
+        message: '[security_exception]: missing authentication credentials for REST request'
+        statusCode: 401
+    APM_UI_error_403_response:
+      description: An example of a 403 Forbidden response, returned when the authenticated user lacks the required APM and User Experience privileges.
+      value:
+        error: Forbidden
+        message: Insufficient privileges to perform this action. The APM and User Experience feature requires `all` privileges.
+        statusCode: 403
+    APM_UI_error_404_response:
+      description: An example of a 404 Not Found response, returned when the requested resource does not exist or the feature is not available on the current deployment.
+      value:
+        error: Not Found
+        message: Not Found
+        statusCode: 404
+    APM_UI_error_500_response:
+      description: An example of a 500 Internal Server Error response, returned when an unexpected error occurs while processing the request.
+      value:
+        error: Internal Server Error
+        message: An internal server error occurred. Check the Kibana server logs for details.
+        statusCode: 500
+    APM_UI_error_501_response:
+      description: An example of a 501 Not Implemented response, returned when the source map feature is not available on the current deployment.
+      value:
+        error: Not Implemented
+        message: Not Implemented
+        statusCode: 501
     APM_UI_fleet_apm_server_schema_200_response1:
       description: An example of a successful response from `POST /api/apm/fleet/apm_server_schema`. The response body is intentionally empty.
       value: {}
+    APM_UI_service_agent_name_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/agent_name`, which returns the detected APM agent name for a service.
+      value:
+        agentName: nodejs
     APM_UI_source_maps_delete_200_response1:
       description: An example of a successful response from `DELETE /api/apm/sourcemaps/{id}`. The response body is intentionally empty.
       value: {}
@@ -83921,6 +84099,15 @@ components:
         packageName: apm
         relative_url: /api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456
         type: sourcemap
+    APM_UI_source_maps_upload_request1:
+      description: |
+        An example of a multipart/form-data request body for `POST /api/apm/sourcemaps`.
+        Each field is a separate form part; `sourcemap` is the source map file content (typically uploaded as a file).
+      value:
+        bundle_filepath: /test/e2e/general-usecase/bundle.js.map
+        service_name: opbeans-node
+        service_version: 1.0.0
+        sourcemap: '{"version":3,"sources":["bundle.js"],"names":[],"mappings":"AAAA","file":"bundle.js","sourcesContent":["console.log(''hello'');"]}'
     Data_views_create_data_view_request:
       description: Create a data view for logstash indices that includes a runtime field which extracts the shape name from a source field.
       summary: Create a data view with runtime fields.

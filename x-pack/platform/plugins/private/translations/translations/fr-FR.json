@@ -18364,8 +18364,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfInvalidAnonymization.noFieldsAllowedErrorMessage": "Les paramètres d'anonymisation de Security AI sont configurés de manière à n'autoriser aucun champ. Les champs doivent être autorisés à générer des découvertes d'attaques.",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "Nombre maximal de tentatives de génération ({generationAttempts}) atteint. Essayez d'envoyer un nombre d'événements moins élevé à ce modèle.",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "Nombre maximum d'échecs d'hallucinations ({hallucinationFailures}) atteint. Essayez d'envoyer un nombre d'événements moins élevé à ce modèle.",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureDescription": "Paramètres du point de terminaison d'inférence pour les fonctionnalités Elastic AI Assistant.",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureName": "AI Assistant",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureDescription": "Le modèle qui alimente les réponses aux chats et les analyses pilotées par l'IA dans Security AI Assistant.",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureName": "AI Assistant pour Security",
     "xpack.elasticAssistantPlugin.server.newChat": "Nouveau chat",

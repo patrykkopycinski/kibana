@@ -18402,8 +18402,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfInvalidAnonymization.noFieldsAllowedErrorMessage": "Ihre Security-KI-Anonymisierungseinstellungen sind so konfiguriert, dass keine Felder zulässig sind. Felder müssen zugelassen werden, um Angriffserkennungen zu generieren.",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "Maximale Anzahl an Generierungsversuchen ({generationAttempts}) erreicht. Versuchen Sie, weniger Ereignisse an dieses Modell zu senden.",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "Maximale Anzahl von Halluzinationsfehlern ({hallucinationFailures}) erreicht. Versuchen Sie, weniger Ereignisse an dieses Modell zu senden.",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureDescription": "Inferenz-Endpoint-Einstellungen für Features von Elastic AI Assistant.",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureName": "AI Assistant",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureDescription": "Das Modell, das den Chat-Antworten und der KI-gestützten Analyse im Security AI Assistant zugrunde liegt.",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureName": "AI Assistant für Security",
     "xpack.elasticAssistantPlugin.server.newChat": "Neuer Chat",

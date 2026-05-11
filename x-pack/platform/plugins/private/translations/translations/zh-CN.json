@@ -18468,8 +18468,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfInvalidAnonymization.noFieldsAllowedErrorMessage": "您的 Security AI 匿名化设置配置为不允许任何字段。必须允许字段才能生成攻击发现。",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "已达到最大生成尝试次数（{generationAttempts}）。请尝试向此模型发送更少的事件。",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "已达到最大幻觉失败次数（{hallucinationFailures}）。请尝试向此模型发送更少的事件。",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureDescription": "Elastic AI Assistant 功能的推理终端设置。",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureName": "AI 助手",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureDescription": "该模型为 Security AI 助手提供聊天响应和 AI 驱动的分析支持。",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureName": "安全 AI 助手",
     "xpack.elasticAssistantPlugin.server.newChat": "新聊天",

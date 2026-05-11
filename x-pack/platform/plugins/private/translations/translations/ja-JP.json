@@ -18465,8 +18465,6 @@
     "xpack.elasticAssistantPlugin.attackDiscovery.defaultAttackDiscoveryGraph.nodes.retriever.helpers.throwIfInvalidAnonymization.noFieldsAllowedErrorMessage": "Security AIの匿名化設定は、どのフィールドも許可しないように設定されています。フィールドは攻撃検出を生成することを許可されている必要があります。",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxGenerationAttemptsErrorMessage": "最大生成試行回数（{generationAttempts}）に達しました。このモデルに送信するイベントの数を減らしてください。",
     "xpack.elasticAssistantPlugin.defendInsights.defaultDefendInsightsGraph.nodes.retriever.helpers.throwIfErrorCountsExceeded.maxHallucinationFailuresErrorMessage": "最大ハルシネーション失敗回数（{hallucinationFailures}）に達しました。このモデルに送信するイベントの数を減らしてください。",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureDescription": "Elastic AI Assistant機能向けの推論エンドポイント設定。",
-    "xpack.elasticAssistantPlugin.inferenceFeature.aiAssistant.featureName": "AI Assistant",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureDescription": "Security AI Assistantのチャット対応とAI主導の分析を支えるモデル。",
     "xpack.elasticAssistantPlugin.inferenceFeature.elasticAiAssistant.featureName": "AI Assistant for Security",
     "xpack.elasticAssistantPlugin.server.newChat": "新しいチャット",

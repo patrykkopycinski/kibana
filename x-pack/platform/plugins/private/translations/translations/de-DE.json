@@ -11833,7 +11833,6 @@
     "xpack.aiops.changePointDetection.configActionsLabel": "Kontextmenü",
     "xpack.aiops.changePointDetection.dipDescription": "An diesem Punkt kommt es zu einem deutlichen Einbruch.",
     "xpack.aiops.changePointDetection.distributionChangeDescription": "Die Gesamtverteilung der Werte hat sich signifikant verändert.",
-    "xpack.aiops.changePointDetection.expandConfigLabel": "Konfiguration erweitern",
     "xpack.aiops.changePointDetection.fetchErrorTitle": "Änderungspunkte konnten nicht abgerufen werden",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "Änderungspunkte werden abgerufen …",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "Partitionen konnten nicht abgerufen werden",

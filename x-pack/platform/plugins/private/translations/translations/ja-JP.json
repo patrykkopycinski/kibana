@@ -11863,7 +11863,6 @@
     "xpack.aiops.changePointDetection.configActionsLabel": "コンテキストメニュー",
     "xpack.aiops.changePointDetection.dipDescription": "この点で有意な急降下が発生します。",
     "xpack.aiops.changePointDetection.distributionChangeDescription": "値の全体的な分布が大きく変化しました。",
-    "xpack.aiops.changePointDetection.expandConfigLabel": "構成を展開",
     "xpack.aiops.changePointDetection.fetchErrorTitle": "変化点を取得できませんでした",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "変化点を取得しています...",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "パーティションを取得できませんでした",

@@ -11809,7 +11809,6 @@
     "xpack.aiops.changePointDetection.configActionsLabel": "Menu contextuel",
     "xpack.aiops.changePointDetection.dipDescription": "Une baisse significative existe au niveau de ce point.",
     "xpack.aiops.changePointDetection.distributionChangeDescription": "La distribution générale des valeurs a subi une modification significative.",
-    "xpack.aiops.changePointDetection.expandConfigLabel": "Développer la configuration",
     "xpack.aiops.changePointDetection.fetchErrorTitle": "Impossible de récupérer les points de modification",
     "xpack.aiops.changePointDetection.fetchingChangePointsTitle": "Récupération des points de modification...",
     "xpack.aiops.changePointDetection.fetchPartitionsErrorTitle": "Impossible de récupérer les partitions",

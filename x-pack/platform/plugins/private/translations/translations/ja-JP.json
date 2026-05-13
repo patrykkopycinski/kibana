@@ -22462,8 +22462,6 @@
     "xpack.fleet.settings.remoteServiceToken.generateServiceTokenDescription": "サービストークンは、FleetサーバーにElasticsearchへの書き込み権限を与え、このElasticsearchクラスターをリモート出力用に構成するために使用できます。詳細は{fleetUserGuide}をご覧ください。",
     "xpack.fleet.settings.remoteServiceToken.noPermissionTooltip": "サービストークンを生成するには、最低限必要な権限が必要です。管理者にお問い合わせください。",
     "xpack.fleet.settings.rolesAndPrivilegesGuideLink": "詳しくはこちら",
-    "xpack.fleet.settings.showAgentlessResourcesDescription": "このトグルを有効にすると、デバッグと診断の目的で、エージェントレスエージェントとポリシーがFleetに表示されます。この設定はローカルに保存され、あなただけに表示されます。",
-    "xpack.fleet.settings.showAgentlessResourcesLabel": "エージェントレスリソースを表示",
     "xpack.fleet.settings.sortHandle": "ホストハンドルの並べ替え",
     "xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount": "{agentPolicyCount, plural, one {# agent policy} other {# 件のエージェントポリシー}}",
     "xpack.fleet.settings.updateDownloadSourceModal.agentsCount": "{agentCount, plural, one {# agent} other {# 個のエージェント}}",

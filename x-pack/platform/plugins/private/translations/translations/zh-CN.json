@@ -22465,8 +22465,6 @@
     "xpack.fleet.settings.remoteServiceToken.generateServiceTokenDescription": "服务令牌授予 Fleet 服务器写入 Elasticsearch 的权限，并可用于配置此 Elasticsearch 集群以进行远程输出。有关更多信息，请参见 {fleetUserGuide}。",
     "xpack.fleet.settings.remoteServiceToken.noPermissionTooltip": "要生成服务令牌，您必须具有所需的最小权限。请联系您的管理员。",
     "xpack.fleet.settings.rolesAndPrivilegesGuideLink": "了解详情。",
-    "xpack.fleet.settings.showAgentlessResourcesDescription": "启用此开关，以便在 Fleet 中显示无代理式代理及策略，用于调试和诊断。此设置存储在本地，只有您自己可见。",
-    "xpack.fleet.settings.showAgentlessResourcesLabel": "显示无代理资源",
     "xpack.fleet.settings.sortHandle": "排序主机手柄",
     "xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount": "{agentPolicyCount, plural, one {# agent policy} other {# 个代理策略}}",
     "xpack.fleet.settings.updateDownloadSourceModal.agentsCount": "{agentCount, plural, one {# 个代理} other {# 个代理}}",

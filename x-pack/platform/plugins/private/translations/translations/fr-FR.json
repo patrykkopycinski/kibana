@@ -22335,8 +22335,6 @@
     "xpack.fleet.settings.remoteServiceToken.generateServiceTokenDescription": "Un jeton de service donne au serveur Fleet les autorisations nécessaires pour écrire dans Elasticsearch, et peut servir à configurer ce cluster Elasticsearch pour une sortie distante. Pour en savoir plus, consultez {fleetUserGuide}.",
     "xpack.fleet.settings.remoteServiceToken.noPermissionTooltip": "Pour générer un jeton de service, vous devez avoir les privilèges minimum requis. Contactez votre administrateur.",
     "xpack.fleet.settings.rolesAndPrivilegesGuideLink": "En savoir plus.",
-    "xpack.fleet.settings.showAgentlessResourcesDescription": "Activez cette option pour afficher les agents et les politiques sans agent dans Fleet à des fins de débogage et de diagnostic. Ce paramètre est stocké localement et n'est visible que par vous.",
-    "xpack.fleet.settings.showAgentlessResourcesLabel": "Afficher les ressources sans agent.",
     "xpack.fleet.settings.sortHandle": "Trier par identification d'hôte",
     "xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount": "{agentPolicyCount, plural, one {# agent policy} other {# politiques d'agent}}",
     "xpack.fleet.settings.updateDownloadSourceModal.agentsCount": "{agentCount, plural, one {# agent} other {# agents}}",

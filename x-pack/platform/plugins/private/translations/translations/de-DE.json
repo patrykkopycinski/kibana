@@ -22388,8 +22388,6 @@
     "xpack.fleet.settings.remoteServiceToken.generateServiceTokenDescription": "Ein Service-Token gewährt dem Fleet Server die Berechtigung, in Elasticsearch zu schreiben, und kann verwendet werden, um diesen Elasticsearch-Cluster für den Remote-Ausgang zu konfigurieren. Weitere Informationen finden Sie in der {fleetUserGuide}.",
     "xpack.fleet.settings.remoteServiceToken.noPermissionTooltip": "Zum Generieren eines Servicetokens müssen Sie über die mindestens erforderlichen Berechtigungen verfügen. Wenden Sie sich an Ihren Admin.",
     "xpack.fleet.settings.rolesAndPrivilegesGuideLink": "Weitere Informationen",
-    "xpack.fleet.settings.showAgentlessResourcesDescription": "Aktivieren Sie diesen Schalter, um agentenlose Agenten und Richtlinien in Fleet für Debugging- und Diagnosezwecke anzuzeigen. Diese Einstellung wird lokal gespeichert und ist nur für Sie sichtbar.",
-    "xpack.fleet.settings.showAgentlessResourcesLabel": "Agentenlose Ressourcen anzeigen",
     "xpack.fleet.settings.sortHandle": "Host-Handle sortieren",
     "xpack.fleet.settings.updateDownloadSourceModal.agentPolicyCount": "{agentPolicyCount, plural, one {# agent policy} other {# Agent Policies}}",
     "xpack.fleet.settings.updateDownloadSourceModal.agentsCount": "{agentCount, plural, one {# agent} other {# Agenten}}",

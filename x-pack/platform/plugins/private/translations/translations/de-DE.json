@@ -8711,7 +8711,6 @@
     "unifiedDataTable.comparingDocuments": "Vergleichen von {documentCount} Dokumenten",
     "unifiedDataTable.comparingResults": "{documentCount} Ergebnisse vergleichen",
     "unifiedDataTable.comparisonColumnPinnedTooltip": "Angeheftetes Dokument: {documentId}",
-    "unifiedDataTable.comparisonColumnResultDisplay": "Ergebnis {resultNumber}",
     "unifiedDataTable.comparisonColumnResultPinnedTooltip": "Angeheftetes Ergebnis: {resultNumber}",
     "unifiedDataTable.comparisonColumnResultTooltip": "Vergleichsergebnis: {resultNumber}",
     "unifiedDataTable.comparisonColumnTooltip": "Vergleichsdokument: {documentId}",

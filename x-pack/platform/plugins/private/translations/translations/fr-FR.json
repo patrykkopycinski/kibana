@@ -8712,7 +8712,6 @@
     "unifiedDataTable.comparingDocuments": "Comparaison de {documentCount} documents",
     "unifiedDataTable.comparingResults": "Comparaison de {documentCount} résultats",
     "unifiedDataTable.comparisonColumnPinnedTooltip": "Document épinglé : {documentId}",
-    "unifiedDataTable.comparisonColumnResultDisplay": "Résultat {resultNumber}",
     "unifiedDataTable.comparisonColumnResultPinnedTooltip": "Résultat épinglé : {resultNumber}",
     "unifiedDataTable.comparisonColumnResultTooltip": "Résultat de la comparaison : {resultNumber}",
     "unifiedDataTable.comparisonColumnTooltip": "Document de comparaison : {documentId}",

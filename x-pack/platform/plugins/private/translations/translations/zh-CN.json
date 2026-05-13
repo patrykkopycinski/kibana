@@ -8736,7 +8736,6 @@
     "unifiedDataTable.comparingDocuments": "正在比较 {documentCount} 个文档",
     "unifiedDataTable.comparingResults": "正在比较 {documentCount} 个结果",
     "unifiedDataTable.comparisonColumnPinnedTooltip": "已置顶文档：{documentId}",
-    "unifiedDataTable.comparisonColumnResultDisplay": "结果 {resultNumber}",
     "unifiedDataTable.comparisonColumnResultPinnedTooltip": "已置顶结果：{resultNumber}",
     "unifiedDataTable.comparisonColumnResultTooltip": "比较结果：{resultNumber}",
     "unifiedDataTable.comparisonColumnTooltip": "比较文档：{documentId}",

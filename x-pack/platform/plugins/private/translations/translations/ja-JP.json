@@ -8739,7 +8739,6 @@
     "unifiedDataTable.comparingDocuments": "{documentCount}件のドキュメントを比較中",
     "unifiedDataTable.comparingResults": "{documentCount}件の結果を比較中",
     "unifiedDataTable.comparisonColumnPinnedTooltip": "固定されたドキュメント：{documentId}",
-    "unifiedDataTable.comparisonColumnResultDisplay": "結果{resultNumber}",
     "unifiedDataTable.comparisonColumnResultPinnedTooltip": "固定された結果：{resultNumber}",
     "unifiedDataTable.comparisonColumnResultTooltip": "比較結果：{resultNumber}",
     "unifiedDataTable.comparisonColumnTooltip": "比較ドキュメント：{documentId}",

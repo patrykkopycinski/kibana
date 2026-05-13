@@ -7,27 +7,38 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
-import { useDocumentDetailsContext } from '../../shared/context';
 import { useResponseActionsView } from '../hooks/use_response_actions_view';
 
-/**
- * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
- */
-export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject, isRulePreview } = useDocumentDetailsContext();
+export interface ResponseDetailsContentProps {
+  /**
+   * Alert document used to fetch and display response actions.
+   */
+  hit: DataTableRecord;
+  /**
+   * Whether the flyout is opened in rule preview mode.
+   */
+  isRulePreview?: boolean;
+}
 
+/**
+ * Automated response actions results.
+ */
+export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({
+  hit,
+  isRulePreview = false,
+}) => {
   const responseActionsView = useResponseActionsView({
-    rawEventData: searchHit,
-    ecsData: dataAsNestedObject,
+    hit,
   });
 
   return (
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
       {isRulePreview ? (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.response.previewMessage"
+          id="xpack.securitySolution.flyout.response.previewMessage"
           defaultMessage="Response is not available in alert preview."
         />
       ) : (
@@ -35,18 +46,18 @@ export const ResponseDetails: React.FC = () => {
           <EuiTitle size="xxxs">
             <h5>
               <FormattedMessage
-                id="xpack.securitySolution.flyout.left.response.responseTitle"
+                id="xpack.securitySolution.flyout.response.responseTitle"
                 defaultMessage="Responses"
               />
             </h5>
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          {responseActionsView?.content}
+          {responseActionsView}
         </>
       )}
     </div>
   );
 };
 
-ResponseDetails.displayName = 'ResponseDetails';
+ResponseDetailsContent.displayName = 'ResponseDetailsContent';

@@ -8,16 +8,16 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { DocumentDetailsContext } from '../../shared/context';
-import { rawEventData, TestProviders } from '../../../../common/mock';
-import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
-import { ResponseDetails } from './response_details';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { rawEventData, TestProviders } from '../../../../../common/mock';
+import { RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID, RESPONSE_DETAILS_TEST_ID } from './test_ids';
+import { ResponseDetailsContent } from './response_details';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
@@ -69,15 +69,12 @@ const NO_DATA_MESSAGE =
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
 const defaultContextValue = {
-  dataAsNestedObject: {
-    _id: 'test',
-  },
-  searchHit: rawEventData,
-} as unknown as DocumentDetailsContext;
+  hit: buildDataTableRecord(rawEventData as EsHitRecord),
+};
 
 const contextWithResponseActions = {
   ...defaultContextValue,
-  searchHit: {
+  hit: buildDataTableRecord({
     ...rawEventData,
     fields: {
       ...rawEventData.fields,
@@ -89,16 +86,16 @@ const contextWithResponseActions = {
         },
       ],
     },
-  },
+  } as EsHitRecord),
 };
 
 // Renders System Under Test
-const renderResponseDetails = (contextValue: DocumentDetailsContext) =>
+const renderResponseDetails = (
+  props: React.ComponentProps<typeof ResponseDetailsContent> = defaultContextValue
+) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <ResponseDetails />
-      </DocumentDetailsContext.Provider>
+      <ResponseDetailsContent {...props} />
     </TestProviders>
   );
 
@@ -107,7 +104,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
     // TODO mock osquery results
   });
@@ -121,7 +118,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(contextWithResponseActions);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.getByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.getByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_PRIVILEGES_MESSAGE);
@@ -136,7 +133,7 @@ describe('<ResponseDetails />', () => {
     const wrapper = renderResponseDetails(defaultContextValue);
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toBeInTheDocument();
-    expect(wrapper.queryByTestId('responseActionsViewWrapper')).toBeInTheDocument();
+    expect(wrapper.queryByTestId(RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID)).toBeInTheDocument();
     expect(wrapper.queryByTestId('osqueryViewWrapper')).not.toBeInTheDocument();
 
     expect(wrapper.getByTestId(RESPONSE_DETAILS_TEST_ID)).toHaveTextContent(NO_DATA_MESSAGE);

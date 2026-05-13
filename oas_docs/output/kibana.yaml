@@ -3863,10 +3863,42 @@ paths:
           schema:
             default: false
             type: boolean
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                listSkillsResponseExample:
+                  description: Example response returning a list of skills
+                  value:
+                    results:
+                      - description: A built-in skill provided by the platform.
+                        experimental: false
+                        id: built-in-skill-id
+                        name: Built-in Skill
+                        readonly: true
+                        referenced_content_count: 0
+                      - description: A user-created skill for data analysis.
+                        experimental: false
+                        id: custom-skill-id
+                        name: Custom Skill
+                        readonly: false
+                        referenced_content_count: 1
+                        tool_ids:
+                          - platform.core.search
+          description: Indicates a successful response
       summary: List skills
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/skills" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/skills
       x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -3892,6 +3924,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createSkillRequestExample:
+                description: Example request to create a user-defined skill
+                value:
+                  content: You are an expert data analyst. Use the available tools to query and analyze data.
+                  description: A skill for performing custom data analysis.
+                  id: my-custom-skill
+                  name: Custom Analysis Skill
+                  tool_ids:
+                    - platform.core.search
             schema:
               additionalProperties: false
               type: object
@@ -3941,10 +3983,51 @@ paths:
                 - name
                 - description
                 - content
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                createSkillResponseExample:
+                  description: Example response returning the created skill
+                  value:
+                    content: You are an expert data analyst. Use the available tools to query and analyze data.
+                    description: A skill for performing custom data analysis.
+                    experimental: false
+                    id: my-custom-skill
+                    name: Custom Analysis Skill
+                    readonly: false
+                    tool_ids:
+                      - platform.core.search
+          description: Indicates a successful response
       summary: Create a skill
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/agent_builder/skills" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "id": "my-custom-skill",
+                "name": "Custom Analysis Skill",
+                "description": "A skill for performing custom data analysis.",
+                "content": "You are an expert data analyst.",
+                "tool_ids": ["platform.core.search"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/agent_builder/skills
+            {
+              "id": "my-custom-skill",
+              "name": "Custom Analysis Skill",
+              "description": "A skill for performing custom data analysis.",
+              "content": "You are an expert data analyst.",
+              "tool_ids": ["platform.core.search"]
+            }
       x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -4029,10 +4112,35 @@ paths:
             maxLength: 512
             minLength: 1
             type: string
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSkillResponseExample:
+                  description: Example response returning a skill by ID
+                  value:
+                    content: You are an expert data analyst. Use the available tools to query and analyze data.
+                    description: A skill for performing custom data analysis.
+                    experimental: false
+                    id: my-custom-skill
+                    name: Custom Analysis Skill
+                    readonly: false
+                    tool_ids:
+                      - platform.core.search
+          description: Indicates a successful response
       summary: Get a skill by id
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn:/api/agent_builder/skills/{skillId}
       x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -4066,6 +4174,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateSkillRequestExample:
+                description: Example request to update a user-defined skill
+                value:
+                  content: Updated skill instructions content.
+                  description: Updated description for the skill.
+                  name: Updated Skill Name
+                  tool_ids:
+                    - platform.core.search
+                    - platform.core.execute_esql
             schema:
               additionalProperties: false
               type: object
@@ -4106,10 +4224,46 @@ paths:
                     type: string
                   maxItems: 100
                   type: array
-      responses: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateSkillResponseExample:
+                  description: Example response returning the updated skill
+                  value:
+                    content: Updated skill instructions content.
+                    description: Updated description for the skill.
+                    experimental: false
+                    id: my-custom-skill
+                    name: Updated Skill Name
+                    readonly: false
+                    tool_ids:
+                      - platform.core.search
+                      - platform.core.execute_esql
+          description: Indicates a successful response
       summary: Update a skill
       tags:
         - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "https://${KIBANA_URL}/api/agent_builder/skills/{skillId}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Updated Skill Name",
+                "description": "Updated description for the skill."
+              }'
+        - lang: Console
+          source: |
+            PUT kbn:/api/agent_builder/skills/{skillId}
+            {
+              "name": "Updated Skill Name",
+              "description": "Updated description for the skill."
+            }
       x-state: Technical Preview; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -83229,6 +83383,7 @@ paths:
                           view: logs.errors-view
                         type: query
                         updated_at: '2025-01-20T14:00:00.000Z'
+          description: A list of all streams.
       summary: Get stream list
       tags:
         - streams
@@ -83265,7 +83420,9 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          description: Streams were disabled successfully.
       summary: Disable streams
       tags:
         - streams
@@ -83302,7 +83459,9 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          description: Streams were enabled successfully.
       summary: Enable streams
       tags:
         - streams
@@ -83339,7 +83498,9 @@ paths:
                   properties: {}
                 - nullable: true
                 - {}
-      responses: {}
+      responses:
+        '200':
+          description: Streams were resynced successfully.
       summary: Resync streams
       tags:
         - streams
@@ -85158,7 +85319,9 @@ paths:
           schema:
             oneOf:
               - type: string
-              - type: array
+              - items:
+                  type: string
+                type: array
         - description: The monitor types to filter.
           in: query
           name: monitorTypes
@@ -85170,7 +85333,14 @@ paths:
                   - icmp
                   - tcp
                 type: string
-              - type: array
+              - items:
+                  enum:
+                    - browser
+                    - http
+                    - icmp
+                    - tcp
+                  type: string
+                type: array
         - description: The page number for paginated results.
           in: query
           name: page
@@ -85187,7 +85357,9 @@ paths:
           schema:
             oneOf:
               - type: string
-              - type: array
+              - items:
+                  type: string
+                type: array
         - description: A free-text query string.
           in: query
           name: query
@@ -85198,7 +85370,9 @@ paths:
           name: schedules
           schema:
             oneOf:
-              - type: array
+              - items:
+                  type: string
+                type: array
               - type: string
         - description: The field to sort the results by.
           in: query
@@ -85223,7 +85397,9 @@ paths:
           name: status
           schema:
             oneOf:
-              - type: array
+              - items:
+                  type: string
+                type: array
               - type: string
         - description: Tags to filter monitors.
           in: query
@@ -85231,7 +85407,9 @@ paths:
           schema:
             oneOf:
               - type: string
-              - type: array
+              - items:
+                  type: string
+                type: array
         - description: |
             Specifies whether to apply logical AND filtering for specific fields. Accepts either a string with values "tags" or "locations" or an array containing both.
           in: query
@@ -87662,6 +87840,8 @@ paths:
                 defaultConnectors:
                   default: []
                   description: A list of connector IDs to be used as default connectors for new alerts.
+                  items:
+                    type: string
                   type: array
                 defaultEmail:
                   description: |

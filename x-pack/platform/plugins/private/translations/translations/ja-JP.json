@@ -44104,7 +44104,6 @@
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideEmptyFieldsLabel": "空のフィールドを非表示",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.highlightedFieldsOnlyLabel": "ハイライトされたフィールドのみを表示",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.label": "テーブル設定",
-    "xpack.securitySolution.flyout.ease.header.riskScoreTitle": "リスクスコア",
     "xpack.securitySolution.flyout.ease.header.severityTitle": "重要度",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "関連するホストで検索を実行できませんでした",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "関連するユーザーで検索を実行できませんでした",

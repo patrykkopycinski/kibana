@@ -43937,7 +43937,6 @@
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideEmptyFieldsLabel": "Leere Felder ausblenden",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.highlightedFieldsOnlyLabel": "Nur hervorgehobene Felder anzeigen",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.label": "Tabellen-Einstellungen",
-    "xpack.securitySolution.flyout.ease.header.riskScoreTitle": "Risiko-Score",
     "xpack.securitySolution.flyout.ease.header.severityTitle": "Priorität",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "Die Suche auf verwandten Hosts konnte nicht ausgeführt werden",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "Die Suche nach verwandten Nutzern konnte nicht ausgeführt werden",

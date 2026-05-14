@@ -44097,7 +44097,6 @@
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideEmptyFieldsLabel": "隐藏空字段",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.highlightedFieldsOnlyLabel": "仅显示高亮字段",
     "xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.label": "表格设置",
-    "xpack.securitySolution.flyout.ease.header.riskScoreTitle": "风险分数",
     "xpack.securitySolution.flyout.ease.header.severityTitle": "严重性",
     "xpack.securitySolution.flyout.entities.failRelatedHostsDescription": "无法对相关主机执行搜索",
     "xpack.securitySolution.flyout.entities.failRelatedUsersDescription": "无法对相关用户执行搜索",

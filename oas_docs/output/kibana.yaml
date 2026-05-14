@@ -426,6 +426,9 @@ paths:
                     allow_multiple_system_actions:
                       description: Indicates whether multiple instances of the same system action connector can be used in a single rule.
                       type: boolean
+                    description:
+                      description: Description of the connector type.
+                      type: string
                     enabled:
                       description: Indicates whether the connector is enabled.
                       type: boolean
@@ -440,6 +443,9 @@ paths:
                       type: string
                     is_deprecated:
                       description: Indicates whether the connector type is deprecated.
+                      type: boolean
+                    is_experimental:
+                      description: Indicates whether the connector type is in technical preview.
                       type: boolean
                     is_system_action_type:
                       description: Indicates whether the action is a system action.

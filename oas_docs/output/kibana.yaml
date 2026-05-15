@@ -31207,6 +31207,9 @@ paths:
                                     minLength: 1
                                     nullable: true
                                     type: string
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -31259,6 +31262,9 @@ paths:
                                           properties:
                                             compiled_input:
                                               nullable: true
+                                            condition:
+                                              description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                              type: string
                                             config:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -31307,6 +31313,9 @@ paths:
                                                 properties:
                                                   compiled_stream:
                                                     nullable: true
+                                                  condition:
+                                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                    type: string
                                                   config:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -31436,6 +31445,9 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            condition:
+                                              description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                              type: string
                                             deprecated:
                                               additionalProperties: false
                                               type: object
@@ -31458,6 +31470,9 @@ paths:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
+                                                  condition:
+                                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                    type: string
                                                   deprecated:
                                                     additionalProperties: false
                                                     type: object
@@ -32410,6 +32425,9 @@ paths:
                                   minLength: 1
                                   nullable: true
                                   type: string
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -32462,6 +32480,9 @@ paths:
                                         properties:
                                           compiled_input:
                                             nullable: true
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           config:
                                             additionalProperties:
                                               additionalProperties: false
@@ -32510,6 +32531,9 @@ paths:
                                               properties:
                                                 compiled_stream:
                                                   nullable: true
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 config:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -32639,6 +32663,9 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           deprecated:
                                             additionalProperties: false
                                             type: object
@@ -32661,6 +32688,9 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -33363,6 +33393,9 @@ paths:
                                     minLength: 1
                                     nullable: true
                                     type: string
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                    type: string
                                   created_at:
                                     type: string
                                   created_by:
@@ -33415,6 +33448,9 @@ paths:
                                           properties:
                                             compiled_input:
                                               nullable: true
+                                            condition:
+                                              description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                              type: string
                                             config:
                                               additionalProperties:
                                                 additionalProperties: false
@@ -33463,6 +33499,9 @@ paths:
                                                 properties:
                                                   compiled_stream:
                                                     nullable: true
+                                                  condition:
+                                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                    type: string
                                                   config:
                                                     additionalProperties:
                                                       additionalProperties: false
@@ -33592,6 +33631,9 @@ paths:
                                           additionalProperties: false
                                           type: object
                                           properties:
+                                            condition:
+                                              description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                              type: string
                                             deprecated:
                                               additionalProperties: false
                                               type: object
@@ -33614,6 +33656,9 @@ paths:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
+                                                  condition:
+                                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                    type: string
                                                   deprecated:
                                                     additionalProperties: false
                                                     type: object
@@ -34301,6 +34346,9 @@ paths:
                                   minLength: 1
                                   nullable: true
                                   type: string
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -34353,6 +34401,9 @@ paths:
                                         properties:
                                           compiled_input:
                                             nullable: true
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           config:
                                             additionalProperties:
                                               additionalProperties: false
@@ -34401,6 +34452,9 @@ paths:
                                               properties:
                                                 compiled_stream:
                                                   nullable: true
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 config:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -34530,6 +34584,9 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           deprecated:
                                             additionalProperties: false
                                             type: object
@@ -34552,6 +34609,9 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -35514,6 +35574,9 @@ paths:
                                   minLength: 1
                                   nullable: true
                                   type: string
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -35566,6 +35629,9 @@ paths:
                                         properties:
                                           compiled_input:
                                             nullable: true
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           config:
                                             additionalProperties:
                                               additionalProperties: false
@@ -35614,6 +35680,9 @@ paths:
                                               properties:
                                                 compiled_stream:
                                                   nullable: true
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 config:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -35743,6 +35812,9 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           deprecated:
                                             additionalProperties: false
                                             type: object
@@ -35765,6 +35837,9 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -36578,6 +36653,9 @@ paths:
                                   minLength: 1
                                   nullable: true
                                   type: string
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                  type: string
                                 created_at:
                                   type: string
                                 created_by:
@@ -36630,6 +36708,9 @@ paths:
                                         properties:
                                           compiled_input:
                                             nullable: true
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           config:
                                             additionalProperties:
                                               additionalProperties: false
@@ -36678,6 +36759,9 @@ paths:
                                               properties:
                                                 compiled_stream:
                                                   nullable: true
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 config:
                                                   additionalProperties:
                                                     additionalProperties: false
@@ -36807,6 +36891,9 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                            type: string
                                           deprecated:
                                             additionalProperties: false
                                             type: object
@@ -36829,6 +36916,9 @@ paths:
                                               additionalProperties: false
                                               type: object
                                               properties:
+                                                condition:
+                                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                  type: string
                                                 deprecated:
                                                   additionalProperties: false
                                                   type: object
@@ -38770,6 +38860,9 @@ paths:
                         - azure
                         - gcp
                       type: string
+                condition:
+                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                  type: string
                 description:
                   description: Policy description.
                   type: string
@@ -38802,6 +38895,9 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      condition:
+                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                        type: string
                       deprecated:
                         additionalProperties: false
                         type: object
@@ -38824,6 +38920,9 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            condition:
+                              description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                              type: string
                             deprecated:
                               additionalProperties: false
                               type: object
@@ -39162,6 +39261,9 @@ paths:
                         minLength: 1
                         nullable: true
                         type: string
+                      condition:
+                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -39214,6 +39316,9 @@ paths:
                               properties:
                                 compiled_input:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -39262,6 +39367,9 @@ paths:
                                     properties:
                                       compiled_stream:
                                         nullable: true
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       config:
                                         additionalProperties:
                                           additionalProperties: false
@@ -39391,6 +39499,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -39413,6 +39524,9 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -55568,6 +55682,9 @@ paths:
                           minLength: 1
                           nullable: true
                           type: string
+                        condition:
+                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -55620,6 +55737,9 @@ paths:
                                 properties:
                                   compiled_input:
                                     nullable: true
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                    type: string
                                   config:
                                     additionalProperties:
                                       additionalProperties: false
@@ -55668,6 +55788,9 @@ paths:
                                       properties:
                                         compiled_stream:
                                           nullable: true
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                          type: string
                                         config:
                                           additionalProperties:
                                             additionalProperties: false
@@ -55797,6 +55920,9 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                    type: string
                                   deprecated:
                                     additionalProperties: false
                                     type: object
@@ -55819,6 +55945,9 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                          type: string
                                         deprecated:
                                           additionalProperties: false
                                           type: object
@@ -56186,6 +56315,9 @@ paths:
                       minLength: 1
                       nullable: true
                       type: string
+                    condition:
+                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -56221,6 +56353,9 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          condition:
+                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                            type: string
                           config:
                             additionalProperties:
                               additionalProperties: false
@@ -56269,6 +56404,9 @@ paths:
                               properties:
                                 compiled_stream:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -56518,6 +56656,9 @@ paths:
                       maxItems: 100
                       nullable: true
                       type: array
+                    condition:
+                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                      type: string
                     description:
                       description: Policy description.
                       type: string
@@ -56532,6 +56673,9 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          condition:
+                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                            type: string
                           deprecated:
                             additionalProperties: false
                             type: object
@@ -56554,6 +56698,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -56788,6 +56935,9 @@ paths:
                         minLength: 1
                         nullable: true
                         type: string
+                      condition:
+                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -56840,6 +56990,9 @@ paths:
                               properties:
                                 compiled_input:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -56888,6 +57041,9 @@ paths:
                                     properties:
                                       compiled_stream:
                                         nullable: true
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       config:
                                         additionalProperties:
                                           additionalProperties: false
@@ -57017,6 +57173,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -57039,6 +57198,9 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -57462,6 +57624,9 @@ paths:
                           minLength: 1
                           nullable: true
                           type: string
+                        condition:
+                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                          type: string
                         created_at:
                           type: string
                         created_by:
@@ -57514,6 +57679,9 @@ paths:
                                 properties:
                                   compiled_input:
                                     nullable: true
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                    type: string
                                   config:
                                     additionalProperties:
                                       additionalProperties: false
@@ -57562,6 +57730,9 @@ paths:
                                       properties:
                                         compiled_stream:
                                           nullable: true
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                          type: string
                                         config:
                                           additionalProperties:
                                             additionalProperties: false
@@ -57691,6 +57862,9 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  condition:
+                                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                    type: string
                                   deprecated:
                                     additionalProperties: false
                                     type: object
@@ -57713,6 +57887,9 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                          type: string
                                         deprecated:
                                           additionalProperties: false
                                           type: object
@@ -58185,6 +58362,9 @@ paths:
                         minLength: 1
                         nullable: true
                         type: string
+                      condition:
+                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -58237,6 +58417,9 @@ paths:
                               properties:
                                 compiled_input:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -58285,6 +58468,9 @@ paths:
                                     properties:
                                       compiled_stream:
                                         nullable: true
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       config:
                                         additionalProperties:
                                           additionalProperties: false
@@ -58414,6 +58600,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -58436,6 +58625,9 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -58818,6 +59010,9 @@ paths:
                       minLength: 1
                       nullable: true
                       type: string
+                    condition:
+                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                      type: string
                     description:
                       description: Package policy description
                       type: string
@@ -58849,6 +59044,9 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          condition:
+                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                            type: string
                           config:
                             additionalProperties:
                               additionalProperties: false
@@ -58897,6 +59095,9 @@ paths:
                               properties:
                                 compiled_stream:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -59143,6 +59344,9 @@ paths:
                       maxItems: 100
                       nullable: true
                       type: array
+                    condition:
+                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                      type: string
                     description:
                       description: Policy description.
                       type: string
@@ -59157,6 +59361,9 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          condition:
+                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                            type: string
                           deprecated:
                             additionalProperties: false
                             type: object
@@ -59179,6 +59386,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -59412,6 +59622,9 @@ paths:
                         minLength: 1
                         nullable: true
                         type: string
+                      condition:
+                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                        type: string
                       created_at:
                         type: string
                       created_by:
@@ -59464,6 +59677,9 @@ paths:
                               properties:
                                 compiled_input:
                                   nullable: true
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 config:
                                   additionalProperties:
                                     additionalProperties: false
@@ -59512,6 +59728,9 @@ paths:
                                     properties:
                                       compiled_stream:
                                         nullable: true
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       config:
                                         additionalProperties:
                                           additionalProperties: false
@@ -59641,6 +59860,9 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                condition:
+                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  type: string
                                 deprecated:
                                   additionalProperties: false
                                   type: object
@@ -59663,6 +59885,9 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      condition:
+                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        type: string
                                       deprecated:
                                         additionalProperties: false
                                         type: object
@@ -60469,6 +60694,9 @@ paths:
                                 minLength: 1
                                 nullable: true
                                 type: string
+                              condition:
+                                description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -60520,6 +60748,9 @@ paths:
                                       properties:
                                         compiled_input:
                                           nullable: true
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                          type: string
                                         config:
                                           additionalProperties:
                                             additionalProperties: false
@@ -60568,6 +60799,9 @@ paths:
                                             properties:
                                               compiled_stream:
                                                 nullable: true
+                                              condition:
+                                                description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                type: string
                                               config:
                                                 additionalProperties:
                                                   additionalProperties: false
@@ -60697,6 +60931,9 @@ paths:
                                       additionalProperties: false
                                       type: object
                                       properties:
+                                        condition:
+                                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                          type: string
                                         deprecated:
                                           additionalProperties: false
                                           type: object
@@ -60719,6 +60956,9 @@ paths:
                                             additionalProperties: false
                                             type: object
                                             properties:
+                                              condition:
+                                                description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                                type: string
                                               deprecated:
                                                 additionalProperties: false
                                                 type: object
@@ -60992,6 +61232,9 @@ paths:
                                 minLength: 1
                                 nullable: true
                                 type: string
+                              condition:
+                                description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                                type: string
                               created_at:
                                 type: string
                               created_by:
@@ -61057,6 +61300,9 @@ paths:
                                   properties:
                                     compiled_input:
                                       nullable: true
+                                    condition:
+                                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                      type: string
                                     config:
                                       additionalProperties:
                                         additionalProperties: false
@@ -61105,6 +61351,9 @@ paths:
                                         properties:
                                           compiled_stream:
                                             nullable: true
+                                          condition:
+                                            description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                            type: string
                                           config:
                                             additionalProperties:
                                               additionalProperties: false

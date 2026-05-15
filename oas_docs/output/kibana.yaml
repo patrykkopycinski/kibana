@@ -42098,6 +42098,58 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/agents/{agentId}/remove_collector:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/remove_collector</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Remove a specific OpAMP collector from the Fleet agents list. Marks the collector as unenrolled. This action does not invalidate API keys, so the collector can reconnect on its own.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-agentid-remove-collector
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The collector agent ID
+          in: path
+          name: agentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postRemoveCollectorExample:
+                  description: Collector successfully removed
+                  value: {}
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+          description: Bad Request
+      summary: Remove an OpAMP collector
+      tags:
+        - Elastic Agent actions
+      x-state: Technical Preview; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
       description: |-
@@ -43312,6 +43364,107 @@ paths:
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/fleet/agents/bulk_remove_collectors:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_remove_collectors</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Remove multiple OpAMP collectors from the Fleet agents list. Marks the collectors as unenrolled. This action does not invalidate API keys, so collectors can reconnect on their own.<br/><br/>[Required authorization] Route required privileges: fleet-agents-all.
+      operationId: post-fleet-agents-bulk-remove-collectors
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              postBulkRemoveCollectorsRequestExample:
+                description: Remove multiple OpAMP collectors
+                value:
+                  agents:
+                    - collector-id-1
+                    - collector-id-2
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                agents:
+                  anyOf:
+                    - items:
+                        description: List of collector agent IDs
+                        type: string
+                      maxItems: 10000
+                      type: array
+                    - description: KQL query string. Leave empty to target all collectors
+                      type: string
+                includeInactive:
+                  description: When passing collectors by KQL query, also removes inactive collectors
+                  type: boolean
+              required:
+                - agents
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                postBulkRemoveCollectorsExample:
+                  description: Bulk remove collectors action result
+                  value:
+                    actionId: action-id-1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  actionId:
+                    type: string
+                required:
+                  - actionId
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Bulk remove OpAMP collectors
+      tags:
+        - Elastic Agent actions
+      x-state: Technical Preview; added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name

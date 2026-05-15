@@ -37378,7 +37378,6 @@
     "xpack.searchInferenceEndpoints.settings.copyTo.description": "将 {source} 的模型列表复制到下方选定的子功能。只能选择具有匹配任务类型的子功能。",
     "xpack.searchInferenceEndpoints.settings.copyTo.title": "复制到子功能",
     "xpack.searchInferenceEndpoints.settings.copyTo.treeAriaLabel": "子功能",
-    "xpack.searchInferenceEndpoints.settings.defaultBadge": "默认",
     "xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist": "之前选定的模型不可用。请选择其他选项。",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveError": "保存默认模型设置失败",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess": "已保存默认模型设置",

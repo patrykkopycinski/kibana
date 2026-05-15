@@ -37257,7 +37257,6 @@
     "xpack.searchInferenceEndpoints.settings.copyTo.description": "Kopieren Sie die Modellliste von {source} zu den unten ausgewählten Unter-Features. Nur Unter-Features mit übereinstimmenden Aufgabentypen können ausgewählt werden.",
     "xpack.searchInferenceEndpoints.settings.copyTo.title": "Kopieren Sie zu den Unter-Features",
     "xpack.searchInferenceEndpoints.settings.copyTo.treeAriaLabel": "Unter-Features",
-    "xpack.searchInferenceEndpoints.settings.defaultBadge": "Standard",
     "xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist": "Das zuvor gewählte Modell ist nicht verfügbar. Bitte wählen Sie eine andere Option aus.",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveError": "Fehler beim Speichern der Standardmodelleinstellungen",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess": "Standardmodelleinstellungen gespeichert",

@@ -37375,7 +37375,6 @@
     "xpack.searchInferenceEndpoints.settings.copyTo.description": "{source}のモデルリストを下記の選択したサブ機能にコピーしてください。タスクタイプに対応するサブ機能のみを選択できます。",
     "xpack.searchInferenceEndpoints.settings.copyTo.title": "サブ機能にコピー",
     "xpack.searchInferenceEndpoints.settings.copyTo.treeAriaLabel": "サブ機能",
-    "xpack.searchInferenceEndpoints.settings.defaultBadge": "デフォルト",
     "xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist": "以前に選択したモデルは使用できません。別のオプションを選択してください。",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveError": "デフォルトのモデル設定を保存できませんでした",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess": "デフォルトのモデル設定が保存されました",

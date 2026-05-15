@@ -37184,7 +37184,6 @@
     "xpack.searchInferenceEndpoints.settings.copyTo.description": "Copiez la liste des modèles de {source} vers les sous-fonctionnalités sélectionnées ci-dessous. Seules les sous-fonctionnalités correspondant aux types de tâches peuvent être sélectionnées.",
     "xpack.searchInferenceEndpoints.settings.copyTo.title": "Copier vers les sous-fonctionnalités",
     "xpack.searchInferenceEndpoints.settings.copyTo.treeAriaLabel": "Sous-fonctionnalités",
-    "xpack.searchInferenceEndpoints.settings.defaultBadge": "Par défaut",
     "xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist": "Le modèle précédemment sélectionné n'est pas disponible. Veuillez sélectionner une autre option.",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveError": "Impossible d'enregistrer les paramètres par défaut du modèle",
     "xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess": "Paramètres par défaut du modèle enregistrés",

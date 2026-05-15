@@ -77380,6 +77380,13 @@ paths:
                       build_number: 100200
                       build_snapshot: false
                       number: 9.3.0
+                statusRedactedResponse:
+                  description: A redacted response returned when the caller is unauthenticated or lacks the `monitor` cluster privilege.
+                  summary: Kibana is available (redacted)
+                  value:
+                    status:
+                      overall:
+                        level: available
               schema:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_core_status_response'
@@ -89120,7 +89127,7 @@ components:
             - objects
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
-      description: A minimal representation of Kibana's operational status.
+      description: A minimal representation of Kibana's operational status. Returned when the caller is unauthenticated or lacks the `monitor` cluster privilege.
       properties:
         status:
           additionalProperties: false

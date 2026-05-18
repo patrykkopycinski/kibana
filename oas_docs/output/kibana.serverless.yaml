@@ -83097,6 +83097,12 @@ paths:
               type: string
             maxItems: 100
             type: array
+        - description: Filter by evaluated concurrency group key.
+          in: query
+          name: concurrencyGroupKey
+          required: false
+          schema:
+            type: string
         - description: Whether to exclude step-level execution data.
           in: query
           name: omitStepRuns

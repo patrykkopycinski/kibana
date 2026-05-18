@@ -638,7 +638,6 @@
     "contentManagement.contentList.deleteConfirmation.confirm": "Supprimer",
     "contentManagement.contentList.deleteConfirmation.deleting": "Suppression",
     "contentManagement.contentList.deleteConfirmation.error": "Impossible de supprimer {entityNamePlural}",
-    "contentManagement.contentList.deleteConfirmation.title": "Supprimer {itemCount} {displayEntityName} ?",
     "contentManagement.contentList.deleteConfirmation.unknownError": "Impossible de supprimer {entityNamePlural}. Vérifiez les logs du serveur Kibana ou réessayez.",
     "contentManagement.contentList.filter.clearFilter": "Effacer le filtre",
     "contentManagement.contentList.filter.modifierKeyHelpText": "{modifierKeyPrefix} + cliquer sur Exclure",

@@ -640,7 +640,6 @@
     "contentManagement.contentList.deleteConfirmation.confirm": "删除",
     "contentManagement.contentList.deleteConfirmation.deleting": "正在删除",
     "contentManagement.contentList.deleteConfirmation.error": "无法删除 {entityNamePlural}",
-    "contentManagement.contentList.deleteConfirmation.title": "删除 {itemCount} 个 {displayEntityName}？",
     "contentManagement.contentList.deleteConfirmation.unknownError": "无法删除{entityNamePlural}。请检查 Kibana 服务器日志或重试。",
     "contentManagement.contentList.filter.clearFilter": "清除筛选",
     "contentManagement.contentList.filter.modifierKeyHelpText": "{modifierKeyPrefix} + 单击排除",

@@ -640,7 +640,6 @@
     "contentManagement.contentList.deleteConfirmation.confirm": "削除",
     "contentManagement.contentList.deleteConfirmation.deleting": "削除中",
     "contentManagement.contentList.deleteConfirmation.error": "{entityNamePlural}を削除できません",
-    "contentManagement.contentList.deleteConfirmation.title": "{itemCount}件の{displayEntityName}を削除",
     "contentManagement.contentList.deleteConfirmation.unknownError": "{entityNamePlural}は削除できませんでした。Kibanaサーバーのログを確認するか、もう一度試してください。",
     "contentManagement.contentList.filter.clearFilter": "フィルターをクリア",
     "contentManagement.contentList.filter.modifierKeyHelpText": "{modifierKeyPrefix} + 除外をクリック",

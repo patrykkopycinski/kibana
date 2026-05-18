@@ -640,7 +640,6 @@
     "contentManagement.contentList.deleteConfirmation.confirm": "Löschen",
     "contentManagement.contentList.deleteConfirmation.deleting": "Löschen",
     "contentManagement.contentList.deleteConfirmation.error": "{entityNamePlural} kann nicht gelöscht werden",
-    "contentManagement.contentList.deleteConfirmation.title": "{itemCount} {displayEntityName} löschen?",
     "contentManagement.contentList.deleteConfirmation.unknownError": "{entityNamePlural} konnte nicht gelöscht werden. Überprüfen Sie die Kibana-Serverprotokolle oder versuchen Sie es erneut.",
     "contentManagement.contentList.filter.clearFilter": "Filter löschen",
     "contentManagement.contentList.filter.modifierKeyHelpText": "{modifierKeyPrefix} + auf „Ausschließen“ klicken",

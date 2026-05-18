@@ -44178,7 +44178,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsPreview": "Angriffserkennung Vorschau",
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsRight": "Details der Angriffserkennung",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAnalyzer": "Details zum Analyzer-Node",
-    "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost": "Host isolieren",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsLeft": "Einblicke und Untersuchungen",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsPreview": "Dokumentvorschau",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsRight": "Dokumentdetails",

@@ -44028,7 +44028,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsPreview": "Aperçu de la détection des attaques",
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsRight": "Détails de la détection des attaques",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAnalyzer": "Détails du nœud de l’analyseur",
-    "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost": "Isoler l'hôte",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsLeft": "Informations et enquêtes",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsPreview": "Aperçu du document",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsRight": "Détails des documents",

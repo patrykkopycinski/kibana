@@ -44336,7 +44336,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsPreview": "攻击发现预览",
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsRight": "攻击发现详情",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAnalyzer": "分析器节点详情",
-    "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost": "隔离主机",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsLeft": "见解和调查",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsPreview": "文档预览",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsRight": "文档详情",

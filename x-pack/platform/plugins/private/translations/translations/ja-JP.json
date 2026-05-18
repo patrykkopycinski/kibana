@@ -44343,7 +44343,6 @@
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsPreview": "攻撃検出のプレビュー",
     "xpack.securitySolution.flyout.panelAriaLabel.attackDetailsRight": "攻撃検出の詳細",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAnalyzer": "アナライザーノードの詳細",
-    "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost": "ホストを分離",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsLeft": "洞察と調査",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsPreview": "ドキュメントのプレビュー",
     "xpack.securitySolution.flyout.panelAriaLabel.documentDetailsRight": "ドキュメントの詳細",

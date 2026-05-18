@@ -76274,7 +76274,6 @@ paths:
                         type: string
                     required:
                       - type
-                      - doc
                   type: array
               required:
                 - entities

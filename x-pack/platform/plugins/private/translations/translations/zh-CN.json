@@ -38914,7 +38914,6 @@
     "xpack.securitySolution.artifactListPage.searchPlaceholderInfo": "搜索下面的字段：name、description、comments、value",
     "xpack.securitySolution.artifactListPage.showingTotal": "正在显示 {total, plural, one {# 个工件} other {# 个工件}}",
     "xpack.securitySolution.artifactMinifiedCard.descriptionLabel": "描述",
-    "xpack.securitySolution.artifacts.confirmWarningModal.body": "值中带“*”或“?”若与“is”配合使用则可能使该条目失效。将运算符更改为“matches”可确保通配符正常运行。选择“取消”可修正您的条目，或选择“添加”以继续处理处于其当前状态的条目。",
     "xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText": "添加",
     "xpack.securitySolution.artifacts.confirmWarningModal.title": "确认 {type}",
     "xpack.securitySolution.artifacts.pageDescription": "管理例外情况、受信任的应用程序以及控制终端保护方式和响应活动的其他设置。",

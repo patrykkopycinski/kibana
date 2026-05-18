@@ -38908,7 +38908,6 @@
     "xpack.securitySolution.artifactListPage.searchPlaceholderInfo": "次のフィールドで検索：名前、説明、コメント、値",
     "xpack.securitySolution.artifactListPage.showingTotal": "{total, plural, one {# artifact} other {#個のアーティファクト}}を表示中",
     "xpack.securitySolution.artifactMinifiedCard.descriptionLabel": "説明",
-    "xpack.securitySolution.artifacts.confirmWarningModal.body": "IS演算子で値に*または?を使用すると、エントリが無効になる場合があります。演算子を「一致」に変更すると、ワイルドカードが確実に正常に動作します。エントリを修正するには、［キャンセル］を選択します。現在の状態でエントリを続行するには、［追加］を選択します。",
     "xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText": "追加",
     "xpack.securitySolution.artifacts.confirmWarningModal.title": "{type}の確認",
     "xpack.securitySolution.artifacts.pageDescription": "エンドポイントの保護方法やアクティビティへの応答方法を制御する例外、信頼できるアプリケーション、その他の設定を管理します。",

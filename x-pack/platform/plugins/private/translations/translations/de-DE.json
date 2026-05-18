@@ -38790,7 +38790,6 @@
     "xpack.securitySolution.artifactListPage.searchPlaceholderInfo": "In den folgenden Feldern suchen: Name, Beschreibung, Kommentare, Wert",
     "xpack.securitySolution.artifactListPage.showingTotal": "Anzeigen von {total, plural, one {# artifact} other {# Artefakten}}",
     "xpack.securitySolution.artifactMinifiedCard.descriptionLabel": "Beschreibung",
-    "xpack.securitySolution.artifacts.confirmWarningModal.body": "Die Verwendung eines „*“ oder eines „?“ im Wert mit dem „is“-Operator kann den Eintrag unwirksam machen. Ändern Sie den Operator in „matches“, um sicherzustellen, dass Platzhalter ordnungsgemäß ausgeführt werden. Wählen Sie „Abbrechen“, um Ihren Eintrag zu überarbeiten, oder „Hinzufügen“, um mit dem Eintrag in seinem aktuellen Zustand fortzufahren.",
     "xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText": "Hinzufügen",
     "xpack.securitySolution.artifacts.confirmWarningModal.title": "Bestätigen Sie {type}",
     "xpack.securitySolution.artifacts.pageDescription": "Verwalten Sie Ausnahmen, vertrauenswürdige Anwendungen und andere Einstellungen, die festlegen, wie Endpoints geschützt werden und auf Aktivitäten reagieren.",

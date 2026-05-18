@@ -38710,7 +38710,6 @@
     "xpack.securitySolution.artifactListPage.searchPlaceholderInfo": "Rechercher sur les champs ci-dessous : nom, description, commentaires, valeur",
     "xpack.securitySolution.artifactListPage.showingTotal": "Affichage de {total, plural, one {# artifact} other {# artefacts}}",
     "xpack.securitySolution.artifactMinifiedCard.descriptionLabel": "Description",
-    "xpack.securitySolution.artifacts.confirmWarningModal.body": "L'utilisation d'un \"*\" ou d'un \"?\" dans la valeur avec l'opérateur \"is\" peut rendre l'entrée inefficace. Remplacez l'opérateur par \"correspondances\" pour que les caractères génériques soient correctement exécutés. Sélectionnez \"Annuler\" pour modifier votre entrée ou \"Ajouter\" pour continuer avec l'entrée dans son état actuel.",
     "xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText": "Ajouter",
     "xpack.securitySolution.artifacts.confirmWarningModal.title": "Confirmer le {type}",
     "xpack.securitySolution.artifacts.pageDescription": "Gérez les exceptions, les applications de confiance et d’autres paramètres qui déterminent comment les points de terminaison sont protégés et réagissent à l’activité.",

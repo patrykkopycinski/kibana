@@ -6760,7 +6760,6 @@
     "presentationUtil.labs.enableByValueEmbeddableName": "By-Value埋め込み可能オブジェクト",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "「区切り」の下のすべてのパネル（ウィンドウ下部の下にある非表示の領域）はすぐに読み込まれません。ビューポートを入力するときにのみ読み込まれます",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "「区切り」の下のパネルの読み込みを延期",
-    "presentationUtil.panelPlacement.panelPlacementSettingsExistsError": "埋め込み可能タイプ「{panelType}」のパネル配置設定はすでに存在します",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "ダッシュボードに追加",
     "presentationUtil.saveModalDashboard.dashboardInfoTooltip": "Visualizeライブラリに追加された項目はすべてのダッシュボードで使用できます。ライブラリ項目の編集は、使用されるすべての場所に表示されます。",
     "presentationUtil.saveModalDashboard.existingDashboardOptionLabel": "既存",

@@ -6738,7 +6738,6 @@
     "presentationUtil.labs.enableByValueEmbeddableName": "Einbettbare By-Value-Elemente",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "Alle Panele unter „the fold“ – der Bereich, der hinter dem unteren Rand des Fensters verborgen ist und auf den man durch Scrollen zugreifen kann – werden nicht sofort geladen, sondern erst, wenn sie das Ansichtsfenster betreten.",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "Verschieben Sie das Laden der Panels unterhalb des \"fold\"",
-    "presentationUtil.panelPlacement.panelPlacementSettingsExistsError": "Die Panel-Platzierungseinstellungen für den einbettbaren Typ {panelType} sind bereits vorhanden",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "Zum Dashboard hinzufügen",
     "presentationUtil.saveModalDashboard.dashboardInfoTooltip": "Zur visualisieren Bibliothek hinzugefügte Elemente sind für alle Dashboards verfügbar. Änderungen an einem Bibliothekselement erscheinen überall dort, wo es verwendet wird.",
     "presentationUtil.saveModalDashboard.existingDashboardOptionLabel": "Vorhanden",

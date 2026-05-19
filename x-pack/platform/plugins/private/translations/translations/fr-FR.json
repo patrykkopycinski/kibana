@@ -6740,7 +6740,6 @@
     "presentationUtil.labs.enableByValueEmbeddableName": "Éléments d'incorporation By-Value",
     "presentationUtil.labs.enableDeferBelowFoldProjectDescription": "Les panneaux sous \"le pli\" (la zone masquée en dessous de la fenêtre accessible en faisant défiler), ne se chargeront pas immédiatement, mais seulement lorsqu'ils entreront dans la fenêtre d'affichage.",
     "presentationUtil.labs.enableDeferBelowFoldProjectName": "Différer le chargement des panneaux sous \"le pli\"",
-    "presentationUtil.panelPlacement.panelPlacementSettingsExistsError": "Les paramètres de placement du panneau pour le type incorporable {panelType} existe déjà",
     "presentationUtil.saveModalDashboard.addToDashboardLabel": "Ajouter au tableau de bord",
     "presentationUtil.saveModalDashboard.dashboardInfoTooltip": "Les éléments ajoutés à la bibliothèque Visualize sont disponibles pour tous les tableaux de bord. Les modifications apportées à un élément de bibliothèque sont répercutées partout où il est utilisé.",
     "presentationUtil.saveModalDashboard.existingDashboardOptionLabel": "Existant",

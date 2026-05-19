@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { WorkflowSettings } from '@kbn/workflows';
 
-export interface StrategyResult {
-  status: 'completed' | 'failed' | 'waiting' | 'cancelled';
-  output?: JsonValue;
-  error?: Error;
-}
+/** Default workflow `settings.timeout` when the definition omits it. */
+export const DEFAULT_WORKFLOW_TIMEOUT = '6h';
+
+export const defaultWorkflowSettings: WorkflowSettings = {
+  timeout: DEFAULT_WORKFLOW_TIMEOUT,
+};

@@ -74023,6 +74023,15 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    maxLogsPerWindow:
+                      maximum: 9007199254740991
+                      minimum: 0
+                      type: integer
+                    maxLogsPerWindowCapBehavior:
+                      enum:
+                        - defer
+                        - drop
+                      type: string
                     maxTimeWindowSize:
                       pattern: '[smdh]$'
                       type: string
@@ -81663,6 +81672,17 @@ paths:
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
+                    maxLogsPerWindow:
+                      default: 500000
+                      maximum: 9007199254740991
+                      minimum: 0
+                      type: integer
+                    maxLogsPerWindowCapBehavior:
+                      default: defer
+                      enum:
+                        - defer
+                        - drop
+                      type: string
                     maxTimeWindowSize:
                       default: 15m
                       pattern: '[smdh]$'
@@ -82146,7 +82166,11 @@ paths:
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
+                        maxLogsPerPage: 40000
+                        maxLogsPerWindow: 500000
+                        maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'
@@ -82160,7 +82184,11 @@ paths:
                         indexPattern: ''
                         lastExecutionTimestamp: '2026-04-10T08:30:00.000Z'
                         lookbackPeriod: 3h
+                        maxLogsPerPage: 40000
+                        maxLogsPerWindow: 500000
+                        maxLogsPerWindowCapBehavior: defer
                         maxPageSearchSize: 10000
+                        maxTimeWindowSize: 15m
                         status: started
                         timeout: 25s
                         timestampField: '@timestamp'

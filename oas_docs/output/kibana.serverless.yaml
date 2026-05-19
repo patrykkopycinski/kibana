@@ -83136,6 +83136,36 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: Filter executions finished at or after this timestamp.
+          in: query
+          name: finishedAfter
+          required: false
+          schema:
+            type: string
+        - description: Filter executions finished at or before this timestamp.
+          in: query
+          name: finishedBefore
+          required: false
+          schema:
+            type: string
+        - description: Field to sort executions by.
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - createdAt
+              - finishedAt
+            type: string
+        - description: Sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
+            type: string
         - description: Page number.
           in: query
           name: page

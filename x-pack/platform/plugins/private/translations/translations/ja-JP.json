@@ -21817,8 +21817,6 @@
     "xpack.fleet.multiTextInput.deleteRowButton": "\"{fieldLabel}\"入力{index}を削除",
     "xpack.fleet.namespaceValidation.invalidCharactersErrorMessage": "{type}に無効な文字が含まれています",
     "xpack.fleet.namespaceValidation.lowercaseErrorMessage": "{type}は小文字で指定する必要があります",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixError": "名前空間の先頭は{allowedNamespacePrefixes}にしてください",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixesError": "名前空間の先頭は{allowedNamespacePrefixes}のプレフィックスのいずれかにしてください",
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "{type}が必要です",
     "xpack.fleet.namespaceValidation.tooLongErrorMessage": "{type}は100バイト以下でなければなりません",
     "xpack.fleet.newEnrollmentKey.cancelButtonLabel": "キャンセル",

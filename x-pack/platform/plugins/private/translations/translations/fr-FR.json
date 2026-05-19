@@ -21694,8 +21694,6 @@
     "xpack.fleet.multiTextInput.deleteRowButton": "Supprimer l'entrée \"{fieldLabel}\" {index}",
     "xpack.fleet.namespaceValidation.invalidCharactersErrorMessage": "{type} contient des caractères non valides",
     "xpack.fleet.namespaceValidation.lowercaseErrorMessage": "{type} doit être en minuscules",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixError": "Un espace de nom doit commencer par {allowedNamespacePrefixes}",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixesError": "Un espace de nom doit commencer par l'un des préfixes suivants : {allowedNamespacePrefixes}",
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "{type} est requis",
     "xpack.fleet.namespaceValidation.tooLongErrorMessage": "{type} ne peut pas dépasser 100 octets",
     "xpack.fleet.newEnrollmentKey.cancelButtonLabel": "Annuler",

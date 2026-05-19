@@ -21820,8 +21820,6 @@
     "xpack.fleet.multiTextInput.deleteRowButton": "删除“{fieldLabel}”输入 {index}",
     "xpack.fleet.namespaceValidation.invalidCharactersErrorMessage": "{type} 包含无效字符",
     "xpack.fleet.namespaceValidation.lowercaseErrorMessage": "{type} 必须为小写",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixError": "命名空间应以 {allowedNamespacePrefixes} 开头",
-    "xpack.fleet.namespaceValidation.notAllowedPrefixesError": "命名空间应以这些前缀之一开头：{allowedNamespacePrefixes}",
     "xpack.fleet.namespaceValidation.requiredErrorMessage": "{type} 必填",
     "xpack.fleet.namespaceValidation.tooLongErrorMessage": "{type} 不能超过 100 个字节",
     "xpack.fleet.newEnrollmentKey.cancelButtonLabel": "取消",

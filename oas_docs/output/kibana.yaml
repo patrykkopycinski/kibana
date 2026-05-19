@@ -105462,6 +105462,17 @@ components:
                 items:
                   type: string
                 type: array
+              features:
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    run_id:
+                      type: string
+                  required:
+                    - id
+                type: array
               id:
                 description: A non-empty string.
                 minLength: 1
@@ -127879,6 +127890,17 @@ components:
                 items:
                   type: string
                 type: array
+              features:
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    run_id:
+                      type: string
+                  required:
+                    - id
+                type: array
               id:
                 description: A non-empty string.
                 minLength: 1
@@ -135592,6 +135614,17 @@ components:
               evidence:
                 items:
                   type: string
+                type: array
+              features:
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    run_id:
+                      type: string
+                  required:
+                    - id
                 type: array
               id:
                 description: A non-empty string.

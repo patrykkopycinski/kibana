@@ -15030,6 +15030,8 @@ paths:
           description: success
         '403':
           description: forbidden
+        '500':
+          description: internal server error
       summary: Search dashboards
       tags:
         - Dashboards
@@ -16025,6 +16027,8 @@ paths:
           description: forbidden
         '404':
           description: not found
+        '500':
+          description: internal server error
       summary: Delete a dashboard
       tags:
         - Dashboards
@@ -16233,10 +16237,14 @@ paths:
                       updated_at: '2026-04-13T10:00:00.000Z'
                       version: WzEwMiwxXQ==
           description: success
+        '400':
+          description: invalid response
         '403':
           description: forbidden
         '404':
           description: not found
+        '500':
+          description: internal server error
       summary: Get a dashboard
       tags:
         - Dashboards
@@ -83360,7 +83368,7 @@ paths:
           required: false
           schema:
             type: string
-        - description: Page number.
+        - description: The page of results to return.
           in: query
           name: page
           required: false
@@ -83368,7 +83376,7 @@ paths:
             default: 1
             minimum: 1
             type: number
-        - description: Results per page.
+        - description: The number of results to return per page.
           in: query
           name: per_page
           required: false
@@ -83395,11 +83403,18 @@ paths:
                     type: object
                     properties:
                       page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
                         type: number
                       per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
                         type: number
                       total:
-                        description: Total number of matching visualizations.
+                        description: The total number of results matching the query.
                         type: number
                     required:
                       - total
@@ -95978,6 +95993,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
         visible:
@@ -104450,6 +104466,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -111347,6 +111364,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -111582,6 +111600,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -114643,6 +114662,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -116206,6 +116226,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -119428,6 +119449,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -119509,6 +119531,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -119539,6 +119562,29 @@ components:
         - desc
       title: termsRankByAlphabeticalDirection
       type: string
+    Kibana_HTTP_APIs_termsRankByCustomCountOperation:
+      additionalProperties: false
+      description: Terms ranked by count, either of all documents or of a specific field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - count
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - direction
+        - operation
+      title: Terms Rank By Custom Count Operation
+      type: object
     Kibana_HTTP_APIs_termsRankByCustomDirection:
       description: Sort direction for custom ranking.
       enum:
@@ -119563,7 +119609,6 @@ components:
             - median
             - standard_deviation
             - unique_count
-            - count
             - sum
             - last_value
           type: string
@@ -120409,6 +120454,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -122384,6 +122430,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -125911,6 +125958,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
@@ -127952,6 +128000,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:

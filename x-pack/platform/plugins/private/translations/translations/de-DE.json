@@ -48923,8 +48923,6 @@
     "xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage": "Fehler beim Laden von Repositories",
     "xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel": "Bearbeiten Sie das Repository `{name}`",
     "xpack.snapshotRestore.repositoryList.table.actionEditTooltip": "Bearbeiten",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel": "Repository `{name}` entfernen",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip": "Entfernen",
     "xpack.snapshotRestore.repositoryList.table.actionsColumnTitle": "Aktionen",
     "xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip": "Sie können ein verwaltetes Repository nicht löschen.",
     "xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton": "Repositorys entfernen",

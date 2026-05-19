@@ -49097,8 +49097,6 @@
     "xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage": "加载存储库时出错",
     "xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel": "编辑存储库 `{name}`",
     "xpack.snapshotRestore.repositoryList.table.actionEditTooltip": "编辑",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel": "移除存储库 `{name}`",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip": "移除",
     "xpack.snapshotRestore.repositoryList.table.actionsColumnTitle": "操作",
     "xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip": "您无法删除托管存储库。",
     "xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton": "移除存储库",

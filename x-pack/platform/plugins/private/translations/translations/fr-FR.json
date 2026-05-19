@@ -48762,8 +48762,6 @@
     "xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage": "Erreur lors du chargement des référentiels",
     "xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel": "Modifier le référentiel `{name}`",
     "xpack.snapshotRestore.repositoryList.table.actionEditTooltip": "Modifier",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel": "Retirer le référentiel `{name}`",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip": "Retirer",
     "xpack.snapshotRestore.repositoryList.table.actionsColumnTitle": "Actions",
     "xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip": "Vous ne pouvez pas supprimer un référentiel géré.",
     "xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton": "Retirer les référentiels",

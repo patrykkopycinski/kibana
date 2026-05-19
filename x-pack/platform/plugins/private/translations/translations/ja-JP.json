@@ -49107,8 +49107,6 @@
     "xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage": "レポジトリの読み込み中にエラーが発生しました",
     "xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel": "レポジトリ「{name}」を編集",
     "xpack.snapshotRestore.repositoryList.table.actionEditTooltip": "編集",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel": "レポジトリ「{name}」を削除",
-    "xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip": "削除",
     "xpack.snapshotRestore.repositoryList.table.actionsColumnTitle": "アクション",
     "xpack.snapshotRestore.repositoryList.table.deleteManagedRepositoryTooltip": "管理されているレポジトリは削除できません。",
     "xpack.snapshotRestore.repositoryList.table.deleteMultipleRepositoriesButton": "レポジトリを削除",

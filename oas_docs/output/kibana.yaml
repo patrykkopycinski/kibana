@@ -40307,6 +40307,11 @@ paths:
                           type: number
                         sequence_num:
                           type: number
+                        signals:
+                          items:
+                            type: string
+                          maxItems: 50
+                          type: array
                         sort:
                           items:
                             nullable: true
@@ -40963,6 +40968,11 @@ paths:
                         type: number
                       sequence_num:
                         type: number
+                      signals:
+                        items:
+                          type: string
+                        maxItems: 50
+                        type: array
                       sort:
                         items:
                           nullable: true
@@ -41436,6 +41446,11 @@ paths:
                         type: number
                       sequence_num:
                         type: number
+                      signals:
+                        items:
+                          type: string
+                        maxItems: 50
+                        type: array
                       sort:
                         items:
                           nullable: true

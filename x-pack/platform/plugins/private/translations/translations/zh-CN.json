@@ -10775,7 +10775,6 @@
     "xpack.agentBuilder.agents.form.settings.agentIdDescription": "唯一 ID，用于在代码或配置中引用智能体。",
     "xpack.agentBuilder.agents.form.settings.agentIdLabel": "代理 ID",
     "xpack.agentBuilder.agents.form.settings.cancelButtonLabel": "取消",
-    "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription": "启用内置的 Elastic 功能，利用 Elastic 提供的额外工具和技能来增强代理。",
     "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle": "Elastic 功能",
     "xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel": "启用 Elastic 的功能",
     "xpack.agentBuilder.agents.form.settings.instructionsDescription": "指导该智能体在与工具交互或回复查询时的行为。用它来确定基调、优先事项或特殊行为。",

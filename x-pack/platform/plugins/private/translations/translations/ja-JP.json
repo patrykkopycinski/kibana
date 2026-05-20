@@ -10777,7 +10777,6 @@
     "xpack.agentBuilder.agents.form.settings.agentIdDescription": "コードまたは構成内でエージェントを参照するための一意のID。",
     "xpack.agentBuilder.agents.form.settings.agentIdLabel": "エージェントID",
     "xpack.agentBuilder.agents.form.settings.cancelButtonLabel": "キャンセル",
-    "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription": "Elasticが提供する追加のツールやスキルでエージェントを強化するElasticの組み込み機能を有効にします。",
     "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle": "Elasticの機能",
     "xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel": "Elasticの機能を有効にする",
     "xpack.agentBuilder.agents.form.settings.instructionsDescription": "このエージェントがツールと対話するとき、またはクエリに応答するときの振る舞いをガイドします。これを使用して、トーン、優先順位、または特別な動作を設定します。",

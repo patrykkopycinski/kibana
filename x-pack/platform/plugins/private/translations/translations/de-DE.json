@@ -10748,7 +10748,6 @@
     "xpack.agentBuilder.agents.form.settings.agentIdDescription": "Eindeutige ID zur Referenzierung des Agents im Code oder in Konfigurationen.",
     "xpack.agentBuilder.agents.form.settings.agentIdLabel": "Agenten-ID",
     "xpack.agentBuilder.agents.form.settings.cancelButtonLabel": "Abbrechen",
-    "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription": "Aktivieren Sie integrierte Elastic-Funktionen, die den Agenten mit zusätzlichen Tools und Fähigkeiten von Elastic erweitern.",
     "xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle": "Funktionen von Elastic",
     "xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel": "Funktionen von Elastic aktivieren",
     "xpack.agentBuilder.agents.form.settings.instructionsDescription": "Steuert das Verhalten dieses Agenten bei der Interaktion mit Tools oder bei der Beantwortung von Anfragen. Verwenden Sie dies, um den Ton, die Prioritäten oder besondere Verhaltensweisen festzulegen.",

@@ -8869,8 +8869,6 @@
     "unifiedDocViewer.flyout.docViewerDetailHeading": "Document",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "Résultat",
     "unifiedDocViewer.flyout.screenReaderDescription": "Vous êtes dans une boîte de dialogue non modale. Pour fermer la boîte de dialogue, appuyez sur Échap.",
-    "unifiedDocViewer.flyout.toastColumnAdded": "La colonne \"{columnName}\" a été ajoutée",
-    "unifiedDocViewer.flyout.toastColumnRemoved": "La colonne \"{columnName}\" a été supprimée",
     "unifiedDocViewer.fullScreenWaterfall.logDocument.error": "Une erreur s'est produite lors de la récupération du document log",
     "unifiedDocViewer.fullScreenWaterfall.spanDocument.error": "Une erreur s'est produite lors de la récupération du document Span",
     "unifiedDocViewer.hideNullValues.switchLabel": "Masquer les champs nuls",

@@ -8893,8 +8893,6 @@
     "unifiedDocViewer.flyout.docViewerDetailHeading": "文档",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "结果",
     "unifiedDocViewer.flyout.screenReaderDescription": "您位于非模式对话框中。要关闭对话框，请按 Esc 键。",
-    "unifiedDocViewer.flyout.toastColumnAdded": "已添加列“{columnName}”",
-    "unifiedDocViewer.flyout.toastColumnRemoved": "已移除列“{columnName}”",
     "unifiedDocViewer.fullScreenWaterfall.logDocument.error": "在获取日志文档时发生错误",
     "unifiedDocViewer.fullScreenWaterfall.spanDocument.error": "在获取跨度文档时发生错误",
     "unifiedDocViewer.hideNullValues.switchLabel": "隐藏 null 字段",

@@ -8896,8 +8896,6 @@
     "unifiedDocViewer.flyout.docViewerDetailHeading": "ドキュメント",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "結果",
     "unifiedDocViewer.flyout.screenReaderDescription": "非モーダルダイアログで操作しています。ダイアログを閉じるには、Escapeを押します。",
-    "unifiedDocViewer.flyout.toastColumnAdded": "列''{columnName}''が追加されました",
-    "unifiedDocViewer.flyout.toastColumnRemoved": "列''{columnName}''が削除されました",
     "unifiedDocViewer.fullScreenWaterfall.logDocument.error": "ログドキュメントの取得中にエラーが発生しました",
     "unifiedDocViewer.fullScreenWaterfall.spanDocument.error": "スパンドキュメントの取得中にエラーが発生しまし",
     "unifiedDocViewer.hideNullValues.switchLabel": "Nullフィールドを非表示",

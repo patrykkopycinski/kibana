@@ -8868,8 +8868,6 @@
     "unifiedDocViewer.flyout.docViewerDetailHeading": "Dokument",
     "unifiedDocViewer.flyout.docViewerEsqlDetailHeading": "Ergebnis",
     "unifiedDocViewer.flyout.screenReaderDescription": "Sie befinden sich in einem nicht-modalen Dialogfenster. Um den Dialog zu schließen, drücken Sie die Escape-Taste.",
-    "unifiedDocViewer.flyout.toastColumnAdded": "Spalte „{columnName}“ wurde hinzugefügt",
-    "unifiedDocViewer.flyout.toastColumnRemoved": "Spalte „{columnName}“ wurde entfernt",
     "unifiedDocViewer.fullScreenWaterfall.logDocument.error": "Beim Abrufen des Log-Dokuments ist ein Fehler aufgetreten.",
     "unifiedDocViewer.fullScreenWaterfall.spanDocument.error": "Beim Abrufen des Span-Dokuments ist ein Fehler aufgetreten.",
     "unifiedDocViewer.hideNullValues.switchLabel": "Null-Felder ausblenden",

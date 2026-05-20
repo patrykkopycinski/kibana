@@ -76741,7 +76741,7 @@ paths:
                       minimum: 0
                       type: integer
                     maxLogsPerWindowCapBehavior:
-                      default: defer
+                      default: drop
                       enum:
                         - defer
                         - drop

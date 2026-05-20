@@ -78254,6 +78254,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78380,6 +78381,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78419,6 +78421,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78458,6 +78461,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78503,6 +78507,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78540,6 +78545,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -78815,6 +78821,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79119,6 +79126,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79334,6 +79342,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79511,6 +79520,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79624,12 +79634,14 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: Start of the time range as an ISO 8601 date string.
+          in: query
           name: from
           required: true
           schema:
             type: string
-        - in: query
+        - description: End of the time range as an ISO 8601 date string.
+          in: query
           name: to
           required: true
           schema:
@@ -79659,6 +79671,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79741,12 +79754,14 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: Start of the time range as an ISO 8601 date string.
+          in: query
           name: from
           required: true
           schema:
             type: string
-        - in: query
+        - description: End of the time range as an ISO 8601 date string.
+          in: query
           name: to
           required: true
           schema:
@@ -79760,6 +79775,7 @@ paths:
       requestBody:
         content:
           application/json:
+            examples: {}
             schema:
               anyOf:
                 - additionalProperties: false
@@ -79802,12 +79818,14 @@ paths:
           required: true
           schema:
             type: string
-        - in: query
+        - description: Start of the time range as an ISO 8601 date string.
+          in: query
           name: from
           required: true
           schema:
             type: string
-        - in: query
+        - description: End of the time range as an ISO 8601 date string.
+          in: query
           name: to
           required: true
           schema:
@@ -79821,6 +79839,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              previewSignificantEvents:
+                value:
+                  query:
+                    esql:
+                      query: FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name
             schema:
               additionalProperties: false
               type: object

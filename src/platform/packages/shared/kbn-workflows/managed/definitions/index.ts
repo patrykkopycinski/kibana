@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
-export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { WorkflowsExtensionsExamplePlugin } = await import('./plugin');
-  return new WorkflowsExtensionsExamplePlugin(initializerContext);
-};
+export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
+
+export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;

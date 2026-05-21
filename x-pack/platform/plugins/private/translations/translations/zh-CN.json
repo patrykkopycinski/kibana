@@ -15913,7 +15913,6 @@
     "xpack.cases.caseView.markInProgress": "标记为进行中",
     "xpack.cases.caseView.metrics.associatedHosts": "关联的主机",
     "xpack.cases.caseView.metrics.associatedUsers": "关联的用户",
-    "xpack.cases.caseView.metrics.isolatedHosts": "已隔离主机",
     "xpack.cases.caseView.metrics.lifespan.caseCreated": "已创建案例",
     "xpack.cases.caseView.metrics.lifespan.inProgressDuration": "进行中持续时间",
     "xpack.cases.caseView.metrics.lifespan.openDuration": "打开持续时间",

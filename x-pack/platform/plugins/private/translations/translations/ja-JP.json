@@ -15912,7 +15912,6 @@
     "xpack.cases.caseView.markInProgress": "実行中に設定",
     "xpack.cases.caseView.metrics.associatedHosts": "関連付けられたホスト",
     "xpack.cases.caseView.metrics.associatedUsers": "関連付けられたユーザー",
-    "xpack.cases.caseView.metrics.isolatedHosts": "分離されたホスト",
     "xpack.cases.caseView.metrics.lifespan.caseCreated": "ケースが作成されました",
     "xpack.cases.caseView.metrics.lifespan.inProgressDuration": "実行中の期間",
     "xpack.cases.caseView.metrics.lifespan.openDuration": "オープン期間",

@@ -15837,7 +15837,6 @@
     "xpack.cases.caseView.markInProgress": "Marquer comme étant en cours",
     "xpack.cases.caseView.metrics.associatedHosts": "Hôtes associés",
     "xpack.cases.caseView.metrics.associatedUsers": "Utilisateurs associés",
-    "xpack.cases.caseView.metrics.isolatedHosts": "Hôtes isolés",
     "xpack.cases.caseView.metrics.lifespan.caseCreated": "Cas créé",
     "xpack.cases.caseView.metrics.lifespan.inProgressDuration": "Durée en cours",
     "xpack.cases.caseView.metrics.lifespan.openDuration": "Durée d'ouverture",

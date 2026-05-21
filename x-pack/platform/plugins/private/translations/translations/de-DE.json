@@ -15863,7 +15863,6 @@
     "xpack.cases.caseView.markInProgress": "Als „In Bearbeitung“ markieren",
     "xpack.cases.caseView.metrics.associatedHosts": "Zugeordnete Hosts",
     "xpack.cases.caseView.metrics.associatedUsers": "Zugeordnete Benutzer",
-    "xpack.cases.caseView.metrics.isolatedHosts": "Isolierte Hosts",
     "xpack.cases.caseView.metrics.lifespan.caseCreated": "Fall wurde erstellt",
     "xpack.cases.caseView.metrics.lifespan.inProgressDuration": "Dauer der Bearbeitung",
     "xpack.cases.caseView.metrics.lifespan.openDuration": "Offene Dauer",

@@ -88527,6 +88527,67 @@ components:
           type: boolean
       required:
         - data_view
+    Kibana_HTTP_APIs_aiops_change_point_chart:
+      additionalProperties: false
+      description: Change point detection chart embeddable schema
+      properties:
+        aggregation_function:
+          default: avg
+          description: The aggregation function used to calculate the metric values.
+          enum:
+            - avg
+            - sum
+            - min
+            - max
+          type: string
+        data_view_id:
+          description: The data view ID used to run change point detection.
+          minLength: 1
+          type: string
+        description:
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        max_series_to_plot:
+          default: 6
+          description: The maximum number of change points to visualize. Defaults to 6.
+          maximum: 50
+          minimum: 1
+          type: number
+        metric_field:
+          description: The metric field used by the aggregation function.
+          minLength: 1
+          type: string
+        partitions:
+          description: Optional split field values to include in the panel.
+          items:
+            minLength: 1
+            type: string
+          maxItems: 10000
+          type: array
+        split_field:
+          description: The optional field used to split change point results.
+          minLength: 1
+          type: string
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+        view_type:
+          default: charts
+          description: The type of change point detection view to display.
+          enum:
+            - charts
+            - table
+          type: string
+      required:
+        - time_range
+        - data_view_id
+        - metric_field
+      title: aiops_change_point_chart
+      type: object
     Kibana_HTTP_APIs_apm-anomaly-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -97692,6 +97753,7 @@ components:
             anyOf:
               - anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
@@ -97855,6 +97917,26 @@ components:
         - x
         - 'y'
       title: Panel grid
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_change_point_chart'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - aiops_change_point_chart
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Change point detection chart
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map:
       additionalProperties: false
@@ -99364,6 +99446,7 @@ components:
           items:
             discriminator:
               mapping:
+                aiops_change_point_chart: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -99383,6 +99466,7 @@ components:
               propertyName: type
             oneOf:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'

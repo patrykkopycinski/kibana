@@ -9030,7 +9030,6 @@ paths:
                 untrack:
                   description: Defines whether this rule's alerts should be untracked.
                   type: boolean
-              x-oas-optional: true
       responses:
         '204':
           description: Indicates a successful call.
@@ -31810,7 +31809,6 @@ paths:
                                               type: object
                                         description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                         type: object
-                                        x-oas-optional: true
                                     description: Package policy inputs.
                                   is_managed:
                                     type: boolean
@@ -31969,7 +31967,6 @@ paths:
                                           nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
-                                        x-oas-optional: true
                                     description: Package level variable.
                                   version:
                                     description: Package policy ES version.
@@ -33028,7 +33025,6 @@ paths:
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package policy inputs.
                                 is_managed:
                                   type: boolean
@@ -33187,7 +33183,6 @@ paths:
                                         nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package level variable.
                                 version:
                                   description: Package policy ES version.
@@ -33996,7 +33991,6 @@ paths:
                                               type: object
                                         description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                         type: object
-                                        x-oas-optional: true
                                     description: Package policy inputs.
                                   is_managed:
                                     type: boolean
@@ -34155,7 +34149,6 @@ paths:
                                           nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
-                                        x-oas-optional: true
                                     description: Package level variable.
                                   version:
                                     description: Package policy ES version.
@@ -34949,7 +34942,6 @@ paths:
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package policy inputs.
                                 is_managed:
                                   type: boolean
@@ -35108,7 +35100,6 @@ paths:
                                         nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package level variable.
                                 version:
                                   description: Package policy ES version.
@@ -36177,7 +36168,6 @@ paths:
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package policy inputs.
                                 is_managed:
                                   type: boolean
@@ -36336,7 +36326,6 @@ paths:
                                         nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package level variable.
                                 version:
                                   description: Package policy ES version.
@@ -37256,7 +37245,6 @@ paths:
                                             type: object
                                       description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package policy inputs.
                                 is_managed:
                                   type: boolean
@@ -37415,7 +37403,6 @@ paths:
                                         nullable: true
                                       description: Input/stream level variable. Refer to the integration documentation for more information.
                                       type: object
-                                      x-oas-optional: true
                                   description: Package level variable.
                                 version:
                                   description: Package policy ES version.
@@ -38204,7 +38191,6 @@ paths:
                                         type: string
                                       maxItems: 1000
                                       type: array
-                                  x-oas-optional: true
                                 type: object
                           signed:
                             additionalProperties: false
@@ -39864,7 +39850,6 @@ paths:
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
-                            x-oas-optional: true
                         description: Package policy inputs.
                       is_managed:
                         type: boolean
@@ -40023,7 +40008,6 @@ paths:
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                            x-oas-optional: true
                         description: Package level variable.
                       version:
                         description: Package policy ES version.
@@ -53578,7 +53562,6 @@ paths:
                                     type: string
                                   maxItems: 1000
                                   type: array
-                              x-oas-optional: true
                             type: object
                     required:
                       - inputs
@@ -56300,7 +56283,6 @@ paths:
                                     type: object
                               description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                               type: object
-                              x-oas-optional: true
                           description: Package policy inputs.
                         is_managed:
                           type: boolean
@@ -56459,7 +56441,6 @@ paths:
                                 nullable: true
                               description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
-                              x-oas-optional: true
                           description: Package level variable.
                         version:
                           description: Package policy ES version.
@@ -57553,7 +57534,6 @@ paths:
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
-                            x-oas-optional: true
                         description: Package policy inputs.
                       is_managed:
                         type: boolean
@@ -57712,7 +57692,6 @@ paths:
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                            x-oas-optional: true
                         description: Package level variable.
                       version:
                         description: Package policy ES version.
@@ -58242,7 +58221,6 @@ paths:
                                     type: object
                               description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                               type: object
-                              x-oas-optional: true
                           description: Package policy inputs.
                         is_managed:
                           type: boolean
@@ -58401,7 +58379,6 @@ paths:
                                 nullable: true
                               description: Input/stream level variable. Refer to the integration documentation for more information.
                               type: object
-                              x-oas-optional: true
                           description: Package level variable.
                         version:
                           description: Package policy ES version.
@@ -58980,7 +58957,6 @@ paths:
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
-                            x-oas-optional: true
                         description: Package policy inputs.
                       is_managed:
                         type: boolean
@@ -59139,7 +59115,6 @@ paths:
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                            x-oas-optional: true
                         description: Package level variable.
                       version:
                         description: Package policy ES version.
@@ -60240,7 +60215,6 @@ paths:
                                   type: object
                             description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                             type: object
-                            x-oas-optional: true
                         description: Package policy inputs.
                       is_managed:
                         type: boolean
@@ -60399,7 +60373,6 @@ paths:
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
-                            x-oas-optional: true
                         description: Package level variable.
                       version:
                         description: Package policy ES version.
@@ -61311,7 +61284,6 @@ paths:
                                           type: object
                                     description: Package policy inputs. Refer to the integration documentation to know which inputs are available.
                                     type: object
-                                    x-oas-optional: true
                                 description: Package policy inputs.
                               is_managed:
                                 type: boolean
@@ -61470,7 +61442,6 @@ paths:
                                       nullable: true
                                     description: Input/stream level variable. Refer to the integration documentation for more information.
                                     type: object
-                                    x-oas-optional: true
                                 description: Package level variable.
                               version:
                                 description: Package policy ES version.
@@ -101050,7 +101021,6 @@ components:
             - table
           type: string
       required:
-        - time_range
         - data_view_id
         - metric_field
       title: aiops_change_point_chart
@@ -101674,8 +101644,6 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
           type: string
-      required:
-        - time_range
       title: apm-service-map-embeddable
       type: object
     Kibana_HTTP_APIs_apm-transaction-duration-create-rule-body-alerting:
@@ -102366,7 +102334,6 @@ components:
         - mode
         - palette
         - mapping
-        - unassigned
       title: Categorical Color Mapping
       type: object
     Kibana_HTTP_APIs_ClassicFieldDefinition:
@@ -102582,7 +102549,6 @@ components:
         - min
       title: collapseBy
       type: string
-      x-oas-optional: true
     Kibana_HTTP_APIs_color_code:
       additionalProperties: false
       description: A color specified as a hex or CSS color code string.
@@ -102719,7 +102685,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_gradientColorMapping'
       description: Color mapping for dimension values, either categorical (for specific values) or as a gradient.
       title: Color Mapping
-      x-oas-optional: true
     Kibana_HTTP_APIs_Condition:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_FilterCondition'
@@ -103153,9 +103118,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -103192,9 +103154,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -103226,9 +103185,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -103599,7 +103555,6 @@ components:
           type: string
       title: datatableDensity
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_datatableESQL:
       additionalProperties: false
       description: Datatable state configuration for ES|QL queries
@@ -103772,8 +103727,6 @@ components:
                 type: number
             required:
               - column
-              - format
-              - collapse_by
           maxItems: 50
           minItems: 1
           type: array
@@ -103799,7 +103752,6 @@ components:
                 type: string
             required:
               - column
-              - format
           maxItems: 20
           minItems: 1
           type: array
@@ -103815,10 +103767,7 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - styling
-        - time_range
       title: Datatable (ES|QL)
       type: object
     Kibana_HTTP_APIs_datatableESQLMetric:
@@ -103880,7 +103829,6 @@ components:
           type: number
       required:
         - column
-        - format
       title: Datatable Metric (ES|QL)
       type: object
     Kibana_HTTP_APIs_datatableMetricCounterRate:
@@ -103957,9 +103905,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -104042,9 +103987,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -104122,9 +104064,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -104202,9 +104141,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -104285,10 +104221,8 @@ components:
           minimum: 0
           type: number
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_datatableMetricLastValue:
@@ -104372,9 +104306,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -104457,9 +104388,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -104542,9 +104470,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -104627,9 +104552,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -104712,9 +104634,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -104797,9 +104716,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -104882,9 +104798,6 @@ components:
           minimum: 0
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -105075,12 +104988,8 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
-        - styling
         - metrics
-        - time_range
       title: Datatable (DSL)
       type: object
     Kibana_HTTP_APIs_datatableRowDateHistogram:
@@ -105144,7 +105053,6 @@ components:
       required:
         - operation
         - field
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_datatableRowFilters:
@@ -105195,7 +105103,6 @@ components:
       required:
         - operation
         - filters
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_datatableRowHistogram:
@@ -105259,9 +105166,7 @@ components:
           type: number
       required:
         - operation
-        - format
         - field
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_datatableRowRanges:
@@ -105327,10 +105232,8 @@ components:
           type: number
       required:
         - operation
-        - format
         - field
         - ranges
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_datatableRowTerms:
@@ -105440,9 +105343,7 @@ components:
           type: number
       required:
         - operation
-        - format
         - fields
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_datatableStyling:
@@ -105519,11 +105420,8 @@ components:
                 - values
                 - direction
           description: Sorting configuration. Only one column can be sorted at a time. Use "column_type" to specify the column type.
-      required:
-        - density
       title: Datatable styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_dateHistogramOperation:
       additionalProperties: false
       properties:
@@ -105584,9 +105482,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -105988,7 +105883,6 @@ components:
                   type: string
                 - minLength: 1
                   type: string
-                  x-oas-optional: true
             timeWindowSize:
               description: The size of the time window (in `timeWindowUnit` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.
               minimum: 1
@@ -106357,7 +106251,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
-      x-oas-optional: true
     Kibana_HTTP_APIs_formulaOperation:
       additionalProperties: false
       properties:
@@ -106388,10 +106281,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_gaugeESQL:
@@ -106591,7 +106482,6 @@ components:
                   type: boolean
           required:
             - column
-            - format
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
@@ -106614,11 +106504,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - styling
         - metric
-        - time_range
       title: Gauge Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_gaugeMetricCountMetric:
@@ -106708,9 +106595,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -106799,10 +106683,8 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_gaugeMetricLastValue:
@@ -106895,9 +106777,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -106990,9 +106869,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -107084,9 +106960,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -107178,9 +107051,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -107272,9 +107142,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -107366,9 +107233,6 @@ components:
               description: When `true`, displays the title.
               type: boolean
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -107523,12 +107387,8 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
-        - styling
         - metric
-        - time_range
       title: Gauge Chart (DSL)
       type: object
     Kibana_HTTP_APIs_gaugeShapeBullet:
@@ -107543,7 +107403,6 @@ components:
           type: string
       required:
         - type
-        - orientation
       title: Shape (Bullet)
       type: object
     Kibana_HTTP_APIs_gaugeShapeCircular:
@@ -107570,7 +107429,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeShapeCircular'
       title: Gauge styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_geo-containment-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -107917,7 +107775,6 @@ components:
       required:
         - mode
         - palette
-        - unassigned
       title: Gradient Color Mapping
       type: object
     Kibana_HTTP_APIs_heatmapAxes:
@@ -107928,12 +107785,8 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapXAxis'
         'y':
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapYAxis'
-      required:
-        - x
-        - 'y'
       title: Axes
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_heatmapCells:
       additionalProperties: false
       description: Cells configuration
@@ -107947,7 +107800,6 @@ components:
               type: boolean
       title: Cells
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_heatmapESQL:
       additionalProperties: false
       description: Heatmap configuration using an ES|QL query.
@@ -108084,7 +107936,6 @@ components:
               type: string
           required:
             - column
-            - format
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
@@ -108119,7 +107970,6 @@ components:
               type: string
           required:
             - column
-            - format
         'y':
           additionalProperties: false
           type: object
@@ -108134,17 +107984,11 @@ components:
               type: string
           required:
             - column
-            - format
       required:
         - type
-        - legend
-        - filters
-        - axis
         - x
         - data_source
-        - styling
         - metric
-        - time_range
       title: Heatmap Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_heatmapLegend:
@@ -108172,11 +108016,8 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - size
       title: Legend
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_heatmapMetricCounterRate:
       additionalProperties: false
       properties:
@@ -108210,9 +108051,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -108254,9 +108092,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -108293,9 +108128,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -108332,9 +108164,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -108374,10 +108203,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_heatmapMetricLastValue:
@@ -108420,9 +108247,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -108464,9 +108288,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -108508,9 +108329,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -108552,9 +108370,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -108596,9 +108411,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -108640,9 +108452,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -108684,9 +108493,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -108868,15 +108674,9 @@ components:
           title: Breakdown Operation
       required:
         - type
-        - legend
-        - filters
-        - axis
         - x
-        - query
         - data_source
-        - styling
         - metric
-        - time_range
       title: Heatmap Chart (DSL)
       type: object
     Kibana_HTTP_APIs_heatmapStyling:
@@ -108885,11 +108685,8 @@ components:
       properties:
         cells:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapCells'
-      required:
-        - cells
       title: Heatmap styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_heatmapXAxis:
       additionalProperties: false
       description: X axis configuration
@@ -108903,8 +108700,6 @@ components:
             visible:
               description: Show axis labels
               type: boolean
-          required:
-            - orientation
         scale:
           description: X-axis scale type. Use 'temporal' for timestamp/date fields (for example, @timestamp or DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.
           enum:
@@ -108932,7 +108727,6 @@ components:
         - scale
       title: X Axis
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_heatmapYAxis:
       additionalProperties: false
       description: Y axis configuration
@@ -108962,7 +108756,6 @@ components:
               type: boolean
       title: Y Axis
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_histogramOperation:
       additionalProperties: false
       properties:
@@ -108994,7 +108787,6 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
       title: Histogram Operation
       type: object
@@ -109732,7 +109524,6 @@ components:
         - language
       title: Query
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_kbn-composite-runtime-field-schema:
       additionalProperties: false
       properties:
@@ -110191,7 +109982,6 @@ components:
           type: string
       title: Access control
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_kbn-dashboard-data:
       additionalProperties: false
       properties:
@@ -110277,12 +110067,7 @@ components:
           minLength: 1
           type: string
       required:
-        - options
-        - query
-        - refresh_interval
-        - time_range
         - title
-        - access_control
       title: kbn-dashboard-data
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-dropped-panel-warning:
@@ -110592,7 +110377,6 @@ components:
                               - aggregated
                             type: string
                         required:
-                          - query
                           - data_source
                       - additionalProperties: false
                         type: object
@@ -110673,7 +110457,6 @@ components:
                 title:
                   type: string
               required:
-                - time_range
                 - tabs
               title: By value
               type: object
@@ -110807,7 +110590,6 @@ components:
                 title:
                   type: string
               required:
-                - time_range
                 - ref_id
               title: By reference
               type: object
@@ -111868,7 +111650,6 @@ components:
                   type: string
               required:
                 - ref_id
-                - time_range
               title: By reference
               type: object
           description: Lens embeddable schema
@@ -111974,7 +111755,6 @@ components:
         - value
       title: Refresh interval
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_kbn-data-view-field-setting:
       additionalProperties: false
       description: Display overrides for a field. These settings can define a custom label, description, and format.
@@ -111991,8 +111771,6 @@ components:
           type: string
         format:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
-      required:
-        - format
       title: Field settings
       type: object
     Kibana_HTTP_APIs_kbn-data-view-reference-schema:
@@ -112055,7 +111833,6 @@ components:
         - to
       title: Time range
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_kbn-field-format:
       additionalProperties: false
       description: Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.
@@ -112069,7 +111846,6 @@ components:
         - params
       title: Format
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_kbn-field-settings-entry:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-composite-runtime-field-schema'
@@ -112171,7 +111947,6 @@ components:
         type:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
       required:
-        - format
         - type
       title: Runtime field
       type: object
@@ -112222,9 +111997,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -112417,9 +112189,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -112500,10 +112269,8 @@ components:
                 - right
               type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_legacyMetricLastValue:
@@ -112588,9 +112355,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -112744,11 +112508,8 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
         - metric
-        - time_range
       title: Legacy Metric Chart (DSL)
       type: object
     Kibana_HTTP_APIs_legacyMetricPercentile:
@@ -112830,9 +112591,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -112916,9 +112674,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -113002,9 +112757,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -113088,9 +112840,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -113174,9 +112923,6 @@ components:
                 - right
               type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -113191,7 +112937,6 @@ components:
         - xl
       title: Legend Size
       type: string
-      x-oas-optional: true
     Kibana_HTTP_APIs_lensApiConfigNoESQL:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricNoESQL'
@@ -113219,7 +112964,6 @@ components:
       maxItems: 100
       title: lensPanelFilters
       type: array
-      x-oas-optional: true
     Kibana_HTTP_APIs_lensResponseItem:
       additionalProperties: false
       properties:
@@ -113688,7 +113432,6 @@ components:
           type: string
       required:
         - type
-        - orientation
         - max_value
       title: Bar Background Chart
       type: object
@@ -113729,7 +113472,6 @@ components:
       required:
         - operation
         - field
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_metricBreakdownFilters:
@@ -113756,7 +113498,6 @@ components:
       required:
         - operation
         - filters
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_metricBreakdownHistogram:
@@ -113796,9 +113537,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_metricBreakdownRanges:
@@ -113840,10 +113579,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_metricBreakdownTerms:
@@ -113929,9 +113666,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_metricCompareToBaseline:
@@ -114001,11 +113736,9 @@ components:
           type: string
       required:
         - type
-        - orientation
         - max_value
       title: Complementary Bar
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_metricComplementaryViz:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_metricBarBackgroundChart'
@@ -114020,7 +113753,6 @@ components:
             - type
       description: Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.
       title: Complementary Visualization
-      x-oas-optional: true
     Kibana_HTTP_APIs_metricESQL:
       additionalProperties: false
       description: Metric chart configuration for ES|QL queries
@@ -114045,8 +113777,6 @@ components:
               type: string
           required:
             - column
-            - format
-            - collapse_by
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         description:
@@ -114194,9 +113924,7 @@ components:
                     type: string
                 required:
                   - column
-                  - format
                   - type
-                  - background_chart
               - additionalProperties: false
                 type: object
                 properties:
@@ -114223,7 +113951,6 @@ components:
                     type: string
                 required:
                   - column
-                  - format
                   - type
           maxItems: 2
           minItems: 1
@@ -114250,11 +113977,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - styling
         - metrics
-        - time_range
       title: Metric Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_metricIconConfig:
@@ -114292,7 +114016,6 @@ components:
         - name
       title: Icon Configuration
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_metricNoESQL:
       additionalProperties: false
       description: Metric chart configuration for standard queries
@@ -114476,12 +114199,8 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
-        - styling
         - metrics
-        - time_range
       title: Metric Chart (DSL)
       type: object
     Kibana_HTTP_APIs_metricPrimaryCounterRate:
@@ -114533,13 +114252,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Counter Rate Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryCountMetric:
@@ -114595,12 +114310,8 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - type
-        - background_chart
       title: Count Metric Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryCumulativeSum:
@@ -114652,13 +114363,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Cumulative Sum Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryDifferences:
@@ -114709,13 +114416,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
         - type
-        - background_chart
       title: Differences Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryFormula:
@@ -114769,12 +114472,9 @@ components:
             - primary
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
         - type
-        - background_chart
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryLastValue:
@@ -114833,14 +114533,10 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
         - type
-        - background_chart
       title: Last Value Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryMovingAverage:
@@ -114895,13 +114591,9 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
         - type
-        - background_chart
       title: Moving Average Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryPercentile:
@@ -114957,13 +114649,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Percentile Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryPercentileRanks:
@@ -115019,13 +114707,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Percentile Ranks Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryStatsMetric:
@@ -115081,13 +114765,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Stats Metric Operation
       type: object
     Kibana_HTTP_APIs_metricPrimarySumMetric:
@@ -115143,13 +114823,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Sum Metric Operation
       type: object
     Kibana_HTTP_APIs_metricPrimaryUniqueCountMetric:
@@ -115205,13 +114881,9 @@ components:
             - primary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
-        - background_chart
       title: Unique Count Metric Operation
       type: object
     Kibana_HTTP_APIs_metrics-alert-inventory-threshold-create-rule-body-alerting:
@@ -115987,9 +115659,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116040,9 +115709,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - type
       title: Count Metric Operation
@@ -116088,9 +115754,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116136,9 +115799,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
         - type
@@ -116187,10 +115847,8 @@ components:
             - secondary
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
         - type
       title: Formula Operation
       type: object
@@ -116242,9 +115900,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -116295,9 +115950,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
         - type
@@ -116348,9 +116000,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116401,9 +116050,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116454,9 +116100,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116507,9 +116150,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116560,9 +116200,6 @@ components:
             - secondary
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - type
@@ -116644,11 +116281,8 @@ components:
                     - center
                     - right
                   type: string
-      required:
-        - icon
       title: metricStyling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation:
       additionalProperties: false
       properties:
@@ -116681,9 +116315,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -120522,9 +120153,6 @@ components:
                 type: string
             required:
               - column
-              - format
-              - color
-              - collapse_by
           maxItems: 100
           minItems: 1
           type: array
@@ -120548,9 +120176,6 @@ components:
                 type: string
             required:
               - column
-              - format
-              - color
-              - collapse_by
           maxItems: 100
           minItems: 1
           type: array
@@ -120579,7 +120204,6 @@ components:
               type: string
           required:
             - column
-            - format
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
@@ -120602,12 +120226,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - legend
-        - styling
         - metric
-        - time_range
       title: Mosaic Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByDateHistogram:
@@ -120643,7 +120263,6 @@ components:
       required:
         - operation
         - field
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByFilters:
@@ -120666,7 +120285,6 @@ components:
       required:
         - operation
         - filters
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByHistogram:
@@ -120702,9 +120320,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByRanges:
@@ -120742,10 +120358,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupBreakdownByTerms:
@@ -120827,9 +120441,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupByDateHistogram:
@@ -120867,8 +120479,6 @@ components:
       required:
         - operation
         - field
-        - color
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupByFilters:
@@ -120893,8 +120503,6 @@ components:
       required:
         - operation
         - filters
-        - color
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupByHistogram:
@@ -120932,10 +120540,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - color
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupByRanges:
@@ -120975,11 +120580,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - color
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_mosaicGroupByTerms:
@@ -121063,10 +120665,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - color
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_mosaicLegend:
@@ -121091,11 +120690,8 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - size
       title: Legend
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_mosaicMetricCounterRate:
       additionalProperties: false
       properties:
@@ -121124,9 +120720,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -121163,9 +120756,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -121197,9 +120787,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -121231,9 +120818,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -121268,10 +120852,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_mosaicMetricLastValue:
@@ -121309,9 +120891,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -121348,9 +120927,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -121387,9 +120963,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -121426,9 +120999,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -121465,9 +121035,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -121504,9 +121071,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -121543,9 +121107,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -121731,13 +121292,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - query
-        - legend
-        - styling
         - metric
-        - time_range
       title: Mosaic Chart (DSL)
       type: object
     Kibana_HTTP_APIs_mosaicStyling:
@@ -121746,11 +121302,8 @@ components:
       properties:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
-      required:
-        - values
       title: Mosaic styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_movingAverageOperation:
       additionalProperties: false
       properties:
@@ -121782,9 +121335,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -123055,7 +122605,6 @@ components:
         - d
       title: Operation Time Scale Setting
       type: string
-      x-oas-optional: true
     Kibana_HTTP_APIs_output_elasticsearch:
       additionalProperties: true
       properties:
@@ -123652,9 +123201,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -123691,9 +123237,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -123823,9 +123366,6 @@ components:
                 type: string
             required:
               - column
-              - format
-              - color
-              - collapse_by
           maxItems: 100
           minItems: 1
           type: array
@@ -123860,7 +123400,6 @@ components:
                 type: string
             required:
               - column
-              - format
           maxItems: 100
           minItems: 1
           type: array
@@ -123886,12 +123425,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Pie Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_pieGroupByDateHistogram:
@@ -123929,8 +123464,6 @@ components:
       required:
         - operation
         - field
-        - color
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_pieGroupByFilters:
@@ -123955,8 +123488,6 @@ components:
       required:
         - operation
         - filters
-        - color
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_pieGroupByHistogram:
@@ -123994,10 +123525,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - color
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_pieGroupByRanges:
@@ -124037,11 +123565,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - color
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_pieGroupByTerms:
@@ -124125,10 +123650,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - color
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_pieLegend:
@@ -124153,11 +123675,8 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - size
       title: Legend
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_pieMetricCounterRate:
       additionalProperties: false
       properties:
@@ -124190,9 +123709,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -124233,9 +123749,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -124271,9 +123784,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -124309,9 +123819,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -124350,10 +123857,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_pieMetricLastValue:
@@ -124395,9 +123900,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -124438,9 +123940,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -124481,9 +123980,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -124524,9 +124020,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -124567,9 +124060,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -124610,9 +124100,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -124653,9 +124140,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -124834,13 +124318,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - query
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Pie Chart (DSL)
       type: object
     Kibana_HTTP_APIs_pieStyling:
@@ -124871,11 +124350,8 @@ components:
               type: boolean
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
-      required:
-        - values
       title: Pie chart styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_QueryStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -125057,7 +124533,6 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
       title: Ranges Operation
@@ -125210,7 +124685,6 @@ components:
               type: string
           required:
             - column
-            - format
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
@@ -125256,11 +124730,9 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
         - metric
         - region
-        - time_range
       title: Region Map (ES|QL)
       type: object
     Kibana_HTTP_APIs_regionMapNoESQL:
@@ -125413,12 +124885,9 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
         - metric
         - region
-        - time_range
       title: Region Map (DSL)
       type: object
     Kibana_HTTP_APIs_regionMapRegionDateHistogram:
@@ -125544,7 +125013,6 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
       title: Histogram Operation
       type: object
@@ -125594,7 +125062,6 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
       title: Ranges Operation
@@ -125689,7 +125156,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
       title: Terms Operation
       type: object
@@ -125747,9 +125213,6 @@ components:
           type: number
         sort:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_query_roles_sort'
-      required:
-        - sort
-        - filters
       title: security_query_roles_body
       type: object
     Kibana_HTTP_APIs_security_query_roles_filters:
@@ -125760,7 +125223,6 @@ components:
           type: boolean
       title: security_query_roles_filters
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_security_query_roles_response:
       additionalProperties: false
       description: The response payload for a roles query.
@@ -125797,7 +125259,6 @@ components:
         - direction
       title: security_query_roles_sort
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_security_role_elasticsearch:
       additionalProperties: false
       description: The Elasticsearch cluster, index, and remote cluster security privileges for the role.
@@ -126807,7 +126268,6 @@ components:
           description: Static value
           type: number
       required:
-        - format
         - operation
       title: Static Operation Definition
       type: object
@@ -127852,9 +127312,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -127986,7 +127443,6 @@ components:
               type: string
           required:
             - column
-            - format
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
@@ -128015,8 +127471,6 @@ components:
               type: string
           required:
             - column
-            - format
-            - color
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -128027,12 +127481,9 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - styling
         - metric
         - tag_by
-        - time_range
       title: Tag Cloud Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_tagcloudMetricCounterRate:
@@ -128063,9 +127514,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -128102,9 +127550,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -128136,9 +127581,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -128170,9 +127612,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -128207,10 +127646,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_tagcloudMetricLastValue:
@@ -128248,9 +127685,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -128287,9 +127721,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -128326,9 +127757,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -128365,9 +127793,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -128404,9 +127829,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -128443,9 +127865,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -128482,9 +127901,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -128651,13 +128067,9 @@ components:
           type: string
       required:
         - type
-        - filters
-        - query
         - data_source
-        - styling
         - metric
         - tag_by
-        - time_range
       title: Tag Cloud Chart (DSL)
       type: object
     Kibana_HTTP_APIs_tagcloudStyling:
@@ -128690,11 +128102,8 @@ components:
               type: number
         orientation:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_orientation'
-      required:
-        - orientation
       title: Tag cloud styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_tagcloudTagDateHistogram:
       additionalProperties: false
       properties:
@@ -128728,7 +128137,6 @@ components:
       required:
         - operation
         - field
-        - color
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_tagcloudTagFilters:
@@ -128751,7 +128159,6 @@ components:
       required:
         - operation
         - filters
-        - color
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_tagcloudTagHistogram:
@@ -128787,9 +128194,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - color
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_tagcloudTagRanges:
@@ -128827,10 +128232,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - color
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_tagcloudTagTerms:
@@ -128912,9 +128315,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - color
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_termsOperation:
@@ -128994,7 +128395,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
       title: Terms Operation
       type: object
@@ -129616,9 +129016,6 @@ components:
                 type: string
             required:
               - column
-              - format
-              - color
-              - collapse_by
           maxItems: 100
           minItems: 1
           type: array
@@ -129652,7 +129049,6 @@ components:
                 type: string
             required:
               - column
-              - format
           maxItems: 100
           minItems: 1
           type: array
@@ -129678,12 +129074,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Treemap Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_treemapGroupByDateHistogram:
@@ -129721,8 +129113,6 @@ components:
       required:
         - operation
         - field
-        - color
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_treemapGroupByFilters:
@@ -129747,8 +129137,6 @@ components:
       required:
         - operation
         - filters
-        - color
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_treemapGroupByHistogram:
@@ -129786,10 +129174,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - color
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_treemapGroupByRanges:
@@ -129829,11 +129214,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - color
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_treemapGroupByTerms:
@@ -129917,10 +129299,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - color
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_treemapLegend:
@@ -129945,11 +129324,8 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - size
       title: Legend
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_treemapMetricCounterRate:
       additionalProperties: false
       properties:
@@ -129982,9 +129358,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -130025,9 +129398,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -130063,9 +129433,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -130101,9 +129468,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -130142,10 +129506,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_treemapMetricLastValue:
@@ -130187,9 +129549,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -130230,9 +129589,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -130273,9 +129629,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -130316,9 +129669,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -130359,9 +129709,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -130402,9 +129749,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -130445,9 +129789,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -130626,13 +129967,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - query
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Treemap Chart (DSL)
       type: object
     Kibana_HTTP_APIs_treemapStyling:
@@ -130649,18 +129985,14 @@ components:
               type: boolean
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
-      required:
-        - values
       title: Treemap styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_unassignedColorSchema:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorFromPalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_color_code'
       description: The color to use for unassigned values.
       title: unassignedColorSchema
-      x-oas-optional: true
     Kibana_HTTP_APIs_uniqueCountMetricOperation:
       additionalProperties: false
       properties:
@@ -130693,9 +130025,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -131196,7 +130525,6 @@ components:
           type: boolean
       title: valueDisplay
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_vis_api_direction:
       description: Sort direction.
       enum:
@@ -131268,7 +130596,6 @@ components:
         - angled
       title: vis_api_orientation
       type: string
-      x-oas-optional: true
     Kibana_HTTP_APIs_vis_api_simple_orientation:
       default: horizontal
       description: Orientation
@@ -131308,8 +130635,6 @@ components:
               properties:
                 orientation:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_orientation'
-              required:
-                - orientation
             scale:
               description: X-axis scale type. Use 'temporal' for timestamp/date fields (for example, @timestamp or DATE_TRUNC results). Use 'ordinal' for categorical/text fields. Use 'linear' for numeric fields.
               enum:
@@ -131372,8 +130697,6 @@ components:
               properties:
                 orientation:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_orientation'
-              required:
-                - orientation
             scale:
               description: Y-axis scale type for data transformation
               enum:
@@ -131432,8 +130755,6 @@ components:
               properties:
                 orientation:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_vis_api_orientation'
-              required:
-                - orientation
             scale:
               description: Y-axis scale type for data transformation
               enum:
@@ -131466,7 +130787,6 @@ components:
             - domain
       title: Axis
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_waffleESQL:
       additionalProperties: false
       description: Waffle chart configuration for ES|QL queries
@@ -131592,9 +130912,6 @@ components:
                 type: string
             required:
               - column
-              - format
-              - color
-              - collapse_by
           maxItems: 100
           minItems: 1
           type: array
@@ -131628,7 +130945,6 @@ components:
                 type: string
             required:
               - column
-              - format
           maxItems: 100
           minItems: 1
           type: array
@@ -131654,12 +130970,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Waffle Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_waffleGroupByDateHistogram:
@@ -131697,8 +131009,6 @@ components:
       required:
         - operation
         - field
-        - color
-        - collapse_by
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_waffleGroupByFilters:
@@ -131723,8 +131033,6 @@ components:
       required:
         - operation
         - filters
-        - color
-        - collapse_by
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_waffleGroupByHistogram:
@@ -131762,10 +131070,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - color
-        - collapse_by
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_waffleGroupByRanges:
@@ -131805,11 +131110,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - color
-        - collapse_by
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_waffleGroupByTerms:
@@ -131893,10 +131195,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - color
-        - collapse_by
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_waffleLegend:
@@ -131927,11 +131226,8 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - size
       title: Legend
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_waffleMetricCounterRate:
       additionalProperties: false
       properties:
@@ -131964,9 +131260,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -132007,9 +131300,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -132045,9 +131335,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -132083,9 +131370,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -132124,10 +131408,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_waffleMetricLastValue:
@@ -132169,9 +131451,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -132212,9 +131491,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -132255,9 +131531,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -132298,9 +131571,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -132341,9 +131611,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -132384,9 +131651,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -132427,9 +131691,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -132608,13 +131869,8 @@ components:
           type: string
       required:
         - type
-        - filters
         - data_source
-        - query
-        - legend
-        - styling
         - metrics
-        - time_range
       title: Waffle Chart (DSL)
       type: object
     Kibana_HTTP_APIs_waffleStyling:
@@ -132623,11 +131879,8 @@ components:
       properties:
         values:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_valueDisplay'
-      required:
-        - values
       title: Waffle styling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_WiredStreamUpsertRequest:
       additionalProperties: false
       type: object
@@ -135213,8 +134466,6 @@ components:
       required:
         - operation
         - field
-        - collapse_by
-        - color
       title: Date Histogram Operation
       type: object
     Kibana_HTTP_APIs_xyBreakdownFilters:
@@ -135242,8 +134493,6 @@ components:
       required:
         - operation
         - filters
-        - collapse_by
-        - color
       title: Filters Operation
       type: object
     Kibana_HTTP_APIs_xyBreakdownHistogram:
@@ -135284,10 +134533,7 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
-        - collapse_by
-        - color
       title: Histogram Operation
       type: object
     Kibana_HTTP_APIs_xyBreakdownRanges:
@@ -135330,11 +134576,8 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
-        - collapse_by
-        - color
       title: Ranges Operation
       type: object
     Kibana_HTTP_APIs_xyBreakdownTerms:
@@ -135421,10 +134664,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
-        - collapse_by
-        - color
       title: Terms Operation
       type: object
     Kibana_HTTP_APIs_xyChartESQL:
@@ -135561,12 +134801,7 @@ components:
           type: string
       required:
         - type
-        - filters
-        - legend
-        - axis
-        - styling
         - layers
-        - time_range
       title: XY Chart (ES|QL)
       type: object
     Kibana_HTTP_APIs_xyChartNoESQL:
@@ -135705,13 +134940,7 @@ components:
           type: string
       required:
         - type
-        - filters
-        - legend
-        - axis
-        - styling
-        - query
         - layers
-        - time_range
       title: XY Chart (DSL)
       type: object
     Kibana_HTTP_APIs_xyFitting:
@@ -135743,7 +134972,6 @@ components:
         - type
       title: xyFitting
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyLayerESQL:
       additionalProperties: false
       description: Data layer for ES|QL queries with column references
@@ -135767,9 +134995,6 @@ components:
               type: string
           required:
             - column
-            - format
-            - color
-            - collapse_by
         data_source:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
         ignore_global_filters:
@@ -135810,7 +135035,6 @@ components:
               type: string
           required:
             - column
-            - format
         'y':
           description: Array of ES|QL columns for Y-axis metrics
           items:
@@ -135838,7 +135062,6 @@ components:
                 type: string
             required:
               - column
-              - format
           maxItems: 100
           type: array
       required:
@@ -135938,7 +135161,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegendInside'
       description: Legend configuration for XY chart
       title: Legend
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyLegendInside:
       additionalProperties: false
       description: Inside legend
@@ -136018,7 +135240,6 @@ components:
             - hidden
           type: string
       required:
-        - series_header
         - placement
       title: Inside
       type: object
@@ -136102,8 +135323,6 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - series_header
       title: Outside horizontal
       type: object
     Kibana_HTTP_APIs_xyLegendOutsideVertical:
@@ -136178,9 +135397,6 @@ components:
             - visible
             - hidden
           type: string
-      required:
-        - series_header
-        - size
       title: Outside vertical
       type: object
     Kibana_HTTP_APIs_xyLegendSeriesHeader:
@@ -136195,7 +135411,6 @@ components:
           type: boolean
       title: xyLegendSeriesHeader
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyReferenceLineLayerNoESQL:
       additionalProperties: false
       description: Reference line layer for standard queries
@@ -136338,9 +135553,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -136439,10 +135651,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_xyRefLineLastValue:
@@ -136545,9 +135755,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -136650,9 +135857,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -136754,9 +135958,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -136843,7 +136044,6 @@ components:
           description: Static value
           type: number
       required:
-        - format
         - operation
       title: Static Operation Definition
       type: object
@@ -136944,9 +136144,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -137048,9 +136245,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -137152,9 +136346,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation
@@ -137180,15 +136371,8 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStylingOverlays'
         points:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStylingPoints'
-      required:
-        - overlays
-        - fitting
-        - points
-        - areas
-        - bars
       title: xyStyling
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyStylingAreas:
       additionalProperties: false
       description: Area-specific rendering settings
@@ -137200,7 +136384,6 @@ components:
           type: number
       title: xyStylingAreas
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyStylingBars:
       additionalProperties: false
       description: Bar-specific rendering settings
@@ -137220,7 +136403,6 @@ components:
           type: number
       title: xyStylingBars
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyStylingOverlays:
       additionalProperties: false
       description: Visual overlays drawn on top of the chart canvas
@@ -137245,7 +136427,6 @@ components:
               type: boolean
       title: xyStylingOverlays
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyStylingPoints:
       additionalProperties: false
       description: Data point marker settings for line and area series
@@ -137259,7 +136440,6 @@ components:
           type: string
       title: xyStylingPoints
       type: object
-      x-oas-optional: true
     Kibana_HTTP_APIs_xyXDateHistogram:
       additionalProperties: false
       properties:
@@ -137344,7 +136524,6 @@ components:
           type: string
       required:
         - operation
-        - format
         - field
       title: Histogram Operation
       type: object
@@ -137381,7 +136560,6 @@ components:
           type: array
       required:
         - operation
-        - format
         - field
         - ranges
       title: Ranges Operation
@@ -137463,7 +136641,6 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
       required:
         - operation
-        - format
         - fields
       title: Terms Operation
       type: object
@@ -137505,9 +136682,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Counter Rate Operation
@@ -137554,9 +136728,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
       title: Count Metric Operation
       type: object
@@ -137598,9 +136769,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Cumulative Sum Operation
@@ -137642,9 +136810,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Differences Operation
@@ -137689,10 +136854,8 @@ components:
             - d
           type: string
       required:
-        - format
         - operation
         - formula
-        - filter
       title: Formula Operation
       type: object
     Kibana_HTTP_APIs_xyYLastValue:
@@ -137740,9 +136903,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
         - time_field
@@ -137789,9 +136949,6 @@ components:
           description: Window
           type: number
       required:
-        - format
-        - filter
-        - time_scale
         - operation
         - of
       title: Moving Average Operation
@@ -137838,9 +136995,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Operation
@@ -137887,9 +137041,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Percentile Ranks Operation
@@ -137936,9 +137087,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Stats Metric Operation
@@ -137985,9 +137133,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Sum Metric Operation
@@ -138034,9 +137179,6 @@ components:
           title: Operation Time Shift Setting
           type: string
       required:
-        - format
-        - filter
-        - time_scale
         - field
         - operation
       title: Unique Count Metric Operation

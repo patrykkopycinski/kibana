@@ -1238,7 +1238,7 @@ paths:
       summary: Send A2A task
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -1317,7 +1317,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/a2a/{agentId}.json
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -1760,7 +1760,7 @@ paths:
           source: |
             POST kbn://api/agent_builder/agents/elastic-ai-agent/consumption
             {"size": 25, "sort_field": "updated_at", "sort_order": "desc"}
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2316,7 +2316,7 @@ paths:
       summary: List conversation attachments
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2422,7 +2422,7 @@ paths:
       summary: Create conversation attachment
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2482,7 +2482,7 @@ paths:
       summary: Delete conversation attachment
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2558,7 +2558,7 @@ paths:
       summary: Rename attachment
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2647,7 +2647,7 @@ paths:
       summary: Update conversation attachment
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2707,7 +2707,7 @@ paths:
       summary: Restore deleted attachment
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2789,7 +2789,7 @@ paths:
       summary: Update attachment origin
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -2837,7 +2837,7 @@ paths:
       summary: Check attachment staleness
       tags:
         - agent builder
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3567,7 +3567,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/plugins
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3626,7 +3626,7 @@ paths:
         - lang: Console
           source: |
             DELETE kbn://api/agent_builder/plugins/{id}
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3691,7 +3691,7 @@ paths:
         - lang: Console
           source: |
             GET kbn://api/agent_builder/plugins/{id}
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3795,7 +3795,7 @@ paths:
             {
               "url": "https://github.com/anthropics/financial-services-plugins/tree/main/financial-analysis"
             }
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3854,7 +3854,7 @@ paths:
         - lang: Console
           source: |
             GET kbn:/api/agent_builder/skills
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -3983,7 +3983,7 @@ paths:
               "content": "You are an expert data analyst.",
               "tool_ids": ["platform.core.search"]
             }
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -4044,7 +4044,7 @@ paths:
         - lang: Console
           source: |
             DELETE kbn:/api/agent_builder/skills/{skillId}
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -4096,7 +4096,7 @@ paths:
         - lang: Console
           source: |
             GET kbn:/api/agent_builder/skills/{skillId}
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -4219,7 +4219,7 @@ paths:
               "name": "Updated Skill Name",
               "description": "Updated description for the skill."
             }
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -36912,7 +36912,7 @@ paths:
       summary: Create an agentless policy
       tags:
         - Fleet agentless policies
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -37029,7 +37029,7 @@ paths:
       summary: Delete an agentless policy
       tags:
         - Fleet agentless policies
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -39201,7 +39201,7 @@ paths:
       summary: Change agent privilege level
       tags:
         - Elastic Agents
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -39342,7 +39342,7 @@ paths:
       summary: Remove an OpAMP collector
       tags:
         - Elastic Agent actions
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -39524,7 +39524,7 @@ paths:
       summary: Rollback an agent
       tags:
         - Elastic Agent actions
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -40455,7 +40455,7 @@ paths:
       summary: Bulk change agent privilege level
       tags:
         - Elastic Agents
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -40660,7 +40660,7 @@ paths:
       summary: Bulk remove OpAMP collectors
       tags:
         - Elastic Agent actions
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -40869,7 +40869,7 @@ paths:
       summary: Bulk rollback agents
       tags:
         - Elastic Agent actions
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -41861,7 +41861,7 @@ paths:
       summary: Get cloud connectors
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -42048,7 +42048,7 @@ paths:
       summary: Create cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -42133,7 +42133,7 @@ paths:
       summary: Delete cloud connector (supports force deletion)
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -42248,7 +42248,7 @@ paths:
       summary: Get cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -42428,7 +42428,7 @@ paths:
       summary: Update cloud connector
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -42575,7 +42575,7 @@ paths:
       summary: Get cloud connector usage (package policies using the connector)
       tags:
         - Fleet cloud connectors
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -49883,7 +49883,7 @@ paths:
       summary: Rollback a package to previous version
       tags:
         - Elastic Package Manager (EPM)
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78326,7 +78326,7 @@ paths:
       summary: Get stream list
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78366,7 +78366,7 @@ paths:
       summary: Disable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78406,7 +78406,7 @@ paths:
       summary: Enable streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78446,7 +78446,7 @@ paths:
       summary: Resync streams
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78492,7 +78492,7 @@ paths:
       summary: Delete a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78592,7 +78592,7 @@ paths:
       summary: Get a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78696,7 +78696,7 @@ paths:
       summary: Create or update a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78767,7 +78767,7 @@ paths:
       summary: Fork a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -78843,7 +78843,7 @@ paths:
       summary: Get ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79072,7 +79072,7 @@ paths:
       summary: Update ingest stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79111,7 +79111,7 @@ paths:
       summary: Get query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79171,7 +79171,7 @@ paths:
       summary: Upsert query stream settings
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79235,7 +79235,7 @@ paths:
       summary: Export stream content
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79288,7 +79288,7 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79347,7 +79347,7 @@ paths:
       summary: Get stream queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79453,7 +79453,7 @@ paths:
       summary: Bulk update queries
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79505,7 +79505,7 @@ paths:
       summary: Remove a query from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79583,7 +79583,7 @@ paths:
       summary: Upsert a query to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79690,7 +79690,7 @@ paths:
       summary: Read the significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79760,7 +79760,7 @@ paths:
       summary: Generate significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79842,7 +79842,7 @@ paths:
       summary: Preview significant events
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -79927,7 +79927,7 @@ paths:
       summary: Get stream attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -80027,7 +80027,7 @@ paths:
       summary: Bulk update attachments
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -80097,7 +80097,7 @@ paths:
       summary: Unlink an attachment from a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -80166,7 +80166,7 @@ paths:
       summary: Link an attachment to a stream
       tags:
         - streams
-      x-state: Technical Preview
+      x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name

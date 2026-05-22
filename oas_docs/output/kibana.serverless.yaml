@@ -72998,12 +72998,12 @@ paths:
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
-                      default: 40000
+                      default: 50000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     maxLogsPerWindow:
-                      default: 500000
+                      default: 100000
                       maximum: 9007199254740991
                       minimum: 0
                       type: integer

@@ -87256,13 +87256,13 @@ paths:
           required: false
           schema:
             type: boolean
-        - description: Filter executions finished at or after this timestamp.
+        - description: Datemath lower bound for filtering executions by finishedAt (inclusive when parsed).
           in: query
           name: finishedAfter
           required: false
           schema:
             type: string
-        - description: Filter executions finished at or before this timestamp.
+        - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
           in: query
           name: finishedBefore
           required: false
@@ -87301,6 +87301,18 @@ paths:
             maximum: 100
             minimum: 1
             type: number
+        - description: Datemath lower bound for filtering executions by startedAt (inclusive when parsed).
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:
@@ -87348,7 +87360,7 @@ paths:
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20
+            GET kbn://api/workflows/workflow/{workflowId}/executions?page=1&size=20&startedAfter=now-1d&startedBefore=now
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -87449,6 +87461,18 @@ paths:
             maximum: 100
             minimum: 1
             type: number
+        - description: Datemath lower bound for filtering step executions by startedAt (inclusive when parsed).
+          in: query
+          name: startedAfter
+          required: false
+          schema:
+            type: string
+        - description: Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).
+          in: query
+          name: startedBefore
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           content:

@@ -20432,7 +20432,6 @@
     "xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle": "集成",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "重新加载",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "上次更新时间",
-    "xpack.fleet.AgentPolicyOutputsSummary.popover.title": "集成的输出",
     "xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip": "此策略是在 Fleet 外进行管理的。与此策略相关的操作多数不可用。",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel": "不兼容的集成",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip": "该策略包含以下不兼容的集成：{integrations}。将代理升级到 {minVersion} 或更高版本。",

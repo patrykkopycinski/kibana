@@ -20323,7 +20323,6 @@
     "xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle": "Intégrations",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "Recharger",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "Dernière mise à jour le",
-    "xpack.fleet.AgentPolicyOutputsSummary.popover.title": "Sortie pour les intégrations",
     "xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip": "Cette stratégie est gérée en dehors de Fleet. La plupart des actions liées à cette stratégie sont indisponibles.",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel": "Intégrations incompatibles",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip": "Cette politique contient les intégrations incompatibles suivantes : {integrations}. Mettre à niveau l’agent vers {minVersion} ou une version ultérieure.",

@@ -20429,7 +20429,6 @@
     "xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle": "統合",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "再読み込み",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "最終更新日",
-    "xpack.fleet.AgentPolicyOutputsSummary.popover.title": "統合の出力",
     "xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip": "このポリシーはFleet外で管理されます。このポリシーに関連するほとんどのアクションは使用できません。",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel": "互換性のない統合",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip": "このポリシーには以下の互換性のない統合が含まれています: {integrations}。エージェントを{minVersion}以降にアップグレードしてください。",

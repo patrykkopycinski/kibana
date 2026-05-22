@@ -20362,7 +20362,6 @@
     "xpack.fleet.agentPolicyList.packagePoliciesCountColumnTitle": "Integrationen",
     "xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText": "Neu laden",
     "xpack.fleet.agentPolicyList.updatedOnColumnTitle": "Letzte Aktualisierung am",
-    "xpack.fleet.AgentPolicyOutputsSummary.popover.title": "Ausgang für Integrationen",
     "xpack.fleet.agentPolicySummaryLine.hostedPolicyTooltip": "Diese Richtlinie wird außerhalb von Fleet verwaltet. Die meisten Aktionen im Zusammenhang mit dieser Richtlinie sind nicht verfügbar.",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel": "Inkompatible Integrationen",
     "xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip": "Diese Richtlinie enthält die folgenden inkompatiblen Integrationen: {integrations}. Aktualisieren Sie den Agenten auf {minVersion} oder höher.",

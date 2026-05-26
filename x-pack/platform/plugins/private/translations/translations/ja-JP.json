@@ -10921,7 +10921,6 @@
     "xpack.agentBuilder.appError.startNewConversationButtonLabel": "新しい会話を開始",
     "xpack.agentBuilder.attachmentActions.moreActions": "さらにアクションを表示",
     "xpack.agentBuilder.attachmentHeader.close": "閉じる",
-    "xpack.agentBuilder.attachmentHeader.currentlyPreviewing": "これをプレビューしています",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "プレビューのみ",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "添付ファイルを削除",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "添付ファイル",

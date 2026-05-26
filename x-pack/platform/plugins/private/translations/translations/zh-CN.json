@@ -10919,7 +10919,6 @@
     "xpack.agentBuilder.appError.startNewConversationButtonLabel": "开始新对话",
     "xpack.agentBuilder.attachmentActions.moreActions": "更多操作",
     "xpack.agentBuilder.attachmentHeader.close": "关闭",
-    "xpack.agentBuilder.attachmentHeader.currentlyPreviewing": "您正在预览此内容",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "仅限预览",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "移除附件",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "附件",

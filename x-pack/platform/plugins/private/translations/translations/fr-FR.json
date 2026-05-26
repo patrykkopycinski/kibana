@@ -10878,7 +10878,6 @@
     "xpack.agentBuilder.appError.startNewConversationButtonLabel": "Démarrer une nouvelle conversation",
     "xpack.agentBuilder.attachmentActions.moreActions": "Plus d'actions",
     "xpack.agentBuilder.attachmentHeader.close": "Fermer",
-    "xpack.agentBuilder.attachmentHeader.currentlyPreviewing": "Vous visualisez un aperçu",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "Aperçu uniquement",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "Supprimer la pièce jointe",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "Pièces jointes",

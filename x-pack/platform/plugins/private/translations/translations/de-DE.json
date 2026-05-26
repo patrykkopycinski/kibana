@@ -10892,7 +10892,6 @@
     "xpack.agentBuilder.appError.startNewConversationButtonLabel": "Neues Gespräch beginnen",
     "xpack.agentBuilder.attachmentActions.moreActions": "Weitere Aktionen",
     "xpack.agentBuilder.attachmentHeader.close": "Schließen",
-    "xpack.agentBuilder.attachmentHeader.currentlyPreviewing": "Sie sehen sich dies in der Vorschau an",
     "xpack.agentBuilder.attachmentHeader.previewOnly": "Nur Vorschau",
     "xpack.agentBuilder.attachmentPill.removeAriaLabel": "Anhang entfernen",
     "xpack.agentBuilder.attachmentPillsRow.attachments": "Anhänge",

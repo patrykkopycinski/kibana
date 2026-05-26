@@ -75270,6 +75270,7 @@ paths:
           name: bucketSize
           required: true
           schema:
+            pattern: ^(\d+)([smhd])$
             type: string
         - description: Query string to filter significant events on metadata fields
           in: query
@@ -75454,6 +75455,7 @@ paths:
           name: bucketSize
           required: true
           schema:
+            pattern: ^(\d+)([smhd])$
             type: string
       requestBody:
         content:

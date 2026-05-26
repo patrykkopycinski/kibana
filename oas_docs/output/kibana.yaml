@@ -63025,97 +63025,7 @@ paths:
                         kql: 'kibana.alert.tags: "infra"'
                   title: Weekly Maintenance Window
             schema:
-              additionalProperties: false
-              type: object
-              properties:
-                enabled:
-                  description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                  type: boolean
-                schedule:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    custom:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        duration:
-                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                          type: string
-                        recurring:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            end:
-                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                              type: string
-                            every:
-                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                              type: string
-                            occurrences:
-                              description: The total number of recurrences of the schedule.
-                              minimum: 1
-                              type: number
-                            onMonth:
-                              description: The specific months for a recurring schedule. Valid values are 1-12.
-                              items:
-                                maximum: 12
-                                minimum: 1
-                                type: number
-                              minItems: 1
-                              type: array
-                            onMonthDay:
-                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                              items:
-                                maximum: 31
-                                minimum: 1
-                                type: number
-                              minItems: 1
-                              type: array
-                            onWeekDay:
-                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                              items:
-                                type: string
-                              minItems: 1
-                              type: array
-                        start:
-                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                          type: string
-                        timezone:
-                          description: The timezone of the schedule. The default timezone is UTC.
-                          type: string
-                      required:
-                        - start
-                        - duration
-                  required:
-                    - custom
-                scope:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    alerting:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            kql:
-                              description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.
-                              type: string
-                          required:
-                            - kql
-                      required:
-                        - query
-                  required:
-                    - alerting
-                title:
-                  description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
-                  type: string
-              required:
-                - title
-                - schedule
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_new_maintenance_window'
       responses:
         '200':
           content:
@@ -63150,122 +63060,7 @@ paths:
                     updated_at: '2025-02-25T10:00:00.000Z'
                     updated_by: elastic
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  created_at:
-                    description: The date and time when the maintenance window was created.
-                    type: string
-                  created_by:
-                    description: The identifier for the user that created the maintenance window.
-                    nullable: true
-                    type: string
-                  enabled:
-                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                    type: boolean
-                  id:
-                    description: The identifier for the maintenance window.
-                    type: string
-                  schedule:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      custom:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          duration:
-                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                            type: string
-                          recurring:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              end:
-                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                type: string
-                              every:
-                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                type: string
-                              occurrences:
-                                description: The total number of recurrences of the schedule.
-                                type: number
-                              onMonth:
-                                description: The specific months for a recurring schedule. Valid values are 1-12.
-                                items:
-                                  type: number
-                                type: array
-                              onMonthDay:
-                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                items:
-                                  type: number
-                                type: array
-                              onWeekDay:
-                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                items:
-                                  type: string
-                                type: array
-                          start:
-                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                            type: string
-                          timezone:
-                            description: The timezone of the schedule. The default timezone is UTC.
-                            type: string
-                        required:
-                          - start
-                          - duration
-                    required:
-                      - custom
-                  scope:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      alerting:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          query:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              kql:
-                                description: A filter written in Kibana Query Language (KQL).
-                                type: string
-                            required:
-                              - kql
-                        required:
-                          - query
-                    required:
-                      - alerting
-                  status:
-                    description: The current status of the maintenance window.
-                    enum:
-                      - running
-                      - upcoming
-                      - finished
-                      - archived
-                      - disabled
-                    type: string
-                  title:
-                    description: The name of the maintenance window.
-                    type: string
-                  updated_at:
-                    description: The date and time when the maintenance window was last updated.
-                    type: string
-                  updated_by:
-                    description: The identifier for the user that last updated this maintenance window.
-                    nullable: true
-                    type: string
-                required:
-                  - id
-                  - title
-                  - enabled
-                  - created_by
-                  - updated_by
-                  - created_at
-                  - updated_at
-                  - status
-                  - schedule
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -63394,143 +63189,7 @@ paths:
                     per_page: 10
                     total: 2
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  maintenanceWindows:
-                    description: The list of maintenance windows.
-                    items:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        created_at:
-                          description: The date and time when the maintenance window was created.
-                          type: string
-                        created_by:
-                          description: The identifier for the user that created the maintenance window.
-                          nullable: true
-                          type: string
-                        enabled:
-                          description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                          type: boolean
-                        id:
-                          description: The identifier for the maintenance window.
-                          type: string
-                        schedule:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            custom:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                duration:
-                                  description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                                  type: string
-                                recurring:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    end:
-                                      description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                      type: string
-                                    every:
-                                      description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                      type: string
-                                    occurrences:
-                                      description: The total number of recurrences of the schedule.
-                                      type: number
-                                    onMonth:
-                                      description: The specific months for a recurring schedule. Valid values are 1-12.
-                                      items:
-                                        type: number
-                                      type: array
-                                    onMonthDay:
-                                      description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                      items:
-                                        type: number
-                                      type: array
-                                    onWeekDay:
-                                      description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                      items:
-                                        type: string
-                                      type: array
-                                start:
-                                  description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                                  type: string
-                                timezone:
-                                  description: The timezone of the schedule. The default timezone is UTC.
-                                  type: string
-                              required:
-                                - start
-                                - duration
-                          required:
-                            - custom
-                        scope:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            alerting:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                query:
-                                  additionalProperties: false
-                                  type: object
-                                  properties:
-                                    kql:
-                                      description: A filter written in Kibana Query Language (KQL).
-                                      type: string
-                                  required:
-                                    - kql
-                              required:
-                                - query
-                          required:
-                            - alerting
-                        status:
-                          description: The current status of the maintenance window.
-                          enum:
-                            - running
-                            - upcoming
-                            - finished
-                            - archived
-                            - disabled
-                          type: string
-                        title:
-                          description: The name of the maintenance window.
-                          type: string
-                        updated_at:
-                          description: The date and time when the maintenance window was last updated.
-                          type: string
-                        updated_by:
-                          description: The identifier for the user that last updated this maintenance window.
-                          nullable: true
-                          type: string
-                      required:
-                        - id
-                        - title
-                        - enabled
-                        - created_by
-                        - updated_by
-                        - created_at
-                        - updated_at
-                        - status
-                        - schedule
-                    type: array
-                  page:
-                    description: The current page number.
-                    type: number
-                  per_page:
-                    description: The number of maintenance windows returned per page.
-                    type: number
-                  total:
-                    description: The total number of maintenance windows that match the query.
-                    type: number
-                required:
-                  - page
-                  - per_page
-                  - total
-                  - maintenanceWindows
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_find_maintenance_windows_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -63635,122 +63294,7 @@ paths:
                     updated_at: '2025-02-25T10:00:00.000Z'
                     updated_by: elastic
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  created_at:
-                    description: The date and time when the maintenance window was created.
-                    type: string
-                  created_by:
-                    description: The identifier for the user that created the maintenance window.
-                    nullable: true
-                    type: string
-                  enabled:
-                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                    type: boolean
-                  id:
-                    description: The identifier for the maintenance window.
-                    type: string
-                  schedule:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      custom:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          duration:
-                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                            type: string
-                          recurring:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              end:
-                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                type: string
-                              every:
-                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                type: string
-                              occurrences:
-                                description: The total number of recurrences of the schedule.
-                                type: number
-                              onMonth:
-                                description: The specific months for a recurring schedule. Valid values are 1-12.
-                                items:
-                                  type: number
-                                type: array
-                              onMonthDay:
-                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                items:
-                                  type: number
-                                type: array
-                              onWeekDay:
-                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                items:
-                                  type: string
-                                type: array
-                          start:
-                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                            type: string
-                          timezone:
-                            description: The timezone of the schedule. The default timezone is UTC.
-                            type: string
-                        required:
-                          - start
-                          - duration
-                    required:
-                      - custom
-                  scope:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      alerting:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          query:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              kql:
-                                description: A filter written in Kibana Query Language (KQL).
-                                type: string
-                            required:
-                              - kql
-                        required:
-                          - query
-                    required:
-                      - alerting
-                  status:
-                    description: The current status of the maintenance window.
-                    enum:
-                      - running
-                      - upcoming
-                      - finished
-                      - archived
-                      - disabled
-                    type: string
-                  title:
-                    description: The name of the maintenance window.
-                    type: string
-                  updated_at:
-                    description: The date and time when the maintenance window was last updated.
-                    type: string
-                  updated_by:
-                    description: The identifier for the user that last updated this maintenance window.
-                    nullable: true
-                    type: string
-                required:
-                  - id
-                  - title
-                  - enabled
-                  - created_by
-                  - updated_by
-                  - created_at
-                  - updated_at
-                  - status
-                  - schedule
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -63815,94 +63359,7 @@ paths:
                         kql: 'kibana.alert.tags: "database"'
                   title: Updated maintenance window
             schema:
-              additionalProperties: false
-              type: object
-              properties:
-                enabled:
-                  description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                  type: boolean
-                schedule:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    custom:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        duration:
-                          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                          type: string
-                        recurring:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            end:
-                              description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                              type: string
-                            every:
-                              description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                              type: string
-                            occurrences:
-                              description: The total number of recurrences of the schedule.
-                              minimum: 1
-                              type: number
-                            onMonth:
-                              description: The specific months for a recurring schedule. Valid values are 1-12.
-                              items:
-                                maximum: 12
-                                minimum: 1
-                                type: number
-                              minItems: 1
-                              type: array
-                            onMonthDay:
-                              description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                              items:
-                                maximum: 31
-                                minimum: 1
-                                type: number
-                              minItems: 1
-                              type: array
-                            onWeekDay:
-                              description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                              items:
-                                type: string
-                              minItems: 1
-                              type: array
-                        start:
-                          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                          type: string
-                        timezone:
-                          description: The timezone of the schedule. The default timezone is UTC.
-                          type: string
-                      required:
-                        - start
-                        - duration
-                  required:
-                    - custom
-                scope:
-                  additionalProperties: false
-                  type: object
-                  properties:
-                    alerting:
-                      additionalProperties: false
-                      type: object
-                      properties:
-                        query:
-                          additionalProperties: false
-                          type: object
-                          properties:
-                            kql:
-                              description: A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.
-                              type: string
-                          required:
-                            - kql
-                      required:
-                        - query
-                  required:
-                    - alerting
-                title:
-                  description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
-                  type: string
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_update_maintenance_window'
       responses:
         '200':
           content:
@@ -63936,122 +63393,7 @@ paths:
                     updated_at: '2025-03-15T14:30:00.000Z'
                     updated_by: elastic
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  created_at:
-                    description: The date and time when the maintenance window was created.
-                    type: string
-                  created_by:
-                    description: The identifier for the user that created the maintenance window.
-                    nullable: true
-                    type: string
-                  enabled:
-                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                    type: boolean
-                  id:
-                    description: The identifier for the maintenance window.
-                    type: string
-                  schedule:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      custom:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          duration:
-                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                            type: string
-                          recurring:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              end:
-                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                type: string
-                              every:
-                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                type: string
-                              occurrences:
-                                description: The total number of recurrences of the schedule.
-                                type: number
-                              onMonth:
-                                description: The specific months for a recurring schedule. Valid values are 1-12.
-                                items:
-                                  type: number
-                                type: array
-                              onMonthDay:
-                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                items:
-                                  type: number
-                                type: array
-                              onWeekDay:
-                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                items:
-                                  type: string
-                                type: array
-                          start:
-                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                            type: string
-                          timezone:
-                            description: The timezone of the schedule. The default timezone is UTC.
-                            type: string
-                        required:
-                          - start
-                          - duration
-                    required:
-                      - custom
-                  scope:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      alerting:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          query:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              kql:
-                                description: A filter written in Kibana Query Language (KQL).
-                                type: string
-                            required:
-                              - kql
-                        required:
-                          - query
-                    required:
-                      - alerting
-                  status:
-                    description: The current status of the maintenance window.
-                    enum:
-                      - running
-                      - upcoming
-                      - finished
-                      - archived
-                      - disabled
-                    type: string
-                  title:
-                    description: The name of the maintenance window.
-                    type: string
-                  updated_at:
-                    description: The date and time when the maintenance window was last updated.
-                    type: string
-                  updated_by:
-                    description: The identifier for the user that last updated this maintenance window.
-                    nullable: true
-                    type: string
-                required:
-                  - id
-                  - title
-                  - enabled
-                  - created_by
-                  - updated_by
-                  - created_at
-                  - updated_at
-                  - status
-                  - schedule
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -64127,122 +63469,7 @@ paths:
                     updated_at: '2025-02-25T10:00:00.000Z'
                     updated_by: elastic
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  created_at:
-                    description: The date and time when the maintenance window was created.
-                    type: string
-                  created_by:
-                    description: The identifier for the user that created the maintenance window.
-                    nullable: true
-                    type: string
-                  enabled:
-                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                    type: boolean
-                  id:
-                    description: The identifier for the maintenance window.
-                    type: string
-                  schedule:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      custom:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          duration:
-                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                            type: string
-                          recurring:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              end:
-                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                type: string
-                              every:
-                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                type: string
-                              occurrences:
-                                description: The total number of recurrences of the schedule.
-                                type: number
-                              onMonth:
-                                description: The specific months for a recurring schedule. Valid values are 1-12.
-                                items:
-                                  type: number
-                                type: array
-                              onMonthDay:
-                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                items:
-                                  type: number
-                                type: array
-                              onWeekDay:
-                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                items:
-                                  type: string
-                                type: array
-                          start:
-                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                            type: string
-                          timezone:
-                            description: The timezone of the schedule. The default timezone is UTC.
-                            type: string
-                        required:
-                          - start
-                          - duration
-                    required:
-                      - custom
-                  scope:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      alerting:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          query:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              kql:
-                                description: A filter written in Kibana Query Language (KQL).
-                                type: string
-                            required:
-                              - kql
-                        required:
-                          - query
-                    required:
-                      - alerting
-                  status:
-                    description: The current status of the maintenance window.
-                    enum:
-                      - running
-                      - upcoming
-                      - finished
-                      - archived
-                      - disabled
-                    type: string
-                  title:
-                    description: The name of the maintenance window.
-                    type: string
-                  updated_at:
-                    description: The date and time when the maintenance window was last updated.
-                    type: string
-                  updated_by:
-                    description: The identifier for the user that last updated this maintenance window.
-                    nullable: true
-                    type: string
-                required:
-                  - id
-                  - title
-                  - enabled
-                  - created_by
-                  - updated_by
-                  - created_at
-                  - updated_at
-                  - status
-                  - schedule
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -64316,122 +63543,7 @@ paths:
                     updated_at: '2025-02-25T10:00:00.000Z'
                     updated_by: elastic
               schema:
-                additionalProperties: false
-                type: object
-                properties:
-                  created_at:
-                    description: The date and time when the maintenance window was created.
-                    type: string
-                  created_by:
-                    description: The identifier for the user that created the maintenance window.
-                    nullable: true
-                    type: string
-                  enabled:
-                    description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
-                    type: boolean
-                  id:
-                    description: The identifier for the maintenance window.
-                    type: string
-                  schedule:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      custom:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          duration:
-                            description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
-                            type: string
-                          recurring:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              end:
-                                description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
-                                type: string
-                              every:
-                                description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
-                                type: string
-                              occurrences:
-                                description: The total number of recurrences of the schedule.
-                                type: number
-                              onMonth:
-                                description: The specific months for a recurring schedule. Valid values are 1-12.
-                                items:
-                                  type: number
-                                type: array
-                              onMonthDay:
-                                description: The specific days of the month for a recurring schedule. Valid values are 1-31.
-                                items:
-                                  type: number
-                                type: array
-                              onWeekDay:
-                                description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
-                                items:
-                                  type: string
-                                type: array
-                          start:
-                            description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
-                            type: string
-                          timezone:
-                            description: The timezone of the schedule. The default timezone is UTC.
-                            type: string
-                        required:
-                          - start
-                          - duration
-                    required:
-                      - custom
-                  scope:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      alerting:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          query:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              kql:
-                                description: A filter written in Kibana Query Language (KQL).
-                                type: string
-                            required:
-                              - kql
-                        required:
-                          - query
-                    required:
-                      - alerting
-                  status:
-                    description: The current status of the maintenance window.
-                    enum:
-                      - running
-                      - upcoming
-                      - finished
-                      - archived
-                      - disabled
-                    type: string
-                  title:
-                    description: The name of the maintenance window.
-                    type: string
-                  updated_at:
-                    description: The date and time when the maintenance window was last updated.
-                    type: string
-                  updated_by:
-                    description: The identifier for the user that last updated this maintenance window.
-                    nullable: true
-                    type: string
-                required:
-                  - id
-                  - title
-                  - enabled
-                  - created_by
-                  - updated_by
-                  - created_at
-                  - updated_at
-                  - status
-                  - schedule
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
           description: Indicates a successful call.
         '400':
           description: Indicates an invalid schema or parameters.
@@ -102121,6 +101233,30 @@ components:
         - data
       title: find_backfill_response
       type: object
+    Kibana_HTTP_APIs_find_maintenance_windows_response:
+      additionalProperties: false
+      properties:
+        maintenanceWindows:
+          description: The list of maintenance windows.
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_response'
+          type: array
+        page:
+          description: The current page number.
+          type: number
+        per_page:
+          description: The number of maintenance windows returned per page.
+          type: number
+        total:
+          description: The total number of maintenance windows that match the query.
+          type: number
+      required:
+        - page
+        - per_page
+        - total
+        - maintenanceWindows
+      title: find_maintenance_windows_response
+      type: object
     Kibana_HTTP_APIs_formatType:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
@@ -108829,6 +107965,189 @@ components:
         - params
       title: Log threshold
       type: object
+    Kibana_HTTP_APIs_maintenance_window_response:
+      additionalProperties: false
+      properties:
+        created_at:
+          description: The date and time when the maintenance window was created.
+          type: string
+        created_by:
+          description: The identifier for the user that created the maintenance window.
+          nullable: true
+          type: string
+        enabled:
+          description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+          type: boolean
+        id:
+          description: The identifier for the maintenance window.
+          type: string
+        schedule:
+          additionalProperties: false
+          type: object
+          properties:
+            custom:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_response'
+          required:
+            - custom
+        scope:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+        status:
+          description: The current status of the maintenance window.
+          enum:
+            - running
+            - upcoming
+            - finished
+            - archived
+            - disabled
+          type: string
+        title:
+          description: The name of the maintenance window.
+          type: string
+        updated_at:
+          description: The date and time when the maintenance window was last updated.
+          type: string
+        updated_by:
+          description: The identifier for the user that last updated this maintenance window.
+          nullable: true
+          type: string
+      required:
+        - id
+        - title
+        - enabled
+        - created_by
+        - updated_by
+        - created_at
+        - updated_at
+        - status
+        - schedule
+      title: maintenance_window_response
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request:
+      additionalProperties: false
+      properties:
+        end:
+          description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          type: string
+        every:
+          description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          type: string
+        occurrences:
+          description: The total number of recurrences of the schedule.
+          minimum: 1
+          type: number
+        onMonth:
+          description: The specific months for a recurring schedule. Valid values are 1-12.
+          items:
+            maximum: 12
+            minimum: 1
+            type: number
+          minItems: 1
+          type: array
+        onMonthDay:
+          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          items:
+            maximum: 31
+            minimum: 1
+            type: number
+          minItems: 1
+          type: array
+        onWeekDay:
+          description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+          items:
+            type: string
+          minItems: 1
+          type: array
+      title: maintenance_window_schedule_recurring_request
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_schedule_recurring_response:
+      additionalProperties: false
+      properties:
+        end:
+          description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          type: string
+        every:
+          description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          type: string
+        occurrences:
+          description: The total number of recurrences of the schedule.
+          type: number
+        onMonth:
+          description: The specific months for a recurring schedule. Valid values are 1-12.
+          items:
+            type: number
+          type: array
+        onMonthDay:
+          description: The specific days of the month for a recurring schedule. Valid values are 1-31.
+          items:
+            type: number
+          type: array
+        onWeekDay:
+          description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
+          items:
+            type: string
+          type: array
+      title: maintenance_window_schedule_recurring_response
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_schedule_request:
+      additionalProperties: false
+      properties:
+        duration:
+          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          type: string
+        recurring:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
+        start:
+          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          type: string
+        timezone:
+          description: The timezone of the schedule. The default timezone is UTC.
+          type: string
+      required:
+        - start
+        - duration
+      title: maintenance_window_schedule_request
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_schedule_response:
+      additionalProperties: false
+      properties:
+        duration:
+          description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          type: string
+        recurring:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_response'
+        start:
+          description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          type: string
+        timezone:
+          description: The timezone of the schedule. The default timezone is UTC.
+          type: string
+      required:
+        - start
+        - duration
+      title: maintenance_window_schedule_response
+      type: object
+    Kibana_HTTP_APIs_maintenance_window_scope:
+      additionalProperties: false
+      properties:
+        alerting:
+          additionalProperties: false
+          type: object
+          properties:
+            query:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  description: A filter written in Kibana Query Language (KQL).
+                  type: string
+              required:
+                - kql
+          required:
+            - query
+      required:
+        - alerting
+      title: maintenance_window_scope
+      type: object
     Kibana_HTTP_APIs_metricBarBackgroundChart:
       additionalProperties: false
       description: Bar chart shown as background context behind the primary metric value.
@@ -114364,6 +113683,30 @@ components:
         - type
         - keys
       title: Multi Field Key
+      type: object
+    Kibana_HTTP_APIs_new_maintenance_window:
+      additionalProperties: false
+      properties:
+        enabled:
+          description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+          type: boolean
+        schedule:
+          additionalProperties: false
+          type: object
+          properties:
+            custom:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_request'
+          required:
+            - custom
+        scope:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+        title:
+          description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
+          type: string
+      required:
+        - title
+        - schedule
+      title: new_maintenance_window
       type: object
     Kibana_HTTP_APIs_new_output_elasticsearch:
       additionalProperties: false
@@ -123235,6 +122578,27 @@ components:
         - field
         - operation
       title: Unique Count Metric Operation
+      type: object
+    Kibana_HTTP_APIs_update_maintenance_window:
+      additionalProperties: false
+      properties:
+        enabled:
+          description: Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.
+          type: boolean
+        schedule:
+          additionalProperties: false
+          type: object
+          properties:
+            custom:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_request'
+          required:
+            - custom
+        scope:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_scope'
+        title:
+          description: The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.
+          type: string
+      title: update_maintenance_window
       type: object
     Kibana_HTTP_APIs_update_output_elasticsearch:
       additionalProperties: false

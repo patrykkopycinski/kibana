@@ -2156,6 +2156,229 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/agent_builder/agents/{id}/acl:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-agents-id-acl
+      parameters:
+        - description: The unique identifier of the agent whose ACL to retrieve.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getAgentAclMaskedResponseExample:
+                  description: Example response for a caller without manage permission — the principal list is hidden and `entries` is always empty.
+                  value:
+                    acl:
+                      entries: []
+                    can_manage: false
+                getAgentAclResponseExample:
+                  description: Example response for a caller who can manage the ACL — the agent has two grantees.
+                  value:
+                    acl:
+                      entries:
+                        - name: alice
+                          role: editor
+                          type: user
+                        - name: bob
+                          role: user
+                          type: user
+                    can_manage: true
+          description: Indicates a successful response
+        '404':
+          content:
+            application/json:
+              examples:
+                agentNotFoundResponseExample:
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Agent custom-agent-id not found
+                    statusCode: 404
+          description: Not Found — no agent with this ID is visible to the caller. Matches the existing `agentNotFound` shape, so unprivileged callers cannot probe for hidden agents.
+      summary: Get an agent's access control list
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -H "Authorization: ApiKey ${API_KEY}"
+        - lang: Console
+          source: |
+            GET kbn://api/agent_builder/agents/{id}/acl
+      x-state: Added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: put-agent-builder-agents-id-acl
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the agent whose ACL to update.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              clearAgentAclRequestExample:
+                description: Submit an empty entries list to remove all ACL grants. Access then falls back to the agent's visibility setting.
+                value:
+                  entries: []
+              updateAgentAclRequestExample:
+                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its ACL), Bob as User (can run the agent).
+                value:
+                  entries:
+                    - name: alice
+                      role: editor
+                      type: user
+                    - name: bob
+                      role: user
+                      type: user
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                entries:
+                  description: Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      name:
+                        description: Case-sensitive Kibana username of the principal to grant access to.
+                        maxLength: 1024
+                        minLength: 1
+                        type: string
+                      role:
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.'
+                        enum:
+                          - user
+                          - editor
+                          - manager
+                        type: string
+                      type:
+                        enum:
+                          - user
+                        type: string
+                    required:
+                      - type
+                      - name
+                      - role
+                  maxItems: 100
+                  type: array
+              required:
+                - entries
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateAgentAclResponseExample:
+                  description: Example response returning the persisted ACL after the update.
+                  value:
+                    entries:
+                      - name: alice
+                        role: editor
+                        type: user
+                      - name: bob
+                        role: user
+                        type: user
+          description: Indicates a successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                aclOnDefaultAgentResponseExample:
+                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have a custom ACL — its access is governed by the platform, not per-agent grants.
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Bad Request
+                    message: The default agent (elastic-ai-agent) does not support custom access controls.
+                    statusCode: 400
+                tooManyEntriesResponseExample:
+                  description: Request body exceeds the 100-entry maximum.
+                  value:
+                    error: Bad Request
+                    message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
+                    statusCode: 400
+          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have an ACL).
+        '404':
+          content:
+            application/json:
+              examples:
+                agentNotFoundResponseExample:
+                  value:
+                    attributes:
+                      trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
+                    error: Not Found
+                    message: Agent custom-agent-id not found
+                    statusCode: 404
+          description: Not Found — no agent with this ID is visible to the caller, or the caller lacks write access. Matches the existing `agentNotFound` shape so unprivileged callers cannot probe for hidden agents.
+      summary: Update an agent's access control list
+      tags:
+        - agent builder
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "entries": [
+                  { "type": "user", "name": "alice", "role": "editor" },
+                  { "type": "user", "name": "bob", "role": "user" }
+                ]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/agent_builder/agents/{id}/acl
+            {
+              "entries": [
+                { "type": "user", "name": "alice", "role": "editor" },
+                { "type": "user", "name": "bob", "role": "user" }
+              ]
+            }
+      x-state: Added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/conversations:
     get:
       description: |-

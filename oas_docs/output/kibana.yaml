@@ -86622,6 +86622,17 @@ paths:
           required: false
           schema:
             type: string
+        - description: Field to collapse execution results by.
+          in: query
+          name: collapse
+          required: false
+          schema:
+            enum:
+              - concurrencyGroupKey
+              - status
+              - executedBy
+              - triggeredBy
+            type: string
         - description: Field to sort executions by.
           in: query
           name: sortField

@@ -6,9 +6,11 @@
  */
 
 import { tags } from '@kbn/scout';
+import { createTrajectoryEvaluator } from '@kbn/evals';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import type { DashboardAgentTaskOutput } from '../../src/evaluate_dataset';
 import {
   dashboardMinPanelCountEvaluator,
   dashboardSectionCountEvaluator,
@@ -17,6 +19,7 @@ import {
   dashboardSkillActivatedEvaluator,
   dashboardSkillNotActivatedEvaluator,
   visualizationSkillWithoutDashboardEvaluator,
+  getToolIds,
 } from '../../src/skill_selection_evaluators';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
@@ -34,6 +37,16 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
     },
     { scope: 'test' },
   ],
+});
+
+const trajectoryEvaluator = createTrajectoryEvaluator({
+  extractToolCalls: (output) => getToolIds(output as DashboardAgentTaskOutput),
+  goldenPathExtractor: (expected) => {
+    const exp = expected as { goldenToolPath?: string[] };
+    return exp?.goldenToolPath ?? [];
+  },
+  orderWeight: 0.4,
+  coverageWeight: 0.6,
 });
 
 evaluate.describe(
@@ -63,6 +76,7 @@ evaluate.describe(
                 expectedDashboardAttachment: {
                   panelCount: { min: 3 },
                 },
+                goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
               },
             },
             {
@@ -76,6 +90,7 @@ evaluate.describe(
                   panelCount: { min: 2 },
                   sectionCount: 2,
                 },
+                goldenToolPath: ['load_skill', 'platform.dashboard.manage_dashboard'],
               },
             },
           ],
@@ -84,6 +99,7 @@ evaluate.describe(
           dashboardSkillActivatedEvaluator,
           dashboardMinPanelCountEvaluator,
           dashboardSectionCountEvaluator,
+          trajectoryEvaluator,
         ],
       });
     });
@@ -103,11 +119,12 @@ evaluate.describe(
               output: {
                 expected:
                   'Visualization skill should be activated and dashboard management should not be used.',
+                goldenToolPath: ['load_skill'],
               },
             },
           ],
         },
-        evaluators: [visualizationSkillWithoutDashboardEvaluator],
+        evaluators: [visualizationSkillWithoutDashboardEvaluator, trajectoryEvaluator],
       });
     });
 
@@ -124,11 +141,12 @@ evaluate.describe(
               },
               output: {
                 expected: 'Dashboard management should not be used.',
+                goldenToolPath: [],
               },
             },
           ],
         },
-        evaluators: [dashboardSkillNotActivatedEvaluator],
+        evaluators: [dashboardSkillNotActivatedEvaluator, trajectoryEvaluator],
       });
     });
   }

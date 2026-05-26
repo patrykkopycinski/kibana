@@ -49,6 +49,7 @@ export interface DashboardDatasetExample extends Example {
         noOverflow?: boolean;
       };
     };
+    goldenToolPath?: string[];
   };
   metadata?: {
     [key: string]: unknown;
@@ -198,7 +199,12 @@ export function createEvaluateDataset({
         };
       };
 
-      await executorClient.runExperiment({ dataset, task }, customEvaluators);
+      // Always include trace-based evaluators (tokens, latency, tool calls) alongside custom evaluators
+      const traceEvaluators = Object.values(evaluators.traceBasedEvaluators);
+      await executorClient.runExperiment({ dataset, task }, [
+        ...customEvaluators,
+        ...traceEvaluators,
+      ]);
     } else {
       const { task, evaluators: selectedEvaluators } = configureExperiment({
         evaluators,

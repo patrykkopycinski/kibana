@@ -29470,7 +29470,7 @@ paths:
                         nullable: true
                         type: string
                       condition:
-                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+                        description: Agent condition expression to evaluate whether to apply this integration to its inputs.
                         type: string
                       created_at:
                         type: string
@@ -29525,7 +29525,7 @@ paths:
                                 compiled_input:
                                   nullable: true
                                 condition:
-                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  description: Agent condition expression to evaluate whether to apply this input.
                                   type: string
                                 config:
                                   additionalProperties:
@@ -29564,7 +29564,7 @@ paths:
                                       compiled_stream:
                                         nullable: true
                                       condition:
-                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        description: Agent condition expression to evaluate whether to apply this stream.
                                         type: string
                                       config:
                                         additionalProperties:
@@ -29684,7 +29684,7 @@ paths:
                               type: object
                               properties:
                                 condition:
-                                  description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                                  description: Agent condition expression to evaluate whether to apply this input.
                                   type: string
                                 deprecated:
                                   $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -29697,7 +29697,7 @@ paths:
                                     type: object
                                     properties:
                                       condition:
-                                        description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                                        description: Agent condition expression to evaluate whether to apply this stream.
                                         type: string
                                       deprecated:
                                         $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -83649,7 +83649,7 @@ components:
           nullable: true
           type: string
         condition:
-          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
         description:
           description: Package policy description
@@ -83687,7 +83687,7 @@ components:
             type: object
             properties:
               condition:
-                description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                description: Agent condition expression to evaluate whether to apply this input.
                 type: string
               config:
                 additionalProperties:
@@ -83726,7 +83726,7 @@ components:
                     compiled_stream:
                       nullable: true
                     condition:
-                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                      description: Agent condition expression to evaluate whether to apply this stream.
                       type: string
                     config:
                       additionalProperties:
@@ -86235,7 +86235,7 @@ components:
           nullable: true
           type: string
         condition:
-          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
         created_at:
           type: string
@@ -86303,7 +86303,7 @@ components:
               compiled_input:
                 nullable: true
               condition:
-                description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                description: Agent condition expression to evaluate whether to apply this input.
                 type: string
               config:
                 additionalProperties:
@@ -86342,7 +86342,7 @@ components:
                     compiled_stream:
                       nullable: true
                     condition:
-                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                      description: Agent condition expression to evaluate whether to apply this stream.
                       type: string
                     config:
                       additionalProperties:
@@ -103716,7 +103716,7 @@ components:
           nullable: true
           type: string
         condition:
-          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
         created_at:
           type: string
@@ -103770,7 +103770,7 @@ components:
                   compiled_input:
                     nullable: true
                   condition:
-                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                    description: Agent condition expression to evaluate whether to apply this input.
                     type: string
                   config:
                     additionalProperties:
@@ -103809,7 +103809,7 @@ components:
                         compiled_stream:
                           nullable: true
                         condition:
-                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                          description: Agent condition expression to evaluate whether to apply this stream.
                           type: string
                         config:
                           additionalProperties:
@@ -103929,7 +103929,7 @@ components:
                 type: object
                 properties:
                   condition:
-                    description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                    description: Agent condition expression to evaluate whether to apply this input.
                     type: string
                   deprecated:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -103942,7 +103942,7 @@ components:
                       type: object
                       properties:
                         condition:
-                          description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                          description: Agent condition expression to evaluate whether to apply this stream.
                           type: string
                         deprecated:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107128,7 +107128,7 @@ components:
                 - gcp
               type: string
         condition:
-          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
         description:
           description: Policy description.
@@ -107163,7 +107163,7 @@ components:
             type: object
             properties:
               condition:
-                description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                description: Agent condition expression to evaluate whether to apply this input.
                 type: string
               deprecated:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107176,7 +107176,7 @@ components:
                   type: object
                   properties:
                     condition:
-                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                      description: Agent condition expression to evaluate whether to apply this stream.
                       type: string
                     deprecated:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -111950,7 +111950,7 @@ components:
           nullable: true
           type: string
         condition:
-          description: '**Experimental.** Agent condition expression to evaluate whether to apply this integration to its inputs.'
+          description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
         description:
           description: Package policy description
@@ -111984,7 +111984,7 @@ components:
             type: object
             properties:
               condition:
-                description: '**Experimental.** Agent condition expression to evaluate whether to apply this input.'
+                description: Agent condition expression to evaluate whether to apply this input.
                 type: string
               config:
                 additionalProperties:
@@ -112023,7 +112023,7 @@ components:
                     compiled_stream:
                       nullable: true
                     condition:
-                      description: '**Experimental.** Agent condition expression to evaluate whether to apply this stream.'
+                      description: Agent condition expression to evaluate whether to apply this stream.
                       type: string
                     config:
                       additionalProperties:

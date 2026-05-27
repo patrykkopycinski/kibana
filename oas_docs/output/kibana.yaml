@@ -30417,6 +30417,9 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        pipeline_config:
+                          maxLength: 10000
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -31078,6 +31081,9 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pipeline_config:
+                        maxLength: 10000
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -31556,6 +31562,9 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      pipeline_config:
+                        maxLength: 10000
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:

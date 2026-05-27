@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { LazyCollectorsApp } from './lazy_collector_app';
+import { lazy } from 'react';
+
+export const LazyCollectorsApp = lazy(() =>
+  import('./app').then(({ CollectorsApp }) => ({
+    default: CollectorsApp,
+  }))
+);

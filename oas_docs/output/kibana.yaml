@@ -34247,6 +34247,160 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/fleet/agents/collector_groups:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/collector_groups</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get OpAMP collectors grouped by elastic.collector.group with cursor-based pagination.<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.
+      operationId: get-fleet-agents-collector-groups
+      parameters:
+        - description: Field to group collectors by
+          in: query
+          name: groupBy
+          required: false
+          schema:
+            default: collector.group
+            enum:
+              - collector.group
+              - config.name
+            type: string
+        - description: A KQL query string to filter collectors before grouping
+          in: query
+          name: kuery
+          required: false
+          schema:
+            maxLength: 4096
+            type: string
+        - description: Number of groups per page
+          in: query
+          name: perPage
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: After key is used for cursor-based pagination, use it to get the next page of results
+          in: query
+          name: afterKey
+          required: false
+          schema:
+            maxLength: 2048
+            type: string
+        - description: When true, include inactive collectors in the results
+          in: query
+          name: showInactive
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCollectorGroupsExample:
+                  description: Collector groups
+                  value:
+                    afterKey: '{"collector.group":"database-servers"}'
+                    items:
+                      - docCount: 5
+                        group: web-servers
+                        groupDisplayName: web-servers
+                        isUngrouped: false
+                        signals:
+                          - logs
+                          - metrics
+                      - docCount: 3
+                        group: database-servers
+                        groupDisplayName: database-servers
+                        signals:
+                          - metrics
+                          - traces
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  afterKey:
+                    maxLength: 2048
+                    type: string
+                  items:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        docCount:
+                          description: Number of collectors in this group
+                          type: number
+                        group:
+                          description: Group key value
+                          maxLength: 1024
+                          type: string
+                        groupDisplayName:
+                          description: Human-readable display name for the group
+                          maxLength: 1024
+                          type: string
+                        isUngrouped:
+                          description: True when the collectors in this bucket have no value for the group-by field
+                          type: boolean
+                        signals:
+                          description: Signal types present in this group (for example, logs, metrics, traces)
+                          items:
+                            maxLength: 64
+                            type: string
+                          maxItems: 10
+                          type: array
+                      required:
+                        - group
+                        - groupDisplayName
+                        - docCount
+                        - signals
+                    maxItems: 1000
+                    type: array
+                required:
+                  - items
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                genericErrorResponseExample:
+                  description: Example of a generic error response
+                  value:
+                    error: Bad Request
+                    message: An error message describing what went wrong
+                    statusCode: 400
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes:
+                    nullable: true
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+          description: Bad Request
+      summary: Get collector groups
+      tags:
+        - Elastic Agents
+      x-state: Experimental; added in 9.5.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/fleet/agents/files/{fileId}:
     delete:
       description: |-

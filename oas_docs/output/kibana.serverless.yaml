@@ -37880,7 +37880,14 @@ paths:
                 properties:
                   items:
                     items:
-                      anyOf:
+                      discriminator:
+                        mapping:
+                          elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
+                          kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                          logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
+                          remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                        propertyName: type
+                      oneOf:
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
                         - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
@@ -37966,7 +37973,14 @@ paths:
                   name: My output
                   type: elasticsearch
             schema:
-              anyOf:
+              discriminator:
+                mapping:
+                  elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_new_output_elasticsearch'
+                  kafka: '#/components/schemas/Kibana_HTTP_APIs_new_output_kafka'
+                  logstash: '#/components/schemas/Kibana_HTTP_APIs_new_output_logstash'
+                  remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_new_output_remote_elasticsearch'
+                propertyName: type
+              oneOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_elasticsearch'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_remote_elasticsearch'
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_new_output_logstash'
@@ -37992,7 +38006,14 @@ paths:
                 type: object
                 properties:
                   item:
-                    anyOf:
+                    discriminator:
+                      mapping:
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                      propertyName: type
+                    oneOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
@@ -38180,7 +38201,14 @@ paths:
                 type: object
                 properties:
                   item:
-                    anyOf:
+                    discriminator:
+                      mapping:
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                      propertyName: type
+                    oneOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
@@ -38295,7 +38323,14 @@ paths:
                 type: object
                 properties:
                   item:
-                    anyOf:
+                    discriminator:
+                      mapping:
+                        elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
+                        kafka: '#/components/schemas/Kibana_HTTP_APIs_output_kafka'
+                        logstash: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'
+                        remote_elasticsearch: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
+                      propertyName: type
+                    oneOf:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_remote_elasticsearch'
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_logstash'

@@ -6671,8 +6671,6 @@
     "metricsExperience.metricFlyout.esqlQueryTab": "ES|QL 查询",
     "metricsExperience.metricFlyout.overviewTab": "概览",
     "metricsExperience.metricInsightsFlyout.title": "指标",
-    "metricsExperience.metricsInfoError.description": "我们在检索可视化所需的信息时遇到了一些麻烦。请稍等片刻或尝试刷新页面。",
-    "metricsExperience.metricsInfoError.title": "无法加载可视化",
     "metricsExperience.metricTypeDescription.counter": "只会增加的值，例如接收到的请求数量。",
     "metricsExperience.metricTypeDescription.gauge": "表示可以上下变化的值，例如内存利用率。",
     "metricsExperience.metricTypeDescription.histogram": "样本观察，例如请求持续时间，并将它们计数在可配置的分桶中。",

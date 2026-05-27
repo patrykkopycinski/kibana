@@ -6651,8 +6651,6 @@
     "metricsExperience.metricFlyout.esqlQueryTab": "ES|QL-Abfrage",
     "metricsExperience.metricFlyout.overviewTab": "Überblick",
     "metricsExperience.metricInsightsFlyout.title": "Metrik",
-    "metricsExperience.metricsInfoError.description": "Wir haben momentan Schwierigkeiten, die für diese Visualisierung benötigten Informationen abzurufen. Bitte warten Sie einen Moment oder versuchen Sie, die Seite zu aktualisieren.",
-    "metricsExperience.metricsInfoError.title": "Visualisierung kann nicht geladen werden",
     "metricsExperience.metricTypeDescription.counter": "Ein Wert, der sich nur erhöht, z. B. die Anzahl der eingegangenen Anfragen.",
     "metricsExperience.metricTypeDescription.gauge": "Stellt einen Wert dar, der steigen oder fallen kann, wie z. B. die Speichernutzung.",
     "metricsExperience.metricTypeDescription.histogram": "Erfasst Stichproben von Beobachtungen, wie z. B. Anfragedauern, und zählt diese in konfigurierbaren Buckets.",

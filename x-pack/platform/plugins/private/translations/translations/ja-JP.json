@@ -6673,8 +6673,6 @@
     "metricsExperience.metricFlyout.esqlQueryTab": "ES|QLクエリ",
     "metricsExperience.metricFlyout.overviewTab": "概要",
     "metricsExperience.metricInsightsFlyout.title": "メトリック",
-    "metricsExperience.metricsInfoError.description": "現在、この可視化に必要な情報を取得する際に問題が発生しています。しばらくお待ちいただくか、ページを更新してみてください。",
-    "metricsExperience.metricsInfoError.title": "可視化を読み込めません",
     "metricsExperience.metricTypeDescription.counter": "受信したリクエストの数など、増加する一方の値。",
     "metricsExperience.metricTypeDescription.gauge": "メモリ使用量など、上下に変動する可能性のある数値を表します。",
     "metricsExperience.metricTypeDescription.histogram": "リクエストの所要時間などの観測値をサンプリングし、設定可能なバケツごとにカウントします。",

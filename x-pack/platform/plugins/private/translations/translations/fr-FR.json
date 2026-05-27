@@ -6653,8 +6653,6 @@
     "metricsExperience.metricFlyout.esqlQueryTab": "Requête ES|QL",
     "metricsExperience.metricFlyout.overviewTab": "Aperçu",
     "metricsExperience.metricInsightsFlyout.title": "Indicateur",
-    "metricsExperience.metricsInfoError.description": "Nous rencontrons actuellement des difficultés pour récupérer les informations nécessaires à cette visualisation. Veuillez patienter quelques instants ou actualiser la page.",
-    "metricsExperience.metricsInfoError.title": "Impossible de charger la visualisation",
     "metricsExperience.metricTypeDescription.counter": "Une valeur qui ne fait qu’augmenter, comme le nombre de requêtes reçues.",
     "metricsExperience.metricTypeDescription.gauge": "Représente une valeur qui peut augmenter ou diminuer, comme l'utilisation de la mémoire.",
     "metricsExperience.metricTypeDescription.histogram": "Échantillonne des observations, telles que la durée des requêtes, et les comptabilise dans des buckets configurables.",

@@ -8880,7 +8880,6 @@
     "unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel": "Details zum Feldwert",
     "unifiedDocViewer.observability.traces.details.readLess": "Weniger lesen",
     "unifiedDocViewer.observability.traces.details.readMore": "Mehr erfahren",
-    "unifiedDocViewer.observability.traces.docViewerSpanOverview.error": "Beim Versuch, Daten abzurufen, ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors": "Fehler",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description": "Fehler, die während dieses Zeitraums aufgetreten sind, und ihre Ursachen",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error": "Fehlermeldung und Ursache",

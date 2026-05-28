@@ -8908,7 +8908,6 @@
     "unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel": "フィールドの値の詳細",
     "unifiedDocViewer.observability.traces.details.readLess": "表示を減らす",
     "unifiedDocViewer.observability.traces.details.readMore": "さらに詳しく",
-    "unifiedDocViewer.observability.traces.docViewerSpanOverview.error": "データの取得時にエラーが発生しました。再試行してください。",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors": "エラー",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description": "この期間中に発生したエラーとその原因",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error": "エラーメッセージと原因",

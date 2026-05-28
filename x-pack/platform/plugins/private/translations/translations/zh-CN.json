@@ -8905,7 +8905,6 @@
     "unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel": "字段值详情",
     "unifiedDocViewer.observability.traces.details.readLess": "收起",
     "unifiedDocViewer.observability.traces.details.readMore": "展开",
-    "unifiedDocViewer.observability.traces.docViewerSpanOverview.error": "在尝试获取数据时发生错误。请重试",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors": "错误",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description": "此跨度内发生的错误及其原因",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error": "错误消息和原因",

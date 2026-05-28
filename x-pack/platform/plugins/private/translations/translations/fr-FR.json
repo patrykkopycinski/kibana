@@ -8881,7 +8881,6 @@
     "unifiedDocViewer.observability.traces.details.hoverPopover.ariaLabel": "Détails de la valeur du champ",
     "unifiedDocViewer.observability.traces.details.readLess": "Voir moins",
     "unifiedDocViewer.observability.traces.details.readMore": "En savoir plus",
-    "unifiedDocViewer.observability.traces.docViewerSpanOverview.error": "Une erreur est survenue pendant la tentative de récupération des données. Réessayez plus tard",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors": "Erreurs",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.description": "Erreurs survenues durant cet intervalle et leurs causes",
     "unifiedDocViewer.observability.traces.docViewerSpanOverview.errors.table.error": "Message d'erreur et coupable",

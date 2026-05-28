@@ -133289,6 +133289,8 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+            interval:
+              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
@@ -133310,6 +133312,10 @@ components:
                     type: string
                   removed:
                     type: boolean
+                  rrule_schedule:
+                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                  schedule_type:
+                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
                   snapshot:
                     type: boolean
                   timeout:
@@ -133317,9 +133323,13 @@ components:
                   version:
                     type: string
               type: array
+            rrule_schedule:
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -133613,12 +133623,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+        interval:
+          $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+        schedule_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_CreatePacksResponse:
@@ -133669,15 +133685,21 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+            interval:
+              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -134111,6 +134133,8 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+            interval:
+              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             namespaces:
@@ -134125,9 +134149,13 @@ components:
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
+            rrule_schedule:
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             type:
@@ -134195,6 +134223,8 @@ components:
                 $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
               enabled:
                 $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              interval:
+                $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
               name:
                 $ref: '#/components/schemas/Security_Osquery_API_PackName'
               policy_ids:
@@ -134216,6 +134246,10 @@ components:
                       type: string
                     removed:
                       type: boolean
+                    rrule_schedule:
+                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                    schedule_type:
+                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
                     snapshot:
                       type: boolean
                     timeout:
@@ -134226,9 +134260,13 @@ components:
               read_only:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
+              rrule_schedule:
+                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
               saved_object_id:
                 description: The saved object ID of the pack.
                 type: string
+              schedule_type:
+                $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
               updated_at:
                 format: date-time
                 type: string
@@ -134676,8 +134714,12 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
           $ref: '#/components/schemas/Security_Osquery_API_Removed'
+        rrule_schedule:
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
         saved_query_id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+        schedule_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
         snapshot:
           $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
         version:
@@ -134695,6 +134737,14 @@ components:
       type: string
     Security_Osquery_API_PackIdOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_PackId'
+      nullable: true
+    Security_Osquery_API_PackInterval:
+      description: Pack-level interval, in seconds. Used when `schedule_type` is `interval`. Mutually exclusive with `rrule_schedule`.
+      example: 60
+      minimum: 1
+      type: integer
+    Security_Osquery_API_PackIntervalOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
       nullable: true
     Security_Osquery_API_PackName:
       description: The pack name.
@@ -134745,6 +134795,58 @@ components:
       type: boolean
     Security_Osquery_API_RemovedOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Removed'
+      nullable: true
+    Security_Osquery_API_RRuleScheduleConfig:
+      description: |
+        RRULE schedule configuration consumed by osquerybeat. Loose date
+        forms like `"2024-01-01"` are rejected with 400. DTSTART is NOT
+        embedded in `rrule`; the separate `start_date` field is the
+        schedule anchor.
+      type: object
+      properties:
+        end_date:
+          description: Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
+          example: '2024-12-31T23:59:59Z'
+          format: date-time
+          maxLength: 64
+          type: string
+        rrule:
+          description: |
+            Fully serialized RFC 5545 RRULE string (e.g.
+            `"FREQ=WEEKLY;BYDAY=MO,WE,FR"`). The Kibana UI writes only a
+            subset of parts — `FREQ`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`,
+            `BYMONTH` — but the server accepts and round-trips any
+            well-formed parts (other recognized parts like `BYHOUR`,
+            `BYMINUTE`, `BYSETPOS`, `WKST`, `COUNT`, `UNTIL` are preserved
+            verbatim).
+          example: FREQ=WEEKLY;BYDAY=MO,WE,FR
+          maxLength: 2048
+          type: string
+        splay:
+          description: |
+            Optional Go duration string for splay (random execution delay),
+            e.g. `"30s"`, `"5m"`, `"1h"`. The Kibana form writes single-unit
+            values only; compound durations (`"1h30m"`) are tolerated on
+            read for round-trip safety with osquerybeat's writer. Maximum
+            12 hours (43200 seconds).
+          example: 5m
+          maxLength: 64
+          type: string
+        start_date:
+          description: RFC 3339 datetime string for the schedule's start.
+          example: '2024-01-01T00:00:00Z'
+          format: date-time
+          maxLength: 64
+          type: string
+        timeout:
+          description: Optional query execution timeout, in seconds. Defaults to 60 in osquerybeat when unset.
+          example: 60
+          type: number
+      required:
+        - rrule
+        - start_date
+    Security_Osquery_API_RRuleScheduleConfigOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
       nullable: true
     Security_Osquery_API_SavedQueryDescription:
       description: The saved query description.
@@ -134830,6 +134932,20 @@ components:
           required:
             - sourceType
             - source
+    Security_Osquery_API_ScheduleType:
+      description: |
+        Discriminator for the pack's schedule mode. `interval` uses native
+        osqueryd interval scheduling (seconds). `rrule` uses osquerybeat's
+        RRULE-based recurrence scheduling. Per-query overrides MUST use the
+        same mode as the pack — cross-mode overrides are rejected with 400.
+      enum:
+        - interval
+        - rrule
+      example: rrule
+      type: string
+    Security_Osquery_API_ScheduleTypeOrUndefined:
+      $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+      nullable: true
     Security_Osquery_API_Shards:
       additionalProperties:
         type: number
@@ -134919,12 +135035,18 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
         enabled:
           $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+        interval:
+          $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
           $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+        rrule_schedule:
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+        schedule_type:
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_UpdatePacksResponse:
@@ -134972,15 +135094,21 @@ components:
               $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
             enabled:
               $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+            interval:
+              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
               $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
+            rrule_schedule:
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
+            schedule_type:
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             updated_at:

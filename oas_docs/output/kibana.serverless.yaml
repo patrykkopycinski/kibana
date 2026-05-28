@@ -95568,6 +95568,47 @@ components:
                 - from
                 - pattern
             - additionalProperties: false
+              description: URI parts processor - Parse a URI into components (scheme, domain, port, path, query, fragment, ...)
+              type: object
+              properties:
+                action:
+                  enum:
+                    - uri_parts
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field holding the URI string to parse
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                keep_original:
+                  description: If true (default), preserve the original URI string alongside the extracted parts
+                  type: boolean
+                remove_if_successful:
+                  description: If true, remove the source field after a successful parse. Source field is kept on failure.
+                  type: boolean
+                to:
+                  description: 'Target field / column prefix for the extracted URI components (defaults to "url"). May equal `from` — the canonical ECS shape parses the `url` field in place. Note: combining `to === from` with `remove_if_successful: true` nulls the parsed object after writing it.'
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - additionalProperties: false
               description: Date processor - Parse dates from strings using one or more expected formats
               type: object
               properties:

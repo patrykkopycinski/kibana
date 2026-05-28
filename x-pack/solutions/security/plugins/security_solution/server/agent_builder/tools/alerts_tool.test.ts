@@ -125,7 +125,7 @@ describe('alertsTool', () => {
 
       expect(runSearchTool).toHaveBeenCalledWith({
         nlQuery: expect.stringContaining('find all alerts'),
-        index: `${DEFAULT_ALERTS_INDEX}-default`,
+        index: `${DEFAULT_ALERTS_INDEX}-*`,
         esClient: mockEsClient.asCurrentUser,
         model: { model: 'test-model' },
         events: mockEvents,
@@ -136,7 +136,7 @@ describe('alertsTool', () => {
       expect(callArgs.nlQuery).toContain(fieldsList);
     });
 
-    it('uses handler context spaceId when building default index', async () => {
+    it('uses wildcard default index regardless of spaceId', async () => {
       (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
 
       await tool.handler(
@@ -149,7 +149,8 @@ describe('alertsTool', () => {
       );
 
       const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
-      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
+      // Wildcard pattern, NOT per-space alias
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-*`);
     });
 
     it('calls runSearchTool with explicit index when provided', async () => {

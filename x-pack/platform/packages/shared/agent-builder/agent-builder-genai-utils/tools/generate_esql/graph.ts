@@ -39,6 +39,30 @@ import {
   isValidateQueryAction,
 } from './actions';
 
+/**
+ * Ensure the FROM clause in the generated query matches the target the graph
+ * was given. When the LLM hallucinates a different index (e.g. dropping a
+ * leading dot, using a per-space alias instead of the wildcard pattern), this
+ * rewrites the FROM clause to use `state.target`.
+ *
+ * Only rewrites when the FROM target differs from the graph target.
+ * Only touches the first FROM clause (ES|QL has one source clause).
+ */
+const ensureFromClauseMatchesTarget = (esql: string, target: string): string => {
+  if (!target) {
+    return esql;
+  }
+  const fromMatch = esql.match(/\bFROM\s+(?:([\w-]+):)?([^\s,|]+)/i);
+  if (!fromMatch || fromMatch[2] === target) {
+    return esql;
+  }
+  const cluster = fromMatch[1] ? `${fromMatch[1]}:` : '';
+  return esql.replace(
+    /(\bFROM\s+)(?:[\w-]+:)?[^\s,|]+/i,
+    `$1${cluster}${target}`
+  );
+};
+
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
@@ -182,12 +206,13 @@ export const createNlToEsqlGraph = ({
       throw new Error(`Last action is not a generate_query action`);
     }
 
-    const correction = correctCommonEsqlMistakes(lastAction.query);
+    const healed = ensureFromClauseMatchesTarget(lastAction.query, state.target);
+    const correction = correctCommonEsqlMistakes(healed);
 
     const action: AutocorrectQueryAction = {
       type: 'autocorrect_query',
-      wasCorrected: correction.isCorrection,
-      input: correction.input,
+      wasCorrected: correction.isCorrection || healed !== lastAction.query,
+      input: lastAction.query,
       output: correction.output,
     };
 

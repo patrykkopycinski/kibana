@@ -62530,6 +62530,114 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/workflows/managed/workflow/{id}:
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/workflows/managed/workflow/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Partially update an existing managed workflow. This elevated route can update fields beyond the enabled state.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:update AND workflowsManagement:managed:update.
+      operationId: put-workflows-managed-workflow-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: Workflow ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateManagedWorkflowExample:
+                description: Example request to update a managed workflow
+                value:
+                  description: Updated managed workflow description
+                  enabled: true
+                  name: Updated managed workflow
+                  tags:
+                    - managed
+                    - updated
+                  yaml: |
+                    name: Updated managed workflow
+                    enabled: true
+                    description: Updated managed workflow description
+                    triggers:
+                      - type: manual
+                    steps:
+                      - name: hello_world_step
+                        type: console
+                        with:
+                          message: "hello world"
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                enabled:
+                  type: boolean
+                name:
+                  type: string
+                tags:
+                  items:
+                    type: string
+                  type: array
+                yaml:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateManagedWorkflowResponseExample:
+                  description: Example response returning the updated managed workflow
+                  value:
+                    enabled: true
+                    id: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    lastUpdatedAt: '2026-03-23T13:38:59.568Z'
+                    lastUpdatedBy: elastic
+                    valid: true
+                    validationErrors: []
+          description: Indicates a successful response
+      summary: Update a managed workflow
+      tags:
+        - workflows
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X PUT "${KIBANA_URL}/api/workflows/managed/workflow/{id}" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+                "name": "Updated managed workflow",
+                "enabled": true,
+                "tags": ["managed", "updated"]
+              }'
+        - lang: Console
+          source: |
+            PUT kbn://api/workflows/managed/workflow/{id}
+            {
+              "name": "Updated managed workflow",
+              "enabled": true,
+              "tags": ["managed", "updated"]
+            }
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/workflows/mget:
     post:
       description: |-

@@ -78782,6 +78782,10 @@ components:
                       - after
                       - fixed_interval
                   type: array
+                frozen_after:
+                  description: A non-empty string.
+                  minLength: 1
+                  type: string
           required:
             - dsl
         - additionalProperties: false

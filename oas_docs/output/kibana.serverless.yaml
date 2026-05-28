@@ -3129,6 +3129,14 @@ paths:
                           nullable: true
                         description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
+                      description:
+                        description: Human-readable label for the attachment.
+                        maxLength: 1024
+                        type: string
+                      group_id:
+                        description: Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.
+                        maxLength: 256
+                        type: string
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
                         type: boolean
@@ -3512,6 +3520,14 @@ paths:
                           nullable: true
                         description: Payload of the attachment. Required unless `origin` is provided (content is resolved once at send time).
                         type: object
+                      description:
+                        description: Human-readable label for the attachment.
+                        maxLength: 1024
+                        type: string
+                      group_id:
+                        description: Stable identifier for the logical group this attachment belongs to. Attachments sharing the same group_id were submitted together as a single logical entity.
+                        maxLength: 256
+                        type: string
                       hidden:
                         description: When true, the attachment will not be displayed in the UI.
                         type: boolean

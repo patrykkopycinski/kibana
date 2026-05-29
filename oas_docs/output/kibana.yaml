@@ -84442,6 +84442,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         rows:
           description: Array of operations to split the datatable rows by
@@ -85707,6 +85708,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         rows:
           description: Array of operations to split the datatable rows by
@@ -88172,6 +88174,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -89055,6 +89058,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -90239,6 +90243,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -90937,6 +90942,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -94064,6 +94070,7 @@ components:
                 references:
                   items:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+                  maxItems: 10000
                   type: array
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
@@ -94945,6 +94952,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -96444,6 +96452,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -96666,6 +96675,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -100277,6 +100287,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -101343,6 +101354,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -104579,6 +104591,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -105472,6 +105485,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -105879,6 +105893,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         region:
           additionalProperties: false
@@ -106052,6 +106067,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         region:
           anyOf:
@@ -109215,6 +109231,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -109810,6 +109827,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -110673,6 +110691,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -111566,6 +111585,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -113091,6 +113111,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -113990,6 +114011,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         sampling:
           default: 1
@@ -115871,6 +115893,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStyling'
@@ -116010,6 +116033,7 @@ components:
         references:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
+          maxItems: 10000
           type: array
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStyling'

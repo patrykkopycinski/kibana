@@ -1,4 +1,5 @@
 {
+  "locale": "de-DE",
   "formats": {
     "number": {
       "currency": {

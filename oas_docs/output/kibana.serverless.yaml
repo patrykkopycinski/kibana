@@ -17622,72 +17622,12 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
-  /api/endpoint/action/running_procs:
+  /api/endpoint/action/run_script:
     post:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/running_procs</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Get a list of all processes running on an endpoint.
-      operationId: EndpointGetProcessesAction
-      requestBody:
-        content:
-          application/json:
-            examples:
-              singleEndpoint:
-                summary: Get running processes on a single endpoint
-                value:
-                  endpoint_ids:
-                    - ed518850-681a-4d60-bb98-e22640cae2a8
-            schema:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_GetProcessesRouteRequestBody'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                RunningProcsSuccess:
-                  summary: Running processes action successfully created
-                  value:
-                    data:
-                      agents:
-                        - ed518850-681a-4d60-bb98-e22640cae2a8
-                      agentState:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          isCompleted: false
-                          wasSuccessful: false
-                      agentType: endpoint
-                      command: running-processes
-                      createdBy: elastic
-                      hosts:
-                        ed518850-681a-4d60-bb98-e22640cae2a8:
-                          name: gke-node-1235412
-                      id: 233db9ea-6733-4849-9226-5a7039c7161d
-                      isCompleted: false
-                      isExpired: false
-                      outputs: {}
-                      startedAt: '2022-07-29T19:08:49.126Z'
-                      status: pending
-                      wasSuccessful: false
-              schema:
-                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
-          description: Indicates a successful call.
-      summary: Get running processes
-      tags:
-        - Security Endpoint Management API
-      x-metaTags:
-        - content: Kibana, Elastic Cloud Serverless
-          name: product_name
-  /api/endpoint/action/runscript:
-    post:
-      description: |-
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/runscript</span></div>
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/run_script</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
@@ -17764,6 +17704,66 @@ paths:
                 $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
           description: Indicates a successful call.
       summary: Run a script
+      tags:
+        - Security Endpoint Management API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/endpoint/action/running_procs:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/running_procs</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a list of all processes running on an endpoint.
+      operationId: EndpointGetProcessesAction
+      requestBody:
+        content:
+          application/json:
+            examples:
+              singleEndpoint:
+                summary: Get running processes on a single endpoint
+                value:
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+            schema:
+              $ref: '#/components/schemas/Security_Endpoint_Management_API_GetProcessesRouteRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                RunningProcsSuccess:
+                  summary: Running processes action successfully created
+                  value:
+                    data:
+                      agents:
+                        - ed518850-681a-4d60-bb98-e22640cae2a8
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      agentType: endpoint
+                      command: running-processes
+                      createdBy: elastic
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: gke-node-1235412
+                      id: 233db9ea-6733-4849-9226-5a7039c7161d
+                      isCompleted: false
+                      isExpired: false
+                      outputs: {}
+                      startedAt: '2022-07-29T19:08:49.126Z'
+                      status: pending
+                      wasSuccessful: false
+              schema:
+                $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionCreateSuccessResponse'
+          description: Indicates a successful call.
+      summary: Get running processes
       tags:
         - Security Endpoint Management API
       x-metaTags:

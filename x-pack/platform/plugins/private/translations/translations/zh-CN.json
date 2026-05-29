@@ -867,7 +867,6 @@
     "core.application.appRenderError.defaultTitle": "应用程序错误",
     "core.chrome.appMenu.showMoreButtonLabel": "更多",
     "core.chrome.appMenu.showMoreButtonTooltip": "更多",
-    "core.chrome.euiDevProviderWarning": "Kibana 组件必须封装在 React Context 提供程序内才能获得全部功能和适当的主题支持。请参阅 {link}。",
     "core.chrome.legacyBrowserWarning": "您的浏览器不满足 Kibana 的安全要求。",
     "core.deprecations.apiAccessDeprecation.apiCallsDetailsMessage": "API“{routeWithMethod}”已被调用 {apiTotalCalls} 次。上一次调用时间为 {apiLastCalledAt}。",
     "core.deprecations.apiAccessDeprecation.enableDebugLogsMessage": "要在调试日志中包括有关 Elastic 内部的 API 调用的信息，请按照[文档]({enableDeprecationHttpDebugLogsLink}) 中的详细说明编辑 Kibana 配置。",

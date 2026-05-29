@@ -865,7 +865,6 @@
     "core.application.appRenderError.defaultTitle": "Erreur d'application",
     "core.chrome.appMenu.showMoreButtonLabel": "Plus",
     "core.chrome.appMenu.showMoreButtonTooltip": "Plus",
-    "core.chrome.euiDevProviderWarning": "Les composants Kibana doivent être intégrés dans un fournisseur React Context pour obtenir l'ensemble des fonctionnalités et une prise en charge adéquate des thèmes. Voir {link}.",
     "core.chrome.legacyBrowserWarning": "Votre navigateur ne satisfait pas aux exigences de sécurité de Kibana.",
     "core.deprecations.apiAccessDeprecation.apiCallsDetailsMessage": "L'API « {routeWithMethod} » a été appelée {apiTotalCalls} fois. Le dernier appel est survenu le {apiLastCalledAt}.",
     "core.deprecations.apiAccessDeprecation.enableDebugLogsMessage": "Pour inclure des informations dans les logs de débogage au sujet des appels aux API internes à Elastic, modifiez votre configuration Kibana comme décrit dans [la documentation]({enableDeprecationHttpDebugLogsLink}).",

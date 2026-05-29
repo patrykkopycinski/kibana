@@ -867,7 +867,6 @@
     "core.application.appRenderError.defaultTitle": "アプリケーションエラー",
     "core.chrome.appMenu.showMoreButtonLabel": "詳細",
     "core.chrome.appMenu.showMoreButtonTooltip": "詳細",
-    "core.chrome.euiDevProviderWarning": "KibanaコンポーネントはReactコンテキストプロバイダーでラップする必要があります。そうすることで、すべての機能と適切なテーマ設定のサポートが実現します。{link}をご覧ください。",
     "core.chrome.legacyBrowserWarning": "ご使用のブラウザが Kibana のセキュリティ要件を満たしていません。",
     "core.deprecations.apiAccessDeprecation.apiCallsDetailsMessage": "API \"{routeWithMethod}\"が{apiTotalCalls}回呼び出されました。前回の呼び出しは{apiLastCalledAt}でした。",
     "core.deprecations.apiAccessDeprecation.enableDebugLogsMessage": "Elastic内部のAPI呼び出しに関する情報をデバッグログに含めるには、[ドキュメント]({enableDeprecationHttpDebugLogsLink})の詳細に従ってKibana構成を編集してください。",

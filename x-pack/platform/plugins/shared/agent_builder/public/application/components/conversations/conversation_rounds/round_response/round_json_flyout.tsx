@@ -5,33 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody, EuiCodeBlock } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type { ConversationRound } from '@kbn/agent-builder-common';
+import React, { useMemo } from 'react';
+import { EuiCodeBlock, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 
-const rawResponseFlyoutTitle = i18n.translate(
-  'xpack.agentBuilder.conversation.rawResponseFlyout.title',
-  {
-    defaultMessage: 'Raw response',
-  }
-);
+const title = i18n.translate('xpack.agentBuilder.round.jsonFlyout.title', {
+  defaultMessage: 'Raw response',
+});
 
-interface RawResponseFlyoutProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface RoundJsonFlyoutProps {
   rawRound: ConversationRound;
+  onClose: () => void;
 }
 
-export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose, rawRound }) => {
-  if (!isOpen) return null;
+export const RoundJsonFlyout: React.FC<RoundJsonFlyoutProps> = ({ rawRound, onClose }) => {
+  const formattedJson = useMemo(() => JSON.stringify(rawRound, null, 2), [rawRound]);
 
   return (
     <EuiFlyout
       onClose={onClose}
-      aria-labelledby="rawResponseFlyoutTitle"
+      aria-labelledby="agentBuilderRoundJsonFlyoutTitle"
       size="m"
       ownFocus={false}
       css={css`
@@ -40,7 +36,7 @@ export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose,
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="rawResponseFlyoutTitle">{rawResponseFlyoutTitle}</h2>
+          <h2 id="agentBuilderRoundJsonFlyoutTitle">{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -48,12 +44,12 @@ export const RoundFlyout: React.FC<RawResponseFlyoutProps> = ({ isOpen, onClose,
           language="json"
           fontSize="s"
           paddingSize="m"
-          isCopyable={true}
+          isCopyable
           css={css`
             overflow: auto;
           `}
         >
-          {JSON.stringify(rawRound, null, 2)}
+          {formattedJson}
         </EuiCodeBlock>
       </EuiFlyoutBody>
     </EuiFlyout>

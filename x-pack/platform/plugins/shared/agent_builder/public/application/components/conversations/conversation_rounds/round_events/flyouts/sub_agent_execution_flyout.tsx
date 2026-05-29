@@ -7,35 +7,40 @@
 
 import React from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
   EuiCallOut,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiMarkdownFormat,
   EuiPanel,
-  EuiCodeBlock,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RoundSteps } from './round_steps';
 import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
+import { RoundEvents } from '../round_events';
+import { JsonCodeBlock } from '../json_code_block';
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
   onClose: () => void;
 }
 
+/**
+ * Flyout showing a sub-agent's full execution — params, error (if any), the
+ * sub-agent's own steps (rendered recursively via `RoundEvents`), and the
+ * final response message.
+ */
 export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = ({
   executionId,
   params,
   onClose,
 }) => {
-  const { steps, isLoading, response, streamingMessage, error } = useFollowExecution(executionId);
+  const { steps, response, streamingMessage, error } = useFollowExecution(executionId);
   const displayMessage = response?.message ?? streamingMessage;
 
   return (
@@ -52,7 +57,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         <EuiTitle size="m">
           <h2 id="subAgentExecutionFlyoutTitle">
             <FormattedMessage
-              id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.title"
+              id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.title"
               defaultMessage="Sub-agent execution"
             />
           </h2>
@@ -61,7 +66,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
         <EuiText color="subdued" size="s">
           <p>
             <FormattedMessage
-              id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.executionId"
+              id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.executionId"
               defaultMessage="Execution ID: {executionId}"
               values={{ executionId }}
             />
@@ -71,21 +76,29 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
       <EuiFlyoutBody>
         {params && (
           <>
-            <EuiCodeBlock language="json" paddingSize="s" fontSize="s" isCopyable>
-              {JSON.stringify(params, null, 2)}
-            </EuiCodeBlock>
+            <JsonCodeBlock data={params} />
             <EuiSpacer size="m" />
           </>
         )}
         {error && (
           <>
-            <EuiCallOut title="Execution error" color="danger" iconType="error">
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.errorTitle"
+                  defaultMessage="Execution error"
+                />
+              }
+              color="danger"
+              iconType="error"
+            >
               <p>{error}</p>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
-        <RoundSteps steps={steps} isLoading={isLoading} />
+        <RoundEvents steps={steps} isReloadedRound={false} hideMasterToggle />
         {displayMessage && (
           <>
             <EuiSpacer size="m" />
@@ -94,12 +107,12 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
                 <h3>
                   {response ? (
                     <FormattedMessage
-                      id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.finalResponse"
+                      id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.finalResponse"
                       defaultMessage="Final response"
                     />
                   ) : (
                     <FormattedMessage
-                      id="xpack.agentBuilder.conversation.subAgentExecutionFlyout.responding"
+                      id="xpack.agentBuilder.roundEvents.subAgentExecutionFlyout.responding"
                       defaultMessage="Responding..."
                     />
                   )}

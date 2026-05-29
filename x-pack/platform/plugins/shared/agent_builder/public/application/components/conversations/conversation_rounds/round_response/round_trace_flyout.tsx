@@ -6,39 +6,32 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlyoutResizable, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiFlyoutResizable, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { createEsTraceFetcher, TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import { buildAgentBuilderTracesIndexPattern } from '../../../../../../common/traces';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useSpaceId } from '../../../../hooks/use_space_id';
 
-const traceFlyoutTitle = i18n.translate('xpack.agentBuilder.conversation.traceFlyout.title', {
+const title = i18n.translate('xpack.agentBuilder.round.traceFlyout.title', {
   defaultMessage: 'Trace',
 });
 
-interface TraceFlyoutProps {
+interface RoundTraceFlyoutProps {
   traceId: string;
   onClose: () => void;
 }
 
-export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) => {
+export const RoundTraceFlyout: React.FC<RoundTraceFlyoutProps> = ({ traceId, onClose }) => {
   const { services } = useKibana();
   const { data } = services.plugins;
-  const spaceId = useSpaceId(services.plugins.spaces);
-  const index = spaceId ? buildAgentBuilderTracesIndexPattern(spaceId) : undefined;
-  const fetchTrace = useMemo(
-    () => createEsTraceFetcher(data.search.search, ...(index ? [{ index }] : [])),
-    [data.search.search, index]
-  );
-  const traceSpansResult = useTraceSpans(traceId, { fetchTrace, index, enabled: spaceId != null });
+  const fetchTrace = useMemo(() => createEsTraceFetcher(data.search.search), [data.search.search]);
+  const traceSpansResult = useTraceSpans(traceId, { fetchTrace });
 
   return (
     <EuiFlyoutResizable
       onClose={onClose}
-      aria-labelledby="traceFlyoutTitle"
+      aria-labelledby="agentBuilderRoundTraceFlyoutTitle"
       size={620}
       minWidth={400}
       maxWidth={1200}
@@ -56,8 +49,8 @@ export const TraceFlyout: React.FC<TraceFlyoutProps> = ({ traceId, onClose }) =>
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="traceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
-            {traceFlyoutTitle}: {traceId}
+          <h2 id="agentBuilderRoundTraceFlyoutTitle" style={{ wordBreak: 'break-all' }}>
+            {title}: {traceId}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>

@@ -47619,7 +47619,6 @@
     "xpack.slo.errorRateChart.errorRateLabel": "错误率",
     "xpack.slo.eventsChartPanel.euiIcon.noResultsLabel": "无结果",
     "xpack.slo.extraInstanceIds.badge": "+{count, plural, one {# instance} other {# 个实例}}",
-    "xpack.slo.featureFeedbackButtonLabel": "反馈",
     "xpack.slo.featureRegistry.linkSloTitle": "SLO",
     "xpack.slo.fieldSelector.all": "全部",
     "xpack.slo.formattedConfigLabel.valid": "只能检查有效表单配置。",

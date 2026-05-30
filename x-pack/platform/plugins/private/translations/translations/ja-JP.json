@@ -47629,7 +47629,6 @@
     "xpack.slo.errorRateChart.errorRateLabel": "エラー率",
     "xpack.slo.eventsChartPanel.euiIcon.noResultsLabel": "結果なし",
     "xpack.slo.extraInstanceIds.badge": "+{count, plural, one {# instance} other {#件のインスタンス}}",
-    "xpack.slo.featureFeedbackButtonLabel": "フィードバックを送信",
     "xpack.slo.featureRegistry.linkSloTitle": "SLO",
     "xpack.slo.fieldSelector.all": "すべて",
     "xpack.slo.formattedConfigLabel.valid": "有効な形式の構成のみを検査できます。",

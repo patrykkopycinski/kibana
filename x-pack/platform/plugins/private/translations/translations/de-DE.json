@@ -47448,7 +47448,6 @@
     "xpack.slo.errorRateChart.errorRateLabel": "Fehlerrate",
     "xpack.slo.eventsChartPanel.euiIcon.noResultsLabel": "keine Ergebnisse",
     "xpack.slo.extraInstanceIds.badge": "+{count, plural, one {# instance} other {# Instanzen}}",
-    "xpack.slo.featureFeedbackButtonLabel": "Feedback geben",
     "xpack.slo.featureRegistry.linkSloTitle": "SLOs",
     "xpack.slo.fieldSelector.all": "Alle",
     "xpack.slo.formattedConfigLabel.valid": "Es können nur gültige Formularkonfigurationen inspiziert werden.",

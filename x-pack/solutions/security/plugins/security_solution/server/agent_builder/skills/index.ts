@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { alertAnalysisSkill } from './alert_analysis';
-import { threatHuntingSkill } from './threat_hunting';
-import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
-import { pciComplianceSkill } from './pci_compliance';
-import { getDetectionRuleEditSkill } from './detection_rule_edit';
-import { registerSkills } from './register_skills';
-import { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';
-
-export {
-  alertAnalysisSkill,
-  threatHuntingSkill,
-  createAutomaticTroubleshootingSkill,
-  pciComplianceSkill,
-  getDetectionRuleEditSkill,
-  registerSkills,
-  endpointResponseActionsSkill,
-};
+export { alertAnalysisSkill } from './alert_analysis';
+export { threatHuntingSkill } from './threat_hunting';
+export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
+export { pciComplianceSkill } from './pci_compliance';
+export { getDetectionRuleEditSkill } from './detection_rule_edit';
+export { registerSkills } from './register_skills';
+export { endpointResponseActionsSkill } from './endpoint_response_actions/endpoint_response_actions_skill';

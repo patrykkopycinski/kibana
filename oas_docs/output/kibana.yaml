@@ -69483,6 +69483,35 @@ paths:
                     topologicalIndex: 0
                     workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                     workflowRunId: exec-a1b2c3d4-e5f6-7890
+                getWaitForInputStepExecutionResponseExample:
+                  description: Example response for a Human-In-The-Loop `wait_for_input` step. Once a responder submits via any client (Kibana Inbox UI, Slack, Agent Builder, raw API/MCP), the `hitl` envelope is populated synchronously — before Task Manager runs the resume — so every reader can detect the "responded but not yet resumed" state from this single doc.
+                  value:
+                    error: null
+                    executionTimeMs: 329000
+                    finishedAt: '2025-11-20T12:05:30.000Z'
+                    globalExecutionIndex: 1
+                    hitl:
+                      channel: kibana-ui
+                      respondedAt: '2025-11-20T12:05:29.000Z'
+                      respondedBy: alice
+                    id: step-exec-002
+                    input:
+                      message: Approve change to production?
+                    isTestRun: false
+                    output:
+                      approved: true
+                      reason: looks good
+                    scopeStack: []
+                    spaceId: default
+                    startedAt: '2025-11-20T12:00:01.000Z'
+                    state: null
+                    status: completed
+                    stepExecutionIndex: 0
+                    stepId: approve_change
+                    stepType: wait_for_input
+                    topologicalIndex: 1
+                    workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                    workflowRunId: exec-a1b2c3d4-e5f6-7890
           description: Indicates a successful response
       summary: Get a step execution
       tags:
@@ -71019,7 +71048,7 @@ paths:
             application/json:
               examples:
                 getWorkflowStepExecutionsResponseExample:
-                  description: Example response returning step execution records for a workflow
+                  description: 'Example response returning step execution records for a workflow. The second entry shows a Human-In-The-Loop `wait_for_input` step that has been responded to: the `hitl` envelope is populated synchronously by the inbox respond path so every reader (Kibana Inbox UI, Slack, Agent Builder, raw API/MCP) sees a single canonical responder for the step.'
                   value:
                     results:
                       - executionTimeMs: 1000
@@ -71039,7 +71068,30 @@ paths:
                         topologicalIndex: 0
                         workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
                         workflowRunId: exec-001
-                    total: 1
+                      - executionTimeMs: 329000
+                        finishedAt: '2025-11-20T12:05:31.000Z'
+                        globalExecutionIndex: 1
+                        hitl:
+                          channel: kibana-ui
+                          respondedAt: '2025-11-20T12:05:29.000Z'
+                          respondedBy: alice
+                        id: step-exec-002
+                        input:
+                          message: Approve change to production?
+                        isTestRun: false
+                        output:
+                          approved: true
+                        scopeStack: []
+                        spaceId: default
+                        startedAt: '2025-11-20T12:00:02.000Z'
+                        status: completed
+                        stepExecutionIndex: 0
+                        stepId: approve_change
+                        stepType: wait_for_input
+                        topologicalIndex: 1
+                        workflowId: workflow-a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        workflowRunId: exec-001
+                    total: 2
           description: Indicates a successful response
       summary: Get workflow step executions
       tags:

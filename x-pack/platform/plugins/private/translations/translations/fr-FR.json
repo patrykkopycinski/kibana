@@ -31290,7 +31290,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage": "Impossible de trouver d'exemples de catégories, cela peut provenir d'une version non prise en charge de l'un des clusters.",
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.title": "La vue de données semble être inter-clusters.",
     "xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric": "Ajouter un indicateur",
-    "xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel": "Suivant",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message": "Au moins un détecteur est nécessaire pour créer une tâche.",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title": "Aucun détecteur",
     "xpack.ml.newJob.wizard.pickFieldsStep.populationField.ariaLabel": "Sélection du champ de remplissage",

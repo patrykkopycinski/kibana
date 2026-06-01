@@ -31467,7 +31467,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage": "找不到任何示例类别，这可能由于有一个集群的版本不受支持。",
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.title": "数据视图似乎跨集群",
     "xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric": "添加指标",
-    "xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel": "下一步",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message": "至少需要一个检测工具，才能创建作业。",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title": "无检测工具",
     "xpack.ml.newJob.wizard.pickFieldsStep.populationField.ariaLabel": "填充字段选择",

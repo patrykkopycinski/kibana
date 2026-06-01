@@ -31356,7 +31356,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage": "Es konnten keine Beispielkategorien gefunden werden, was daran liegen könnte, dass einer der Cluster einer nicht unterstützten Version entspricht.",
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.title": "Die Datenansicht scheint clusterübergreifend zu sein",
     "xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric": "Metrik hinzufügen",
-    "xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel": "Weiter",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message": "Es wird mindestens ein Detektor benötigt, um einen Job zu erstellen.",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title": "Keine Detektoren",
     "xpack.ml.newJob.wizard.pickFieldsStep.populationField.ariaLabel": "Populationsfeld auswählen",

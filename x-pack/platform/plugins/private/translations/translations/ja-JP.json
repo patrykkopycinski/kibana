@@ -31463,7 +31463,6 @@
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.mesage": "カテゴリの例が見つかりませんでした。これはクラスターの1つがサポートされていないバージョンであることが原因です。",
     "xpack.ml.newJob.wizard.pickFieldsStep.invalidCssVersionCallout.title": "データビューがクロスクラスターである可能性があります",
     "xpack.ml.newJob.wizard.pickFieldsStep.metricSelector.addMetric": "メトリックを追加",
-    "xpack.ml.newJob.wizard.pickFieldsStep.nextButtonAriaLabel": "次へ",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.message": "ジョブを作成するには最低 1 つのディテクターが必要です。",
     "xpack.ml.newJob.wizard.pickFieldsStep.noDetectorsCallout.title": "ディテクターがありません",
     "xpack.ml.newJob.wizard.pickFieldsStep.populationField.ariaLabel": "入力フィールド選択",

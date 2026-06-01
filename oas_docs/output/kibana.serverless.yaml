@@ -2767,14 +2767,22 @@ paths:
                   type: string
                 prompts:
                   additionalProperties:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      allow:
-                        type: boolean
-                    required:
-                      - allow
-                  description: Can be used to respond to a confirmation prompt.
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          allow:
+                            type: boolean
+                        required:
+                          - allow
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          authorized:
+                            type: boolean
+                        required:
+                          - authorized
+                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
                   type: object
       responses:
         '200':
@@ -3158,14 +3166,22 @@ paths:
                   type: string
                 prompts:
                   additionalProperties:
-                    additionalProperties: false
-                    type: object
-                    properties:
-                      allow:
-                        type: boolean
-                    required:
-                      - allow
-                  description: Can be used to respond to a confirmation prompt.
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          allow:
+                            type: boolean
+                        required:
+                          - allow
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          authorized:
+                            type: boolean
+                        required:
+                          - authorized
+                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
                   type: object
       responses:
         '200':

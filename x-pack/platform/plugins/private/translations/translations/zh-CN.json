@@ -38934,8 +38934,6 @@
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibilityDropdownLabel": "可见性",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibleToYourTeamLabel": "对您的团队可见",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.accordionButton.aiConnectorTooltipTitle": "AI 连接器",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.openScheduleDetailsLabel": "打开日程详情",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.scheduledAttackDiscoveryTooltipTitle": "计划的攻击发现",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.subtitle.createdByUserLabel": "创建者：{user}",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.alertsLabel": "告警：",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.attackChainLabel": "攻击链：",

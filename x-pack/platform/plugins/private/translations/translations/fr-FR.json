@@ -38725,8 +38725,6 @@
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibilityDropdownLabel": "Visibilité",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibleToYourTeamLabel": "Visible pour votre équipe",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.accordionButton.aiConnectorTooltipTitle": "Connecteur IA",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.openScheduleDetailsLabel": "Ouvrir les détails du planning",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.scheduledAttackDiscoveryTooltipTitle": "Détection planifiée d'attaques",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.subtitle.createdByUserLabel": "Créé par : {user}",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.alertsLabel": "Alertes :",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.attackChainLabel": "Chaîne d'attaque :",

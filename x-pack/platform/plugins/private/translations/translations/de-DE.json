@@ -38808,8 +38808,6 @@
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibilityDropdownLabel": "Sichtbarkeit",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibleToYourTeamLabel": "Sichtbar für Ihr Team",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.accordionButton.aiConnectorTooltipTitle": "KI-Connector",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.openScheduleDetailsLabel": "Zeitplandetails öffnen",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.scheduledAttackDiscoveryTooltipTitle": "Geplante Angriffserkennung",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.subtitle.createdByUserLabel": "Erstellt von: {user}",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.alertsLabel": "Alerts:",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.attackChainLabel": "Angriffskette:",

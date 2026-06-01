@@ -38928,8 +38928,6 @@
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibilityDropdownLabel": "可視性",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.badges.sharedBadge.visibleToYourTeamLabel": "チームに表示",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.accordionButton.aiConnectorTooltipTitle": "AIコネクター",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.openScheduleDetailsLabel": "スケジュールの詳細を開く",
-    "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.primaryInteractions.title.scheduledAttackDiscoveryTooltipTitle": "スケジュールされた攻撃検出",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.subtitle.createdByUserLabel": "作成者: {user}",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.alertsLabel": "アラート：",
     "xpack.securitySolution.attackDiscovery.results.attackDiscoveryPanel.panelHeader.summaryActions.attackChainLabel": "攻撃チェーン：",

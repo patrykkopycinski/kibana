@@ -2779,7 +2779,6 @@
     "discover.docViews.observability.traces.overview.title": "概览",
     "discover.docViews.patterns.cellAction.viewResults": "查看匹配结果",
     "discover.dropZoneTableLabel": "放置区域以将字段作为列添加到表中",
-    "discover.embeddable.byValueTabName": "按值的 Discover 会话",
     "discover.embeddable.deletedTab.editModePreEditWarningDescription": "编辑 {editIcon} 面板以选择不同的选项卡",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionEditable": "<EditPanelLink>编辑面板</EditPanelLink>以修复它。",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly": "请联系仪表板的某位作者以修复此问题。",

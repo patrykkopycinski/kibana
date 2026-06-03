@@ -2762,7 +2762,6 @@
     "discover.docViews.observability.traces.overview.title": "Überblick",
     "discover.docViews.patterns.cellAction.viewResults": "Passende Ergebnisse anzeigen",
     "discover.dropZoneTableLabel": "Ablagebereich, um ein Feld als Spalte zur Tabelle hinzuzufügen",
-    "discover.embeddable.byValueTabName": "By-Value-Discover-Sitzung",
     "discover.embeddable.deletedTab.editModePreEditWarningDescription": "Bearbeiten Sie {editIcon} dieses Panel, um einen anderen Tab auszuwählen",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionEditable": "<EditPanelLink>Bearbeiten Sie das Bedienfeld</EditPanelLink>, um es zu reparieren.",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly": "Wenden Sie sich an einen der Autoren des Dashboards, um das Problem zu beheben.",

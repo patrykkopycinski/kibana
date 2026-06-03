@@ -2780,7 +2780,6 @@
     "discover.docViews.observability.traces.overview.title": "概要",
     "discover.docViews.patterns.cellAction.viewResults": "一致する結果を表示",
     "discover.dropZoneTableLabel": "フィールドを列として表に追加するには、ゾーンをドロップします",
-    "discover.embeddable.byValueTabName": "By-value Discoverセッション",
     "discover.embeddable.deletedTab.editModePreEditWarningDescription": "このパネルを{editIcon}して別のタブを選択",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionEditable": "<EditPanelLink>パネルを編集</EditPanelLink>して修正してください。",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly": "ダッシュボードの作成者に連絡して修正してもらってください。",

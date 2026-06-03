@@ -2766,7 +2766,6 @@
     "discover.docViews.observability.traces.overview.title": "Aperçu",
     "discover.docViews.patterns.cellAction.viewResults": "Afficher les résultats correspondants",
     "discover.dropZoneTableLabel": "Abandonner la zone pour ajouter un champ en tant que colonne dans la table",
-    "discover.embeddable.byValueTabName": "Session Discover par valeur",
     "discover.embeddable.deletedTab.editModePreEditWarningDescription": "Modifier {editIcon} ce panneau pour choisir un autre onglet",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionEditable": "<EditPanelLink>Modifier le panneau</EditPanelLink> pour le réparer.",
     "discover.embeddable.deletedTab.viewModeWarningDescriptionReadOnly": "Contactez l’un des auteurs du tableau de bord pour le corriger.",

@@ -61428,6 +61428,16 @@ paths:
             maxItems: 25
             minItems: 1
             type: array
+        - description: Filter aggregations by managed status.
+          in: query
+          name: managed
+          required: false
+          schema:
+            enum:
+              - all
+              - managed
+              - unmanaged
+            type: string
       responses:
         '200':
           content:

@@ -79873,6 +79873,30 @@ components:
         - panel_config
       title: Dropped panel
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-dropped-property-warning:
+      additionalProperties: false
+      description: A panel that was excluded from the response because its type is not supported by the API.
+      properties:
+        key:
+          description: The name of the property that was dropped.
+          type: string
+        message:
+          description: Human-readable explanation of why the property was dropped.
+          type: string
+        type:
+          enum:
+            - dropped_property
+          type: string
+        value:
+          description: The original value of the property that was dropped.
+          nullable: true
+      required:
+        - type
+        - message
+        - key
+        - value
+      title: Dropped panel
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-options:
       additionalProperties: false
       default:

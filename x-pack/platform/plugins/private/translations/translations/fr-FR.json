@@ -1561,7 +1561,6 @@
     "dashboard.discardChangesConfirmModal.discardChangesDescription": "Des modifications ne sont pas enregistrées. Souhaitez-vous enregistrer votre travail ou le supprimer ?",
     "dashboard.drilldown.errorDestinationDashboardIsMissing": "Le tableau de bord de destination (\"{dashboardId}\") n'existe plus. Choisissez un autre tableau de bord.",
     "dashboard.drilldown.goToDashboard": "Accéder au tableau de bord",
-    "dashboard.droppedPanelsWarning": "{droppedPanelsCount} panneaux ont été retirés du tableau de bord",
     "dashboard.editButtonTooltip.managed": "Ce tableau de bord est géré par Elastic. Dupliquez-le pour apporter des modifications.",
     "dashboard.editorMenu.addPanelFlyout.searchLabelText": "champ de recherche pour les panneaux",
     "dashboard.editorMenu.deprecatedTag": "Déclassé",

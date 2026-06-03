@@ -1575,7 +1575,6 @@
     "dashboard.discardChangesConfirmModal.discardChangesDescription": "保存されていない変更があります。作業を保存しますか、それとも破棄しますか？",
     "dashboard.drilldown.errorDestinationDashboardIsMissing": "対象ダッシュボード（''{dashboardId}''）は存在しません。別のダッシュボードを選択してください。",
     "dashboard.drilldown.goToDashboard": "ダッシュボードに移動",
-    "dashboard.droppedPanelsWarning": "ダッシュボードから{droppedPanelsCount}パネルが削除されました",
     "dashboard.editButtonTooltip.managed": "このダッシュボードはElasticによって管理されています。変更するには、複製してください。",
     "dashboard.editorMenu.addPanelFlyout.searchLabelText": "パネルの検索フィールド",
     "dashboard.editorMenu.deprecatedTag": "非推奨",

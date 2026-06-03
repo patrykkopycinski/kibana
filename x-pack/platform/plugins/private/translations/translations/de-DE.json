@@ -1557,7 +1557,6 @@
     "dashboard.discardChangesConfirmModal.discardChangesDescription": "Es liegen ungespeicherte Änderungen vor. Möchten Sie Ihre Arbeit speichern oder verwerfen?",
     "dashboard.drilldown.errorDestinationDashboardIsMissing": "Das Ziel-Dashboard („{dashboardId}“) existiert nicht mehr. Wählen Sie ein anderes Dashboard.",
     "dashboard.drilldown.goToDashboard": "Zum Dashboard gehen",
-    "dashboard.droppedPanelsWarning": "{droppedPanelsCount} Panels wurden vom Dashboard entfernt",
     "dashboard.editButtonTooltip.managed": "Dieses Dashboard wird von Elastic verwaltet. Duplizieren Sie es, um Änderungen vorzunehmen.",
     "dashboard.editorMenu.addPanelFlyout.searchLabelText": "Suchfeld für Felder",
     "dashboard.editorMenu.deprecatedTag": "Veraltet",

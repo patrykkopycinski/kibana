@@ -29059,6 +29059,8 @@ paths:
                         type: string
                       condition:
                         description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+                        maxLength: 10000
+                        nullable: true
                         type: string
                       created_at:
                         type: string
@@ -29114,6 +29116,8 @@ paths:
                                   nullable: true
                                 condition:
                                   description: Agent condition expression to evaluate whether to apply this input.
+                                  maxLength: 10000
+                                  nullable: true
                                   type: string
                                 config:
                                   additionalProperties:
@@ -29153,6 +29157,8 @@ paths:
                                         nullable: true
                                       condition:
                                         description: Agent condition expression to evaluate whether to apply this stream.
+                                        maxLength: 10000
+                                        nullable: true
                                         type: string
                                       config:
                                         additionalProperties:
@@ -29273,6 +29279,8 @@ paths:
                               properties:
                                 condition:
                                   description: Agent condition expression to evaluate whether to apply this input.
+                                  maxLength: 10000
+                                  nullable: true
                                   type: string
                                 deprecated:
                                   $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -29286,6 +29294,8 @@ paths:
                                     properties:
                                       condition:
                                         description: Agent condition expression to evaluate whether to apply this stream.
+                                        maxLength: 10000
+                                        nullable: true
                                         type: string
                                       deprecated:
                                         $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -83634,6 +83644,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         create_dataset_templates:
           description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
@@ -83675,6 +83687,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -83714,6 +83728,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:
@@ -86225,6 +86241,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         created_at:
           type: string
@@ -86293,6 +86311,8 @@ components:
                 nullable: true
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -86332,6 +86352,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:
@@ -103840,6 +103862,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         created_at:
           type: string
@@ -103894,6 +103918,8 @@ components:
                     nullable: true
                   condition:
                     description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
                     type: string
                   config:
                     additionalProperties:
@@ -103933,6 +103959,8 @@ components:
                           nullable: true
                         condition:
                           description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
                           type: string
                         config:
                           additionalProperties:
@@ -104053,6 +104081,8 @@ components:
                 properties:
                   condition:
                     description: Agent condition expression to evaluate whether to apply this input.
+                    maxLength: 10000
+                    nullable: true
                     type: string
                   deprecated:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -104066,6 +104096,8 @@ components:
                       properties:
                         condition:
                           description: Agent condition expression to evaluate whether to apply this stream.
+                          maxLength: 10000
+                          nullable: true
                           type: string
                         deprecated:
                           $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107256,6 +107288,8 @@ components:
               type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         create_dataset_templates:
           description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
@@ -107294,6 +107328,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               deprecated:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -107307,6 +107343,8 @@ components:
                   properties:
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     deprecated:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_deprecation_info'
@@ -112190,6 +112228,8 @@ components:
           type: string
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
+          maxLength: 10000
+          nullable: true
           type: string
         description:
           description: Package policy description
@@ -112224,6 +112264,8 @@ components:
             properties:
               condition:
                 description: Agent condition expression to evaluate whether to apply this input.
+                maxLength: 10000
+                nullable: true
                 type: string
               config:
                 additionalProperties:
@@ -112263,6 +112305,8 @@ components:
                       nullable: true
                     condition:
                       description: Agent condition expression to evaluate whether to apply this stream.
+                      maxLength: 10000
+                      nullable: true
                       type: string
                     config:
                       additionalProperties:

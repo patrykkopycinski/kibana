@@ -22275,7 +22275,6 @@
     "xpack.fleet.updateAgentTags.errorNotificationTitle": "タグの更新が失敗しました",
     "xpack.fleet.updateAgentTags.successNotificationTitle": "タグが更新されました",
     "xpack.fleet.updatePackagePolicy.datasetCannotBeModified": "入力専用パッケージのパッケージポリシーデータストリームタイプを変更できません。新しいパッケージポリシーを作成してください。",
-    "xpack.fleet.updatePackagePolicy.namespaceCannotBeModified": "入力専用パッケージのパッケージポリシー名前空間を変更できません。新しいパッケージポリシーを作成してください。",
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "キャンセル",
     "xpack.fleet.upgradeAgents.chooseVersionLabel": "バージョンのアップグレード",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "{isAllAgents, select, true {all selected agents} other {{count, plural, one {agent} other {#個のエージェント}}} }をアップグレード",

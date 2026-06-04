@@ -22150,7 +22150,6 @@
     "xpack.fleet.updateAgentTags.errorNotificationTitle": "Échec de la mise à jour des balises",
     "xpack.fleet.updateAgentTags.successNotificationTitle": "Balises mises à jour",
     "xpack.fleet.updatePackagePolicy.datasetCannotBeModified": "Le type de flux de données de la politique de package ne peut pas être modifié en packages à entrée seulement. Nous vous invitons à créer une nouvelle politique de package.",
-    "xpack.fleet.updatePackagePolicy.namespaceCannotBeModified": "L'espace de nom de la politique de package ne peut pas être modifié en packages à entrée seulement. Veuillez créer une nouvelle politique de package.",
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "Annuler",
     "xpack.fleet.upgradeAgents.chooseVersionLabel": "Mettre à niveau la version",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "Mise à niveau de {isAllAgents, select, true {all selected agents} other {{count, plural, one {agent} other {# agents}}} }",

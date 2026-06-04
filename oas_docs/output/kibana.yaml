@@ -38114,7 +38114,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete datastream assets for a specific input package, by data stream name.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Delete datastream assets for a specific package, by data stream name.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -38185,7 +38185,7 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Delete assets for an input package
+      summary: Delete assets for a package
       tags:
         - Elastic Package Manager (EPM)
       x-metaTags:
@@ -83635,6 +83635,9 @@ components:
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
+        create_dataset_templates:
+          description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
+          type: boolean
         description:
           description: Package policy description
           type: string
@@ -86612,6 +86615,10 @@ components:
     Kibana_HTTP_APIs_es_asset_reference:
       additionalProperties: false
       properties:
+        customDataStreamOriginDataset:
+          type: string
+        customDataStreamOriginType:
+          type: string
         deferred:
           type: boolean
         id:
@@ -107250,6 +107257,9 @@ components:
         condition:
           description: Agent condition expression to evaluate whether to apply this integration to its inputs.
           type: string
+        create_dataset_templates:
+          description: When true, install dedicated index templates for streams with a custom data_stream.dataset. Defaults to true for input packages, false for integration packages.
+          type: boolean
         description:
           description: Policy description.
           type: string

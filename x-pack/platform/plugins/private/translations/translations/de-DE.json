@@ -22203,7 +22203,6 @@
     "xpack.fleet.updateAgentTags.errorNotificationTitle": "Tag(s)-Update fehlgeschlagen",
     "xpack.fleet.updateAgentTags.successNotificationTitle": "Tag(s) aktualisiert",
     "xpack.fleet.updatePackagePolicy.datasetCannotBeModified": "Der Paketrichtlinien-Datenstromtyp kann für Nur-Eingang-Pakete nicht geändert werden. Bitte erstellen Sie eine neue Paketrichtlinie.",
-    "xpack.fleet.updatePackagePolicy.namespaceCannotBeModified": "Der Paketrichtlinien-Namespace kann für reine Eingangspakete nicht geändert werden. Bitte erstellen Sie eine neue Paketrichtlinie.",
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "Abbrechen",
     "xpack.fleet.upgradeAgents.chooseVersionLabel": "Version aktualisieren",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "Upgrade {isAllAgents, select, true {all selected agents} other {{count, plural, one {agent} other {# Agenten}}} }",

@@ -22278,7 +22278,6 @@
     "xpack.fleet.updateAgentTags.errorNotificationTitle": "标签更新失败",
     "xpack.fleet.updateAgentTags.successNotificationTitle": "标签已更新",
     "xpack.fleet.updatePackagePolicy.datasetCannotBeModified": "对于仅输入软件包，无法修改软件包策略的数据流类型，请创建新的软件包策略。",
-    "xpack.fleet.updatePackagePolicy.namespaceCannotBeModified": "对于仅输入软件包，无法修改软件包策略命名空间，请创建新的软件包策略。",
     "xpack.fleet.upgradeAgents.cancelButtonLabel": "取消",
     "xpack.fleet.upgradeAgents.chooseVersionLabel": "升级版本",
     "xpack.fleet.upgradeAgents.confirmMultipleButtonLabel": "升级 {isAllAgents, select, true {all selected agents} other {{count, plural, one {agent} other {# 个代理}}} }",

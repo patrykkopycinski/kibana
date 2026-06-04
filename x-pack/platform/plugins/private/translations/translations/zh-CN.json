@@ -34362,8 +34362,6 @@
     "xpack.observability_onboarding.wiredStreams.ingestionLabel": "数据摄取选择器",
     "xpack.observability_onboarding.wiredStreams.readMore": "深入了解 Streams",
     "xpack.observability_onboarding.wiredStreams.techPreview": "技术预览",
-    "xpack.observability_onboarding.wiredStreams.tooltip.description": "将日志路由到托管层次结构而不是经典数据流。Streams继承父级数据流的生命周期设置和处理器，从而实现数据保留和路由的集中配置。",
-    "xpack.observability_onboarding.wiredStreams.tooltip.learnMore": "了解详情",
     "xpack.observability_onboarding.wiredStreams.tooltip.title": "Wired Streams (技术预览版)",
     "xpack.observability_onboarding.wiredStreams.willEnableNote": "选择 Wired Streams 将为您的 {envType} 启用该功能。",
     "xpack.observability_onboarding.wiredStreams.wiredStreamsOption": "Wired Streams",

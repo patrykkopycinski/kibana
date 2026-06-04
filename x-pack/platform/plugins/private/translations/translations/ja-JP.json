@@ -34360,8 +34360,6 @@
     "xpack.observability_onboarding.wiredStreams.ingestionLabel": "インジェストセレクター",
     "xpack.observability_onboarding.wiredStreams.readMore": "Streamsの詳細はこちら",
     "xpack.observability_onboarding.wiredStreams.techPreview": "テクニカルプレビュー",
-    "xpack.observability_onboarding.wiredStreams.tooltip.description": "ログを従来のデータストリームではなく、管理された階層にルーティングします。ストリームは親ストリームからライフサイクル設定とプロセッサーを継承し、データの保持とルーティングの集中管理を可能にします。",
-    "xpack.observability_onboarding.wiredStreams.tooltip.learnMore": "詳しくはこちら",
     "xpack.observability_onboarding.wiredStreams.tooltip.title": "Wired Streams（技術プレビュー）",
     "xpack.observability_onboarding.wiredStreams.willEnableNote": "Wired Streamsを選択すると、{envType}の機能が有効になります。",
     "xpack.observability_onboarding.wiredStreams.wiredStreamsOption": "Wired Streams",

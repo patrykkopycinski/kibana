@@ -34183,8 +34183,6 @@
     "xpack.observability_onboarding.wiredStreams.ingestionLabel": "Sélecteur d'ingestion",
     "xpack.observability_onboarding.wiredStreams.readMore": "En savoir plus sur Streams",
     "xpack.observability_onboarding.wiredStreams.techPreview": "Version d'évaluation technique",
-    "xpack.observability_onboarding.wiredStreams.tooltip.description": "Acheminez les logs vers une hiérarchie gérée au lieu des flux de données classiques. Les Streams héritent des paramètres de cycle de vie et des processeurs des streams parents, permettant une configuration centralisée pour la rétention et le routage des données.",
-    "xpack.observability_onboarding.wiredStreams.tooltip.learnMore": "En savoir plus",
     "xpack.observability_onboarding.wiredStreams.tooltip.title": "Wired Streams (Aperçu technique)",
     "xpack.observability_onboarding.wiredStreams.willEnableNote": "La sélection de Wired Streams activera la fonctionnalité pour votre {envType}.",
     "xpack.observability_onboarding.wiredStreams.wiredStreamsOption": "Wired Streams",

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataVisualizerDataViewManagement } from './data_view_management';
+export { DataVisualizerDataSourcePicker } from './data_source_picker';

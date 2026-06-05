@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export * from './data_drift';
-export * from './data_comparison';
-export * from './datavisualizer';
-export { indexBasedRouteFactory, indexESQLBasedRouteFactory } from './index_based';
-export * from './file_based';
+export { AiopsDataSourcePicker } from './data_source_picker';

@@ -68708,6 +68708,60 @@ components:
         - data_view_id
       title: aiops_log_rate_analysis
       type: object
+    Kibana_HTTP_APIs_aiops_pattern_analysis:
+      additionalProperties: false
+      description: Log Pattern Analysis embeddable schema
+      properties:
+        data_view_id:
+          description: The data view ID used for pattern analysis.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        description:
+          type: string
+        field_name:
+          description: The text field on which to run pattern analysis.
+          maxLength: 1000
+          minLength: 1
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        minimum_time_range:
+          default: no_minimum
+          description: Minimum time range for pattern analysis.
+          enum:
+            - no_minimum
+            - 1_week
+            - 1_month
+            - 3_months
+            - 6_months
+          type: string
+        random_sampler_mode:
+          default: on_automatic
+          description: The random sampler mode.
+          enum:
+            - on_automatic
+            - on_manual
+            - 'off'
+          type: string
+        random_sampler_probability:
+          default: null
+          description: The probability to use for random sampling (between 0.00001 and 0.5).
+          maximum: 0.5
+          minimum: 0.00001
+          nullable: true
+          type: number
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - data_view_id
+        - field_name
+      title: aiops_pattern_analysis
+      type: object
     Kibana_HTTP_APIs_alerts_filter_query:
       additionalProperties: false
       properties:
@@ -79737,6 +79791,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
@@ -79953,6 +80008,26 @@ components:
         - type
         - config
       title: Log rate analysis
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_aiops_pattern_analysis'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - aiops_pattern_analysis
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Pattern analysis
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map:
       additionalProperties: false
@@ -81481,6 +81556,7 @@ components:
               mapping:
                 aiops_change_point_chart: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
+                aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -81510,6 +81586,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'

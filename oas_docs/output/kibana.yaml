@@ -6325,6 +6325,7 @@ paths:
                   untrack: true
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -29331,6 +29332,7 @@ paths:
                                               required:
                                                 - id
                                                 - isSecretRef
+                                          default: null
                                           nullable: true
                                         description: Input/stream level variable. Refer to the integration documentation for more information.
                                         type: object
@@ -29360,6 +29362,7 @@ paths:
                                         required:
                                           - id
                                           - isSecretRef
+                                    default: null
                                     nullable: true
                                   description: Input/stream level variable. Refer to the integration documentation for more information.
                                   type: object
@@ -29422,12 +29425,10 @@ paths:
                         maxItems: 100
                         type: array
                       supports_agentless:
-                        default: false
                         description: Indicates whether the package policy belongs to an agentless agent policy.
                         nullable: true
                         type: boolean
                       supports_cloud_connector:
-                        default: false
                         description: Indicates whether the package policy supports cloud connectors.
                         nullable: true
                         type: boolean
@@ -29479,6 +29480,7 @@ paths:
                                   required:
                                     - id
                                     - isSecretRef
+                              default: null
                               nullable: true
                             description: Input/stream level variable. Refer to the integration documentation for more information.
                             type: object
@@ -31431,15 +31433,15 @@ paths:
                           type: object
                           properties:
                             log_level:
+                              default: null
                               enum:
                                 - debug
                                 - info
                                 - warning
                                 - error
+                                - null
                               nullable: true
                               type: string
-                          required:
-                            - log_level
                         type:
                           enum:
                             - SETTINGS
@@ -31791,6 +31793,7 @@ paths:
                     username: username
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -32027,6 +32030,7 @@ paths:
                     - CPU
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -32196,6 +32200,7 @@ paths:
                   revoke: false
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -35448,6 +35453,7 @@ paths:
                           type: string
                         serviceDetails:
                           additionalProperties: false
+                          default: null
                           nullable: true
                           type: object
                           properties:
@@ -35477,7 +35483,6 @@ paths:
                         - size_in_bytes
                         - size_in_bytes_formatted
                         - dashboards
-                        - serviceDetails
                     maxItems: 10000
                     type: array
                 required:
@@ -37490,6 +37495,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_package_from_registry_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -37892,6 +37898,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_package_from_registry_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -38398,6 +38405,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_kibana_assets_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -38489,6 +38497,7 @@ paths:
             schema:
               allOf:
                 - $ref: '#/components/schemas/Kibana_HTTP_APIs_install_rule_assets_request'
+              default: null
               nullable: true
       responses:
         '200':
@@ -40027,6 +40036,7 @@ paths:
                 name:
                   type: string
                 proxy_id:
+                  default: null
                   nullable: true
                   type: string
                 secrets:
@@ -40105,8 +40115,6 @@ paths:
                       type: string
                     key:
                       type: string
-              required:
-                - proxy_id
       responses:
         '200':
           content:
@@ -43034,12 +43042,15 @@ paths:
               type: object
               properties:
                 certificate:
+                  default: null
                   nullable: true
                   type: string
                 certificate_authorities:
+                  default: null
                   nullable: true
                   type: string
                 certificate_key:
+                  default: null
                   nullable: true
                   type: string
                 name:
@@ -43054,10 +43065,6 @@ paths:
                   type: object
                 url:
                   type: string
-              required:
-                - certificate_authorities
-                - certificate
-                - certificate_key
       responses:
         '200':
           content:
@@ -43546,6 +43553,7 @@ paths:
                   remote: true
             schema:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -43673,16 +43681,19 @@ paths:
                           logs:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           metrics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           synthetics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
@@ -43883,16 +43894,19 @@ paths:
                           logs:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           metrics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                           synthetics:
                             enum:
                               - success
+                              - null
                             nullable: true
                             type: string
                       integration_knowledge_enabled:
@@ -80917,7 +80931,6 @@ components:
         is_verifier:
           type: boolean
         keep_monitoring_alive:
-          default: false
           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
           nullable: true
           type: boolean
@@ -81054,7 +81067,6 @@ components:
             - inactive
           type: string
         supports_agentless:
-          default: false
           description: Indicates whether the agent policy supports agentless integrations.
           nullable: true
           type: boolean
@@ -81270,6 +81282,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81410,6 +81423,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81639,6 +81653,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81804,6 +81819,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -81958,6 +81974,7 @@ components:
               nullable: true
               type: boolean
             api_key_owner:
+              default: null
               nullable: true
               type: string
             consumer:
@@ -81965,6 +81982,7 @@ components:
             created_at:
               type: string
             created_by:
+              default: null
               nullable: true
               type: string
             enabled:
@@ -81997,6 +82015,7 @@ components:
             updated_at:
               type: string
             updated_by:
+              default: null
               nullable: true
               type: string
           required:
@@ -82005,12 +82024,9 @@ components:
             - tags
             - rule_type_id
             - params
-            - api_key_owner
             - consumer
             - enabled
             - schedule
-            - created_by
-            - updated_by
             - created_at
             - updated_at
             - revision
@@ -83781,13 +83797,11 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           deprecated: true
           description: Indicates whether the package policy belongs to an agentless agent policy. Deprecated in favor of the Fleet agentless policies API.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -83935,6 +83949,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -86420,12 +86435,10 @@ components:
           maxItems: 1000
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -86624,6 +86637,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -88945,6 +88959,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -90921,6 +90936,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -95313,6 +95329,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -95532,6 +95549,7 @@ components:
           description: The date and time when the maintenance window was created.
           type: string
         created_by:
+          default: null
           description: The identifier for the user that created the maintenance window.
           nullable: true
           type: string
@@ -95567,6 +95585,7 @@ components:
           description: The date and time when the maintenance window was last updated.
           type: string
         updated_by:
+          default: null
           description: The identifier for the user that last updated this maintenance window.
           nullable: true
           type: string
@@ -95574,8 +95593,6 @@ components:
         - id
         - title
         - enabled
-        - created_by
-        - updated_by
         - created_at
         - updated_at
         - status
@@ -97254,6 +97271,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -97421,6 +97439,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98461,6 +98480,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98575,6 +98595,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98689,6 +98710,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98803,6 +98825,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -98917,6 +98940,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99031,6 +99055,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99145,6 +99170,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99259,6 +99285,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99373,6 +99400,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99487,6 +99515,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99601,6 +99630,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99713,6 +99743,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99825,6 +99856,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -99939,6 +99971,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -101454,7 +101487,6 @@ components:
         is_verifier:
           type: boolean
         keep_monitoring_alive:
-          default: false
           description: When set to true, monitoring will be enabled but logs/metrics collection will be disabled
           nullable: true
           type: boolean
@@ -101571,7 +101603,6 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           deprecated: true
           description: Indicates whether the agent policy supports agentless integrations. Deprecated in favor of the Fleet agentless policies API.
           nullable: true
@@ -102249,6 +102280,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -102378,13 +102410,13 @@ components:
           description: Indicates whether the action is a summary.
           type: boolean
         throttle:
+          default: null
           description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
           type: string
       required:
         - summary
         - notify_when
-        - throttle
       title: new_rule_action_frequency
       type: object
     Kibana_HTTP_APIs_noColor:
@@ -102486,6 +102518,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -103489,46 +103522,45 @@ components:
       additionalProperties: true
       properties:
         compression_level:
+          default: null
           nullable: true
           type: number
         disk_queue_compression_enabled:
+          default: null
           nullable: true
           type: boolean
         disk_queue_enabled:
-          default: false
+          default: null
           nullable: true
           type: boolean
         disk_queue_encryption_enabled:
+          default: null
           nullable: true
           type: boolean
         disk_queue_max_size:
+          default: null
           nullable: true
           type: number
         disk_queue_path:
+          default: null
           nullable: true
           type: string
         loadbalance:
+          default: null
           nullable: true
           type: boolean
         max_batch_bytes:
+          default: null
           nullable: true
           type: number
         mem_queue_events:
+          default: null
           nullable: true
           type: number
         queue_flush_timeout:
+          default: null
           nullable: true
           type: number
-      required:
-        - disk_queue_path
-        - disk_queue_max_size
-        - disk_queue_encryption_enabled
-        - disk_queue_compression_enabled
-        - compression_level
-        - loadbalance
-        - mem_queue_events
-        - queue_flush_timeout
-        - max_batch_bytes
       title: output_shipper
       type: object
     Kibana_HTTP_APIs_output_ssl:
@@ -104129,6 +104161,7 @@ components:
                                 required:
                                   - id
                                   - isSecretRef
+                            default: null
                             nullable: true
                           description: Input/stream level variable. Refer to the integration documentation for more information.
                           type: object
@@ -104158,6 +104191,7 @@ components:
                           required:
                             - id
                             - isSecretRef
+                      default: null
                       nullable: true
                     description: Input/stream level variable. Refer to the integration documentation for more information.
                     type: object
@@ -104220,12 +104254,10 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -104277,6 +104309,7 @@ components:
                     required:
                       - id
                       - isSecretRef
+                default: null
                 nullable: true
               description: Input/stream level variable. Refer to the integration documentation for more information.
               type: object
@@ -106460,13 +106493,13 @@ components:
                     description: Indicates whether the action is a summary.
                     type: boolean
                   throttle:
+                    default: null
                     description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when 'notify_when' is set to 'onThrottleInterval'. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
                     nullable: true
                     type: string
                 required:
                   - summary
                   - notify_when
-                  - throttle
               group:
                 description: The group name, which affects when the action runs (for example, when the threshold is met or when the alert is recovered). Each rule type has a list of valid action group names. If you don't need to group actions, set to `default`.
                 type: string
@@ -106504,6 +106537,7 @@ components:
           nullable: true
           type: boolean
         api_key_owner:
+          default: null
           description: The owner of the API key that is associated with the rule and used to run background tasks.
           nullable: true
           type: string
@@ -106537,6 +106571,7 @@ components:
           description: The date and time that the rule was created.
           type: string
         created_by:
+          default: null
           description: The identifier for the user that created the rule.
           nullable: true
           type: string
@@ -106669,6 +106704,7 @@ components:
                 - maxAlerts
                 - maxQueuedActions
                 - ruleExecution
+                - null
               nullable: true
               type: string
           required:
@@ -106699,6 +106735,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -106742,6 +106779,7 @@ components:
           description: The date and time of the latest updates to the rule.
           type: string
         updated_by:
+          default: null
           description: The identifier for the user who was the last to update the rule.
           nullable: true
           type: string
@@ -106755,11 +106793,8 @@ components:
         - schedule
         - actions
         - params
-        - created_by
-        - updated_by
         - created_at
         - updated_at
-        - api_key_owner
         - mute_all
         - muted_alert_ids
         - execution_status
@@ -107376,6 +107411,7 @@ components:
                             required:
                               - id
                               - isSecretRef
+                        default: null
                         nullable: true
                       description: Input/stream level variable. Refer to the integration documentation for more information.
                       type: object
@@ -107405,6 +107441,7 @@ components:
                       required:
                         - id
                         - isSecretRef
+                  default: null
                   nullable: true
                 description: Input/stream level variable. Refer to the integration documentation for more information.
                 type: object
@@ -107450,6 +107487,7 @@ components:
                 required:
                   - id
                   - isSecretRef
+            default: null
             nullable: true
           description: Input/stream level variable. Refer to the integration documentation for more information.
           type: object
@@ -107785,6 +107823,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -107831,6 +107870,7 @@ components:
                       - value
                       - unit
                   maxBurnRateThreshold:
+                    default: null
                     nullable: true
                     type: number
                   shortWindow:
@@ -107847,7 +107887,6 @@ components:
                 required:
                   - id
                   - burnRateThreshold
-                  - maxBurnRateThreshold
                   - longWindow
                   - shortWindow
                   - actionGroup
@@ -110468,6 +110507,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -110475,7 +110515,7 @@ components:
           description: The parameters for the transform health rule. These parameters are appropriate when `rule_type_id` is `transform_health`.
           properties:
             excludeTransforms:
-              default: []
+              default: null
               items:
                 type: string
               nullable: true
@@ -110486,11 +110526,13 @@ components:
               type: array
             testsConfig:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
                 errorMessages:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -110499,6 +110541,7 @@ components:
                       type: boolean
                 healthCheck:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -110507,19 +110550,15 @@ components:
                       type: boolean
                 notStarted:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     enabled:
                       default: true
                       type: boolean
-              required:
-                - notStarted
-                - errorMessages
-                - healthCheck
           required:
             - includeTransforms
-            - testsConfig
           title: Transform Health Rule Params
           type: object
         rule_type_id:
@@ -112509,12 +112548,10 @@ components:
           maxItems: 100
           type: array
         supports_agentless:
-          default: false
           description: Indicates whether the package policy belongs to an agentless agent policy.
           nullable: true
           type: boolean
         supports_cloud_connector:
-          default: false
           description: Indicates whether the package policy supports cloud connectors.
           nullable: true
           type: boolean
@@ -112619,6 +112656,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -112741,13 +112779,13 @@ components:
           description: Indicates whether the action is a summary.
           type: boolean
         throttle:
+          default: null
           description: The throttle interval defines how frequently rule actions are triggered. It is specified in seconds, minutes, hours, or days and only applies when `notify_when` is set to `onThrottleInterval`. You cannot set the throttle interval at both the rule and action level. The recommended approach is to set it for each action individually. If you set the throttle interval at the rule level and then edit the rule, it will automatically be converted to action-specific values.
           nullable: true
           type: string
       required:
         - summary
         - notify_when
-        - throttle
       title: update_rule_action_frequency
       type: object
     Kibana_HTTP_APIs_upgrade_package_policies_request:
@@ -114381,6 +114419,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114405,9 +114444,11 @@ components:
                     type: string
                   type: array
             kqlQueryString:
+              default: null
               nullable: true
               type: string
             lookbackInterval:
+              default: null
               nullable: true
               type: string
             resultType:
@@ -114421,6 +114462,7 @@ components:
               minimum: 0
               type: number
             topNBuckets:
+              default: null
               minimum: 1
               nullable: true
               type: number
@@ -114428,9 +114470,6 @@ components:
             - jobSelection
             - severity
             - resultType
-            - lookbackInterval
-            - topNBuckets
-            - kqlQueryString
           title: Anomaly Detection Rule Params
           type: object
         rule_type_id:
@@ -114527,6 +114566,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114535,6 +114575,7 @@ components:
           properties:
             excludeJobs:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
@@ -114564,11 +114605,13 @@ components:
                   type: array
             testsConfig:
               additionalProperties: false
+              default: null
               nullable: true
               type: object
               properties:
                 behindRealtime:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114576,12 +114619,12 @@ components:
                       default: true
                       type: boolean
                     timeInterval:
+                      default: null
                       nullable: true
                       type: string
-                  required:
-                    - timeInterval
                 datafeed:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114590,10 +114633,12 @@ components:
                       type: boolean
                 delayedData:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     docsCount:
+                      default: null
                       minimum: 1
                       nullable: true
                       type: number
@@ -114601,13 +114646,12 @@ components:
                       default: true
                       type: boolean
                     timeInterval:
+                      default: null
                       nullable: true
                       type: string
-                  required:
-                    - docsCount
-                    - timeInterval
                 errorMessages:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
@@ -114616,22 +114660,15 @@ components:
                       type: boolean
                 mml:
                   additionalProperties: false
+                  default: null
                   nullable: true
                   type: object
                   properties:
                     enabled:
                       default: true
                       type: boolean
-              required:
-                - datafeed
-                - mml
-                - delayedData
-                - behindRealtime
-                - errorMessages
           required:
             - includeJobs
-            - excludeJobs
-            - testsConfig
           title: Anomaly Detection Jobs Health Rule Params
           type: object
         rule_type_id:
@@ -114728,6 +114765,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -114903,6 +114941,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -115033,6 +115072,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -115144,6 +115184,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:
@@ -115319,6 +115360,7 @@ components:
             - onActionGroupChange
             - onActiveAlert
             - onThrottleInterval
+            - null
           nullable: true
           type: string
         params:

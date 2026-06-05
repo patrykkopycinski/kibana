@@ -96491,6 +96491,59 @@ components:
                 - policy_name
                 - to
             - additionalProperties: false
+              description: User agent processor - Extract browser, OS, and device details from a user agent string
+              type: object
+              properties:
+                action:
+                  enum:
+                    - user_agent
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                extract_device_type:
+                  description: Extracts device type from the user agent string
+                  type: boolean
+                from:
+                  description: The field containing the user agent string
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                properties:
+                  description: Specific properties to extract (defaults to all)
+                  items:
+                    enum:
+                      - name
+                      - os
+                      - device
+                      - original
+                      - version
+                    type: string
+                  type: array
+                regex_file:
+                  description: Custom regex file name containing the regular expressions for parsing the user agent string
+                  minLength: 1
+                  type: string
+                to:
+                  description: The field that will be filled with the user agent details
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_Condition'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - additionalProperties: false
               description: Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN
               type: object
               properties:

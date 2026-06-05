@@ -69192,10 +69192,43 @@ components:
       additionalProperties: false
       description: APM service map embeddable schema
       properties:
+        alert_status_filter:
+          items:
+            enum:
+              - active
+              - recovered
+              - untracked
+              - delayed
+            type: string
+          maxItems: 4
+          type: array
+        anomaly_severity_filter:
+          items:
+            enum:
+              - critical
+              - major
+              - minor
+              - warning
+              - low
+              - unknown
+            type: string
+          maxItems: 6
+          type: array
+        connection_filter:
+          items:
+            enum:
+              - orphaned
+              - connected
+            type: string
+          maxItems: 2
+          type: array
         description:
           type: string
         environment:
           default: ENVIRONMENT_ALL
+          type: string
+        find_query:
+          maxLength: 2048
           type: string
         hide_border:
           type: boolean
@@ -69203,10 +69236,27 @@ components:
           type: boolean
         kuery:
           type: string
+        map_orientation:
+          enum:
+            - horizontal
+            - vertical
+          type: string
         service_group_id:
           type: string
         service_name:
           type: string
+        slo_status_filter:
+          items:
+            enum:
+              - healthy
+              - degrading
+              - violated
+              - noData
+            type: string
+          maxItems: 4
+          type: array
+        sync_with_dashboard_filters:
+          type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:

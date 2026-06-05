@@ -79711,6 +79711,7 @@ components:
           items:
             anyOf:
               - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -80669,6 +80670,26 @@ components:
         - config
       title: Markdown
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_swimlane'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_anomaly_swimlane
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Anomaly swim lane
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control:
       additionalProperties: false
       properties:
@@ -81450,6 +81471,7 @@ components:
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
+                ml_anomaly_swimlane: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                 options_list_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                 range_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                 slo_alerts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
@@ -81462,6 +81484,7 @@ components:
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -85833,6 +85856,82 @@ components:
         - operation
       title: Stats Metric Operation
       type: object
+    Kibana_HTTP_APIs_ml_anomaly_swimlane:
+      anyOf:
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            job_ids:
+              description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
+              items:
+                maxLength: 1000
+                minLength: 1
+                type: string
+              maxItems: 10000
+              minItems: 1
+              type: array
+            per_page:
+              description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
+              minimum: 1
+              type: number
+            swimlane_type:
+              enum:
+                - overall
+              type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+          required:
+            - job_ids
+            - swimlane_type
+        - additionalProperties: false
+          type: object
+          properties:
+            description:
+              type: string
+            hide_border:
+              type: boolean
+            hide_title:
+              type: boolean
+            job_ids:
+              description: IDs of the anomaly detection jobs or groups whose results are shown in the swim lane.
+              items:
+                maxLength: 1000
+                minLength: 1
+                type: string
+              maxItems: 10000
+              minItems: 1
+              type: array
+            per_page:
+              description: Number of rows to display per page in a view-by swim lane. Ignored for overall swim lanes.
+              minimum: 1
+              type: number
+            swimlane_type:
+              enum:
+                - viewBy
+              type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+            title:
+              type: string
+            view_by:
+              description: Field name used to split anomalies into a view-by swim lane.
+              maxLength: 1000
+              minLength: 1
+              type: string
+          required:
+            - job_ids
+            - swimlane_type
+            - view_by
+      description: Anomaly Swim Lane embeddable
+      title: ml_anomaly_swimlane
     Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting:
       additionalProperties: false
       properties:

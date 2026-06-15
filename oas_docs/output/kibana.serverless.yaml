@@ -82825,6 +82825,15 @@ components:
         - operation
       title: Unique Count Metric Operation
       type: object
+    Kibana_HTTP_APIs_legendPosition:
+      description: Legend Position.
+      enum:
+        - top
+        - bottom
+        - left
+        - right
+      title: Legend Position
+      type: string
     Kibana_HTTP_APIs_legendSize:
       description: Legend size.
       enum:
@@ -88285,6 +88294,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -92454,6 +92465,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -98622,6 +98635,8 @@ components:
         nested:
           description: Show nested legend with hierarchical breakdown levels
           type: boolean
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -101108,6 +101123,8 @@ components:
       additionalProperties: false
       description: Legend configuration for waffle chart
       properties:
+        position:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_legendPosition'
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:

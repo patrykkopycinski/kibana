@@ -2758,6 +2758,9 @@ paths:
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
                   type: string
+                execution_id:
+                  description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
+                  type: string
                 inference_id:
                   description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.
                   nullable: true
@@ -3156,6 +3159,9 @@ paths:
                   type: string
                 conversation_id:
                   description: Optional existing conversation ID to continue a previous conversation.
+                  type: string
+                execution_id:
+                  description: Optional client-generated execution ID. Provide it to address this execution later (for example, to abort it). Must be unique; defaults to a server-generated ID.
                   type: string
                 inference_id:
                   description: Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.

@@ -69152,15 +69152,14 @@ components:
           type: string
         environment:
           default: ENVIRONMENT_ALL
-          type: string
-        find_query:
-          maxLength: 2048
+          maxLength: 1024
           type: string
         hide_border:
           type: boolean
         hide_title:
           type: boolean
         kuery:
+          maxLength: 2048
           type: string
         map_orientation:
           enum:
@@ -69168,8 +69167,10 @@ components:
             - vertical
           type: string
         service_group_id:
+          maxLength: 1024
           type: string
         service_name:
+          maxLength: 1024
           type: string
         slo_status_filter:
           items:

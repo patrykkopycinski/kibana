@@ -92127,7 +92127,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
-          maxItems: 100
+          maxItems: 1000
           type: array
         pinned_panels:
           default: []
@@ -93921,7 +93921,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
-          maxItems: 100
+          maxItems: 1000
           type: array
         title:
           description: The title of the section.

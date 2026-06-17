@@ -118511,6 +118511,11 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEntitySourceProperties'
         - type: object
           properties:
+            apiKeyId:
+              description: ID of the API key used for scoped reads from the source index. Only present for index-type sources.
+              maxLength: 64
+              nullable: true
+              type: string
             id:
               type: string
           required:

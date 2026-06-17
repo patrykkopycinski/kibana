@@ -45949,6 +45949,95 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/risk_score/history:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/history</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns time-ordered historical risk score entries from the risk score time-series index for a given entity.
+      operationId: GetRiskScoreHistory
+      parameters:
+        - description: The type of entity to retrieve history for.
+          in: query
+          name: entity_type
+          required: true
+          schema:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_IdentifierType'
+        - description: The identifier of the entity to retrieve history for.
+          in: query
+          name: entity_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Start of the time range, in date-math syntax. Defaults to 90 days ago.
+          in: query
+          name: from
+          required: false
+          schema:
+            default: now-90d
+            maxLength: 100
+            type: string
+        - description: End of the time range, in date-math syntax. Defaults to now.
+          in: query
+          name: to
+          required: false
+          schema:
+            default: now
+            maxLength: 100
+            type: string
+        - description: Filter entries by the type of score recorded (`base`, `propagated`, or `resolution`).
+          in: query
+          name: score_type
+          required: false
+          schema:
+            enum:
+              - base
+              - propagated
+              - resolution
+            type: string
+        - description: Maximum number of history entries to return per request.
+          in: query
+          name: page_size
+          required: false
+          schema:
+            default: 100
+            maximum: 1000
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                riskScoreHistory:
+                  summary: Risk score history for a user
+                  value:
+                    entity_id: alice
+                    entity_type: user
+                    entries:
+                      - '@timestamp': '2026-05-20T12:00:00.000Z'
+                        calculated_level: High
+                        calculated_score: 145.2
+                        calculated_score_norm: 72.4
+                        category_1_count: 18
+                        category_1_score: 102
+                        score_type: base
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryResponse'
+          description: Successful response
+        '400':
+          description: Invalid request
+      summary: Get risk score history for an entity
+      tags:
+        - Security Entity Analytics API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/saved_objects/_export:
     post:
       description: |-
@@ -118252,6 +118341,13 @@ components:
             - name
       required:
         - entity
+    Security_Entity_Analytics_API_IdentifierType:
+      enum:
+        - host
+        - user
+        - service
+        - generic
+      type: string
     Security_Entity_Analytics_API_IdField:
       enum:
         - host.name
@@ -118496,6 +118592,54 @@ components:
       properties:
         success:
           type: boolean
+    Security_Entity_Analytics_API_RiskScoreHistoryEntry:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          maxLength: 33
+          type: string
+        calculated_level:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityRiskLevels'
+        calculated_score:
+          format: double
+          type: number
+        calculated_score_norm:
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        category_1_count:
+          type: integer
+        category_1_score:
+          format: double
+          type: number
+        score_type:
+          enum:
+            - base
+            - propagated
+            - resolution
+          type: string
+      required:
+        - '@timestamp'
+        - calculated_score_norm
+        - calculated_level
+    Security_Entity_Analytics_API_RiskScoreHistoryResponse:
+      type: object
+      properties:
+        entity_id:
+          maxLength: 1000
+          type: string
+        entity_type:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_IdentifierType'
+        entries:
+          items:
+            $ref: '#/components/schemas/Security_Entity_Analytics_API_RiskScoreHistoryEntry'
+          type: array
+      required:
+        - entity_id
+        - entity_type
+        - entries
     Security_Entity_Analytics_API_RiskScoreInput:
       description: A generic representation of a document contributing to a Risk Score.
       type: object

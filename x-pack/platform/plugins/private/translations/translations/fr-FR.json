@@ -20192,7 +20192,6 @@
     "xpack.fleet.appNavigation.agentsLinkText": "Agents",
     "xpack.fleet.appNavigation.dataStreamsLinkText": "Flux de données",
     "xpack.fleet.appNavigation.enrollmentTokensText": "Jetons d'enregistrement",
-    "xpack.fleet.appNavigation.giveFeedbackButton": "Donner un retour",
     "xpack.fleet.appNavigation.integrationsAllLinkText": "Parcourir les intégrations",
     "xpack.fleet.appNavigation.integrationsInstalledLinkText": "Intégrations installées",
     "xpack.fleet.appNavigation.policiesLinkText": "Politiques d'agent",

@@ -20301,7 +20301,6 @@
     "xpack.fleet.appNavigation.agentsLinkText": "代理",
     "xpack.fleet.appNavigation.dataStreamsLinkText": "数据流",
     "xpack.fleet.appNavigation.enrollmentTokensText": "注册令牌",
-    "xpack.fleet.appNavigation.giveFeedbackButton": "反馈",
     "xpack.fleet.appNavigation.integrationsAllLinkText": "浏览集成",
     "xpack.fleet.appNavigation.integrationsInstalledLinkText": "已安装集成",
     "xpack.fleet.appNavigation.policiesLinkText": "代理策略",

@@ -20231,7 +20231,6 @@
     "xpack.fleet.appNavigation.agentsLinkText": "Agents",
     "xpack.fleet.appNavigation.dataStreamsLinkText": "Datenstreams",
     "xpack.fleet.appNavigation.enrollmentTokensText": "Registrierungstoken",
-    "xpack.fleet.appNavigation.giveFeedbackButton": "Feedback geben",
     "xpack.fleet.appNavigation.integrationsAllLinkText": "Integrationen durchsuchen",
     "xpack.fleet.appNavigation.integrationsInstalledLinkText": "Installierte Integrationen",
     "xpack.fleet.appNavigation.policiesLinkText": "Agent Policies",

@@ -20298,7 +20298,6 @@
     "xpack.fleet.appNavigation.agentsLinkText": "エージェント",
     "xpack.fleet.appNavigation.dataStreamsLinkText": "データストリーム",
     "xpack.fleet.appNavigation.enrollmentTokensText": "登録トークン",
-    "xpack.fleet.appNavigation.giveFeedbackButton": "フィードバックを送信",
     "xpack.fleet.appNavigation.integrationsAllLinkText": "統合の参照",
     "xpack.fleet.appNavigation.integrationsInstalledLinkText": "インストールされている統合",
     "xpack.fleet.appNavigation.policiesLinkText": "エージェントポリシー",

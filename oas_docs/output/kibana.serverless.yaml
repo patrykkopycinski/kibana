@@ -2785,7 +2785,30 @@ paths:
                             type: boolean
                         required:
                           - authorized
-                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          answers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                choice:
+                                  items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                custom:
+                                  maxLength: 20000
+                                  minLength: 1
+                                  type: string
+                                skipped:
+                                  type: boolean
+                            maxItems: 100
+                            type: array
+                        required:
+                          - answers
+                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
                   type: object
       responses:
         '200':
@@ -3187,7 +3210,30 @@ paths:
                             type: boolean
                         required:
                           - authorized
-                  description: Use this field to respond to a confirmation or authorization prompt. Send an `allow` boolean to answer a confirmation prompt, or an `authorized` boolean to answer an authorization prompt.
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          answers:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                choice:
+                                  items:
+                                    type: number
+                                  maxItems: 100
+                                  type: array
+                                custom:
+                                  maxLength: 20000
+                                  minLength: 1
+                                  type: string
+                                skipped:
+                                  type: boolean
+                            maxItems: 100
+                            type: array
+                        required:
+                          - answers
+                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
                   type: object
       responses:
         '200':

@@ -29511,7 +29511,6 @@
     "xpack.ml.cases.anomalyTimelineTitle": "异常时间线",
     "xpack.ml.cases.registerSingleMetricViewer.displayName": "Single Metric Viewer",
     "xpack.ml.cases.singleMetricViewer.description.jobIdLabel": "作业 ID",
-    "xpack.ml.cases.singleMetricViewer.description.queryLabel": "查询",
     "xpack.ml.cases.singleMetricViewer.description.timeRangeLabel": "时间范围",
     "xpack.ml.cases.singleMetricViewer.displayName": "Single Metric Viewer",
     "xpack.ml.cases.singleMetricViewer.embeddableAddedEvent": "已添加 Single Metric Viewer",

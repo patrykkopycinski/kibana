@@ -29404,7 +29404,6 @@
     "xpack.ml.cases.anomalyTimelineTitle": "Anomalie-Zeitleiste",
     "xpack.ml.cases.registerSingleMetricViewer.displayName": "Single Metric Viewer",
     "xpack.ml.cases.singleMetricViewer.description.jobIdLabel": "Job-ID",
-    "xpack.ml.cases.singleMetricViewer.description.queryLabel": "Abfrage",
     "xpack.ml.cases.singleMetricViewer.description.timeRangeLabel": "Zeitraum",
     "xpack.ml.cases.singleMetricViewer.displayName": "Single Metric Viewer",
     "xpack.ml.cases.singleMetricViewer.embeddableAddedEvent": "Single Metric Viewer hinzugefügt",

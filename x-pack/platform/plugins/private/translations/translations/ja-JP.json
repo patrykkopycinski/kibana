@@ -29506,7 +29506,6 @@
     "xpack.ml.cases.anomalyTimelineTitle": "異常のタイムライン",
     "xpack.ml.cases.registerSingleMetricViewer.displayName": "シングルメトリックビューアー",
     "xpack.ml.cases.singleMetricViewer.description.jobIdLabel": "ジョブID",
-    "xpack.ml.cases.singleMetricViewer.description.queryLabel": "クエリー",
     "xpack.ml.cases.singleMetricViewer.description.timeRangeLabel": "時間範囲",
     "xpack.ml.cases.singleMetricViewer.displayName": "シングルメトリックビューアー",
     "xpack.ml.cases.singleMetricViewer.embeddableAddedEvent": "シングルメトリックビューアーが追加されました",

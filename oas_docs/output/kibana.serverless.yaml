@@ -79804,6 +79804,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_error_budget'
@@ -80792,6 +80793,26 @@ components:
         - config
       title: Anomaly swim lane
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_single_metric_viewer'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_single_metric_viewer
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Single metric viewer
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control:
       additionalProperties: false
       properties:
@@ -81575,6 +81596,7 @@ components:
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
                 ml_anomaly_swimlane: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
+                ml_single_metric_viewer: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                 options_list_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
                 range_slider_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
                 slo_alerts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
@@ -81599,6 +81621,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-range_slider_control'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_alerts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_burn_rate'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-slo_error_budget'
@@ -86048,6 +86071,53 @@ components:
             - view_by
       description: Anomaly Swim Lane embeddable
       title: ml_anomaly_swimlane
+    Kibana_HTTP_APIs_ml_single_metric_viewer:
+      additionalProperties: false
+      description: Single Metric Viewer embeddable
+      properties:
+        description:
+          type: string
+        forecast_id:
+          description: Identifier of a forecast to overlay on the chart.
+          maxLength: 1000
+          type: string
+        function_description:
+          description: 'For detectors that use the `metric` function, selects which value to plot: `min`, `max`, or `mean`. Ignored for other detector functions. When omitted, the viewer derives a default from the highest-scoring anomaly record.'
+          maxLength: 1000
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        job_ids:
+          description: Anomaly detection job ID whose results are shown in the single metric viewer.
+          items:
+            maxLength: 1000
+            minLength: 1
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        selected_detector_index:
+          default: 0
+          description: Zero-based index of the detector (the Elasticsearch detector_index) within the job whose results are shown.
+          minimum: 0
+          type: number
+        selected_entities:
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+          description: Values of the partition, by, or over fields that identify the single time series to display.
+          type: object
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - job_ids
+      title: ml_single_metric_viewer
+      type: object
     Kibana_HTTP_APIs_monitoring-alert-cluster-health-create-rule-body-alerting:
       additionalProperties: false
       properties:

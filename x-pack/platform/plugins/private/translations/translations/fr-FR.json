@@ -29356,7 +29356,6 @@
     "xpack.ml.cases.anomalyTimelineTitle": "Chronologie des anomalies",
     "xpack.ml.cases.registerSingleMetricViewer.displayName": "Visionneuse d’indicateur unique",
     "xpack.ml.cases.singleMetricViewer.description.jobIdLabel": "ID tâche",
-    "xpack.ml.cases.singleMetricViewer.description.queryLabel": "Requête",
     "xpack.ml.cases.singleMetricViewer.description.timeRangeLabel": "Plage temporelle",
     "xpack.ml.cases.singleMetricViewer.displayName": "Single Metric Viewer (Visionneuse d'indicateur unique)",
     "xpack.ml.cases.singleMetricViewer.embeddableAddedEvent": "ajout d'une visionneuse d’indicateur unique",

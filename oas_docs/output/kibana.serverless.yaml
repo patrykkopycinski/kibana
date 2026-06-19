@@ -79804,6 +79804,7 @@ components:
           items:
             anyOf:
               - anyOf:
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
@@ -80785,6 +80786,26 @@ components:
         - config
       title: Markdown
       type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts:
+      additionalProperties: false
+      properties:
+        config:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_ml_anomaly_charts'
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - ml_anomaly_charts
+          type: string
+      required:
+        - grid
+        - type
+        - config
+      title: Anomaly charts
+      type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane:
       additionalProperties: false
       properties:
@@ -81607,6 +81628,7 @@ components:
                 image: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-image'
                 links: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-links'
                 markdown: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-markdown'
+                ml_anomaly_charts: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                 ml_anomaly_swimlane: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                 ml_single_metric_viewer: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_single_metric_viewer'
                 options_list_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-options_list_control'
@@ -81621,6 +81643,7 @@ components:
                 vis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
               propertyName: type
             oneOf:
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
@@ -86006,6 +86029,109 @@ components:
         - field
         - operation
       title: Stats Metric Operation
+      type: object
+    Kibana_HTTP_APIs_ml_anomaly_charts:
+      additionalProperties: false
+      description: Anomaly Charts embeddable
+      properties:
+        description:
+          type: string
+        hide_border:
+          type: boolean
+        hide_title:
+          type: boolean
+        job_ids:
+          description: Anomaly detection job or group IDs whose results are shown in the charts.
+          items:
+            maxLength: 1000
+            minLength: 1
+            type: string
+          maxItems: 10000
+          minItems: 1
+          type: array
+        max_series_to_plot:
+          description: Maximum number of anomaly series to plot.
+          maximum: 50
+          minimum: 1
+          type: number
+        severity_threshold:
+          description: Severity threshold ranges used to filter anomaly results.
+          items:
+            anyOf:
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 3
+                    type: integer
+                  min:
+                    enum:
+                      - 0
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 25
+                    type: integer
+                  min:
+                    enum:
+                      - 3
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 50
+                    type: integer
+                  min:
+                    enum:
+                      - 25
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  max:
+                    enum:
+                      - 75
+                    type: integer
+                  min:
+                    enum:
+                      - 50
+                    type: integer
+                required:
+                  - min
+                  - max
+              - additionalProperties: false
+                type: object
+                properties:
+                  min:
+                    enum:
+                      - 75
+                    type: integer
+                required:
+                  - min
+          maxItems: 5
+          type: array
+        time_range:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+        title:
+          type: string
+      required:
+        - job_ids
+      title: ml_anomaly_charts
       type: object
     Kibana_HTTP_APIs_ml_anomaly_swimlane:
       anyOf:

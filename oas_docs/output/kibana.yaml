@@ -360,7 +360,7 @@ tags:
     x-displayName: Streams
     externalDocs:
       description: Streams documentation
-      url: https://www.elastic.co/docs/solutions/observability/streams
+      url: https://www.elastic.co/docs/solutions/observability/streams/streams
   - name: synthetics
     x-displayName: Synthetics
     description: Synthetics APIs enable you to check the status of your services and applications.

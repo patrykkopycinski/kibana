@@ -80246,6 +80246,7 @@ components:
                         required:
                           - data_source
                       - additionalProperties: false
+                        description: ES|QL (Elasticsearch Query Language) data source.
                         type: object
                         properties:
                           column_order:

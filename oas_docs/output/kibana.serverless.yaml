@@ -81729,6 +81729,7 @@ components:
           type: object
         index_pattern:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
+          minLength: 1
           title: Index pattern
           type: string
         time_field:

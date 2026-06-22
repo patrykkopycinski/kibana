@@ -2856,6 +2856,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
+                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
                         type: object
                         properties:
                           answers:
@@ -2878,7 +2879,7 @@ paths:
                             type: array
                         required:
                           - answers
-                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
+                  description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
         '200':
@@ -3281,6 +3282,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
+                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
                         type: object
                         properties:
                           answers:
@@ -3303,7 +3305,7 @@ paths:
                             type: array
                         required:
                           - answers
-                  description: Use this field to respond to a confirmation, authorization, or ask_user_question prompt. Send `allow` for confirmation, `authorized` for authorization, or `answers` (array of `{ choice?, custom?, skipped? }`) for ask_user_question.
+                  description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
         '200':

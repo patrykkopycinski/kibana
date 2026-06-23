@@ -319,6 +319,7 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, features, and installed plugins.
+  - name: Tags
   - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
     externalDocs:
       description: Task manager
@@ -59770,6 +59771,425 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/tags:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of tags matching the optional `query` text.
+      operationId: get-tags
+      parameters:
+        - description: Filters results by `name` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                searchTagsResponse:
+                  summary: Tags matching a search query
+                  value:
+                    data:
+                      - data:
+                          color: '#1BA9F5'
+                          description: Dashboards owned by engineering teams.
+                          name: Engineering
+                        id: tag-engineering
+                        meta:
+                          created_at: '2026-06-01T12:00:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-01T12:00:00.000Z'
+                          version: WzEsMV0=
+                      - data:
+                          color: '#54B399'
+                          description: Content used by operations teams.
+                          name: Operations
+                        id: tag-operations
+                        meta:
+                          created_at: '2026-06-02T09:30:00.000Z'
+                          managed: false
+                          updated_at: '2026-06-02T09:30:00.000Z'
+                          version: WzIsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of tags matching the query.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                        id:
+                          description: The tag ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    minItems: 0
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+      summary: Search tags
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a new tag and returns it.
+      operationId: post-tags
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createTagRequest:
+                summary: Create a tag
+                value:
+                  color: '#F04E98'
+                  description: Content related to security investigations.
+                  name: Security
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                createTagResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#F04E98'
+                      description: Content related to security investigations.
+                      name: Security
+                    id: tag-security
+                    meta:
+                      created_at: '2026-06-03T14:15:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-03T14:15:00.000Z'
+                      version: WzMsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Create a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/tags/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a tag by ID.
+      operationId: delete-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a tag by ID.
+      operationId: get-tags-id
+      parameters:
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                readTagResponse:
+                  summary: The requested tag
+                  value:
+                    data:
+                      color: '#1BA9F5'
+                      description: Dashboards owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-01T12:00:00.000Z'
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: success
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Get a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/tags/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Updates a tag if it exists, or creates it at the provided ID.
+      operationId: put-tags-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The tag ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              upsertTagRequest:
+                summary: Update or create a tag
+                value:
+                  color: '#006BB4'
+                  description: Dashboards and visualizations owned by engineering teams.
+                  name: Engineering
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-request-attributes'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateTagResponse:
+                  summary: The updated tag
+                  value:
+                    data:
+                      color: '#006BB4'
+                      description: Dashboards and visualizations owned by engineering teams.
+                      name: Engineering
+                    id: tag-engineering
+                    meta:
+                      created_at: '2026-06-01T12:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-05T16:45:00.000Z'
+                      version: WzEsMl0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                upsertTagCreatedResponse:
+                  summary: The created tag
+                  value:
+                    data:
+                      color: '#9170B8'
+                      description: Content used for compliance reporting.
+                      name: Compliance
+                    id: tag-compliance
+                    meta:
+                      created_at: '2026-06-06T10:20:00.000Z'
+                      managed: false
+                      updated_at: '2026-06-06T10:20:00.000Z'
+                      version: WzQsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-tags-attributes'
+                  id:
+                    description: The tag ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a tag
+      tags:
+        - Tags
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/task_manager/_health:
     get:
       description: |
@@ -82290,6 +82710,39 @@ components:
         - geo_point
       title: Type
       type: string
+    Kibana_HTTP_APIs_kbn-tags-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+        - color
+      title: kbn-tags-attributes
+      type: object
+    Kibana_HTTP_APIs_kbn-tags-request-attributes:
+      additionalProperties: false
+      properties:
+        color:
+          description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          type: string
+        description:
+          description: Optional description of the tag.
+          type: string
+        name:
+          description: The display name of the tag.
+          type: string
+      required:
+        - name
+      title: kbn-tags-request-attributes
+      type: object
     Kibana_HTTP_APIs_kibana_asset_reference:
       additionalProperties: false
       properties:

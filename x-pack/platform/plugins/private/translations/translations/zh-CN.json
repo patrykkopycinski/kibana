@@ -15738,7 +15738,6 @@
     "xpack.cases.caseView.observables.addObservableModal.selectType": "选择类型",
     "xpack.cases.caseView.observables.addObservableModal.selectValue": "输入值名称",
     "xpack.cases.caseView.observables.agentId": "代理 ID",
-    "xpack.cases.caseView.observables.autoExtract.description": "自动提取的可观察对象",
     "xpack.cases.caseView.observables.bulkCreated": "已添加可观察对象",
     "xpack.cases.caseView.observables.cancel": "取消",
     "xpack.cases.caseView.observables.created": "已创建可观察对象",

@@ -15688,7 +15688,6 @@
     "xpack.cases.caseView.observables.addObservableModal.selectType": "Typ auswählen",
     "xpack.cases.caseView.observables.addObservableModal.selectValue": "Wertname eingeben",
     "xpack.cases.caseView.observables.agentId": "Agenten-ID",
-    "xpack.cases.caseView.observables.autoExtract.description": "Automatisch extrahiertes Observable",
     "xpack.cases.caseView.observables.bulkCreated": "Observables hinzugefügt",
     "xpack.cases.caseView.observables.cancel": "Abbrechen",
     "xpack.cases.caseView.observables.created": "Observable wurde erstellt",

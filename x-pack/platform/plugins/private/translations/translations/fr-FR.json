@@ -15663,7 +15663,6 @@
     "xpack.cases.caseView.observables.addObservableModal.selectType": "Sélectionner un type",
     "xpack.cases.caseView.observables.addObservableModal.selectValue": "Saisir le nom de la valeur",
     "xpack.cases.caseView.observables.agentId": "ID d'agent",
-    "xpack.cases.caseView.observables.autoExtract.description": "Observable extrait automatiquement.",
     "xpack.cases.caseView.observables.bulkCreated": "Observables ajoutés",
     "xpack.cases.caseView.observables.cancel": "Annuler",
     "xpack.cases.caseView.observables.created": "Observable ajouté",

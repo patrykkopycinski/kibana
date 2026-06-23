@@ -15737,7 +15737,6 @@
     "xpack.cases.caseView.observables.addObservableModal.selectType": "タイプを選択",
     "xpack.cases.caseView.observables.addObservableModal.selectValue": "値名を入力",
     "xpack.cases.caseView.observables.agentId": "エージェントID",
-    "xpack.cases.caseView.observables.autoExtract.description": "自動抽出されたオブザーバブル",
     "xpack.cases.caseView.observables.bulkCreated": "オブザーバブルが追加されました",
     "xpack.cases.caseView.observables.cancel": "キャンセル",
     "xpack.cases.caseView.observables.created": "オブザーバブルが作成されました",

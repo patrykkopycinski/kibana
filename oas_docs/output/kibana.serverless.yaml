@@ -33095,7 +33095,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: Filter data streams by dataset name
           in: query
@@ -35636,7 +35636,7 @@ paths:
               - metrics
               - traces
               - synthetics
-              - profiling
+              - profiles
             type: string
         - description: When true, only return packages with active data streams
           in: query
@@ -71347,7 +71347,7 @@ components:
                   - metrics
                   - traces
                   - synthetics
-                  - profiling
+                  - profiles
                 type: string
             required:
               - name

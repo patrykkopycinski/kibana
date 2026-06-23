@@ -62,6 +62,8 @@ import { registerDataGeneratorRoutes } from './data_generator/register_data_gene
 import { registerInitializationRoutes } from '../lib/initialization';
 import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
 import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
+import { registerDetectionEmulationRoutes } from '../lib/detection_emulation';
+import type { DetectionEmulationGuardrails } from '../lib/detection_emulation/execution/shared_guardrails';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -81,7 +83,8 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  detectionEmulationGuardrails?: DetectionEmulationGuardrails
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -180,4 +183,6 @@ export const initRoutes = (
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);
   }
+
+  registerDetectionEmulationRoutes(router, config, logger, detectionEmulationGuardrails);
 };

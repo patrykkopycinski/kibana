@@ -75,6 +75,13 @@ export const allowedExperimentalValues = Object.freeze({
   endpointResponseActionsSkill: true,
 
   /**
+   * Detection emulation skill — validates detection rules by emulating attacks
+   * (log injection or real execution) and measuring alert coverage.
+   * Release: TBD
+   */
+  detectionEmulation: false,
+
+  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,

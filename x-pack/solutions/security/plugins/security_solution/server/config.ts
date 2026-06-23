@@ -232,6 +232,53 @@ export const configSchema = schema.object({
       }),
     })
   ),
+  detectionEmulation: schema.maybe(
+    schema.object({
+      realExecutionEnabled: schema.boolean({ defaultValue: true }),
+      allowlist: schema.maybe(
+        schema.object({
+          allowAll: schema.boolean({ defaultValue: false }),
+          endpointIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        })
+      ),
+      rateLimiter: schema.maybe(
+        schema.object({
+          maxCommands: schema.number({ defaultValue: 100, min: 1 }),
+          windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+          disabled: schema.boolean({ defaultValue: false }),
+          perHost: schema.maybe(
+            schema.object({
+              capacity: schema.number({ defaultValue: 3, min: 1 }),
+              windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+            })
+          ),
+        })
+      ),
+      idempotencyCache: schema.maybe(
+        schema.object({
+          ttlMs: schema.number({ defaultValue: 30_000, min: 0 }),
+          maxEntriesPerSpace: schema.number({ defaultValue: 256, min: 1 }),
+          disabled: schema.boolean({ defaultValue: false }),
+        })
+      ),
+      logInjection: schema.maybe(
+        schema.object({
+          indexTemplateName: schema.string({
+            defaultValue: '.kibana-security-emulation-logs',
+          }),
+          retentionDays: schema.number({ defaultValue: 7, min: 1 }),
+        })
+      ),
+      validation: schema.maybe(
+        schema.object({
+          wallBudgetMsDefault: schema.number({ defaultValue: 60_000, min: 1_000 }),
+          wallBudgetMsMax: schema.number({ defaultValue: 300_000, min: 1_000 }),
+          curatedOnly: schema.boolean({ defaultValue: false }),
+          allowedScriptIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        })
+      ),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

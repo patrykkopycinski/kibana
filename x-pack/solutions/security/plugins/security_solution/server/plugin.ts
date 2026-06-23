@@ -23,6 +23,8 @@ import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library'
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
+import type { DetectionEmulationGuardrails } from './lib/detection_emulation/execution/shared_guardrails';
+import { createDetectionEmulationGuardrails } from './lib/detection_emulation/execution/shared_guardrails';
 import { migrateEndpointDataToSupportSpaces } from './endpoint/migrations/space_awareness_migration';
 import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
@@ -206,6 +208,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private endpointContext: EndpointAppContext;
   private trialCompanionMilestoneService: TrialCompanionMilestoneService;
   private usageCollection?: UsageCollectionSetup;
+  private detectionEmulationGuardrails?: DetectionEmulationGuardrails;
 
   private isServerless: boolean;
 
@@ -297,11 +300,14 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerSkills({
       agentBuilder,
+      core,
+      config: this.config,
       experimentalFeatures,
       getStartServices: core.getStartServices,
       kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
+      detectionEmulationGuardrails: this.detectionEmulationGuardrails,
       options: { endpointAppContextService },
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
@@ -661,6 +667,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    const detectionEmulationGuardrails = config.experimentalFeatures.detectionEmulation
+      ? createDetectionEmulationGuardrails(config, logger)
+      : undefined;
+
+    this.detectionEmulationGuardrails = detectionEmulationGuardrails;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -682,7 +694,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      detectionEmulationGuardrails
     );
 
     registerEndpointRoutes(router, this.endpointContext);

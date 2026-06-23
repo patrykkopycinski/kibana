@@ -146,6 +146,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'pci-compliance',
   'siem-readiness',
   'endpoint-response-actions',
+  'detection-emulation',
 
   // O11Y
   'observability.rca',

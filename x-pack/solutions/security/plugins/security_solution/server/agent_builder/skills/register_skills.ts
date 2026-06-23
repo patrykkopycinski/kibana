@@ -9,6 +9,9 @@ import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
+import type { ConfigType } from '../../config';
+import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
+import type { DetectionEmulationGuardrails } from '../../lib/detection_emulation/execution/shared_guardrails';
 import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
@@ -17,17 +20,21 @@ import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { createEndpointResponseActionsSkill } from './endpoint_response_actions';
+import { getDetectionEmulationSkill } from './detection_emulation';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
+  core: SecuritySolutionPluginCoreSetupDependencies;
+  config: ConfigType;
   experimentalFeatures: ExperimentalFeatures;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   kibanaVersion: string;
   logger: Logger;
   ml: EntityAnalyticsRoutesDeps['ml'];
+  detectionEmulationGuardrails?: DetectionEmulationGuardrails;
   options: {
     endpointAppContextService: EndpointAppContextService;
   };
@@ -38,11 +45,14 @@ interface RegisterSkillsOpts {
  */
 export const registerSkills = async ({
   agentBuilder,
+  core,
+  config,
   experimentalFeatures,
   getStartServices,
   kibanaVersion,
   logger,
   ml,
+  detectionEmulationGuardrails,
   options,
 }: RegisterSkillsOpts): Promise<void> => {
   if (experimentalFeatures.automaticTroubleshootingSkill) {
@@ -75,6 +85,18 @@ export const registerSkills = async ({
   if (experimentalFeatures.endpointResponseActionsSkill) {
     agentBuilder.skills.register(
       createEndpointResponseActionsSkill(options.endpointAppContextService)
+    );
+  }
+
+  if (experimentalFeatures.detectionEmulation && detectionEmulationGuardrails) {
+    agentBuilder.skills.register(
+      getDetectionEmulationSkill({
+        core,
+        endpointService: options.endpointAppContextService,
+        config,
+        logger,
+        guardrails: detectionEmulationGuardrails,
+      })
     );
   }
 };

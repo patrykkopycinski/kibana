@@ -50567,7 +50567,6 @@
     "xpack.streams.deleteTableItemsModal.tableContentAriaLabel": "Liste der zu löschenden Elemente",
     "xpack.streams.deleteTableItemsModal.warningMessage": "Diese Aktion kann nicht rückgängig gemacht werden.",
     "xpack.streams.discoverFlyout.cpsWarning": "Die projektübergreifende Suche ist aktiv. Dieses Dokument kann aus einem verknüpften Projekt stammen und möglicherweise nicht in Streams verfügbar sein.",
-    "xpack.streams.discoverFlyout.cpsWarningNotLocal": "Dieses Dokument stammt aus einem verknüpften Projekt und ist in Streams nicht verfügbar.",
     "xpack.streams.discoverFlyoutStreamField.title": "Stream",
     "xpack.streams.discoverFlyoutStreamProcessingLink": "Inhalt in Streams parsen",
     "xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning": "Die projektübergreifende Suche ist aktiv. Dieses Dokument kann aus einem verknüpften Projekt stammen und möglicherweise nicht in Streams verfügbar sein.",

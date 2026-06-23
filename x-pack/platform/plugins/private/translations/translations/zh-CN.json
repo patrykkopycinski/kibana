@@ -50747,7 +50747,6 @@
     "xpack.streams.deleteTableItemsModal.tableContentAriaLabel": "待删除项目列表",
     "xpack.streams.deleteTableItemsModal.warningMessage": "此操作无法撤销。",
     "xpack.streams.discoverFlyout.cpsWarning": "跨项目搜索功能已启用。此文档可能来自关联项目，因此可能在 Streams 中不可用。",
-    "xpack.streams.discoverFlyout.cpsWarningNotLocal": "此文档来自关联项目，在 Streams 中不可用。",
     "xpack.streams.discoverFlyoutStreamField.title": "流",
     "xpack.streams.discoverFlyoutStreamProcessingLink": "解析 Streams 中的内容",
     "xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning": "跨项目搜索功能已启用。此文档可能来自关联项目，因此可能在 Streams 中不可用。",

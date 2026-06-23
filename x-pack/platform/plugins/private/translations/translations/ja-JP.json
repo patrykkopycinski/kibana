@@ -50755,7 +50755,6 @@
     "xpack.streams.deleteTableItemsModal.tableContentAriaLabel": "削除するアイテムのリスト",
     "xpack.streams.deleteTableItemsModal.warningMessage": "この操作は元に戻すことができません。",
     "xpack.streams.discoverFlyout.cpsWarning": "プロジェクト横断検索は有効です。このドキュメントはリンクされたプロジェクトからのもので、Streamsでは利用できない可能性があります。",
-    "xpack.streams.discoverFlyout.cpsWarningNotLocal": "このドキュメントはリンクされたプロジェクトからのもので、Streamsでは使用できません。",
     "xpack.streams.discoverFlyoutStreamField.title": "ストリーム",
     "xpack.streams.discoverFlyoutStreamProcessingLink": "Streamsのコンテンツを解析",
     "xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning": "プロジェクト横断検索は有効です。このドキュメントはリンクされたプロジェクトからのもので、Streamsでは利用できない可能性があります。",

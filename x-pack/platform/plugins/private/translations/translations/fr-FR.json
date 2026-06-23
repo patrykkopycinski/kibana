@@ -50398,7 +50398,6 @@
     "xpack.streams.deleteTableItemsModal.tableContentAriaLabel": "Liste des éléments à supprimer",
     "xpack.streams.deleteTableItemsModal.warningMessage": "Cette action est irréversible.",
     "xpack.streams.discoverFlyout.cpsWarning": "La recherche interprojets est active. Ce document peut provenir d'un projet lié et pourrait ne pas être disponible dans Streams.",
-    "xpack.streams.discoverFlyout.cpsWarningNotLocal": "Ce document provient d'un projet lié et n'est pas disponible dans Streams.",
     "xpack.streams.discoverFlyoutStreamField.title": "Flux",
     "xpack.streams.discoverFlyoutStreamProcessingLink": "Analyser le contenu dans Streams",
     "xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning": "La recherche interprojets est active. Ce document peut provenir d'un projet lié et peut ne pas être disponible dans Streams.",

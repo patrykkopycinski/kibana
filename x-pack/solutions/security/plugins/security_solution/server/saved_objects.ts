@@ -46,8 +46,6 @@ const typesTiedToFeatureFlags: Array<{
   soType: SavedObjectsType;
 }> = [
   { feature: 'responseActionsScriptLibraryManagement', soType: scriptsLibrarySavedObjectType },
-  { feature: 'detectionEmulation', soType: emulationReportType },
-  { feature: 'detectionEmulation', soType: emulationRuleBindingType },
 ];
 
 const types = [
@@ -101,6 +99,16 @@ export const initSavedObjects = (
     logger.debug(`Registering SavedObject type [${soType.name}]`);
     savedObjects.registerType(soType);
   });
+
+  if (
+    experimentalFeatures.detectionEmulationLogInjection ||
+    experimentalFeatures.detectionEmulationRealExecution
+  ) {
+    for (const soType of [emulationReportType, emulationRuleBindingType]) {
+      logger.debug(`Registering SavedObject type [${soType.name}]`);
+      savedObjects.registerType(soType);
+    }
+  }
 };
 
 export const initEncryptedSavedObjects = ({

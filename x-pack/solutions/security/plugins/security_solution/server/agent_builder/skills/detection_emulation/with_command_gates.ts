@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  Logger,
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 import type { ConfigType } from '../../../config';

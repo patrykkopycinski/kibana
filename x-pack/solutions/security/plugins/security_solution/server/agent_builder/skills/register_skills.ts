@@ -88,7 +88,10 @@ export const registerSkills = async ({
     );
   }
 
-  if (experimentalFeatures.detectionEmulation && detectionEmulationGuardrails) {
+  const detectionEmulationEnabled =
+    experimentalFeatures.detectionEmulationLogInjection ||
+    experimentalFeatures.detectionEmulationRealExecution;
+  if (detectionEmulationEnabled && detectionEmulationGuardrails) {
     agentBuilder.skills.register(
       getDetectionEmulationSkill({
         core,

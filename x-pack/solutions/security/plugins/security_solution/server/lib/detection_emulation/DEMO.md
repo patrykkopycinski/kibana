@@ -25,11 +25,13 @@ xpack.securitySolution.enableExperimental:
 > `detectionEmulationRealExecution` is required only when you want live response
 > actions dispatched to actual enrolled agents.
 
-Start the dev server:
+Start the dev server (**`--no-base-path` is required** for Fleet/endpoint scripts and Agent Builder URLs):
 
 ```sh
-KBN_USE_RSPACK=true yarn start
+KBN_USE_RSPACK=true yarn start --no-base-path
 ```
+
+Kibana will be at `http://localhost:5601` with no random base path prefix.
 
 ### 1.2 Optional runtime config
 

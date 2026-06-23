@@ -667,7 +667,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
-    const detectionEmulationGuardrails = config.experimentalFeatures.detectionEmulation
+    const detectionEmulationEnabled =
+      config.experimentalFeatures.detectionEmulationLogInjection ||
+      config.experimentalFeatures.detectionEmulationRealExecution;
+    const detectionEmulationGuardrails = detectionEmulationEnabled
       ? createDetectionEmulationGuardrails(config, logger)
       : undefined;
 

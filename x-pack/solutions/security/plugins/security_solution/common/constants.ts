@@ -318,6 +318,10 @@ export const INTERNAL_TAGS_URL = `/internal/tags`;
  * Internal detection engine routes
  */
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
+export const DETECTION_ENGINE_EMULATION_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/emulation` as const;
+export const DETECTION_ENGINE_EMULATION_HALT_URL =
+  `${DETECTION_ENGINE_EMULATION_URL}/halt` as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
 export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =

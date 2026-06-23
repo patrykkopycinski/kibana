@@ -58,7 +58,7 @@ import {
   randomAgentPolicyName,
   waitForHostToEnroll,
 } from '../fleet_services';
-import { getLocalhostRealIp } from '../network_services';
+import { resolveLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
 import { fetchActiveSpace } from '../spaces';
 
@@ -270,7 +270,7 @@ const startFleetServerWithDocker = async ({
   await verifyDockerInstalled(log);
 
   let agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
-  const localhostRealIp = getLocalhostRealIp();
+  const localhostRealIp = await resolveLocalhostRealIp({ port });
   const fleetServerUrl = `https://${localhostRealIp}:${port}`;
   const isServerless = await isServerlessKibanaFlavor(kbnClient);
   const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
@@ -669,7 +669,7 @@ const updateFleetElasticsearchOutputHostNames = async (
 
   return log.indent(4, async () => {
     try {
-      const localhostRealIp = getLocalhostRealIp();
+      const localhostRealIp = await resolveLocalhostRealIp();
       const fleetOutputs = await fetchFleetOutputs(kbnClient);
 
       // make sure that all ES hostnames are using localhost real IP

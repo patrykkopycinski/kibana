@@ -9,7 +9,12 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { isolateHostTool, unisolateHostTool, getEndpointStatusTool } from './tools';
+import {
+  isolateHostTool,
+  unisolateHostTool,
+  getEndpointStatusTool,
+  executeCommandTool,
+} from './tools';
 
 const ID = 'endpoint-response-actions';
 const NAME = 'endpoint-response-actions';
@@ -20,6 +25,7 @@ function toolName(name: string) {
 export const ISOLATE_TOOL_ID = toolName('isolate_host');
 export const UNISOLATE_TOOL_ID = toolName('unisolate_host');
 export const GET_ENDPOINT_STATUS_TOOL_ID = toolName('get_endpoint_status');
+export const EXECUTE_COMMAND_TOOL_ID = toolName('execute_command');
 
 const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 
@@ -28,6 +34,7 @@ const SYSTEM_INSTRUCTIONS = `# Endpoint Response Actions Skill
 Use this skill when the analyst requests any of the following in natural language:
 - Isolate or un-isolate a host
 - Check the status of a host (isolation state, last seen, online/offline)
+- Execute a shell command on an endpoint
 
 ## Conversation Flow
 
@@ -36,10 +43,12 @@ Identify the action type from the analyst's message:
 - **isolate** / **quarantine** / **disconnect** → use \`isolate_host\` tool
 - **unisolate** / **release** / **reconnect** → use \`unisolate_host\` tool
 - **status** / **check** / **is isolated** → use \`get_endpoint_status\` tool
+- **execute** / **run command** / **shell** → use \`execute_command\` tool
 
 ### 2. Confirm Before Acting (Write Actions Only)
-For isolation/un-isolation actions:
-- Present the target host name
+For isolation, un-isolation, and execute actions:
+- Present the target host name and intended action
+- For execute: show the exact command that will run
 - State the expected impact clearly
 - Wait for explicit analyst confirmation before dispatching
 
@@ -71,12 +80,13 @@ export const createEndpointResponseActionsSkill = (
     name: NAME,
     basePath: BASE_PATH,
     description:
-      'Execute endpoint response actions (isolate, unisolate, check status) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service.',
+      'Execute endpoint response actions (isolate, unisolate, execute command, check status) from chat conversations. Resolves hostnames to endpoint identities and dispatches actions through the Elastic Defend Response Actions service.',
     content: SYSTEM_INSTRUCTIONS,
     getInlineTools: () => [
       isolateHostTool(endpointAppContextService),
       unisolateHostTool(endpointAppContextService),
       getEndpointStatusTool(endpointAppContextService),
+      executeCommandTool(endpointAppContextService),
     ],
   });
 };

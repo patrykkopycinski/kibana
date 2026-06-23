@@ -21,26 +21,20 @@ import {
   isRealExecutionEnabled,
   REAL_EXECUTION_DISABLE_REASON_TEXT,
 } from '../feature_flag';
-import {
-  resolveAllowlistConfig,
-  resolveRateLimiterConfig,
-} from '../runtime_config_resolver';
-import {
-  checkValidationGates,
-  resolveValidationGateConfig,
-} from './validation_gate';
+import { resolveAllowlistConfig, resolveRateLimiterConfig } from '../runtime_config_resolver';
+import { checkValidationGates, resolveValidationGateConfig } from './validation_gate';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
 
 // ─── Result types ──────────────────────────────────────────────────────────────
 
 export type GateOk<T = void> = { ok: true } & (T extends void ? {} : { value: T });
-export type GateFail = {
+export interface GateFail {
   ok: false;
   reason: string;
   message: string;
   statusCode: number;
   extra?: Record<string, unknown>;
-};
+}
 export type GateResult<T = void> = GateOk<T> | GateFail;
 
 const pass = <T = void>(value?: T): GateResult<T> =>
@@ -82,12 +76,9 @@ export function checkModeFeatureFlags(
 ): GateResult {
   const featureFlags = getDetectionEmulationFeatureFlags(config);
   if (mode === 'log_injection' && !featureFlags.logInjection) {
-    return fail(
-      'feature_disabled',
-      'Detection emulation log injection is disabled.',
-      403,
-      { likely_cause: 'Feature flag detectionEmulationLogInjection is not enabled.' }
-    );
+    return fail('feature_disabled', 'Detection emulation log injection is disabled.', 403, {
+      likely_cause: 'Feature flag detectionEmulationLogInjection is not enabled.',
+    });
   }
   if (
     mode === 'real_execution' &&
@@ -106,10 +97,7 @@ export function checkModeFeatureFlags(
 
 // ─── Gate 1.5: Validation gates ────────────────────────────────────────────────
 
-export function checkValidation(
-  cmd: RunEmulationCommandInput,
-  config: ConfigType
-): GateResult {
+export function checkValidation(cmd: RunEmulationCommandInput, config: ConfigType): GateResult {
   const validationGateConfig = resolveValidationGateConfig(config.detectionEmulation?.validation);
   const result = checkValidationGates(cmd, validationGateConfig);
   if (!result.allowed) {

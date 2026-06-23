@@ -1,0 +1,24 @@
+elasticsearch.hosts: ['http://localhost:9200']
+elasticsearch.serviceAccountToken: '__KIBANA_SERVICE_ACCOUNT_TOKEN__'
+
+# Fleet Server URL agents/multipass VMs use (must be reachable from host scripts AND multipass)
+xpack.fleet.agents.fleet_server.hosts: ['https://__FLEET_HOST_IP__:8220']
+
+# Preconfigure ES output for Docker Fleet Server (host.docker.internal from container)
+xpack.fleet.outputs:
+  - id: fleet-default-output
+    name: default
+    type: elasticsearch
+    is_default: true
+    is_default_monitoring: true
+    hosts: ['http://host.docker.internal:9200']
+
+xpack.securitySolution.enableExperimental:
+  - endpointResponseActionsSkill
+  - detectionEmulationLogInjection
+  - detectionEmulationRealExecution
+
+xpack.securitySolution.detectionEmulation:
+  realExecutionEnabled: true
+  allowlist:
+    allowAll: true

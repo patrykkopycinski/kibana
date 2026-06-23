@@ -6,23 +6,14 @@
  */
 
 import { createHash } from 'crypto';
-import type { Logger } from '@kbn/core/server';
 import { AgentExecutionMode, ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { RunEmulationCommandInput } from '../../../../common/detection_emulation/schemas';
-import type { ConfigType } from '../../../config';
-import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import {
-  generateScenario,
-} from '../../../lib/detection_emulation/scenario_generator';
+import { generateScenario } from '../../../lib/detection_emulation/scenario_generator';
 import { generateDocs } from '../../../lib/detection_emulation/log_injection/generator';
 import { executeLogInjection } from '../../../lib/detection_emulation/log_injection/executor';
-import {
-  collectTelemetry,
-  type TelemetryResult,
-} from '../../../lib/detection_emulation/telemetry_collector';
+import { collectTelemetry } from '../../../lib/detection_emulation/telemetry_collector';
 import { scoreConfidence } from '../../../lib/detection_emulation/confidence_scorer';
 import { createEmulationHistory } from '../../../lib/detection_emulation/emulation_history';
 import {
@@ -31,10 +22,12 @@ import {
   type EmulationReportPhase,
 } from '../../../lib/detection_emulation/emulation_report_type';
 import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
-import type { DetectionEmulationGuardrails } from '../../../lib/detection_emulation/execution/shared_guardrails';
 import { buildAgentBuilderActor } from '../../../lib/detection_emulation/execution/audit_context';
 import { createTracedLogger } from '../../../lib/detection_emulation/execution/traced_logger';
-import { PipelineStepError, runStep } from '../../../lib/detection_emulation/execution/pipeline_step_error';
+import {
+  PipelineStepError,
+  runStep,
+} from '../../../lib/detection_emulation/execution/pipeline_step_error';
 import type { ToolFactoryDeps } from '../../../lib/detection_emulation/execution/tool_factory_deps';
 import {
   checkModeFeatureFlags,
@@ -45,9 +38,7 @@ import {
   resolveEffectiveConfig,
 } from '../../../lib/detection_emulation/execution/gate_checks';
 import { resolveCurrentUsername } from '../../../lib/detection_emulation/resolve_current_user';
-import {
-  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-} from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../common/endpoint/service/response_actions/constants';
 import { validateRuleSchema } from './validate_rule_input';
 import { toolError, type EmulationErrorContext } from './emulation_tool_errors';
 
@@ -69,8 +60,6 @@ const computeScenarioFingerprint = (
 };
 
 // ─── Tool ─────────────────────────────────────────────────────────────────────
-
-
 
 /**
  * Creates the validateRule tool for the detection emulation Agent Builder skill.
@@ -169,8 +158,12 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
         }
 
         // Per-request resolution of operator-tunable guardrails.
-        let effectiveAllowlist: Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveAllowlist'] | undefined;
-        let effectiveRateLimiter: Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveRateLimiter'] | undefined;
+        let effectiveAllowlist:
+          | Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveAllowlist']
+          | undefined;
+        let effectiveRateLimiter:
+          | Awaited<ReturnType<typeof resolveEffectiveConfig>>['effectiveRateLimiter']
+          | undefined;
         if (mode === 'real_execution') {
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
@@ -186,12 +179,18 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
 
         // Step 3a (real_execution only): host allowlist (uses shared gate_checks).
         if (mode === 'real_execution') {
-          const allowlistResult = checkAllowlist(allowlist, endpointIds, effectiveAllowlist!);
+          // effectiveAllowlist is always assigned inside the `mode === 'real_execution'` block above.
+          const allowlistResult = checkAllowlist(
+            allowlist,
+            endpointIds,
+            effectiveAllowlist as NonNullable<typeof effectiveAllowlist>
+          );
           if (!allowlistResult.ok) {
             log.warn(`Allowlist blocked: ${allowlistResult.message}`);
             return toolError.authorizationError(errCtx, {
               message: allowlistResult.message,
-              likelyCause: (allowlistResult.extra?.likely_cause as string) ?? 'Allowlist check failed',
+              likelyCause:
+                (allowlistResult.extra?.likely_cause as string) ?? 'Allowlist check failed',
               blockedEndpoints: allowlistResult.extra?.blocked_endpoints as string[] | undefined,
             });
           }
@@ -337,9 +336,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
             try {
               casesClient = await endpointService.getCasesClient(request);
             } catch (err) {
-              log.debug(
-                `Cases client unavailable: ${(err as Error).message ?? err}`
-              );
+              log.debug(`Cases client unavailable: ${(err as Error).message ?? err}`);
             }
 
             const runner = new EmulationRunner({
@@ -455,10 +452,7 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
             actor: actorContext,
           };
 
-          return createEmulationHistory(
-            { attributes },
-            { soClient: internalSoClient }
-          );
+          return createEmulationHistory({ attributes }, { soClient: internalSoClient });
         });
 
         // PROD-5: release the concurrency slot on the success path.
@@ -504,8 +498,13 @@ Fails with \`no_mitre_tags\` or \`no_supported_techniques\` if the rule has no e
         if (err instanceof PipelineStepError) {
           const meta = err.toMeta();
           log.error(
-            `Step [${meta.step}] failed after ${meta.durationMs}ms: ${(err.cause as Error)?.message ?? err.message}`,
-            { tags: ['detection-emulation', 'pipeline-step-error'], ...meta } as Record<string, unknown>
+            `Step [${meta.step}] failed after ${meta.durationMs}ms: ${
+              (err.cause as Error)?.message ?? err.message
+            }`,
+            {
+              tags: ['detection-emulation', 'pipeline-step-error'],
+              ...meta,
+            } as Record<string, unknown>
           );
         } else {
           const error = err as Error;

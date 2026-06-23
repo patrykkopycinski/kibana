@@ -22,7 +22,7 @@ import {
 } from '../../../common/endpoint/utils/kibana_status';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { isLocalhost } from './is_localhost';
-import { getLocalhostRealIp } from './network_services';
+import { resolveLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
@@ -200,7 +200,7 @@ export const createRuntimeServices = async ({
       useCertForSsl,
     }),
     log,
-    localhostRealIp: getLocalhostRealIp(),
+    localhostRealIp: await resolveLocalhostRealIp(),
     apiKey: apiKey ?? '',
     user: {
       username,

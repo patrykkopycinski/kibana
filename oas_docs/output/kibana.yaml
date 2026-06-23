@@ -963,7 +963,8 @@ paths:
                   description: Example response that returns one built-in Elastic agent and one created by the user
                   value:
                     results:
-                      - configuration:
+                      - access_control: null
+                        configuration:
                           tools:
                             - tool_ids:
                                 - platform.core.search
@@ -973,8 +974,17 @@ paths:
                         description: Elastic AI Agent
                         id: elastic-ai-agent
                         name: Elastic AI Agent
+                        permissions:
+                          update_access_control: false
+                          update_agent: false
                         type: chat
-                      - avatar_color: '#BFDBFF'
+                      - access_control:
+                          access_mode: private
+                          entries:
+                            - name: alice
+                              role: manager
+                              type: user
+                        avatar_color: '#BFDBFF'
                         avatar_symbol: SI
                         configuration:
                           instructions: You are a custom agent that wants to help searching data using all indices starting with prefix "content-".
@@ -990,6 +1000,9 @@ paths:
                           - custom-indices
                           - department-search
                         name: Search Index Helper
+                        permissions:
+                          update_access_control: true
+                          update_agent: true
                         type: chat
           description: Indicates a successful response
       summary: List agents
@@ -1053,6 +1066,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Optional hex color code for the agent avatar.
                   type: string
@@ -1128,13 +1154,6 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
               required:
                 - id
@@ -1462,6 +1481,12 @@ paths:
                 getAgentByIdResponseExample:
                   description: Example response that an agent created by the user that will query elasticsearch indices starting with 'content-' prefix to answer the questions.
                   value:
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: alice
+                          role: manager
+                          type: user
                     avatar_color: '#BFDBFF'
                     avatar_symbol: SI
                     configuration:
@@ -1478,6 +1503,9 @@ paths:
                       - custom-indices
                       - department-search
                     name: Search Index Helper
+                    permissions:
+                      update_access_control: true
+                      update_agent: true
                     type: chat
           description: Indicates a successful response
       summary: Get an agent by ID
@@ -1548,6 +1576,19 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                access_control:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    access_mode:
+                      description: '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                      enum:
+                        - public
+                        - shared
+                        - private
+                      type: string
+                  required:
+                    - access_mode
                 avatar_color:
                   description: Updated hex color code for the agent avatar.
                   type: string
@@ -1618,13 +1659,6 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
-                  type: string
-                visibility:
-                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
-                  enum:
-                    - public
-                    - shared
-                    - private
                   type: string
       responses:
         '200':
@@ -1707,19 +1741,19 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
-  /api/agent_builder/agents/{id}/acl:
+  /api/agent_builder/agents/{id}/access_control:
     get:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the access control list (ACL) for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
-      operationId: get-agent-builder-agents-id-acl
+        Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-agents-id-access-control
       parameters:
-        - description: The unique identifier of the agent whose ACL to retrieve.
+        - description: The unique identifier of the agent whose access control to retrieve.
           in: path
           name: id
           required: true
@@ -1730,16 +1764,22 @@ paths:
           content:
             application/json:
               examples:
-                getAgentAclMaskedResponseExample:
-                  description: Example response for a caller without manage permission — the principal list is hidden and `entries` is always empty.
+                getAgentAccessControlMaskedResponseExample:
+                  description: Example response for a caller without manage permission — only the caller's own entry is returned.
                   value:
-                    acl:
-                      entries: []
-                    can_manage: false
-                getAgentAclResponseExample:
-                  description: Example response for a caller who can manage the ACL — the agent has two grantees.
+                    access_control:
+                      access_mode: private
+                      entries:
+                        - name: bob
+                          role: user
+                          type: user
+                    permissions:
+                      update_access_control: false
+                getAgentAccessControlResponseExample:
+                  description: Example response for a caller who can manage access control — the agent has two grantees.
                   value:
-                    acl:
+                    access_control:
+                      access_mode: private
                       entries:
                         - name: alice
                           role: editor
@@ -1747,7 +1787,8 @@ paths:
                         - name: bob
                           role: user
                           type: user
-                    can_manage: true
+                    permissions:
+                      update_access_control: true
           description: Indicates a successful response
         '404':
           content:
@@ -1768,11 +1809,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X GET "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/agent_builder/agents/{id}/acl
+            GET kbn://api/agent_builder/agents/{id}/access_control
       x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -1781,12 +1822,12 @@ paths:
       description: |-
         **Spaces method and path for this operation:**
 
-        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/acl</span></div>
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}/access_control</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Replace the per-agent access control list (ACL). The agent owner, cluster admins, and anyone the ACL grants Editor or higher can call this endpoint (or anyone with `manageAgents` on a Public agent). Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
-      operationId: put-agent-builder-agents-id-acl
+        Replace the per-agent access-control entries. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).<br/><br/>[Required authorization] Route required privileges: agentBuilder:manageAgents.
+      operationId: put-agent-builder-agents-id-access-control
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -1795,7 +1836,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The unique identifier of the agent whose ACL to update.
+        - description: The unique identifier of the agent whose access control to update.
           in: path
           name: id
           required: true
@@ -1805,12 +1846,12 @@ paths:
         content:
           application/json:
             examples:
-              clearAgentAclRequestExample:
-                description: Submit an empty entries list to remove all ACL grants. Access then falls back to the agent's visibility setting.
+              clearAgentAccessControlRequestExample:
+                description: Submit an empty entries list to remove all custom grants. Access then falls back to the agent's access-control mode.
                 value:
                   entries: []
-              updateAgentAclRequestExample:
-                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its ACL), Bob as User (can run the agent).
+              updateAgentAccessControlRequestExample:
+                description: Example request granting two users access to the agent — Alice as Editor (can update the agent and its access control), Bob as User (can run the agent).
                 value:
                   entries:
                     - name: alice
@@ -1824,7 +1865,7 @@ paths:
               type: object
               properties:
                 entries:
-                  description: Access control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported; role-based grants are planned for a future release), a `name` (the principal username), and a `role`. Submitting this field replaces the existing ACL entirely; submit an empty array to clear all grants.
+                  description: Access-control entries to apply to the agent. Each entry has a `type` (currently only `user` is supported), a `name` (the principal username), and a `role`.
                   items:
                     additionalProperties: false
                     type: object
@@ -1835,7 +1876,7 @@ paths:
                         minLength: 1
                         type: string
                       role:
-                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its ACL; `manager` adds deleting the agent and changing visibility.'
+                        description: 'Role granted to the principal. Roles are hierarchical: `user` allows viewing, listing, reading, and running the agent; `editor` adds updating the agent and its access control; `manager` adds deleting the agent and managing access control.'
                         enum:
                           - user
                           - editor
@@ -1858,9 +1899,10 @@ paths:
           content:
             application/json:
               examples:
-                updateAgentAclResponseExample:
-                  description: Example response returning the persisted ACL after the update.
+                updateAgentAccessControlResponseExample:
+                  description: Example response returning the persisted access control after the update.
                   value:
+                    access_mode: private
                     entries:
                       - name: alice
                         role: editor
@@ -1873,8 +1915,8 @@ paths:
           content:
             application/json:
               examples:
-                aclOnDefaultAgentResponseExample:
-                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have a custom ACL — its access is governed by the platform, not per-agent grants.
+                accessControlOnDefaultAgentResponseExample:
+                  description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants.
                   value:
                     attributes:
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
@@ -1887,7 +1929,7 @@ paths:
                     error: Bad Request
                     message: '[request body.entries]: array size is [101], but cannot be greater than [100]'
                     statusCode: 400
-          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have an ACL).
+          description: Bad Request — the request body failed validation, or the request targets the built-in Elastic default agent (which cannot have custom access control).
         '404':
           content:
             application/json:
@@ -1907,7 +1949,7 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/acl" \
+              -X PUT "${KIBANA_URL}/api/agent_builder/agents/{id}/access_control" \
               -H "Authorization: ApiKey ${API_KEY}" \
               -H "kbn-xsrf: true" \
               -H "Content-Type: application/json" \
@@ -1919,7 +1961,7 @@ paths:
               }'
         - lang: Console
           source: |
-            PUT kbn://api/agent_builder/agents/{id}/acl
+            PUT kbn://api/agent_builder/agents/{id}/access_control
             {
               "entries": [
                 { "type": "user", "name": "alice", "role": "editor" },

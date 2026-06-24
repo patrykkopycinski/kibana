@@ -38685,8 +38685,6 @@
     "xpack.securitySolution.attackDetailsFlyout.content.jsonTabLabel": "JSON",
     "xpack.securitySolution.attackDetailsFlyout.content.overviewTabLabel": "概要",
     "xpack.securitySolution.attackDetailsFlyout.content.tableTabLabel": "表",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.backgroundTitle": "背景",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.sectionTitle": "攻撃概要",
     "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedLabel": "匿名化された値を表示",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTitle": "相関関係",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTooltip": "関連アラートを表示してください",

@@ -38691,8 +38691,6 @@
     "xpack.securitySolution.attackDetailsFlyout.content.jsonTabLabel": "JSON",
     "xpack.securitySolution.attackDetailsFlyout.content.overviewTabLabel": "概览",
     "xpack.securitySolution.attackDetailsFlyout.content.tableTabLabel": "表",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.backgroundTitle": "背景",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.sectionTitle": "攻击摘要",
     "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedLabel": "显示已匿名处理值",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTitle": "相关性",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTooltip": "显示相关告警",

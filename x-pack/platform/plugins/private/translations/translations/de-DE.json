@@ -38566,8 +38566,6 @@
     "xpack.securitySolution.attackDetailsFlyout.content.jsonTabLabel": "JSON",
     "xpack.securitySolution.attackDetailsFlyout.content.overviewTabLabel": "Überblick",
     "xpack.securitySolution.attackDetailsFlyout.content.tableTabLabel": "Tabelle",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.backgroundTitle": "Hintergrund",
-    "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.sectionTitle": "Angriffs-Zusammenfassung",
     "xpack.securitySolution.attackDetailsFlyout.overview.AISummary.showAnonymizedLabel": "Anonymisierte Werte anzeigen",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTitle": "Korrelation",
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.correlationTooltip": "Verwandte Warnmeldungen anzeigen",

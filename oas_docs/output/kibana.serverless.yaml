@@ -61501,7 +61501,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -61776,7 +61776,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve distinct values and their counts for the specified workflow fields. Useful for building filters such as lists of tags or creators.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: get-workflows-aggs
       parameters:
         - description: Field or fields to aggregate on.
@@ -61910,7 +61910,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid
       parameters:
         - description: Workflow execution ID
@@ -62071,7 +62071,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-children
       parameters:
         - description: Workflow execution ID
@@ -62134,7 +62134,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-logs
       parameters:
         - description: Workflow execution ID
@@ -62329,7 +62329,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-step-stepexecutionid
       parameters:
         - description: Workflow execution ID.
@@ -62427,7 +62427,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Export one or more workflows as JSON with YAML content and metadata.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Export one or more workflows as JSON with YAML content and metadata.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: post-workflows-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62631,7 +62631,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve multiple workflows by their IDs in a single request. Optionally use the `source` parameter to return only specific fields from each workflow document.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: post-workflows-mget
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -62795,7 +62795,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -63266,7 +63266,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read.
+        Retrieve a single workflow by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read.
       operationId: get-workflows-workflow-id
       parameters:
         - description: Workflow ID
@@ -63641,7 +63641,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions
       parameters:
         - description: Workflow ID
@@ -63877,7 +63877,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution.
+        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions-steps
       parameters:
         - description: Workflow ID

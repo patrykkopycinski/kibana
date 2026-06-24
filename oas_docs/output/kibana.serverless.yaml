@@ -8069,12 +8069,15 @@ paths:
           name: product_name
   /api/asset_criticality:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
 
         Delete the asset criticality record for a specific entity.
       operationId: DeleteAssetCriticalityRecord
@@ -8126,6 +8129,7 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -8133,7 +8137,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the asset criticality record for a specific entity.
+        **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
@@ -8168,12 +8172,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
 
         Create or update an asset criticality record for a specific entity.
 
@@ -8214,12 +8221,15 @@ paths:
           name: product_name
   /api/asset_criticality/bulk:
     post:
+      deprecated: true
       description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality/bulk</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
 
         Bulk upsert up to 1000 asset criticality records.
 
@@ -8289,6 +8299,7 @@ paths:
           name: product_name
   /api/asset_criticality/list:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -8296,7 +8307,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List asset criticality records, paging, sorting and filtering as needed.
+        **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
       operationId: FindAssetCriticalityRecords
       parameters:
         - description: The field to sort by.

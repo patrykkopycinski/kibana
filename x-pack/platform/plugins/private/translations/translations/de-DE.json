@@ -43778,7 +43778,6 @@
     "xpack.securitySolution.flyout.left.insights.vulnerabilitiesButtonLabel": "Schwachstellen",
     "xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption": "Liste der gefundenen Sicherheitslücken",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel": "Vorschau der Schwachstellendetails",
-    "xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName": "Paket",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName": "CVE-ID",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityTitleColumnName": "Titel der Schwachstelle",
     "xpack.securitySolution.flyout.left.insights.vulnerability.tableTitle": "Sicherheitsrisiko",

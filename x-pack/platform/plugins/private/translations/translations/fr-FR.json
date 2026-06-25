@@ -43629,7 +43629,6 @@
     "xpack.securitySolution.flyout.left.insights.vulnerabilitiesButtonLabel": "Vulnérabilités",
     "xpack.securitySolution.flyout.left.insights.vulnerability.findingsTableCaption": "Liste des résultats des vulnérabilités",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel": "Prévisualiser les détails de la vulnérabilité",
-    "xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName": "Pack",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName": "ID CVE",
     "xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityTitleColumnName": "Titre de la vulnérabilité",
     "xpack.securitySolution.flyout.left.insights.vulnerability.tableTitle": "Vulnérabilité",

@@ -460,6 +460,40 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/actions/connector/{connectorId}/oauth/start:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{connectorId}/oauth/start</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        [Required authorization] Route required privileges: actions:oauth.
+      operationId: get-actions-connector-connectorid-oauth-start
+      parameters:
+        - description: An identifier for the connector.
+          in: path
+          name: connectorId
+          required: true
+          schema:
+            maxLength: 36
+            type: string
+      responses:
+        '302':
+          description: Redirects to the identity provider to begin OAuth authorization.
+        '400':
+          description: Invalid request, such as a disallowed returnUrl.
+        '401':
+          description: User is not authenticated.
+        '404':
+          description: Connector not found.
+      summary: Start OAuth authorization (redirects to the identity provider)
+      tags:
+        - connectors
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/actions/connector/{id}:
     delete:
       description: |-

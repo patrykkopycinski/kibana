@@ -79744,6 +79744,8 @@ components:
           type: array
         name:
           type: string
+        rolledBack:
+          type: boolean
         status:
           type: string
         title:

@@ -19878,7 +19878,6 @@
     "xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText": "无代理部署成功",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle": "确认传入数据",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle": "确认无代理注册",
-    "xpack.fleet.agentlessStepConfirmData.connectorCard.description": "配置连接器",
     "xpack.fleet.agentList.actionsColumnTitle": "操作",
     "xpack.fleet.agentList.addAgentButton.tooltip": "将 Elastic 代理添加到您的主机，以收集数据并将其发送到 Elastic Stack",
     "xpack.fleet.agentList.addButton": "添加代理",

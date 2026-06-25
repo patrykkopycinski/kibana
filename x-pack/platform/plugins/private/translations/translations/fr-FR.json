@@ -19771,7 +19771,6 @@
     "xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText": "Le déploiement sans agent a réussi",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle": "Confirmer les données entrantes",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle": "Confirmer l'enregistrement sans agent",
-    "xpack.fleet.agentlessStepConfirmData.connectorCard.description": "Configurer le connecteur",
     "xpack.fleet.agentList.actionsColumnTitle": "Actions",
     "xpack.fleet.agentList.addAgentButton.tooltip": "Ajoutez des agents Elastic à vos hôtes pour collecter des données et les envoyer à la Suite Elastic",
     "xpack.fleet.agentList.addButton": "Ajouter un agent",

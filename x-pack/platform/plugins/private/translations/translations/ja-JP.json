@@ -19875,7 +19875,6 @@
     "xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText": "エージェントレスデプロイが成功しました",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle": "受信データの確認",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle": "エージェント登録の確認",
-    "xpack.fleet.agentlessStepConfirmData.connectorCard.description": "コネクターを構成",
     "xpack.fleet.agentList.actionsColumnTitle": "アクション",
     "xpack.fleet.agentList.addAgentButton.tooltip": "Elastic エージェントをホストに追加し、データを収集して、Elastic Stack に送信します",
     "xpack.fleet.agentList.addButton": "エージェントの追加",

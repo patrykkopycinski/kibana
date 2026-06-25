@@ -19809,7 +19809,6 @@
     "xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText": "Die agentenlose Deployment war erfolgreich",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmDataTitle": "Bestätigen Sie die eingehenden Daten",
     "xpack.fleet.agentlessEnrollmentFlyout.stepConfirmEnrollmentTitle": "Agentenlose Registrierung bestätigen",
-    "xpack.fleet.agentlessStepConfirmData.connectorCard.description": "Connector konfigurieren",
     "xpack.fleet.agentList.actionsColumnTitle": "Aktionen",
     "xpack.fleet.agentList.addAgentButton.tooltip": "Fügen Sie Ihren Hosts Elastic Agents hinzu, um Daten zu sammeln und sie an den Elastic Stack zu senden.",
     "xpack.fleet.agentList.addButton": "Agent hinzufügen",

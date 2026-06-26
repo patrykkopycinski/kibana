@@ -2633,7 +2633,6 @@
     "dataViews.indexPatternLoad.error.kibanaRequest": "Ein KibanaRequest ist erforderlich, um diese Suche auf dem Server auszuführen. Geben Sie bitte ein Anfrageobjekt für die Ausdrucksausführungsparameter an.",
     "dataViews.rollupLabel": "Rollup (veraltet)",
     "dataViews.unableWriteLabel": "Datenquelle kann nicht geschrieben werden! Aktualisieren Sie die Seite, um die neuesten Änderungen für diese Datenquelle zu erhalten.",
-    "devTools.badge.betaLabel": "Beta",
     "devTools.badge.readOnly.text": "Lesezugriff",
     "devTools.badge.readOnly.tooltip": "Kann nicht gespeichert werden",
     "devTools.breadcrumb.homeLabel": "Entwicklungstools",

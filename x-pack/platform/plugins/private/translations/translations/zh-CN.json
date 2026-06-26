@@ -2650,7 +2650,6 @@
     "dataViews.indexPatternLoad.error.kibanaRequest": "在服务器上执行此搜索时需要 Kibana 请求。请向表达式执行模式参数提供请求对象。",
     "dataViews.rollupLabel": "汇总/打包（已过时）",
     "dataViews.unableWriteLabel": "无法写入数据视图！请刷新页面以获取此数据视图的最新更改。",
-    "devTools.badge.betaLabel": "公测版",
     "devTools.badge.readOnly.text": "只读",
     "devTools.badge.readOnly.tooltip": "无法保存",
     "devTools.breadcrumb.homeLabel": "开发工具",

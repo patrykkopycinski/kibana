@@ -2637,7 +2637,6 @@
     "dataViews.indexPatternLoad.error.kibanaRequest": "Une requête Kibana est nécessaire pour exécuter cette recherche sur le serveur. Veuillez fournir un objet de requête pour les paramètres d'exécution de l'expression.",
     "dataViews.rollupLabel": "Cumul (déclassé)",
     "dataViews.unableWriteLabel": "Impossible d'écrire la vue de données ! Actualisez la page pour obtenir la dernière version de cette vue de données.",
-    "devTools.badge.betaLabel": "Bêta",
     "devTools.badge.readOnly.text": "Lecture seule",
     "devTools.badge.readOnly.tooltip": "Enregistrement impossible",
     "devTools.breadcrumb.homeLabel": "Outils de développement",

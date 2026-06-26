@@ -2651,7 +2651,6 @@
     "dataViews.indexPatternLoad.error.kibanaRequest": "サーバーでこの検索を実行するには、KibanaRequestが必要です。式実行パラメーターに要求オブジェクトを渡してください。",
     "dataViews.rollupLabel": "ロールアップ（廃止予定）",
     "dataViews.unableWriteLabel": "データビューを書き込めません。このデータビューへの最新の変更を取得するには、ページを更新してください。",
-    "devTools.badge.betaLabel": "ベータ",
     "devTools.badge.readOnly.text": "読み取り専用",
     "devTools.badge.readOnly.tooltip": "保存できませんでした",
     "devTools.breadcrumb.homeLabel": "開発ツール",

@@ -57897,7 +57897,6 @@ paths:
                       simulate: true
                       text_structure: true
                       view_index_metadata: true
-                    queries: []
                     rules: []
                     stream:
                       description: Web server access logs, routed by severity
@@ -57966,7 +57965,6 @@ paths:
               createQueryStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: All error-level logs across every stream
@@ -57977,7 +57975,6 @@ paths:
               createWiredStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: Web server access logs, routed by severity
@@ -58007,7 +58004,6 @@ paths:
               updateClassicStream:
                 value:
                   dashboards: []
-                  queries: []
                   rules: []
                   stream:
                     description: Legacy application logs managed as a classic data stream
@@ -58523,7 +58519,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Exports a content pack with the stream structure (routing, mappings, and processing). Significant-event queries are not included; manage them via the /api/streams/{name}/queries endpoints.<br/><br/>[Required authorization] Route required privileges: manage_stream.
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -58587,7 +58583,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
+        Imports stream structure (routing, mappings, and processing) from a content pack into a stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -70415,60 +70411,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              expires_at:
-                format: date-time
-                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                type: string
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -70562,7 +70504,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_collapseBy:
       description: Aggregation function used to collapse a breakdown dimension into a single value.
@@ -71011,15 +70952,6 @@ components:
               properties:
                 mappings:
                   type: boolean
-                queries:
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                    required:
-                      - id
-                  type: array
                 routing:
                   items:
                     allOf:
@@ -71033,7 +70965,6 @@ components:
                   type: array
               required:
                 - mappings
-                - queries
                 - routing
           required:
             - objects
@@ -94084,60 +94015,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              expires_at:
-                format: date-time
-                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                type: string
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -94183,7 +94060,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
@@ -102705,60 +102581,6 @@ components:
           items:
             type: string
           type: array
-        queries:
-          items:
-            type: object
-            properties:
-              description:
-                type: string
-              esql:
-                type: object
-                properties:
-                  query:
-                    type: string
-                required:
-                  - query
-              evidence:
-                items:
-                  type: string
-                type: array
-              expires_at:
-                format: date-time
-                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z))$
-                type: string
-              features:
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    run_id:
-                      type: string
-                  required:
-                    - id
-                type: array
-              id:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              severity_score:
-                type: number
-              title:
-                description: A non-empty string.
-                minLength: 1
-                type: string
-              type:
-                default: match
-                enum:
-                  - match
-                  - stats
-                type: string
-            required:
-              - id
-              - title
-              - description
-              - esql
-          type: array
         rules:
           items:
             type: string
@@ -102878,7 +102700,6 @@ components:
       required:
         - dashboards
         - rules
-        - queries
         - stream
     Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting:
       additionalProperties: false

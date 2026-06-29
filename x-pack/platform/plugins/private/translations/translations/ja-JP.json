@@ -22182,7 +22182,7 @@
     "xpack.fleet.setupTechnology.agentlessInputDisplay": "エージェントレス",
     "xpack.fleet.setupTechnology.integrationSubtitle": "{integrationName}をElasticに接続する方法。",
     "xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription": "Elastic Agentをデプロイして環境から選択した{integrationName}を収集します。すでにエージェントを実行している場合や、より多くのコントロールが必要な場合が最適です。",
-    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "インフラストラクチャをデプロイすることなく、選択された{integrationName}を直接収集します。簡単なセットアップと迅速なオンボーディングに最適です。",
+    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "簡単なセットアップと迅速なオンボーディングに最適です。",
     "xpack.fleet.setupTechnology.radioCardAgentlessInputDisplay": "エージェントレス",
     "xpack.fleet.setupTechnology.setupTechnologyDescription": "この統合のデプロイモードを選択します。",
     "xpack.fleet.setupTechnology.setupTechnologyLabel": "デプロイオプション",

@@ -22185,7 +22185,7 @@
     "xpack.fleet.setupTechnology.agentlessInputDisplay": "无代理",
     "xpack.fleet.setupTechnology.integrationSubtitle": "如何将 {integrationName} 连接到 Elastic。",
     "xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription": "部署 Elastic Agent 以从您的环境中收集选定的{integrationName}。如果您已经运行代理，或需要更多控制，则此选项最佳。",
-    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "直接收集选定的 {integrationName}，无需部署任何基础架构。最适合简单设置和更快的上手。",
+    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "最适合简单设置和更快的上手。",
     "xpack.fleet.setupTechnology.radioCardAgentlessInputDisplay": "无代理",
     "xpack.fleet.setupTechnology.setupTechnologyDescription": "为此集成选择部署模式。",
     "xpack.fleet.setupTechnology.setupTechnologyLabel": "部署选项",

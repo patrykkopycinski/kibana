@@ -22057,7 +22057,7 @@
     "xpack.fleet.setupTechnology.agentlessInputDisplay": "Sans agent",
     "xpack.fleet.setupTechnology.integrationSubtitle": "Comment connecter {integrationName} à Elastic.",
     "xpack.fleet.setupTechnology.radioCardAgentbasedInputDescription": "Déployez Elastic Agent pour collecter l'intégration {integrationName} sélectionnée dans votre environnement. C'est la meilleure solution si vous gérez déjà des agents ou si vous avez besoin de plus de contrôle.",
-    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "Collectez directement l'intégration {integrationName} sélectionnée, sans déployer d’infrastructure. Idéal pour une configuration simple et une prise en main plus rapide.",
+    "xpack.fleet.setupTechnology.radioCardAgentlessInputDescription": "Idéal pour une configuration simple et une prise en main plus rapide.",
     "xpack.fleet.setupTechnology.radioCardAgentlessInputDisplay": "Sans agent",
     "xpack.fleet.setupTechnology.setupTechnologyDescription": "Sélectionnez un mode de déploiement pour cette intégration.",
     "xpack.fleet.setupTechnology.setupTechnologyLabel": "Options de déploiement",

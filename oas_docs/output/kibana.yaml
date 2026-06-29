@@ -115760,10 +115760,30 @@ components:
           additionalProperties: false
           description: The parameters for the synthetics tls rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.tls`.
           properties:
+            browserResourceTypes:
+              items:
+                maxLength: 1024
+                type: string
+              maxItems: 100
+              type: array
             certAgeThreshold:
               type: number
             certExpirationThreshold:
               type: number
+            certOrigin:
+              items:
+                maxLength: 256
+                type: string
+              maxItems: 100
+              type: array
+            includeBrowserCerts:
+              type: boolean
+            issuers:
+              items:
+                maxLength: 4096
+                type: string
+              maxItems: 1000
+              type: array
             kqlQuery:
               type: string
             locations:

@@ -50661,7 +50661,6 @@
     "xpack.streams.dataLifecycleSummary.downsamplingStepsLabel": "ダウンサンプリングステップ",
     "xpack.streams.dataLifecycleSummary.maxDownsampleStepsTooltip": "最大{max}件のダウンサンプリングステップ",
     "xpack.streams.dataLifecycleSummary.panelLabel": "データフェーズ",
-    "xpack.streams.dataManagement.streamDetailLifecycle.indefinite": "無期限",
     "xpack.streams.dataSource.dataSourceSelector.ariaLabel": "データソースを選択...",
     "xpack.streams.dataSourceCard.completeSimulationBadgeLabel": "このデータソースは、元のデータコンテンツが保証されているため、パイプライン全体をシミュレートできます。",
     "xpack.streams.dataSourceCard.completeSimulationBadgeShortLabel": "完了",

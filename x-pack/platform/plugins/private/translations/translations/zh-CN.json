@@ -50653,7 +50653,6 @@
     "xpack.streams.dataLifecycleSummary.downsamplingStepsLabel": "下采样步骤",
     "xpack.streams.dataLifecycleSummary.maxDownsampleStepsTooltip": "最多 {max} 次下采样步骤",
     "xpack.streams.dataLifecycleSummary.panelLabel": "数据阶段",
-    "xpack.streams.dataManagement.streamDetailLifecycle.indefinite": "无限期",
     "xpack.streams.dataSource.dataSourceSelector.ariaLabel": "选择数据源...",
     "xpack.streams.dataSourceCard.completeSimulationBadgeLabel": "这个数据源可以模拟整个管道，因为原始数据内容是有保证的。",
     "xpack.streams.dataSourceCard.completeSimulationBadgeShortLabel": "已完成",

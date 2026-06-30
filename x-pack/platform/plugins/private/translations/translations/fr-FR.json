@@ -50309,7 +50309,6 @@
     "xpack.streams.dataLifecycleSummary.downsamplingStepsLabel": "Étapes de sous-échantillonnage",
     "xpack.streams.dataLifecycleSummary.maxDownsampleStepsTooltip": "Maximum de {max} étapes de sous-échantillonnage",
     "xpack.streams.dataLifecycleSummary.panelLabel": "Phases des données",
-    "xpack.streams.dataManagement.streamDetailLifecycle.indefinite": "Indéfini",
     "xpack.streams.dataSource.dataSourceSelector.ariaLabel": "Sélectionnez une source de données...",
     "xpack.streams.dataSourceCard.completeSimulationBadgeLabel": "Cette source de données peut simuler l'ensemble du pipeline, car le contenu des données d'origine est garanti.",
     "xpack.streams.dataSourceCard.completeSimulationBadgeShortLabel": "Terminé",

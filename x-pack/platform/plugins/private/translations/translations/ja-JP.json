@@ -38673,8 +38673,6 @@
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers": "関連するユーザー",
     "xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle": "インサイト",
     "xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel": "概要",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle": "攻撃チェーン",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.sectionTitle": "可視化",
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "フィールド",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "フィールドまたは値でフィルタリング...",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "値",

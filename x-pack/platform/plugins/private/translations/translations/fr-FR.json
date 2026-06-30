@@ -38472,8 +38472,6 @@
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers": "Utilisateurs associés",
     "xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle": "Informations",
     "xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel": "Aperçu",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle": "Chaîne d'attaque",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.sectionTitle": "Visualisations",
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "Champ",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "Filtrer par champ ou par valeur...",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "Valeur",

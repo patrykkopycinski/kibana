@@ -38679,8 +38679,6 @@
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers": "相关用户",
     "xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle": "洞见",
     "xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel": "概览",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle": "攻击链",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.sectionTitle": "可视化",
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "字段",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "按字段或值筛选......",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "值",

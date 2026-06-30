@@ -38554,8 +38554,6 @@
     "xpack.securitySolution.attackDetailsFlyout.overview.insights.relatedUsers": "Verwandte Nutzer",
     "xpack.securitySolution.attackDetailsFlyout.overview.insightsSection.sectionTitle": "Einblicke",
     "xpack.securitySolution.attackDetailsFlyout.overview.overviewContentAriaLabel": "Überblick",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.attackChainTitle": "Angriffskette",
-    "xpack.securitySolution.attackDetailsFlyout.overview.visualizationsSection.sectionTitle": "Visualisierungen",
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "Feld",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "Nach Feld oder Wert filtern …",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "Wert",

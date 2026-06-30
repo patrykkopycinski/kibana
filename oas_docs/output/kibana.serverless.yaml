@@ -6523,6 +6523,127 @@ paths:
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-snooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+        - description: Set to `true` to validate that the specified alert exists. If a `400` error is returned, the specified alert does not exist. Defaults to `true`.
+          in: query
+          name: validate_alerts_existence
+          required: false
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                condition_operator:
+                  description: Logical operator applied to the conditions array. "any" expires the snooze when at least one condition is met; "all" requires every condition to be met. When conditions are provided but this field is omitted, defaults to "any".
+                  enum:
+                    - any
+                    - all
+                  type: string
+                conditions:
+                  description: 'One or more conditions that, when met, automatically expire the snooze. Supported types: `field_change`, `severity_change`, `severity_equals`.'
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        description: Expires the snooze when the value of the specified alert field changes.
+                        type: object
+                        properties:
+                          field:
+                            description: The alert field to watch, written as a dot-notation path. When the value of the specified alert field changes, the snooze expires
+                            maxLength: 1000
+                            type: string
+                          type:
+                            enum:
+                              - field_change
+                            type: string
+                        required:
+                          - type
+                          - field
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert changes.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_change
+                            type: string
+                        required:
+                          - type
+                      - additionalProperties: false
+                        description: Expires the snooze when the severity of the specified alert equals a target level.
+                        type: object
+                        properties:
+                          type:
+                            enum:
+                              - severity_equals
+                            type: string
+                          value:
+                            description: 'The target severity level: critical, high, medium, low, or info.'
+                            enum:
+                              - critical
+                              - high
+                              - medium
+                              - low
+                              - info
+                            type: string
+                        required:
+                          - type
+                          - value
+                  maxItems: 10
+                  type: array
+                expires_at:
+                  description: The datetime at which the snooze expires, in ISO 8601 format (`YYYY-MM-DDTHH:mm:ss.sssZ`). When omitted, the snooze persists indefinitely unless manually removed or a defined condition is met.
+                  maxLength: 30
+                  type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Snooze an alert
+      tags:
+        - alerting
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
@@ -6565,6 +6686,53 @@ paths:
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze:
+    post:
+      operationId: post-alerting-rule-rule-id-alert-alert-id-unsnooze
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The identifier for the rule.
+          in: path
+          name: rule_id
+          required: true
+          schema:
+            maxLength: 256
+            type: string
+        - description: The identifier for the alert.
+          in: path
+          name: alert_id
+          required: true
+          schema:
+            maxLength: 1000
+            type: string
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '400':
+          description: Indicates an invalid schema or parameters.
+        '403':
+          description: Indicates that this call is forbidden.
+        '404':
+          description: Indicates the specified rule or alert doesn't exist.
+      summary: Unsnooze an alert
+      tags:
+        - alerting
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
@@ -6701,7 +6869,8 @@ paths:
           required: false
           schema:
             type: string
-        - in: query
+        - description: 'Filters the returned rules by the consumer (Kibana application) that owns them, for example: `siem`, `apm`, `infrastructure`.'
+          in: query
           name: filter_consumers
           required: false
           schema:

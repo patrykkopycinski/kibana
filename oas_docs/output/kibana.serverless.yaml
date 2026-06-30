@@ -2715,6 +2715,14 @@ paths:
         content:
           application/json:
             examples:
+              conversePublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  connector_id: my-connector-id
+                  input: What is Elasticsearch?
               converseRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -2737,6 +2745,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2897,6 +2918,8 @@ paths:
                 converseResponseExample:
                   description: Example response containing the chain of events representing a conversation with the agent
                   value:
+                    access_control:
+                      access_mode: private
                     conversation_id: 696ccd6d-4bff-4b26-a62e-522ccf2dcd16
                     response:
                       message: Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.
@@ -2928,13 +2951,20 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "input": "What is Elasticsearch?",
-                "agent_id": "elastic-ai-agent"}'
+                "agent_id": "elastic-ai-agent",
+                "access_control": {
+                  "access_mode": "public"
+                }
+              }'
         - lang: Console
           source: |
             POST kbn://api/agent_builder/converse
             {
               "input": "What is Elasticsearch?",
-              "agent_id": "elastic-ai-agent"
+              "agent_id": "elastic-ai-agent",
+              "access_control": {
+                "access_mode": "public"
+              }
             }
       x-state: ''
       x-metaTags:
@@ -3141,6 +3171,13 @@ paths:
         content:
           application/json:
             examples:
+              converseAsyncPublicRequestExample:
+                description: Example request to create a public conversation
+                value:
+                  access_control:
+                    access_mode: public
+                  agent_id: elastic-ai-agent
+                  input: Hello
               converseAsyncRequestExample:
                 description: Example request to send a message to the agent as a part of the conversation
                 value:
@@ -3163,6 +3200,19 @@ paths:
                     - local
                     - task_manager
                   type: string
+                access_control:
+                  additionalProperties: false
+                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  type: object
+                  properties:
+                    access_mode:
+                      description: Access mode to apply when creating a new conversation. Set to public to make the conversation visible to other users who can access the underlying agent. This setting is ignored when continuing an existing conversation.
+                      enum:
+                        - private
+                        - public
+                      type: string
+                  required:
+                    - access_mode
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3355,6 +3405,13 @@ paths:
                             response:
                               message: Hello! How can I help you today?
                       event: round_complete
+                    - data:
+                        data:
+                          access_control:
+                            access_mode: private
+                          conversation_id: c250305b-1929-4248-b568-b9e3f065fda5
+                          title: Hello
+                      event: conversation_created
           description: Indicates a successful response
       summary: Send chat message (streaming)
       tags:

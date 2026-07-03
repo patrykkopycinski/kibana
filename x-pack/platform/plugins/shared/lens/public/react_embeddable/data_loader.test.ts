@@ -73,6 +73,7 @@ async function expectRerenderOnDataLoader(
         query$: BehaviorSubject<Query | AggregateQuery | undefined>;
         timeRange$: BehaviorSubject<TimeRange | undefined>;
         esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
+        isApproximate$: BehaviorSubject<boolean | undefined>;
       } & LensOverrides
     >;
     internalApiOverrides?: Partial<LensInternalApi>;
@@ -380,6 +381,57 @@ describe('Data Loader', () => {
           { from: 'now-7d', to: 'now' },
           undefined
         ),
+      }
+    );
+  });
+
+  it('should propagate isApproximate from parent API to search context', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: true,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: { isApproximate$: new BehaviorSubject<boolean | undefined>(true) },
+      }
+    );
+  });
+
+  it('should handle undefined isApproximate from parent API', async () => {
+    await expectRerenderOnDataLoader(
+      async ({ internalApi }) => {
+        await waitForValue(
+          internalApi.expressionParams$,
+          (v: unknown) => isObject(v) && 'searchContext' in v
+        );
+
+        const params = internalApi.expressionParams$.getValue()!;
+        expect(params.searchContext).toEqual(
+          expect.objectContaining({
+            isApproximate: undefined,
+          })
+        );
+
+        return false;
+      },
+      undefined,
+      {
+        parentApiOverrides: createUnifiedSearchApi({ query: '', language: 'kuery' }, [], {
+          from: 'now-7d',
+          to: 'now',
+        }),
       }
     );
   });

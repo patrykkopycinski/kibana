@@ -6,10 +6,11 @@
  */
 
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
-import type {
-  PolicyExecutionHistoryItem,
-  PolicyExecutionOutcome,
-  SearchMatchCounts,
+import {
+  MAX_EMBEDDED_RULES_PER_ITEM,
+  type PolicyExecutionHistoryItem,
+  type PolicyExecutionOutcome,
+  type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
@@ -82,31 +83,54 @@ export function collectIdsFromEvents(events: IValidatedEvent[]): {
 export function getRelevantRuleIdsFromLogEvent(
   policyId: string,
   allRuleIds: string[],
-  matchingSearchIds?: ResolvedSearchIds
+  matchingSearchIds?: ResolvedSearchIds,
+  mandatoryRuleIds?: string[]
 ): string[] {
-  if (!matchingSearchIds || matchingSearchIds.policyIds.includes(policyId)) {
+  const searchNarrows =
+    matchingSearchIds !== undefined && !matchingSearchIds.policyIds.includes(policyId);
+  const mandatoryActive = mandatoryRuleIds !== undefined && mandatoryRuleIds.length > 0;
+
+  if (!searchNarrows && !mandatoryActive) {
     return allRuleIds;
   }
 
-  return allRuleIds.filter((ruleId) => matchingSearchIds.ruleIds.includes(ruleId));
+  const relevantRuleIds = new Set<string>([
+    ...(searchNarrows ? matchingSearchIds.ruleIds : []),
+    ...(mandatoryActive ? mandatoryRuleIds : []),
+  ]);
+
+  return allRuleIds.filter((id) => relevantRuleIds.has(id));
 }
 
-export function denormalizeEvent(
+/**
+ * Builds an execution history item for a given log event.
+ * @param event The validated log event
+ * @param param1 An object containing name maps for policies, rules, and workflows
+ * @param matchingSearchIds Used to decide which rules are relevant for the current
+ * log event. A rule is relevant if it is search scoped, either because search is not active,
+ * or because the rule, or its parent policy, is in the resolved search IDs.
+ * @param mandatoryRuleIds An array of rule IDs. When provided, the resulting execution
+ * history item will only include rules that are in this list. If undefined, all relevant
+ * rules will be included.
+ * @returns A policy execution history item or null if the event is not relevant
+ */
+export function buildExecutionHistoryItem(
   event: IValidatedEvent,
   { policyNames, ruleNames, workflowNames }: NameMaps,
-  matchingSearchIds?: ResolvedSearchIds
-): PolicyExecutionHistoryItem[] {
+  matchingSearchIds?: ResolvedSearchIds,
+  mandatoryRuleIds?: string[]
+): PolicyExecutionHistoryItem | null {
   if (!event || (matchingSearchIds && !matchingSearchIds.hasMatches)) {
-    return [];
+    return null;
   }
 
   const timestamp = event['@timestamp'];
   const action = event.event?.action;
-  if (!timestamp || !isPolicyOutcome(action)) return [];
+  if (!timestamp || !isPolicyOutcome(action)) return null;
 
   const savedObjects = event.kibana?.saved_objects ?? [];
   const policyId = savedObjects.find((so) => so.type === ACTION_POLICY_SAVED_OBJECT_TYPE)?.id;
-  if (!policyId) return [];
+  if (!policyId) return null;
 
   const dispatcher = event.kibana?.alerting_v2?.dispatcher ?? {};
 
@@ -114,19 +138,31 @@ export function denormalizeEvent(
     .filter((so) => so.type === RULE_SAVED_OBJECT_TYPE)
     .map((so) => so.id);
   const allRuleIds = [...referencedRuleIds, ...(dispatcher.rule_ids ?? [])].filter(isString);
-  const relevantRuleIds = getRelevantRuleIdsFromLogEvent(policyId, allRuleIds, matchingSearchIds);
+  const relevantRuleIds = getRelevantRuleIdsFromLogEvent(
+    policyId,
+    allRuleIds,
+    matchingSearchIds,
+    mandatoryRuleIds
+  );
+  if (relevantRuleIds.length === 0) return null;
+
+  const totalRuleCount = relevantRuleIds.length;
+  const rules = relevantRuleIds
+    .slice(0, MAX_EMBEDDED_RULES_PER_ITEM)
+    .map((id) => ({ id, name: ruleNames.get(id) ?? null }));
 
   const workflows = (dispatcher.workflow_ids ?? [])
     .filter(isString)
     .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
 
-  return relevantRuleIds.map((ruleId) => ({
+  return {
     '@timestamp': timestamp,
     policy: { id: policyId, name: policyNames.get(policyId) ?? null },
-    rule: { id: ruleId, name: ruleNames.get(ruleId) ?? null },
     outcome: action,
     episode_count: Number(dispatcher.episode_count ?? 0),
     action_group_count: Number(dispatcher.action_group_count ?? 0),
+    rules,
+    totalRuleCount,
     workflows,
-  }));
+  };
 }

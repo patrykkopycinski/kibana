@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PAGINATION_DEFAULT_PER_PAGE = 20;
-export const PAGINATION_MAX_SIZE = 1000;
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
 
-export const AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG = 'asCode.useGASchemas';
-export const AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT = true;
+export async function getUseGASchemas(core: CoreRequestHandlerContext): Promise<boolean> {
+  return core.featureFlags.getBooleanValue(
+    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  );
+}

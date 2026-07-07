@@ -7,9 +7,9 @@
 
 import Mustache from 'mustache';
 import type { Detection, Discovery } from '@kbn/significant-events-schema';
-import investigatorUserPrompt from './user_prompt.text';
+import discoveryUserPrompt from './user_prompt.text';
 
-export interface InvestigatorInputParams {
+export interface DiscoveryInputParams {
   /** Short unique string used verbatim by the agent as the new-episode slug suffix. */
   episodeSuffix: string;
   /** The unhandled detection batch (one latest doc per rule). */
@@ -19,15 +19,15 @@ export interface InvestigatorInputParams {
 }
 
 /**
- * Build the investigator agent's user message — the same shape the production batch workflow sends.
+ * Build the discovery agent's user message — the same shape the production batch workflow sends.
  * `## Continuation Candidates` is omitted when there are none.
  */
-export function buildInvestigatorInput({
+export function buildDiscoveryInput({
   episodeSuffix,
   detections,
   continuationCandidates = [],
-}: InvestigatorInputParams): string {
-  return Mustache.render(investigatorUserPrompt, {
+}: DiscoveryInputParams): string {
+  return Mustache.render(discoveryUserPrompt, {
     episodeSuffix,
     activeBatch: JSON.stringify(detections),
     continuationCandidates: continuationCandidates.length

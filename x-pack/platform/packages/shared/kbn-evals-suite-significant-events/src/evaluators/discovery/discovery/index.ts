@@ -8,29 +8,29 @@
 import { selectEvaluators } from '@kbn/evals';
 import { createScenarioCriteriaLlmEvaluator } from '../../scenario_criteria/evaluators';
 import type { CreateScenarioCriteriaLlmEvaluatorOptions } from '../../scenario_criteria/evaluators';
-import type { InvestigatorEvaluator } from '../types';
+import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
-import { createInvestigatorToolUsageEvaluator } from './tool_usage/tool_usage';
+import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
   createCriticalityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
-import { schemaValidityInvestigatorEvaluator } from './schema/schema_validity';
+import { schemaValidityDiscoveryEvaluator } from './schema/schema_validity';
 import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 
 /**
- * Factory that creates the full set of evaluators for the investigator agent eval suite.
+ * Factory that creates the full set of evaluators for the discovery agent eval suite.
  */
-export const createInvestigatorEvaluators = (
+export const createDiscoveryEvaluators = (
   scenarioCriteria?: CreateScenarioCriteriaLlmEvaluatorOptions
-): InvestigatorEvaluator[] => {
-  const codeEvaluators: InvestigatorEvaluator[] = [
-    schemaValidityInvestigatorEvaluator,
+): DiscoveryEvaluator[] => {
+  const codeEvaluators: DiscoveryEvaluator[] = [
+    schemaValidityDiscoveryEvaluator,
     groupingCorrectnessEvaluator,
     evidenceCollectionEvaluator,
-    createInvestigatorToolUsageEvaluator(),
+    createDiscoveryToolUsageEvaluator(),
     createExecuteEsqlGroundingEvaluator(),
   ];
 

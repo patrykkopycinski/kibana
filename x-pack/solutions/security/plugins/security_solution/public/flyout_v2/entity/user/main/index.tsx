@@ -23,7 +23,8 @@ import { ENTITY_ANALYTICS_TABLE_ID } from '../../../../entity_analytics/componen
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
@@ -39,12 +40,14 @@ import {
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { RiskInputs } from '../../shared/tools/risk_inputs';
 import { MisconfigurationInsights } from '../../shared/tools/misconfiguration_insights';
-import { VulnerabilityInsights } from '../tools/vulnerability_insights';
 import { AlertsInsights } from '../../shared/tools/alerts_insights';
+import { OktaInsights } from '../tools/okta_insights';
+import { EntraInsights } from '../tools/entra_insights';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
-import { useObservedHost } from './hooks/use_observed_host';
+import { useObservedUser } from './hooks/use_observed_user';
+import { useManagedUser } from '../../../../flyout/entity_details/shared/hooks/use_managed_user';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -60,7 +63,7 @@ import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
 } from '../../../../flyout/document_details/shared/utils';
-import { HOST_PANEL_RISK_SCORE_QUERY_ID } from './constants';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from './constants';
 import {
   useEntityPanelTabs,
   TABLE_TAB_ID,
@@ -69,20 +72,20 @@ import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
 
-export interface HostProps {
+export interface UserProps {
   /**
-   * Display name from the source row / document (typically `host.name`).
+   * Display name from the source row / document (typically `user.name`).
    */
-  hostName: string;
+  userName: string;
   /**
    * The source document record. When provided, entityId is computed from the document's
-   * host identity fields using the EUID API. Falls back to the `entityId` prop if the
+   * user identity fields using the EUID API. Falls back to the `entityId` prop if the
    * EUID API returns no value.
    */
   hit?: DataTableRecord;
   /**
-   * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
-   * Used directly when `hit` is not provided, or as a fallback when EUID resolution from `hit` yields no value.
+   * Canonical Entity Store v2 id (`entity.id`) when already resolved.
+   * Used directly when `hit` is not provided, or as a fallback when EUID resolution yields no value.
    */
   entityId?: string;
   /**
@@ -90,7 +93,7 @@ export interface HostProps {
    */
   scopeId?: string;
   /**
-   * Stable identifier for the host panel context (defaults to `scopeId` or a static fallback).
+   * Stable identifier for the user panel context (defaults to `scopeId` or a static fallback).
    */
   contextID?: string;
 }
@@ -101,14 +104,12 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 /**
- * Standalone host details flyout content (for use with `overlays.openSystemFlyout`).
- *
- * Runs the same data hooks as the v1 `HostPanel`, but without the expandable-flyout
- * navigation or preview-mode handling. Detail panels (risk inputs, graph view, etc.)
+ * Runs the same data hooks as the v1 `UserPanel`, but without the expandable-flyout
+ * navigation or preview-mode handling. Detail panels (risk inputs, Okta, Entra, etc.)
  * open as separate system flyouts via `overlays.openSystemFlyout`.
  */
-export const Host: FC<HostProps> = memo(function Host({
-  hostName,
+export const User: FC<UserProps> = memo(function User({
+  userName,
   hit,
   entityId: entityIdProp,
   scopeId = '',
@@ -120,9 +121,8 @@ export const Host: FC<HostProps> = memo(function Host({
   const history = useHistory();
   const euidApi = useEntityStoreEuidApi();
 
-  // Compute entityId from hit when provided, otherwise use the prop
   const entityId = useMemo(
-    () => (hit ? euidApi?.euid?.getEuidFromObject('host', hit.flattened) : entityIdProp),
+    () => (hit ? euidApi?.euid?.getEuidFromObject('user', hit.flattened) : entityIdProp),
     [hit, euidApi, entityIdProp]
   );
   const assetInventoryEnabled = uiSettings.get(ENABLE_ASSET_INVENTORY_SETTING, true);
@@ -131,43 +131,43 @@ export const Host: FC<HostProps> = memo(function Host({
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
-  const safeContextID = contextID ?? scopeId ?? 'host-panel';
+  const safeContextID = contextID ?? scopeId ?? 'user-panel';
   const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
-  const hostStoreIdentityFields = useMemo(
-    () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
-    [entityId, hostName]
+  const userStoreIdentityFields = useMemo(
+    () => (!entityId && userName ? { 'user.name': userName } : undefined),
+    [entityId, userName]
   );
 
   const entityFromStoreResult = useEntityFromStore({
     entityId,
-    identityFields: hostStoreIdentityFields,
-    entityType: 'host',
+    identityFields: userStoreIdentityFields,
+    entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     const legacyFields =
-      hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
+      userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     if (entityStoreV2Enabled) {
       const fromStore =
         euidApi?.euid?.getEntityIdentifiersFromDocument(
-          'host',
+          'user',
           entityFromStoreResult.entityRecord
         ) ?? {};
       return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
     }
     return legacyFields;
-  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, hostName]);
+  }, [entityStoreV2Enabled, euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
 
-  const hostNameFilterQuery = useMemo(
-    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
-    [hostName]
+  const userNameFilterQuery = useMemo(
+    () => (userName ? buildUserNamesFilter([userName]) : undefined),
+    [userName]
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: EntityType.host,
-    filterQuery: hostNameFilterQuery,
+    riskEntity: EntityType.user,
+    filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: entityStoreV2Enabled,
@@ -175,8 +175,10 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { inspect: inspectRiskScore, refetch, loading } = riskScoreState;
 
-  const observedHost = useObservedHost(
-    hostName,
+  const managedUser = useManagedUser();
+
+  const observedUser = useObservedUser(
+    userName,
     scopeId,
     entityStoreV2Enabled ? entityFromStoreResult : undefined
   );
@@ -188,9 +190,9 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
-      entityType: EntityType.host,
-      identifier: hostName,
-      entityId: entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : undefined,
+      entityType: EntityType.user,
+      identifier: userName,
+      entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
@@ -202,18 +204,18 @@ export const Host: FC<HostProps> = memo(function Host({
     calculateEntityRiskScore();
   }, [calculateEntityRiskScore, refetchEntitiesTable]);
 
-  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('host', {
+  const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: onAssetCriticalityChanged,
   });
 
-  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityId ?? hostName);
+  const assetCriticalityPrivileges = useAssetCriticalityPrivileges(entityIdProp ?? userName);
 
   const panelDisplayEntityId = useMemo(
-    () => (entityStoreV2Enabled ? observedHost.entityRecord?.entity?.id : entityId),
-    [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
+    () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityId),
+    [entityId, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
   );
 
-  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedHost.entityRecord != null;
+  const useEntityStoreInspectForRisk = entityStoreV2Enabled && observedUser.entityRecord != null;
 
   useQueryInspector({
     deleteQuery,
@@ -221,19 +223,19 @@ export const Host: FC<HostProps> = memo(function Host({
       ? entityFromStoreResult?.inspect ?? null
       : inspectRiskScore,
     loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
-    queryId: HOST_PANEL_RISK_SCORE_QUERY_ID,
+    queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
     refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? noop : refetch,
     setQuery,
   });
 
   const entityFromStore: EntityStoreRecord | undefined = entityStoreV2Enabled
-    ? observedHost.entityRecord ?? undefined
+    ? observedUser.entityRecord ?? undefined
     : undefined;
   const riskScoreStateFromStore =
-    entityStoreV2Enabled && observedHost.entityRecord
-      ? buildRiskScoreStateFromEntityRecord(EntityType.host, observedHost.entityRecord, {
-          refetch: observedHost.refetchEntityStore ?? noop,
-          isLoading: observedHost.isLoading,
+    entityStoreV2Enabled && observedUser.entityRecord
+      ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+          refetch: observedUser.refetchEntityStore ?? noop,
+          isLoading: observedUser.isLoading,
           error: null,
           inspect: entityFromStoreResult?.inspect,
         })
@@ -244,20 +246,20 @@ export const Host: FC<HostProps> = memo(function Host({
   const onCriticalitySave =
     !!assetCriticalityPrivileges.data?.has_write_permissions &&
     entityFromStoreResult.entityRecord &&
-    observedHost.entityRecord
+    observedUser.entityRecord
       ? (level: CriticalityLevelWithUnassigned) =>
-          updateAssetCriticalityLevel(level, observedHost.entityRecord)
+          updateAssetCriticalityLevel(level, observedUser.entityRecord)
       : undefined;
 
   const entityStoreEntityId = entityStoreV2Enabled
-    ? observedHost.entityRecord?.entity?.id
+    ? observedUser.entityRecord?.entity?.id
     : undefined;
 
   const noEntityInStore =
-    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedHost.entityRecord;
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !observedUser.entityRecord;
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
-    entityRecord: observedHost.entityRecord ?? null,
+    entityRecord: observedUser.entityRecord ?? null,
   });
 
   const tabsNode = tabs ? (
@@ -268,15 +270,15 @@ export const Host: FC<HostProps> = memo(function Host({
     />
   ) : undefined;
 
-  const onShowHost = useCallback(() => {
+  const onOpenUser = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
         services,
         store,
         history,
-        children: <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
+        children: <User userName={userName} entityId={entityId} scopeId={scopeId} />,
       }),
-      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' }
+      { ...defaultDocumentFlyoutProperties, title: userName, historyKey, session: 'inherit' }
     );
   }, [
     overlays,
@@ -284,7 +286,7 @@ export const Host: FC<HostProps> = memo(function Host({
     store,
     history,
     historyKey,
-    hostName,
+    userName,
     entityId,
     scopeId,
     defaultDocumentFlyoutProperties,
@@ -294,7 +296,7 @@ export const Host: FC<HostProps> = memo(function Host({
     (path: EntityDetailsPath) => {
       const common = {
         ...defaultToolsFlyoutProperties,
-        title: hostName,
+        title: userName,
         historyKey,
         session: 'start' as const,
       };
@@ -305,41 +307,61 @@ export const Host: FC<HostProps> = memo(function Host({
         case EntityDetailsLeftPanelTab.RISK_INPUTS:
           return wrap(
             <RiskInputs
-              entityType={EntityType.host}
-              entityName={hostName}
+              entityType={EntityType.user}
+              entityName={userName}
               entityId={entityStoreEntityId}
-              onShowEntity={onShowHost}
+              onShowEntity={onOpenUser}
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
           switch (path.subTab) {
-            case CspInsightLeftPanelSubTab.VULNERABILITIES:
-              return wrap(
-                <VulnerabilityInsights
-                  value={hostName}
-                  entityId={panelDisplayEntityId}
-                  onShowHost={onShowHost}
-                />
-              );
             case CspInsightLeftPanelSubTab.ALERTS:
               return wrap(
                 <AlertsInsights
-                  entityType={EntityType.host}
-                  value={hostName}
+                  entityType={EntityType.user}
+                  value={userName}
                   entityId={panelDisplayEntityId}
-                  onShowEntity={onShowHost}
+                  onShowEntity={onOpenUser}
                 />
               );
             case CspInsightLeftPanelSubTab.MISCONFIGURATIONS:
               return wrap(
                 <MisconfigurationInsights
-                  entityType={EntityType.host}
-                  value={hostName}
+                  entityType={EntityType.user}
+                  value={userName}
                   entityId={panelDisplayEntityId}
-                  onShowEntity={onShowHost}
+                  onShowEntity={onOpenUser}
                 />
               );
           }
+          break;
+        // TODO: currently dead (v1 accessed through left pane tabs, need to perhaps add preview?)
+        case EntityDetailsLeftPanelTab.OKTA: {
+          const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
+          if (oktaManagedUser) {
+            return wrap(
+              <OktaInsights
+                managedUser={oktaManagedUser}
+                value={userName}
+                onOpenUser={onOpenUser}
+              />
+            );
+          }
+          break;
+        }
+        case EntityDetailsLeftPanelTab.ENTRA: {
+          const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
+          if (entraManagedUser) {
+            return wrap(
+              <EntraInsights
+                managedUser={entraManagedUser}
+                value={userName}
+                onOpenUser={onOpenUser}
+              />
+            );
+          }
+          break;
+        }
       }
     },
     [
@@ -348,15 +370,16 @@ export const Host: FC<HostProps> = memo(function Host({
       store,
       history,
       historyKey,
-      hostName,
+      userName,
       panelDisplayEntityId,
       entityStoreEntityId,
-      onShowHost,
+      managedUser,
+      onOpenUser,
     ]
   );
 
-  const riskLevel = observedHost.entityRecord
-    ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+  const riskLevel = observedUser.entityRecord
+    ? ((getRiskFromEntityRecord(observedUser.entityRecord)?.calculated_level ??
         'Unknown') as RiskSeverity)
     : undefined;
 
@@ -364,30 +387,31 @@ export const Host: FC<HostProps> = memo(function Host({
     <>
       <EuiFlyoutHeader hasBorder>
         <Header
-          hostName={hostName}
-          lastSeen={observedHost.lastSeen}
+          userName={userName}
+          managedUser={managedUser}
+          lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
           identityFields={documentEntityIdentifiers}
-          isEntityInStore={!!observedHost.entityRecord}
+          isEntityInStore={!!observedUser.entityRecord}
           riskLevel={riskLevel}
         />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {observedHost.entityRecord && (
+        {observedUser.entityRecord && (
           <EntitySummaryGrid
-            entityRecord={observedHost.entityRecord}
+            entityRecord={observedUser.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
           />
         )}
         {tabsNode}
         {tabs && <EuiSpacer size="l" />}
-        {tabs && selectedTabId === TABLE_TAB_ID && observedHost.entityRecord ? (
-          <EntityStoreTableTab entityRecord={observedHost.entityRecord} />
+        {tabs && selectedTabId === TABLE_TAB_ID && observedUser.entityRecord ? (
+          <EntityStoreTableTab entityRecord={observedUser.entityRecord} />
         ) : (
           <Content
             identityFields={documentEntityIdentifiers}
-            observedHost={observedHost}
+            observedUser={observedUser}
             riskScoreState={effectiveRiskScoreState}
             entityRiskScores={entityRiskScores}
             contextID={safeContextID}
@@ -396,13 +420,9 @@ export const Host: FC<HostProps> = memo(function Host({
             recalculatingScore={recalculatingScore}
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
-            entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
+            entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
-            // The v2 flyout does not yet wire up the graph view / resolution group tabs, so hide
-            // their navigation here. v1 HostPanel and the agent-builder canvas keep it (default).
-            // TODO: remove this prop (and `enableGraphAndResolutionNavigation` in content.tsx) once
-            // `openDetailsPanel` handles the GRAPH_VIEW and RESOLUTION_GROUP tabs in this flyout.
             enableGraphAndResolutionNavigation={false}
             hideHeaderIcons
           />
@@ -417,4 +437,4 @@ export const Host: FC<HostProps> = memo(function Host({
   );
 });
 
-Host.displayName = 'Host';
+User.displayName = 'User';

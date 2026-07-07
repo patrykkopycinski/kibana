@@ -7,13 +7,37 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EntityMaintainerTaskMethodContext } from '../../tasks/entity_maintainers/types';
-import { RESOLUTION_RULE_IDS } from '../../../common/domain/resolution_rules/constants';
+import type { EntityMaintainerTaskMethodContext } from '../../../../../tasks/entity_maintainers/types';
+import {
+  RESOLUTION_RULE_IDS,
+  RESOLUTION_RULE_KINDS,
+} from '../../../../../../common/domain/resolution_rules/constants';
 import { automatedResolutionMaintainerConfig, MAINTAINER_ID } from '.';
+import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import type { AutomatedResolutionState } from './types';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+const ALIAS_RESOLUTION_RULE = RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION;
 const NAMESPACE = 'default';
+
+jest.mock('../related_user_alias_resolution', () => ({
+  runRelatedUserAliasResolution: jest.fn(),
+}));
+
+const DEFAULT_EFFECTIVE_RULES = [
+  {
+    id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+    kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    managed: true,
+    enabled: true,
+  },
+  {
+    id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
+    kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
+    managed: true,
+    enabled: false,
+  },
+];
 
 const noEmailsSearchResponse = {
   aggregations: {
@@ -41,7 +65,8 @@ const createEsClient = () =>
 
 const runConfig = async (
   esClient: ElasticsearchClient,
-  persistedState: unknown
+  persistedState: unknown,
+  effectiveRules = DEFAULT_EFFECTIVE_RULES
 ): Promise<AutomatedResolutionState> => {
   const context = {
     status: {
@@ -58,6 +83,9 @@ const runConfig = async (
     logger: loggerMock.create(),
     esClient,
     cpsEsClient: esClient,
+    resolutionRulesClient: {
+      getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
+    },
     telemetry: { report: jest.fn() },
   } as unknown as EntityMaintainerTaskMethodContext;
 
@@ -118,5 +146,39 @@ describe('automatedResolutionMaintainerConfig', () => {
       resolutionsCreated: 0,
       skippedAmbiguousBuckets: 0,
     });
+  });
+
+  it('skips disabled alias resolution rule and preserves its existing state', async () => {
+    const esClient = createEsClient();
+    const aliasResolutionState = {
+      lastProcessedTimestamp: '2026-06-01T00:00:00Z',
+      lastRun: {
+        seedsScanned: 10,
+        linksCreated: 2,
+      },
+    };
+
+    const result = await runConfig(
+      esClient,
+      { rules: { [ALIAS_RESOLUTION_RULE]: aliasResolutionState } },
+      [
+        {
+          id: EMAIL_RULE,
+          kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+          managed: true,
+          enabled: false,
+        },
+        {
+          id: ALIAS_RESOLUTION_RULE,
+          kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
+          managed: true,
+          enabled: false,
+        },
+      ]
+    );
+
+    expect(runRelatedUserAliasResolution).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual(aliasResolutionState);
   });
 });

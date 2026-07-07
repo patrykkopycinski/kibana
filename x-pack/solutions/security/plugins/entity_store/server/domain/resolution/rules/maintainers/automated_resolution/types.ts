@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityMaintainerState } from '../../tasks/entity_maintainers/types';
+import type { EntityMaintainerState } from '../../../../../tasks/entity_maintainers/types';
 
 // These extend `EntityMaintainerState` (the framework's JSON-serializable task-state
 // type) so the maintainer can hand them to task-manager directly, without casting at
@@ -17,7 +17,7 @@ export interface PerRuleLastRunStats extends EntityMaintainerState {
 
 export interface PerRuleState extends EntityMaintainerState {
   lastProcessedTimestamp: string | null;
-  lastRun: PerRuleLastRunStats | null;
+  lastRun: EntityMaintainerState | null;
 }
 
 // `rules` is an open map keyed by rule id rather than a fixed set: a rule with no

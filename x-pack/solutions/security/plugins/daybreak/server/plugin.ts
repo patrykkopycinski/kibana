@@ -11,12 +11,16 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import type { ConfigType } from '../common/config';
-import type { DaybreakPluginSetup, DaybreakPluginStart } from './types';
+import type { DaybreakPluginSetup, DaybreakPluginStart, DaybreakPluginStartDeps } from './types';
+import { runSpikeWorkflow } from './workflow/run_spike_workflow';
 
-export class DaybreakPlugin implements Plugin<DaybreakPluginSetup, DaybreakPluginStart> {
+export class DaybreakPlugin
+  implements Plugin<DaybreakPluginSetup, DaybreakPluginStart, never, DaybreakPluginStartDeps>
+{
   private readonly logger: Logger;
   private readonly config: ConfigType;
 
@@ -35,13 +39,27 @@ export class DaybreakPlugin implements Plugin<DaybreakPluginSetup, DaybreakPlugi
     return {};
   }
 
-  public start(core: CoreStart): DaybreakPluginStart {
+  public start(core: CoreStart, deps: DaybreakPluginStartDeps): DaybreakPluginStart {
     if (!this.config.enabled) {
       return {};
     }
 
     this.logger.debug('daybreak: Started');
-    return {};
+
+    const engine = deps.workflowsExecutionEngine;
+    if (!engine) {
+      this.logger.warn('daybreak: workflowsExecutionEngine not available — runner disabled');
+      return {};
+    }
+
+    return {
+      runSpikeWorkflow: (request: KibanaRequest) =>
+        runSpikeWorkflow({
+          executeWorkflow: engine.executeWorkflow,
+          logger: this.logger,
+          request,
+        }).then(() => undefined),
+    };
   }
 
   public stop() {

@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/daybreak-plugin",
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Daybreak alert-analysis workflow engine spike (PD-1)",
+  "plugin": {
+    "id": "daybreak",
+    "browser": false,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "daybreak"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [
+      "workflowsExecutionEngine"
+    ]
+  }
+}

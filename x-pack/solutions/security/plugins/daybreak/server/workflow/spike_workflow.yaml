@@ -1,0 +1,43 @@
+# PD-1 Spike Workflow — validates the Kibana Workflow Engine can express the
+# alert-analysis worker step shape (HTTP fetch + conditional guard + AI
+# inference) using shipped YAML syntax (FR-001..FR-007).
+#
+# Gated behind the daybreak experimental flag, default off (FR-007, NFR-2).
+# This is a capability-validation definition only — not wired to a live
+# connector or a production trigger.
+version: '1'
+name: Daybreak Alert Analysis Spike
+description: >-
+  Minimal workflow exercising HTTP fetch, conditional guard, and AI inference
+  step types to validate the Kibana Workflow Engine can express the
+  alert-analysis worker shape (PD-1).
+enabled: false
+triggers:
+  - type: manual
+steps:
+  # Step 1 — HTTP fetch (FR-002): kibana.request step type calls an internal
+  # Kibana API route and returns parsed structured output.
+  - name: fetch_alert_summary
+    type: kibana.request
+    with:
+      method: GET
+      path: '/internal/detection_engine/signals/_alerts_summary'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+
+  # Step 2 — Conditional guard (FR-003, FR-005): if step with a KQL condition
+  # expression and a nested steps array — the shipped syntax, not the README
+  # illustrative if:/then: form.
+  - name: guard_has_alerts
+    type: if
+    condition: 'steps.fetch_alert_summary.output.total:*'
+    steps:
+      # Step 3 — Stub AI invocation (FR-004): connector step with a connector-id
+      # and a with sub-action. Uses the echo_inference stub connector
+      # (actionTypeId: inference) to produce structured JSON output without a
+      # live model call.
+      - name: analyze_alert
+        type: inference
+        connector-id: inference_connector
+        with:
+          text: 'Analyze alert summary for triage insights.'

@@ -1,0 +1,81 @@
+# PD-2 Worker Workflow — real 5-phase alert-analysis worker.
+# Setup → Guard → Enrich → Reason → Act (FR-006).
+#
+# Gated behind the daybreak experimental flag, default off (FR-007, NFR-2).
+# This is the production workflow definition; the integration test
+# (alert_analysis_worker.test.ts) exercises the Setup phase and enabled-gate
+# short-circuit with an inline YAML compatible with the WorkflowRunFixture.
+version: '1'
+name: Daybreak Alert Analysis Worker
+description: >-
+  Real 5-phase alert-analysis worker: Setup (config load) → Guard (idempotency)
+  → Enrich (evidence packaging) → Reason (ai.agent) → Act (proposal emission).
+  Gated behind the daybreak experimental flag, default off (FR-006, FR-007, NFR-2).
+enabled: false
+triggers:
+  - type: manual
+steps:
+  # Phase 1 — Setup (FR-007): load per-space runtime config (enabled flag,
+  # connector, thresholds) via a kibana.request config-fetch step.
+  - name: setup
+    type: kibana.request
+    with:
+      method: GET
+      path: '/internal/daybreak/config'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+
+  # Enabled gate: short-circuit the entire worker when the per-space config
+  # has enabled: false (FR-007).  All subsequent phases are nested inside
+  # this guard so a disabled space produces no side-effects.
+  - name: guard_enabled
+    type: if
+    condition: 'steps.setup.output.enabled: true'
+    steps:
+      # Phase 2 — Guard (FR-008): idempotency/dedup check.  Skips processing
+      # when the alert already carries this worker's result tag.
+      - name: guard
+        type: if
+        condition: 'NOT steps.setup.output.already_tagged: true'
+        steps:
+          # Phase 3 — Enrich (FR-009): package real evidence from the alert
+          # into a compact ground-truth block, structurally separate from
+          # the Reason-phase framing/rubric (NFR-4 prompt-injection control).
+          - name: enrich
+            type: kibana.request
+            with:
+              method: GET
+              path: '/internal/detection_engine/signals/_alerts_summary'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+
+          # Phase 4 — Reason (FR-010): ai.agent step invoking the
+          # daybreak-alert-analysis agent scoped to the alert-analysis skill.
+          # MUST NOT use deprecated inference.* / bedrock.* / gen-ai.* step
+          # types (FR-011).
+          - name: reason
+            type: ai.agent
+            agent-id: daybreak-alert-analysis-agent
+            with:
+              message: >-
+                Analyze the following alert evidence and produce a structured
+                triage verdict: {{ steps.enrich.output | json }}
+            timeout: 600s
+
+          # Output validation guard (FR-015, FR-016): halts the workflow on
+          # malformed or empty ai.agent output rather than emitting a silent
+          # wrong verdict.
+          - name: validate_reasoning
+            type: if
+            condition: 'steps.reason.output.structured_output: *'
+            steps:
+              # Phase 5 — Act (FR-014): emit a Proposal/Result record with
+              # an auditable shape (actor, timestamp, rationale) and gate
+              # any consequential action behind approval.
+              - name: act
+                type: kibana.request
+                with:
+                  method: POST
+                  path: '/internal/daybreak/proposals'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'

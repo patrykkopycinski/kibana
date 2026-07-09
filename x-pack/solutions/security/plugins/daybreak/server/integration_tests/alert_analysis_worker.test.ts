@@ -24,6 +24,12 @@ const DISABLED_SETUP_CONFIG = {
   already_tagged: false,
 };
 
+const ALREADY_TAGGED_SETUP_CONFIG = {
+  ...DISABLED_SETUP_CONFIG,
+  enabled: true,
+  already_tagged: true,
+};
+
 const ALERT_ANALYSIS_WORKER_SETUP_DISABLED_YAML = `
 steps:
   - name: setup
@@ -125,6 +131,35 @@ describe('alert analysis worker workflow', () => {
     expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
     expect(guardEnabled?.input).toHaveProperty('conditionResult', false);
     expect(getStepExecutions(workflowRunFixture, 'guard')).toHaveLength(0);
+    expect(getStepExecutions(workflowRunFixture, 'enrich')).toHaveLength(0);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('halts at the Guard step when the alert already carries the result tag (FR-006, FR-008)', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue(
+      createMockJsonResponse(ALREADY_TAGGED_SETUP_CONFIG)
+    );
+
+    await workflowRunFixture.runWorkflow({
+      workflowYaml: ALERT_ANALYSIS_WORKER_SETUP_DISABLED_YAML,
+    });
+
+    const workflowExecution =
+      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        'fake_workflow_execution_id'
+      );
+    const guardEnabled = getStepExecutions(workflowRunFixture, 'guard_enabled').find(
+      (stepExecution) =>
+        (stepExecution.input as JsonObject | undefined)?.conditionResult !== undefined
+    );
+    const guard = getStepExecutions(workflowRunFixture, 'guard').find(
+      (stepExecution) =>
+        (stepExecution.input as JsonObject | undefined)?.conditionResult !== undefined
+    );
+
+    expect(workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+    expect(guardEnabled?.input).toHaveProperty('conditionResult', true);
+    expect(guard?.input).toHaveProperty('conditionResult', false);
     expect(getStepExecutions(workflowRunFixture, 'enrich')).toHaveLength(0);
     expect(global.fetch).toHaveBeenCalledTimes(1);
   });

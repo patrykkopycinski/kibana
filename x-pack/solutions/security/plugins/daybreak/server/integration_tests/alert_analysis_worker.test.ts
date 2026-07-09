@@ -13,6 +13,8 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import { z } from '@kbn/zod/v4';
 import { ALERT_ANALYSIS_AGENT_ID } from '../agent_builder/ensure_alert_analysis_agent';
+import { requireReadinessGate, ReadinessGateError } from '../client/proposals/gate';
+import type { ProposalProperties } from '../client/proposals/types';
 import ALERT_ANALYSIS_WORKER_YAML from '../workflow/alert_analysis_worker.yaml';
 
 const DISABLED_SETUP_CONFIG = {
@@ -43,6 +45,18 @@ const ENABLED_NOT_TAGGED_CONFIG = {
 const MOCK_ALERT_SUMMARY = {
   total: 1,
   alert_ids: ['alert-1'],
+};
+
+const MOCK_CREATED_PROPOSAL: ProposalProperties = {
+  id: 'proposal-from-worker-1',
+  title: 'Alert triage proposal',
+  capability: 'detection',
+  severity: 'high',
+  confidence: 0.85,
+  status: 'new',
+  evidenceRefs: [],
+  decisionHistory: [],
+  createdAt: '2025-01-01T00:00:00.000Z',
 };
 
 const ALERT_ANALYSIS_WORKER_SETUP_DISABLED_YAML = `
@@ -136,6 +150,49 @@ const stubRunAgentStep = createServerStepDefinition({
 const wireReasonStepStub = (fixture: WorkflowRunFixture) => {
   (fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
     (id: string) => (id === REASON_STEP_TYPE ? stubRunAgentStep : undefined)
+  );
+  (fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => id === REASON_STEP_TYPE
+  );
+};
+
+const STRUCTURED_TRIAGE_VERDICT = {
+  verdict: 'true_positive',
+  confidence: 0.85,
+  rationale: 'Alert pattern matches known attack signature with high signal-to-noise ratio.',
+};
+
+const stubRunAgentStepWithStructuredOutput = createServerStepDefinition({
+  id: REASON_STEP_TYPE,
+  category: StepCategory.Ai,
+  label: 'ai.agent (test stub — structured output)',
+  description:
+    'Extended stub that includes structured_output so the validate_reasoning gate passes and the Act phase executes.',
+  inputSchema: z.object({ message: z.string() }),
+  outputSchema: z.object({
+    message: z.string(),
+    agent_id: z.string().optional(),
+    structured_output: z
+      .object({
+        verdict: z.string(),
+        confidence: z.number(),
+        rationale: z.string(),
+      })
+      .optional(),
+  }),
+  configSchema: z.object({ 'agent-id': z.string().optional() }),
+  handler: async (context) => ({
+    output: {
+      message: context.input.message,
+      agent_id: context.config['agent-id'],
+      structured_output: STRUCTURED_TRIAGE_VERDICT,
+    },
+  }),
+});
+
+const wireActPhaseStub = (fixture: WorkflowRunFixture) => {
+  (fixture.dependencies.workflowsExtensions.getStepDefinition as jest.Mock).mockImplementation(
+    (id: string) => (id === REASON_STEP_TYPE ? stubRunAgentStepWithStructuredOutput : undefined)
   );
   (fixture.dependencies.workflowsExtensions.hasStepDefinition as jest.Mock).mockImplementation(
     (id: string) => id === REASON_STEP_TYPE
@@ -282,5 +339,78 @@ describe('Reason phase — ai.agent step (FR-010, FR-011, FR-012, FR-013)', () =
     expect((reason?.output as { agent_id?: string } | undefined)?.agent_id).toBe(
       ALERT_ANALYSIS_AGENT_ID
     );
+  });
+});
+
+describe('Act phase — readiness gate blocks pending proposal (FR-014)', () => {
+  let workflowRunFixture: WorkflowRunFixture;
+
+  beforeAll(async () => {
+    (global.fetch as jest.Mock).mockImplementation((url: string) => {
+      if (String(url).includes('/internal/daybreak/config')) {
+        return createMockJsonResponse(ENABLED_NOT_TAGGED_CONFIG);
+      }
+      if (String(url).includes('/internal/detection_engine/signals/_alerts_summary')) {
+        return createMockJsonResponse(MOCK_ALERT_SUMMARY);
+      }
+      // POST /internal/daybreak/proposals — Act phase Proposal emission
+      return createMockJsonResponse(MOCK_CREATED_PROPOSAL);
+    });
+
+    workflowRunFixture = new WorkflowRunFixture();
+    wireActPhaseStub(workflowRunFixture);
+    (workflowRunFixture.fakeKibanaRequest as { headers?: Record<string, string> }).headers = {
+      authorization: 'Api-Key c29tZS1rZXk=',
+    };
+
+    await workflowRunFixture.runWorkflow({ workflowYaml: ALERT_ANALYSIS_WORKER_YAML });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  const getActStep = () => {
+    const executions = getStepExecutions(workflowRunFixture, 'act');
+    return executions.find((stepExecution) => stepExecution.status === ExecutionStatus.COMPLETED);
+  };
+
+  // FR-014 — the Act phase emits a Proposal/Result record with an auditable
+  // shape (actor, timestamp, rationale) via a POST to the proposals endpoint.
+  it('emits a Proposal via the Act step POST (FR-014)', () => {
+    const act = getActStep();
+
+    expect(act).toBeDefined();
+    const proposal = act?.output as ProposalProperties | undefined;
+    expect(proposal).toEqual(MOCK_CREATED_PROPOSAL);
+    expect(proposal?.createdAt).toBeDefined();
+    expect(proposal?.decisionHistory).toEqual([]);
+  });
+
+  // FR-014 — a pending Proposal (status 'new', no evidence, no recommendation)
+  // blocks the consequential action (transition to 'approved') via
+  // requireReadinessGate — fail closed without approval.
+  it('blocks approval of a pending proposal via requireReadinessGate — fail closed (FR-014)', () => {
+    const act = getActStep();
+    expect(act).toBeDefined();
+
+    const pendingProposal = act?.output as unknown as ProposalProperties;
+
+    expect(() => requireReadinessGate(pendingProposal, 'approved')).toThrow(ReadinessGateError);
+  });
+
+  // FR-014 counter-factual — once the proposal accumulates evidence and a
+  // recommendation, the gate allows the consequential action.
+  it('allows approval when the proposal satisfies the readiness gate (FR-014)', () => {
+    const act = getActStep();
+    expect(act).toBeDefined();
+
+    const satisfiedProposal: ProposalProperties = {
+      ...(act?.output as unknown as ProposalProperties),
+      evidenceRefs: ['evidence-1'],
+      recommendation: 'Escalate to the IR team immediately.',
+    };
+
+    expect(() => requireReadinessGate(satisfiedProposal, 'approved')).not.toThrow();
   });
 });

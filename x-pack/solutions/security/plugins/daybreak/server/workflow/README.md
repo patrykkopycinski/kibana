@@ -134,11 +134,152 @@ leading edges of the A-1 (wiring) and A-2 (shape) unknowns:
 
 ---
 
+## PD-2 — The real 5-phase worker (`alert_analysis_worker.yaml`)
+
+PD-2 delivered the production worker as a single shipped workflow definition,
+`alert_analysis_worker.yaml`, gated behind `xpack.daybreak.enabled` (default
+`false`, FR-007/NFR-2). Five phases, each a step (or nested `if` guard) in the
+same file the runtime executes — there is no separate "prod" copy that can
+drift from what CI validates:
+
+| Phase | Step id | Step type | Purpose | FR |
+|---|---|---|---|---|
+| 1. Setup | `setup` | `kibana.request` | Load per-space runtime config (`enabled`, `connector`, `thresholds`, `already_tagged`) | FR-007 |
+| — enabled gate | `guard_enabled` | `if` | Short-circuits the whole worker when the space config has `enabled: false` — every later phase nests inside this guard | FR-007 |
+| 2. Guard | `guard` | `if` | Idempotency/dedup check — skips when the alert already carries this worker's result tag (`NOT ... already_tagged: true`) | FR-008 |
+| 3. Enrich | `enrich` | `kibana.request` | Packages real alert evidence from `/internal/detection_engine/signals/_alerts_summary`, kept structurally separate from Reason-phase framing (NFR-4 prompt-injection control) | FR-009 |
+| 4. Reason | `reason` | `ai.agent` | Structured triage via the Agent Builder agent (`ALERT_ANALYSIS_AGENT_ID`); guarded by `validate_reasoning` so a malformed/missing `structured_output` fails closed before Act runs | FR-010 |
+| 5. Act | `act` | `kibana.request` | Emits the Proposal via `POST /internal/daybreak/proposals`, producing a document that satisfies the full `ProposalProperties` shape | FR-011 |
+
+`reason` always uses the recognized `ai.agent` step type, never a deprecated
+connector type — asserted directly by the FR-9 e2e gate below
+(`isDeprecatedStepType`).
+
+---
+
+## PD-3 — The two-gate eval architecture
+
+PD-3 answers "how do we know the worker still works?" with **two independent
+gates**, each catching a different class of regression. Both must be green;
+neither substitutes for the other.
+
+```
+                 ┌─────────────────────────────┐        ┌──────────────────────────────┐
+                 │   Gate 1 — Offline Dataset   │        │  Gate 2 — Live UI-Journey     │
+                 │   (server/evals/*)           │        │  (server/integration_tests/  │
+                 │                               │        │   alert_analysis_e2e.test.ts)│
+                 ├───────────────────────────────┤        ├───────────────────────────────┤
+                 │ Golden alert evidence         │        │ Real 5-phase worker YAML       │
+                 │  → deterministic reasoning    │        │  → WorkflowRunFixture engine   │
+                 │  → shape-match scorer         │        │  → full Proposal ES document   │
+                 │                               │        │                               │
+                 │ Fast, no engine, no HTTP      │        │ Exercises the real workflow    │
+                 │ Proves the REASONING is right │        │ Proves the WIRING is right     │
+                 └───────────────────────────────┘        └───────────────────────────────┘
+```
+
+### Gate 1 — Offline Dataset Gate (FR-8)
+
+Files: `server/evals/golden_dataset.ts`, `server/evals/offline_dataset_gate.ts`,
+`server/evals/alert_analysis_eval.test.ts`, `server/evals/generate_eval_report.ts`.
+
+- **Dataset** (`golden_dataset.ts`) — a small golden set of
+  `AlertEvidence → ExpectedProposalShape` rows (`daybreakGoldenDataset`). Two
+  nominal rows (one true-positive/escalate, one false-positive/dismiss) plus
+  one **deliberately-broken** row (see FR-10/A-3 below). Deliberately
+  framework-agnostic (no `@kbn/evals` runtime import) so it can be adopted
+  verbatim by a future `kbn-evals-suite-daybreak` package via
+  `satisfies EvaluationDataset`.
+- **Reasoning task** (`reasonOverAlertEvidence` in `offline_dataset_gate.ts`) —
+  a deterministic mirror of the Reason phase's triage logic (stance-signal
+  balance → true/false positive, severity weight → confidence, both →
+  status/recommendation polarity). Deterministic on purpose: the gate must be
+  reproducible without a live model call.
+- **Scorer** (`scoreProposalShape`) — compares the produced
+  `ExpectedProposalShape` against the golden expected shape: exact match on
+  `capability`/`severity`/`status`, `confidence` within
+  `CONFIDENCE_TOLERANCE` (0.15), escalate/dismiss polarity match on
+  `recommendation` prose, non-empty `title`. Returns `score: 1` (match) or
+  `score: 0` (mismatch) with a mismatch-list `explanation`.
+- **Runner** (`runOfflineExperiment`) — a minimal in-process mirror of
+  `@kbn/evals`'s `EvalsExecutorClient.runExperiment`: iterates every example
+  through the task then every evaluator, structurally identical to the real
+  contract so swapping to `executorClient.runExperiment` later is a drop-in
+  change.
+- **Report** (`generate_eval_report.ts`) — `generateEvalReport` /
+  `writeEvalReport` roll the per-example scores into a versioned JSON report
+  (`data/daybreak-alert-analysis-eval-report.json` via `@kbn/fs`) with a single
+  `summary.gatePassed` boolean CI can key off of.
+
+**Pass condition (FR-8):** every nominal row scores `1` AND every broken row
+scores `0`.
+
+### Gate 2 — Live UI-Journey Gate (FR-9)
+
+File: `server/integration_tests/alert_analysis_e2e.test.ts`.
+
+FR-9 calls for a Playwright/Scout test against a live stack. Since no UI panel
+exists yet (PD-4 not delivered on this branch), this gate takes the documented
+fallback: it drives the **real, shipped** `alert_analysis_worker.yaml`
+end-to-end through `WorkflowRunFixture` (real engine runtime; `fetch` and the
+Reason-phase `ai.agent` step definition are the only mocked boundaries) and
+asserts against the ES document directly instead of a rendered panel.
+
+- Mocks `fetch` for the three HTTP boundaries the worker calls
+  (`/internal/daybreak/config`, `/internal/detection_engine/signals/_alerts_summary`,
+  `/internal/daybreak/proposals`).
+- Stubs the `ai.agent` step definition with a deterministic
+  `structured_output` triage verdict so `validate_reasoning` passes and Act
+  actually runs (the fixture cannot host a live Agent Builder execution
+  service).
+- Runs `workflowRunFixture.runWorkflow({ workflowYaml: ALERT_ANALYSIS_WORKER_YAML })`
+  — the **production YAML import**, not an inline copy, so the gate fails the
+  moment the shipped definition drifts.
+- Asserts:
+  1. the workflow execution reaches `ExecutionStatus.COMPLETED` with no error;
+  2. the Reason phase dispatches as `ai.agent` (never a deprecated connector
+     type — `isDeprecatedStepType`) and carries the expected `agent_id`;
+  3. the Act phase's output matches the full `ProposalProperties` shape field
+     by field (not a subset);
+  4. a freshly-emitted (`status: 'new'`) Proposal fails
+     `requireReadinessGate(..., 'approved')` — fail-closed is enforced at the
+     document level, not just by convention.
+
+### FR-10 / A-3 — Non-vacuous gate proof
+
+`golden_dataset.ts` ships one row, `BROKEN_FLIPPED_RECOMMENDATION`
+(`daybreak-golden-broken-flipped-ransomware`), whose evidence unambiguously
+describes a critical ransomware true positive but whose `output` is
+**intentionally flipped** (dismiss, low severity, confidence 0.1). Gate 1
+scores this row `0` — the worker's real reasoning cannot match the wrong
+expected shape — and `alert_analysis_eval.test.ts` asserts:
+
+- the broken row scores `0` (mismatch), never `1`;
+- the mismatch `explanation` is non-empty;
+- at least **two independent fields** disagree (severity, status, confidence,
+  and recommendation polarity all flip together), so a single-field
+  false-negative in the scorer cannot mask the regression;
+- the full-gate contract holds: `gatePassed` is `true` **iff** all nominal
+  rows match **and** all broken rows fail.
+
+If this row ever scored `1`, the gate would be vacuous (matching anything) —
+that is the exact regression `BROKEN_EXAMPLE_IDS` / this test exists to catch.
+
+---
+
 ## Files
 
 | File | Role |
 |---|---|
-| `spike_workflow.yaml` | The 3-step spike workflow definition (FR-001..FR-005) |
-| `alert_analysis_workflow.ts` | Parses + schema-validates the YAML via `WorkflowSchema` (FR-005) |
-| `run_spike_workflow.ts` | Runner: triggers via `executeWorkflow`, logs step I/O (FR-008..FR-010) |
-| `../integration_tests/workflow_engine_shape.test.ts` | End-to-end shape-validation test (FR-011..FR-014) |
+| `spike_workflow.yaml` | PD-1 spike: 3-step shape-validation definition (FR-001..FR-005) |
+| `alert_analysis_workflow.ts` | Parses + schema-validates the spike YAML via `WorkflowSchema` (FR-005) |
+| `run_spike_workflow.ts` | PD-1 spike runner: triggers via `executeWorkflow`, logs step I/O (FR-008..FR-010) |
+| `alert_analysis_worker.yaml` | PD-2: the real, shipped 5-phase worker (Setup → Guard → Enrich → Reason → Act) (FR-006..FR-011) |
+| `run_alert_analysis_worker.ts` | PD-2 runner wiring the worker into `DaybreakPlugin.start()`, gated by config | 
+| `output_validation_guard.ts` | `validate_reasoning` guard — fails closed when the Reason phase's `structured_output` is missing/malformed | 
+| `../evals/golden_dataset.ts` | Gate 1 (FR-8): golden `AlertEvidence → ExpectedProposalShape` dataset, including the FR-10/A-3 broken row |
+| `../evals/offline_dataset_gate.ts` | Gate 1 (FR-8): deterministic reasoning task + shape-match scorer + experiment runner |
+| `../evals/generate_eval_report.ts` | Gate 1: rolls per-example scores into a versioned JSON report via `@kbn/fs` |
+| `../evals/alert_analysis_eval.test.ts` | Gate 1 (FR-8, FR-10, A-3) suite-level pass/fail assertions |
+| `../integration_tests/alert_analysis_e2e.test.ts` | Gate 2 (FR-9): live-journey e2e against the real worker YAML via `WorkflowRunFixture` |
+| `../integration_tests/workflow_engine_shape.test.ts` | PD-1 spike: end-to-end shape-validation test (FR-011..FR-014) |

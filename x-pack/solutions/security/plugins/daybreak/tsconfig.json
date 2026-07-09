@@ -15,10 +15,12 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/workflows",
+    "@kbn/workflows-extensions",
     "@kbn/workflows-execution-engine",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/zod",
     "@kbn/logging-mocks"
   ],
   "exclude": [

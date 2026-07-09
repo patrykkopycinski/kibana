@@ -53,6 +53,15 @@ steps:
           # daybreak-alert-analysis agent scoped to the alert-analysis skill.
           # MUST NOT use deprecated inference.* / bedrock.* / gen-ai.* step
           # types (FR-011).
+          #
+          # A-4 — retry/backoff for the ai.agent call is wired through the
+          # engine's generic step-level `on-failure.retry` config (inherited
+          # from BaseConnectorStepSchema), not the ai.agent-specific config.
+          # The graph builder compiles this block into enter-retry / exit-retry
+          # nodes around the step. `continue: false` makes retry exhaustion a
+          # hard stop — the worker fail-closes (no Proposal emitted) instead of
+          # silently swallowing the model error, closing the PD-1 README §3
+          # "Fail-closed on error is NOT an engine built-in" gap.
           - name: reason
             type: ai.agent
             agent-id: daybreak-alert-analysis-agent
@@ -61,6 +70,15 @@ steps:
                 Analyze the following alert evidence and produce a structured
                 triage verdict: {{ steps.enrich.output | json }}
             timeout: 600s
+            on-failure:
+              retry:
+                max-attempts: 3
+                strategy: exponential
+                delay: 2s
+                multiplier: 2
+                max-delay: 30s
+                jitter: true
+              continue: false
 
           # Output validation guard (FR-015, FR-016): halts the workflow on
           # malformed or empty ai.agent output rather than emitting a silent

@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/fs",
     "@kbn/i18n",
     "@kbn/workflows",
     "@kbn/workflows-extensions",

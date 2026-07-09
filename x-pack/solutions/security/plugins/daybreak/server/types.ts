@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 // ---------------------------------------------------------------------------
 // Plugin lifecycle contracts
@@ -15,6 +16,11 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 /** Setup contract exposed to other plugins by the Daybreak plugin. */
 export type DaybreakPluginSetup = Record<string, never>;
+
+/** Optional plugin dependencies consumed during setup. */
+export interface DaybreakPluginSetupDeps {
+  spaces?: SpacesPluginSetup;
+}
 
 /** Optional plugin dependencies consumed during start. */
 export interface DaybreakPluginStartDeps {

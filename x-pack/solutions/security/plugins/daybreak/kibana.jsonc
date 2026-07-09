@@ -18,7 +18,8 @@
     "requiredPlugins": [],
     "optionalPlugins": [
       "workflowsExecutionEngine",
-      "agentBuilder"
+      "agentBuilder",
+      "spaces"
     ]
   }
 }

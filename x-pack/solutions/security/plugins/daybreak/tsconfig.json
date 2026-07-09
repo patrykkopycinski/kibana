@@ -21,6 +21,8 @@
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
+    "@kbn/core-spaces-common",
+    "@kbn/spaces-plugin",
     "@kbn/zod",
     "@kbn/logging-mocks"
   ],

@@ -13,13 +13,26 @@ import type {
   Logger,
   KibanaRequest,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { ConfigType } from '../common/config';
-import type { DaybreakPluginSetup, DaybreakPluginStart, DaybreakPluginStartDeps } from './types';
+import type {
+  DaybreakPluginSetup,
+  DaybreakPluginSetupDeps,
+  DaybreakPluginStart,
+  DaybreakPluginStartDeps,
+} from './types';
 import { runSpikeWorkflow } from './workflow/run_spike_workflow';
+import { registerRoutes } from './http_routes';
 
 export class DaybreakPlugin
-  implements Plugin<DaybreakPluginSetup, DaybreakPluginStart, never, DaybreakPluginStartDeps>
+  implements
+    Plugin<
+      DaybreakPluginSetup,
+      DaybreakPluginStart,
+      DaybreakPluginSetupDeps,
+      DaybreakPluginStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly config: ConfigType;
@@ -29,13 +42,19 @@ export class DaybreakPlugin
     this.config = initializerContext.config.get<ConfigType>();
   }
 
-  public setup(core: CoreSetup): DaybreakPluginSetup {
+  public setup(core: CoreSetup, plugins: DaybreakPluginSetupDeps): DaybreakPluginSetup {
     if (!this.config.enabled) {
       this.logger.debug('daybreak: plugin disabled, skipping setup');
       return {};
     }
 
     this.logger.debug('daybreak: Setup');
+
+    const router = core.http.createRouter();
+    const getSpaceId = (request: KibanaRequest) =>
+      plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    registerRoutes({ router, logger: this.logger, getSpaceId });
+
     return {};
   }
 

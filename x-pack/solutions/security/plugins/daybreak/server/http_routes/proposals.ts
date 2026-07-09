@@ -91,9 +91,10 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
     })
   );
 
-  // Transition proposal status — gate-approval flow (FR-7, FR-016).
+  // Transition proposal status — gate-approval flow (FR-7, FR-016, FR-017).
   // The readiness gate runs server-side inside transitionStatus; a failed
-  // gate surfaces as a 400 carrying the GateFailure body.
+  // gate surfaces as a 422 (Unprocessable Content) carrying the GateFailure
+  // body, so the UI can render the specific missing requirement (FR-018).
   router.post(
     {
       path: `${daybreakApiPath}/proposals/{id}/transition`,

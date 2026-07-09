@@ -15,8 +15,9 @@ import { EvidenceNotFoundError } from '../client/evidence/client';
  * store domain errors surface as meaningful HTTP responses:
  *
  * - {@link ProposalNotFoundError} / {@link EvidenceNotFoundError} → 404
- * - {@link ReadinessGateError} → 400 with the {@link GateFailure} body, so the
- *   gate-approval UI can render the `missingRequirements` list (FR-7, FR-016)
+ * - {@link ReadinessGateError} → 422 (Unprocessable Content) with the
+ *   {@link GateFailure} body, so the gate-approval UI can render the
+ *   `missingRequirements` list (FR-7, FR-016, FR-017)
  * - anything else → 500
  *
  * The readiness-gate logic itself stays server-side (FR-7); the browser only
@@ -36,7 +37,7 @@ export const getHandlerWrapper =
         }
 
         if (e instanceof ReadinessGateError) {
-          return res.badRequest({
+          return res.unprocessableContent({
             body: {
               message: e.message,
               attributes: { failure: e.failure },

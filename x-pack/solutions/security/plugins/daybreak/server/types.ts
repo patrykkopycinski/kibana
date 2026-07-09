@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 // ---------------------------------------------------------------------------
 // Plugin lifecycle contracts
@@ -18,6 +19,7 @@ export type DaybreakPluginSetup = Record<string, never>;
 /** Optional plugin dependencies consumed during start. */
 export interface DaybreakPluginStartDeps {
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 /** Function returned by {@link DaybreakPluginStart.runSpikeWorkflow}. */

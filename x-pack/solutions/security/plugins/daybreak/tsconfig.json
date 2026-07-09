@@ -15,7 +15,11 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/workflows",
-    "@kbn/workflows-execution-engine"
+    "@kbn/workflows-execution-engine",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/logging-mocks"
   ],
   "exclude": [
     "target/**/*"

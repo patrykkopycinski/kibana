@@ -17,7 +17,8 @@
     ],
     "requiredPlugins": [],
     "optionalPlugins": [
-      "workflowsExecutionEngine"
+      "workflowsExecutionEngine",
+      "agentBuilder"
     ]
   }
 }

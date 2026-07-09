@@ -9,7 +9,7 @@
   "description": "Daybreak alert-analysis workflow engine spike (PD-1)",
   "plugin": {
     "id": "daybreak",
-    "browser": false,
+    "browser": true,
     "server": true,
     "configPath": [
       "xpack",

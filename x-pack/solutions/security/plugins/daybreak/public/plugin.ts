@@ -6,14 +6,16 @@
  */
 
 import type {
+  AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { registerApp } from './register';
 import type {
   DaybreakPublicPluginSetup,
   DaybreakPublicPluginStart,
@@ -25,14 +27,17 @@ interface DaybreakBrowserConfig {
   enabled: boolean;
 }
 
+export const DAYBREAK_APP_ID = 'daybreak';
+export const DAYBREAK_APP_ROUTE = '/app/daybreak';
+
 /**
  * Public-side plugin for Daybreak (FR-008, FR-009, FR-010).
  *
  * Registers the top-level application route only when the server-side
  * `xpack.daybreak.enabled` flag is on (FR-009, NFR-2). The flag is exposed to
  * the browser via `exposeToBrowser` in `server/index.ts`. When disabled, no
- * daybreak UI renders — `registerApp` is never called, so `core.application`
- * has no `daybreak` entry at all.
+ * daybreak UI renders — `core.application.register` is never called, so
+ * `core.application` has no `daybreak` entry at all.
  *
  * The app is additionally registered with an `appUpdater$` (mirroring the
  * `agent_builder` pattern in `public/plugin.tsx`) so the app's `status` can be
@@ -61,7 +66,20 @@ export class DaybreakPublicPlugin
       return {};
     }
 
-    registerApp({ core, appUpdater$: this.appUpdater$ });
+    core.application.register({
+      id: DAYBREAK_APP_ID,
+      appRoute: DAYBREAK_APP_ROUTE,
+      category: DEFAULT_APP_CATEGORIES.security,
+      title: i18n.translate('xpack.daybreak.appTitle', { defaultMessage: 'Daybreak' }),
+      euiIconType: 'logoSecurity',
+      visibleIn: [],
+      updater$: this.appUpdater$,
+      async mount({ element, history }: AppMountParameters) {
+        const { mountApp } = await import('./application');
+        const [coreStart] = await core.getStartServices();
+        return mountApp({ core: coreStart, element, history });
+      },
+    });
 
     return {};
   }

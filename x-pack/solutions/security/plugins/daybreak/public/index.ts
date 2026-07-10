@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { DaybreakPublicPlugin } from './plugin';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 /**
- * Browser-side entry point for the Daybreak plugin (FR-008).
+ * Browser-side entry point for the Daybreak plugin (FR-008, FR-009, FR-010).
  *
- * Flipping `kibana.jsonc` to `browser: true` requires this module so the
- * kbn-optimizer can resolve a bundle entry point. The full application shell,
- * route registration, and Throughline UI components are layered in by
- * subsequent plan tasks.
+ * Registers the top-level Kibana application route (`public/plugin.ts`'s
+ * `core.application.register` call) gated on the server-exposed
+ * `xpack.daybreak.enabled` flag (FR-009, NFR-2).
+ * The application shell (`public/application/components/shell.tsx`) renders
+ * real PD-2 Proposal data via the Daybreak HTTP API — no mocked/seeded data.
  */
-export function plugin() {
-  return new DaybreakPublicPlugin();
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DaybreakPublicPlugin } = await import('./plugin');
+  return new DaybreakPublicPlugin(initializerContext);
 }

@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+import { DaybreakPublicPlugin } from './plugin';
 
 /**
  * Browser-side entry point for the Daybreak plugin (FR-008, FR-009, FR-010).
@@ -15,8 +16,16 @@ import type { PluginInitializerContext } from '@kbn/core/public';
  * `xpack.daybreak.enabled` flag (FR-009, NFR-2).
  * The application shell (`public/application/components/shell.tsx`) renders
  * real PD-2 Proposal data via the Daybreak HTTP API — no mocked/seeded data.
+ *
+ * Unlike the server-side `PluginInitializer` (which is `async` so
+ * `./plugin` can be lazily imported), the browser-side `PluginInitializer`
+ * type (`@kbn/core-plugins-browser`) is synchronous — core calls
+ * `initializer(context)` without `await` and immediately checks
+ * `instance.setup`/`instance.start` on the return value. An `async`
+ * initializer here returns a `Promise`, which has no `.setup` and throws
+ * `Instance of plugin "daybreak" does not define "setup" function.` at
+ * runtime.
  */
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DaybreakPublicPlugin } = await import('./plugin');
+export function plugin(initializerContext: PluginInitializerContext) {
   return new DaybreakPublicPlugin(initializerContext);
 }

@@ -11,30 +11,49 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { significantEventSchema } from '@kbn/significant-events-schema';
+import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
+import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
-import { createEventToolHandler } from './handler';
+import { eventsWriteHandler } from './handler';
 
-export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
+export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
-const createEventSchema = significantEventSchema
+const eventsWriteSchema = significantEventSchema
   .pick({
+    discovery_slug: true,
+    discovery_id: true,
     status: true,
+    stream_names: true,
+    rule_names: true,
     title: true,
     summary: true,
     root_cause: true,
-    stream_names: true,
     criticality: true,
     confidence: true,
     recommendations: true,
+    assessment_note: true,
+    evidences: true,
+    cause_kis: true,
+    dependency_edges: true,
+    infra_components: true,
+    workflow_execution_id: true,
   })
-  .partial({ status: true, recommendations: true });
+  .extend({
+    // Override the base schema's description — it's written for discovery_write, where
+    // discovery_slug is optional and auto-generated for new episodes. Here it always refers
+    // to an existing discovery, so it's required and must never be omitted.
+    discovery_slug: significantEventSchema.shape.discovery_slug.describe(
+      'Required. Stable episode identifier of the discovery being reviewed — ' +
+        'copy it verbatim from the input discovery.'
+    ),
+    conversation_id: z.string().optional(),
+  });
 
-export function createEventTool({
+export function createEventsWriteTool({
   getScopedClients,
   server,
   logger,
@@ -44,50 +63,16 @@ export function createEventTool({
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): StaticToolRegistration<typeof createEventSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof createEventSchema> = {
-    id: SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
+}): StaticToolRegistration<typeof eventsWriteSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof eventsWriteSchema> = {
+    id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventCreate.description', {
-        defaultMessage: 'Create a significant event for one or more streams.',
-      })}
+      Create or version a significant event for a discovery episode. Handles deduplication: looks up the current event version by discovery_slug; if status has not changed, skips the write and returns the existing event_id.
+      For events linked to a discovery episode via discovery_slug. Standalone events not tied to a discovery episode use event_create instead.
     `,
-    schema: createEventSchema,
+    schema: eventsWriteSchema,
     tags: ['streams', 'significant_events'],
-    confirmation: {
-      askUser: 'always',
-      getConfirmation: async ({ toolParams }) => ({
-        title: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.title',
-          {
-            defaultMessage: 'Create Significant Event',
-          }
-        ),
-        message: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message',
-          {
-            defaultMessage: 'Create significant event "{title}" for streams: {streams}?',
-            values: {
-              title: toolParams.title,
-              streams: toolParams.stream_names.join(', '),
-            },
-          }
-        ),
-        confirm_text: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.confirm',
-          {
-            defaultMessage: 'Create',
-          }
-        ),
-        cancel_text: i18n.translate(
-          'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.cancel',
-          {
-            defaultMessage: 'Cancel',
-          }
-        ),
-      }),
-    },
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
@@ -95,22 +80,30 @@ export function createEventTool({
         const { getEventClient, licensing, uiSettingsClient } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-        const data = await createEventToolHandler({
+        const data = await eventsWriteHandler({
           eventClient: getEventClient(),
-          eventInput: toolParams,
+          input: toolParams,
         });
 
-        telemetry.trackAgentToolEventCreate({
+        telemetry.trackAgentToolEventsWrite({
           success: true,
+          discovery_slug: data.discovery_slug,
+          status: data.status,
+          written: data.written,
           stream_names: toolParams.stream_names,
         });
 
-        return { results: [{ type: ToolResultType.other, data }] };
+        return {
+          results: [{ type: ToolResultType.other, data }],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_create: ${message}`);
-        telemetry.trackAgentToolEventCreate({
+        logger.error(`Error running events_write: ${message}`);
+        telemetry.trackAgentToolEventsWrite({
           success: false,
+          discovery_slug: toolParams.discovery_slug,
+          status: toolParams.status,
+          written: false,
           stream_names: toolParams.stream_names,
           error_message: message,
         });
@@ -120,9 +113,9 @@ export function createEventTool({
               type: ToolResultType.error,
               data: {
                 message: i18n.translate(
-                  'xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage',
+                  'xpack.significantEvents.agentBuilder.tools.eventsWrite.errorMessage',
                   {
-                    defaultMessage: 'Failed to create significant event: {message}',
+                    defaultMessage: 'Failed to write significant event: {message}',
                     values: { message },
                   }
                 ),

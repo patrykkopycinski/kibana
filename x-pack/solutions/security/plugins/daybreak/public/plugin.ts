@@ -39,6 +39,12 @@ export const DAYBREAK_APP_ROUTE = '/app/daybreak';
  * daybreak UI renders — `core.application.register` is never called, so
  * `core.application` has no `daybreak` entry at all.
  *
+ * `mount` lazy-loads `public/application`'s `mountApp`, which renders
+ * `DaybreakApp` (`public/application/components/shell.tsx`) — the top-level
+ * route component, named to match the `<PluginName>App` convention used by
+ * sibling plugins (`IngestHubApp`, `EvalsApp`). It is imported lazily rather
+ * than eagerly here so the application bundle stays code-split from `plugin.ts`.
+ *
  * The app is additionally registered with an `appUpdater$` (mirroring the
  * `agent_builder` pattern in `public/plugin.tsx`) so the app's `status` can be
  * toggled to `inaccessible` at runtime without a full page reload — e.g. if a

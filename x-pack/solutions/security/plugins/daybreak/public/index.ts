@@ -14,8 +14,9 @@ import { DaybreakPublicPlugin } from './plugin';
  * Registers the top-level Kibana application route (`public/plugin.ts`'s
  * `core.application.register` call) gated on the server-exposed
  * `xpack.daybreak.enabled` flag (FR-009, NFR-2).
- * The application shell (`public/application/components/shell.tsx`) renders
- * real PD-2 Proposal data via the Daybreak HTTP API — no mocked/seeded data.
+ * The top-level application component, `DaybreakApp`
+ * (`public/application/components/shell.tsx`), renders real PD-2 Proposal
+ * data via the Daybreak HTTP API — no mocked/seeded data.
  *
  * Unlike the server-side `PluginInitializer` (which is `async` so
  * `./plugin` can be lazily imported), the browser-side `PluginInitializer`

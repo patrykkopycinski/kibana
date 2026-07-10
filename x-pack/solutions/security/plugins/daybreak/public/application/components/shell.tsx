@@ -28,15 +28,20 @@ import type { DaybreakProposal } from '../../services/proposals_service';
  * FR-010: the top-level route component rendering the application shell — a
  * left rail (thread/proposal list/nav), a main stage, and a composer.
  *
+ * Named `DaybreakApp` (not `DaybreakShell`) to align with the top-level
+ * component naming convention used by sibling plugins (`IngestHubApp`,
+ * `EvalsApp`, `QueryActivityApp`) — this is the component `plugin.ts`'s
+ * `mount` callback renders via `mountApp` (`public/application/mount.tsx`).
+ *
  * This is a design-neutral EUI implementation, not a port of the Throughline
  * (NotDaybreak) prototype: the prototype source (`Throughline.dc.html`,
  * `throughline-app.js`, `support.js`) is unavailable in this repository and
- * git history (see `.ao/blocked.md`, FR-001). Once vendored, this shell's
+ * git history (see `.ao/blocked.md`, FR-001). Once vendored, this component's
  * markup/structure should be replaced 1:1 with the ported prototype
  * components — the shape (rail / stage / composer) and the real-data wiring
  * below are intended to stay stable across that follow-up port.
  */
-export const DaybreakShell: React.FC = () => {
+export const DaybreakApp: React.FC = () => {
   const { proposals, isLoading } = useProposals();
   const [selectedId, setSelectedId] = React.useState<string | undefined>(undefined);
   const selected = proposals.find((proposal) => proposal.id === selectedId);

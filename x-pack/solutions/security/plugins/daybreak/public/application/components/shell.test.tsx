@@ -9,7 +9,7 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { DaybreakShell } from './shell';
+import { DaybreakApp } from './shell';
 import { useProposals } from '../hooks/use_proposals';
 import type { DaybreakProposal } from '../../services/proposals_service';
 
@@ -39,11 +39,11 @@ const proposalsFixture: DaybreakProposal[] = [
 const renderShell = () =>
   render(
     <IntlProvider locale="en">
-      <DaybreakShell />
+      <DaybreakApp />
     </IntlProvider>
   );
 
-describe('DaybreakShell (FR-010, FR-011, FR-020)', () => {
+describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { DaybreakShell } from './components/shell';
+import { DaybreakApp } from './components/shell';
 
 /** FR-010: single top-level route rendering the application shell. */
 export const DaybreakRoutes: React.FC = () => (
   <Routes>
     <Route path="/" exact>
-      <DaybreakShell />
+      <DaybreakApp />
     </Route>
   </Routes>
 );

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getDefaultSort } from './get_default_sort';
-export { getSort, getSortArray, isLegacySort } from './get_sort';
-export type { SortOrder, SortInput, SortPair } from './get_sort';
-export { getSortForSearchSource } from './get_sort_for_search_source';
-export { getEsQuerySort, getTieBreakerFieldName } from './get_es_query_sort';
+export { transformDiscoverSessionOut } from './transform_discover_session_out';
+export { transformDiscoverSessionIn } from './transform_discover_session_in';
+export { transformVisContextOut, transformVisContextIn } from './transform_vis_context';
+export { transformControlPanelsOut, transformControlPanelsIn } from './transform_control_panels';

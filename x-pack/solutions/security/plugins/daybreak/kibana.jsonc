@@ -16,6 +16,9 @@
       "daybreak"
     ],
     "requiredPlugins": [],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "optionalPlugins": [
       "workflowsExecutionEngine",
       "agentBuilder",

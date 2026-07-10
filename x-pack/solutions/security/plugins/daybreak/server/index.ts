@@ -14,6 +14,12 @@ import { configSchema, type ConfigType } from '../common/config';
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
+  // Expose `enabled` to the browser so the public plugin can gate
+  // `core.application.register` on the same flag (FR-009, NFR-2). The value
+  // is read-only in the browser — the server remains the hard kill switch.
+  exposeToBrowser: {
+    enabled: true,
+  },
 };
 
 export async function plugin(initializerContext: PluginInitializerContext) {

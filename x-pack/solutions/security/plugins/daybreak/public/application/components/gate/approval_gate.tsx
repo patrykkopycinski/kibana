@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
 import type { DaybreakProposal, MissingRequirement } from '../../../services/proposals_service';
 import { GateTierBadge } from './gate_tier_badge';
 import { deriveGateTier } from './gate_tier';
+import { PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 
 /**
  * Human-readable label for a single gate {@link MissingRequirement} (FR-018).
@@ -36,23 +37,37 @@ const missingRequirementLabel = (requirement: MissingRequirement): string => {
 };
 
 /**
- * Renders a Proposal's {@link GateTierBadge} and, for the
- * `approval-required` tier only, the human-approval action that POSTs to
- * `/proposals/{id}/transition` via {@link useProposalTransition} (FR-016,
- * FR-7). The readiness gate itself stays server-side
- * (`server/client/proposals/gate.ts`'s `evaluateReadinessGate`) — this
- * component never grants approval locally, it only triggers the request and
- * surfaces the specific `missingRequirements` the gate reports back on a 422
- * fail-closed rejection (FR-018), mirroring
- * `use_proposal_transition.test.tsx`'s fixture shape.
+ * Renders a Proposal's current {@link ProposalStatusValue} badge (the
+ * 7-value `new | needs-evidence | approved | modified | dismissed |
+ * escalated | deferred` union, FR-019) alongside its {@link GateTierBadge}
+ * and, for the `approval-required` tier only, the human-approval action
+ * that POSTs to `/proposals/{id}/transition` via {@link
+ * useProposalTransition} (FR-016, FR-7). The readiness gate itself stays
+ * server-side (`server/client/proposals/gate.ts`'s
+ * `evaluateReadinessGate`) — this component never grants approval locally,
+ * it only triggers the request and surfaces the specific
+ * `missingRequirements` the gate reports back on a 422 fail-closed
+ * rejection (FR-018), mirroring `use_proposal_transition.test.tsx`'s
+ * fixture shape.
  *
- * `auto` and `propose` tier Proposals render only the badge — matching the
- * prototype's "read & gather auto-runs / assemble & draft proposed as a
- * diff" phases, which require no human approval action
- * (`.ao/recon.md` section 4.2).
+ * `auto` and `propose` tier Proposals render only the tier badge (no
+ * approve button) — matching the prototype's "read & gather auto-runs /
+ * assemble & draft proposed as a diff" phases, which require no human
+ * approval action (`.ao/recon.md` section 4.2). The status badge renders
+ * unconditionally for every tier and every status value, since FR-019
+ * requires the gate/status UI to reflect the full 7-value union regardless
+ * of gate-tier bucketing.
+ *
+ * Named `ApprovalGate` (not `GateApproval`) to match the `<Noun>Gate`
+ * component-naming convention used elsewhere in the repo for gate/guard
+ * components (e.g. `GettingStartedRedirectGate`,
+ * `WorkflowExecutionsRouteGate`) — the same sibling-plugin naming-alignment
+ * rationale as `shell.tsx`'s `DaybreakShell` → `DaybreakApp` rename
+ * (FR-010).
  */
-export const GateApproval: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
+export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
   const tier = deriveGateTier(proposal);
+  const statusMeta = PROPOSAL_STATUS_META[proposal.status];
   const { transition, isLoading, missingRequirements } = useProposalTransition();
 
   const handleApprove = () => {
@@ -62,6 +77,14 @@ export const GateApproval: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
   return (
     <div data-test-subj="daybreakGateApproval">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            data-test-subj={`daybreakGateApprovalStatus-${proposal.status}`}
+            color={statusMeta.color}
+          >
+            {statusMeta.label()}
+          </EuiBadge>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GateTierBadge tier={tier} />
         </EuiFlexItem>

@@ -9,9 +9,10 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { GateApproval } from './gate_approval';
+import { ApprovalGate } from './approval_gate';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
 import type { DaybreakProposal } from '../../../services/proposals_service';
+import { PROPOSAL_STATUS_VALUES, PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 
 jest.mock('../../hooks/use_proposal_transition');
 
@@ -31,11 +32,11 @@ const baseProposal: DaybreakProposal = {
 const renderGate = (proposal: DaybreakProposal) =>
   render(
     <IntlProvider locale="en">
-      <GateApproval proposal={proposal} />
+      <ApprovalGate proposal={proposal} />
     </IntlProvider>
   );
 
-describe('GateApproval (FR-016, FR-7, FR-018)', () => {
+describe('ApprovalGate (FR-016, FR-7, FR-018, FR-019)', () => {
   let transition: jest.Mock;
 
   beforeEach(() => {
@@ -101,5 +102,32 @@ describe('GateApproval (FR-016, FR-7, FR-018)', () => {
     renderGate(baseProposal);
 
     expect(screen.queryByTestId('daybreakGateApprovalFailure')).not.toBeInTheDocument();
+  });
+
+  describe('7-value ProposalStatus rendering (FR-019)', () => {
+    it('exposes exactly the 7 expected status values', () => {
+      expect(PROPOSAL_STATUS_VALUES).toEqual([
+        'new',
+        'needs-evidence',
+        'approved',
+        'modified',
+        'dismissed',
+        'escalated',
+        'deferred',
+      ]);
+    });
+
+    it.each(PROPOSAL_STATUS_VALUES)(
+      'renders a status badge with the status-scoped test subject and label for "%s"',
+      (status) => {
+        const { unmount } = renderGate({ ...baseProposal, status });
+
+        const badge = screen.getByTestId(`daybreakGateApprovalStatus-${status}`);
+        expect(badge).toBeInTheDocument();
+        expect(badge).toHaveTextContent(PROPOSAL_STATUS_META[status].label());
+
+        unmount();
+      }
+    );
   });
 });

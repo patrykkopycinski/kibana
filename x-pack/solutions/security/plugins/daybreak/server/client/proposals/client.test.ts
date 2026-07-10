@@ -301,6 +301,33 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
+    it('surfaces missingRequirements: ["evidence"] and does not transition to approved on empty evidenceRefs (FR-017, FR-018)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createMockProposalDoc({
+              status: 'new',
+              evidenceRefs: [],
+              recommendation: 'Approve this',
+            }),
+          ],
+        },
+      });
+
+      expect.assertions(4);
+      try {
+        await client.transitionStatus('proposal-1', 'approved');
+      } catch (e) {
+        expect(e).toBeInstanceOf(ReadinessGateError);
+        expect((e as ReadinessGateError).failure.missingRequirements).toEqual(['evidence']);
+      }
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+
+      const document = await client.get('proposal-1');
+      expect(document.status).not.toBe('approved');
+    });
+
     it('transitions to a non-approved status without checking the gate', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {

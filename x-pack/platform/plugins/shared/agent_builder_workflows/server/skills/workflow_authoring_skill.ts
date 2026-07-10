@@ -228,6 +228,10 @@ The \`if\` step's \`condition\` uses KQL, not Liquid. KQL cannot evaluate Liquid
 
 To test a condition with \`${workflowTools.executeStep}\`, temporarily add an \`if\` step with console children in both branches, execute it with \`contextOverride\` providing mock upstream outputs, and check which branch ran. Remove the test step afterwards.
 
+### Known Limitations — Ask, Don't Guess
+
+Some requests describe automation the workflow engine or ES|QL cannot actually do, or contain contradictory requirements (e.g. mutually exclusive trigger behavior). Do not silently substitute a workaround or emit a workflow that only approximates the request — name the specific limitation and ask a clarifying question or decline. In particular: ES|QL does not support cross-cluster \`LOOKUP JOIN\`, and there is no true unbounded/real-time streaming aggregation (only scheduled, bounded-window approximations). \`${platformCoreTools.generateWorkflow}\` applies this rule during generation; if you see it silently working around a limitation like this, flag it to the user rather than presenting the result as a full solution.
+
 ### Fixing Validation Errors
 
 When fixing validation errors on an existing workflow:

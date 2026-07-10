@@ -126,6 +126,23 @@ triggers:
       rule_name: "Emergency Alert"
 \`\`\`
 
+## Known Limitations — Ask, Don't Guess
+
+Some requests describe automation that the workflow engine or ES|QL cannot actually perform, or contain contradictory requirements. **Do not silently substitute a workaround or fabricate a workflow that only approximates the request.** Instead, name the specific limitation and either ask a clarifying question or decline, explaining why.
+
+### Unsupported ES|QL / query features
+
+- **Cross-cluster \`LOOKUP JOIN\`**: ES|QL does not support \`LOOKUP JOIN\` across remote clusters — only against local indices. Do not generate a step that presents a cross-cluster JOIN as if it works.
+- **Unbounded / real-time streaming aggregation**: There is no true streaming aggregation. Any "moving average", "running total", or "continuous" computation can only be approximated by a \`scheduled\` trigger re-running a bounded/windowed query (e.g. "last 5 minutes") at an interval. If the user's request implies unbounded/continuous streaming semantics, do not silently narrow it to a scheduled bounded query without saying so — state the limitation explicitly and confirm the bounded-window approximation is acceptable.
+
+### Contradictory trigger requirements
+
+If a request implies mutually exclusive trigger configuration (e.g. "must run both on a fixed schedule AND only when manually invoked, in a way that isn't just 'support both'" — a genuine logical contradiction, not simply "support multiple triggers"), do not silently pick one, and do not emit a workflow with both trigger types spliced together without comment. Name the contradiction and ask which behavior is intended before generating YAML.
+
+### General rule
+
+When a request cannot be honestly fulfilled as asked, prefer explaining the limitation (and proposing the closest honest alternative) over emitting a workflow that looks correct but misrepresents what it actually does.
+
 ## Data Flow
 
 ### A Complete Example

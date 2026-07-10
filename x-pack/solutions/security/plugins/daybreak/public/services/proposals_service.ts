@@ -40,6 +40,31 @@ interface ListProposalsResponse {
 }
 
 /**
+ * A requirement that may be missing when the readiness gate fails (FR-018).
+ * Mirrors `server/client/proposals/gate.ts`'s `MissingRequirement`, kept as a
+ * browser-local type for the same public/server boundary reason as
+ * {@link DaybreakProposal} above — the HTTP error body is the actual
+ * contract the browser depends on.
+ */
+export type MissingRequirement = 'evidence' | 'recommendation';
+
+/**
+ * Body of the 422 Unprocessable Content response the transition route
+ * returns when the fail-closed readiness gate rejects a status transition
+ * (FR-017, FR-018). See `server/http_routes/wrap_handler.ts`.
+ */
+export interface TransitionGateFailureBody {
+  message: string;
+  attributes?: {
+    failure?: {
+      proposalId: string;
+      targetStatus: DaybreakProposal['status'];
+      missingRequirements: MissingRequirement[];
+    };
+  };
+}
+
+/**
  * Thin HTTP client wrapping the Daybreak Proposal API (FR-010, FR-011). The
  * `public/` layer renders real PD-2 worker output — no mocked or seeded data.
  */

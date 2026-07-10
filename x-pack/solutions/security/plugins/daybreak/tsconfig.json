@@ -27,6 +27,7 @@
     "@kbn/zod",
     "@kbn/logging-mocks",
     "@kbn/core-http-browser",
+    "@kbn/core-http-browser-mocks",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",

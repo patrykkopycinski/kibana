@@ -30,7 +30,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*"

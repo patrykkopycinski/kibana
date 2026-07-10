@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MetricInsightsFlyout } from './metrics_insights_flyout';
-export { GridSettingsFlyout } from './metrics_grid_settings_flyout';
+import type { MetricsGridSettings } from '../../../types';
+
+export const getChangedSettings = (
+  draft: MetricsGridSettings,
+  applied: MetricsGridSettings
+): Partial<MetricsGridSettings> =>
+  Object.fromEntries(
+    (Object.keys(draft) as Array<keyof MetricsGridSettings>)
+      .filter((key) => draft[key] !== applied[key])
+      .map((key) => [key, draft[key]])
+  );

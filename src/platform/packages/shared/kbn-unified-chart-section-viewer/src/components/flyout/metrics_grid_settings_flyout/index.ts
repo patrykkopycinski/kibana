@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MetricInsightsFlyout } from './metrics_insights_flyout';
-export { GridSettingsFlyout } from './metrics_grid_settings_flyout';
+export * from './constants';
+export * from './options';
+export { GridSettingsFlyout } from './grid_settings_flyout';

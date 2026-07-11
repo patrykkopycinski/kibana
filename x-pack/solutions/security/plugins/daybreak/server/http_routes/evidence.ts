@@ -44,7 +44,7 @@ export const registerEvidenceRoutes = ({ logger, router, getSpaceId }: RouteDepe
     return createEvidenceClient({
       space: getSpaceId(request),
       logger,
-      esClient: client.asCurrentUser,
+      esClient: client.asInternalUser,
     });
   };
 

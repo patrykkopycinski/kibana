@@ -7,7 +7,7 @@
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 
-/** Proposal status values for the .daybreak-proposals index. */
+/** Proposal status values for the `.kibana-daybreak-proposals` index. */
 export type ProposalStatus =
   | 'new'
   | 'needs-evidence'
@@ -29,7 +29,7 @@ export interface DecisionHistoryEntry {
 }
 
 /**
- * Full Proposal document for the .daybreak-proposals index.
+ * Full Proposal document for the `.kibana-daybreak-proposals` index.
  */
 export interface ProposalProperties {
   id: string;

@@ -18,11 +18,12 @@ import {
   EuiFieldText,
   EuiButton,
   EuiHealth,
-  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../hooks/use_proposals';
 import type { DaybreakProposal } from '../../services/proposals_service';
+import { BriefDashboard } from './brief/brief_dashboard';
+import { ApprovalGate } from './gate/approval_gate';
 
 /**
  * FR-010: the top-level route component rendering the application shell — a
@@ -97,12 +98,16 @@ export const DaybreakApp: React.FC = () => {
             {selected ? (
               <DaybreakProposalDetail proposal={selected} />
             ) : (
-              <EuiText color="subdued" data-test-subj="daybreakStageEmpty">
-                <FormattedMessage
-                  id="xpack.daybreak.stage.empty"
-                  defaultMessage="Select a proposal from the list."
-                />
-              </EuiText>
+              <>
+                <BriefDashboard />
+                <EuiSpacer size="m" />
+                <EuiText color="subdued" data-test-subj="daybreakStageEmpty">
+                  <FormattedMessage
+                    id="xpack.daybreak.stage.empty"
+                    defaultMessage="Select a proposal from the list."
+                  />
+                </EuiText>
+              </>
             )}
           </div>
 
@@ -141,9 +146,6 @@ const DaybreakProposalDetail: React.FC<{ proposal: DaybreakProposal }> = ({ prop
       <EuiFlexItem grow={false}>
         <EuiHealth color={severityColor[proposal.severity]}>{proposal.severity}</EuiHealth>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge>{proposal.status}</EuiBadge>
-      </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
     <EuiTitle size="s">
@@ -151,5 +153,7 @@ const DaybreakProposalDetail: React.FC<{ proposal: DaybreakProposal }> = ({ prop
     </EuiTitle>
     <EuiSpacer size="s" />
     {proposal.recommendation && <EuiText size="s">{proposal.recommendation}</EuiText>}
+    <EuiSpacer size="s" />
+    <ApprovalGate proposal={proposal} />
   </div>
 );

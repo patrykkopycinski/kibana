@@ -43,7 +43,7 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
     return createProposalClient({
       space: getSpaceId(request),
       logger,
-      esClient: client.asCurrentUser,
+      esClient: client.asInternalUser,
     });
   };
 

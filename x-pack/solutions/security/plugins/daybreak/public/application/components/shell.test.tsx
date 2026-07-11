@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DaybreakApp } from './shell';
 import { useProposals } from '../hooks/use_proposals';
@@ -67,8 +67,9 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
     // it must render an item per fixture proposal once data-populated
     // (FR-011), not the loading placeholder.
     expect(screen.getByTestId('daybreakRailList')).toBeInTheDocument();
-    expect(screen.getByTestId('daybreakRailItem-proposal-1')).toBeInTheDocument();
-    expect(screen.getByText('Suspicious login from new device')).toBeInTheDocument();
+    const railItem = screen.getByTestId('daybreakRailItem-proposal-1');
+    expect(railItem).toBeInTheDocument();
+    expect(within(railItem).getByText('Suspicious login from new device')).toBeInTheDocument();
     expect(screen.queryByTestId('daybreakRailLoading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('daybreakRailEmpty')).not.toBeInTheDocument();
   });

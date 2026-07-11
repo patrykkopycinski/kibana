@@ -10,8 +10,16 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { ProposalProperties } from './types';
 
-/** Index name for .daybreak-proposals. */
-export const proposalIndexName = '.daybreak-proposals';
+/**
+ * Index name for the Daybreak proposal store. Prefixed with `.kibana-` (not
+ * just `.daybreak-`) so it falls under the `.kibana*` index pattern already
+ * granted to the `kibana_system` role (see `KibanaOwnedReservedRoleDescriptors
+ * .kibanaSystem` in Elasticsearch) — matching the convention used by other
+ * Kibana-owned `StorageIndexAdapter` indices (e.g.
+ * `.kibana-automatic-import-samples`, `.kibana-anonymization-profiles`).
+ * A bare `.daybreak-*` index would need its own Elasticsearch-side role grant.
+ */
+export const proposalIndexName = '.kibana-daybreak-proposals';
 
 const storageSettings = {
   name: proposalIndexName,

@@ -9,8 +9,13 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 
-/** Index name for .daybreak-evidence. */
-export const evidenceIndexName = '.daybreak-evidence';
+/**
+ * Index name for the Daybreak evidence store. Prefixed with `.kibana-` (not
+ * just `.daybreak-`) so it falls under the `.kibana*` index pattern already
+ * granted to the `kibana_system` role — see the matching rationale on
+ * `proposalIndexName` in `../proposals/storage.ts`.
+ */
+export const evidenceIndexName = '.kibana-daybreak-evidence';
 
 const storageSettings = {
   name: evidenceIndexName,

@@ -28,8 +28,8 @@ import ALERT_ANALYSIS_WORKER_YAML from '../workflow/alert_analysis_worker.yaml';
  * the real, shipped 5-phase worker workflow (Setup → Guard → Enrich → Reason
  * → Act) end-to-end through the `WorkflowRunFixture` (real engine runtime,
  * mocked HTTP/Task-Manager boundary) and asserts the Proposal document the
- * Act phase emits matches the full `.daybreak-proposals` ES document shape
- * (every `ProposalProperties` field, not just a subset).
+ * Act phase emits matches the full `.kibana-daybreak-proposals` ES document
+ * shape (every `ProposalProperties` field, not just a subset).
  */
 
 const REASON_STEP_TYPE = 'ai.agent';
@@ -59,10 +59,11 @@ const STRUCTURED_TRIAGE_VERDICT = {
 };
 
 /**
- * The full `.daybreak-proposals` ES document the `/internal/daybreak/proposals`
- * route would return after indexing — every field of {@link ProposalProperties},
- * proving the Act phase's POST payload round-trips into a schema-conformant
- * document, not just the subset asserted elsewhere.
+ * The full `.kibana-daybreak-proposals` ES document the
+ * `/internal/daybreak/proposals` route would return after indexing — every
+ * field of {@link ProposalProperties}, proving the Act phase's POST payload
+ * round-trips into a schema-conformant document, not just the subset
+ * asserted elsewhere.
  */
 const MOCK_PROPOSAL_DOCUMENT: ProposalProperties = {
   id: 'proposal-e2e-1',
@@ -210,7 +211,7 @@ describe('alert analysis worker — live-journey e2e (FR-9)', () => {
     );
   });
 
-  it('emits a Proposal document matching the full .daybreak-proposals ES shape (FR-9)', () => {
+  it('emits a Proposal document matching the full .kibana-daybreak-proposals ES shape (FR-9)', () => {
     const act = getStepExecutions(workflowRunFixture, 'act').find(
       (stepExecution) => stepExecution.status === ExecutionStatus.COMPLETED
     );

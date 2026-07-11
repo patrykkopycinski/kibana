@@ -21,22 +21,39 @@ import type { DaybreakProposal } from '../../../services/proposals_service';
 import type { DaybreakEvidence } from '../../../services/evidence_service';
 import { PROPOSAL_STATUS_META } from './proposal_status';
 
-/**
- * Detail panel for a single {@link DaybreakEvidence} entry (FR-012, FR-022).
- * Renders every {@link DaybreakEvidence} field the prototype's inspector
- * surface distinguishes evidence by (`kind`, `provenance`, `stance`,
- * `sensitivityLabel` — the four fields this component's spec traces
- * explicitly — plus `summary`, `confidence`, `sourceRef`, and `limitations`
- * so no evidence data is silently dropped from the inspector view).
- */
 const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) => (
   <EuiPanel
     data-test-subj={`daybreakInspectorEvidence-${evidence.id}`}
-    paddingSize="s"
+    paddingSize="m"
     hasShadow={false}
     hasBorder
   >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      responsive={false}
+      gutterSize="s"
+    >
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          EVIDENCE / {evidence.provenance}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge
+          data-test-subj={`daybreakInspectorEvidenceStance-${evidence.id}`}
+          color={evidence.stance === 'for' ? 'success' : 'danger'}
+        >
+          {evidence.stance}
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiSpacer size="s" />
+    <EuiText size="s" data-test-subj={`daybreakInspectorEvidenceSummary-${evidence.id}`}>
+      {evidence.summary}
+    </EuiText>
+    <EuiSpacer size="s" />
+    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiBadge data-test-subj={`daybreakInspectorEvidenceKind-${evidence.id}`}>
           {evidence.kind}
@@ -52,14 +69,6 @@ const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) =>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBadge
-          data-test-subj={`daybreakInspectorEvidenceStance-${evidence.id}`}
-          color={evidence.stance === 'for' ? 'success' : 'danger'}
-        >
-          {evidence.stance}
-        </EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge
           data-test-subj={`daybreakInspectorEvidenceSensitivity-${evidence.id}`}
           color="hollow"
         >
@@ -67,10 +76,6 @@ const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) =>
         </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiText size="s" data-test-subj={`daybreakInspectorEvidenceSummary-${evidence.id}`}>
-      {evidence.summary}
-    </EuiText>
     <EuiSpacer size="s" />
     <EuiDescriptionList
       data-test-subj={`daybreakInspectorEvidenceDetails-${evidence.id}`}
@@ -99,7 +104,7 @@ const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) =>
               },
             ]
           : []),
-        ...(evidence.limitations && evidence.limitations.length > 0
+        ...(evidence.limitations?.length
           ? [
               {
                 title: (
@@ -117,22 +122,6 @@ const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) =>
   </EuiPanel>
 );
 
-/**
- * Renders the readiness-gate/evidence inspector for a single Proposal
- * (FR-012, FR-016). Surfaces the Proposal's current {@link
- * PROPOSAL_STATUS_META} state (one of the 7-value `ProposalStatus` union,
- * FR-019) alongside the full {@link DaybreakEvidence} detail for every
- * evidence document the caller resolved via `evidenceRefs` (FR-022) — the
- * prototype's `renderInspector` surface (`.ao/recon.md`'s thread →
- * stream/msg/spine/inspector decomposition), rebuilt here design-neutrally
- * ahead of the still-blocked prototype port (see `shell.tsx`'s header
- * comment, FR-001).
- *
- * Evidence resolution (matching `evidenceRefs` against the Evidence store)
- * is the caller's responsibility — this component is presentation-only so
- * it stays trivially testable against a fixture, mirroring `shell.tsx`'s
- * `DaybreakProposalDetail`.
- */
 export const ProposalInspector: React.FC<{
   proposal: DaybreakProposal;
   evidence: DaybreakEvidence[];
@@ -141,10 +130,19 @@ export const ProposalInspector: React.FC<{
 
   return (
     <div data-test-subj="daybreakProposalInspector">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h4>{proposal.title}</h4>
+      <EuiText size="xs" color="subdued">
+        DECISION EVIDENCE
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="s"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3>{proposal.title}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -156,27 +154,21 @@ export const ProposalInspector: React.FC<{
           </EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiSpacer size="m" />
-
-      <EuiTitle size="xxxs">
-        <h5>
-          <FormattedMessage
-            id="xpack.daybreak.inspector.evidence.heading"
-            defaultMessage="Evidence ({count})"
-            values={{ count: evidence.length }}
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
+      <EuiText size="s" color="subdued">
+        Evidence is shown with provenance, stance, sensitivity, and caveats so the approver can
+        assess both the recommendation and its limits.
+      </EuiText>
+      <EuiSpacer size="m" />
       {evidence.length === 0 ? (
-        <EuiText size="s" color="subdued" data-test-subj="daybreakProposalInspectorEmpty">
-          <FormattedMessage
-            id="xpack.daybreak.inspector.evidence.empty"
-            defaultMessage="No evidence attached to this proposal yet."
-          />
-        </EuiText>
+        <EuiPanel hasBorder paddingSize="m">
+          <EuiText size="s" color="subdued" data-test-subj="daybreakProposalInspectorEmpty">
+            <FormattedMessage
+              id="xpack.daybreak.inspector.evidence.empty"
+              defaultMessage="No evidence attached to this proposal yet."
+            />
+          </EuiText>
+        </EuiPanel>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
           {evidence.map((item) => (

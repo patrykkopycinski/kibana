@@ -7,12 +7,14 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,14 +24,6 @@ import { GateTierBadge } from './gate_tier_badge';
 import { deriveGateTier } from './gate_tier';
 import { PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 
-/**
- * Human-readable label for a single gate {@link MissingRequirement} (FR-018).
- * Kept as a plain function (not JSX) so it can be joined into a single
- * `EuiCallOut` body without an intermediate list component — there are only
- * two possible values today (see `MissingRequirement` in
- * `services/proposals_service.ts`), and inlining is clearer than an
- * abstraction with a single caller (constitution gate 1/6: 2+ consumers).
- */
 const missingRequirementLabel = (requirement: MissingRequirement): string => {
   switch (requirement) {
     case 'evidence':
@@ -43,63 +37,73 @@ const missingRequirementLabel = (requirement: MissingRequirement): string => {
   }
 };
 
-/**
- * Renders a Proposal's current {@link ProposalStatusValue} badge (the
- * 7-value `new | needs-evidence | approved | modified | dismissed |
- * escalated | deferred` union, FR-019) alongside its {@link GateTierBadge}
- * and, for the `approval-required` tier only, the human-approval action
- * that POSTs to `/proposals/{id}/transition` via {@link
- * useProposalTransition} (FR-016, FR-7). The readiness gate itself stays
- * server-side (`server/client/proposals/gate.ts`'s
- * `evaluateReadinessGate`) — this component never grants approval locally,
- * it only triggers the request and surfaces the specific
- * `missingRequirements` the gate reports back on a 422 fail-closed
- * rejection (FR-018), mirroring `use_proposal_transition.test.tsx`'s
- * fixture shape.
- *
- * `auto` and `propose` tier Proposals render only the tier badge (no
- * approve button) — matching the prototype's "read & gather auto-runs /
- * assemble & draft proposed as a diff" phases, which require no human
- * approval action (`.ao/recon.md` section 4.2). The status badge renders
- * unconditionally for every tier and every status value, since FR-019
- * requires the gate/status UI to reflect the full 7-value union regardless
- * of gate-tier bucketing.
- *
- * Named `ApprovalGate` (not `GateApproval`) to match the `<Noun>Gate`
- * component-naming convention used elsewhere in the repo for gate/guard
- * components (e.g. `GettingStartedRedirectGate`,
- * `WorkflowExecutionsRouteGate`) — the same sibling-plugin naming-alignment
- * rationale as `shell.tsx`'s `DaybreakShell` → `DaybreakApp` rename
- * (FR-010).
- */
+const isTerminal = (status: DaybreakProposal['status']): boolean =>
+  status === 'approved' || status === 'dismissed';
+
 export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
   const tier = deriveGateTier(proposal);
   const statusMeta = PROPOSAL_STATUS_META[proposal.status];
   const { transition, isLoading, missingRequirements } = useProposalTransition();
+  const isApprovalReady = tier === 'approval-required' && !isTerminal(proposal.status);
+  const isComplete = isTerminal(proposal.status);
 
   const handleApprove = () => {
     void transition({ id: proposal.id, targetStatus: 'approved' });
   };
 
   return (
-    <div data-test-subj="daybreakGateApproval">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge
-            data-test-subj={`daybreakGateApprovalStatus-${proposal.status}`}
-            color={statusMeta.color}
-          >
-            {statusMeta.label()}
-          </EuiBadge>
+    <EuiPanel
+      data-test-subj="daybreakGateApproval"
+      paddingSize="m"
+      hasBorder
+      color={isApprovalReady ? 'warning' : 'subdued'}
+    >
+      <EuiText size="xs" color="subdued">
+        DECISION GATE
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        responsive={false}
+        gutterSize="s"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>
+              {isComplete
+                ? 'Decision complete'
+                : isApprovalReady
+                ? 'Ready for a human decision'
+                : 'Evidence still in progress'}
+            </h4>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <GateTierBadge tier={tier} />
         </EuiFlexItem>
-        {tier === 'approval-required' && (
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        {isComplete
+          ? 'This proposal is already closed and cannot be approved again.'
+          : isApprovalReady
+          ? 'Evidence and a recommendation are present. Approval will be revalidated by the server.'
+          : 'Approval stays unavailable until the proposal includes both evidence and a recommendation.'}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" data-test-subj={`daybreakGateApprovalStatus-${proposal.status}`}>
+            <strong>{statusMeta.label()}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        {isApprovalReady && (
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="daybreakGateApproveButton"
               size="s"
+              fill
               isLoading={isLoading}
               onClick={handleApprove}
             >
@@ -108,7 +112,6 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
       {missingRequirements && missingRequirements.length > 0 && (
         <>
           <EuiSpacer size="s" />
@@ -128,6 +131,6 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
           />
         </>
       )}
-    </div>
+    </EuiPanel>
   );
 };

@@ -10,11 +10,14 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DaybreakApp } from './shell';
+import { useEvidence } from '../hooks/use_evidence';
 import { useProposals } from '../hooks/use_proposals';
 import type { DaybreakProposal } from '../../services/proposals_service';
 
+jest.mock('../hooks/use_evidence');
 jest.mock('../hooks/use_proposals');
 
+const mockUseEvidence = useEvidence as jest.Mock;
 const mockUseProposals = useProposals as jest.Mock;
 
 /**
@@ -46,6 +49,7 @@ const renderShell = () =>
 describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseEvidence.mockReturnValue({ evidence: [], isLoading: false, refresh: jest.fn() });
   });
 
   it('renders the rail (nav), stage, and composer once the hook fixture resolves data-populated (FR-010, FR-011, FR-020)', () => {

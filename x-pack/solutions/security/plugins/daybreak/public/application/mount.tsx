@@ -12,14 +12,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { EvidenceService } from '../services/evidence_service';
 import { ProposalsService } from '../services/proposals_service';
 import { DaybreakRoutes } from './routes';
 
-/**
- * Mounts the Daybreak application (FR-010). Lazy-loaded from `plugin.ts`'s
- * `core.application.register` `mount` callback so the route module is
- * code-split from the main bundle.
- */
 export const mountApp = ({
   core,
   element,
@@ -32,6 +28,7 @@ export const mountApp = ({
   const queryClient = new QueryClient();
   const services = {
     ...core,
+    evidenceService: new EvidenceService({ http: core.http }),
     proposalsService: new ProposalsService({ http: core.http }),
   };
 

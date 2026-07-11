@@ -7,47 +7,23 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiSpacer,
-  EuiNotificationBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../../hooks/use_proposals';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 
-/**
- * A Proposal is gate-ready (would pass `evaluateReadinessGate` for the
- * `approved` transition — `server/client/proposals/gate.ts:62`) when it has
- * at least one evidence reference AND a non-empty recommendation. This is a
- * presentation-only mirror of that check for bucketing purposes — the gate
- * itself stays server-side and is re-enforced (fail-closed, 422) by the
- * transition route; this component never calls it directly (FR-016, per
- * `.ao/recon.md`'s "the gate logic stays server-side" integration note).
- */
 const isGateReady = (proposal: DaybreakProposal): boolean =>
-  proposal.evidenceRefs.length > 0 &&
-  Boolean(proposal.recommendation && proposal.recommendation.trim().length > 0);
+  proposal.evidenceRefs.length > 0 && Boolean(proposal.recommendation?.trim());
 
-/**
- * ASSUMPTION (FR-014, FR-020 — no openspec change spec ("spec.md" under
- * openspec/changes/") is present in this worktree to read the literal
- * requirement text against, see `.ao/blocked.md`'s FR-001 precedent): "open threads" means every Proposal
- * not yet in a terminal state (`approved` or `dismissed`); "awaiting review"
- * means an open Proposal that is gate-ready (evidence + recommendation
- * present) and therefore blocked only on a human approval click, not on more
- * analysis; "next actions" surfaces the concrete `recommendation` text for
- * every open Proposal that has one, regardless of gate-readiness, since a
- * recommendation is actionable even before it clears the gate. This is the
- * most conservative reading available from the existing `ProposalStatus`
- * union and gate semantics (`server/client/proposals/gate.ts`,
- * `proposal_status.ts`) — revisit once the spec/prototype is vendored.
- */
 export interface BriefDashboardSections {
   openThreads: DaybreakProposal[];
   awaitingReview: DaybreakProposal[];
@@ -59,39 +35,44 @@ const TERMINAL_STATUSES: ReadonlySet<DaybreakProposal['status']> = new Set([
   'dismissed',
 ]);
 
-/** Buckets a flat Proposal list into the three Brief dashboard sections. */
 export const computeBriefSections = (proposals: DaybreakProposal[]): BriefDashboardSections => {
   const openThreads = proposals.filter((proposal) => !TERMINAL_STATUSES.has(proposal.status));
-  const awaitingReview = openThreads.filter(isGateReady);
-  const nextActions = openThreads.filter(
-    (proposal) => proposal.recommendation && proposal.recommendation.trim().length > 0
-  );
-
-  return { openThreads, awaitingReview, nextActions };
+  return {
+    openThreads,
+    awaitingReview: openThreads.filter(isGateReady),
+    nextActions: openThreads.filter((proposal) => Boolean(proposal.recommendation?.trim())),
+  };
 };
 
 const SectionPanel: React.FC<{
   dataTestSubj: string;
+  eyebrow: React.ReactNode;
   title: React.ReactNode;
   count: number;
   emptyMessage: React.ReactNode;
   isLoading: boolean;
   children: React.ReactNode;
-}> = ({ dataTestSubj, title, count, emptyMessage, isLoading, children }) => (
+}> = ({ dataTestSubj, eyebrow, title, count, emptyMessage, isLoading, children }) => (
   <EuiPanel data-test-subj={dataTestSubj} paddingSize="m" hasBorder>
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
+    <EuiText size="xs" color="subdued">
+      {eyebrow}
+    </EuiText>
+    <EuiSpacer size="xs" />
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      responsive={false}
+      gutterSize="s"
+    >
+      <EuiFlexItem>
         <EuiTitle size="xs">
           <h3>{title}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge
-          data-test-subj={`${dataTestSubj}Count`}
-          color={count > 0 ? 'accent' : 'subdued'}
-        >
+        <EuiBadge data-test-subj={`${dataTestSubj}Count`} color={count > 0 ? 'accent' : 'hollow'}>
           {count}
-        </EuiNotificationBadge>
+        </EuiBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
@@ -109,114 +90,104 @@ const SectionPanel: React.FC<{
   </EuiPanel>
 );
 
-/**
- * FR-014, FR-020: the landing/brief surface summarizing a space's Proposal
- * activity into three sections — open threads, proposals awaiting human
- * review, and concrete next actions — all sourced from the real Proposal
- * HTTP API via {@link useProposals} (no mocked or seeded data), mirroring
- * `shell.tsx`'s `DaybreakApp` hook-driven data flow.
- *
- * This is a design-neutral EUI implementation, not a port of the Throughline
- * (NotDaybreak) prototype's `briefView` — the prototype source is
- * unavailable in this repository (`.ao/blocked.md`, FR-001). Once vendored,
- * this component's markup should be diffed 1:1 against the ported
- * `briefView`, keeping the three-section shape and real-data wiring stable.
- */
 export const BriefDashboard: React.FC = () => {
   const { proposals, isLoading } = useProposals();
   const { openThreads, awaitingReview, nextActions } = computeBriefSections(proposals);
 
   return (
-    <EuiFlexGroup data-test-subj="daybreakBriefDashboard" direction="column" gutterSize="m">
-      <EuiFlexItem>
-        <SectionPanel
-          dataTestSubj="daybreakBriefOpenThreads"
-          title={
-            <FormattedMessage
-              id="xpack.daybreak.brief.openThreads.title"
-              defaultMessage="Open threads"
+    <div data-test-subj="daybreakBriefDashboard">
+      <EuiText size="xs" color="subdued">
+        DAYBREAK / SHIFT BRIEF
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiTitle size="m">
+        <h1>Operational brief</h1>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        Review the work that needs a decision, then open a thread for its evidence and approval
+        context.
+      </EuiText>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="m" wrap>
+        <EuiFlexItem grow={false} style={{ minWidth: 260, flexBasis: '31%' }}>
+          <SectionPanel
+            dataTestSubj="daybreakBriefOpenThreads"
+            eyebrow="LIVE QUEUE"
+            title={
+              <FormattedMessage
+                id="xpack.daybreak.brief.openThreads.title"
+                defaultMessage="Open threads"
+              />
+            }
+            count={openThreads.length}
+            isLoading={isLoading}
+            emptyMessage="No open threads."
+          >
+            <EuiListGroup
+              data-test-subj="daybreakBriefOpenThreadsList"
+              bordered={false}
+              listItems={openThreads.map((proposal) => ({
+                id: proposal.id,
+                label: proposal.title,
+                'data-test-subj': `daybreakBriefOpenThreadsItem-${proposal.id}`,
+              }))}
             />
-          }
-          count={openThreads.length}
-          isLoading={isLoading}
-          emptyMessage={
-            <FormattedMessage
-              id="xpack.daybreak.brief.openThreads.empty"
-              defaultMessage="No open threads."
+          </SectionPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 260, flexBasis: '31%' }}>
+          <SectionPanel
+            dataTestSubj="daybreakBriefAwaitingReview"
+            eyebrow="HUMAN DECISION"
+            title={
+              <FormattedMessage
+                id="xpack.daybreak.brief.awaitingReview.title"
+                defaultMessage="Awaiting review"
+              />
+            }
+            count={awaitingReview.length}
+            isLoading={isLoading}
+            emptyMessage="Nothing is awaiting review."
+          >
+            <EuiListGroup
+              data-test-subj="daybreakBriefAwaitingReviewList"
+              bordered={false}
+              listItems={awaitingReview.map((proposal) => ({
+                id: proposal.id,
+                label: proposal.title,
+                'data-test-subj': `daybreakBriefAwaitingReviewItem-${proposal.id}`,
+              }))}
             />
-          }
-        >
-          <EuiListGroup
-            data-test-subj="daybreakBriefOpenThreadsList"
-            bordered={false}
-            listItems={openThreads.map((proposal) => ({
-              id: proposal.id,
-              label: proposal.title,
-              'data-test-subj': `daybreakBriefOpenThreadsItem-${proposal.id}`,
-            }))}
-          />
-        </SectionPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <SectionPanel
-          dataTestSubj="daybreakBriefAwaitingReview"
-          title={
-            <FormattedMessage
-              id="xpack.daybreak.brief.awaitingReview.title"
-              defaultMessage="Awaiting review"
-            />
-          }
-          count={awaitingReview.length}
-          isLoading={isLoading}
-          emptyMessage={
-            <FormattedMessage
-              id="xpack.daybreak.brief.awaitingReview.empty"
-              defaultMessage="Nothing is awaiting review."
-            />
-          }
-        >
-          <EuiListGroup
-            data-test-subj="daybreakBriefAwaitingReviewList"
-            bordered={false}
-            listItems={awaitingReview.map((proposal) => ({
-              id: proposal.id,
-              label: proposal.title,
-              'data-test-subj': `daybreakBriefAwaitingReviewItem-${proposal.id}`,
-            }))}
-          />
-        </SectionPanel>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <SectionPanel
-          dataTestSubj="daybreakBriefNextActions"
-          title={
-            <FormattedMessage
-              id="xpack.daybreak.brief.nextActions.title"
-              defaultMessage="Next actions"
-            />
-          }
-          count={nextActions.length}
-          isLoading={isLoading}
-          emptyMessage={
-            <FormattedMessage
-              id="xpack.daybreak.brief.nextActions.empty"
-              defaultMessage="No recommended actions yet."
-            />
-          }
-        >
-          <EuiFlexGroup direction="column" gutterSize="s">
-            {nextActions.map((proposal) => (
-              <EuiFlexItem key={proposal.id}>
-                <EuiText size="s" data-test-subj={`daybreakBriefNextActionsItem-${proposal.id}`}>
-                  <strong>{proposal.title}:</strong> {proposal.recommendation}
-                </EuiText>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </SectionPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </SectionPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 260, flexBasis: '31%' }}>
+          <SectionPanel
+            dataTestSubj="daybreakBriefNextActions"
+            eyebrow="RECOMMENDED"
+            title={
+              <FormattedMessage
+                id="xpack.daybreak.brief.nextActions.title"
+                defaultMessage="Next actions"
+              />
+            }
+            count={nextActions.length}
+            isLoading={isLoading}
+            emptyMessage="No recommended actions yet."
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {nextActions.map((proposal) => (
+                <EuiFlexItem key={proposal.id}>
+                  <EuiText size="s" data-test-subj={`daybreakBriefNextActionsItem-${proposal.id}`}>
+                    <strong>{proposal.title}</strong>
+                    <br />
+                    {proposal.recommendation}
+                  </EuiText>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </SectionPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };

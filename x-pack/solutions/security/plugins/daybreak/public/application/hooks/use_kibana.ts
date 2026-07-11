@@ -7,12 +7,12 @@
 
 import { useKibana as useKibanaReact } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { EvidenceService } from '../../services/evidence_service';
 import type { ProposalsService } from '../../services/proposals_service';
 
-/** Services injected into the `KibanaContextProvider` in `mount.tsx`. */
 export interface DaybreakKibanaServices extends CoreStart {
+  evidenceService: EvidenceService;
   proposalsService: ProposalsService;
 }
 
-/** Typed wrapper over `@kbn/kibana-react-plugin`'s `useKibana` (FR-010). */
 export const useKibana = () => useKibanaReact<DaybreakKibanaServices>();

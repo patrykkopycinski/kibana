@@ -23,6 +23,7 @@ import { PROPOSAL_STATUS_META } from './proposal_status';
 
 const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) => (
   <EuiPanel
+    className="daybreakEvidenceCard"
     data-test-subj={`daybreakInspectorEvidence-${evidence.id}`}
     paddingSize="m"
     hasShadow={false}

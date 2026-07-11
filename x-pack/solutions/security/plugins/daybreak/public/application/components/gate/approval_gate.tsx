@@ -53,6 +53,7 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
 
   return (
     <EuiPanel
+      className="daybreakGateCard"
       data-test-subj="daybreakGateApproval"
       paddingSize="m"
       hasBorder

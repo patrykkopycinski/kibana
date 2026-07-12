@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../hooks/use_proposals';
@@ -172,6 +173,8 @@ export const DaybreakApp: React.FC = () => {
   const [destination, setDestination] = React.useState<Destination>('brief');
   const [chatThreadId, setChatThreadId] = React.useState<string | undefined>();
   const [mode, setMode] = React.useState<'dayshift' | 'nightshift'>('dayshift');
+  const { colorMode } = useEuiTheme();
+  const isDarkVisual = colorMode === 'DARK' || mode === 'nightshift';
   const selected = proposals.find((proposal) => proposal.id === selectedId);
   const awaitingReview = proposals.filter(
     (proposal) =>
@@ -452,7 +455,8 @@ export const DaybreakApp: React.FC = () => {
 
   return (
     <EuiFlexGroup
-      className={`daybreakVisualShell ${mode === 'nightshift' ? 'daybreakNightshift' : ''}`}
+      className={`daybreakVisualShell ${isDarkVisual ? 'daybreakNightshift' : ''}`}
+      data-daybreak-color-mode={colorMode}
       data-test-subj="daybreakAppShell"
       gutterSize="none"
       responsive={false}

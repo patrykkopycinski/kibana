@@ -21,6 +21,16 @@ jest.mock('../hooks/use_proposals');
 jest.mock('../hooks/use_proposal_transition');
 jest.mock('../hooks/use_watches');
 
+const mockUseEuiTheme = jest.fn(() => ({ colorMode: 'LIGHT' as const, euiTheme: {} }));
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    useEuiTheme: () => mockUseEuiTheme(),
+  };
+});
+
 const mockUseEvidence = useEvidence as jest.Mock;
 const mockUseProposals = useProposals as jest.Mock;
 const mockUseProposalTransition = useProposalTransition as jest.Mock;
@@ -87,5 +97,36 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
 
     fireEvent.click(screen.getByTestId('daybreakRailItem-chats'));
     expect(screen.getByTestId('daybreakNavItem-proposal-1')).toBeInTheDocument();
+  });
+
+  it('applies dark visual tokens when Kibana color mode is DARK', () => {
+    mockUseEuiTheme.mockReturnValue({ colorMode: 'DARK', euiTheme: {} });
+    mockUseProposals.mockReturnValue({
+      proposals: proposalsFixture,
+      isLoading: false,
+      refresh: jest.fn(),
+    });
+
+    renderShell();
+
+    const shell = screen.getByTestId('daybreakAppShell');
+    expect(shell).toHaveClass('daybreakNightshift');
+    expect(shell).toHaveAttribute('data-daybreak-color-mode', 'DARK');
+  });
+
+  it('applies dark visual tokens when NightShift mode is toggled in light Kibana', () => {
+    mockUseEuiTheme.mockReturnValue({ colorMode: 'LIGHT', euiTheme: {} });
+    mockUseProposals.mockReturnValue({
+      proposals: proposalsFixture,
+      isLoading: false,
+      refresh: jest.fn(),
+    });
+
+    renderShell();
+
+    fireEvent.click(screen.getByTestId('daybreakRailItem-brief'));
+
+    const shell = screen.getByTestId('daybreakAppShell');
+    expect(shell).toHaveClass('daybreakNightshift');
   });
 });

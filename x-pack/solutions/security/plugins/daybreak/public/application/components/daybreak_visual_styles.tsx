@@ -34,6 +34,7 @@ const styles = `
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Kibana dark mode or NightShift toggle — shared dark visual tokens */
 .daybreakVisualShell.daybreakNightshift {
   --db-ink-0: #f0f2f5;
   --db-ink-1: #e4e8ef;
@@ -43,16 +44,37 @@ const styles = `
   --db-panel-muted: #111418;
   --db-line: #2c333e;
   --db-line-strong: #3d4654;
+  --db-blue-dark: #6eb3ff;
   --db-blue-bg: rgba(23, 105, 211, .18);
   --db-shell: #0d1015;
   --db-shadow: 0 1px 2px rgba(0, 0, 0, .16), 0 12px 28px rgba(0, 0, 0, .22);
+}
+.daybreakVisualShell.daybreakNightshift .euiPanel {
+  background-color: var(--db-panel) !important;
+  border-color: var(--db-line) !important;
+  color: var(--db-ink-1);
+}
+.daybreakVisualShell.daybreakNightshift .euiText--subdued,
+.daybreakVisualShell.daybreakNightshift .euiTextColor--subdued {
+  color: var(--db-ink-2) !important;
 }
 .daybreakVisualShell.daybreakNightshift .daybreakBriefPriority {
   background: linear-gradient(135deg, rgba(23, 105, 211, .15) 0%, var(--db-panel) 56%) !important;
   border-color: rgba(23, 105, 211, .35) !important;
 }
+.daybreakVisualShell.daybreakNightshift .daybreakBriefCard:hover,
+.daybreakVisualShell.daybreakNightshift .daybreakRadarCard:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .28) !important;
+}
+.daybreakVisualShell.daybreakNightshift .daybreakComposerBox,
+.daybreakVisualShell.daybreakNightshift .daybreakComposerInner {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .32);
+}
 .daybreakVisualShell.daybreakNightshift .daybreakDecisionPill {
   background: rgba(0, 0, 0, .25);
+}
+.daybreakVisualShell.daybreakNightshift .daybreakFloatingComposer {
+  background: linear-gradient(180deg, transparent, var(--db-shell) 38%);
 }
 
 /* Icon rail chrome */
@@ -163,6 +185,13 @@ const styles = `
   font-weight: 750;
   letter-spacing: .065em;
   text-transform: uppercase;
+}
+.daybreakEyebrow {
+  color: var(--db-ink-3) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .065em !important;
+  text-transform: uppercase !important;
 }
 .daybreakStageScroll { box-sizing: border-box; max-width: 980px; width: 100%; margin: 0 auto; padding: 42px 44px 132px; }
 .daybreakAppPage { display: flex; align-items: center; justify-content: center; height: 100%; }

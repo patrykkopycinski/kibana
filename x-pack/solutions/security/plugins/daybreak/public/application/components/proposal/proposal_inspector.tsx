@@ -18,9 +18,47 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DaybreakProposal } from '../../../services/proposals_service';
+import type { DaybreakProposal, DecisionRecord } from '../../../services/proposals_service';
 import type { DaybreakEvidence } from '../../../services/evidence_service';
 import { PROPOSAL_STATUS_META } from './proposal_status';
+
+const decisionLabel = (decision?: DecisionRecord): string => {
+  if (!decision) return 'No decision recorded';
+  switch (decision.type) {
+    case 'approve':
+      return 'Approved';
+    case 'modify':
+      return 'Modified';
+    case 'defer':
+      return 'Deferred';
+    case 'dismiss':
+      return 'Dismissed';
+    case 'escalate':
+      return 'Escalated';
+    default:
+      return decision.type;
+  }
+};
+
+const decisionColor = (
+  decision?: DecisionRecord
+): 'success' | 'primary' | 'warning' | 'danger' | 'subdued' => {
+  if (!decision) return 'subdued';
+  switch (decision.type) {
+    case 'approve':
+      return 'success';
+    case 'modify':
+      return 'primary';
+    case 'defer':
+      return 'warning';
+    case 'dismiss':
+      return 'subdued';
+    case 'escalate':
+      return 'danger';
+    default:
+      return 'subdued';
+  }
+};
 
 const EvidenceCard: React.FC<{ evidence: DaybreakEvidence }> = ({ evidence }) => (
   <EuiPanel
@@ -180,9 +218,64 @@ export const ProposalInspector: React.FC<{
           ))}
         </EuiFlexGroup>
       )}
+
       <EuiSpacer size="l" />
       <EuiText size="xs" color="subdued">
-        DECISION HISTORY
+        RECORDED DECISION
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {proposal.decision ? (
+        <EuiPanel
+          className="daybreakReceiptDecision"
+          data-test-subj="daybreakProposalInspectorDecision"
+          paddingSize="m"
+          hasBorder
+          color={decisionColor(proposal.decision)}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="document" size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong data-test-subj="daybreakProposalInspectorDecisionType">
+                  {decisionLabel(proposal.decision)}
+                </strong>
+              </EuiText>
+              {proposal.decision.actor && (
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  data-test-subj="daybreakProposalInspectorDecisionActor"
+                >
+                  {proposal.decision.actor}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {new Date(proposal.decision.timestamp).toLocaleString()}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {proposal.decision.reason && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="s" data-test-subj="daybreakProposalInspectorDecisionReason">
+                {proposal.decision.reason}
+              </EuiText>
+            </>
+          )}
+        </EuiPanel>
+      ) : (
+        <EuiText size="s" color="subdued" data-test-subj="daybreakProposalInspectorDecisionEmpty">
+          No terminal decision recorded yet.
+        </EuiText>
+      )}
+
+      <EuiSpacer size="l" />
+      <EuiText size="xs" color="subdued">
+        DECISION HISTORY / RECEIPT
       </EuiText>
       <EuiSpacer size="xs" />
       {(proposal.decisionHistory?.length ?? 0) === 0 ? (
@@ -197,21 +290,60 @@ export const ProposalInspector: React.FC<{
         >
           {proposal.decisionHistory?.map((entry, index) => (
             <EuiFlexItem key={index} grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="arrowRight" size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    {entry.fromStatus} → {entry.toStatus}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {new Date(entry.timestamp).toLocaleString()}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiPanel
+                className="daybreakReceiptTrail"
+                paddingSize="s"
+                hasBorder
+                hasShadow={false}
+              >
+                <EuiFlexGroup
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="arrowRight" size="s" color="subdued" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText size="s">
+                        {entry.fromStatus} → {entry.toStatus}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {new Date(entry.timestamp).toLocaleString()}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {(entry.actor || entry.reason) && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiFlexGroup gutterSize="s" responsive={false}>
+                      {entry.actor && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow" data-test-subj={`daybreakHistoryActor-${index}`}>
+                            {entry.actor}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {entry.reason && (
+                        <EuiFlexItem>
+                          <EuiText
+                            size="xs"
+                            color="subdued"
+                            data-test-subj={`daybreakHistoryReason-${index}`}
+                          >
+                            {entry.reason}
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </>
+                )}
+              </EuiPanel>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

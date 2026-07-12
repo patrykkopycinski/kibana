@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -91,6 +92,8 @@ const RAIL_DESTINATIONS: RailDestination[] = [
   { key: 'performance', label: 'Performance', icon: 'stats', group: 'agent' },
   { key: 'guardrails', label: 'Guardrails', icon: 'security', group: 'agent' },
 ];
+
+const RAIL_GROUPS = ['primary', 'operate', 'agent'] as const;
 
 const ProposalRailLabel: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
   const status = PROPOSAL_STATUS_META[proposal.status];
@@ -180,10 +183,43 @@ export const DaybreakApp: React.FC = () => {
     if (destination === 'brief') {
       return (
         <>
-          <div className="daybreakRailHeader">
-            <EuiText className="daybreakEyebrow" size="xs">
-              DAYBREAK / OPERATIONAL QUEUE
-            </EuiText>
+          <div className="daybreakNavPanelHeader">
+            <div className="daybreakNavTop">
+              <div className="daybreakNavBrand">
+                <EuiIcon type="logoSecurity" size="m" />
+                <span>NotDaybreak</span>
+              </div>
+              <EuiButtonEmpty
+                className="daybreakNavNew"
+                iconType="plus"
+                size="xs"
+                aria-label="New thread"
+                disabled
+              />
+              <EuiButtonEmpty
+                className="daybreakNavCollapse"
+                iconType="menuRight"
+                size="xs"
+                aria-label="Collapse sidebar"
+                disabled
+              />
+            </div>
+            <EuiSpacer size="s" />
+            <EuiFieldSearch
+              className="daybreakNavSearch"
+              placeholder="Search threads & records"
+              disabled
+              fullWidth
+              compressed
+            />
+            <EuiSpacer size="s" />
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText className="daybreakEyebrow" size="xs">
+                  DAYBREAK / OPERATIONAL QUEUE
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <EuiSpacer size="xs" />
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -239,13 +275,35 @@ export const DaybreakApp: React.FC = () => {
     if (destination === 'chats') {
       return (
         <>
-          <div className="daybreakRailHeader">
+          <div className="daybreakNavPanelHeader">
+            <div className="daybreakNavTop">
+              <div className="daybreakNavBrand">
+                <EuiIcon type="comment" size="m" />
+                <span>Chats</span>
+              </div>
+              <EuiButtonEmpty
+                className="daybreakNavNew"
+                iconType="plus"
+                size="xs"
+                aria-label="New thread"
+                disabled
+              />
+            </div>
+            <EuiSpacer size="s" />
+            <EuiFieldSearch
+              className="daybreakNavSearch"
+              placeholder="Search threads"
+              disabled
+              fullWidth
+              compressed
+            />
+            <EuiSpacer size="s" />
             <EuiText className="daybreakEyebrow" size="xs">
-              CHATS
+              THREADS
             </EuiText>
             <EuiSpacer size="xs" />
             <EuiTitle className="daybreakRailTitle" size="s">
-              <h2>Threads</h2>
+              <h2>Conversations</h2>
             </EuiTitle>
           </div>
           <ChatThreadList selectedId={chatThreadId} onSelect={setChatThreadId} />
@@ -255,7 +313,17 @@ export const DaybreakApp: React.FC = () => {
 
     return (
       <>
-        <div className="daybreakRailHeader">
+        <div className="daybreakNavPanelHeader">
+          <div className="daybreakNavTop">
+            <div className="daybreakNavBrand">
+              <EuiIcon
+                type={RAIL_DESTINATIONS.find((d) => d.key === destination)?.icon ?? 'apps'}
+                size="m"
+              />
+              <span>{RAIL_DESTINATIONS.find((d) => d.key === destination)?.label}</span>
+            </div>
+          </div>
+          <EuiSpacer size="s" />
           <EuiText className="daybreakEyebrow" size="xs">
             {RAIL_DESTINATIONS.find((d) => d.key === destination)?.label.toUpperCase()}
           </EuiText>
@@ -399,39 +467,54 @@ export const DaybreakApp: React.FC = () => {
           style={{ height: '100%' }}
         >
           <EuiFlexItem grow={false}>
-            {RAIL_DESTINATIONS.map((dest) => {
-              const isBrief = dest.key === 'brief';
-              const isActive = destination === dest.key;
-              const label = isBrief ? (mode === 'nightshift' ? 'NightShift' : 'Brief') : dest.label;
-              const icon = isBrief ? (mode === 'nightshift' ? 'moon' : dest.icon) : dest.icon;
-              const tooltip = isBrief
-                ? mode === 'nightshift'
-                  ? 'NightShift'
-                  : 'NotDaybreak · Brief'
-                : dest.label;
-              return (
-                <EuiToolTip content={tooltip} position="right" key={dest.key}>
-                  <button
-                    className={`daybreakRailItem ${isActive ? 'daybreakRailItem--active' : ''} ${
-                      isBrief ? 'daybreakRailItem--solution' : ''
-                    }`}
-                    onClick={() => {
-                      if (isBrief) {
-                        setMode((current) => (current === 'dayshift' ? 'nightshift' : 'dayshift'));
-                      }
-                      setDestination(dest.key);
-                      setSelectedId(undefined);
-                      setChatThreadId(undefined);
-                    }}
-                    data-test-subj={`daybreakRailItem-${dest.key}`}
-                    aria-label={label}
-                  >
-                    <EuiIcon type={icon} size="m" />
-                    <span className="daybreakRailItemLabel">{label}</span>
-                  </button>
-                </EuiToolTip>
-              );
-            })}
+            <div className="daybreakRailBrand">
+              <EuiIcon type="logoSecurity" size="m" />
+            </div>
+            <EuiSpacer size="s" />
+            {RAIL_GROUPS.map((group, groupIndex) => (
+              <React.Fragment key={group}>
+                {groupIndex > 0 && <div className="daybreakRailSeparator" />}
+                {RAIL_DESTINATIONS.filter((d) => d.group === group).map((dest) => {
+                  const isBrief = dest.key === 'brief';
+                  const isActive = destination === dest.key;
+                  const label = isBrief
+                    ? mode === 'nightshift'
+                      ? 'NightShift'
+                      : 'Brief'
+                    : dest.label;
+                  const icon = isBrief ? (mode === 'nightshift' ? 'moon' : dest.icon) : dest.icon;
+                  const tooltip = isBrief
+                    ? mode === 'nightshift'
+                      ? 'NightShift'
+                      : 'NotDaybreak · Brief'
+                    : dest.label;
+                  return (
+                    <EuiToolTip content={tooltip} position="right" key={dest.key}>
+                      <button
+                        className={`daybreakRailItem ${
+                          isActive ? 'daybreakRailItem--active' : ''
+                        } ${isBrief ? 'daybreakRailItem--solution' : ''}`}
+                        onClick={() => {
+                          if (isBrief) {
+                            setMode((current) =>
+                              current === 'dayshift' ? 'nightshift' : 'dayshift'
+                            );
+                          }
+                          setDestination(dest.key);
+                          setSelectedId(undefined);
+                          setChatThreadId(undefined);
+                        }}
+                        data-test-subj={`daybreakRailItem-${dest.key}`}
+                        aria-label={label}
+                      >
+                        <EuiIcon type={icon} size="m" />
+                        <span className="daybreakRailItemLabel">{label}</span>
+                      </button>
+                    </EuiToolTip>
+                  );
+                })}
+              </React.Fragment>
+            ))}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -481,25 +564,25 @@ export const DaybreakApp: React.FC = () => {
           </div>
           {destination === 'brief' && (
             <div className="daybreakFloatingComposer">
-              <EuiFlexGroup
-                className="daybreakComposerInner"
-                gutterSize="s"
-                data-test-subj="daybreakComposer"
-              >
-                <EuiFlexItem>
-                  <EuiFieldText
-                    data-test-subj="daybreakComposerInput"
-                    placeholder="Ask about the operational queue…"
-                    fullWidth
-                    disabled
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton data-test-subj="daybreakComposerSubmit" disabled>
-                    <FormattedMessage id="xpack.daybreak.composer.send" defaultMessage="Send" />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <div className="daybreakComposerBox" data-test-subj="daybreakComposer">
+                <EuiFieldText
+                  className="daybreakComposerInput"
+                  data-test-subj="daybreakComposerInput"
+                  placeholder="Ask about the operational queue…"
+                  fullWidth
+                  disabled
+                />
+                <EuiButton
+                  className="daybreakComposerSend"
+                  data-test-subj="daybreakComposerSubmit"
+                  disabled
+                >
+                  <FormattedMessage id="xpack.daybreak.composer.send" defaultMessage="Send" />
+                </EuiButton>
+              </div>
+              <EuiText size="xs" color="subdued" className="daybreakComposerFoot">
+                Reads run automatically · drafts & actions ask first
+              </EuiText>
             </div>
           )}
         </EuiPanel>

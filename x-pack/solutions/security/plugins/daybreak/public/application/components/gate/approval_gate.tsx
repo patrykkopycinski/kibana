@@ -12,6 +12,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -40,6 +41,14 @@ const missingRequirementLabel = (requirement: MissingRequirement): string => {
         defaultMessage: 'additional approver',
       });
   }
+};
+
+const blastRadiusCopy: Partial<Record<MissingRequirement, string>> = {
+  evidence: 'Approving without evidence means accepting an unverified recommendation.',
+  recommendation:
+    'No recommended action is recorded, so approval would not trigger a controlled change.',
+  'approver-count':
+    'A single-approval override removes the second-key safeguard for this proposal.',
 };
 
 const isTerminal = (status: DaybreakProposal['status']): boolean =>
@@ -142,7 +151,7 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
       </EuiFlexGroup>
       {missingRequirements && missingRequirements.length > 0 && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiCallOut
             data-test-subj="daybreakGateApprovalFailure"
             color="danger"
@@ -157,6 +166,37 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
               />
             }
           />
+          <EuiSpacer size="s" />
+          <div className="daybreakBlastRadius" data-test-subj="daybreakGateBlastRadius">
+            <EuiText size="xs" color="subdued" className="daybreakBlastRadiusTitle">
+              <FormattedMessage
+                id="xpack.daybreak.gate.blastRadiusTitle"
+                defaultMessage="Blast radius if approved anyway"
+              />
+            </EuiText>
+            <EuiSpacer size="xs" />
+            {missingRequirements.map((req) => (
+              <div
+                className="daybreakBlastRow"
+                key={req}
+                data-test-subj={`daybreakBlastRow-${req}`}
+              >
+                <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="alert" size="s" color="danger" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <strong>{missingRequirementLabel(req)}</strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
+                      {blastRadiusCopy[req]}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            ))}
+          </div>
         </>
       )}
     </EuiPanel>

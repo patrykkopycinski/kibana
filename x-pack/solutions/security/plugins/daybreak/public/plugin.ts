@@ -30,27 +30,6 @@ interface DaybreakBrowserConfig {
 export const DAYBREAK_APP_ID = 'daybreak';
 export const DAYBREAK_APP_ROUTE = '/app/daybreak';
 
-/**
- * Public-side plugin for Daybreak (FR-008, FR-009, FR-010).
- *
- * Registers the top-level application route only when the server-side
- * `xpack.daybreak.enabled` flag is on (FR-009, NFR-2). The flag is exposed to
- * the browser via `exposeToBrowser` in `server/index.ts`. When disabled, no
- * daybreak UI renders — `core.application.register` is never called, so
- * `core.application` has no `daybreak` entry at all.
- *
- * `mount` lazy-loads `public/application`'s `mountApp`, which renders
- * `DaybreakApp` (`public/application/components/shell.tsx`) — the top-level
- * route component, named to match the `<PluginName>App` convention used by
- * sibling plugins (`IngestHubApp`, `EvalsApp`). It is imported lazily rather
- * than eagerly here so the application bundle stays code-split from `plugin.ts`.
- *
- * The app is additionally registered with an `appUpdater$` (mirroring the
- * `agent_builder` pattern in `public/plugin.tsx`) so the app's `status` can be
- * toggled to `inaccessible` at runtime without a full page reload — e.g. if a
- * future capability/license check needs to hide the nav entry after initial
- * registration.
- */
 export class DaybreakPublicPlugin
   implements
     Plugin<
@@ -78,7 +57,7 @@ export class DaybreakPublicPlugin
       category: DEFAULT_APP_CATEGORIES.security,
       title: i18n.translate('xpack.daybreak.appTitle', { defaultMessage: 'Daybreak' }),
       euiIconType: 'logoSecurity',
-      visibleIn: [],
+      visibleIn: ['classicSideNav', 'projectSideNav'],
       updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { mountApp } = await import('./application');

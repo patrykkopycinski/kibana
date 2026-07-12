@@ -55,6 +55,25 @@ const styles = `
   background: rgba(0, 0, 0, .25);
 }
 
+/* Icon rail chrome */
+.daybreakRailBrand { align-items: center; display: flex; justify-content: center; height: 44px; color: var(--db-amber); }
+
+/* Nav panel chrome */
+.daybreakNavPanelHeader { padding: 16px 16px 12px; border-bottom: 1px solid var(--db-line); }
+.daybreakNavTop { align-items: center; display: flex; gap: 4px; }
+.daybreakNavBrand { align-items: center; display: flex; flex: 1; gap: 7px; font-weight: 650; font-size: 14px; color: var(--db-ink-0); letter-spacing: -.01em; }
+.daybreakNavBrand .euiIcon { color: var(--db-blue); }
+.daybreakNavNew, .daybreakNavCollapse { margin-left: 0 !important; }
+.daybreakNavSearch .euiFormControlLayout--group .euiFormControlLayout__prepend,
+.daybreakNavSearch .euiFieldSearch { background: var(--db-panel-muted); }
+
+/* Composer chrome */
+.daybreakComposerBox { display: flex; align-items: center; gap: 6px; max-width: 660px; margin: 0 auto; border: 1px solid rgba(23, 105, 211, .28); border-radius: 999px; background: var(--db-panel); box-shadow: 0 8px 24px rgba(43, 124, 234, .16); padding: 5px; }
+.daybreakComposerBox .daybreakComposerInput { border: 0 !important; box-shadow: none !important; background: transparent !important; }
+.daybreakComposerBox .daybreakComposerInput:disabled { color: var(--db-ink-3); }
+.daybreakComposerSend { border-radius: 999px !important; }
+.daybreakComposerFoot { text-align: center; margin-top: 6px; }
+
 /* Icon rail */
 .daybreakRail {
   width: 64px;
@@ -198,6 +217,31 @@ const styles = `
 .daybreakGauge { display: inline-flex; position: relative; align-items: center; justify-content: center; }
 .daybreakGauge b { position: absolute; font-size: 11px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .daybreakGauge--featured b { font-size: 13px; }
+
+
+/* Blast radius itemization in ApprovalGate */
+.daybreakBlastRadius { border-top: 1px solid var(--db-line); padding-top: 12px; }
+.daybreakBlastRadiusTitle { font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.daybreakBlastRow { padding: 8px 0; border-bottom: 1px solid var(--db-line); }
+.daybreakBlastRow:last-child { border-bottom: none; }
+.daybreakBlastRow .euiIcon { margin-top: 2px; }
+
+/* Receipt / audit trail in ProposalInspector */
+.daybreakReceiptDecision { border-left: 4px solid currentColor; }
+.daybreakReceiptTrail { background: var(--db-panel-muted); }
+
+/* Consistent rounded panels — match NotDaybreak 12-14px radius */
+.daybreakVisualShell .euiPanel,
+.daybreakVisualShell .euiPanel.daybreakEvidenceCard,
+.daybreakVisualShell .euiPanel.daybreakGateCard,
+.daybreakVisualShell .euiPanel.daybreakRecommendation,
+.daybreakVisualShell .euiPanel.daybreakRadarCard,
+.daybreakVisualShell .euiPanel.daybreakOverviewMetric,
+.daybreakVisualShell .euiPanel.daybreakReceiptTrail,
+.daybreakVisualShell .euiPanel.daybreakReceiptDecision { border-radius: var(--db-radius-sm) !important; }
+.daybreakVisualShell .euiPanel.daybreakHomeStage,
+.daybreakVisualShell .euiPanel.daybreakBriefPriority,
+.daybreakVisualShell .euiPanel.daybreakBriefOverview { border-radius: var(--db-radius) !important; }
 
 /* Thread view */
 .daybreakThreadView { display: flex; flex-direction: column; height: 100%; width: 100%; }

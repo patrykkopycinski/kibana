@@ -10,10 +10,12 @@ import { registerEvidenceRoutes } from './evidence';
 import { registerProposalRoutes } from './proposals';
 import { registerWatchRoutes } from './watches';
 import { registerWorkflowRoutes } from './workflows';
+import { registerSeedDemoDataRoute } from './seed_demo_data';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalRoutes(dependencies);
   registerEvidenceRoutes(dependencies);
   registerWatchRoutes(dependencies);
   registerWorkflowRoutes(dependencies);
+  registerSeedDemoDataRoute(dependencies);
 };

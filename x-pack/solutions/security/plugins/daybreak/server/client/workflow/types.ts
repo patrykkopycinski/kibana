@@ -22,6 +22,7 @@ export interface WorkflowProperties {
   enabled: boolean;
   priority: number;
   lastRunAt?: string;
+  activeExecutionId?: string;
   auditTrail: WorkflowAuditEvent[];
   deletedAt?: string;
   createdAt: string;

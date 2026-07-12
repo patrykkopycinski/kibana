@@ -23,9 +23,17 @@ export interface DaybreakWorkflow {
   enabled: boolean;
   priority: number;
   lastRunAt?: string;
+  activeExecutionId?: string;
   auditTrail?: WorkflowAuditEvent[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface WorkflowExecutionStatus {
+  workflowId: string;
+  activeExecutionId?: string;
+  status: 'idle' | 'in-motion' | 'completed' | 'failed';
+  timestamp?: string;
 }
 
 interface ListWorkflowsResponse {
@@ -45,7 +53,10 @@ export class WorkflowsService {
   }
 
   async create(
-    workflow: Omit<DaybreakWorkflow, 'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail'>
+    workflow: Omit<
+      DaybreakWorkflow,
+      'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail' | 'activeExecutionId'
+    >
   ): Promise<DaybreakWorkflow> {
     return this.http.post<DaybreakWorkflow>(`${daybreakApiPath}/workflows`, {
       body: JSON.stringify(workflow),
@@ -55,7 +66,10 @@ export class WorkflowsService {
   async update(
     id: string,
     updates: Partial<
-      Omit<DaybreakWorkflow, 'id' | 'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail'>
+      Omit<
+        DaybreakWorkflow,
+        'id' | 'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail' | 'activeExecutionId'
+      >
     >
   ): Promise<DaybreakWorkflow> {
     return this.http.put<DaybreakWorkflow>(`${daybreakApiPath}/workflows/${id}`, {
@@ -65,6 +79,10 @@ export class WorkflowsService {
 
   async execute(id: string): Promise<ExecuteWorkflowResponse> {
     return this.http.post<ExecuteWorkflowResponse>(`${daybreakApiPath}/workflows/${id}/execute`);
+  }
+
+  async getExecutionStatus(id: string): Promise<WorkflowExecutionStatus> {
+    return this.http.get<WorkflowExecutionStatus>(`${daybreakApiPath}/workflows/${id}/execution`);
   }
 
   async delete(id: string): Promise<DaybreakWorkflow> {

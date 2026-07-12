@@ -79,6 +79,8 @@ export class DaybreakPlugin
         enabled: true,
       }).then((result) => result.workflowExecutionId);
 
+    this.routeDependencies.workflowEventLoggerService = engine.workflowEventLoggerService;
+
     return {
       runSpikeWorkflow: (request: KibanaRequest) =>
         runSpikeWorkflow({

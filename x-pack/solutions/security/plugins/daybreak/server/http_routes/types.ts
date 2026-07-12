@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, Logger, KibanaRequest, RouteSecurity } from '@kbn/core/server';
+import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 
 export const daybreakRouteSecurity: RouteSecurity = {
   authz: {
@@ -20,4 +21,5 @@ export interface RouteDependencies {
   logger: Logger;
   getSpaceId: (request: KibanaRequest) => string;
   executeAlertAnalysisWorker?: (request: KibanaRequest) => Promise<string>;
+  workflowEventLoggerService?: IWorkflowEventLoggerService;
 }

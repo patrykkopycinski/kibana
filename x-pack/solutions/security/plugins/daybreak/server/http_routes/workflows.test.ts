@@ -135,6 +135,24 @@ describe('workflow lifecycle routes', () => {
 
     await handlers.get('POST /api/daybreak/workflows/{id}/execute')!(ctx, request, response);
 
-    expect(mockClient.recordExecution).toHaveBeenCalledWith(workflow.id, expect.any(String));
+    expect(mockClient.recordExecution).toHaveBeenCalledWith(
+      workflow.id,
+      expect.any(String),
+      'execution-2'
+    );
+  });
+
+  it('returns idle execution status when no active execution is set', async () => {
+    const handlers = registerRoutes();
+    const response = createResponse();
+    mockClient.get.mockResolvedValue(workflow);
+
+    await handlers.get('GET /api/daybreak/workflows/{id}/execution')!(ctx, request, response);
+
+    expect(response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { workflowId: workflow.id, status: 'idle' },
+      })
+    );
   });
 });

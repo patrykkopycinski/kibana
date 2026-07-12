@@ -25,6 +25,7 @@ export interface WorkflowCreateParams {
 
 export type WorkflowUpdateParams = Partial<Omit<WorkflowCreateParams, 'id'>> & {
   lastRunAt?: string;
+  activeExecutionId?: string;
 };
 
 export interface WorkflowClient {
@@ -35,7 +36,7 @@ export interface WorkflowClient {
   update(id: string, updates: WorkflowUpdateParams): Promise<WorkflowProperties>;
   pruneWatchReference(watchId: string): Promise<void>;
   delete(id: string): Promise<WorkflowProperties>;
-  recordExecution(id: string, timestamp: string): Promise<WorkflowProperties>;
+  recordExecution(id: string, timestamp: string, activeExecutionId?: string): Promise<WorkflowProperties>;
 }
 
 class WorkflowClientImpl implements WorkflowClient {
@@ -109,12 +110,17 @@ class WorkflowClientImpl implements WorkflowClient {
     return workflow;
   }
 
-  async recordExecution(id: string, timestamp: string): Promise<WorkflowProperties> {
+  async recordExecution(
+    id: string,
+    timestamp: string,
+    activeExecutionId?: string
+  ): Promise<WorkflowProperties> {
     const document = await this.getById(id);
     if (!document || document._source?.deletedAt) throw new WorkflowNotFoundError(id);
     const workflow: WorkflowProperties = {
       ...document._source!,
       lastRunAt: timestamp,
+      activeExecutionId,
       updatedAt: timestamp,
       auditTrail: [
         ...(document._source!.auditTrail ?? []),

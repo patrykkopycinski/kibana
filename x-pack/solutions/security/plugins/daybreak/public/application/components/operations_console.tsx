@@ -32,6 +32,7 @@ import { useKibana } from '../hooks/use_kibana';
 import { useProposals } from '../hooks/use_proposals';
 import { useWatches } from '../hooks/use_watches';
 import { useWorkflows } from '../hooks/use_workflows';
+import { useWorkflowExecutionStatus } from '../hooks/use_workflow_execution_status';
 
 const proposalColor: Record<DaybreakProposal['severity'], 'success' | 'warning' | 'danger'> = {
   low: 'success',
@@ -43,6 +44,25 @@ const proposalColor: Record<DaybreakProposal['severity'], 'success' | 'warning' 
 type Selection =
   | { kind: 'watch'; value: DaybreakWatch }
   | { kind: 'workflow'; value: DaybreakWorkflow };
+
+const WorkflowExecutionStatusBadge: React.FC<{ workflowId: string }> = ({ workflowId }) => {
+  const { status, isLoading } = useWorkflowExecutionStatus(workflowId);
+  if (isLoading) return <EuiLoadingSpinner size="s" />;
+  if (!status || status.status === 'idle') return null;
+  const color =
+    status.status === 'completed' ? 'success' : status.status === 'failed' ? 'danger' : 'primary';
+  const icon =
+    status.status === 'in-motion' ? 'play' : status.status === 'completed' ? 'check' : 'alert';
+  return (
+    <EuiBadge
+      color={color}
+      iconType={icon}
+      data-test-subj={`daybreakWorkflowExecutionStatus-${status.status}`}
+    >
+      {status.status.replace('-', ' ')}
+    </EuiBadge>
+  );
+};
 
 const LinkedProposals: React.FC<{ watchId: string }> = ({ watchId }) => {
   const { proposals } = useProposals();
@@ -147,9 +167,20 @@ const AutomationList: React.FC<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color={workflow.enabled ? 'success' : 'hollow'}>
-                {workflow.enabled ? 'enabled' : 'paused'}
-              </EuiBadge>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                {workflow.activeExecutionId && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary" iconType="play">
+                      In motion
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={workflow.enabled ? 'success' : 'hollow'}>
+                    {workflow.enabled ? 'enabled' : 'paused'}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -314,6 +345,21 @@ export const OperationsConsole: React.FC = () => {
                     description: selected.value.watchIds.join(', ') || 'None configured',
                   },
                   { title: 'Last run', description: selected.value.lastRunAt ?? 'Not yet run' },
+                  {
+                    title: 'Active execution',
+                    description: selected.value.activeExecutionId ? (
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s">{selected.value.activeExecutionId}</EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <WorkflowExecutionStatusBadge workflowId={selected.value.id} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    ) : (
+                      'Idle'
+                    ),
+                  },
                 ]}
               />
               <EuiSpacer size="m" />
@@ -327,7 +373,7 @@ export const OperationsConsole: React.FC = () => {
                   <EuiButton
                     fill
                     isLoading={isExecuting}
-                    disabled={!selected.value.enabled}
+                    disabled={!selected.value.enabled || Boolean(selected.value.activeExecutionId)}
                     onClick={() => executeWorkflow(selected.value)}
                   >
                     Run now

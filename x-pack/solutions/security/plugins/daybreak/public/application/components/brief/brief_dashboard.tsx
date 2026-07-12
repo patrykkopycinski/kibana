@@ -392,7 +392,9 @@ const BriefOverview: React.FC<{
   openThreads: DaybreakProposal[];
   awaitingReview: DaybreakProposal[];
   isLoading: boolean;
-}> = ({ openThreads, awaitingReview, isLoading }) => {
+  activeFilter: DaybreakProposal['severity'] | 'all';
+  onFilter: (severity: DaybreakProposal['severity'] | 'all') => void;
+}> = ({ openThreads, awaitingReview, isLoading, activeFilter, onFilter }) => {
   if (isLoading) {
     return (
       <EuiPanel
@@ -477,6 +479,26 @@ const BriefOverview: React.FC<{
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            Surface filter:
+          </EuiText>
+        </EuiFlexItem>
+        {(['all', 'critical', 'high', 'medium', 'low'] as const).map((severity) => (
+          <EuiFlexItem grow={false} key={severity}>
+            <EuiButtonEmpty
+              size="xs"
+              color={activeFilter === severity ? 'primary' : 'text'}
+              onClick={() => onFilter(severity)}
+              data-test-subj={`daybreakBriefFilter-${severity}`}
+            >
+              {severity === 'all' ? 'All' : severity}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -490,16 +512,33 @@ export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal
   const { openThreads, awaitingReview, nextActions, priorityProposal } =
     computeBriefSections(proposals);
   const { transition, isLoading: transitionLoading } = useProposalTransition();
+  const [surfaceFilter, setSurfaceFilter] = React.useState<DaybreakProposal['severity'] | 'all'>(
+    'all'
+  );
+  const filteredThreads = React.useMemo(
+    () =>
+      surfaceFilter === 'all'
+        ? openThreads
+        : openThreads.filter((p) => p.severity === surfaceFilter),
+    [openThreads, surfaceFilter]
+  );
+  const filteredAwaiting = React.useMemo(
+    () =>
+      surfaceFilter === 'all'
+        ? awaitingReview
+        : awaitingReview.filter((p) => p.severity === surfaceFilter),
+    [awaitingReview, surfaceFilter]
+  );
   const grouped = React.useMemo(() => {
     const acc: Record<DecisionKey, DaybreakProposal[]> = DECISION_ORDER.reduce((map, key) => {
       map[key] = [];
       return map;
     }, {} as Record<DecisionKey, DaybreakProposal[]>);
-    sortByPriority(openThreads).forEach((proposal) => {
+    sortByPriority(filteredThreads).forEach((proposal) => {
       acc[deriveDecision(proposal)].push(proposal);
     });
     return acc;
-  }, [openThreads]);
+  }, [filteredThreads]);
 
   const onOpenThread = (proposal: DaybreakProposal) => {
     onSelectProposal?.(proposal.id);
@@ -540,8 +579,8 @@ export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal
     );
   }
 
-  const emptyOpenThreads = openThreads.length === 0 && !isLoading;
-  const emptyAwaitingReview = awaitingReview.length === 0 && !isLoading;
+  const emptyOpenThreads = filteredThreads.length === 0 && !isLoading;
+  const emptyAwaitingReview = filteredAwaiting.length === 0 && !isLoading;
 
   return (
     <div className="daybreakBriefRadar" data-test-subj="daybreakBriefDashboard">
@@ -572,12 +611,17 @@ export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal
         </EuiText>
       </div>
 
-      <PriorityBrief proposal={priorityProposal} isLoading={isLoading} />
+      <PriorityBrief
+        proposal={surfaceFilter === 'all' ? priorityProposal : sortByPriority(filteredThreads)[0]}
+        isLoading={isLoading}
+      />
       <EuiSpacer size="m" />
       <BriefOverview
-        openThreads={openThreads}
-        awaitingReview={awaitingReview}
+        openThreads={filteredThreads}
+        awaitingReview={filteredAwaiting}
         isLoading={isLoading}
+        activeFilter={surfaceFilter}
+        onFilter={setSurfaceFilter}
       />
       <EuiSpacer size="l" />
 

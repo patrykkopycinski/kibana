@@ -29,7 +29,7 @@ export const registerSeedDemoDataRoute = ({ logger, router, getSpaceId }: RouteD
           confirm: schema.literal(true),
         }),
       },
-      options: { access: 'internal', tags: ['access:daybreak'] },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx: RequestHandlerContext, request, response) => {
       const {

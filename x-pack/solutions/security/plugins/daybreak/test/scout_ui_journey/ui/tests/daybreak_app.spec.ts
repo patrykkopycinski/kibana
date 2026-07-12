@@ -5,20 +5,52 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import { tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
+import { createProposalClient } from '../../../../server/client/proposals/client';
 import type { ProposalProperties } from '../../../../server/client/proposals/types';
 import { test, testData } from '../fixtures';
+
+/**
+ * Minimal no-op {@link Logger} for seeding through `createProposalClient()`
+ * in this Playwright/Scout context (no Jest globals available here, so
+ * `@kbn/logging-mocks`'s `jest.fn()`-based `loggerMock` cannot be used).
+ */
+const noopLogger: Logger = {
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  trace: () => {},
+  fatal: () => {},
+  log: () => {},
+  get: () => noopLogger,
+  isLevelEnabled: () => false,
+};
 
 /**
  * End-to-end journey through the real, wired Daybreak application shell
  * (FR-012, FR-014, FR-017, FR-020) — no mocked hooks or seeded component
  * fixtures, unlike the Jest unit suites for `shell.tsx`, `brief_dashboard.tsx`,
- * and `approval_gate.tsx`. Proposals are seeded directly into the real
- * `.kibana-daybreak-proposals` write alias (there is no `POST /proposals`
- * HTTP route yet — see `fixtures/constants.ts`), then the browser renders them via
- * the real `GET /api/daybreak/proposals` route and the real
+ * and `approval_gate.tsx`. Proposals are seeded through the real
+ * `createProposalClient()` (the same `StorageIndexAdapter`-backed client the
+ * HTTP routes use — there is no `POST /proposals` HTTP route yet, see
+ * `fixtures/constants.ts`), then the browser renders them via the real
+ * `GET /api/daybreak/proposals` route and the real
  * `POST /api/daybreak/proposals/{id}/transition` route (FR-023).
+ *
+ * Seeding MUST go through `createProposalClient()` rather than a raw
+ * `esClient.index()` call against the `.kibana-daybreak-proposals` alias
+ * name: on a fresh cluster, a raw write to that literal name auto-creates a
+ * *concrete* index called `.kibana-daybreak-proposals`, and when
+ * `StorageIndexAdapter` (used by the real transition route) later tries to
+ * establish that same name as an *alias* (`is_write_index: true`), ES
+ * rejects it with `invalid_alias_name_exception` — silently breaking every
+ * subsequent write through the real client/route. Routing the seed through
+ * `createProposalClient()` runs the adapter's own
+ * `validateComponentsBeforeWriting` first, so the template/index/alias are
+ * provisioned correctly before any assertion or HTTP call depends on them.
  *
  * Covers:
  *  - FR-020: the shell rail renders every seeded Proposal, populated from the
@@ -48,21 +80,18 @@ test.describe(
       esClient: import('@kbn/scout-security').EsClient,
       overrides: Partial<ProposalProperties> & Pick<ProposalProperties, 'id' | 'title' | 'status'>
     ) => {
-      const document: ProposalProperties = {
+      const proposalClient = createProposalClient({
+        space: testData.DEFAULT_SPACE,
+        logger: noopLogger,
+        esClient,
+      });
+
+      await proposalClient.create({
         capability: 'alert-analysis',
         severity: 'high',
         confidence: 0.82,
         evidenceRefs: [],
-        decisionHistory: [],
-        createdAt: new Date().toISOString(),
-        space: testData.DEFAULT_SPACE,
         ...overrides,
-      };
-
-      await esClient.index({
-        index: testData.DAYBREAK_PROPOSALS_ALIAS,
-        refresh: 'wait_for',
-        document,
       });
     };
 

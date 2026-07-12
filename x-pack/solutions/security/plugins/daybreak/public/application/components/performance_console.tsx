@@ -8,9 +8,14 @@
 import React from 'react';
 import {
   EuiBadge,
+  EuiButtonIcon,
+  EuiCodeBlock,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -22,12 +27,14 @@ import { useProposals } from '../hooks/use_proposals';
 import { useWatches } from '../hooks/use_watches';
 import { useWorkflows } from '../hooks/use_workflows';
 import { useWorkerEvalRecords } from '../hooks/use_worker_eval_records';
+import type { WorkerEvalRecordProperties } from '../../../server/client/worker_eval_records';
 
 export const PerformanceConsole: React.FC = () => {
   const { proposals, isLoading: proposalsLoading } = useProposals();
   const { watches, isLoading: watchesLoading } = useWatches();
   const { workflows, isLoading: workflowsLoading } = useWorkflows();
   const { records, isLoading: recordsLoading } = useWorkerEvalRecords();
+  const [selectedRecord, setSelectedRecord] = React.useState<WorkerEvalRecordProperties | null>(null);
   const isLoading = proposalsLoading || watchesLoading || workflowsLoading || recordsLoading;
 
   const pendingDecisions = proposals.filter(
@@ -130,15 +137,65 @@ export const PerformanceConsole: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={record.score === 1 ? 'success' : 'danger'}>
-                      {record.score === 1 ? 'match' : 'mismatch'}
-                    </EuiBadge>
+                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color={record.score === 1 ? 'success' : 'danger'}>
+                          {record.score === 1 ? 'match' : 'mismatch'}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          iconType="inspect"
+                          aria-label={`Inspect eval record ${record.runId}`}
+                          onClick={() => setSelectedRecord(record)}
+                          data-test-subj="daybreakEvalRecordInspect"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
+      )}
+
+      {selectedRecord && (
+        <EuiFlyout
+          ownFocus
+          onClose={() => setSelectedRecord(null)}
+          aria-labelledby="daybreakEvalRecordFlyoutTitle"
+          data-test-subj="daybreakEvalRecordFlyout"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id="daybreakEvalRecordFlyoutTitle">{selectedRecord.runId}</h2>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              {selectedRecord.environment} · {selectedRecord.dataset} · score: {selectedRecord.score}
+            </EuiText>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>Actual</strong>
+                </EuiText>
+                <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
+                  {JSON.stringify(selectedRecord.actual, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>Expected</strong>
+                </EuiText>
+                <EuiCodeBlock language="json" isCopyable overflowHeight={300}>
+                  {JSON.stringify(selectedRecord.expected, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutBody>
+        </EuiFlyout>
       )}
     </section>
   );

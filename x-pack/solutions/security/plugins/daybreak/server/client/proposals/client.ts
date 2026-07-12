@@ -7,7 +7,13 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ProposalStorage } from './storage';
-import type { ApprovalEntry, ProposalProperties, ProposalStatus, ProposalDocument } from './types';
+import type {
+  ApprovalEntry,
+  DecisionTaxonomy,
+  ProposalProperties,
+  ProposalStatus,
+  ProposalDocument,
+} from './types';
 import { createProposalsStorage } from './storage';
 import { requireReadinessGate } from './gate';
 import { ProposalNotFoundError } from './errors';
@@ -35,7 +41,9 @@ export interface ProposalClient {
     id: string,
     targetStatus: ProposalStatus,
     actor?: string,
-    reason?: string
+    reason?: string,
+    decisionType?: DecisionTaxonomy,
+    decisionReason?: string
   ): Promise<ProposalProperties>;
   /** Add an evidence reference to a proposal. */
   addEvidenceRef(id: string, evidenceId: string): Promise<ProposalProperties>;
@@ -195,7 +203,9 @@ class ProposalClientImpl implements ProposalClient {
     id: string,
     targetStatus: ProposalStatus,
     actor?: string,
-    reason?: string
+    reason?: string,
+    decisionType?: DecisionTaxonomy,
+    decisionReason?: string
   ): Promise<ProposalProperties> {
     const document = await this.getById(id);
     if (!document) {
@@ -218,10 +228,33 @@ class ProposalClientImpl implements ProposalClient {
 
     requireReadinessGate({ ...current, approvals }, targetStatus);
 
+    const statusToDecisionType: Record<
+      Exclude<ProposalStatus, 'new' | 'needs-evidence'>,
+      DecisionTaxonomy
+    > = {
+      approved: 'approve',
+      modified: 'modify',
+      dismissed: 'dismiss',
+      escalated: 'escalate',
+      deferred: 'defer',
+    };
+    const decision: ProposalProperties['decision'] =
+      targetStatus in statusToDecisionType
+        ? {
+            type:
+              decisionType ??
+              statusToDecisionType[targetStatus as keyof typeof statusToDecisionType],
+            actor,
+            reason: decisionReason ?? reason,
+            timestamp: new Date().toISOString(),
+          }
+        : current.decision;
+
     const updatedSource: ProposalProperties = {
       ...current,
       status: targetStatus,
       approvals,
+      decision,
       decisionHistory: [
         ...current.decisionHistory,
         {

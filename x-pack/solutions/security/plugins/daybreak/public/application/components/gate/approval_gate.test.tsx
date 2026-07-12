@@ -83,7 +83,7 @@ describe('ApprovalGate (FR-016, FR-7, FR-018, FR-019)', () => {
 
     fireEvent.click(screen.getByTestId('daybreakGateApproveButton'));
 
-    expect(transition).toHaveBeenCalledWith({ id: 'proposal-1', targetStatus: 'approved' });
+    expect(transition).toHaveBeenCalledWith({ id: 'proposal-1', targetStatus: 'approved', decisionType: 'approve' });
   });
 
   it('renders the missingRequirements failure callout when the gate rejects the transition (FR-018)', () => {

@@ -57,7 +57,11 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
     isApprovalReady && approvalCount > 0 && approvalCount < requiredApproverCount;
 
   const handleApprove = () => {
-    void transition({ id: proposal.id, targetStatus: 'approved' });
+    void transition({
+      id: proposal.id,
+      targetStatus: 'approved',
+      decisionType: 'approve',
+    });
   };
 
   return (

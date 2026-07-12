@@ -14,6 +14,8 @@ import { daybreakApiPath } from '../../common/http_api';
  * to preserve the public/server boundary — the HTTP response is the actual
  * contract the browser depends on.
  */
+export type DecisionTaxonomy = 'approve' | 'modify' | 'defer' | 'dismiss' | 'escalate';
+
 export interface DecisionHistoryEntry {
   fromStatus: DaybreakProposal['status'];
   toStatus: DaybreakProposal['status'];
@@ -26,6 +28,13 @@ export interface ApprovalEntry {
   actor: string;
   timestamp: string;
   reason?: string;
+}
+
+export interface DecisionRecord {
+  type: DecisionTaxonomy;
+  actor?: string;
+  reason?: string;
+  timestamp: string;
 }
 
 export interface DaybreakProposal {
@@ -52,6 +61,7 @@ export interface DaybreakProposal {
   requiredApproverCount?: number;
   approvals?: ApprovalEntry[];
   decisionHistory?: DecisionHistoryEntry[];
+  decision?: DecisionRecord;
   createdAt: string;
 }
 
@@ -104,10 +114,12 @@ export class ProposalsService {
     id: string,
     targetStatus: DaybreakProposal['status'],
     actor?: string,
-    reason?: string
+    reason?: string,
+    decisionType?: DecisionTaxonomy,
+    decisionReason?: string
   ): Promise<DaybreakProposal> {
     return this.http.post<DaybreakProposal>(`${daybreakApiPath}/proposals/${id}/transition`, {
-      body: JSON.stringify({ targetStatus, actor, reason }),
+      body: JSON.stringify({ targetStatus, actor, reason, decisionType, decisionReason }),
     });
   }
 }

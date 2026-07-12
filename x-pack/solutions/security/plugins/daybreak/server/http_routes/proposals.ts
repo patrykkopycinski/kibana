@@ -30,6 +30,14 @@ const proposalSeveritySchema = schema.oneOf([
   schema.literal('critical'),
 ]);
 
+const decisionTaxonomySchema = schema.oneOf([
+  schema.literal('approve'),
+  schema.literal('modify'),
+  schema.literal('defer'),
+  schema.literal('dismiss'),
+  schema.literal('escalate'),
+]);
+
 interface RequestAuthWithUser {
   getCurrentUser(): { username: string; profile_uid?: string } | null;
 }
@@ -116,6 +124,8 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
           targetStatus: proposalStatusSchema,
           actor: schema.maybe(schema.string()),
           reason: schema.maybe(schema.string()),
+          decisionType: schema.maybe(decisionTaxonomySchema),
+          decisionReason: schema.maybe(schema.string()),
         }),
       },
       options: { access: 'public' },
@@ -127,7 +137,9 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
         request.params.id,
         request.body.targetStatus,
         actor,
-        request.body.reason
+        request.body.reason,
+        request.body.decisionType,
+        request.body.decisionReason
       );
       return response.ok({ body: proposal });
     })

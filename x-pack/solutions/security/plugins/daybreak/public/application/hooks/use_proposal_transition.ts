@@ -10,6 +10,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from './use_kibana';
 import type {
   DaybreakProposal,
+  DecisionTaxonomy,
   MissingRequirement,
   TransitionGateFailureBody,
 } from '../../services/proposals_service';
@@ -18,6 +19,8 @@ interface TransitionVariables {
   id: string;
   targetStatus: DaybreakProposal['status'];
   reason?: string;
+  decisionType?: DecisionTaxonomy;
+  decisionReason?: string;
 }
 
 /**
@@ -49,8 +52,15 @@ export const useProposalTransition = () => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ id, targetStatus, reason }: TransitionVariables) =>
-      services.proposalsService.transitionStatus(id, targetStatus, undefined, reason),
+    mutationFn: ({ id, targetStatus, reason, decisionType, decisionReason }: TransitionVariables) =>
+      services.proposalsService.transitionStatus(
+        id,
+        targetStatus,
+        undefined,
+        reason,
+        decisionType,
+        decisionReason
+      ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['daybreak', 'proposals'] });
     },

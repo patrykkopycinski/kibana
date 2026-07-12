@@ -18,6 +18,12 @@ export type ProposalStatus =
   | 'deferred';
 
 /**
+ * Decision taxonomy values. Maps to terminal proposal statuses but captures
+ * the operator's decision intent explicitly for analytics and audit.
+ */
+export type DecisionTaxonomy = 'approve' | 'modify' | 'defer' | 'dismiss' | 'escalate';
+
+/**
  * DecisionHistoryEntry describes a single status transition.
  */
 export interface DecisionHistoryEntry {
@@ -35,6 +41,16 @@ export interface ApprovalEntry {
   actor: string;
   timestamp: string;
   reason?: string;
+}
+
+/**
+ * Recorded decision when a proposal reaches a terminal status.
+ */
+export interface DecisionRecord {
+  type: DecisionTaxonomy;
+  actor?: string;
+  reason?: string;
+  timestamp: string;
 }
 
 /**
@@ -59,6 +75,7 @@ export interface ProposalProperties {
   approvals: ApprovalEntry[];
   hypothesis?: string;
   decisionHistory: DecisionHistoryEntry[];
+  decision?: DecisionRecord;
   space?: string;
 }
 

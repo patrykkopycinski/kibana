@@ -295,7 +295,7 @@ export const DaybreakApp: React.FC = () => {
           />
         );
       }
-      return <BriefDashboard />;
+      return <BriefDashboard onSelectProposal={setSelectedId} />;
     }
 
     if (destination === 'chats') {

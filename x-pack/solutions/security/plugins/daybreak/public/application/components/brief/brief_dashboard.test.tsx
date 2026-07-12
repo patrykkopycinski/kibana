@@ -11,11 +11,14 @@ import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BriefDashboard, computeBriefSections } from './brief_dashboard';
 import { useProposals } from '../../hooks/use_proposals';
+import { useProposalTransition } from '../../hooks/use_proposal_transition';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 
 jest.mock('../../hooks/use_proposals');
+jest.mock('../../hooks/use_proposal_transition');
 
 const mockUseProposals = useProposals as jest.Mock;
+const mockUseProposalTransition = useProposalTransition as jest.Mock;
 
 /**
  * Real-data-shaped fixture standing in for `GET /api/daybreak/proposals`
@@ -134,6 +137,11 @@ describe('computeBriefSections (FR-014, FR-020)', () => {
 describe('BriefDashboard (FR-014, FR-020)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseProposalTransition.mockReturnValue({
+      transition: jest.fn().mockResolvedValue(undefined),
+      isLoading: false,
+      missingRequirements: undefined,
+    });
   });
 
   it('renders open threads + awaiting-review + next-actions from real-data fixtures', () => {

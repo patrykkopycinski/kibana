@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../../hooks/use_proposals';
+import { useProposalTransition } from '../../hooks/use_proposal_transition';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 import { ActionFlyout, type GatedAction } from '../action/action_flyout';
 
@@ -234,7 +235,8 @@ const RadarCard: React.FC<{
   featured?: boolean;
   onOpenThread?: () => void;
   onRunGatedAction?: () => void;
-}> = ({ proposal, featured, onOpenThread, onRunGatedAction }) => {
+  isTransitionLoading?: boolean;
+}> = ({ proposal, featured, onOpenThread, onRunGatedAction, isTransitionLoading }) => {
   const decision = deriveDecision(proposal);
   const meta = DECISION_META[decision];
   const score = radarScore(proposal);
@@ -309,12 +311,14 @@ const RadarCard: React.FC<{
             Open thread
           </EuiButtonEmpty>
         )}
-        {proposal.recommendation && onRunGatedAction && (
+        {isReady && onRunGatedAction && (
           <EuiButtonEmpty
             size="s"
             iconType="lock"
             color="danger"
             onClick={onRunGatedAction}
+            isLoading={isTransitionLoading}
+            disabled={isTransitionLoading}
             data-test-subj={`daybreakRadarAction-${proposal.id}`}
           >
             Run action
@@ -334,7 +338,8 @@ const DecisionSection: React.FC<{
   proposals: DaybreakProposal[];
   onOpenThread: (proposal: DaybreakProposal) => void;
   onRunGatedAction: (proposal: DaybreakProposal) => void;
-}> = ({ meta, proposals, onOpenThread, onRunGatedAction }) => {
+  isTransitionLoading?: boolean;
+}> = ({ meta, proposals, onOpenThread, onRunGatedAction, isTransitionLoading }) => {
   if (proposals.length === 0) return null;
   const waiting = proposals.filter((p) => !TERMINAL_STATUSES.has(p.status)).length;
   return (
@@ -371,6 +376,7 @@ const DecisionSection: React.FC<{
               featured={index === 0 && ACTIVE_DECISIONS.includes(meta.key)}
               onOpenThread={() => onOpenThread(proposal)}
               onRunGatedAction={() => onRunGatedAction(proposal)}
+              isTransitionLoading={isTransitionLoading}
             />
           </EuiFlexItem>
         ))}
@@ -472,10 +478,15 @@ const BriefOverview: React.FC<{
   );
 };
 
-export const BriefDashboard: React.FC = () => {
+export interface BriefDashboardProps {
+  onSelectProposal?: (id: string) => void;
+}
+
+export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal }) => {
   const { proposals, isLoading } = useProposals();
   const { openThreads, awaitingReview, nextActions, priorityProposal } =
     computeBriefSections(proposals);
+  const { transition, isLoading: transitionLoading } = useProposalTransition();
   const grouped = React.useMemo(() => {
     const acc: Record<DecisionKey, DaybreakProposal[]> = DECISION_ORDER.reduce((map, key) => {
       map[key] = [];
@@ -488,9 +499,7 @@ export const BriefDashboard: React.FC = () => {
   }, [openThreads]);
 
   const onOpenThread = (proposal: DaybreakProposal) => {
-    // TODO: wire to thread selection once home-thread integration lands
-    // eslint-disable-next-line no-console
-    console.log('Open thread', proposal.id);
+    onSelectProposal?.(proposal.id);
   };
 
   const [flyout, setFlyout] = React.useState<{
@@ -511,9 +520,9 @@ export const BriefDashboard: React.FC = () => {
   const onRunGatedAction = (proposal: DaybreakProposal) => {
     setFlyout({ proposal, action: defaultGatedAction });
   };
-  const onConfirmAction = () => {
-    // eslint-disable-next-line no-console
-    console.log('Confirmed action on', flyout?.proposal.id);
+  const onConfirmAction = async () => {
+    if (!flyout) return;
+    await transition({ id: flyout.proposal.id, targetStatus: 'approved' });
     setFlyout(null);
   };
 
@@ -587,6 +596,7 @@ export const BriefDashboard: React.FC = () => {
           proposals={grouped[key]}
           onOpenThread={onOpenThread}
           onRunGatedAction={onRunGatedAction}
+          isTransitionLoading={transitionLoading}
         />
       ))}
 

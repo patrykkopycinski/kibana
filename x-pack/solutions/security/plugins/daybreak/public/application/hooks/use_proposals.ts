@@ -23,6 +23,7 @@ export const useProposals = () => {
   } = useQuery({
     queryKey: ['daybreak', 'proposals'],
     queryFn: () => services.proposalsService.list(),
+    refetchInterval: 5000,
   });
 
   return {

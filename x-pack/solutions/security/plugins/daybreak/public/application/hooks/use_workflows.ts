@@ -16,6 +16,7 @@ export const useWorkflows = () => {
   const query = useQuery({
     queryKey: ['daybreak', 'workflows'],
     queryFn: () => workflowsService.list(),
+    refetchInterval: 5000,
   });
 
   return { workflows: query.data ?? [], isLoading: query.isLoading };

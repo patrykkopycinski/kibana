@@ -16,6 +16,7 @@ export const useWatches = () => {
   const query = useQuery({
     queryKey: ['daybreak', 'watches'],
     queryFn: () => watchesService.list(),
+    refetchInterval: 5000,
   });
 
   return { watches: query.data ?? [], isLoading: query.isLoading };

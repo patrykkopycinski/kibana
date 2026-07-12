@@ -13,10 +13,11 @@ export const useWorkerEvalRecords = () => {
     services: { workerEvalRecordsService },
   } = useKibana();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['daybreak', 'worker-eval-records'],
     queryFn: () => workerEvalRecordsService.list(),
+    refetchInterval: 5000,
   });
 
-  return { records: data ?? [], isLoading, error };
+  return { records: data ?? [], isLoading, error, refresh: refetch };
 };

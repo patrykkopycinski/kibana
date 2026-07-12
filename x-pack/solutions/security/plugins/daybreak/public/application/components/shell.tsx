@@ -152,6 +152,7 @@ export const DaybreakApp: React.FC = () => {
   const [selectedId, setSelectedId] = React.useState<string | undefined>();
   const [destination, setDestination] = React.useState<Destination>('brief');
   const [chatThreadId, setChatThreadId] = React.useState<string | undefined>();
+  const [mode, setMode] = React.useState<'dayshift' | 'nightshift'>('dayshift');
   const selected = proposals.find((proposal) => proposal.id === selectedId);
   const awaitingReview = proposals.filter(
     (proposal) =>
@@ -314,7 +315,7 @@ export const DaybreakApp: React.FC = () => {
 
   return (
     <EuiFlexGroup
-      className="daybreakVisualShell"
+      className={`daybreakVisualShell ${mode === 'nightshift' ? 'daybreakNightshift' : ''}`}
       data-test-subj="daybreakAppShell"
       gutterSize="none"
       responsive={false}
@@ -329,25 +330,39 @@ export const DaybreakApp: React.FC = () => {
           style={{ height: '100%' }}
         >
           <EuiFlexItem grow={false}>
-            {RAIL_DESTINATIONS.map((dest) => (
-              <EuiToolTip content={dest.label} position="right" key={dest.key}>
-                <button
-                  className={`daybreakRailItem ${
-                    destination === dest.key ? 'daybreakRailItem--active' : ''
-                  } ${dest.key === 'brief' ? 'daybreakRailItem--solution' : ''}`}
-                  onClick={() => {
-                    setDestination(dest.key);
-                    setSelectedId(undefined);
-                    setChatThreadId(undefined);
-                  }}
-                  data-test-subj={`daybreakRailItem-${dest.key}`}
-                  aria-label={dest.label}
-                >
-                  <EuiIcon type={dest.icon} size="m" />
-                  <span className="daybreakRailItemLabel">{dest.label}</span>
-                </button>
-              </EuiToolTip>
-            ))}
+            {RAIL_DESTINATIONS.map((dest) => {
+              const isBrief = dest.key === 'brief';
+              const isActive = destination === dest.key;
+              const label = isBrief ? (mode === 'nightshift' ? 'NightShift' : 'Brief') : dest.label;
+              const icon = isBrief ? (mode === 'nightshift' ? 'moon' : dest.icon) : dest.icon;
+              const tooltip = isBrief
+                ? mode === 'nightshift'
+                  ? 'NightShift'
+                  : 'NotDaybreak · Brief'
+                : dest.label;
+              return (
+                <EuiToolTip content={tooltip} position="right" key={dest.key}>
+                  <button
+                    className={`daybreakRailItem ${isActive ? 'daybreakRailItem--active' : ''} ${
+                      isBrief ? 'daybreakRailItem--solution' : ''
+                    }`}
+                    onClick={() => {
+                      if (isBrief) {
+                        setMode((current) => (current === 'dayshift' ? 'nightshift' : 'dayshift'));
+                      }
+                      setDestination(dest.key);
+                      setSelectedId(undefined);
+                      setChatThreadId(undefined);
+                    }}
+                    data-test-subj={`daybreakRailItem-${dest.key}`}
+                    aria-label={label}
+                  >
+                    <EuiIcon type={icon} size="m" />
+                    <span className="daybreakRailItemLabel">{label}</span>
+                  </button>
+                </EuiToolTip>
+              );
+            })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

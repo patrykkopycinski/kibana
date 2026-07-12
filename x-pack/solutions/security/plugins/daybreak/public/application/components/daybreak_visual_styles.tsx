@@ -34,6 +34,27 @@ const styles = `
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.daybreakVisualShell.daybreakNightshift {
+  --db-ink-0: #f0f2f5;
+  --db-ink-1: #e4e8ef;
+  --db-ink-2: #9aa5b5;
+  --db-ink-3: #7e8796;
+  --db-panel: #181b21;
+  --db-panel-muted: #111418;
+  --db-line: #2c333e;
+  --db-line-strong: #3d4654;
+  --db-blue-bg: rgba(23, 105, 211, .18);
+  --db-shell: #0d1015;
+  --db-shadow: 0 1px 2px rgba(0, 0, 0, .16), 0 12px 28px rgba(0, 0, 0, .22);
+}
+.daybreakVisualShell.daybreakNightshift .daybreakBriefPriority {
+  background: linear-gradient(135deg, rgba(23, 105, 211, .15) 0%, var(--db-panel) 56%) !important;
+  border-color: rgba(23, 105, 211, .35) !important;
+}
+.daybreakVisualShell.daybreakNightshift .daybreakDecisionPill {
+  background: rgba(0, 0, 0, .25);
+}
+
 /* Icon rail */
 .daybreakRail {
   width: 64px;

@@ -123,6 +123,7 @@ export enum SecurityPageName {
    * external links
    */
   externalLinkAgentBuilder = 'external_link-agent_builder',
+  externalLinkDaybreak = 'external_link-daybreak',
   externalLinkDiscover = 'external_link-discover',
   externalLinkWorkflows = 'external_link-workflows',
 

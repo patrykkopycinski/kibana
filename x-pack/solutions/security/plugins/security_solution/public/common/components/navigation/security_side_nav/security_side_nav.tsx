@@ -226,6 +226,17 @@ const useSolutionSideNavItems = (
 
     // External app links — hrefs are built via getUrlForApp so basePath and active
     // space are automatically prepended (handles e.g. /s/my-space/app/discover).
+    const daybreakLink: SolutionSideNavItem = {
+      id: SecurityPageName.externalLinkDaybreak,
+      label: 'Daybreak',
+      href: application.getUrlForApp('daybreak'),
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        application.navigateToApp('daybreak');
+      },
+      position: SolutionSideNavItemPosition.top,
+    };
+
     const externalLinks: SolutionSideNavItem[] = [
       // Agent builder for AI agent chat and not classic AI experience
       ...(chatExperience === AIChatExperience.Agent
@@ -265,6 +276,7 @@ const useSolutionSideNavItems = (
     ];
 
     return [
+      daybreakLink,
       ...(isClassicNavExternalLinksEnabled ? externalLinks : []),
       ...bodyItems,
       ...(classicFooterItems ? classicFooterItems : []),

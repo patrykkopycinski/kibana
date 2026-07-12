@@ -23,12 +23,17 @@ export const getNavCategories = (
         ? // Agent builder for AI agent chat and at the top
           chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
           ? [
+              SecurityPageName.externalLinkDaybreak,
               SecurityPageName.externalLinkAgentBuilder,
               SecurityPageName.externalLinkDiscover,
               SecurityPageName.dashboards,
             ]
-          : [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
-        : [SecurityPageName.dashboards],
+          : [
+              SecurityPageName.externalLinkDaybreak,
+              SecurityPageName.externalLinkDiscover,
+              SecurityPageName.dashboards,
+            ]
+        : [SecurityPageName.externalLinkDaybreak, SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,

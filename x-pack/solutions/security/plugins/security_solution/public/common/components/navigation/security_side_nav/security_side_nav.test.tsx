@@ -117,6 +117,7 @@ describe('SecuritySideNav', () => {
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
+    useKibana().services.application.getUrlForApp.mockReturnValue('/app/daybreak');
     useKibana().services.serverless = undefined;
   });
 
@@ -127,6 +128,13 @@ describe('SecuritySideNav', () => {
       expect.objectContaining({
         selectedId: SecurityPageName.alerts,
         items: [
+          {
+            id: SecurityPageName.externalLinkDaybreak,
+            label: 'Daybreak',
+            href: '/app/daybreak',
+            onClick: expect.any(Function),
+            position: 'top',
+          },
           {
             id: SecurityPageName.alerts,
             label: 'alerts',

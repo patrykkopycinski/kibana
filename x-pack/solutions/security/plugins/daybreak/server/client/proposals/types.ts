@@ -46,6 +46,7 @@ export interface ProposalProperties {
   expectedImpact?: string;
   riskCaveats?: string[];
   approvalRequirement?: 'manual' | 'automatic';
+  hypothesis?: string;
   decisionHistory: DecisionHistoryEntry[];
   space?: string;
 }

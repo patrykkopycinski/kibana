@@ -58,6 +58,7 @@ export interface ProposalCreateParams {
   expectedImpact?: string;
   riskCaveats?: string[];
   approvalRequirement?: ProposalProperties['approvalRequirement'];
+  hypothesis?: string;
 }
 
 const createSpaceFilter = (space: string) => ({ term: { space } });
@@ -140,6 +141,7 @@ class ProposalClientImpl implements ProposalClient {
       expectedImpact: params.expectedImpact,
       riskCaveats: params.riskCaveats,
       approvalRequirement: params.approvalRequirement,
+      hypothesis: params.hypothesis,
       decisionHistory: [],
       createdAt: new Date().toISOString(),
       space: this.space,

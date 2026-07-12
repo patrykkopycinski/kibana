@@ -41,6 +41,7 @@ export interface DaybreakProposal {
   evidenceRefs: string[];
   expectedImpact?: string;
   riskCaveats?: string[];
+  hypothesis?: string;
   decisionHistory?: DecisionHistoryEntry[];
   createdAt: string;
 }

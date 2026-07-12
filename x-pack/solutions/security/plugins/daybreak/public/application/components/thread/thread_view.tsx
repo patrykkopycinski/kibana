@@ -183,6 +183,20 @@ export const ThreadView: React.FC<ThreadViewProps> = ({ proposal, type }) => {
   return (
     <div className="daybreakThreadView" data-test-subj="daybreakThreadView">
       <SpineHeader proposal={proposal} type={threadType} />
+      {proposal.hypothesis && (
+        <EuiPanel
+          className="daybreakHypothesis"
+          hasBorder
+          paddingSize="m"
+          data-test-subj="daybreakThreadHypothesis"
+        >
+          <EuiText size="xs" color="subdued" className="daybreakEyebrow">
+            HYPOTHESIS
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s">{proposal.hypothesis}</EuiText>
+        </EuiPanel>
+      )}
       <div className="daybreakStream" ref={scrollRef} data-test-subj="daybreakMessageStream">
         {messages.length === 0 ? (
           <EuiText color="subdued" size="s">

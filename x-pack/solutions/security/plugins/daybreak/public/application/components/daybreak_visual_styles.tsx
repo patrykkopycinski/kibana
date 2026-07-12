@@ -179,8 +179,11 @@ const styles = `
 .daybreakGauge--featured b { font-size: 13px; }
 
 /* Thread view */
-.daybreakThreadView { display: flex; flex-direction: column; height: 100%; max-width: 900px; margin: 0 auto; }
+.daybreakThreadView { display: flex; flex-direction: column; height: 100%; width: 100%; }
 .daybreakSpineHeader { border-bottom: 1px solid var(--db-line); border-radius: 0 !important; }
+.daybreakSpineHeaderTop { min-width: 0; }
+.daybreakSpineTitle { width: 100%; display: block; }
+.daybreakSpineTitle h2 { margin: 0; white-space: normal; word-break: break-word; width: 100%; display: block; }
 .daybreakStream { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
 .daybreakMessage { max-width: 80%; }
 .daybreakMessage--user { align-self: flex-end; }

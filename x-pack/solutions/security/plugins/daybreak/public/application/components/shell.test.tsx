@@ -58,7 +58,6 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
     expect(screen.getByTestId('daybreakAppShell')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakRail')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakStage')).toBeInTheDocument();
-    expect(screen.getByTestId('daybreakComposer')).toBeInTheDocument();
 
     expect(screen.getByTestId('daybreakRailItem-brief')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakRailItem-chats')).toBeInTheDocument();

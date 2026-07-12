@@ -79,25 +79,26 @@ const SpineHeader: React.FC<{ proposal: DaybreakProposal; type: ThreadType }> = 
   const inMotion = isGateReady(proposal) && proposal.status !== 'approved';
   return (
     <EuiPanel className="daybreakSpineHeader" hasBorder={false} hasShadow={false} paddingSize="m">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={meta.color}>{meta.label}</EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h2>{proposal.title}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {inMotion && (
+      <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <div className="daybreakSpineHeaderTop">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="primary" iconType="play">
-                  In motion
-                </EuiBadge>
+                <EuiBadge color={meta.color}>{meta.label}</EuiBadge>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+              {inMotion && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="primary" iconType="play">
+                    In motion
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+            <EuiTitle size="xs" className="daybreakSpineTitle">
+              <h2>{proposal.title}</h2>
+            </EuiTitle>
+          </div>
           <EuiSpacer size="xs" />
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
@@ -14,22 +15,27 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIcon,
+  EuiListGroup,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../hooks/use_proposals';
 import { useEvidence } from '../hooks/use_evidence';
+import type { DaybreakEvidence } from '../../services/evidence_service';
 import type { DaybreakProposal } from '../../services/proposals_service';
 import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
 import { OperationsConsole } from './operations_console';
+import { ApprovalGate } from './gate/approval_gate';
+import { ProposalInspector } from './proposal/proposal_inspector';
+import { deriveGateTier } from './gate/gate_tier';
 import { PROPOSAL_STATUS_META } from './proposal/proposal_status';
-import { DaybreakRail, type DaybreakDest, type HomeNavView } from './rail';
-import { ThreadView } from './thread/thread_view';
-import { InspectorPanel } from './inspector/inspector_panel';
 
 const severityColor: Record<DaybreakProposal['severity'], 'success' | 'warning' | 'danger'> = {
   low: 'success',
@@ -38,8 +44,41 @@ const severityColor: Record<DaybreakProposal['severity'], 'success' | 'warning' 
   critical: 'danger',
 };
 
+type Destination =
+  | 'brief'
+  | 'chats'
+  | 'discover'
+  | 'dashboards'
+  | 'alerts'
+  | 'attacks'
+  | 'records'
+  | 'hunt'
+  | 'streams'
+  | 'agents';
+
+interface RailDestination {
+  key: Destination;
+  label: string;
+  icon: string;
+  group?: 'primary' | 'operate' | 'agent';
+}
+
+const RAIL_DESTINATIONS: RailDestination[] = [
+  { key: 'brief', label: 'Brief', icon: 'sun', group: 'primary' },
+  { key: 'chats', label: 'Chats', icon: 'comment', group: 'primary' },
+  { key: 'discover', label: 'Discover', icon: 'compass', group: 'operate' },
+  { key: 'dashboards', label: 'Dashboards', icon: 'grid', group: 'operate' },
+  { key: 'alerts', label: 'Alerts', icon: 'alert', group: 'operate' },
+  { key: 'attacks', label: 'Attacks', icon: 'siren', group: 'operate' },
+  { key: 'records', label: 'Records', icon: 'list', group: 'operate' },
+  { key: 'hunt', label: 'Threat hunt', icon: 'target', group: 'operate' },
+  { key: 'streams', label: 'Streams', icon: 'logstashFilter', group: 'operate' },
+  { key: 'agents', label: 'Watches', icon: 'eye', group: 'agent' },
+];
+
 const ProposalRailLabel: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
   const status = PROPOSAL_STATUS_META[proposal.status];
+
   return (
     <div className="daybreakRailItemContent">
       <div className="daybreakRailItemTopline">
@@ -52,83 +91,229 @@ const ProposalRailLabel: React.FC<{ proposal: DaybreakProposal }> = ({ proposal 
   );
 };
 
-const NavPanel: React.FC<{
-  proposals: DaybreakProposal[];
-  selectedId?: string;
-  onSelect: (id: string) => void;
-  hidden: boolean;
-}> = ({ proposals, selectedId, onSelect, hidden }) => {
-  if (hidden) return null;
-  return (
-    <EuiPanel className="daybreakNavPanel" hasBorder={false} hasShadow={false} paddingSize="none">
-      <div className="daybreakNavPanelHeader">
-        <EuiText className="daybreakEyebrow" size="xs">
-          THREADS
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiTitle size="xs">
-          <h3>Active records</h3>
-        </EuiTitle>
-      </div>
-      <div className="daybreakNavPanelList">
-        {proposals.length === 0 ? (
-          <EuiText size="s" color="subdued">
-            No records yet.
-          </EuiText>
-        ) : (
-          proposals.map((proposal) => (
-            <button
-              key={proposal.id}
-              className={`daybreakNavPanelItem ${
-                proposal.id === selectedId ? 'daybreakNavPanelItem--active' : ''
-              }`}
-              onClick={() => onSelect(proposal.id)}
-              data-test-subj={`daybreakNavItem-${proposal.id}`}
-            >
-              <ProposalRailLabel proposal={proposal} />
-            </button>
-          ))
-        )}
-      </div>
-    </EuiPanel>
-  );
-};
-
-const AppPage: React.FC<{ dest: DaybreakDest }> = ({ dest }) => (
-  <div className="daybreakAppPage" data-test-subj={`daybreakAppPage-${dest}`}>
-    <EuiEmptyPrompt
-      title={<h2>{dest}</h2>}
-      body={<p>This operational app surface is not yet wired in the Daybreak spike.</p>}
-    />
+const AppPlaceholder: React.FC<{ title: string; subtitle: string }> = ({ title, subtitle }) => (
+  <div className="daybreakAppPage" data-test-subj="daybreakAppPlaceholder">
+    <EuiEmptyPrompt title={<h3>{title}</h3>} body={<p>{subtitle}</p>} />
   </div>
 );
 
-export const DaybreakApp: React.FC = () => {
+const ChatThreadList: React.FC<{ onSelect: (id: string) => void; selectedId?: string }> = ({
+  onSelect,
+  selectedId,
+}) => {
   const { proposals } = useProposals();
+  const threads = proposals.map((proposal) => ({
+    id: proposal.id,
+    title: proposal.title,
+    status: proposal.status,
+    severity: proposal.severity,
+  }));
+
+  return (
+    <div className="daybreakNavPanelList">
+      {threads.length === 0 ? (
+        <EuiText size="s" color="subdued" className="daybreakNavPanelList">
+          No chat threads yet.
+        </EuiText>
+      ) : (
+        threads.map((thread) => (
+          <button
+            key={thread.id}
+            className={`daybreakNavPanelItem ${
+              selectedId === thread.id ? 'daybreakNavPanelItem--active' : ''
+            }`}
+            onClick={() => onSelect(thread.id)}
+            data-test-subj={`daybreakNavItem-${thread.id}`}
+          >
+            <div className="daybreakRailItemContent">
+              <div className="daybreakRailItemTopline">
+                <EuiHealth color={severityColor[thread.severity]}>{thread.severity}</EuiHealth>
+              </div>
+              <div className="daybreakRailItemTitle">{thread.title}</div>
+              <div className="daybreakRailItemStatus">{thread.status}</div>
+            </div>
+          </button>
+        ))
+      )}
+    </div>
+  );
+};
+
+const ChatThreadView: React.FC<{ threadId: string; onBack: () => void }> = ({
+  threadId,
+  onBack,
+}) => {
+  const { proposals } = useProposals();
+  const thread = proposals.find((p) => p.id === threadId);
+  if (!thread) return null;
+
+  return (
+    <div className="daybreakThreadView" data-test-subj="daybreakThreadView">
+      <EuiPanel className="daybreakSpineHeader" paddingSize="m" hasBorder>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty iconType="arrowLeft" size="s" onClick={onBack}>
+              Back to chats
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem className="daybreakSpineHeaderTop">
+            <EuiTitle size="s" className="daybreakSpineTitle">
+              <h2>{thread.title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <div className="daybreakStream">
+        <EuiPanel className="daybreakMessage daybreakMessage--agent" paddingSize="m">
+          <EuiText size="s">
+            I’m looking at this thread. Ask me to investigate, summarize evidence, or propose a
+            decision.
+          </EuiText>
+        </EuiPanel>
+      </div>
+      <div className="daybreakThreadComposer">
+        <EuiFieldText
+          className="daybreakThreadComposerInput"
+          placeholder="Message NotDaybreak..."
+          fullWidth
+          disabled
+        />
+      </div>
+    </div>
+  );
+};
+
+export const DaybreakApp: React.FC = () => {
+  const { proposals, isLoading } = useProposals();
   const { evidence } = useEvidence();
   const [selectedId, setSelectedId] = React.useState<string | undefined>();
-  const [dest, setDest] = React.useState<DaybreakDest>('home');
-  const [navView, setNavView] = React.useState<HomeNavView>('brief');
-  const [showOperations, setShowOperations] = React.useState(false);
+  const [destination, setDestination] = React.useState<Destination>('brief');
+  const [chatThreadId, setChatThreadId] = React.useState<string | undefined>();
   const selected = proposals.find((proposal) => proposal.id === selectedId);
+  const awaitingReview = proposals.filter(
+    (proposal) =>
+      !['approved', 'dismissed'].includes(proposal.status) &&
+      deriveGateTier(proposal) === 'approval-required'
+  ).length;
 
-  const onGoBrief = () => {
-    setDest('home');
-    setNavView('brief');
-    setSelectedId(undefined);
-  };
-  const onGoChats = () => {
-    setDest('home');
-    setNavView('chats');
-  };
-  const onGo = (next: DaybreakDest) => {
-    setDest(next);
+  const renderNavPanel = () => {
+    if (destination === 'brief') {
+      return (
+        <>
+          <div className="daybreakRailHeader">
+            <EuiText className="daybreakEyebrow" size="xs">
+              DAYBREAK / OPERATIONAL QUEUE
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle className="daybreakRailTitle" size="s">
+                  <h2>Active threads</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  className="daybreakReviewBadge"
+                  color={awaitingReview > 0 ? 'warning' : 'hollow'}
+                >
+                  {awaitingReview} review
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+          <div className="daybreakRailSummary">
+            <span>{proposals.length} active signals</span>
+            <span>Prioritized by decision risk</span>
+          </div>
+          {isLoading ? (
+            <div className="daybreakRailLoading" data-test-subj="daybreakRailLoading">
+              <EuiLoadingSpinner size="m" />
+            </div>
+          ) : proposals.length === 0 ? (
+            <EuiText
+              className="daybreakRailEmpty"
+              size="s"
+              color="subdued"
+              data-test-subj="daybreakRailEmpty"
+            >
+              No proposals yet.
+            </EuiText>
+          ) : (
+            <EuiListGroup
+              className="daybreakRailList"
+              data-test-subj="daybreakRailList"
+              bordered={false}
+              listItems={proposals.map((proposal) => ({
+                id: proposal.id,
+                label: <ProposalRailLabel proposal={proposal} />,
+                isActive: proposal.id === selectedId,
+                onClick: () => setSelectedId(proposal.id),
+                'data-test-subj': `daybreakRailItem-${proposal.id}`,
+              }))}
+            />
+          )}
+        </>
+      );
+    }
+
+    if (destination === 'chats') {
+      return (
+        <>
+          <div className="daybreakRailHeader">
+            <EuiText className="daybreakEyebrow" size="xs">
+              CHATS
+            </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiTitle className="daybreakRailTitle" size="s">
+              <h2>Threads</h2>
+            </EuiTitle>
+          </div>
+          <ChatThreadList selectedId={chatThreadId} onSelect={setChatThreadId} />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <div className="daybreakRailHeader">
+          <EuiText className="daybreakEyebrow" size="xs">
+            {RAIL_DESTINATIONS.find((d) => d.key === destination)?.label.toUpperCase()}
+          </EuiText>
+        </div>
+      </>
+    );
   };
 
-  const onOpenNavPrefs = () => {};
+  const renderMainStage = () => {
+    if (destination === 'brief') {
+      if (selected) {
+        return (
+          <DaybreakProposalDetail
+            proposal={selected}
+            evidence={evidence.filter((item) => selected.evidenceRefs.includes(item.id))}
+            onBack={() => setSelectedId(undefined)}
+          />
+        );
+      }
+      return <BriefDashboard />;
+    }
 
-  const isHome = dest === 'home';
-  const showNavPanel = isHome && navView !== 'brief';
+    if (destination === 'chats') {
+      if (chatThreadId) {
+        return <ChatThreadView threadId={chatThreadId} onBack={() => setChatThreadId(undefined)} />;
+      }
+      return <AppPlaceholder title="Chats" subtitle="Select a thread to start investigating." />;
+    }
+
+    if (destination === 'agents') {
+      return <OperationsConsole />;
+    }
+
+    const dest = RAIL_DESTINATIONS.find((d) => d.key === destination);
+    return (
+      <AppPlaceholder title={dest?.label ?? destination} subtitle="App integration coming soon." />
+    );
+  };
 
   return (
     <EuiFlexGroup
@@ -138,116 +323,156 @@ export const DaybreakApp: React.FC = () => {
       responsive={false}
     >
       <DaybreakVisualStyles />
-      <DaybreakRail
-        dest={dest}
-        navView={navView}
-        onGoBrief={onGoBrief}
-        onGoChats={onGoChats}
-        onGo={onGo}
-        onOpenNavPrefs={onOpenNavPrefs}
-      />
 
-      <EuiFlexItem className="daybreakStage" data-test-subj="daybreakStage">
-        <EuiFlexGroup gutterSize="none" responsive={false} style={{ height: '100%' }}>
-          {showNavPanel && (
-            <EuiFlexItem grow={false} className="daybreakNavPanelWrapper">
-              <NavPanel
-                proposals={proposals}
-                selectedId={selectedId}
-                onSelect={(id) => {
-                  setSelectedId(id);
-                  setNavView('chats');
-                }}
-                hidden={false}
-              />
-            </EuiFlexItem>
-          )}
-
-          <EuiFlexItem className="daybreakHomeStage">
-            <EuiPanel
-              borderRadius="none"
-              hasShadow={false}
-              paddingSize="none"
-              style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-            >
-              <div className="daybreakStageToolbar">
-                <span>
-                  {isHome
-                    ? navView === 'brief'
-                      ? 'Shift brief'
-                      : showOperations
-                      ? 'Automation controls'
-                      : 'Active thread'
-                    : dest}
-                </span>
-                {isHome && navView === 'brief' && (
-                  <EuiButtonEmpty
-                    size="xs"
-                    onClick={() => {
-                      setSelectedId(undefined);
-                      setShowOperations((value) => !value);
-                    }}
-                  >
-                    {showOperations ? 'View brief' : 'Manage automations'}
-                  </EuiButtonEmpty>
-                )}
-              </div>
-              <div style={{ flexGrow: 1, overflow: 'auto' }}>
-                <main className="daybreakStageScroll">
-                  {isHome ? (
-                    navView === 'brief' ? (
-                      showOperations ? (
-                        <OperationsConsole />
-                      ) : (
-                        <BriefDashboard />
-                      )
-                    ) : selected ? (
-                      <ThreadView proposal={selected} />
-                    ) : (
-                      <EuiText color="subdued" size="s">
-                        Select a record from the secondary nav.
-                      </EuiText>
-                    )
-                  ) : (
-                    <AppPage dest={dest} />
-                  )}
-                </main>
-              </div>
-              {isHome && (
-                <div className="daybreakFloatingComposer">
-                  <EuiFlexGroup
-                    className="daybreakComposerInner"
-                    gutterSize="s"
-                    data-test-subj="daybreakComposer"
-                  >
-                    <EuiFlexItem>
-                      <EuiFieldText
-                        data-test-subj="daybreakComposerInput"
-                        placeholder="Ask about the operational queue…"
-                        fullWidth
-                        disabled
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton data-test-subj="daybreakComposerSubmit" disabled>
-                        <FormattedMessage id="xpack.daybreak.composer.send" defaultMessage="Send" />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              )}
-            </EuiPanel>
+      <EuiFlexItem grow={false} className="daybreakRail" data-test-subj="daybreakRail">
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="spaceBetween"
+          gutterSize="none"
+          style={{ height: '100%' }}
+        >
+          <EuiFlexItem grow={false}>
+            {RAIL_DESTINATIONS.map((dest) => (
+              <EuiToolTip content={dest.label} position="right" key={dest.key}>
+                <button
+                  className={`daybreakRailItem ${
+                    destination === dest.key ? 'daybreakRailItem--active' : ''
+                  } ${dest.key === 'brief' ? 'daybreakRailItem--solution' : ''}`}
+                  onClick={() => {
+                    setDestination(dest.key);
+                    setSelectedId(undefined);
+                    setChatThreadId(undefined);
+                  }}
+                  data-test-subj={`daybreakRailItem-${dest.key}`}
+                  aria-label={dest.label}
+                >
+                  <EuiIcon type={dest.icon} size="m" />
+                  <span className="daybreakRailItemLabel">{dest.label}</span>
+                </button>
+              </EuiToolTip>
+            ))}
           </EuiFlexItem>
-          {selected && navView === 'chats' && (
-            <EuiFlexItem grow={false} className="daybreakInspectorWrapper">
-              <InspectorPanel
-                proposal={selected}
-                evidence={evidence.filter((item) => selected.evidenceRefs.includes(item.id))}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              className="daybreakRailFooterButton"
+              iconType="gear"
+              size="xs"
+              disabled
+              aria-label="Settings"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+
+      <EuiFlexItem grow={false} className="daybreakNavPanelWrapper">
+        <EuiPanel
+          className="daybreakNavPanel"
+          borderRadius="none"
+          hasShadow={false}
+          paddingSize="none"
+        >
+          {renderNavPanel()}
+        </EuiPanel>
+      </EuiFlexItem>
+
+      <EuiFlexItem className="daybreakStage" data-test-subj="daybreakStage">
+        <EuiPanel
+          borderRadius="none"
+          hasShadow={false}
+          paddingSize="none"
+          style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+        >
+          <div className="daybreakStageToolbar">
+            <span>{RAIL_DESTINATIONS.find((d) => d.key === destination)?.label}</span>
+          </div>
+          <div style={{ flexGrow: 1, overflow: 'auto' }}>
+            <main className="daybreakStageScroll">{renderMainStage()}</main>
+          </div>
+          {destination === 'brief' && (
+            <div className="daybreakFloatingComposer">
+              <EuiFlexGroup
+                className="daybreakComposerInner"
+                gutterSize="s"
+                data-test-subj="daybreakComposer"
+              >
+                <EuiFlexItem>
+                  <EuiFieldText
+                    data-test-subj="daybreakComposerInput"
+                    placeholder="Ask about the operational queue…"
+                    fullWidth
+                    disabled
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton data-test-subj="daybreakComposerSubmit" disabled>
+                    <FormattedMessage id="xpack.daybreak.composer.send" defaultMessage="Send" />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          )}
+        </EuiPanel>
+      </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+const DaybreakProposalDetail: React.FC<{
+  proposal: DaybreakProposal;
+  evidence: DaybreakEvidence[];
+  onBack: () => void;
+}> = ({ proposal, evidence, onBack }) => {
+  const status = PROPOSAL_STATUS_META[proposal.status];
+
+  return (
+    <div data-test-subj="daybreakProposalDetail">
+      <EuiButtonEmpty className="daybreakDetailBack" iconType="arrowLeft" size="s" onClick={onBack}>
+        Back to operational brief
+      </EuiButtonEmpty>
+      <EuiSpacer size="m" />
+      <section className="daybreakDecisionHero">
+        <EuiText className="daybreakEyebrow" size="xs">
+          PROPOSAL / DECISION CONTEXT
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiTitle className="daybreakDetailTitle" size="m">
+          <h3>{proposal.title}</h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup
+          className="daybreakDecisionMeta"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiHealth color={severityColor[proposal.severity]}>{proposal.severity}</EuiHealth>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={status.color}>{status.label()}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              Confidence {Math.round(proposal.confidence * 100)}%
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </section>
+      <EuiSpacer size="l" />
+      <EuiPanel className="daybreakRecommendation" hasBorder paddingSize="l" color="subdued">
+        <div className="daybreakRecommendationHeader">
+          <span>Recommended action</span>
+          <span>Decision ready</span>
+        </div>
+        <EuiSpacer size="s" />
+        <EuiText className="daybreakRecommendationCopy" size="m">
+          {proposal.recommendation ?? 'Continue gathering evidence before recommending an action.'}
+        </EuiText>
+      </EuiPanel>
+      <EuiSpacer size="l" />
+      <ProposalInspector proposal={proposal} evidence={evidence} />
+      <EuiSpacer size="l" />
+      <ApprovalGate proposal={proposal} />
+    </div>
   );
 };

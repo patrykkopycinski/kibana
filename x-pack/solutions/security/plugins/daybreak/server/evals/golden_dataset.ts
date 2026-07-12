@@ -38,6 +38,11 @@ export interface AlertEvidence {
    * true-positive verdict. The worker weighs these in the Reason phase.
    */
   stanceSignals: Array<{ stance: 'for' | 'against'; note: string }>;
+  /**
+   * When true, enrichment could not supply enough correlated evidence for a
+   * triage verdict. The worker emits `needs-evidence` (FPR family #5).
+   */
+  insufficientData?: boolean;
 }
 
 /**
@@ -65,6 +70,31 @@ export type ExpectedVerdict =
   | 'needs_evidence';
 
 /**
+ * FPR scenario families from watch-floor-gaps-handoff.md Gap #3. Each family
+ * appears exactly once in the golden dataset (except the duplicate-replayed row
+ * which reuses the credential-dumping evidence shape under its own id).
+ */
+export type ScenarioFamily =
+  | 'benign-scanner'
+  | 'expected-admin'
+  | 'risky-broad-exception'
+  | 'tuning-hides-suspicious'
+  | 'insufficient-data'
+  | 'malformed-output-regression'
+  | 'duplicate-replayed';
+
+/** All FPR scenario families the golden dataset must cover (Gap #3). */
+export const SCENARIO_FAMILIES: readonly ScenarioFamily[] = [
+  'benign-scanner',
+  'expected-admin',
+  'risky-broad-exception',
+  'tuning-hides-suspicious',
+  'insufficient-data',
+  'malformed-output-regression',
+  'duplicate-replayed',
+] as const;
+
+/**
  * Per-row metadata for the golden dataset. The {@link broken} flag drives the
  * non-vacuous-gate proof (FR-10 / A-3): a broken row carries an intentionally
  * wrong expected shape and the gate MUST fail on it.
@@ -80,6 +110,11 @@ export interface DaybreakGoldenExampleMetadata {
   broken?: boolean;
   /** Expected Reason-phase triage verdict (supplementary ground truth). */
   verdict: ExpectedVerdict;
+  /**
+   * FPR scenario family tag (Gap #3). Omitted on the baseline true-positive row
+   * that is not itself an FPR scenario.
+   */
+  scenarioFamily?: ScenarioFamily;
 }
 
 /**
@@ -124,17 +159,52 @@ const TRUE_POSITIVE_CRITICAL: DaybreakGoldenExample = {
     },
   },
   output: {
-    title: 'Credential dumping on domain controller DC01',
+    title: 'Credential Dumping - LSASS Memory - Mimikatz on alert-mimikatz-dc01',
     capability: 'detection',
     severity: 'critical',
     confidence: 0.9,
     recommendation:
-      'Escalate to the IR team immediately — credential dumping on a domain controller indicates active compromise.',
+      'Escalate — Repeated Invoke-Mimikatz sequences against lsass.exe observed on a domain controller.',
     status: 'escalated',
   },
   metadata: {
     description: 'Nominal true positive — critical credential dumping on a domain controller.',
     verdict: 'true_positive',
+  },
+};
+
+const BENIGN_SCANNER: DaybreakGoldenExample = {
+  id: 'daybreak-golden-benign-vuln-scanner',
+  input: {
+    alertEvidence: {
+      alertId: 'alert-qualys-scan-app01',
+      ruleName: 'Network Scanning - Suspicious Port Sweep',
+      ruleDescription: 'Flags rapid sequential connection attempts across many ports.',
+      severity: 'low',
+      signalCount: 12,
+      hostSummary: 'Application server APP-01 in the production VLAN.',
+      summary:
+        'Port sweep from the approved Qualys vulnerability scanner during the weekly assessment window.',
+      tactics: ['Discovery', 'Network Service Discovery', 'T1046'],
+      stanceSignals: [
+        { stance: 'against', note: 'Source IP belongs to the approved Qualys scanner appliance.' },
+        { stance: 'against', note: 'Scan matches the documented weekly vulnerability assessment window.' },
+      ],
+    },
+  },
+  output: {
+    title: 'Network Scanning - Suspicious Port Sweep on alert-qualys-scan-app01',
+    capability: 'detection',
+    severity: 'low',
+    confidence: 0.1,
+    recommendation:
+      'Dismiss — Port sweep from the approved Qualys vulnerability scanner during the weekly assessment window.',
+    status: 'dismissed',
+  },
+  metadata: {
+    description: 'Nominal false positive — approved vulnerability scanner activity.',
+    verdict: 'benign_true_positive',
+    scenarioFamily: 'benign-scanner',
   },
 };
 
@@ -159,17 +229,159 @@ const FALSE_POSITIVE_AUTHORIZED_ADMIN: DaybreakGoldenExample = {
     },
   },
   output: {
-    title: 'Authorized PowerShell remediation during maintenance window',
+    title: 'PowerShell - Suspicious Script Block Execution on alert-powershell-admin-ws',
     capability: 'detection',
     severity: 'low',
-    confidence: 0.2,
+    confidence: 0.1,
     recommendation:
-      'Dismiss as authorized administrator activity during a scheduled maintenance window.',
+      'Dismiss — Routine PowerShell remediation script executed by a member of the IT-Admins group during a scheduled maintenance window.',
     status: 'dismissed',
   },
   metadata: {
     description: 'Nominal false positive — benign authorized admin PowerShell activity.',
     verdict: 'benign_true_positive',
+    scenarioFamily: 'expected-admin',
+  },
+};
+
+const RISKY_BROAD_EXCEPTION: DaybreakGoldenExample = {
+  id: 'daybreak-golden-risky-broad-exception',
+  input: {
+    alertEvidence: {
+      alertId: 'alert-lateral-movement-dmz',
+      ruleName: 'Lateral Movement - Remote Service Administration',
+      ruleDescription: 'Detects remote service creation indicative of lateral movement.',
+      severity: 'high',
+      signalCount: 18,
+      hostSummary: 'DMZ jump host JUMP-04; broad /24 suppression exception in effect.',
+      summary:
+        'Remote service creation observed on a DMZ jump host despite an overly broad /24 subnet exception.',
+      tactics: ['Lateral Movement', 'Remote Services', 'T1021'],
+      stanceSignals: [
+        { stance: 'for', note: 'Lateral movement pattern detected despite broad suppression rule.' },
+        { stance: 'for', note: 'Existing exception covers entire /24 subnet — risky scope.' },
+      ],
+    },
+  },
+  output: {
+    title: 'Lateral Movement - Remote Service Administration on alert-lateral-movement-dmz',
+    capability: 'detection',
+    severity: 'high',
+    confidence: 0.825,
+    recommendation:
+      'Escalate — Remote service creation observed on a DMZ jump host despite an overly broad /24 subnet exception.',
+    status: 'escalated',
+  },
+  metadata: {
+    description: 'Nominal true positive — lateral movement surfaced through a risky broad exception.',
+    verdict: 'true_positive',
+    scenarioFamily: 'risky-broad-exception',
+  },
+};
+
+const TUNING_HIDES_SUSPICIOUS: DaybreakGoldenExample = {
+  id: 'daybreak-golden-tuning-hides-suspicious',
+  input: {
+    alertEvidence: {
+      alertId: 'alert-exfil-tuning-suppressed',
+      ruleName: 'Data Exfiltration - Unusual Outbound Volume',
+      ruleDescription: 'Flags anomalous outbound data transfer volumes.',
+      severity: 'medium',
+      signalCount: 6,
+      hostSummary: 'Workstation WS-2291; aggressive threshold tuning applied last sprint.',
+      summary:
+        'Outbound volume spike suppressed by aggressive threshold tuning despite residual exfiltration indicators.',
+      tactics: ['Exfiltration', 'Exfiltration Over Web Service', 'T1567'],
+      stanceSignals: [
+        { stance: 'against', note: 'Alert suppressed by aggressive threshold tuning applied last sprint.' },
+        { stance: 'against', note: 'Similar benign traffic pattern in historical baseline.' },
+        { stance: 'for', note: 'Residual indicators still match exfiltration heuristic.' },
+      ],
+    },
+  },
+  output: {
+    title: 'Data Exfiltration - Unusual Outbound Volume on alert-exfil-tuning-suppressed',
+    capability: 'detection',
+    severity: 'medium',
+    confidence: 0.25,
+    recommendation:
+      'Dismiss — Outbound volume spike suppressed by aggressive threshold tuning despite residual exfiltration indicators.',
+    status: 'dismissed',
+  },
+  metadata: {
+    description: 'Nominal false positive — suspicious activity hidden by aggressive detection tuning.',
+    verdict: 'false_positive',
+    scenarioFamily: 'tuning-hides-suspicious',
+  },
+};
+
+const INSUFFICIENT_DATA: DaybreakGoldenExample = {
+  id: 'daybreak-golden-insufficient-proxy-logs',
+  input: {
+    alertEvidence: {
+      alertId: 'alert-incomplete-proxy-logs',
+      ruleName: 'Data Exfiltration - Unusual Outbound Volume',
+      ruleDescription: 'Flags anomalous outbound data transfer volumes.',
+      severity: 'medium',
+      signalCount: 1,
+      hostSummary: 'Workstation WS-4419; endpoint and proxy logs unavailable.',
+      summary:
+        'Outbound volume spike detected but endpoint and proxy logs are unavailable for correlation.',
+      tactics: ['Exfiltration'],
+      stanceSignals: [
+        { stance: 'for', note: 'Volume exceeds 3-sigma baseline for this host.' },
+      ],
+      insufficientData: true,
+    },
+  },
+  output: {
+    title: 'Data Exfiltration - Unusual Outbound Volume on alert-incomplete-proxy-logs',
+    capability: 'detection',
+    severity: 'medium',
+    confidence: 0.5,
+    recommendation:
+      'Gather additional evidence — Outbound volume spike detected but endpoint and proxy logs are unavailable for correlation.',
+    status: 'needs-evidence',
+  },
+  metadata: {
+    description: 'Nominal needs-evidence — insufficient correlated telemetry for a triage verdict.',
+    verdict: 'needs_evidence',
+    scenarioFamily: 'insufficient-data',
+  },
+};
+
+const DUPLICATE_REPLAYED: DaybreakGoldenExample = {
+  id: 'daybreak-golden-duplicate-mimikatz-replay',
+  input: {
+    alertEvidence: {
+      alertId: 'alert-mimikatz-dc01-replay',
+      ruleName: 'Credential Dumping - LSASS Memory - Mimikatz',
+      ruleDescription: 'Detects credential-dumping activity targeting the LSASS process.',
+      severity: 'critical',
+      signalCount: 47,
+      hostSummary: 'Domain controller DC01 (win2022-dc01); privileged context.',
+      summary:
+        'Repeated Invoke-Mimikatz sequences against lsass.exe observed on a domain controller.',
+      tactics: ['Credential Access', 'OS Credential Dumping', 'T1003.001'],
+      stanceSignals: [
+        { stance: 'for', note: 'Known mimikatz signature matched with high signal-to-noise.' },
+        { stance: 'for', note: 'Activity on a domain controller raises blast radius.' },
+      ],
+    },
+  },
+  output: {
+    title: 'Credential Dumping - LSASS Memory - Mimikatz on alert-mimikatz-dc01-replay',
+    capability: 'detection',
+    severity: 'critical',
+    confidence: 0.9,
+    recommendation:
+      'Escalate — Repeated Invoke-Mimikatz sequences against lsass.exe observed on a domain controller.',
+    status: 'escalated',
+  },
+  metadata: {
+    description: 'Nominal duplicate — replayed credential-dumping input with identical expected shape.',
+    verdict: 'true_positive',
+    scenarioFamily: 'duplicate-replayed',
   },
 };
 
@@ -218,15 +430,17 @@ const BROKEN_FLIPPED_RECOMMENDATION: DaybreakGoldenExample = {
       'BROKEN — ransomware evidence with a deliberately flipped (dismiss) recommendation. Gate must FAIL on this row.',
     broken: true,
     verdict: 'true_positive',
+    scenarioFamily: 'malformed-output-regression',
   },
 };
 
 /**
  * The golden dataset of alert evidence → expected Proposal shape (FR-8).
  *
- * Three rows: two nominal (one true positive, one false positive) and one
- * deliberately-broken row (FR-10 / A-3) whose expected shape is intentionally
- * wrong so the gate can prove it catches real regressions.
+ * Eight rows: seven nominal (baseline true positive plus six FPR scenario
+ * families and one duplicate-replayed row) and one deliberately-broken row
+ * (FR-10 / A-3) whose expected shape is intentionally wrong so the gate can
+ * prove it catches real regressions.
  *
  * Structurally compatible with `@kbn/evals`'s `EvaluationDataset` — pass
  * directly to `executorClient.runExperiment({ datasets: [daybreakGoldenDataset] })`.
@@ -238,10 +452,15 @@ export const daybreakGoldenDataset: {
 } = {
   name: DAYBREAK_GOLDEN_DATASET_NAME,
   description:
-    'Golden alert-evidence → expected Proposal shape for the daybreak alert-analysis worker. Includes one deliberately-broken row (flipped recommendation) to prove the gate is non-vacuous (FR-8, FR-10, A-3).',
+    'Golden alert-evidence → expected Proposal shape for the daybreak alert-analysis worker. Covers all seven FPR scenario families (Gap #3) plus a baseline true positive and one deliberately-broken row (FR-8, FR-10, A-3).',
   examples: [
     TRUE_POSITIVE_CRITICAL,
+    BENIGN_SCANNER,
     FALSE_POSITIVE_AUTHORIZED_ADMIN,
+    RISKY_BROAD_EXCEPTION,
+    TUNING_HIDES_SUSPICIOUS,
+    INSUFFICIENT_DATA,
+    DUPLICATE_REPLAYED,
     BROKEN_FLIPPED_RECOMMENDATION,
   ],
 };

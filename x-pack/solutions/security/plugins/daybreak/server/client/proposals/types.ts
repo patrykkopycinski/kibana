@@ -57,9 +57,12 @@ export interface DecisionRecord {
  * Full Proposal document for the `.kibana-daybreak-proposals` index.
  */
 export interface ProposalProperties {
+  schemaVersion?: string;
   id: string;
   title: string;
   sourceWatch?: string;
+  /** WorkerRef id that emitted this proposal (CWL stub alignment). */
+  sourceWorkerId?: string;
   capability: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   confidence: number;

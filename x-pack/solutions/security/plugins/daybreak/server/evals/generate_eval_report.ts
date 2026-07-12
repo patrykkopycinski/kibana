@@ -26,7 +26,33 @@ import {
  * The on-disk report schema version. Bumped only when the JSON shape changes in
  * a way that would break existing consumers (CI parsers, dashboards).
  */
-export const EVAL_REPORT_SCHEMA_VERSION = 1;
+export const EVAL_REPORT_SCHEMA_VERSION = 2;
+
+/** Cost attribution basis for report-level provenance. */
+export type EvalReportCostBasis = 'priced' | 'unknown' | 'self-hosted';
+
+/**
+ * Model / connector provenance attached to an eval report (schema v2).
+ * Offline gate runs use {@link OFFLINE_GATE_DEFAULT_PROVENANCE}.
+ */
+export interface EvalReportProvenance {
+  modelId?: string;
+  connectorId?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  latencyMs?: number;
+  costBasis: EvalReportCostBasis;
+}
+
+/** Defaults for deterministic offline dataset gate runs (no LLM invocation). */
+export const OFFLINE_GATE_DEFAULT_PROVENANCE: EvalReportProvenance = {
+  modelId: 'offline-deterministic-gate',
+  inputTokens: 0,
+  outputTokens: 0,
+  latencyMs: 0,
+  costBasis: 'self-hosted',
+};
+
 
 /** Per-example entry in the generated report. */
 export interface EvalReportExampleResult {
@@ -92,6 +118,8 @@ export interface DaybreakEvalReport {
   summary: EvalReportSummary;
   /** Per-example results, in dataset order. */
   examples: EvalReportExampleResult[];
+  /** Model / connector provenance for this report run (schema v2). */
+  provenance: EvalReportProvenance;
 }
 
 /** Options for {@link generateEvalReport}. */
@@ -174,6 +202,7 @@ export const generateEvalReport = (options: GenerateEvalReportOptions = {}): Day
     confidenceTolerance: CONFIDENCE_TOLERANCE,
     summary: buildSummary(examples),
     examples,
+    provenance: OFFLINE_GATE_DEFAULT_PROVENANCE,
   };
 };
 

@@ -28,6 +28,8 @@ const storageSettings = {
       id: types.keyword({}),
       title: types.text({}),
       sourceWatch: types.keyword({}),
+      sourceWorkerId: types.keyword({}),
+      schemaVersion: types.keyword({}),
       capability: types.keyword({}),
       severity: types.keyword({}),
       confidence: types.float({}),

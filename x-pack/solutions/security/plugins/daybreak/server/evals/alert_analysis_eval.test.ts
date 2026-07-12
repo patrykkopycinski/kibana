@@ -8,9 +8,11 @@
 import {
   BROKEN_EXAMPLE_IDS,
   NOMINAL_EXAMPLE_IDS,
+  SCENARIO_FAMILIES,
   daybreakGoldenDataset,
   type DaybreakGoldenExample,
   type ExpectedProposalShape,
+  type ScenarioFamily,
 } from './golden_dataset';
 import {
   reasonOverAlertEvidence,
@@ -28,6 +30,27 @@ describe('daybreak alert-analysis offline eval gate (FR-8, FR-10, A-3)', () => {
 
   const task = async (example: DaybreakGoldenExample): Promise<ExpectedProposalShape> =>
     reasonOverAlertEvidence(example.input.alertEvidence);
+
+  it('covers at least seven nominal rows and one broken row (Gap #3)', () => {
+    expect(NOMINAL_EXAMPLE_IDS.length).toBeGreaterThanOrEqual(7);
+    expect(BROKEN_EXAMPLE_IDS.length).toBeGreaterThanOrEqual(1);
+    expect(daybreakGoldenDataset.examples.length).toBe(
+      NOMINAL_EXAMPLE_IDS.length + BROKEN_EXAMPLE_IDS.length
+    );
+  });
+
+  it('includes each FPR scenario family exactly once (Gap #3)', () => {
+    const families = daybreakGoldenDataset.examples
+      .map((example) => example.metadata.scenarioFamily)
+      .filter((family): family is ScenarioFamily => family !== undefined);
+
+    expect(families.length).toBe(SCENARIO_FAMILIES.length);
+
+    for (const family of SCENARIO_FAMILIES) {
+      const matches = families.filter((tag) => tag === family);
+      expect(matches).toHaveLength(1);
+    }
+  });
 
   // FR-8 — every nominal (non-broken) row's worker output must match its golden
   // expected Proposal shape. If any nominal row scores 0, the worker regressed.

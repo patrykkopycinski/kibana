@@ -163,8 +163,22 @@ const SEVERITY_WEIGHT: Record<AlertEvidence['severity'], number> = {
  * true-positive vs false-positive; severity weight anchors confidence; the two
  * together drive status and recommendation polarity — the same fields the real
  * worker weighs before emitting a Proposal.
+ *
+ * When {@link AlertEvidence.insufficientData} is set, the worker cannot reach a
+ * triage verdict and emits `needs-evidence` instead (FPR family #5).
  */
 export const reasonOverAlertEvidence = (evidence: AlertEvidence): ExpectedProposalShape => {
+  if (evidence.insufficientData) {
+    return {
+      title: `${evidence.ruleName} on ${evidence.alertId}`,
+      capability: 'detection',
+      severity: evidence.severity,
+      confidence: 0.5,
+      status: 'needs-evidence',
+      recommendation: `Gather additional evidence — ${evidence.summary}`,
+    };
+  }
+
   const forStance = evidence.stanceSignals.filter((s) => s.stance === 'for').length;
   const againstStance = evidence.stanceSignals.filter((s) => s.stance === 'against').length;
   const isTruePositive = forStance > againstStance;

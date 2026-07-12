@@ -17,6 +17,7 @@ import type {
 import { createProposalsStorage } from './storage';
 import { requireReadinessGate } from './gate';
 import { ProposalNotFoundError } from './errors';
+import { DAYBREAK_PROPOSAL_SCHEMA_VERSION } from '../../common/schemas/versions';
 
 export { ProposalNotFoundError };
 
@@ -61,6 +62,7 @@ export interface ProposalCreateParams {
   id: string;
   title: string;
   sourceWatch?: string;
+  sourceWorkerId?: string;
   capability: string;
   severity: ProposalProperties['severity'];
   confidence: number;
@@ -142,9 +144,11 @@ class ProposalClientImpl implements ProposalClient {
 
   async create(params: ProposalCreateParams): Promise<ProposalProperties> {
     const document: ProposalProperties = {
+      schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
       id: params.id,
       title: params.title,
       sourceWatch: params.sourceWatch,
+      sourceWorkerId: params.sourceWorkerId,
       capability: params.capability,
       severity: params.severity,
       confidence: params.confidence,

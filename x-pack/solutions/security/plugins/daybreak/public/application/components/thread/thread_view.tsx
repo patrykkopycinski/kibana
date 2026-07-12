@@ -53,7 +53,7 @@ const severityColor: Record<DaybreakProposal['severity'], string> = {
   low: '#00bfb3',
 };
 
-const deriveThreadType = (proposal: DaybreakProposal): ThreadType => {
+export const deriveThreadType = (proposal: DaybreakProposal): ThreadType => {
   if (proposal.severity === 'critical') return 'incident';
   if (proposal.severity === 'high') return 'investigation';
   if (proposal.severity === 'medium') return 'case';

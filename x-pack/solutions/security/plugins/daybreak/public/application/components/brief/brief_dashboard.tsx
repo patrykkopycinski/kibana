@@ -25,6 +25,8 @@ import { useProposals } from '../../hooks/use_proposals';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 import { ActionFlyout, type GatedAction } from '../action/action_flyout';
+import { ThreadTypeBadge } from '../thread/thread_type_badge';
+import { deriveThreadType } from '../thread/thread_view';
 
 const severityRank: Record<DaybreakProposal['severity'], number> = {
   critical: 4,
@@ -249,6 +251,7 @@ const RadarCard: React.FC<{
     >
       <div className="daybreakRadarCardHeader">
         <DecisionPill meta={meta} />
+        <ThreadTypeBadge type={deriveThreadType(proposal)} />
         {isReady && (
           <EuiBadge color="warning" className="daybreakRadarCardReady">
             Review ready

@@ -157,6 +157,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'workflow-authoring',
 
   // Security Solution
+  'daybreak-alert-analysis',
   'entity-analytics-leads',
   'find-security-ml-jobs',
   'automatic_troubleshooting',

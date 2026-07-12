@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { registerProposalsFromWorkerRoute } from './proposals_from_worker';
-import { getHandlerWrapper } from './wrap_handler';
 import type { RouteDependencies } from './types';
 
 const createMockRouter = () => {

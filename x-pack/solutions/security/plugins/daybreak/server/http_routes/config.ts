@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
-import { createProposalClient } from '../client/proposals/client';
-import type { ProposalClient } from '../client/proposals/client';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { daybreakRouteSecurity, type RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 

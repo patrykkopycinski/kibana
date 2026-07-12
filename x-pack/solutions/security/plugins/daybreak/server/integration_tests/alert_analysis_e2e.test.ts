@@ -14,7 +14,7 @@ import { ExecutionStatus, isDeprecatedStepType, StepCategory } from '@kbn/workfl
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { WorkflowRunFixture } from '@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture';
 import { z } from '@kbn/zod/v4';
-import { ALERT_ANALYSIS_AGENT_ID } from '../agent_builder/ensure_alert_analysis_agent';
+import { ALERT_ANALYSIS_AGENT_ID } from '../agent_builder/constants';
 import { requireReadinessGate } from '../client/proposals/gate';
 import type { ProposalProperties } from '../client/proposals/types';
 import ALERT_ANALYSIS_WORKER_YAML from '../workflow/alert_analysis_worker.yaml';

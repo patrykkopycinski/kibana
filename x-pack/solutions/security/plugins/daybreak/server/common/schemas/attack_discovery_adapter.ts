@@ -6,10 +6,7 @@
  */
 
 import type { ProposalProperties, ProposalStatus } from "../../client/proposals/types";
-import {
-  DAYBREAK_PROPOSAL_SCHEMA_VERSION,
-  DEFAULT_ALERT_ANALYSIS_WORKER_ID,
-} from "./versions";
+import { DAYBREAK_PROPOSAL_SCHEMA_VERSION } from "./versions";
 
 /**
  * Minimal Attack Discovery alert shape the spike adapter accepts.

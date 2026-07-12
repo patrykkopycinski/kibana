@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { daybreakApiPath } from '../../common/http_api';
 import { daybreakRouteSecurity, type RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';

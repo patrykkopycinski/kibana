@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 // ---------------------------------------------------------------------------
@@ -19,6 +19,7 @@ export type DaybreakPluginSetup = Record<string, never>;
 
 /** Optional plugin dependencies consumed during setup. */
 export interface DaybreakPluginSetupDeps {
+  agentBuilder?: AgentBuilderPluginSetup;
   spaces?: SpacesPluginSetup;
 }
 

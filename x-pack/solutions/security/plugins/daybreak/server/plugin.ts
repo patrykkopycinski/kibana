@@ -26,6 +26,7 @@ import { registerRoutes } from './http_routes';
 import type { RouteDependencies } from './http_routes/types';
 import { runAlertAnalysisWorker } from './workflow/run_alert_analysis_worker';
 import { runSpikeWorkflow } from './workflow/run_spike_workflow';
+import { registerSkills } from './agent_builder/skills/register_skills';
 
 export class DaybreakPlugin
   implements
@@ -57,6 +58,12 @@ export class DaybreakPlugin
     const routeDependencies: RouteDependencies = { router, logger: this.logger, getSpaceId };
     registerRoutes(routeDependencies);
     this.routeDependencies = routeDependencies;
+
+    if (plugins.agentBuilder) {
+      registerSkills({ agentBuilder: plugins.agentBuilder, logger: this.logger }).catch((error) => {
+        this.logger.error(`daybreak: failed to register agent builder skills: ${error.message}`);
+      });
+    }
 
     return {};
   }

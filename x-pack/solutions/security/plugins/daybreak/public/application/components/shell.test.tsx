@@ -21,7 +21,7 @@ jest.mock('../hooks/use_proposals');
 jest.mock('../hooks/use_proposal_transition');
 jest.mock('../hooks/use_watches');
 
-const mockUseEuiTheme = jest.fn(() => ({ colorMode: 'LIGHT' as const, euiTheme: {} }));
+const mockUseEuiTheme = jest.fn(() => ({ colorMode: 'LIGHT', euiTheme: {} }));
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');

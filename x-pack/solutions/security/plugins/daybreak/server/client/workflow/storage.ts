@@ -25,6 +25,7 @@ const storageSettings = {
       enabled: types.boolean({}),
       priority: types.float({}),
       lastRunAt: types.date({}),
+      activeExecutionId: types.keyword({}),
       auditTrail: types.object({
         properties: {
           action: types.keyword({}),

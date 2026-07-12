@@ -46,20 +46,36 @@ export const seedDemoData = async ({
     requiredApproverCount: 2,
   });
 
-  await proposalClient.transitionStatus(
-    proposalA.id,
-    'approved',
-    'operator-1',
-    'Initial evidence supports the hypothesis.',
-    'approve'
-  );
-  await proposalClient.transitionStatus(
-    proposalA.id,
-    'approved',
-    'operator-2',
-    'Second approval — credentials confirmed compromised.',
-    'approve'
-  );
+  await proposalClient.update(proposalA.id, {
+    status: 'approved',
+    approvals: [
+      {
+        actor: 'operator-1',
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        reason: 'Initial evidence supports the hypothesis.',
+      },
+      {
+        actor: 'operator-2',
+        timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        reason: 'Second approval — credentials confirmed compromised.',
+      },
+    ],
+    decision: {
+      type: 'approve',
+      actor: 'operator-2',
+      reason: 'Two-person approval complete.',
+      timestamp: new Date().toISOString(),
+    },
+    decisionHistory: [
+      {
+        fromStatus: 'new',
+        toStatus: 'approved',
+        actor: 'operator-2',
+        reason: 'Two-person approval complete.',
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
 
   await proposalClient.create({
     id: 'demo-proposal-2',
@@ -94,13 +110,24 @@ export const seedDemoData = async ({
     requiredApproverCount: 1,
   });
 
-  await proposalClient.transitionStatus(
-    'demo-proposal-3',
-    'modified',
-    'operator-1',
-    'Modified to require step-up rather than block.',
-    'modify'
-  );
+  await proposalClient.update('demo-proposal-3', {
+    status: 'modified',
+    decision: {
+      type: 'modify',
+      actor: 'operator-1',
+      reason: 'Modified to require step-up rather than block.',
+      timestamp: new Date().toISOString(),
+    },
+    decisionHistory: [
+      {
+        fromStatus: 'new',
+        toStatus: 'modified',
+        actor: 'operator-1',
+        reason: 'Modified to require step-up rather than block.',
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
 
   await proposalClient.create({
     id: 'demo-proposal-4',
@@ -117,13 +144,24 @@ export const seedDemoData = async ({
     requiredApproverCount: 1,
   });
 
-  await proposalClient.transitionStatus(
-    'demo-proposal-4',
-    'dismissed',
-    'operator-1',
-    'Confirmed scanner traffic; no tunneling.',
-    'dismiss'
-  );
+  await proposalClient.update('demo-proposal-4', {
+    status: 'dismissed',
+    decision: {
+      type: 'dismiss',
+      actor: 'operator-1',
+      reason: 'Confirmed scanner traffic; no tunneling.',
+      timestamp: new Date().toISOString(),
+    },
+    decisionHistory: [
+      {
+        fromStatus: 'new',
+        toStatus: 'dismissed',
+        actor: 'operator-1',
+        reason: 'Confirmed scanner traffic; no tunneling.',
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
 
   await proposalClient.create({
     id: 'demo-proposal-5',
@@ -141,13 +179,24 @@ export const seedDemoData = async ({
     requiredApproverCount: 2,
   });
 
-  await proposalClient.transitionStatus(
-    'demo-proposal-5',
-    'escalated',
-    'operator-1',
-    'Volume and timing warrant formal review.',
-    'escalate'
-  );
+  await proposalClient.update('demo-proposal-5', {
+    status: 'escalated',
+    decision: {
+      type: 'escalate',
+      actor: 'operator-1',
+      reason: 'Volume and timing warrant formal review.',
+      timestamp: new Date().toISOString(),
+    },
+    decisionHistory: [
+      {
+        fromStatus: 'new',
+        toStatus: 'escalated',
+        actor: 'operator-1',
+        reason: 'Volume and timing warrant formal review.',
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
 
   await proposalClient.create({
     id: 'demo-proposal-6',
@@ -165,13 +214,24 @@ export const seedDemoData = async ({
     requiredApproverCount: 1,
   });
 
-  await proposalClient.transitionStatus(
-    'demo-proposal-6',
-    'deferred',
-    'operator-1',
-    'Low risk and routine; defer to review cycle.',
-    'defer'
-  );
+  await proposalClient.update('demo-proposal-6', {
+    status: 'deferred',
+    decision: {
+      type: 'defer',
+      actor: 'operator-1',
+      reason: 'Low risk and routine; defer to review cycle.',
+      timestamp: new Date().toISOString(),
+    },
+    decisionHistory: [
+      {
+        fromStatus: 'new',
+        toStatus: 'deferred',
+        actor: 'operator-1',
+        reason: 'Low risk and routine; defer to review cycle.',
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  });
 
   await proposalClient.create({
     id: 'demo-proposal-7',

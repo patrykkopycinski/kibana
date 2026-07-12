@@ -39,6 +39,15 @@ const storageSettings = {
       expectedImpact: types.text({}),
       riskCaveats: types.keyword({}),
       approvalRequirement: types.keyword({}),
+      requiredApproverCount: types.long({}),
+      approvals: types.nested({
+        properties: {
+          actor: types.keyword({}),
+          timestamp: types.date({}),
+          reason: types.text({}),
+        },
+      }),
+      hypothesis: types.text({}),
       decisionHistory: types.nested({
         properties: {
           fromStatus: types.keyword({}),
@@ -49,6 +58,14 @@ const storageSettings = {
         },
       }),
       space: types.keyword({}),
+      decision: types.object({
+        properties: {
+          type: types.keyword({}),
+          actor: types.keyword({}),
+          reason: types.text({}),
+          timestamp: types.date({}),
+        },
+      }),
     },
   },
 } satisfies IndexStorageSettings;

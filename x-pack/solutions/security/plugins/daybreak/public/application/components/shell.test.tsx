@@ -13,15 +13,18 @@ import { DaybreakApp } from './shell';
 import { useEvidence } from '../hooks/use_evidence';
 import { useProposals } from '../hooks/use_proposals';
 import { useProposalTransition } from '../hooks/use_proposal_transition';
+import { useWatches } from '../hooks/use_watches';
 import type { DaybreakProposal } from '../../services/proposals_service';
 
 jest.mock('../hooks/use_evidence');
 jest.mock('../hooks/use_proposals');
 jest.mock('../hooks/use_proposal_transition');
+jest.mock('../hooks/use_watches');
 
 const mockUseEvidence = useEvidence as jest.Mock;
 const mockUseProposals = useProposals as jest.Mock;
 const mockUseProposalTransition = useProposalTransition as jest.Mock;
+const mockUseWatches = useWatches as jest.Mock;
 
 const proposalsFixture: DaybreakProposal[] = [
   {
@@ -47,6 +50,7 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseEvidence.mockReturnValue({ evidence: [], isLoading: false, refresh: jest.fn() });
+    mockUseWatches.mockReturnValue({ watches: [], isLoading: false });
     mockUseProposalTransition.mockReturnValue({
       transition: jest.fn().mockResolvedValue(undefined),
       isLoading: false,

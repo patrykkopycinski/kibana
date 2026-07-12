@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../../hooks/use_proposals';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
+import { useWatches } from '../../hooks/use_watches';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 import { ActionFlyout, type GatedAction } from '../action/action_flyout';
 import { ThreadTypeBadge } from '../thread/thread_type_badge';
@@ -611,6 +612,7 @@ export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal
         </EuiText>
       </div>
 
+      <OvernightDigest proposals={proposals} />
       <PriorityBrief
         proposal={surfaceFilter === 'all' ? priorityProposal : sortByPriority(filteredThreads)[0]}
         isLoading={isLoading}
@@ -680,6 +682,78 @@ const TERMINAL_STATUSES_FOR_HANDOFF: ReadonlySet<DaybreakProposal['status']> = n
   'dismissed',
   'escalated',
 ]);
+
+const AUTONOMOUS_STATUSES: ReadonlySet<DaybreakProposal['status']> = new Set([
+  'approved',
+  'dismissed',
+]);
+
+const OvernightDigest: React.FC<{ proposals: DaybreakProposal[] }> = ({ proposals }) => {
+  const { watches } = useWatches();
+  const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const watchById = React.useMemo(
+    () => Object.fromEntries(watches.map((watch) => [watch.id, watch])),
+    [watches]
+  );
+  const receipts = proposals
+    .filter((proposal) => AUTONOMOUS_STATUSES.has(proposal.status))
+    .filter((proposal) =>
+      (proposal.decisionHistory ?? []).some(
+        (entry) => new Date(entry.timestamp).getTime() > twentyFourHoursAgo
+      )
+    )
+    .sort((a, b) => {
+      const aLast = Math.max(
+        ...(a.decisionHistory ?? []).map((e) => new Date(e.timestamp).getTime())
+      );
+      const bLast = Math.max(
+        ...(b.decisionHistory ?? []).map((e) => new Date(e.timestamp).getTime())
+      );
+      return bLast - aLast;
+    });
+
+  const autonomousCount = receipts.filter(
+    (proposal) => watchById[proposal.sourceWatch ?? '']?.autonomyTier === 'auto-run'
+  ).length;
+
+  if (receipts.length === 0) return null;
+
+  return (
+    <>
+      <EuiPanel
+        className="daybreakOvernightDigest"
+        hasBorder
+        paddingSize="m"
+        data-test-subj="daybreakOvernightDigest"
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <EuiText className="daybreakEyebrow" size="xs">
+              OVERNIGHT DIGEST
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">{receipts.length} resolved</EuiBadge>
+          </EuiFlexItem>
+          {autonomousCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="success">{autonomousCount} autonomous</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {receipts.length - autonomousCount > 0
+            ? `${
+                receipts.length - autonomousCount
+              } decision(s) still need a human review before the next shift.`
+            : 'All recent decisions were handled automatically.'}
+        </EuiText>
+      </EuiPanel>
+      <EuiSpacer size="l" />
+    </>
+  );
+};
 
 const ShiftHandoff: React.FC<{ proposals: DaybreakProposal[] }> = ({ proposals }) => {
   const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;

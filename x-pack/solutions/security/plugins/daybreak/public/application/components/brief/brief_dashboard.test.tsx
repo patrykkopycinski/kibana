@@ -12,13 +12,16 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BriefDashboard, computeBriefSections } from './brief_dashboard';
 import { useProposals } from '../../hooks/use_proposals';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
+import { useWatches } from '../../hooks/use_watches';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 
 jest.mock('../../hooks/use_proposals');
 jest.mock('../../hooks/use_proposal_transition');
+jest.mock('../../hooks/use_watches');
 
 const mockUseProposals = useProposals as jest.Mock;
 const mockUseProposalTransition = useProposalTransition as jest.Mock;
+const mockUseWatches = useWatches as jest.Mock;
 
 /**
  * Real-data-shaped fixture standing in for `GET /api/daybreak/proposals`
@@ -100,6 +103,10 @@ const renderDashboard = () =>
       <BriefDashboard />
     </IntlProvider>
   );
+
+beforeEach(() => {
+  mockUseWatches.mockReturnValue({ watches: [], isLoading: false });
+});
 
 describe('computeBriefSections (FR-014, FR-020)', () => {
   it('buckets open (non-terminal) proposals into openThreads, excluding approved/dismissed', () => {

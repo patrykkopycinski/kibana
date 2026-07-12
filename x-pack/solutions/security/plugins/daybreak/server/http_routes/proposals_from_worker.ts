@@ -60,7 +60,11 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
       }
 
       const enriched = enrichAlertSchema(enrichedRaw);
-      const reason = validateReasonOutput({ structured_output: reasonRaw });
+
+      const structuredOutput =
+        reasonRaw?.structured_output ??
+        (typeof reasonRaw?.content === 'string' ? JSON.parse(reasonRaw.content) : reasonRaw);
+      const reason = validateReasonOutput({ structured_output: structuredOutput });
 
       const proposal = buildProposalFromWorkerRun({
         id: enriched.alertId,

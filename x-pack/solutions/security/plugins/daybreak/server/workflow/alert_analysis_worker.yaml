@@ -15,8 +15,10 @@ enabled: false
 triggers:
   - type: manual
 steps:
-  # Phase 1 — Setup (FR-007): load per-space runtime config (enabled flag,
-  # connector, thresholds) via a kibana.request config-fetch step.
+  # Phase 1 — Setup (FR-007): load per-space runtime config via a flat
+  # kibana.request step. The workflow-level enabled gate is enforced by the
+  # execute route before dispatching; the engine runtime strips nested-step
+  # configs, so all actionable steps must be top-level.
   - name: setup
     type: kibana.request
     with:
@@ -25,81 +27,52 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
 
-  # Enabled gate: short-circuit the entire worker when the per-space config
-  # has enabled: false (FR-007).  All subsequent phases are nested inside
-  # this guard so a disabled space produces no side-effects.
-  - name: guard_enabled
-    type: if
-    condition: 'steps.setup.output.enabled: true'
-    steps:
-      # Phase 2 — Guard (FR-008): idempotency/dedup check.  Skips processing
-      # when the alert already carries this worker's result tag.
-      - name: guard
-        type: if
-        condition: 'NOT steps.setup.output.already_tagged: true'
-        steps:
-          # Phase 3 — Enrich (FR-009): package real evidence from the alert
-          # into a compact ground-truth block, structurally separate from
-          # the Reason-phase framing/rubric (NFR-4 prompt-injection control).
-          - name: enrich
-            type: kibana.request
-            with:
-              method: GET
-              path: '/internal/detection_engine/signals/_alerts_summary'
-              headers:
-                x-elastic-internal-origin: 'kibana'
+  # Phase 2 — Enrich (FR-009): package real evidence from the alert into a
+  # compact ground-truth block, structurally separate from the Reason-phase
+  # framing/rubric (NFR-4 prompt-injection control).
+  - name: enrich
+    type: kibana.request
+    with:
+      method: GET
+      path: '/api/daybreak/alert-summary'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
 
-          # Phase 4 — Reason (FR-010): ai.agent step invoking the
-          # daybreak-alert-analysis agent scoped to the alert-analysis skill.
-          # MUST NOT use deprecated inference.* / bedrock.* / gen-ai.* step
-          # types (FR-011).
-          #
-          # A-4 — retry/backoff for the ai.agent call is wired through the
-          # engine's generic step-level `on-failure.retry` config (inherited
-          # from BaseConnectorStepSchema), not the ai.agent-specific config.
-          # The graph builder compiles this block into enter-retry / exit-retry
-          # nodes around the step. `continue: false` makes retry exhaustion a
-          # hard stop — the worker fail-closes (no Proposal emitted) instead of
-          # silently swallowing the model error, closing the PD-1 README §3
-          # "Fail-closed on error is NOT an engine built-in" gap.
-          - name: reason
-            type: ai.agent
-            agent-id: daybreak-alert-analysis-agent
-            with:
-              message: >-
-                Analyze the following alert evidence and produce a structured
-                triage verdict: {{ steps.enrich.output | json }}
-            timeout: 600s
-            on-failure:
-              retry:
-                max-attempts: 3
-                strategy: exponential
-                delay: 2s
-                multiplier: 2
-                max-delay: 30s
-                jitter: true
-              continue: false
+  # Phase 3 — Reason (FR-010): ai.agent step invoking the daybreak-alert-analysis
+  # agent scoped to the alert-analysis skill. MUST NOT use deprecated
+  # inference.* / bedrock.* / gen-ai.* step types (FR-011).
+  - name: reason
+    type: ai.agent
+    agent-id: daybreak-alert-analysis-agent
+    with:
+      message: >-
+        Analyze the following alert evidence and produce a structured
+        triage verdict: {{ steps.enrich.output | json }}
+    timeout: 600s
+    on-failure:
+      retry:
+        max-attempts: 3
+        strategy: exponential
+        delay: 2s
+        multiplier: 2
+        max-delay: 30s
+        jitter: true
+      continue: false
 
-          # Output validation guard (FR-015, FR-016): halts the workflow on
-          # malformed or empty ai.agent output rather than emitting a silent
-          # wrong verdict.
-          - name: validate_reasoning
-            type: if
-            condition: 'steps.reason.output.structured_output: *'
-            steps:
-              # Phase 5 — Act (FR-014): emit a Proposal/Result record with
-              # an auditable shape (actor, timestamp, rationale) and gate
-              # any consequential action behind approval.
-              - name: act
-                type: kibana.request
-                with:
-                  method: POST
-                  path: '/api/daybreak/proposals/from-worker-run'
-                  headers:
-                    x-elastic-internal-origin: 'kibana'
-                    kbn-xsrf: 'true'
-                    Content-Type: 'application/json'
-                  body:
-                    enrichedJson: '{{ steps.enrich.output | json }}'
-                    reasonJson: '{{ steps.reason.output.structured_output | json }}'
-                    sourceWatchId: 'daybreak-alert-analysis-watch'
+  # Phase 4 — Act (FR-014): emit a Proposal/Result record with an auditable
+  # shape. The from-worker-run route validates the Enrich + Reason output and
+  # fail-closes on malformed data (FR-015, FR-016).
+  - name: act
+    type: kibana.request
+    with:
+      method: POST
+      path: '/api/daybreak/proposals/from-worker-run'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
+        Content-Type: 'application/json'
+      body:
+        enrichedJson: '{{ steps.enrich.output | json }}'
+        reasonJson: '{{ steps.reason.output | json }}'
+        sourceWatchId: 'daybreak-alert-analysis-watch'

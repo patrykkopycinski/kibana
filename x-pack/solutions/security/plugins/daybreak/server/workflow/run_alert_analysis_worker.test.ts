@@ -37,9 +37,7 @@ type RawWorkflowStep = { name: string; type?: string } & Record<string, unknown>
 
 const getRawReasonStep = (): Record<string, unknown> => {
   const raw = parse(ALERT_ANALYSIS_WORKER_YAML) as { steps: RawWorkflowStep[] };
-  const guardEnabled = raw.steps.find((s) => s.name === 'guard_enabled')!;
-  const guard = (guardEnabled.steps as RawWorkflowStep[]).find((s) => s.name === 'guard')!;
-  return (guard.steps as RawWorkflowStep[]).find((s) => s.name === 'reason')!;
+  return (raw.steps as RawWorkflowStep[]).find((s) => s.name === 'reason')!;
 };
 
 describe('run_alert_analysis_worker', () => {
@@ -169,7 +167,7 @@ describe('run_alert_analysis_worker', () => {
       // worker's nested Reason step lives two `if` levels deep, so only the
       // outer guard chain is logged here; the retry config is asserted above.
       expect(stepInputLogs.some((m) => m.includes('setup'))).toBe(true);
-      expect(stepInputLogs.some((m) => m.includes('guard_enabled'))).toBe(true);
+      expect(stepInputLogs.some((m) => m.includes('enrich'))).toBe(true);
     });
 
     it('logs the execution result after completion (FR-009)', async () => {

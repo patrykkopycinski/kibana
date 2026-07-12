@@ -11,6 +11,9 @@ import { registerProposalRoutes } from './proposals';
 import { registerWatchRoutes } from './watches';
 import { registerWorkflowRoutes } from './workflows';
 import { registerSeedDemoDataRoute } from './seed_demo_data';
+import { registerConfigRoute } from './config';
+import { registerAlertSummaryRoute } from './alert_summary';
+import { registerProposalsFromWorkerRoute } from './proposals_from_worker';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalRoutes(dependencies);
@@ -18,5 +21,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerWatchRoutes(dependencies);
   registerWorkflowRoutes(dependencies);
   registerSeedDemoDataRoute(dependencies);
+  registerConfigRoute(dependencies);
+  registerAlertSummaryRoute(dependencies);
   registerProposalsFromWorkerRoute(dependencies);
 };

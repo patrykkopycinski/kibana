@@ -36,7 +36,11 @@ export interface WorkflowClient {
   update(id: string, updates: WorkflowUpdateParams): Promise<WorkflowProperties>;
   pruneWatchReference(watchId: string): Promise<void>;
   delete(id: string): Promise<WorkflowProperties>;
-  recordExecution(id: string, timestamp: string, activeExecutionId?: string): Promise<WorkflowProperties>;
+  recordExecution(
+    id: string,
+    timestamp: string,
+    activeExecutionId?: string
+  ): Promise<WorkflowProperties>;
 }
 
 class WorkflowClientImpl implements WorkflowClient {

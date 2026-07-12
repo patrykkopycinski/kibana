@@ -10,7 +10,7 @@ import { THREAD_TYPES, THREAD_TYPE_META, isThreadType } from './thread_type';
 
 describe('THREAD_TYPES (FR-013)', () => {
   it('exposes exactly the five prototype thread kinds, in the prototype order', () => {
-    expect(THREAD_TYPES).toEqual(['case', 'investigation', 'hunt', 'incident', 'chat']);
+    expect(THREAD_TYPES).toEqual(['case', 'investigation', 'hunt', 'incident', 'chat', 'custom']);
   });
 
   it('has metadata for every thread type', () => {

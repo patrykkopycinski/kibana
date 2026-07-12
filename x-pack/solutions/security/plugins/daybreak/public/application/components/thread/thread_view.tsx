@@ -31,7 +31,7 @@ export interface ThreadMessage {
   name?: string;
 }
 
-export type ThreadType = 'chat' | 'case' | 'investigation' | 'hunt' | 'incident';
+export type ThreadType = 'chat' | 'case' | 'investigation' | 'hunt' | 'incident' | 'custom';
 
 interface ThreadViewProps {
   proposal: DaybreakProposal;
@@ -44,6 +44,7 @@ const typeMeta: Record<ThreadType, { label: string; icon: string; color: string 
   investigation: { label: 'Investigation', icon: 'magnifyWithExclamation', color: '#d4791a' },
   hunt: { label: 'Hunt', icon: 'crosshairs', color: '#00bfb3' },
   incident: { label: 'Incident', icon: 'alert', color: '#bd271e' },
+  custom: { label: 'Custom', icon: 'tag', color: '#7e8796' },
 };
 
 const severityColor: Record<DaybreakProposal['severity'], string> = {
@@ -58,6 +59,7 @@ export const deriveThreadType = (proposal: DaybreakProposal): ThreadType => {
   if (proposal.severity === 'high') return 'investigation';
   if (proposal.severity === 'medium') return 'case';
   if (proposal.status === 'new') return 'chat';
+  if (proposal.status === 'deferred' || proposal.status === 'modified') return 'custom';
   return 'case';
 };
 

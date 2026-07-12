@@ -20,7 +20,7 @@ import type { DaybreakThreadTypeTokens } from '../../theme';
  * inspector) can consume a single stable type rather than inlining string
  * literals per-component.
  */
-export type ThreadType = 'case' | 'investigation' | 'hunt' | 'incident' | 'chat';
+export type ThreadType = 'case' | 'investigation' | 'hunt' | 'incident' | 'chat' | 'custom';
 
 /** Every {@link ThreadType} value, in the prototype's declared order. */
 export const THREAD_TYPES: readonly ThreadType[] = [
@@ -29,6 +29,7 @@ export const THREAD_TYPES: readonly ThreadType[] = [
   'hunt',
   'incident',
   'chat',
+  'custom',
 ];
 
 interface ThreadTypeMeta {
@@ -75,6 +76,11 @@ export const THREAD_TYPE_META: Record<ThreadType, ThreadTypeMeta> = {
     icon: 'discuss',
     themeToken: 'timeline',
     label: () => i18n.translate('xpack.daybreak.thread.type.chat', { defaultMessage: 'Chat' }),
+  },
+  custom: {
+    icon: 'tag',
+    themeToken: 'assumption',
+    label: () => i18n.translate('xpack.daybreak.thread.type.custom', { defaultMessage: 'Custom' }),
   },
 };
 

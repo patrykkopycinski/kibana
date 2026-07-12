@@ -95,6 +95,15 @@ const styles = `
 .daybreakBriefCards { gap: 12px !important; }
 .daybreakBriefCard { background: var(--db-panel) !important; border: 1px solid var(--db-line) !important; border-radius: var(--db-radius-sm) !important; box-shadow: 0 1px 2px rgba(20,23,28,.04) !important; padding: 17px !important; }
 .daybreakBriefCard:hover { border-color: var(--db-line-strong) !important; box-shadow: 0 6px 16px rgba(20,23,28,.07) !important; transform: translateY(-1px); }
+.daybreakBriefPriority { background: linear-gradient(135deg, #f4f8ff 0%, var(--db-panel) 56%) !important; border: 1px solid rgba(23, 105, 211, .26) !important; border-left: 4px solid var(--db-blue) !important; border-radius: var(--db-radius) !important; box-shadow: 0 10px 24px rgba(23, 105, 211, .10) !important; }
+.daybreakBriefPriority h2 { color: var(--db-ink-0); letter-spacing: -.025em; }
+.daybreakBriefPriorityCopy { color: var(--db-ink-1) !important; line-height: 1.55; max-width: 680px; }
+.daybreakBriefPriorityFacts, .daybreakBriefSignals { color: var(--db-ink-3); font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .035em; }
+.daybreakBriefPriorityFacts { display: flex; flex-wrap: wrap; gap: 16px; }
+.daybreakBriefPriorityFacts span + span::before { color: var(--db-line-strong); content: "•"; margin-right: 16px; }
+.daybreakBriefSignals { border-bottom: 1px solid var(--db-line); border-top: 1px solid var(--db-line); padding: 10px 0; }
+.daybreakBriefSignals .euiFlexItem { flex-grow: 0 !important; }
+.daybreakBriefSignals strong { color: var(--db-ink-0); font-size: 14px; margin-right: 4px; }
 .daybreakDetailBack { color: var(--db-ink-3) !important; margin-left: -8px; }
 .daybreakDecisionHero { border-bottom: 1px solid var(--db-line); padding-bottom: 24px; }
 .daybreakDetailTitle { color: var(--db-ink-0) !important; letter-spacing: -.03em; max-width: 760px; }

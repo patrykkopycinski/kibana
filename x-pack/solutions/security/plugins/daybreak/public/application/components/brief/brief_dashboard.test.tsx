@@ -123,6 +123,12 @@ describe('computeBriefSections (FR-014, FR-020)', () => {
       'proposal-needs-evidence',
     ]);
   });
+
+  it('surfaces a gate-ready proposal as the priority decision ahead of more severe incomplete work', () => {
+    const { priorityProposalId } = computeBriefSections(proposalsFixture);
+
+    expect(priorityProposalId).toBe('proposal-ready');
+  });
 });
 
 describe('BriefDashboard (FR-014, FR-020)', () => {
@@ -140,6 +146,10 @@ describe('BriefDashboard (FR-014, FR-020)', () => {
     renderDashboard();
 
     expect(screen.getByTestId('daybreakBriefDashboard')).toBeInTheDocument();
+    expect(screen.getByTestId('daybreakBriefPriority')).toHaveTextContent(
+      'Suspicious login from new device'
+    );
+    expect(screen.getByTestId('daybreakBriefPriority')).toHaveTextContent('Review ready');
 
     // Open threads (FR-014): 3 non-terminal proposals, terminal ones excluded.
     expect(screen.getByTestId('daybreakBriefOpenThreadsCount')).toHaveTextContent('3');
@@ -191,6 +201,7 @@ describe('BriefDashboard (FR-014, FR-020)', () => {
 
     renderDashboard();
 
+    expect(screen.getByTestId('daybreakBriefPriorityLoading')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefOpenThreadsLoading')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefAwaitingReviewLoading')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefNextActionsLoading')).toBeInTheDocument();
@@ -206,6 +217,7 @@ describe('BriefDashboard (FR-014, FR-020)', () => {
 
     renderDashboard();
 
+    expect(screen.getByTestId('daybreakBriefPriorityEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefOpenThreadsEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefAwaitingReviewEmpty')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakBriefNextActionsEmpty')).toBeInTheDocument();

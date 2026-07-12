@@ -669,7 +669,75 @@ export const BriefDashboard: React.FC<BriefDashboardProps> = ({ onSelectProposal
         </EuiText>
       )}
       {isLoading && <EuiLoadingSpinner data-test-subj="daybreakBriefNextActionsLoading" />}
+
+      <ShiftHandoff proposals={proposals} />
     </div>
+  );
+};
+
+const TERMINAL_STATUSES_FOR_HANDOFF: ReadonlySet<DaybreakProposal['status']> = new Set([
+  'approved',
+  'dismissed',
+  'escalated',
+]);
+
+const ShiftHandoff: React.FC<{ proposals: DaybreakProposal[] }> = ({ proposals }) => {
+  const twentyFourHoursAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const decisions = proposals
+    .filter((proposal) => TERMINAL_STATUSES_FOR_HANDOFF.has(proposal.status))
+    .filter((proposal) =>
+      (proposal.decisionHistory ?? []).some(
+        (entry) => new Date(entry.timestamp).getTime() > twentyFourHoursAgo
+      )
+    )
+    .sort((a, b) => {
+      const aLast = Math.max(
+        ...(a.decisionHistory ?? []).map((e) => new Date(e.timestamp).getTime())
+      );
+      const bLast = Math.max(
+        ...(b.decisionHistory ?? []).map((e) => new Date(e.timestamp).getTime())
+      );
+      return bLast - aLast;
+    });
+
+  if (decisions.length === 0) return null;
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiText className="daybreakEyebrow" size="xs">
+        SHIFT HANDOFF
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="daybreakShiftHandoff">
+        {decisions.map((proposal) => (
+          <EuiFlexItem key={proposal.id} grow={false}>
+            <EuiPanel hasBorder paddingSize="s">
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge
+                    color={
+                      proposal.status === 'approved'
+                        ? 'success'
+                        : proposal.status === 'escalated'
+                        ? 'danger'
+                        : 'hollow'
+                    }
+                  >
+                    {proposal.status}
+                  </EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>{proposal.title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
   );
 };
 

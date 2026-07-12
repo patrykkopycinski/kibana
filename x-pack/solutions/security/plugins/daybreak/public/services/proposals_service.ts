@@ -14,6 +14,14 @@ import { daybreakApiPath } from '../../common/http_api';
  * to preserve the public/server boundary — the HTTP response is the actual
  * contract the browser depends on.
  */
+export interface DecisionHistoryEntry {
+  fromStatus: DaybreakProposal['status'];
+  toStatus: DaybreakProposal['status'];
+  actor?: string;
+  reason?: string;
+  timestamp: string;
+}
+
 export interface DaybreakProposal {
   id: string;
   title: string;
@@ -33,6 +41,7 @@ export interface DaybreakProposal {
   evidenceRefs: string[];
   expectedImpact?: string;
   riskCaveats?: string[];
+  decisionHistory?: DecisionHistoryEntry[];
   createdAt: string;
 }
 

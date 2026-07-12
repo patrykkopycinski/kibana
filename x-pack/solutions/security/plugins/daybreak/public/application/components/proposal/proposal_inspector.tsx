@@ -11,6 +11,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -175,6 +176,42 @@ export const ProposalInspector: React.FC<{
           {evidence.map((item) => (
             <EuiFlexItem key={item.id}>
               <EvidenceCard evidence={item} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer size="l" />
+      <EuiText size="xs" color="subdued">
+        DECISION HISTORY
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {(proposal.decisionHistory?.length ?? 0) === 0 ? (
+        <EuiText size="s" color="subdued" data-test-subj="daybreakProposalInspectorHistoryEmpty">
+          No decisions recorded yet.
+        </EuiText>
+      ) : (
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          data-test-subj="daybreakProposalInspectorHistory"
+        >
+          {proposal.decisionHistory?.map((entry, index) => (
+            <EuiFlexItem key={index} grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="arrowRight" size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    {entry.fromStatus} → {entry.toStatus}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {new Date(entry.timestamp).toLocaleString()}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

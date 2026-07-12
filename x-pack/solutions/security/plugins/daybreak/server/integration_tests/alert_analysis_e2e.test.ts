@@ -80,6 +80,8 @@ const MOCK_PROPOSAL_DOCUMENT: ProposalProperties = {
   expectedImpact: 'Prevents lateral spread of ransomware encryption.',
   riskCaveats: ['Automated triage — confirm before isolating production hosts.'],
   approvalRequirement: 'manual',
+  requiredApproverCount: 1,
+  approvals: [],
   decisionHistory: [],
   space: 'default',
 };

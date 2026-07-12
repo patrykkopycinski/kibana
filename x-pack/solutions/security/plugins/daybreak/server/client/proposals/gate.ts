@@ -8,7 +8,7 @@
 import type { ProposalProperties, ProposalStatus } from './types';
 
 /** A requirement that may be missing when the readiness gate fails. */
-export type MissingRequirement = 'evidence' | 'recommendation';
+export type MissingRequirement = 'evidence' | 'recommendation' | 'approver-count';
 
 /**
  * Details of a failed readiness-gate evaluation.
@@ -49,12 +49,16 @@ const isEvidenceMissing = (proposal: ProposalProperties): boolean =>
 const isRecommendationMissing = (proposal: ProposalProperties): boolean =>
   !proposal.recommendation || proposal.recommendation.trim().length === 0;
 
+const isApproverCountMissing = (proposal: ProposalProperties): boolean =>
+  (proposal.approvals?.length ?? 0) < (proposal.requiredApproverCount ?? 1);
+
 /**
  * Fail-closed readiness gate for status transitions (FR-005).
  *
- * When transitioning a proposal to `approved`, the gate requires BOTH:
+ * When transitioning a proposal to `approved`, the gate requires:
  *   1. At least one evidence reference (non-empty `evidenceRefs` array)
  *   2. A non-null, non-empty `recommendation` string
+ *   3. At least `requiredApproverCount` approval entries (default 1)
  *
  * For all other target statuses the gate passes without checking these
  * requirements — fail-closed applies only to `approved`.
@@ -75,6 +79,10 @@ export const evaluateReadinessGate = (
 
   if (isRecommendationMissing(proposal)) {
     missingRequirements.push('recommendation');
+  }
+
+  if (isApproverCountMissing(proposal)) {
+    missingRequirements.push('approver-count');
   }
 
   if (missingRequirements.length > 0) {

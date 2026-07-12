@@ -21,6 +21,8 @@ const createMockProposalSource = (overrides?: Partial<ProposalProperties>): Prop
   status: 'new',
   recommendation: 'Investigate immediately',
   evidenceRefs: ['evidence-1'],
+  requiredApproverCount: 1,
+  approvals: [],
   decisionHistory: [],
   createdAt: '2025-01-01T00:00:00.000Z',
   space: testSpace,
@@ -191,7 +193,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       );
     });
 
-    it('defaults evidenceRefs and decisionHistory to empty arrays', async () => {
+    it('defaults evidenceRefs, approvals and decisionHistory to empty arrays', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createMockProposalDoc()] },
       });
@@ -210,6 +212,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       expect(indexArg.document).toEqual(
         expect.objectContaining({
           evidenceRefs: [],
+          approvals: [],
           decisionHistory: [],
           createdAt: expect.any(String),
         })
@@ -290,6 +293,13 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       const result = await client.transitionStatus('proposal-1', 'approved');
 
       expect(result.status).toBe('approved');
+      expect(result.approvals).toHaveLength(1);
+      expect(result.approvals[0]).toEqual(
+        expect.objectContaining({
+          actor: 'unknown',
+          timestamp: expect.any(String),
+        })
+      );
       expect(result.decisionHistory).toHaveLength(1);
       expect(result.decisionHistory[0]).toEqual(
         expect.objectContaining({
@@ -299,6 +309,36 @@ describe('ProposalClient (FR-004, FR-005)', () => {
         })
       );
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('records the actor and reason when approving', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createMockProposalDoc({
+              status: 'needs-evidence',
+              recommendation: 'Approve this',
+              evidenceRefs: ['evidence-1'],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ result: 'updated' });
+
+      const result = await client.transitionStatus('proposal-1', 'approved', 'operator-1', 'LGTM');
+
+      expect(result.approvals[0]).toEqual(
+        expect.objectContaining({
+          actor: 'operator-1',
+          reason: 'LGTM',
+        })
+      );
+      expect(result.decisionHistory[0]).toEqual(
+        expect.objectContaining({
+          actor: 'operator-1',
+          reason: 'LGTM',
+        })
+      );
     });
 
     it('throws ReadinessGateError on empty evidenceRefs + empty recommendation (FR-005)', async () => {
@@ -347,6 +387,51 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       expect(document.status).not.toBe('approved');
     });
 
+    it('requires additional approvals for two-person approval', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createMockProposalDoc({
+              status: 'needs-evidence',
+              recommendation: 'Approve this',
+              evidenceRefs: ['evidence-1'],
+              requiredApproverCount: 2,
+              approvals: [],
+            }),
+          ],
+        },
+      });
+
+      await expect(client.transitionStatus('proposal-1', 'approved')).rejects.toThrow(
+        ReadinessGateError
+      );
+      const error = await client.transitionStatus('proposal-1', 'approved').catch((e) => e);
+      expect(error.failure.missingRequirements).toEqual(['approver-count']);
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('transitions to approved once enough approvals are recorded', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createMockProposalDoc({
+              status: 'needs-evidence',
+              recommendation: 'Approve this',
+              evidenceRefs: ['evidence-1'],
+              requiredApproverCount: 2,
+              approvals: [{ actor: 'operator-1', timestamp: '2025-01-01T00:00:00.000Z' }],
+            }),
+          ],
+        },
+      });
+      mockEsClient.index.mockResolvedValue({ result: 'updated' });
+
+      const result = await client.transitionStatus('proposal-1', 'approved', 'operator-2');
+
+      expect(result.status).toBe('approved');
+      expect(result.approvals).toHaveLength(2);
+    });
+
     it('transitions to a non-approved status without checking the gate', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -371,9 +456,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
   describe('addEvidenceRef (FR-004)', () => {
     it('adds an evidence reference to a proposal', async () => {
       mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1'] })],
-        },
+        hits: { hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1'] })] },
       });
       mockEsClient.index.mockResolvedValue({ result: 'updated' });
 
@@ -385,9 +468,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
 
     it('is idempotent — does not duplicate an existing evidence ref', async () => {
       mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1'] })],
-        },
+        hits: { hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1'] })] },
       });
 
       const result = await client.addEvidenceRef('proposal-1', 'evidence-1');
@@ -400,9 +481,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
   describe('removeEvidenceRef (FR-004)', () => {
     it('removes an evidence reference from a proposal', async () => {
       mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1', 'evidence-2'] })],
-        },
+        hits: { hits: [createMockProposalDoc({ evidenceRefs: ['evidence-1', 'evidence-2'] })] },
       });
       mockEsClient.index.mockResolvedValue({ result: 'updated' });
 
@@ -429,6 +508,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
         const proposal = createMockProposalSource({
           evidenceRefs: ['evidence-1'],
           recommendation: 'Approve this',
+          approvals: [{ actor: 'operator-1', timestamp: '2025-01-01T00:00:00.000Z' }],
         });
 
         const result = evaluateReadinessGate(proposal, 'approved');
@@ -448,9 +528,9 @@ describe('ProposalClient (FR-004, FR-005)', () => {
         if (!result.approved) {
           expect(result.failure.proposalId).toBe('proposal-1');
           expect(result.failure.targetStatus).toBe('approved');
-          expect(result.failure.missingRequirements).toHaveLength(2);
+          expect(result.failure.missingRequirements).toHaveLength(3);
           expect(result.failure.missingRequirements).toEqual(
-            expect.arrayContaining(['evidence', 'recommendation'])
+            expect.arrayContaining(['evidence', 'recommendation', 'approver-count'])
           );
         }
       });
@@ -465,7 +545,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
 
         expect(result.approved).toBe(false);
         if (!result.approved) {
-          expect(result.failure.missingRequirements).toEqual(['evidence']);
+          expect(result.failure.missingRequirements).toEqual(['evidence', 'approver-count']);
         }
       });
 
@@ -479,7 +559,23 @@ describe('ProposalClient (FR-004, FR-005)', () => {
 
         expect(result.approved).toBe(false);
         if (!result.approved) {
-          expect(result.failure.missingRequirements).toEqual(['recommendation']);
+          expect(result.failure.missingRequirements).toEqual(['recommendation', 'approver-count']);
+        }
+      });
+
+      it('reports approver-count missing when required count is not met', () => {
+        const proposal = createMockProposalSource({
+          evidenceRefs: ['evidence-1'],
+          recommendation: 'Approve this',
+          requiredApproverCount: 2,
+          approvals: [{ actor: 'a', timestamp: '2025-01-01T00:00:00.000Z' }],
+        });
+
+        const result = evaluateReadinessGate(proposal, 'approved');
+
+        expect(result.approved).toBe(false);
+        if (!result.approved) {
+          expect(result.failure.missingRequirements).toEqual(['approver-count']);
         }
       });
     });
@@ -498,6 +594,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
         const proposal = createMockProposalSource({
           evidenceRefs: ['evidence-1'],
           recommendation: 'Approve this',
+          approvals: [{ actor: 'operator-1', timestamp: '2025-01-01T00:00:00.000Z' }],
         });
 
         expect(() => requireReadinessGate(proposal, 'approved')).not.toThrow();

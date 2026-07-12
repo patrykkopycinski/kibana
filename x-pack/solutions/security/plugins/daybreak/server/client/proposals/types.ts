@@ -29,6 +29,15 @@ export interface DecisionHistoryEntry {
 }
 
 /**
+ * ApprovalEntry records a single human approval action.
+ */
+export interface ApprovalEntry {
+  actor: string;
+  timestamp: string;
+  reason?: string;
+}
+
+/**
  * Full Proposal document for the `.kibana-daybreak-proposals` index.
  */
 export interface ProposalProperties {
@@ -46,6 +55,8 @@ export interface ProposalProperties {
   expectedImpact?: string;
   riskCaveats?: string[];
   approvalRequirement?: 'manual' | 'automatic';
+  requiredApproverCount: number;
+  approvals: ApprovalEntry[];
   hypothesis?: string;
   decisionHistory: DecisionHistoryEntry[];
   space?: string;

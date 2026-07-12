@@ -22,6 +22,12 @@ export interface DecisionHistoryEntry {
   timestamp: string;
 }
 
+export interface ApprovalEntry {
+  actor: string;
+  timestamp: string;
+  reason?: string;
+}
+
 export interface DaybreakProposal {
   id: string;
   title: string;
@@ -42,6 +48,9 @@ export interface DaybreakProposal {
   expectedImpact?: string;
   riskCaveats?: string[];
   hypothesis?: string;
+  approvalRequirement?: 'manual' | 'automatic';
+  requiredApproverCount?: number;
+  approvals?: ApprovalEntry[];
   decisionHistory?: DecisionHistoryEntry[];
   createdAt: string;
 }
@@ -57,7 +66,7 @@ interface ListProposalsResponse {
  * {@link DaybreakProposal} above — the HTTP error body is the actual
  * contract the browser depends on.
  */
-export type MissingRequirement = 'evidence' | 'recommendation';
+export type MissingRequirement = 'evidence' | 'recommendation' | 'approver-count';
 
 /**
  * Body of the 422 Unprocessable Content response the transition route
@@ -93,10 +102,12 @@ export class ProposalsService {
 
   async transitionStatus(
     id: string,
-    targetStatus: DaybreakProposal['status']
+    targetStatus: DaybreakProposal['status'],
+    actor?: string,
+    reason?: string
   ): Promise<DaybreakProposal> {
     return this.http.post<DaybreakProposal>(`${daybreakApiPath}/proposals/${id}/transition`, {
-      body: JSON.stringify({ targetStatus }),
+      body: JSON.stringify({ targetStatus, actor, reason }),
     });
   }
 }

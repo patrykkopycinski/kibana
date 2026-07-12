@@ -30,6 +30,10 @@ const proposalSeveritySchema = schema.oneOf([
   schema.literal('critical'),
 ]);
 
+interface RequestAuthWithUser {
+  getCurrentUser(): { username: string; profile_uid?: string } | null;
+}
+
 export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDependencies) => {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -45,6 +49,11 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
       logger,
       esClient: client.asInternalUser,
     });
+  };
+
+  const getActor = (request: KibanaRequest): string => {
+    const user = (request.auth as unknown as RequestAuthWithUser | undefined)?.getCurrentUser?.();
+    return user?.profile_uid ?? user?.username ?? 'unknown';
   };
 
   // List proposals
@@ -105,13 +114,21 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
         }),
         body: schema.object({
           targetStatus: proposalStatusSchema,
+          actor: schema.maybe(schema.string()),
+          reason: schema.maybe(schema.string()),
         }),
       },
       options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);
-      const proposal = await client.transitionStatus(request.params.id, request.body.targetStatus);
+      const actor = request.body.actor ?? getActor(request);
+      const proposal = await client.transitionStatus(
+        request.params.id,
+        request.body.targetStatus,
+        actor,
+        request.body.reason
+      );
       return response.ok({ body: proposal });
     })
   );

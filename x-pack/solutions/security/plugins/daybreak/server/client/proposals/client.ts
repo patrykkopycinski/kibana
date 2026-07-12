@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ProposalStorage } from './storage';
-import type { ProposalProperties, ProposalStatus, ProposalDocument } from './types';
+import type { ApprovalEntry, ProposalProperties, ProposalStatus, ProposalDocument } from './types';
 import { createProposalsStorage } from './storage';
 import { requireReadinessGate } from './gate';
 import { ProposalNotFoundError } from './errors';
@@ -31,7 +31,12 @@ export interface ProposalClient {
   /** Delete a proposal document by ID. */
   delete(id: string): Promise<boolean>;
   /** Transition a proposal's status, applying the readiness gate (FR-005). */
-  transitionStatus(id: string, targetStatus: ProposalStatus): Promise<ProposalProperties>;
+  transitionStatus(
+    id: string,
+    targetStatus: ProposalStatus,
+    actor?: string,
+    reason?: string
+  ): Promise<ProposalProperties>;
   /** Add an evidence reference to a proposal. */
   addEvidenceRef(id: string, evidenceId: string): Promise<ProposalProperties>;
   /** Remove an evidence reference from a proposal. */
@@ -58,6 +63,7 @@ export interface ProposalCreateParams {
   expectedImpact?: string;
   riskCaveats?: string[];
   approvalRequirement?: ProposalProperties['approvalRequirement'];
+  requiredApproverCount?: number;
   hypothesis?: string;
 }
 
@@ -141,6 +147,8 @@ class ProposalClientImpl implements ProposalClient {
       expectedImpact: params.expectedImpact,
       riskCaveats: params.riskCaveats,
       approvalRequirement: params.approvalRequirement,
+      requiredApproverCount: params.requiredApproverCount ?? 1,
+      approvals: [],
       hypothesis: params.hypothesis,
       decisionHistory: [],
       createdAt: new Date().toISOString(),
@@ -183,23 +191,44 @@ class ProposalClientImpl implements ProposalClient {
     return result.result === 'deleted';
   }
 
-  async transitionStatus(id: string, targetStatus: ProposalStatus): Promise<ProposalProperties> {
+  async transitionStatus(
+    id: string,
+    targetStatus: ProposalStatus,
+    actor?: string,
+    reason?: string
+  ): Promise<ProposalProperties> {
     const document = await this.getById(id);
     if (!document) {
       throw new ProposalNotFoundError(id);
     }
 
     const current = document._source!;
-    requireReadinessGate(current, targetStatus);
+
+    let approvals: ApprovalEntry[] = current.approvals ?? [];
+    if (targetStatus === 'approved') {
+      approvals = [
+        ...approvals,
+        {
+          actor: actor ?? 'unknown',
+          timestamp: new Date().toISOString(),
+          reason,
+        },
+      ];
+    }
+
+    requireReadinessGate({ ...current, approvals }, targetStatus);
 
     const updatedSource: ProposalProperties = {
       ...current,
       status: targetStatus,
+      approvals,
       decisionHistory: [
         ...current.decisionHistory,
         {
           fromStatus: current.status,
           toStatus: targetStatus,
+          actor,
+          reason,
           timestamp: new Date().toISOString(),
         },
       ],

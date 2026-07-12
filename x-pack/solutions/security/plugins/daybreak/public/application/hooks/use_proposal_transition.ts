@@ -17,6 +17,7 @@ import type {
 interface TransitionVariables {
   id: string;
   targetStatus: DaybreakProposal['status'];
+  reason?: string;
 }
 
 /**
@@ -38,17 +39,18 @@ const getMissingRequirements = (error: unknown): MissingRequirement[] | undefine
  * Drives the Proposal gate-approval transition flow (FR-016, FR-017,
  * FR-018). Accepting a Proposal gate in the UI invokes the server's
  * `POST /proposals/{id}/transition` route, which fails closed (422) unless
- * `evidenceRefs` and `recommendation` are both present. On failure, this
- * hook surfaces the specific `missingRequirements` returned by the gate
- * rather than a generic error, so the UI can render exactly what is missing.
+ * `evidenceRefs`, `recommendation`, and `requiredApproverCount` are all
+ * satisfied. On failure, this hook surfaces the specific
+ * `missingRequirements` returned by the gate rather than a generic error,
+ * so the UI can render exactly what is missing.
  */
 export const useProposalTransition = () => {
   const { services } = useKibana();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: ({ id, targetStatus }: TransitionVariables) =>
-      services.proposalsService.transitionStatus(id, targetStatus),
+    mutationFn: ({ id, targetStatus, reason }: TransitionVariables) =>
+      services.proposalsService.transitionStatus(id, targetStatus, undefined, reason),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['daybreak', 'proposals'] });
     },

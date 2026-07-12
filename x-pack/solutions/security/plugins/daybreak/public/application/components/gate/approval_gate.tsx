@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiFlexGroup,
@@ -34,6 +35,10 @@ const missingRequirementLabel = (requirement: MissingRequirement): string => {
       return i18n.translate('xpack.daybreak.gate.missingRequirement.recommendation', {
         defaultMessage: 'recommendation',
       });
+    case 'approver-count':
+      return i18n.translate('xpack.daybreak.gate.missingRequirement.approverCount', {
+        defaultMessage: 'additional approver',
+      });
   }
 };
 
@@ -46,6 +51,10 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
   const { transition, isLoading, missingRequirements } = useProposalTransition();
   const isApprovalReady = tier === 'approval-required' && !isTerminal(proposal.status);
   const isComplete = isTerminal(proposal.status);
+  const requiredApproverCount = proposal.requiredApproverCount ?? 1;
+  const approvalCount = proposal.approvals?.length ?? 0;
+  const needsMoreApprovals =
+    isApprovalReady && approvalCount > 0 && approvalCount < requiredApproverCount;
 
   const handleApprove = () => {
     void transition({ id: proposal.id, targetStatus: 'approved' });
@@ -99,6 +108,13 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
             <strong>{statusMeta.label()}</strong>
           </EuiText>
         </EuiFlexItem>
+        {requiredApproverCount > 1 && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={approvalCount >= requiredApproverCount ? 'success' : 'primary'}>
+              {approvalCount}/{requiredApproverCount} approvals
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {isApprovalReady && (
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -108,7 +124,14 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
               isLoading={isLoading}
               onClick={handleApprove}
             >
-              <FormattedMessage id="xpack.daybreak.gate.approve" defaultMessage="Approve" />
+              {needsMoreApprovals ? (
+                <FormattedMessage
+                  id="xpack.daybreak.gate.addApproval"
+                  defaultMessage="Add approval"
+                />
+              ) : (
+                <FormattedMessage id="xpack.daybreak.gate.approve" defaultMessage="Approve" />
+              )}
             </EuiButton>
           </EuiFlexItem>
         )}

@@ -39,8 +39,8 @@ export const registerConfigRoute = ({ logger, router }: RouteDependencies) => {
         body: {
           enabled: true,
           connector: {
-            id: '8951f9b4-a8c5-46ce-853d-98ce6db68a4d',
-            actionTypeId: '.gen-ai',
+            id: 'eis-anthropic-claude-5-sonnet',
+            actionTypeId: '.inference',
           },
           thresholds: {
             minimumConfidence: 0.7,

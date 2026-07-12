@@ -61,9 +61,36 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
 
       const enriched = enrichAlertSchema(enrichedRaw);
 
-      const structuredOutput =
-        reasonRaw?.structured_output ??
-        (typeof reasonRaw?.content === 'string' ? JSON.parse(reasonRaw.content) : reasonRaw);
+      const extractStructuredOutput = (raw: unknown): unknown => {
+        if (raw == null || typeof raw !== 'object') {
+          return raw;
+        }
+        const record = raw as Record<string, unknown>;
+        if (record.structured_output != null) {
+          return record.structured_output;
+        }
+        const text =
+          typeof record.content === 'string'
+            ? record.content
+            : typeof record.message === 'string'
+            ? record.message
+            : undefined;
+        if (text == null) {
+          return raw;
+        }
+        // Strip markdown fences and any leading/trailing whitespace
+        const stripped = text
+          .replace(/^```(json)?\s*/i, '')
+          .replace(/\s*```$/i, '')
+          .trim();
+        try {
+          return JSON.parse(stripped);
+        } catch {
+          return raw;
+        }
+      };
+
+      const structuredOutput = extractStructuredOutput(reasonRaw);
       const reason = validateReasonOutput({ structured_output: structuredOutput });
 
       const proposal = buildProposalFromWorkerRun({

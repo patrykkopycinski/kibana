@@ -35,6 +35,7 @@ import { SkillsConsole } from './skills_console';
 import { ActivityConsole } from './activity_console';
 import { PerformanceConsole } from './performance_console';
 import { GuardrailsConsole } from './guardrails_console';
+import { EmbeddedAppPage } from './embedded_app_page';
 import { ApprovalGate } from './gate/approval_gate';
 import { ProposalInspector } from './proposal/proposal_inspector';
 import { ThreadView } from './thread/thread_view';
@@ -296,6 +297,39 @@ export const DaybreakApp: React.FC = () => {
     }
 
     const dest = RAIL_DESTINATIONS.find((d) => d.key === destination);
+    const appMap: Record<string, { appId: string; description: string }> = {
+      discover: {
+        appId: 'discover',
+        description: 'Search and explore your Security data in Discover.',
+      },
+      dashboards: {
+        appId: 'dashboards',
+        description: 'View dashboards that visualize your operational posture.',
+      },
+      alerts: {
+        appId: 'alerting',
+        description: 'Inspect and manage active alerts and detection rules.',
+      },
+      attacks: {
+        appId: 'security',
+        description: 'Open the Security app to investigate attacks and detections.',
+      },
+      records: { appId: 'cases', description: 'Manage cases and records from the Cases app.' },
+      hunt: { appId: 'security', description: 'Run threat hunts from the Security app.' },
+      streams: { appId: 'streams', description: 'Browse and manage data streams.' },
+    };
+    const mapped = destination && appMap[destination];
+    if (mapped) {
+      return (
+        <EmbeddedAppPage
+          title={dest?.label ?? destination}
+          appId={mapped.appId}
+          icon={dest?.icon ?? 'apps'}
+          description={mapped.description}
+        />
+      );
+    }
+
     return (
       <AppPlaceholder title={dest?.label ?? destination} subtitle="App integration coming soon." />
     );

@@ -30,7 +30,8 @@ import { useEvidence } from '../hooks/use_evidence';
 import type { DaybreakProposal } from '../../services/proposals_service';
 import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
-import { OperationsConsole } from './operations_console';
+import { WatchesConsole } from './watches_console';
+import { WorkflowsConsole } from './workflows_console';
 import { SkillsConsole } from './skills_console';
 import { ActivityConsole } from './activity_console';
 import { PerformanceConsole } from './performance_console';
@@ -60,6 +61,7 @@ type Destination =
   | 'hunt'
   | 'streams'
   | 'agents'
+  | 'workflows'
   | 'skills'
   | 'activity'
   | 'performance'
@@ -83,6 +85,7 @@ const RAIL_DESTINATIONS: RailDestination[] = [
   { key: 'hunt', label: 'Threat hunt', icon: 'target', group: 'operate' },
   { key: 'streams', label: 'Streams', icon: 'logstashFilter', group: 'operate' },
   { key: 'agents', label: 'Watches', icon: 'eye', group: 'agent' },
+  { key: 'workflows', label: 'Workflows', icon: 'play', group: 'agent' },
   { key: 'skills', label: 'Skills', icon: 'layers', group: 'agent' },
   { key: 'activity', label: 'Activity', icon: 'pulse', group: 'agent' },
   { key: 'performance', label: 'Performance', icon: 'stats', group: 'agent' },
@@ -277,7 +280,11 @@ export const DaybreakApp: React.FC = () => {
     }
 
     if (destination === 'agents') {
-      return <OperationsConsole />;
+      return <WatchesConsole />;
+    }
+
+    if (destination === 'workflows') {
+      return <WorkflowsConsole />;
     }
 
     if (destination === 'skills') {

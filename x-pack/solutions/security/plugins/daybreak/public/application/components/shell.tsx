@@ -31,6 +31,10 @@ import type { DaybreakProposal } from '../../services/proposals_service';
 import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
 import { OperationsConsole } from './operations_console';
+import { SkillsConsole } from './skills_console';
+import { ActivityConsole } from './activity_console';
+import { PerformanceConsole } from './performance_console';
+import { GuardrailsConsole } from './guardrails_console';
 import { ApprovalGate } from './gate/approval_gate';
 import { ProposalInspector } from './proposal/proposal_inspector';
 import { ThreadView } from './thread/thread_view';
@@ -54,7 +58,11 @@ type Destination =
   | 'records'
   | 'hunt'
   | 'streams'
-  | 'agents';
+  | 'agents'
+  | 'skills'
+  | 'activity'
+  | 'performance'
+  | 'guardrails';
 
 interface RailDestination {
   key: Destination;
@@ -74,6 +82,10 @@ const RAIL_DESTINATIONS: RailDestination[] = [
   { key: 'hunt', label: 'Threat hunt', icon: 'target', group: 'operate' },
   { key: 'streams', label: 'Streams', icon: 'logstashFilter', group: 'operate' },
   { key: 'agents', label: 'Watches', icon: 'eye', group: 'agent' },
+  { key: 'skills', label: 'Skills', icon: 'layers', group: 'agent' },
+  { key: 'activity', label: 'Activity', icon: 'pulse', group: 'agent' },
+  { key: 'performance', label: 'Performance', icon: 'stats', group: 'agent' },
+  { key: 'guardrails', label: 'Guardrails', icon: 'security', group: 'agent' },
 ];
 
 const ProposalRailLabel: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
@@ -265,6 +277,22 @@ export const DaybreakApp: React.FC = () => {
 
     if (destination === 'agents') {
       return <OperationsConsole />;
+    }
+
+    if (destination === 'skills') {
+      return <SkillsConsole />;
+    }
+
+    if (destination === 'activity') {
+      return <ActivityConsole />;
+    }
+
+    if (destination === 'performance') {
+      return <PerformanceConsole />;
+    }
+
+    if (destination === 'guardrails') {
+      return <GuardrailsConsole />;
     }
 
     const dest = RAIL_DESTINATIONS.find((d) => d.key === destination);

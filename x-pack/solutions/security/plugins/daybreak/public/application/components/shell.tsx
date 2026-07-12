@@ -28,6 +28,7 @@ import type { DaybreakEvidence } from '../../services/evidence_service';
 import type { DaybreakProposal } from '../../services/proposals_service';
 import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
+import { OperationsConsole } from './operations_console';
 import { ApprovalGate } from './gate/approval_gate';
 import { ProposalInspector } from './proposal/proposal_inspector';
 import { deriveGateTier } from './gate/gate_tier';
@@ -59,6 +60,7 @@ export const DaybreakApp: React.FC = () => {
   const { proposals, isLoading } = useProposals();
   const { evidence } = useEvidence();
   const [selectedId, setSelectedId] = React.useState<string | undefined>();
+  const [showOperations, setShowOperations] = React.useState(false);
   const selected = proposals.find((proposal) => proposal.id === selectedId);
   const awaitingReview = proposals.filter(
     (proposal) =>
@@ -144,8 +146,16 @@ export const DaybreakApp: React.FC = () => {
           style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
         >
           <div className="daybreakStageToolbar">
-            <span>{selected ? 'Decision workspace' : 'Shift brief'}</span>
-            <span>{selected ? 'Evidence and approval' : 'Operational posture'}</span>
+            <span>{selected ? 'Decision workspace' : showOperations ? 'Automation controls' : 'Shift brief'}</span>
+            <EuiButtonEmpty
+              size="xs"
+              onClick={() => {
+                setSelectedId(undefined);
+                setShowOperations((value) => !value);
+              }}
+            >
+              {showOperations ? 'View brief' : 'Manage automations'}
+            </EuiButtonEmpty>
           </div>
           <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <main className="daybreakStageScroll">
@@ -155,6 +165,8 @@ export const DaybreakApp: React.FC = () => {
                   evidence={evidence.filter((item) => selected.evidenceRefs.includes(item.id))}
                   onBack={() => setSelectedId(undefined)}
                 />
+              ) : showOperations ? (
+                <OperationsConsole />
               ) : (
                 <BriefDashboard />
               )}

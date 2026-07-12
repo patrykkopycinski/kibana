@@ -47,6 +47,7 @@ export interface ProposalListFilters {
 export interface ProposalCreateParams {
   id: string;
   title: string;
+  sourceWatch?: string;
   capability: string;
   severity: ProposalProperties['severity'];
   confidence: number;
@@ -128,6 +129,7 @@ class ProposalClientImpl implements ProposalClient {
     const document: ProposalProperties = {
       id: params.id,
       title: params.title,
+      sourceWatch: params.sourceWatch,
       capability: params.capability,
       severity: params.severity,
       confidence: params.confidence,

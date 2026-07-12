@@ -60,7 +60,7 @@ export const registerEvidenceRoutes = ({ logger, router, getSpaceId }: RouteDepe
           provenance: schema.maybe(evidenceProvenanceSchema),
         }),
       },
-      options: { access: 'internal' },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);
@@ -83,7 +83,7 @@ export const registerEvidenceRoutes = ({ logger, router, getSpaceId }: RouteDepe
           id: schema.string(),
         }),
       },
-      options: { access: 'internal' },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);

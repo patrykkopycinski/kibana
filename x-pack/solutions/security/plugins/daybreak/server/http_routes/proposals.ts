@@ -59,7 +59,7 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
           capability: schema.maybe(schema.string()),
         }),
       },
-      options: { access: 'internal' },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);
@@ -82,7 +82,7 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
           id: schema.string(),
         }),
       },
-      options: { access: 'internal' },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);
@@ -107,7 +107,7 @@ export const registerProposalRoutes = ({ logger, router, getSpaceId }: RouteDepe
           targetStatus: proposalStatusSchema,
         }),
       },
-      options: { access: 'internal' },
+      options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
       const client = await getScopedClient(ctx, request);

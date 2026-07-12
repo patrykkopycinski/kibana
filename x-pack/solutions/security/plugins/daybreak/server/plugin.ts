@@ -22,8 +22,10 @@ import type {
   DaybreakPluginStart,
   DaybreakPluginStartDeps,
 } from './types';
-import { runSpikeWorkflow } from './workflow/run_spike_workflow';
 import { registerRoutes } from './http_routes';
+import type { RouteDependencies } from './http_routes/types';
+import { runAlertAnalysisWorker } from './workflow/run_alert_analysis_worker';
+import { runSpikeWorkflow } from './workflow/run_spike_workflow';
 
 export class DaybreakPlugin
   implements
@@ -49,27 +51,33 @@ export class DaybreakPlugin
     }
 
     this.logger.debug('daybreak: Setup');
-
     const router = core.http.createRouter();
     const getSpaceId = (request: KibanaRequest) =>
       plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-    registerRoutes({ router, logger: this.logger, getSpaceId });
+    const routeDependencies: RouteDependencies = { router, logger: this.logger, getSpaceId };
+    registerRoutes(routeDependencies);
+    this.routeDependencies = routeDependencies;
 
     return {};
   }
 
   public start(core: CoreStart, deps: DaybreakPluginStartDeps): DaybreakPluginStart {
-    if (!this.config.enabled) {
-      return {};
-    }
+    if (!this.config.enabled) return {};
 
     this.logger.debug('daybreak: Started');
-
     const engine = deps.workflowsExecutionEngine;
     if (!engine) {
-      this.logger.warn('daybreak: workflowsExecutionEngine not available — runner disabled');
+      this.logger.warn('daybreak: required workflowsExecutionEngine start contract is unavailable');
       return {};
     }
+
+    this.routeDependencies.executeAlertAnalysisWorker = (request) =>
+      runAlertAnalysisWorker({
+        executeWorkflow: engine.executeWorkflow,
+        logger: this.logger,
+        request,
+        enabled: true,
+      }).then((result) => result.workflowExecutionId);
 
     return {
       runSpikeWorkflow: (request: KibanaRequest) =>
@@ -84,4 +92,6 @@ export class DaybreakPlugin
   public stop() {
     this.logger.debug('daybreak: Stopped');
   }
+
+  private routeDependencies!: RouteDependencies;
 }

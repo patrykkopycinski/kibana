@@ -7,6 +7,8 @@
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { ProposalNotFoundError } from '../client/proposals/client';
+import { WatchNotFoundError } from '../client/watch/errors';
+import { WorkflowNotFoundError } from '../client/workflow/errors';
 import { ReadinessGateError } from '../client/proposals/gate';
 import { EvidenceNotFoundError } from '../client/evidence/client';
 
@@ -30,10 +32,19 @@ export const getHandlerWrapper =
       try {
         return await handler(ctx, req, res);
       } catch (e) {
-        if (e instanceof ProposalNotFoundError || e instanceof EvidenceNotFoundError) {
+        if (
+          e instanceof ProposalNotFoundError ||
+          e instanceof EvidenceNotFoundError ||
+          e.name === WatchNotFoundError.name ||
+          e.name === WorkflowNotFoundError.name
+        ) {
           return res.notFound({
             body: { message: e.message },
           });
+        }
+
+        if (e instanceof Error && e.name === 'WorkflowConflictError') {
+          return res.conflict({ body: { message: e.message } });
         }
 
         if (e instanceof ReadinessGateError) {

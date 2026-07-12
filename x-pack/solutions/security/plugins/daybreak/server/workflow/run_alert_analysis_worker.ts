@@ -26,6 +26,7 @@ export interface RunAlertAnalysisWorkerParams {
   executeWorkflow: ExecuteWorkflowFn;
   logger: Logger;
   request: KibanaRequest;
+  enabled?: boolean;
 }
 
 /**
@@ -56,6 +57,7 @@ export const runAlertAnalysisWorker = async ({
   executeWorkflow,
   logger,
   request,
+  enabled,
 }: RunAlertAnalysisWorkerParams): Promise<ExecuteWorkflowResult> => {
   const workflow = getAlertAnalysisWorkerWorkflow();
 
@@ -68,13 +70,22 @@ export const runAlertAnalysisWorker = async ({
     );
   }
 
-  const model = toWorkflowExecutionEngineModel({
-    id: ALERT_ANALYSIS_WORKER_ID,
-    name: workflow.name,
-    enabled: workflow.enabled,
-    yaml: ALERT_ANALYSIS_WORKER_YAML,
-    definition: workflow,
-  });
+  const executableWorkflow = enabled === undefined ? workflow : { ...workflow, enabled };
+  const executableYaml =
+    enabled === undefined
+      ? ALERT_ANALYSIS_WORKER_YAML
+      : ALERT_ANALYSIS_WORKER_YAML.replace('enabled: false', 'enabled: true');
+
+  const model = toWorkflowExecutionEngineModel(
+    {
+      id: ALERT_ANALYSIS_WORKER_ID,
+      name: executableWorkflow.name,
+      enabled: executableWorkflow.enabled,
+      yaml: executableYaml,
+      definition: executableWorkflow,
+    },
+    { isEphemeral: true }
+  );
 
   const result = await executeWorkflow(model, {}, request);
 

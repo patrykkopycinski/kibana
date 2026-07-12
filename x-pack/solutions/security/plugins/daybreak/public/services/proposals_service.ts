@@ -17,6 +17,7 @@ import { daybreakApiPath } from '../../common/http_api';
 export interface DaybreakProposal {
   id: string;
   title: string;
+  sourceWatch?: string;
   capability: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   confidence: number;

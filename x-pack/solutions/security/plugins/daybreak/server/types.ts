@@ -24,7 +24,7 @@ export interface DaybreakPluginSetupDeps {
 
 /** Optional plugin dependencies consumed during start. */
 export interface DaybreakPluginStartDeps {
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   agentBuilder?: AgentBuilderPluginStart;
 }
 

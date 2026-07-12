@@ -127,6 +127,28 @@ describe('run_alert_analysis_worker', () => {
       expect(request).toBeDefined();
     });
 
+    it('enables the worker model when an enabled Daybreak workflow dispatches it', async () => {
+      const executeWorkflow = jest
+        .fn()
+        .mockResolvedValue({ workflowExecutionId: 'worker-exec-enabled' });
+
+      await runAlertAnalysisWorker({
+        executeWorkflow: executeWorkflow as never,
+        logger: createMockLogger() as unknown as Logger,
+        request: createMockRequest(),
+        enabled: true,
+      });
+
+      expect(executeWorkflow.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          id: 'daybreak-alert-analysis-worker',
+          enabled: true,
+          definition: expect.objectContaining({ enabled: true }),
+          isEphemeral: true,
+        })
+      );
+    });
+
     it('logs each flattened step input before execution (FR-009)', async () => {
       const executeWorkflow = jest
         .fn()

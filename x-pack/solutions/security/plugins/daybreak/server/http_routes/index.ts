@@ -6,14 +6,14 @@
  */
 
 import type { RouteDependencies } from './types';
-import { registerProposalRoutes } from './proposals';
 import { registerEvidenceRoutes } from './evidence';
+import { registerProposalRoutes } from './proposals';
+import { registerWatchRoutes } from './watches';
+import { registerWorkflowRoutes } from './workflows';
 
-/**
- * Register all Daybreak HTTP routes that expose the PD-2 Evidence and Proposal
- * stores to the `public/` layer (FR-023).
- */
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalRoutes(dependencies);
   registerEvidenceRoutes(dependencies);
+  registerWatchRoutes(dependencies);
+  registerWorkflowRoutes(dependencies);
 };

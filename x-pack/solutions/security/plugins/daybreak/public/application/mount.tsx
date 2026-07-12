@@ -14,6 +14,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EvidenceService } from '../services/evidence_service';
 import { ProposalsService } from '../services/proposals_service';
+import { WatchesService } from '../services/watches_service';
+import { WorkflowsService } from '../services/workflows_service';
 import { DaybreakRoutes } from './routes';
 
 export const mountApp = ({
@@ -30,6 +32,8 @@ export const mountApp = ({
     ...core,
     evidenceService: new EvidenceService({ http: core.http }),
     proposalsService: new ProposalsService({ http: core.http }),
+    watchesService: new WatchesService(core.http),
+    workflowsService: new WorkflowsService(core.http),
   };
 
   ReactDOM.render(

@@ -172,6 +172,25 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       );
     });
 
+    it('persists the source Watch so operator activity can be traced', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [createMockProposalDoc()] } });
+      mockEsClient.index.mockResolvedValue({ result: 'created' });
+
+      await client.create({
+        id: 'proposal-from-watch',
+        title: 'Watch-produced proposal',
+        sourceWatch: 'watch-1',
+        capability: 'detection',
+        severity: 'high',
+        confidence: 0.9,
+        status: 'new',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ document: expect.objectContaining({ sourceWatch: 'watch-1' }) })
+      );
+    });
+
     it('defaults evidenceRefs and decisionHistory to empty arrays', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createMockProposalDoc()] },

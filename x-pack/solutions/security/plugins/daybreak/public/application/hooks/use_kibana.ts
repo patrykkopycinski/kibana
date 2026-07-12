@@ -9,10 +9,14 @@ import { useKibana as useKibanaReact } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { EvidenceService } from '../../services/evidence_service';
 import type { ProposalsService } from '../../services/proposals_service';
+import type { WatchesService } from '../../services/watches_service';
+import type { WorkflowsService } from '../../services/workflows_service';
 
 export interface DaybreakKibanaServices extends CoreStart {
   evidenceService: EvidenceService;
   proposalsService: ProposalsService;
+  watchesService: WatchesService;
+  workflowsService: WorkflowsService;
 }
 
 export const useKibana = () => useKibanaReact<DaybreakKibanaServices>();

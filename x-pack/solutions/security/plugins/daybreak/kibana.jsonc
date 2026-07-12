@@ -15,12 +15,13 @@
       "xpack",
       "daybreak"
     ],
-    "requiredPlugins": [],
+    "requiredPlugins": [
+      "workflowsExecutionEngine"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "workflowsExecutionEngine",
       "agentBuilder",
       "spaces"
     ]

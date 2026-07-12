@@ -18,4 +18,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerWatchRoutes(dependencies);
   registerWorkflowRoutes(dependencies);
   registerSeedDemoDataRoute(dependencies);
+  registerProposalsFromWorkerRoute(dependencies);
 };

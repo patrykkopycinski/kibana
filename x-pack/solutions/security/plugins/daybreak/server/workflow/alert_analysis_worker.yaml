@@ -94,6 +94,12 @@ steps:
                 type: kibana.request
                 with:
                   method: POST
-                  path: '/internal/daybreak/proposals'
+                  path: '/api/daybreak/proposals/from-worker-run'
                   headers:
                     x-elastic-internal-origin: 'kibana'
+                    kbn-xsrf: 'true'
+                    Content-Type: 'application/json'
+                  body:
+                    enrichedJson: '{{ steps.enrich.output | json }}'
+                    reasonJson: '{{ steps.reason.output.structured_output | json }}'
+                    sourceWatchId: 'daybreak-alert-analysis-watch'

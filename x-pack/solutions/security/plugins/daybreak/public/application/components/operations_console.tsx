@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -164,6 +165,7 @@ export const OperationsConsole: React.FC = () => {
   const [selected, setSelected] = React.useState<Selection>();
   const [deleteWorkflow, setDeleteWorkflow] = React.useState<DaybreakWorkflow>();
   const [isExecuting, setIsExecuting] = React.useState(false);
+  const [updatingWatchId, setUpdatingWatchId] = React.useState<string>();
   const {
     services: { watchesService, workflowsService },
   } = useKibana();
@@ -189,6 +191,18 @@ export const OperationsConsole: React.FC = () => {
       status: watch.status === 'active' ? 'paused' : 'active',
     });
     await invalidate();
+  };
+  const updateAutonomy = async (
+    watch: DaybreakWatch,
+    autonomyTier: DaybreakWatch['autonomyTier']
+  ) => {
+    setUpdatingWatchId(watch.id);
+    try {
+      await watchesService.update(watch.id, { autonomyTier });
+      await invalidate();
+    } finally {
+      setUpdatingWatchId(undefined);
+    }
   };
   const toggleWorkflow = async (workflow: DaybreakWorkflow) => {
     await workflowsService.update(workflow.id, { enabled: !workflow.enabled });
@@ -246,7 +260,6 @@ export const OperationsConsole: React.FC = () => {
                 type="responsiveColumn"
                 listItems={[
                   { title: 'Surface', description: selected.value.surface },
-                  { title: 'Autonomy', description: selected.value.autonomyTier },
                   {
                     title: 'Skills',
                     description: selected.value.skillIds.join(', ') || 'None configured',
@@ -254,9 +267,34 @@ export const OperationsConsole: React.FC = () => {
                 ]}
               />
               <EuiSpacer size="m" />
-              <EuiButton onClick={() => toggleWatch(selected.value)}>
-                {selected.value.status === 'active' ? 'Pause Watch' : 'Activate Watch'}
-              </EuiButton>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiSelect
+                    compressed
+                    value={selected.value.autonomyTier}
+                    onChange={(event) =>
+                      updateAutonomy(
+                        selected.value,
+                        event.target.value as DaybreakWatch['autonomyTier']
+                      )
+                    }
+                    isLoading={updatingWatchId === selected.value.id}
+                    disabled={updatingWatchId === selected.value.id}
+                    data-test-subj="daybreakWatchAutonomySelect"
+                    options={[
+                      { value: 'auto-run', text: 'Auto-run' },
+                      { value: 'proposed-diff', text: 'Proposed diff' },
+                      { value: 'approval-required', text: 'Approval required' },
+                    ]}
+                    aria-label="Watch autonomy tier"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => toggleWatch(selected.value)}>
+                    {selected.value.status === 'active' ? 'Pause Watch' : 'Activate Watch'}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer size="l" />
               <LinkedProposals watchId={selected.value.id} />
             </EuiPanel>

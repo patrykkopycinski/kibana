@@ -10,11 +10,17 @@ import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { daybreakApiPath } from '../../common/http_api';
 import { createProposalClient } from '../client/proposals/client';
 import type { ProposalClient } from '../client/proposals/client';
+import type { ProposalProperties } from '../client/proposals/types';
+import { createWorkerEvalRecordClient } from '../client/worker_eval_records';
+import type { WorkerEvalRecordClient } from '../client/worker_eval_records';
 import { daybreakRouteSecurity, type RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { buildProposalFromWorkerRun } from '../common/schemas/proposal_builder';
 import { enrichAlertSchema } from '../workflow/enrich_alert_schema';
 import { validateReasonOutput } from '../workflow/output_validation_guard';
+import { daybreakGoldenDataset, type ExpectedProposalShape } from '../evals/golden_dataset';
+import { scoreProposalShape } from '../evals/offline_dataset_gate';
+import type { WorkerEvalRecordProvenance } from '../client/worker_eval_records';
 
 const fromWorkerBodySchema = schema.object({
   enrichedJson: schema.string(),
@@ -22,11 +28,26 @@ const fromWorkerBodySchema = schema.object({
   sourceWatchId: schema.maybe(schema.string()),
 });
 
+const DEFAULT_LIVE_PROVENANCE: WorkerEvalRecordProvenance = {
+  modelId: 'eis-anthropic-claude-5-sonnet',
+  connectorId: 'eis-anthropic-claude-5-sonnet',
+  costBasis: 'priced',
+};
+
+const proposalToExpectedShape = (proposal: ProposalProperties): ExpectedProposalShape => ({
+  title: proposal.title,
+  capability: proposal.capability,
+  severity: proposal.severity,
+  confidence: proposal.confidence,
+  recommendation: proposal.recommendation ?? '',
+  status: proposal.status,
+});
+
 export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies) => {
   const { logger, router, getSpaceId } = dependencies;
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getScopedClient = async (
+  const getProposalClient = async (
     ctx: RequestHandlerContext,
     request: KibanaRequest
   ): Promise<ProposalClient> => {
@@ -34,6 +55,20 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
       elasticsearch: { client },
     } = await ctx.core;
     return createProposalClient({
+      space: getSpaceId(request),
+      logger,
+      esClient: client.asInternalUser,
+    });
+  };
+
+  const getWorkerEvalClient = async (
+    ctx: RequestHandlerContext,
+    request: KibanaRequest
+  ): Promise<WorkerEvalRecordClient> => {
+    const {
+      elasticsearch: { client },
+    } = await ctx.core;
+    return createWorkerEvalRecordClient({
       space: getSpaceId(request),
       logger,
       esClient: client.asInternalUser,
@@ -48,7 +83,7 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
       options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
-      const client = await getScopedClient(ctx, request);
+      const proposalClient = await getProposalClient(ctx, request);
 
       let enrichedRaw;
       let reasonRaw;
@@ -56,7 +91,9 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
         enrichedRaw = JSON.parse(request.body.enrichedJson);
         reasonRaw = JSON.parse(request.body.reasonJson);
       } catch (err) {
-        return response.badRequest({ body: { message: `Invalid JSON body: ${(err as Error).message}` } });
+        return response.badRequest({
+          body: { message: `Invalid JSON body: ${(err as Error).message}` },
+        });
       }
 
       const enriched = enrichAlertSchema(enrichedRaw);
@@ -103,7 +140,35 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
         space: getSpaceId(request),
       });
 
-      const created = await client.create(proposal);
+      const created = await proposalClient.create(proposal);
+
+      const rowId = enriched.rowId;
+      if (rowId) {
+        const example = daybreakGoldenDataset.examples.find((e) => e.id === rowId);
+        if (example) {
+          const actual = proposalToExpectedShape(created);
+          const scoreResult = scoreProposalShape(actual, example.output);
+          const workerEvalClient = await getWorkerEvalClient(ctx, request);
+          await workerEvalClient
+            .create({
+              runId: rowId,
+              dataset: daybreakGoldenDataset.name,
+              environment: 'live-workflow',
+              capability: 'alert-analysis',
+              actual: actual as Record<string, unknown>,
+              expected: example.output as Record<string, unknown>,
+              humanDecision: 'pending',
+              score: scoreResult.score,
+              provenance: DEFAULT_LIVE_PROVENANCE,
+            })
+            .catch((error) => {
+              logger.error(
+                `daybreak: failed to create worker eval record for ${rowId}: ${error.message}`
+              );
+            });
+        }
+      }
+
       return response.ok({ body: created });
     })
   );

@@ -39,11 +39,13 @@ export const registerAlertSummaryRoute = ({ logger, router }: RouteDependencies)
       return response.ok({
         body: {
           total: 1,
+          rowId: row.id,
           alerts: [
             {
               _id: evidence.alertId,
               _source: {
                 alertId: evidence.alertId,
+                rowId: row.id,
                 ruleName: evidence.ruleName,
                 ruleDescription: evidence.ruleDescription,
                 severity: evidence.severity,

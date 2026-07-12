@@ -78,12 +78,13 @@ export class DaybreakPlugin
       return {};
     }
 
-    this.routeDependencies.executeAlertAnalysisWorker = (request) =>
+    this.routeDependencies.executeAlertAnalysisWorker = (request, params) =>
       runAlertAnalysisWorker({
         executeWorkflow: engine.executeWorkflow,
         logger: this.logger,
         request,
         enabled: true,
+        rowId: params?.rowId,
       }).then((result) => result.workflowExecutionId);
 
     this.routeDependencies.workflowEventLoggerService = engine.workflowEventLoggerService;

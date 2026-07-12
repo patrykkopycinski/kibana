@@ -20,6 +20,6 @@ export interface RouteDependencies {
   router: IRouter;
   logger: Logger;
   getSpaceId: (request: KibanaRequest) => string;
-  executeAlertAnalysisWorker?: (request: KibanaRequest) => Promise<string>;
+  executeAlertAnalysisWorker?: (request: KibanaRequest, params?: { rowId?: string }) => Promise<string>;
   workflowEventLoggerService?: IWorkflowEventLoggerService;
 }

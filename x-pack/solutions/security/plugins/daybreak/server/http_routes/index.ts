@@ -14,6 +14,7 @@ import { registerSeedDemoDataRoute } from './seed_demo_data';
 import { registerConfigRoute } from './config';
 import { registerAlertSummaryRoute } from './alert_summary';
 import { registerProposalsFromWorkerRoute } from './proposals_from_worker';
+import { registerWorkerEvalRecordRoutes } from './worker_eval_records';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalRoutes(dependencies);
@@ -24,4 +25,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerConfigRoute(dependencies);
   registerAlertSummaryRoute(dependencies);
   registerProposalsFromWorkerRoute(dependencies);
+  registerWorkerEvalRecordRoutes(dependencies);
 };

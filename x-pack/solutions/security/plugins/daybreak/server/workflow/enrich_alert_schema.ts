@@ -61,6 +61,8 @@ export interface StanceSignal {
 export interface EnrichedAlertSchema {
   /** Stable identifier of the alert in the alerts index. */
   alertId: string;
+  /** Optional golden-dataset row id carried through the workflow for eval-record attribution. */
+  rowId?: string;
   /** Detection rule name that produced the alert. */
   ruleName: string;
   /** Human-readable description of the rule's intent. */
@@ -239,6 +241,8 @@ export const enrichAlertSchema = (raw: unknown): EnrichedAlertSchema => {
     );
   }
 
+  const rowId = source.rowId ?? record.rowId;
+
   const ruleName = rule.name ?? source.ruleName;
   if (!isNonEmptyString(ruleName)) {
     throw new EnrichSchemaError(
@@ -305,7 +309,7 @@ export const enrichAlertSchema = (raw: unknown): EnrichedAlertSchema => {
     .filter(isStanceSignal)
     .map((entry) => ({ stance: entry.stance, note: entry.note }));
 
-  return {
+  const result: EnrichedAlertSchema = {
     alertId: String(alertId),
     ruleName: String(ruleName),
     ruleDescription: String(ruleDescription),
@@ -316,4 +320,10 @@ export const enrichAlertSchema = (raw: unknown): EnrichedAlertSchema => {
     tactics: rawTactics,
     stanceSignals,
   };
+
+  if (isNonEmptyString(rowId)) {
+    result.rowId = rowId;
+  }
+
+  return result;
 };

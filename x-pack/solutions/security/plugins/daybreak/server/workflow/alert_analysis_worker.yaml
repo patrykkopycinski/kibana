@@ -22,7 +22,7 @@ steps:
   - name: setup
     type: kibana.request
     with:
-      use_server_info: true
+      debug: true
       method: GET
       path: '/internal/daybreak/config'
       headers:
@@ -34,9 +34,8 @@ steps:
   - name: enrich
     type: kibana.request
     with:
-      use_server_info: true
       method: GET
-      path: '/api/daybreak/alert-summary'
+      path: '/api/daybreak/alert-summary?rowId={{inputs.rowId}}'
       headers:
         x-elastic-internal-origin: 'kibana'
         kbn-xsrf: 'true'
@@ -68,7 +67,6 @@ steps:
   - name: act
     type: kibana.request
     with:
-      use_server_info: true
       method: POST
       path: '/api/daybreak/proposals/from-worker-run'
       headers:

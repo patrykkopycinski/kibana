@@ -12,6 +12,7 @@ import { WorkflowSchema, toWorkflowExecutionEngineModel } from '@kbn/workflows';
 
 import ALERT_ANALYSIS_WORKER_YAML from './alert_analysis_worker.yaml';
 import { collectStepLogs } from './run_spike_workflow';
+import { daybreakGoldenDataset } from '../evals/golden_dataset';
 
 /** Stable ID for the 5-phase alert-analysis worker workflow definition. */
 const ALERT_ANALYSIS_WORKER_ID = 'daybreak-alert-analysis-worker';
@@ -27,6 +28,8 @@ export interface RunAlertAnalysisWorkerParams {
   logger: Logger;
   request: KibanaRequest;
   enabled?: boolean;
+  /** Optional golden-dataset row id; defaults to the first golden example. */
+  rowId?: string;
 }
 
 /**
@@ -58,6 +61,7 @@ export const runAlertAnalysisWorker = async ({
   logger,
   request,
   enabled,
+  rowId,
 }: RunAlertAnalysisWorkerParams): Promise<ExecuteWorkflowResult> => {
   const workflow = getAlertAnalysisWorkerWorkflow();
 
@@ -87,10 +91,11 @@ export const runAlertAnalysisWorker = async ({
     { isEphemeral: true }
   );
 
-  const result = await executeWorkflow(model, {}, request);
+  const resolvedRowId = rowId ?? daybreakGoldenDataset.examples[0].id;
+  const result = await executeWorkflow(model, { inputs: { rowId: resolvedRowId } }, request);
 
   logger.info(
-    `daybreak worker workflow executed — workflowExecutionId=${result.workflowExecutionId}`
+    `daybreak worker workflow executed — workflowExecutionId=${result.workflowExecutionId}, rowId=${resolvedRowId}`
   );
 
   return result;

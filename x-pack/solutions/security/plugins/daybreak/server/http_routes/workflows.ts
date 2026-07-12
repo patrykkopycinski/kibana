@@ -27,6 +27,10 @@ const workflowBodySchema = {
   activeExecutionId: schema.maybe(schema.string()),
 };
 
+const executeWorkflowBodySchema = schema.maybe(
+  schema.object({ rowId: schema.maybe(schema.string()) })
+);
+
 export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
   const { logger, router, getSpaceId } = dependencies;
   const wrapHandler = getHandlerWrapper({ logger });
@@ -81,7 +85,10 @@ export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
     {
       path: `${daybreakApiPath}/workflows/{id}/execute`,
       security: daybreakRouteSecurity,
-      validate: { params: schema.object({ id: schema.string() }) },
+      validate: {
+        params: schema.object({ id: schema.string() }),
+        body: executeWorkflowBodySchema,
+      },
       options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
@@ -95,7 +102,9 @@ export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
           body: { message: 'Daybreak workflow execution engine is unavailable.' },
         });
       }
-      const workflowExecutionId = await dependencies.executeAlertAnalysisWorker(request);
+      const workflowExecutionId = await dependencies.executeAlertAnalysisWorker(request, {
+        rowId: request.body?.rowId,
+      });
       const updated = await (
         await getClient(ctx, request)
       ).recordExecution(workflow.id, new Date().toISOString(), workflowExecutionId);
@@ -118,6 +127,32 @@ export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
         workflowEventLoggerService: dependencies.workflowEventLoggerService,
       });
       return response.ok({ body: status });
+    })
+  );
+
+  router.get(
+    {
+      path: `${daybreakApiPath}/workflows/{id}/execution/{executionId}/logs`,
+      security: daybreakRouteSecurity,
+      validate: {
+        params: schema.object({ id: schema.string(), executionId: schema.string() }),
+      },
+      options: { access: 'public' },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      if (!dependencies.workflowEventLoggerService) {
+        return response.customError({
+          statusCode: 503,
+          body: { message: 'Workflow event logger service is unavailable.' },
+        });
+      }
+      const { logs } = await dependencies.workflowEventLoggerService.searchLogs({
+        executionId: request.params.executionId,
+        size: 200,
+        sortField: '@timestamp',
+        sortOrder: 'asc',
+      });
+      return response.ok({ body: { executionId: request.params.executionId, logs } });
     })
   );
 

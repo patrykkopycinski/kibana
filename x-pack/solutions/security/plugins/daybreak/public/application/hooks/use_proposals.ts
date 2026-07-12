@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import React from 'react';
 import { useKibana } from './use_kibana';
 
 /**
@@ -26,8 +27,9 @@ export const useProposals = () => {
     refetchInterval: 5000,
   });
 
+  const uniqueProposals = React.useMemo(() => [...new Map((proposals ?? []).map((p) => [p.id, p])).values()], [proposals]);
   return {
-    proposals: proposals ?? [],
+    proposals: uniqueProposals,
     isLoading,
     refresh: refetch,
   };

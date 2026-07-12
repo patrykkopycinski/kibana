@@ -27,13 +27,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../hooks/use_proposals';
 import { useEvidence } from '../hooks/use_evidence';
-import type { DaybreakEvidence } from '../../services/evidence_service';
 import type { DaybreakProposal } from '../../services/proposals_service';
 import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
 import { OperationsConsole } from './operations_console';
 import { ApprovalGate } from './gate/approval_gate';
 import { ProposalInspector } from './proposal/proposal_inspector';
+import { ThreadView } from './thread/thread_view';
 import { deriveGateTier } from './gate/gate_tier';
 import { PROPOSAL_STATUS_META } from './proposal/proposal_status';
 
@@ -139,48 +139,11 @@ const ChatThreadList: React.FC<{ onSelect: (id: string) => void; selectedId?: st
   );
 };
 
-const ChatThreadView: React.FC<{ threadId: string; onBack: () => void }> = ({
-  threadId,
-  onBack,
-}) => {
+const ChatThreadView: React.FC<{ threadId: string; onBack: () => void }> = ({ threadId }) => {
   const { proposals } = useProposals();
   const thread = proposals.find((p) => p.id === threadId);
   if (!thread) return null;
-
-  return (
-    <div className="daybreakThreadView" data-test-subj="daybreakThreadView">
-      <EuiPanel className="daybreakSpineHeader" paddingSize="m" hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" size="s" onClick={onBack}>
-              Back to chats
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem className="daybreakSpineHeaderTop">
-            <EuiTitle size="s" className="daybreakSpineTitle">
-              <h2>{thread.title}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-      <div className="daybreakStream">
-        <EuiPanel className="daybreakMessage daybreakMessage--agent" paddingSize="m">
-          <EuiText size="s">
-            I’m looking at this thread. Ask me to investigate, summarize evidence, or propose a
-            decision.
-          </EuiText>
-        </EuiPanel>
-      </div>
-      <div className="daybreakThreadComposer">
-        <EuiFieldText
-          className="daybreakThreadComposerInput"
-          placeholder="Message NotDaybreak..."
-          fullWidth
-          disabled
-        />
-      </div>
-    </div>
-  );
+  return <ThreadView proposal={thread} type="chat" />;
 };
 
 export const DaybreakApp: React.FC = () => {
@@ -287,13 +250,7 @@ export const DaybreakApp: React.FC = () => {
   const renderMainStage = () => {
     if (destination === 'brief') {
       if (selected) {
-        return (
-          <DaybreakProposalDetail
-            proposal={selected}
-            evidence={evidence.filter((item) => selected.evidenceRefs.includes(item.id))}
-            onBack={() => setSelectedId(undefined)}
-          />
-        );
+        return <ProposalThread proposal={selected} />;
       }
       return <BriefDashboard onSelectProposal={setSelectedId} />;
     }
@@ -312,6 +269,46 @@ export const DaybreakApp: React.FC = () => {
     const dest = RAIL_DESTINATIONS.find((d) => d.key === destination);
     return (
       <AppPlaceholder title={dest?.label ?? destination} subtitle="App integration coming soon." />
+    );
+  };
+
+  const renderInspector = () => {
+    if (destination !== 'brief' || !selected) {
+      return null;
+    }
+    const selectedEvidence = evidence.filter((item) => selected.evidenceRefs.includes(item.id));
+    return (
+      <EuiFlexItem
+        grow={false}
+        className="daybreakInspectorWrapper"
+        data-test-subj="daybreakInspectorPanel"
+      >
+        <EuiPanel
+          className="daybreakInspectorPanel"
+          borderRadius="none"
+          hasShadow={false}
+          paddingSize="none"
+        >
+          <div className="daybreakInspectorAppBar">
+            <EuiText size="xs" className="daybreakEyebrow">
+              INSPECTOR
+            </EuiText>
+            <EuiButtonEmpty
+              iconType="cross"
+              size="xs"
+              onClick={() => setSelectedId(undefined)}
+              aria-label="Close inspector"
+            >
+              Close
+            </EuiButtonEmpty>
+          </div>
+          <div className="daybreakInspectorBody">
+            <ProposalInspector proposal={selected} evidence={selectedEvidence} />
+            <EuiSpacer size="l" />
+            <ApprovalGate proposal={selected} />
+          </div>
+        </EuiPanel>
+      </EuiFlexItem>
     );
   };
 
@@ -384,6 +381,16 @@ export const DaybreakApp: React.FC = () => {
         >
           <div className="daybreakStageToolbar">
             <span>{RAIL_DESTINATIONS.find((d) => d.key === destination)?.label}</span>
+            {selected && destination === 'brief' && (
+              <EuiButtonEmpty
+                iconType="panel"
+                size="xs"
+                onClick={() => setSelectedId(undefined)}
+                data-test-subj="daybreakInspectorToggle"
+              >
+                Inspector
+              </EuiButtonEmpty>
+            )}
           </div>
           <div style={{ flexGrow: 1, overflow: 'auto' }}>
             <main className="daybreakStageScroll">{renderMainStage()}</main>
@@ -413,66 +420,14 @@ export const DaybreakApp: React.FC = () => {
           )}
         </EuiPanel>
       </EuiFlexItem>
+
+      {renderInspector()}
     </EuiFlexGroup>
   );
 };
 
-const DaybreakProposalDetail: React.FC<{
-  proposal: DaybreakProposal;
-  evidence: DaybreakEvidence[];
-  onBack: () => void;
-}> = ({ proposal, evidence, onBack }) => {
-  const status = PROPOSAL_STATUS_META[proposal.status];
-
-  return (
-    <div data-test-subj="daybreakProposalDetail">
-      <EuiButtonEmpty className="daybreakDetailBack" iconType="arrowLeft" size="s" onClick={onBack}>
-        Back to operational brief
-      </EuiButtonEmpty>
-      <EuiSpacer size="m" />
-      <section className="daybreakDecisionHero">
-        <EuiText className="daybreakEyebrow" size="xs">
-          PROPOSAL / DECISION CONTEXT
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiTitle className="daybreakDetailTitle" size="m">
-          <h3>{proposal.title}</h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup
-          className="daybreakDecisionMeta"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={severityColor[proposal.severity]}>{proposal.severity}</EuiHealth>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={status.color}>{status.label()}</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              Confidence {Math.round(proposal.confidence * 100)}%
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-      <EuiSpacer size="l" />
-      <EuiPanel className="daybreakRecommendation" hasBorder paddingSize="l" color="subdued">
-        <div className="daybreakRecommendationHeader">
-          <span>Recommended action</span>
-          <span>Decision ready</span>
-        </div>
-        <EuiSpacer size="s" />
-        <EuiText className="daybreakRecommendationCopy" size="m">
-          {proposal.recommendation ?? 'Continue gathering evidence before recommending an action.'}
-        </EuiText>
-      </EuiPanel>
-      <EuiSpacer size="l" />
-      <ProposalInspector proposal={proposal} evidence={evidence} />
-      <EuiSpacer size="l" />
-      <ApprovalGate proposal={proposal} />
-    </div>
-  );
-};
+const ProposalThread: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => (
+  <div data-test-subj="daybreakProposalDetail">
+    <ThreadView proposal={proposal} />
+  </div>
+);

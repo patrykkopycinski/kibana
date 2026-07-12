@@ -8,9 +8,12 @@
 import React from 'react';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
+  EuiHealth,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -20,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposals } from '../../hooks/use_proposals';
 import type { DaybreakProposal } from '../../../services/proposals_service';
+import { ActionFlyout, type GatedAction } from '../action/action_flyout';
 
 const severityRank: Record<DaybreakProposal['severity'], number> = {
   critical: 4,
@@ -65,51 +69,552 @@ export const computeBriefSections = (proposals: DaybreakProposal[]): BriefDashbo
   };
 };
 
-const QueuePanel: React.FC<{
-  dataTestSubj: string;
-  eyebrow: React.ReactNode;
-  title: React.ReactNode;
-  count: number;
-  emptyMessage: React.ReactNode;
-  isLoading: boolean;
-  children: React.ReactNode;
-}> = ({ dataTestSubj, eyebrow, title, count, emptyMessage, isLoading, children }) => (
-  <EuiPanel className="daybreakBriefCard" data-test-subj={dataTestSubj} paddingSize="m" hasBorder>
-    <EuiText className="daybreakEyebrow" size="xs">
-      {eyebrow}
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceBetween"
-      responsive={false}
-      gutterSize="s"
-    >
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge data-test-subj={`${dataTestSubj}Count`} color={count > 0 ? 'accent' : 'hollow'}>
-          {count}
-        </EuiBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    {isLoading ? (
-      <div data-test-subj={`${dataTestSubj}Loading`}>
-        <EuiLoadingSpinner size="m" />
-      </div>
-    ) : count === 0 ? (
-      <EuiText size="s" color="subdued" data-test-subj={`${dataTestSubj}Empty`}>
-        {emptyMessage}
-      </EuiText>
-    ) : (
-      children
-    )}
-  </EuiPanel>
+type DecisionKey =
+  | 'contain'
+  | 'escalate'
+  | 'investigate'
+  | 'tune'
+  | 'suppress'
+  | 'monitor'
+  | 'dismiss';
+
+interface DecisionMeta {
+  key: DecisionKey;
+  label: string;
+  color: string;
+  icon: string;
+  blurb: string;
+}
+
+const DECISION_META: Record<DecisionKey, DecisionMeta> = {
+  contain: {
+    key: 'contain',
+    label: 'Contain',
+    color: '#bd271e',
+    icon: 'lock',
+    blurb: 'Stop the spread now',
+  },
+  escalate: {
+    key: 'escalate',
+    label: 'Escalate',
+    color: '#d4791a',
+    icon: 'arrowRight',
+    blurb: 'Raise for incident response',
+  },
+  investigate: {
+    key: 'investigate',
+    label: 'Investigate',
+    color: '#1769d3',
+    icon: 'search',
+    blurb: 'Confirm scope before acting',
+  },
+  tune: {
+    key: 'tune',
+    label: 'Tune',
+    color: '#7c4dff',
+    icon: 'controls',
+    blurb: 'Adjust a rule or limit',
+  },
+  suppress: {
+    key: 'suppress',
+    label: 'Suppress',
+    color: '#7e8796',
+    icon: 'eyeClosed',
+    blurb: 'Known-good — quiet the alert',
+  },
+  monitor: {
+    key: 'monitor',
+    label: 'Monitor',
+    color: '#7e8796',
+    icon: 'eye',
+    blurb: 'Watching — no action yet',
+  },
+  dismiss: {
+    key: 'dismiss',
+    label: 'Dismiss',
+    color: '#5c6574',
+    icon: 'check',
+    blurb: 'Closed — no action needed',
+  },
+};
+
+const DECISION_ORDER: DecisionKey[] = [
+  'contain',
+  'escalate',
+  'investigate',
+  'tune',
+  'suppress',
+  'monitor',
+  'dismiss',
+];
+
+const ACTIVE_DECISIONS: DecisionKey[] = ['contain', 'escalate', 'investigate', 'tune'];
+
+const severityToScore: Record<DaybreakProposal['severity'], number> = {
+  critical: 90,
+  high: 70,
+  medium: 50,
+  low: 30,
+};
+
+const severityColor: Record<DaybreakProposal['severity'], string> = {
+  critical: '#bd271e',
+  high: '#d4791a',
+  medium: '#1769d3',
+  low: '#00bfb3',
+};
+
+const deriveDecision = (proposal: DaybreakProposal): DecisionKey => {
+  if (TERMINAL_STATUSES.has(proposal.status)) return 'dismiss';
+  if (!isGateReady(proposal)) return 'monitor';
+  switch (proposal.severity) {
+    case 'critical':
+      return 'contain';
+    case 'high':
+      return 'escalate';
+    case 'medium':
+      return 'investigate';
+    case 'low':
+    default:
+      return 'tune';
+  }
+};
+
+const radarScore = (proposal: DaybreakProposal): number =>
+  Math.round(severityToScore[proposal.severity] * (0.6 + proposal.confidence * 0.4));
+
+const ScoreGauge: React.FC<{ score: number; color: string; featured?: boolean }> = ({
+  score,
+  color,
+  featured,
+}) => {
+  const size = featured ? 42 : 38;
+  const strokeWidth = featured ? 4 : 3.5;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - score / 100);
+  return (
+    <span className={`daybreakGauge ${featured ? 'daybreakGauge--featured' : ''}`}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#e4e7ee"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          strokeLinecap="round"
+        />
+      </svg>
+      <b>{score}</b>
+    </span>
+  );
+};
+
+const DecisionPill: React.FC<{ meta: DecisionMeta }> = ({ meta }) => (
+  <span className="daybreakDecisionPill" style={{ color: meta.color }}>
+    <span className="daybreakDecisionPillDot" style={{ background: meta.color }} />
+    {meta.label}
+  </span>
 );
+
+const RadarCard: React.FC<{
+  proposal: DaybreakProposal;
+  featured?: boolean;
+  onOpenThread?: () => void;
+  onRunGatedAction?: () => void;
+}> = ({ proposal, featured, onOpenThread, onRunGatedAction }) => {
+  const decision = deriveDecision(proposal);
+  const meta = DECISION_META[decision];
+  const score = radarScore(proposal);
+  const isReady = isGateReady(proposal);
+  return (
+    <div
+      className={`daybreakRadarCard ${featured ? 'daybreakRadarCard--featured' : ''}`}
+      style={{ borderLeftColor: meta.color }}
+      data-test-subj={`daybreakRadarCard-${proposal.id}`}
+    >
+      <div className="daybreakRadarCardHeader">
+        <DecisionPill meta={meta} />
+        {isReady && (
+          <EuiBadge color="warning" className="daybreakRadarCardReady">
+            Review ready
+          </EuiBadge>
+        )}
+        <EuiFlexItem grow />
+        <ScoreGauge score={score} color={meta.color} featured={featured} />
+      </div>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={meta.icon} size="l" color={meta.color} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xxs">
+            <h4 data-test-subj={`daybreakBriefOpenThreadsItem-${proposal.id}`}>{proposal.title}</h4>
+          </EuiTitle>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="s"
+            color="subdued"
+            data-test-subj={
+              proposal.recommendation ? `daybreakBriefNextActionsItem-${proposal.id}` : undefined
+            }
+          >
+            {proposal.recommendation ?? 'Gathering decision context…'}
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiHealth color={severityColor[proposal.severity]}>{proposal.severity}</EuiHealth>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {Math.round(proposal.confidence * 100)}% confidence
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {proposal.evidenceRefs.length} evidence
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {isReady ? (
+          <EuiButton
+            size="s"
+            fill
+            color="warning"
+            data-test-subj={`daybreakBriefAwaitingReviewItem-${proposal.id}`}
+            onClick={onOpenThread}
+          >
+            Decide
+          </EuiButton>
+        ) : (
+          <EuiButtonEmpty size="s" onClick={onOpenThread}>
+            Open thread
+          </EuiButtonEmpty>
+        )}
+        {proposal.recommendation && onRunGatedAction && (
+          <EuiButtonEmpty
+            size="s"
+            iconType="lock"
+            color="danger"
+            onClick={onRunGatedAction}
+            data-test-subj={`daybreakRadarAction-${proposal.id}`}
+          >
+            Run action
+          </EuiButtonEmpty>
+        )}
+        <EuiFlexItem grow />
+        <EuiButtonEmpty iconType="arrowRight" size="xs" onClick={onOpenThread}>
+          View
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
+const DecisionSection: React.FC<{
+  meta: DecisionMeta;
+  proposals: DaybreakProposal[];
+  onOpenThread: (proposal: DaybreakProposal) => void;
+  onRunGatedAction: (proposal: DaybreakProposal) => void;
+}> = ({ meta, proposals, onOpenThread, onRunGatedAction }) => {
+  if (proposals.length === 0) return null;
+  const waiting = proposals.filter((p) => !TERMINAL_STATUSES.has(p.status)).length;
+  return (
+    <section
+      className="daybreakDecisionSection"
+      style={{ '--decision-color': meta.color } as React.CSSProperties}
+    >
+      <div className="daybreakDecisionSectionHeader">
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <span className="daybreakDecisionSectionDot" style={{ background: meta.color }} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h3 style={{ color: meta.color }}>{meta.label}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{waiting}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {meta.blurb}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {proposals.map((proposal, index) => (
+          <EuiFlexItem key={proposal.id} grow={false}>
+            <RadarCard
+              proposal={proposal}
+              featured={index === 0 && ACTIVE_DECISIONS.includes(meta.key)}
+              onOpenThread={() => onOpenThread(proposal)}
+              onRunGatedAction={() => onRunGatedAction(proposal)}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </section>
+  );
+};
+
+const BriefOverview: React.FC<{
+  openThreads: DaybreakProposal[];
+  awaitingReview: DaybreakProposal[];
+  isLoading: boolean;
+}> = ({ openThreads, awaitingReview, isLoading }) => {
+  if (isLoading) {
+    return (
+      <EuiPanel
+        className="daybreakBriefOverview"
+        data-test-subj="daybreakBriefOverview"
+        paddingSize="m"
+      >
+        <EuiLoadingSpinner data-test-subj="daybreakBriefOverviewLoading" />
+      </EuiPanel>
+    );
+  }
+  const grouped: Record<DecisionKey, DaybreakProposal[]> = DECISION_ORDER.reduce((acc, key) => {
+    acc[key] = [];
+    return acc;
+  }, {} as Record<DecisionKey, DaybreakProposal[]>);
+  openThreads.forEach((proposal) => {
+    grouped[deriveDecision(proposal)].push(proposal);
+  });
+  const visible = ACTIVE_DECISIONS.filter((key) => grouped[key].length > 0).slice(0, 4);
+  return (
+    <EuiPanel
+      className="daybreakBriefOverview"
+      data-test-subj="daybreakBriefOverview"
+      paddingSize="m"
+      hasBorder
+    >
+      <EuiText className="daybreakEyebrow" size="xs">
+        OVERVIEW
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup alignItems="stretch" gutterSize="m" responsive={false}>
+        {visible.map((key) => {
+          const items = grouped[key];
+          const waiting = items.filter((p) => !TERMINAL_STATUSES.has(p.status)).length;
+          return (
+            <EuiFlexItem key={key} className="daybreakOverviewMetric">
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="xs"
+                justifyContent="spaceBetween"
+                style={{ height: '100%' }}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" style={{ color: DECISION_META[key].color }}>
+                    <strong>{DECISION_META[key].label}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2>{waiting}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {DECISION_META[key].blurb}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        className="daybreakBriefSignals"
+      >
+        <EuiFlexItem grow={false}>
+          <span>
+            <strong data-test-subj="daybreakBriefOpenThreadsCount">{openThreads.length}</strong>{' '}
+            active threads
+          </span>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <span>
+            <strong data-test-subj="daybreakBriefAwaitingReviewCount">
+              {awaitingReview.length}
+            </strong>{' '}
+            waiting for review
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+export const BriefDashboard: React.FC = () => {
+  const { proposals, isLoading } = useProposals();
+  const { openThreads, awaitingReview, nextActions, priorityProposal } =
+    computeBriefSections(proposals);
+  const grouped = React.useMemo(() => {
+    const acc: Record<DecisionKey, DaybreakProposal[]> = DECISION_ORDER.reduce((map, key) => {
+      map[key] = [];
+      return map;
+    }, {} as Record<DecisionKey, DaybreakProposal[]>);
+    sortByPriority(openThreads).forEach((proposal) => {
+      acc[deriveDecision(proposal)].push(proposal);
+    });
+    return acc;
+  }, [openThreads]);
+
+  const onOpenThread = (proposal: DaybreakProposal) => {
+    // TODO: wire to thread selection once home-thread integration lands
+    // eslint-disable-next-line no-console
+    console.log('Open thread', proposal.id);
+  };
+
+  const [flyout, setFlyout] = React.useState<{
+    proposal: DaybreakProposal;
+    action: GatedAction;
+  } | null>(null);
+  const defaultGatedAction: GatedAction = {
+    label: 'Block source and isolate host',
+    cta: 'Approve action',
+    tone: 'danger',
+    permNote: 'requires containment privileges',
+    blast: [
+      { icon: 'desktop', text: '1 host will be isolated from the network' },
+      { icon: 'globe', text: 'Source IP will be blocked at the perimeter' },
+      { icon: 'user', text: '2 user sessions will be revoked' },
+    ],
+  };
+  const onRunGatedAction = (proposal: DaybreakProposal) => {
+    setFlyout({ proposal, action: defaultGatedAction });
+  };
+  const onConfirmAction = () => {
+    // eslint-disable-next-line no-console
+    console.log('Confirmed action on', flyout?.proposal.id);
+    setFlyout(null);
+  };
+
+  if (isLoading && proposals.length === 0) {
+    return (
+      <div data-test-subj="daybreakBriefDashboard">
+        <EuiLoadingSpinner data-test-subj="daybreakBriefPriorityLoading" />
+        <EuiLoadingSpinner data-test-subj="daybreakBriefOpenThreadsLoading" />
+        <EuiLoadingSpinner data-test-subj="daybreakBriefAwaitingReviewLoading" />
+        <EuiLoadingSpinner data-test-subj="daybreakBriefNextActionsLoading" />
+      </div>
+    );
+  }
+
+  const emptyOpenThreads = openThreads.length === 0 && !isLoading;
+  const emptyAwaitingReview = awaitingReview.length === 0 && !isLoading;
+
+  return (
+    <div className="daybreakBriefRadar" data-test-subj="daybreakBriefDashboard">
+      <div className="daybreakBriefIntro">
+        <EuiText className="daybreakEyebrow" size="xs">
+          DAYBREAK / SHIFT BRIEF
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiTitle className="daybreakBriefTitle" size="m">
+          <h1>
+            {openThreads.length > 0 ? (
+              <FormattedMessage
+                id="xpack.daybreak.brief.headline.needYou"
+                defaultMessage="{count} {count, plural, one {thread} other {threads}} need you"
+                values={{ count: awaitingReview.length || openThreads.length }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.daybreak.brief.headline.clear"
+                defaultMessage="Operational brief"
+              />
+            )}
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText className="daybreakBriefLead">
+          Start with the highest-priority decision, then scan the remaining operational queue.
+        </EuiText>
+      </div>
+
+      <PriorityBrief proposal={priorityProposal} isLoading={isLoading} />
+      <EuiSpacer size="m" />
+      <BriefOverview
+        openThreads={openThreads}
+        awaitingReview={awaitingReview}
+        isLoading={isLoading}
+      />
+      <EuiSpacer size="l" />
+
+      {emptyOpenThreads && (
+        <EuiText size="s" color="subdued" data-test-subj="daybreakBriefOpenThreadsEmpty">
+          No open threads.
+        </EuiText>
+      )}
+      {emptyAwaitingReview && (
+        <EuiText size="s" color="subdued" data-test-subj="daybreakBriefAwaitingReviewEmpty">
+          Nothing is awaiting review.
+        </EuiText>
+      )}
+
+      {DECISION_ORDER.map((key) => (
+        <DecisionSection
+          key={key}
+          meta={DECISION_META[key]}
+          proposals={grouped[key]}
+          onOpenThread={onOpenThread}
+          onRunGatedAction={onRunGatedAction}
+        />
+      ))}
+
+      {flyout && (
+        <ActionFlyout
+          proposal={flyout.proposal}
+          action={flyout.action}
+          onClose={() => setFlyout(null)}
+          onConfirm={onConfirmAction}
+        />
+      )}
+
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiText size="s" color="subdued">
+          <strong data-test-subj="daybreakBriefNextActionsCount">{nextActions.length}</strong>{' '}
+          recommended actions
+        </EuiText>
+      </EuiFlexGroup>
+      {nextActions.length === 0 && !isLoading && (
+        <EuiText size="s" color="subdued" data-test-subj="daybreakBriefNextActionsEmpty">
+          No recommended actions yet.
+        </EuiText>
+      )}
+      {isLoading && <EuiLoadingSpinner data-test-subj="daybreakBriefNextActionsLoading" />}
+    </div>
+  );
+};
 
 const PriorityBrief: React.FC<{ proposal?: DaybreakProposal; isLoading: boolean }> = ({
   proposal,
@@ -134,12 +639,18 @@ const PriorityBrief: React.FC<{ proposal?: DaybreakProposal; isLoading: boolean 
     );
   }
 
+  const decision = deriveDecision(proposal);
+  const meta = DECISION_META[decision];
+  const score = radarScore(proposal);
+  const isReady = isGateReady(proposal);
+
   return (
     <EuiPanel
       className="daybreakBriefPriority"
       data-test-subj="daybreakBriefPriority"
       paddingSize="l"
       hasBorder
+      style={{ borderLeftColor: meta.color }}
     >
       <EuiText className="daybreakEyebrow" size="xs">
         PRIORITY DECISION
@@ -161,9 +672,16 @@ const PriorityBrief: React.FC<{ proposal?: DaybreakProposal; isLoading: boolean 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color={isGateReady(proposal) ? 'warning' : 'hollow'}>
-            {isGateReady(proposal) ? 'Review ready' : 'Evidence in progress'}
-          </EuiBadge>
+          <EuiFlexGroup alignItems="center" gutterSize="s" direction="column">
+            <EuiFlexItem grow={false}>
+              <ScoreGauge score={score} color={meta.color} featured />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={isReady ? 'warning' : 'hollow'}>
+                {isReady ? 'Review ready' : 'Evidence in progress'}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -176,128 +694,5 @@ const PriorityBrief: React.FC<{ proposal?: DaybreakProposal; isLoading: boolean 
         </span>
       </div>
     </EuiPanel>
-  );
-};
-
-export const BriefDashboard: React.FC = () => {
-  const { proposals, isLoading } = useProposals();
-  const { openThreads, awaitingReview, nextActions, priorityProposal } =
-    computeBriefSections(proposals);
-
-  return (
-    <div data-test-subj="daybreakBriefDashboard">
-      <div className="daybreakBriefIntro">
-        <EuiText className="daybreakEyebrow" size="xs">
-          DAYBREAK / SHIFT BRIEF
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiTitle className="daybreakBriefTitle" size="m">
-          <h1>Operational brief</h1>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText className="daybreakBriefLead">
-          Start with the highest-priority decision, then scan the remaining operational queue.
-        </EuiText>
-      </div>
-      <PriorityBrief proposal={priorityProposal} isLoading={isLoading} />
-      <EuiSpacer size="m" />
-      <EuiFlexGroup className="daybreakBriefSignals" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <span>
-            <strong>{openThreads.length}</strong> active threads
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <span>
-            <strong>{awaitingReview.length}</strong> waiting for review
-          </span>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <span>
-            <strong>{nextActions.length}</strong> recommendations
-          </span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup className="daybreakBriefCards" gutterSize="m" wrap>
-        <EuiFlexItem grow={false} style={{ minWidth: 280, flexBasis: '48%' }}>
-          <QueuePanel
-            dataTestSubj="daybreakBriefAwaitingReview"
-            eyebrow="HUMAN DECISION"
-            title={
-              <FormattedMessage
-                id="xpack.daybreak.brief.awaitingReview.title"
-                defaultMessage="Ready to review"
-              />
-            }
-            count={awaitingReview.length}
-            isLoading={isLoading}
-            emptyMessage="Nothing is awaiting review."
-          >
-            <EuiListGroup
-              data-test-subj="daybreakBriefAwaitingReviewList"
-              bordered={false}
-              listItems={awaitingReview.map((proposal) => ({
-                id: proposal.id,
-                label: proposal.title,
-                'data-test-subj': `daybreakBriefAwaitingReviewItem-${proposal.id}`,
-              }))}
-            />
-          </QueuePanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ minWidth: 280, flexBasis: '48%' }}>
-          <QueuePanel
-            dataTestSubj="daybreakBriefOpenThreads"
-            eyebrow="LIVE QUEUE"
-            title={
-              <FormattedMessage
-                id="xpack.daybreak.brief.openThreads.title"
-                defaultMessage="Active threads"
-              />
-            }
-            count={openThreads.length}
-            isLoading={isLoading}
-            emptyMessage="No open threads."
-          >
-            <EuiListGroup
-              data-test-subj="daybreakBriefOpenThreadsList"
-              bordered={false}
-              listItems={sortByPriority(openThreads).map((proposal) => ({
-                id: proposal.id,
-                label: proposal.title,
-                'data-test-subj': `daybreakBriefOpenThreadsItem-${proposal.id}`,
-              }))}
-            />
-          </QueuePanel>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ minWidth: 280, flexBasis: '100%' }}>
-          <QueuePanel
-            dataTestSubj="daybreakBriefNextActions"
-            eyebrow="RECOMMENDED"
-            title={
-              <FormattedMessage
-                id="xpack.daybreak.brief.nextActions.title"
-                defaultMessage="Recommended actions"
-              />
-            }
-            count={nextActions.length}
-            isLoading={isLoading}
-            emptyMessage="No recommended actions yet."
-          >
-            <EuiFlexGroup direction="column" gutterSize="s">
-              {sortByPriority(nextActions).map((proposal) => (
-                <EuiFlexItem key={proposal.id}>
-                  <EuiText size="s" data-test-subj={`daybreakBriefNextActionsItem-${proposal.id}`}>
-                    <strong>{proposal.title}</strong>
-                    <br />
-                    {proposal.recommendation}
-                  </EuiText>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </QueuePanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
   );
 };

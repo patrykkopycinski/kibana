@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
@@ -300,6 +301,41 @@ export const OperationsConsole: React.FC = () => {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiSpacer size="l" />
+              <EuiText size="s">
+                <strong>Execution history</strong>
+              </EuiText>
+              <EuiSpacer size="s" />
+              {(selected.value.auditTrail?.length ?? 0) === 0 ? (
+                <EuiText size="xs" color="subdued">
+                  No recorded executions yet.
+                </EuiText>
+              ) : (
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  {selected.value.auditTrail?.map((event, index) => (
+                    <EuiFlexItem key={index} grow={false}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon
+                            type={event.action === 'executed' ? 'play' : 'pencil'}
+                            size="s"
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s" style={{ textTransform: 'capitalize' }}>
+                            {event.action}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {new Date(event.timestamp).toLocaleString()}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              )}
             </EuiPanel>
           )}
         </EuiFlexItem>

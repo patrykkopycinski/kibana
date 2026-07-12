@@ -8,6 +8,11 @@
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { daybreakApiPath } from '../../common/http_api';
 
+export interface WorkflowAuditEvent {
+  action: 'created' | 'updated' | 'executed' | 'deleted';
+  timestamp: string;
+}
+
 export interface DaybreakWorkflow {
   id: string;
   name: string;
@@ -18,6 +23,7 @@ export interface DaybreakWorkflow {
   enabled: boolean;
   priority: number;
   lastRunAt?: string;
+  auditTrail?: WorkflowAuditEvent[];
   createdAt: string;
   updatedAt: string;
 }
@@ -39,7 +45,7 @@ export class WorkflowsService {
   }
 
   async create(
-    workflow: Omit<DaybreakWorkflow, 'createdAt' | 'updatedAt' | 'lastRunAt'>
+    workflow: Omit<DaybreakWorkflow, 'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail'>
   ): Promise<DaybreakWorkflow> {
     return this.http.post<DaybreakWorkflow>(`${daybreakApiPath}/workflows`, {
       body: JSON.stringify(workflow),
@@ -48,7 +54,9 @@ export class WorkflowsService {
 
   async update(
     id: string,
-    updates: Partial<Omit<DaybreakWorkflow, 'id' | 'createdAt' | 'updatedAt' | 'lastRunAt'>>
+    updates: Partial<
+      Omit<DaybreakWorkflow, 'id' | 'createdAt' | 'updatedAt' | 'lastRunAt' | 'auditTrail'>
+    >
   ): Promise<DaybreakWorkflow> {
     return this.http.put<DaybreakWorkflow>(`${daybreakApiPath}/workflows/${id}`, {
       body: JSON.stringify(updates),

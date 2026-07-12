@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DaybreakApp } from './shell';
 import { useEvidence } from '../hooks/use_evidence';
@@ -20,12 +20,6 @@ jest.mock('../hooks/use_proposals');
 const mockUseEvidence = useEvidence as jest.Mock;
 const mockUseProposals = useProposals as jest.Mock;
 
-/**
- * Hook fixture standing in for real Proposal HTTP API output (FR-020) — the
- * shape mirrors `DaybreakProposal`, not any prototype demo-seed shape, so the
- * test proves the shell renders `useProposals()` data rather than any
- * hardcoded/seeded state.
- */
 const proposalsFixture: DaybreakProposal[] = [
   {
     id: 'proposal-1',
@@ -52,7 +46,7 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
     mockUseEvidence.mockReturnValue({ evidence: [], isLoading: false, refresh: jest.fn() });
   });
 
-  it('renders the rail (nav), stage, and composer once the hook fixture resolves data-populated (FR-010, FR-011, FR-020)', () => {
+  it('renders the icon rail, stage, and composer once the hook fixture resolves data-populated (FR-010, FR-011, FR-020)', () => {
     mockUseProposals.mockReturnValue({
       proposals: proposalsFixture,
       isLoading: false,
@@ -61,33 +55,26 @@ describe('DaybreakApp (FR-010, FR-011, FR-020)', () => {
 
     renderShell();
 
-    // Application shell top-level regions (FR-010).
     expect(screen.getByTestId('daybreakAppShell')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakRail')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakStage')).toBeInTheDocument();
     expect(screen.getByTestId('daybreakComposer')).toBeInTheDocument();
 
-    // The rail's proposal list is the shell's thread/nav surface (FR-010) —
-    // it must render an item per fixture proposal once data-populated
-    // (FR-011), not the loading placeholder.
-    expect(screen.getByTestId('daybreakRailList')).toBeInTheDocument();
-    const railItem = screen.getByTestId('daybreakRailItem-proposal-1');
-    expect(railItem).toBeInTheDocument();
-    expect(within(railItem).getByText('Suspicious login from new device')).toBeInTheDocument();
-    expect(screen.queryByTestId('daybreakRailLoading')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('daybreakRailEmpty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('daybreakRailItem-brief')).toBeInTheDocument();
+    expect(screen.getByTestId('daybreakRailItem-chats')).toBeInTheDocument();
+    expect(screen.getByTestId('daybreakRailItem-agents')).toBeInTheDocument();
   });
 
-  it('renders an explicit, assertable loading state before the fixture resolves (FR-011)', () => {
+  it('switches to the Chats nav panel when the Chats rail item is selected (FR-010)', () => {
     mockUseProposals.mockReturnValue({
-      proposals: [],
-      isLoading: true,
+      proposals: proposalsFixture,
+      isLoading: false,
       refresh: jest.fn(),
     });
 
     renderShell();
 
-    expect(screen.getByTestId('daybreakRailLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('daybreakRailList')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('daybreakRailItem-chats'));
+    expect(screen.getByTestId('daybreakNavItem-proposal-1')).toBeInTheDocument();
   });
 });

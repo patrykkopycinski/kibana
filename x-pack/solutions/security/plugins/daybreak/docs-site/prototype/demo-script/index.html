@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NotDaybreak Business Demo — Run-of-Show v2</title>
+<style>
+  :root {
+    --ink-0: #0e1218; --ink-1: #1a1f29; --ink-2: #4a505d; --ink-3: #646a77; --ink-4: #8a93a6;
+    --line: #e3e8f2; --line-2: #d6dbe6;
+    --bg: #f7f9fc; --panel: #ffffff;
+    --blue: #0b64dd; --blue-d: #0a55bd;
+    --green: #0d7a55; --green-bg: #e4f5ee;
+    --amber: #9a6b00; --amber-bg: #fdf6e3; --amber-line: #ecd9a8;
+    --teal: #0b8a85; --teal-bg: #e2f4f3;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink-1);
+    background: var(--bg);
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.62;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 28px 96px; }
+  h1 { font-size: 34px; font-weight: 750; letter-spacing: -0.015em; margin: 0 0 10px; color: var(--ink-0); line-height: 1.15; }
+  .subtitle { color: var(--ink-3); font-size: 16.5px; margin: 0 0 26px; max-width: 720px; }
+  .toc { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 34px; }
+  .toc a {
+    display: inline-flex; align-items: center; gap: 7px;
+    text-decoration: none; font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+    background: var(--panel); border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 15px;
+    transition: .15s;
+  }
+  .toc a:hover { border-color: var(--blue); color: var(--blue-d); }
+  .toc a .n { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 10.5px; font-weight: 700; }
+  h2 { font-size: 23px; font-weight: 720; color: var(--ink-0); margin: 0 0 4px; letter-spacing: -0.01em; }
+  .flow { margin-top: 52px; padding-top: 8px; }
+  .flow-meta { font-size: 13px; color: var(--ink-4); margin: 0 0 14px; font-weight: 500; }
+  .prep {
+    border: 1px solid #c9d4e5; border-radius: 12px; background: #eef4fc;
+    padding: 18px 22px; margin-bottom: 8px;
+  }
+  .prep h3 { margin: 0 0 10px; font-size: 13px; font-weight: 750; color: var(--blue-d); text-transform: uppercase; letter-spacing: .05em; }
+  .prep ol { margin: 0; padding-left: 20px; }
+  .prep li { margin-bottom: 7px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 0.82em;
+    background: #e7ecf4; border-radius: 5px; padding: 2px 6px; color: var(--ink-0);
+    word-break: break-all;
+  }
+  .goal {
+    font-size: 15.5px; color: var(--ink-2); background: var(--panel);
+    border: 1px solid var(--line); border-left: 4px solid var(--blue);
+    border-radius: 0 10px 10px 0; padding: 13px 18px; margin: 0 0 20px;
+  }
+  .newpill { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .06em; background: var(--teal-bg); color: var(--teal); border-radius: 4px; padding: 2px 7px; vertical-align: 2px; margin-left: 6px; }
+  .step {
+    display: flex; gap: 15px; margin-bottom: 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 19px;
+  }
+  .step-num {
+    flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 2px;
+  }
+  .step-num.opt { background: var(--ink-4); }
+  .step-body { flex: 1; min-width: 0; }
+  .line { margin-bottom: 7px; }
+  .line:last-child { margin-bottom: 0; }
+  .lbl {
+    display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .08em;
+    border-radius: 4px; padding: 2px 8px; margin-right: 8px; vertical-align: 1.5px;
+  }
+  .lbl.do { background: var(--ink-0); color: #fff; }
+  .lbl.say { background: var(--green-bg); color: var(--green); }
+  .lbl.see { background: #eef1f6; color: var(--ink-2); }
+  .say-text { font-style: italic; color: #2b2f38; }
+  .do-text b, .do-text strong { color: var(--blue-d); }
+  .shot { margin: 20px 0 28px; }
+  .shot img {
+    width: 100%; border: 1px solid var(--line-2); border-radius: 12px; display: block;
+    box-shadow: 0 2px 10px rgba(20, 25, 40, .06);
+  }
+  .shot .cap { font-size: 13px; color: var(--ink-4); font-style: italic; margin-top: 8px; }
+  .pitfall {
+    border: 1px solid var(--amber-line); background: var(--amber-bg); border-radius: 10px;
+    padding: 13px 18px; margin: 18px 0 22px; font-size: 15px;
+  }
+  .pitfall b { color: var(--amber); }
+  .closer {
+    border: 1px solid #bfe3d4; background: var(--green-bg); border-radius: 12px;
+    padding: 20px 24px; margin-top: 48px;
+  }
+  .closer h3 { margin: 0 0 8px; font-size: 13px; font-weight: 750; color: var(--green); text-transform: uppercase; letter-spacing: .05em; }
+  .timing { font-size: 13px; color: var(--ink-4); }
+  .divider { height: 1px; background: var(--line-2); margin: 44px 0 0; }
+  @media (max-width: 640px) {
+    body { font-size: 15px; }
+    .wrap { padding: 28px 16px 64px; }
+    h1 { font-size: 27px; }
+    .step { padding: 13px 14px; gap: 11px; }
+  }
+  @media print {
+    body { background: #fff; font-size: 12px; }
+    .wrap { max-width: none; padding: 0; }
+    .toc { display: none; }
+    .step, .shot, .pitfall, .prep, .closer { page-break-inside: avoid; }
+    .flow { page-break-before: always; margin-top: 0; }
+    .shot img { box-shadow: none; }
+    h1 { font-size: 24px; }
+    h2 { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>NotDaybreak Business Demo — Run-of-Show v2</h1>
+<p class="subtitle">Updated for the latest build. Four acts, ~12 minutes: arrive to work already done, decide with the agent, put two keys on a critical action, then govern and hand off. Every click and question below was verified against this build. Screenshots are dark mode, matching the demo default.</p>
+
+<div class="toc">
+  <a href="../Throughline.dc.html" target="_blank" style="border-color:#0b64dd;color:#0a55bd"><span class="n">↗</span> Open the demo</a>
+  <a href="#prep"><span class="n">✓</span> Prep</a>
+  <a href="#act1"><span class="n">1</span> While you were away</a>
+  <a href="#act2"><span class="n">2</span> Decide with it</a>
+  <a href="#act3"><span class="n">3</span> Two keys &amp; one click</a>
+  <a href="#act4"><span class="n">4</span> Govern &amp; hand off</a>
+  <a href="#closing"><span class="n">★</span> Closing line</a>
+</div>
+
+<div class="prep" id="prep">
+  <h3>Before you start</h3>
+  <ol>
+    <li><a href="../Throughline.dc.html" target="_blank"><b>Open the demo</b></a> in its own window — it's hosted alongside this script. (This script is also reachable from inside the demo: <b>Script</b> in the left rail.)</li>
+    <li><b>Reload right before you begin</b> — a reload fully resets the demo state.</li>
+    <li>The demo defaults to <b>dark mode</b>, matching the screenshots below. Toggle under <b>Settings (gear) → Theme</b> if needed.</li>
+    <li>Sanity check: the headline has the subline <b>"While you were away I resolved 2 threads on my own"</b>, and the foot of the queue shows a teal <b>Resolved autonomously · 2</b> group.</li>
+    <li>If anything gets stuck mid-demo, reload — you're back to the start in 3 seconds.</li>
+  </ol>
+</div>
+
+<!-- ================= ACT 1 ================= -->
+<div class="flow" id="act1">
+<h2>Act 1 — "While you were away" <span class="newpill">NEW</span></h2>
+<p class="flow-meta">~3 minutes · The overnight digest and autonomous receipts</p>
+<p class="goal"><b>The point you're making:</b> the SOC didn't stop when your people went home. Work that was safe to do alone got done — and every bit of it is a receipt you review on your schedule, not a page at 3am.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"This is the analyst's morning. Six threads need a human. But look at the line under the greeting — 'while you were away I resolved two threads on my own.' The night shift happened; nobody was paged."</span></div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Let the brief breathe. Point at the subline, the sparkline summary cards, and the <b>"2 in motion"</b> chip on the Contain group — work executing right now.</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-home-brief-dark.png" alt="Home brief dark">
+  <div class="cap">The brief: overnight digest under the greeting, sparklines per decision group, "in motion" progress on live actions, and "Watched by" attribution on every card.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>"review the activity"</b> in the subline — it jumps to the teal <b>Resolved autonomously</b> group at the foot of the queue.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Receipts, not tasks. These never count toward the analyst's number — they're things Dark Watch already fixed, waiting for review. A forwarding rule that was exfiltrating a mailbox to a personal Gmail: detected, confirmed compromised, removed. Zero messages left."</span></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>"Evidence trail in the record · 4 items"</b> on the mailbox receipt. The record opens on the right.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>"What Dark Watch did" with an <b>AUTO-EXECUTED</b> token and the allow-list note; a <b>Reasoning trace</b> of the queries it ran; <b>Verification checks</b> with per-item confidence; and <b>Follow-ups</b> it suggests. Point at the "View guardrail" link.</div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"It acted alone because this exact action class is pre-approved — reversible, single mailbox. And it proves its work: what it ran, what it verified, and the questions a human should still ask."</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-receipt-record.png" alt="Receipt record">
+  <div class="cap">The autonomous receipt in full: action, guardrail, reasoning trace, verification checks, follow-ups.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Close the panel, then click <b>"Reviewed — file it"</b> on the receipt.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"I review it, I file it. And if I never get to it, it files itself to Records at shift change — nothing autonomous ever disappears unaudited."</span></div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ================= ACT 2 ================= -->
+<div class="flow" id="act2">
+<h2>Act 2 — "It needed me": question it, then contain it</h2>
+<p class="flow-meta">~4 minutes · Impossible travel on cfo@corp · now with the impact map</p>
+<p class="goal"><b>The point you're making:</b> when the call is ambiguous, NotDaybreak builds the case, answers your questions with cited evidence, and waits for your sign-off.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Top of the queue: impossible travel on the CFO's account, MFA passed in both countries. Travelling exec on a VPN — or stolen session? NotDaybreak won't guess. It says: your call."</span></div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Open in chat</b> (speech-bubble icon) on the impossible-travel card. Point at the <b>Impact map</b> in the right panel: entry point, what's compromised, blast radius — each entity tagged active / exposed / caught early / at risk.</span></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Type, exactly: <b>Was MFA re-prompted on the second sign-in?</b> — Enter.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>Answer: MFA satisfied via the <i>existing token</i>, no fresh challenge — session-hijack signature. Note the <b>Evidence · Okta</b> citation tag.</div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Then type: <b>What's the blast radius?</b> — Enter.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>3 active sessions across Okta + M365, cited <b>Evidence · Okta + M365</b>. Both questions move to "Answered" in the panel — and the red <b>Revoke active sessions</b> chip appears.</div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-cfo-qa-unlocked.png" alt="cfo Q&A">
+  <div class="cap">Two typed questions answered with citations; the impact map on the right; the revoke action unlocked above the composer.</div>
+</div>
+
+<div class="pitfall"><b>Don't improvise the order.</b> The revoke action only unlocks after two questions are answered. Ask the two questions, then revoke.</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"That's token theft. Cut their access."</span></div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Revoke active sessions</b> → the approval gate shows the full blast radius → click <b>Revoke sessions</b>. Scroll to the bottom of the chat if needed.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>The contained card: <b>3m 48s to contain · 3 sessions revoked · 0 mail exfiltrated · 24h monitoring</b>. Status flips to Contained.</div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Four minutes from 'is this real?' to contained — and it keeps watching for re-auth from that network for 24 hours."</span></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num opt">3b</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">(Optional) In the right panel, <b>People → Invite</b> → pick <b>Maya Chen (IR Lead)</b> to hand off cleanup.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Maya inherits the entire investigation — queries, evidence, timeline, decisions. Nothing to re-explain."</span></div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ================= ACT 3 ================= -->
+<div class="flow" id="act3">
+<h2>Act 3 — Two keys for critical, one click for scoped <span class="newpill">NEW</span></h2>
+<p class="flow-meta">~3 minutes · Ransomware on Sales-NAS (two-person) · data staging on FIN-DB-02 (one click)</p>
+<p class="goal"><b>The point you're making:</b> approval friction scales with consequence. A scoped, reversible block is one click. Isolating a file server during a ransomware event takes two named humans.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Mass file encryption on the Sales NAS — 1,400 files renamed in four minutes. The move is to isolate the server. But that drops file shares for the whole team, so this action is under a two-person rule."</span></div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Isolate Sales-NAS</b> on its card in the Contain group.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>The confirm sheet, ribboned <b>ACTION · 2 APPROVALS</b> — blast radius, and both approvers named up front: You (Senior Analyst) and Maya Chen (IR lead).</div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-two-person-gate.png" alt="Two person gate">
+  <div class="cap">Two-person rule for critical containment — both approvers named before anything runs.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Approve — 1 of 2</b>. The button flips to <b>"Waiting for second approval…"</b>; a beat later Maya's approval lands (toast: "2 of 2 — two-person rule satisfied. Executing.") and the card resolves.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"My signature alone doesn't ship this. The IR lead is asked automatically, and the action executes only when both have signed — every approval in the audit trail."</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-two-person-executed.png" alt="After execution">
+  <div class="cap">After both approvals: the card resolves, the queue count drops.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"And when the action is pre-scoped and reversible, it's the opposite — one click."</span></div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Scroll to <b>"Data staging detected — FIN-DB-02"</b> and click <b>Block egress on FIN-DB-02</b> → the blast-radius confirm opens in place → <b>Block egress</b>. Done.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"4.2 GB staged for exfil, and it can no longer leave — while the host stays reachable for forensics. Two clicks, audited, reversible."</span></div>
+  </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ================= ACT 4 ================= -->
+<div class="flow" id="act4">
+<h2>Act 4 — Govern the watches, hand off the shift <span class="newpill">NEW</span></h2>
+<p class="flow-meta">~3 minutes · The Watches page and the shift handoff</p>
+<p class="goal"><b>The point you're making:</b> autonomy isn't one global switch. It's a roster of watches, each with its own duty window, autonomy dial, and allow-list — and the shift ends with a handoff the agent writes for you.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Watches</b> in the left rail.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>The coverage graph: who's on duty across 24 hours, watch by watch, with a live "now" marker — and cards for each watch: runs, acceptance, autonomy level, data scope.</div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"This is the org chart of the agentic SOC. Watch Floor triages around the clock but never acts alone. Dark Watch owns the hours nobody's on — 10pm to 6am — and it's the only one trusted to act, on an allow-list. Fraud is still a draft. Coverage, not a black box."</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-watches-page.png" alt="Watches page">
+  <div class="cap">The Watches page: 24-hour coverage per watch with a live now-marker, and a card per watch with runs, acceptance, autonomy, and scope.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click the <b>Dark Watch</b> card.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>Its settings: the <b>autonomy slider</b> (Suggest → Read → Draft → Act, set to "Acts · trusted"), the duty window (22:00–06:00), hand-off destination ("Receipts to the morning brief"), assigned workflows with per-workflow toggles ("Removes exfil rules · allow-listed"), and data boundaries.</div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"Everything we saw this morning traces back to this page: the mailbox receipt exists because this watch, in this window, with this allow-list, was trusted to act. Turn the dial down and it proposes instead. Org guardrails cap everything — gated actions stay gated at any level."</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-watch-detail.png" alt="Dark Watch detail">
+  <div class="cap">Dark Watch settings: autonomy slider, duty window, hand-off, allow-listed workflows.</div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Back on the brief (NotDaybreak in the rail), click the <b>people icon</b> top-right of the queue — <b>Shift handoff</b>.</span></div>
+    <div class="line"><span class="lbl see">SEE</span>The handoff compiled automatically: decisions this shift, still in motion, waiting on a decision — plus a note field: "context the queue can't carry."</div>
+    <div class="line"><span class="lbl do">DO</span><span class="do-text">Click <b>Send to next shift</b>.</span></div>
+    <div class="line"><span class="lbl say">SAY</span><span class="say-text">"The shift ends the way it began — with the agent doing the bookkeeping and the human adding the judgment. The next analyst's brief opens with this."</span></div>
+  </div>
+</div>
+
+<div class="shot">
+  <img src="v2-shift-handoff.png" alt="Shift handoff">
+  <div class="cap">The shift handoff, compiled from the shift's actual decisions — edit, add context, send.</div>
+</div>
+</div>
+
+<div class="closer" id="closing">
+  <h3>Closing line</h3>
+  <p style="margin:0 0 8px"><span class="say-text">"One morning in an agentic SOC. Work finished overnight with receipts you can audit. An ambiguous call where the agent briefed me, took my questions with evidence, and acted only on my word. A critical action that needed two named humans. And the whole thing governed like a team — each watch with its own shift, its own leash, its own scorecard — ending with a handoff written by the agent, signed by me. The dial between 'it proposes' and 'it acts' is yours, per watch, per action. That's agentic security operations with the human in charge."</span></p>
+  <p class="timing" style="margin:0">Total: ~12 minutes. Short on time? Cut Act 3 step 3 (one-click) first, then Act 1 step 4 (file-it). Acts 1 and 3 are the newest material — protect those.</p>
+</div>
+
+<div class="pitfall" style="margin-top:28px"><b>Build notes for the presenter:</b> the cfo case is CASE-2047 in this build. The "Attacks" rail item is new but stubbed — don't click it live. Two rows in Watches/Activity reference NightShift (separate Observability project) — skim past them. Reload always resets everything.</div>
+
+</div>
+</body>
+</html>

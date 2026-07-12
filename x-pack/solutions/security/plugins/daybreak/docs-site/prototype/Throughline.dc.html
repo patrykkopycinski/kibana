@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>window.__tlThemeOverride = true; /* hosted build defaults to dark; in-app Light/Dark toggle still works */</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div id="tl-root" style="position:fixed;inset:0;overflow:hidden"></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0B64DD&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#00BFB3&quot;,&quot;#0B64DD&quot;,&quot;#1BA9F5&quot;,&quot;#FEC514&quot;,&quot;#F04E98&quot;,&quot;#7DD000&quot;]},&quot;panelRadius&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:0,&quot;max&quot;:32,&quot;step&quot;:1},&quot;panelShadow&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Subtle&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;None&quot;,&quot;Subtle&quot;,&quot;Medium&quot;,&quot;Strong&quot;]},&quot;darkMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  async _loadApp(){
+    // The app module is large (~470KB); the direct dynamic import occasionally
+    // fails at the network/fetch stage. Retry, then fall back to fetch + blob import.
+    let lastErr;
+    for(let i=0;i<3;i++){
+      try { return await import('./throughline-app.js'); }
+      catch(e){ lastErr = e; await new Promise(r=>setTimeout(r, 250*(i+1))); }
+    }
+    try {
+      const txt = await (await fetch('./throughline-app.js', {cache:'reload'})).text();
+      const url = URL.createObjectURL(new Blob([txt], {type:'text/javascript'}));
+      return await import(url);
+    } catch(e){ throw (lastErr || e); }
+  }
+  componentDidMount(){
+    const root = document.getElementById('tl-root');
+    if(!root) return;
+    this._loadApp()
+      .then(m => m.mount(root))
+      .then(() => { this.applyAccent(); this.applyRadius(); this.applyShadow(); this.applyDayBg(); this.applyTheme(); })
+      .catch(e => {
+        root.innerHTML = '<pre style="padding:24px;font:13px/1.6 ui-monospace,monospace;color:#c42e3a;white-space:pre-wrap">Failed to load Throughline app:\n' + (e && e.stack || e) + '</pre>';
+      });
+  }
+  componentDidUpdate(){ this.applyAccent(); this.applyRadius(); this.applyShadow(); this.applyDayBg(); this.applyTheme(); }
+  applyShadow(){
+    const levels = {
+      None:   'none',
+      Subtle: '0 1px 3px rgba(20,23,28,.05),0 10px 30px rgba(20,23,28,.06)',
+      Medium: '0 2px 6px rgba(20,23,28,.08),0 16px 40px rgba(20,23,28,.10)',
+      Strong: '0 4px 12px rgba(20,23,28,.10),0 26px 64px rgba(20,23,28,.18)'
+    };
+    const sh = levels[this.props.panelShadow] ?? levels.Subtle;
+    document.documentElement.style.setProperty('--panel-shadow', sh);
+  }
+  applyDayBg(){
+    const css = `body.mode-day{--shell:#F6F9FC;--shell-line:#dbe4f0}
+body.mode-day .stage{padding-left:0}
+body.mode-day .thread{background:#F7F9FC}
+body.mode-day .thread.special{background:#ffffff}
+body.mode-day .composer{background:linear-gradient(180deg,transparent,#F7F9FC 30%)}
+body.mode-day .nav-menu-item.on{background:var(--blue-bg);color:var(--blue-d)}
+body.mode-day .nav-menu-item.on .nmi-ic{color:var(--blue)}
+body.mode-day .rail-item.on{color:var(--blue-d)}
+body.mode-day .rail-item.on .rii{color:var(--blue)}
+body.mode-day .brief-scroll>.radar-page:first-child{padding-top:60px}
+.nav-item.active::before{display:none}
+.nav-brand{flex:1;display:flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--ink-0);letter-spacing:-.01em}
+.nav-brand svg{color:var(--accent)}
+.nav-new.icon-only{width:30px;height:30px;padding:0;gap:0;justify-content:center;flex:0 0 auto;background:none;border:none;color:var(--ink-4)}
+.nav-new.icon-only:hover{background:rgba(20,23,28,.05);color:var(--ink-1)}
+.nav-new.icon-only svg{color:var(--ink-4)}
+.nav-new.icon-only:hover svg{color:var(--ink-1)}
+.nav-top .nav-row1{gap:0}
+.nav-row1 .nav-collapse{margin-left:0}`;
+    let el = document.getElementById('tl-day-bg');
+    if(!el){ el = document.createElement('style'); el.id = 'tl-day-bg'; document.head.appendChild(el); }
+    el.textContent = css;
+  }
+  applyRadius(){
+    const r = (this.props.panelRadius ?? 14);
+    document.documentElement.style.setProperty('--r-lg', r + 'px');
+  }
+  // --- color helpers ---
+  _hexToRgb(h){
+    h = String(h || '').replace('#','').trim();
+    if(h.length === 3) h = h.split('').map(c=>c+c).join('');
+    const n = parseInt(h, 16);
+    return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+  }
+  _mix(rgb, target, amt){
+    return {
+      r: Math.round(rgb.r + (target - rgb.r) * amt),
+      g: Math.round(rgb.g + (target - rgb.g) * amt),
+      b: Math.round(rgb.b + (target - rgb.b) * amt)
+    };
+  }
+  _rgbStr(c){ return `rgb(${c.r},${c.g},${c.b})`; }
+  _relLum(rgb){
+    const f = v => { v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
+    return 0.2126*f(rgb.r) + 0.7152*f(rgb.g) + 0.0722*f(rgb.b);
+  }
+  applyAccent(){
+    const base = this.props.accentColor || '#0B64DD';
+    const rgb = this._hexToRgb(base);
+    const isDark = !!this.props.darkMode;
+    const dark = isDark ? this._mix(rgb, 255, 0.32) : this._mix(rgb, 0, 0.38);   // text shade (lighter in dark)
+    const bg   = isDark ? this._mix(rgb, 18, 0.84)  : this._mix(rgb, 255, 0.90); // tint background
+    const on   = this._relLum(rgb) > 0.18 ? '#08131f' : '#ffffff';              // readable text ON the accent
+    const css = `:root, body.mode-night {
+      --accent: ${this._rgbStr(rgb)} !important;
+      --accent-d: ${this._rgbStr(dark)} !important;
+      --accent-bg: ${this._rgbStr(bg)} !important;
+      --accent-on: ${on} !important;
+      --accent-ring: rgba(${rgb.r},${rgb.g},${rgb.b},.30) !important;
+    }
+    .chat-badge .chat-badge-lbl, .chat-badge .chat-badge-ic { color: ${on} !important; }
+    .chat-badge .chat-badge-ic { background: ${on==='#ffffff'?'rgba(255,255,255,.26)':'rgba(8,19,31,.16)'} !important; }`;
+    let el = document.getElementById('tl-accent-override');
+    if(!el){
+      el = document.createElement('style');
+      el.id = 'tl-accent-override';
+      document.head.appendChild(el);
+    }
+    el.textContent = css;
+  }
+  applyTheme(){
+    const dark = (window.__tlThemeOverride!=null) ? !!window.__tlThemeOverride : !!this.props.darkMode;
+    document.body.classList.toggle('theme-dark', dark);
+    if(dark) document.documentElement.setAttribute('data-theme','dark');
+    else document.documentElement.removeAttribute('data-theme');
+    const css = `body.theme-dark{
+  --ink-0:#E7ECF5; --ink-1:#C8D2E2; --ink-2:#A6B4CD; --ink-3:#8294B0; --ink-4:#74849F; --ink-5:#56657F;
+  --bg:#07101F; --bg-2:#18263C; --panel:#0B1628; --panel-2:#11203A;
+  --line:#1E2C42; --line-2:#2C3B53; --line-strong:#3C4D68;
+  --blue:#61A2FF; --blue-d:#9CC4FF; --blue-bg:#11233E; --blue-ring:rgba(97,162,255,.40);
+  --green:#2BC79A; --green-d:#74E6C4; --green-bg:#0E2A22;
+  --teal:#1EC8C3; --teal-bg:#0E2A2A;
+  --amber:#FBD06B; --amber-d:#FBD06B; --amber-bg:#2A2413;
+  --red:#F6726A; --red-d:#FF9F98; --red-bg:#2C1A1B;
+  --violet:#B794F4; --violet-bg:#221A33;
+  --t-case:#61A2FF; --t-inv:#1EC8C3; --t-hunt:#B794F4; --t-incident:#F6726A; --t-custom:#A6B4CD;
+  --shell:#060B15; --shell-line:#18263C;
+  --sh-xs:0 1px 2px rgba(0,0,0,.45);
+  --sh-sm:0 1px 2px rgba(0,0,0,.45),0 2px 5px rgba(0,0,0,.40);
+  --sh-md:0 4px 14px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.45);
+  --sh-lg:0 18px 50px rgba(0,0,0,.65),0 4px 12px rgba(0,0,0,.50);
+}
+body.theme-dark{background:var(--bg);color:var(--ink-1)}
+body.theme-dark.mode-day{--shell:#060B15;--shell-line:#18263C}
+body.theme-dark.mode-day .thread{background:var(--bg)}
+body.theme-dark.mode-day .thread.special{background:#0A1626}
+body.theme-dark.mode-day .composer{background:linear-gradient(180deg,transparent,var(--bg) 30%)}
+body.theme-dark.mode-night{--bg:#07101F;--bg-2:#18263C;--shell:#060B15;--shell-line:#18263C}
+body.theme-dark .pill-btn{background:var(--blue);color:#06101e;border-color:var(--blue)}
+body.theme-dark .pill-btn:hover{background:var(--blue-d);border-color:var(--blue-d)}
+body.theme-dark .toast{background:#142136;color:var(--ink-0);border:1px solid var(--line-2)}
+body.theme-dark .brand .logo{background:linear-gradient(150deg,#2c3a52,#16202f)}
+body.theme-dark .tool-q{background:var(--panel-2)}
+body.theme-dark .fly-code.decoded{background:#1c1416;border-color:color-mix(in srgb,var(--red) 40%,transparent)}
+body.theme-dark .chat-badge{border-color:rgba(255,255,255,.18)}
+body.theme-dark .rail-item{color:#9DACC6}
+body.theme-dark .rail-item .rii{color:#9DACC6}
+body.theme-dark .rad-chat, body.theme-dark .rad-chat svg{color:var(--ink-3)}
+body.theme-dark.mode-day .brief-scroll .rad-mini-acts .rad-chat{color:var(--ink-3) !important}
+body.theme-dark.mode-day .brief-scroll .rad-mini-acts .rad-chat svg{color:var(--ink-3) !important}
+body.theme-dark .ptool.open-chat, body.theme-dark .ptool.open-chat svg{color:var(--ink-3)}
+body.theme-dark .brief-callout.warn{color:var(--amber-d);border-color:color-mix(in srgb,var(--amber) 42%,transparent)}
+body.theme-dark .brief-callout.ok{color:var(--green-d);border-color:color-mix(in srgb,var(--green) 42%,transparent)}
+body.theme-dark .brief-callout.crit{border-color:color-mix(in srgb,var(--red) 42%,transparent)}
+body.theme-dark .brief-callout.info{border-color:color-mix(in srgb,var(--blue) 42%,transparent)}
+body.theme-dark .hypo-state.inv{color:var(--amber-d)}
+body.theme-dark .hypo-state.conf{color:var(--green-d)}
+/* a11y — dark ink on bright fills (dark-palette blue/green/amber/red are pastels; white text fails AA on them) */
+body.theme-dark .btn.primary,body.theme-dark .btn.go,body.theme-dark .btn.warn,body.theme-dark .btn.danger{color:#06101E}
+body.theme-dark .btn.primary svg,body.theme-dark .btn.go svg,body.theme-dark .btn.warn svg,body.theme-dark .btn.danger svg{color:#06101E}
+body.theme-dark .ho-foot .btn.go,body.theme-dark .ho-foot .btn.go svg{color:#06101E}
+body.theme-dark .gate-yes,body.theme-dark .gate-yes svg,body.theme-dark .rad-cf-yes,body.theme-dark .rad-cf-yes svg{color:#06101E}
+body.theme-dark .gate-ic,body.theme-dark .gate-ic svg{color:#06101E}
+body.theme-dark .rcard-badge,body.theme-dark .rcard-badge svg{color:#06101E}
+body.theme-dark .newchat,body.theme-dark .send,body.theme-dark .dv-refresh{color:#06101E}
+body.theme-dark .send:disabled{color:var(--ink-3)}
+body.theme-dark .msg.user .bubble{color:#06101E}
+body.theme-dark .evrow .en,body.theme-dark .evcard .enum,body.theme-dark .bfind-n,body.theme-dark .hev-h-n{color:#06101E}
+body.theme-dark .rv.on{color:#06101E}
+body.theme-dark .rv.on .rv-c{background:rgba(6,16,30,.16)}
+body.theme-dark .allowrow .cb.on,body.theme-dark .rem-cb.on{color:#06101E}
+body.theme-dark .cs-pill{color:#06101E !important}
+body.theme-dark .hx-go,body.theme-dark .hx-go svg{color:#06101E}
+body.theme-dark .dsc-refresh,body.theme-dark .dsc-refresh svg{color:#06101E}
+body.theme-dark .hx-ttp{color:var(--ink-3)}
+/* a11y — hardcoded light-mode hues swapped for dark-legible equivalents */
+body.theme-dark .hev.for .hev-h-l{color:var(--green-d)}
+body.theme-dark .wt-surf.dayshift,body.theme-dark .wt-surfic.dayshift{color:#E8A765}
+body.theme-dark .wt-surf.nightshift,body.theme-dark .wt-surfic.nightshift{color:#A89BF5}
+body.theme-dark .nav-item .ni-id{color:var(--ink-3)}
+body.theme-dark .act-tag.teal{color:var(--teal)}`;
+    let el = document.getElementById('tl-dark');
+    if(!el){ el = document.createElement('style'); el.id = 'tl-dark'; document.head.appendChild(el); }
+    el.textContent = css;
+  }
+  renderVals(){ this.applyRadius(); return { accentColor: this.props.accentColor }; }
+}
+</script>
+</body>
+</html>

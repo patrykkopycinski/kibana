@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @font-face{font-family:'Inter';src:url('./fonts/Inter-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  @font-face{font-family:'Inter';src:url('./fonts/Inter-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+  @font-face{font-family:'Inter';src:url('./fonts/Inter-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+  html,body{margin:0;padding:0}
+  *{box-sizing:border-box}
+  .disco-scroll::-webkit-scrollbar{width:11px;height:11px}
+  .disco-scroll::-webkit-scrollbar-thumb{background:#cdd4df;border-radius:6px;border:3px solid #f6f9fc}
+  .disco-scroll::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+<div style="position:fixed;inset:0;display:flex;flex-direction:column;background:#F6F9FC;font-family:Inter,system-ui,sans-serif;color:#07101F">
+
+  <!-- time range subtitle -->
+  <div style="text-align:center;padding:8px 0 6px;font-size:12px;color:#646a77;letter-spacing:.1px">{{ timeRange }}</div>
+
+  <!-- tab bar -->
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:0 16px;border-bottom:1px solid #E3E8F2;background:#F6F9FC">
+    <div style="display:flex;align-items:stretch;gap:24px">
+      <div style="display:flex;align-items:center;gap:6px;padding:10px 0 9px;border-bottom:2px solid #0B64DD;font-size:13.5px;font-weight:600;color:#0B64DD">
+        <span>Documents</span>
+        <span style="font-weight:600;color:#0B64DD">{{ docCount }}</span>
+      </div>
+      <div style="padding:11px 0;font-size:13.5px;font-weight:500;color:#3a414c;border-bottom:2px solid transparent;cursor:pointer">Patterns</div>
+      <div style="padding:11px 0;font-size:13.5px;font-weight:500;color:#3a414c;border-bottom:2px solid transparent;cursor:pointer">Field statistics</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;padding:8px 0;font-size:13px;color:#3a414c;cursor:pointer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M3 4.5h10M4.5 8h7M6.5 11.5h3"/></svg>
+      <span>Sort fields</span>
+      <span style="display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#E3E8F2;font-size:11px;font-weight:600;color:#3a414c">1</span>
+    </div>
+  </div>
+
+  <!-- column header -->
+  <div style="display:flex;align-items:center;padding:7px 0;background:#fff;border-bottom:1px solid #E3E8F2;font-size:12px;font-weight:600;color:#1a1f29">
+    <div style="width:34px;flex:none"></div>
+    <div style="width:30px;flex:none"></div>
+    <div style="width:188px;flex:none;display:flex;align-items:center;gap:5px">
+      <span>timestamp</span>
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#646a77" stroke-width="1.1"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.4" stroke-linecap="round"/></svg>
+    </div>
+    <div style="flex:1">Summary</div>
+  </div>
+
+  <!-- rows -->
+  <div class="disco-scroll" style="flex:1;overflow:auto;background:#fff">
+    <sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+      <div style="display:flex;align-items:flex-start;padding:6px 0;border-bottom:1px solid #EEF1F6;font-size:12px;line-height:1.45"
+           style-hover="background:#F1F6FF">
+        <div style="width:34px;flex:none;display:flex;justify-content:center;padding-top:1px">
+          <span style="width:14px;height:14px;border:1px solid #c3ccdb;border-radius:3px;background:#fff;display:inline-block"></span>
+        </div>
+        <div style="width:30px;flex:none;display:flex;justify-content:center;padding-top:1px;color:#98a1b1">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M6 2H2v4M14 6V2h-4M2 10v4h4M10 14h4v-4"/></svg>
+        </div>
+        <div style="width:188px;flex:none;font-family:'Roboto Mono',ui-monospace,monospace;font-size:11.5px;color:#1a1f29;white-space:nowrap;padding-right:8px">{{ r.ts }}</div>
+        <div style="flex:1;font-family:'Roboto Mono',ui-monospace,monospace;font-size:11.5px;color:#3a414c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:16px">{{ r.pre }}<span style="color:#0b766f;font-weight:500">{{ r.path }}</span>{{ r.post }}</div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;rowCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:320,&quot;tsType&quot;:&quot;number&quot;,&quot;min&quot;:20,&quot;max&quot;:1000,&quot;step&quot;:20}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = { rows: this.generate(this.props.rowCount ?? 320) };
+  }
+  componentDidUpdate(prev){
+    if(prev.rowCount !== this.props.rowCount){
+      this.setState({ rows: this.generate(this.props.rowCount ?? 320) });
+    }
+  }
+  pad(n,l){ return String(n).padStart(l,'0'); }
+  fmtTs(d){
+    const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+    return `${mo} ${d.getUTCDate()}, ${d.getUTCFullYear()} @ ${this.pad(d.getUTCHours(),2)}:${this.pad(d.getUTCMinutes(),2)}:${this.pad(d.getUTCSeconds(),2)}.${this.pad(d.getUTCMilliseconds(),3)}`;
+  }
+  rip(){ const o=()=>Math.floor(Math.random()*254)+1; return `${o()}.${o()}.${o()}.${o()}`; }
+  generate(n){
+    const paths = [
+      '/app-search','/elasticsearch','/elasticsearch/elasticsearch-6.3.2.zip',
+      '/elasticsearch/elasticsearch-6.3.2.deb','/elasticsearch/elasticsearch-6.3.2.tar.gz',
+      '/kibana/kibana-6.3.2-darwin-x86_64.tar.gz','/kibana/kibana-6.3.2-linux-x86_64.tar.gz',
+      '/kibana/kibana-6.3.2-windows-x86_64.zip','/apm-server/apm-server-6.3.2-amd64.deb',
+      '/apm-server/apm-server-6.3.2-x86_64.rpm','/beats/metricbeat/metricbeat-6.3.2-amd64.deb',
+      '/beats/filebeat/filebeat-6.3.2-windows-x86.zip','/beats/packetbeat/packetbeat-6.3.2-amd64.deb',
+      '/beats/heartbeat/heartbeat-6.3.2-linux-x86_64.tar.gz','/logstash/logstash-6.3.2.tar.gz',
+      '/logstash/logstash-6.3.2.rpm','/canvas','/maps','/uptime','/graph/api/explore'
+    ];
+    const agents = [
+      'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)',
+      'Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24',
+      'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/11.0.696.50',
+      'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/11.0.696',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/604.5.6 (KHTML, like Gecko)',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029',
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko)'
+    ];
+    const statuses = [200,200,200,200,200,200,200,200,404,404,503,302,301];
+    const rows = [];
+    let t = Date.UTC(2024,9,14,15,56,1,735); // Oct 14 2024 15:56:01.735
+    for(let i=0;i<n;i++){
+      const d = new Date(t);
+      const path = paths[Math.floor(Math.random()*paths.length)];
+      const status = statuses[Math.floor(Math.random()*statuses.length)];
+      const size = status===200 ? Math.floor(Math.random()*11000)+150 : 0;
+      const agent = agents[Math.floor(Math.random()*agents.length)];
+      const ip = this.rip();
+      // embedded apache-style timestamp (sample data uses 2018)
+      const ed = new Date(Date.UTC(2018,6,30, Math.floor(Math.random()*24), Math.floor(Math.random()*60), Math.floor(Math.random()*60), Math.floor(Math.random()*1000)));
+      const eStr = `${ed.getUTCFullYear()}-${this.pad(ed.getUTCMonth()+1,2)}-${this.pad(ed.getUTCDate(),2)}T${this.pad(ed.getUTCHours(),2)}:${this.pad(ed.getUTCMinutes(),2)}:${this.pad(ed.getUTCSeconds(),2)}.${this.pad(ed.getUTCMilliseconds(),3)}Z`;
+      rows.push({
+        ts: this.fmtTs(d),
+        pre: `${ip} - - [${eStr}] "GET `,
+        path: path,
+        post: ` HTTP/1.1" ${status} ${size} "-" "${agent}"`
+      });
+      // step back a random interval (seconds to a few minutes)
+      t -= (Math.floor(Math.random()*210)+8) * 1000;
+    }
+    return rows;
+  }
+  renderVals(){
+    return {
+      rows: this.state.rows,
+      docCount: '1,776',
+      timeRange: 'Oct 7, 2024 @ 00:00:00.000 \u2014 Oct 14, 2024 @ 15:58:54.398 (interval: Auto - 3 hours)'
+    };
+  }
+}
+</script>
+</body>
+</html>

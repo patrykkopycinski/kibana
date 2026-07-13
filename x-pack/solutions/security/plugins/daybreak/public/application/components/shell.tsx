@@ -432,7 +432,9 @@ export const DaybreakApp: React.FC = () => {
     if (destination !== 'brief' || !selected) {
       return null;
     }
-    const selectedEvidence = evidence.filter((item) => selected.evidenceRefs.includes(item.id));
+    const selectedEvidence = evidence
+      .filter((item) => selected.evidenceRefs.includes(item.id))
+      .filter((item, index, arr) => arr.findIndex((e) => e.id === item.id) === index);
     return (
       <EuiFlexItem
         grow={false}

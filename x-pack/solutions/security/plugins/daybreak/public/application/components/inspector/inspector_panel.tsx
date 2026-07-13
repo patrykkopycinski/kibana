@@ -32,6 +32,19 @@ import { PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 type AppKey = 'object' | 'discover' | 'records' | 'alerts' | 'entities' | 'dashboards';
 type RecordTab = 'overview' | 'evidence' | 'timeline' | 'actions' | 'people';
 
+
+/** ponytail: ES may hold duplicate logical ids after re-seed; keep first for stable React keys. */
+const dedupeEvidenceById = (items: DaybreakEvidence[]): DaybreakEvidence[] => {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) {
+      return false;
+    }
+    seen.add(item.id);
+    return true;
+  });
+};
+
 interface InspectorPanelProps {
   proposal: DaybreakProposal;
   evidence: DaybreakEvidence[];
@@ -75,14 +88,16 @@ const PlaceholderApp: React.FC<{ app: AppKey }> = ({ app }) => (
   </div>
 );
 
-const EvidenceTab: React.FC<{ evidence: DaybreakEvidence[] }> = ({ evidence }) => (
+const EvidenceTab: React.FC<{ evidence: DaybreakEvidence[] }> = ({ evidence }) => {
+  const uniqueEvidence = dedupeEvidenceById(evidence);
+  return (
   <div className="daybreakInspectorEvidence">
-    {evidence.length === 0 ? (
+    {uniqueEvidence.length === 0 ? (
       <EuiText size="s" color="subdued">
         No evidence attached.
       </EuiText>
     ) : (
-      evidence.map((item, index) => (
+      uniqueEvidence.map((item, index) => (
         <EuiPanel key={item.id} className="daybreakEvidenceCard" paddingSize="s" hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -101,7 +116,8 @@ const EvidenceTab: React.FC<{ evidence: DaybreakEvidence[] }> = ({ evidence }) =
       ))
     )}
   </div>
-);
+  );
+};
 
 const TimelineTab: React.FC = () => (
   <div className="daybreakInspectorTimeline">
@@ -287,6 +303,7 @@ const OverviewTab: React.FC<{ proposal: DaybreakProposal; evidence: DaybreakEvid
   proposal,
   evidence,
 }) => {
+  const uniqueEvidence = dedupeEvidenceById(evidence);
   const status = PROPOSAL_STATUS_META[proposal.status];
   return (
     <div className="daybreakInspectorOverview">
@@ -302,12 +319,12 @@ const OverviewTab: React.FC<{ proposal: DaybreakProposal; evidence: DaybreakEvid
         KEY FINDINGS
       </EuiText>
       <EuiSpacer size="xs" />
-      {evidence.length === 0 ? (
+      {uniqueEvidence.length === 0 ? (
         <EuiText size="s" color="subdued">
           No evidence linked.
         </EuiText>
       ) : (
-        evidence.map((item) => (
+        uniqueEvidence.map((item) => (
           <EuiFlexGroup key={item.id} alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="check" color="success" />

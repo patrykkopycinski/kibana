@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('../src/dev/github/get_serverless_release_sha_cli');
+import { run } from '@kbn/dev-cli-runner';
+import { getServerlessReleaseSha } from './get_serverless_release_sha';
+
+run(async ({ log }) => log.write(await getServerlessReleaseSha()));

@@ -274,7 +274,9 @@ that is the exact regression `BROKEN_EXAMPLE_IDS` / this test exists to catch.
 | `spike_workflow.yaml` | PD-1 spike: 3-step shape-validation definition (FR-001..FR-005) |
 | `alert_analysis_workflow.ts` | Parses + schema-validates the spike YAML via `WorkflowSchema` (FR-005) |
 | `run_spike_workflow.ts` | PD-1 spike runner: triggers via `executeWorkflow`, logs step I/O (FR-008..FR-010) |
-| `alert_analysis_worker.yaml` | PD-2: the real, shipped 5-phase worker (Setup → Guard → Enrich → Reason → Act) (FR-006..FR-011) |
+| `alert_analysis_worker.yaml` |
+| `alert_analysis_worker_alert.yaml` | PD-2 alert-trigger variant (`type: alert`); same phases as manual worker |
+ PD-2: the real, shipped 5-phase worker (Setup → Guard → Enrich → Reason → Act) (FR-006..FR-011) |
 | `run_alert_analysis_worker.ts` | PD-2 runner wiring the worker into `DaybreakPlugin.start()`, gated by config | 
 | `output_validation_guard.ts` | `validate_reasoning` guard — fails closed when the Reason phase's `structured_output` is missing/malformed | 
 | `../evals/golden_dataset.ts` | Gate 1 (FR-8): golden `AlertEvidence → ExpectedProposalShape` dataset, including the FR-10/A-3 broken row |

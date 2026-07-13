@@ -24,6 +24,14 @@ export interface AttackDiscoveryAlertSummary {
   relatedAlertIds?: string[];
   /** AD-assigned triage hint when present. */
   triageStatus?: "open" | "acknowledged" | "closed";
+  /** Explicit monitor-only / no-op flag for low-value findings. */
+  monitorOnly?: boolean;
+  /** Id of a previous AD finding this one duplicates. */
+  duplicateOf?: string;
+  /** Set when the finding lacks supporting evidence. */
+  missingEvidence?: boolean;
+  /** Sources of contradictory evidence that undermine the finding. */
+  contradicts?: string[];
 }
 
 const normalizeSeverity = (
@@ -41,6 +49,22 @@ const adTriageToProposalStatus = (
   if (triageStatus === "closed") return "dismissed";
   if (triageStatus === "acknowledged") return "approved";
   return "new";
+};
+
+/**
+ * Derive proposal status from the AD scenario flags in addition to triageStatus.
+ * - monitor-only / duplicate → dismissed (no-op)
+ * - missing evidence / contradictory evidence → needs-evidence
+ * - otherwise fall back to triageStatus mapping
+ */
+const adStatusFromScenario = (ad: AttackDiscoveryAlertSummary): ProposalStatus => {
+  if (ad.monitorOnly || ad.duplicateOf) {
+    return "dismissed";
+  }
+  if (ad.missingEvidence || (ad.contradicts && ad.contradicts.length > 0)) {
+    return "needs-evidence";
+  }
+  return adTriageToProposalStatus(ad.triageStatus);
 };
 
 export interface MapAttackDiscoveryParams {
@@ -72,7 +96,22 @@ export const mapAttackDiscoveryToProposal = (
 
   const severity = normalizeSeverity(ad.severity);
   const confidence = ad.confidence ?? 0.7;
-  const status = adTriageToProposalStatus(ad.triageStatus);
+  const status = adStatusFromScenario(ad);
+
+  const recommendationParts: string[] = [];
+  if (ad.monitorOnly) {
+    recommendationParts.push("Monitor only");
+  } else if (ad.duplicateOf) {
+    recommendationParts.push(`Duplicate of ${ad.duplicateOf}`);
+  } else if (ad.missingEvidence) {
+    recommendationParts.push("Missing evidence");
+  } else if (ad.contradicts && ad.contradicts.length > 0) {
+    recommendationParts.push(`Contradicted by ${ad.contradicts.join(", ")}`);
+  } else {
+    recommendationParts.push("Review Attack Discovery finding");
+  }
+  recommendationParts.push(ad.description ?? `correlate related alerts for ${ad.id}.`);
+  const recommendation = recommendationParts.join(" — ");
 
   return {
     id: proposalId,
@@ -84,9 +123,7 @@ export const mapAttackDiscoveryToProposal = (
     severity,
     confidence,
     status,
-    recommendation:
-      ad.description ??
-      `Review Attack Discovery finding ${ad.id} and correlate related alerts.`,
+    recommendation,
     evidenceRefs: ad.relatedAlertIds ?? [],
     hypothesis: ad.description,
     expectedImpact: ad.tactics?.length

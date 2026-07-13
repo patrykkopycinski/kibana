@@ -143,6 +143,8 @@ class ProposalClientImpl implements ProposalClient {
   }
 
   async create(params: ProposalCreateParams): Promise<ProposalProperties> {
+    const existing = await this.getById(params.id);
+    const now = new Date().toISOString();
     const document: ProposalProperties = {
       schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
       id: params.id,
@@ -160,18 +162,20 @@ class ProposalClientImpl implements ProposalClient {
       riskCaveats: params.riskCaveats,
       approvalRequirement: params.approvalRequirement,
       requiredApproverCount: params.requiredApproverCount ?? 1,
-      approvals: [],
+      approvals: existing?._source?.approvals ?? [],
       hypothesis: params.hypothesis,
-      decisionHistory: [],
-      createdAt: new Date().toISOString(),
+      decisionHistory: existing?._source?.decisionHistory ?? [],
+      createdAt: existing?._source?.createdAt ?? now,
       space: this.space,
     };
 
+    await this.deleteAllById(params.id);
     await this.storage.getClient().index({
+      id: params.id,
       document,
     });
 
-    return this.get(params.id);
+    return document;
   }
 
   async update(id: string, updates: Partial<ProposalProperties>): Promise<ProposalProperties> {
@@ -186,8 +190,9 @@ class ProposalClientImpl implements ProposalClient {
       id: document._source!.id,
     };
 
+    await this.deleteAllById(id);
     await this.storage.getClient().index({
-      id: document._id,
+      id,
       document: updatedSource,
     });
 
@@ -271,8 +276,9 @@ class ProposalClientImpl implements ProposalClient {
       ],
     };
 
+    await this.deleteAllById(id);
     await this.storage.getClient().index({
-      id: document._id,
+      id,
       document: updatedSource,
     });
 
@@ -295,8 +301,9 @@ class ProposalClientImpl implements ProposalClient {
       evidenceRefs: [...current.evidenceRefs, evidenceId],
     };
 
+    await this.deleteAllById(id);
     await this.storage.getClient().index({
-      id: document._id,
+      id,
       document: updatedSource,
     });
 
@@ -315,8 +322,9 @@ class ProposalClientImpl implements ProposalClient {
       evidenceRefs: current.evidenceRefs.filter((ref) => ref !== evidenceId),
     };
 
+    await this.deleteAllById(id);
     await this.storage.getClient().index({
-      id: document._id,
+      id,
       document: updatedSource,
     });
 
@@ -328,6 +336,7 @@ class ProposalClientImpl implements ProposalClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      sort: [{ createdAt: 'desc' }],
       query: {
         bool: {
           filter: [createSpaceFilter(this.space), { term: { id } }],
@@ -339,6 +348,28 @@ class ProposalClientImpl implements ProposalClient {
       return undefined;
     }
     return { _id: hit._id!, _source: hit._source } as ProposalDocument;
+  }
+
+  private async deleteAllById(id: string): Promise<void> {
+    const response = await this.storage.getClient().search({
+      query: { bool: { filter: [createSpaceFilter(this.space), { term: { id } }] } },
+      size: 100,
+      track_total_hits: true,
+    });
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+    if (total > 100) {
+      this.logger.warn(
+        `More than 100 duplicate documents found for proposal ${id}; truncating cleanup.`
+      );
+    }
+    for (const hit of response.hits.hits) {
+      if (hit._id) {
+        await this.storage.getClient().delete({ id: hit._id });
+      }
+    }
   }
 }
 

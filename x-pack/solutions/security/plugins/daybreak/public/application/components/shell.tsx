@@ -34,13 +34,15 @@ import { BriefDashboard } from './brief/brief_dashboard';
 import { DaybreakVisualStyles } from './daybreak_visual_styles';
 import { WatchesConsole } from './watches_console';
 import { WorkflowsConsole } from './workflows_console';
+import { InvestigationsConsole } from './investigations_console';
+import { SseConsole } from './sse_console';
 import { SkillsConsole } from './skills_console';
 import { ActivityConsole } from './activity_console';
 import { PerformanceConsole } from './performance_console';
 import { GuardrailsConsole } from './guardrails_console';
 import { EmbeddedAppPage } from './embedded_app_page';
 import { ApprovalGate } from './gate/approval_gate';
-import { ProposalInspector } from './proposal/proposal_inspector';
+import { InspectorPanel } from './inspector/inspector_panel';
 import { ThreadView } from './thread/thread_view';
 import { deriveGateTier } from './gate/gate_tier';
 import { PROPOSAL_STATUS_META } from './proposal/proposal_status';
@@ -65,6 +67,8 @@ type Destination =
   | 'agents'
   | 'workflows'
   | 'skills'
+  | 'investigations'
+  | 'sse'
   | 'activity'
   | 'performance'
   | 'guardrails';
@@ -89,6 +93,8 @@ const RAIL_DESTINATIONS: RailDestination[] = [
   { key: 'agents', label: 'Watches', icon: 'eye', group: 'agent' },
   { key: 'workflows', label: 'Workflows', icon: 'play', group: 'agent' },
   { key: 'skills', label: 'Skills', icon: 'layers', group: 'agent' },
+  { key: 'investigations', label: 'Investigations', icon: 'magnifyWithPlus', group: 'agent' },
+  { key: 'sse', label: 'SSE', icon: 'bell', group: 'agent' },
   { key: 'activity', label: 'Activity', icon: 'pulse', group: 'agent' },
   { key: 'performance', label: 'Performance', icon: 'stats', group: 'agent' },
   { key: 'guardrails', label: 'Guardrails', icon: 'security', group: 'agent' },
@@ -189,7 +195,7 @@ export const DaybreakApp: React.FC = () => {
           <div className="daybreakNavPanelHeader">
             <div className="daybreakNavTop">
               <div className="daybreakNavBrand">
-                <EuiIcon type="logoSecurity" size="m" />
+                <EuiIcon type="logoSecurity" size="m" aria-hidden={true} />
                 <span>NotDaybreak</span>
               </div>
               <EuiButtonEmpty
@@ -281,7 +287,7 @@ export const DaybreakApp: React.FC = () => {
           <div className="daybreakNavPanelHeader">
             <div className="daybreakNavTop">
               <div className="daybreakNavBrand">
-                <EuiIcon type="comment" size="m" />
+                <EuiIcon type="comment" size="m" aria-hidden={true} />
                 <span>Chats</span>
               </div>
               <EuiButtonEmpty
@@ -322,6 +328,7 @@ export const DaybreakApp: React.FC = () => {
               <EuiIcon
                 type={RAIL_DESTINATIONS.find((d) => d.key === destination)?.icon ?? 'apps'}
                 size="m"
+                aria-hidden={true}
               />
               <span>{RAIL_DESTINATIONS.find((d) => d.key === destination)?.label}</span>
             </div>
@@ -360,6 +367,14 @@ export const DaybreakApp: React.FC = () => {
 
     if (destination === 'skills') {
       return <SkillsConsole />;
+    }
+
+    if (destination === 'investigations') {
+      return <InvestigationsConsole />;
+    }
+
+    if (destination === 'sse') {
+      return <SseConsole />;
     }
 
     if (destination === 'activity') {
@@ -422,33 +437,18 @@ export const DaybreakApp: React.FC = () => {
       <EuiFlexItem
         grow={false}
         className="daybreakInspectorWrapper"
-        data-test-subj="daybreakInspectorPanel"
+        data-test-subj="daybreakInspectorWrapper"
       >
-        <EuiPanel
-          className="daybreakInspectorPanel"
-          borderRadius="none"
-          hasShadow={false}
-          paddingSize="none"
-        >
-          <div className="daybreakInspectorAppBar">
-            <EuiText size="xs" className="daybreakEyebrow">
-              INSPECTOR
-            </EuiText>
-            <EuiButtonEmpty
-              iconType="cross"
-              size="xs"
-              onClick={() => setSelectedId(undefined)}
-              aria-label="Close inspector"
-            >
-              Close
-            </EuiButtonEmpty>
-          </div>
-          <div className="daybreakInspectorBody">
-            <ProposalInspector proposal={selected} evidence={selectedEvidence} />
-            <EuiSpacer size="l" />
+        <div className="daybreakInspectorColumn">
+          <InspectorPanel
+            proposal={selected}
+            evidence={selectedEvidence}
+            onClose={() => setSelectedId(undefined)}
+          />
+          <div className="daybreakInspectorGate">
             <ApprovalGate proposal={selected} />
           </div>
-        </EuiPanel>
+        </div>
       </EuiFlexItem>
     );
   };
@@ -472,7 +472,7 @@ export const DaybreakApp: React.FC = () => {
         >
           <EuiFlexItem grow={false}>
             <div className="daybreakRailBrand">
-              <EuiIcon type="logoSecurity" size="m" />
+              <EuiIcon type="logoSecurity" size="m" aria-hidden={true} />
             </div>
             <EuiSpacer size="s" />
             {RAIL_GROUPS.map((group, groupIndex) => (
@@ -511,7 +511,7 @@ export const DaybreakApp: React.FC = () => {
                         data-test-subj={`daybreakRailItem-${dest.key}`}
                         aria-label={label}
                       >
-                        <EuiIcon type={icon} size="m" />
+                        <EuiIcon type={icon} size="m" aria-hidden={true} />
                         <span className="daybreakRailItemLabel">{label}</span>
                       </button>
                     </EuiToolTip>

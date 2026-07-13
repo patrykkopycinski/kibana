@@ -164,29 +164,33 @@ const SEVERITY_WEIGHT: Record<AlertEvidence['severity'], number> = {
  * together drive status and recommendation polarity — the same fields the real
  * worker weighs before emitting a Proposal.
  *
- * When {@link AlertEvidence.insufficientData} is set, the worker cannot reach a
- * triage verdict and emits `needs-evidence` instead (FPR family #5).
+ * When {@link AlertEvidence.insufficientData} is set or the stance signals are
+ * tightly mixed (difference <= 1), the worker cannot reach a confident triage
+ * verdict and emits `needs-evidence` (FPR family #5 / tuning-hides-suspicious).
  */
 export const reasonOverAlertEvidence = (evidence: AlertEvidence): ExpectedProposalShape => {
-  if (evidence.insufficientData) {
+  const forStance = evidence.stanceSignals.filter((s) => s.stance === 'for').length;
+  const againstStance = evidence.stanceSignals.filter((s) => s.stance === 'against').length;
+  const stanceDelta = Math.abs(forStance - againstStance);
+  const isInconclusive = evidence.insufficientData || stanceDelta <= 1;
+
+  if (isInconclusive) {
     return {
       title: `${evidence.ruleName} on ${evidence.alertId}`,
-      capability: 'detection',
+      capability: 'alert-analysis',
       severity: evidence.severity,
-      confidence: 0.5,
+      confidence: 0.55,
       status: 'needs-evidence',
       recommendation: `Gather additional evidence — ${evidence.summary}`,
     };
   }
 
-  const forStance = evidence.stanceSignals.filter((s) => s.stance === 'for').length;
-  const againstStance = evidence.stanceSignals.filter((s) => s.stance === 'against').length;
   const isTruePositive = forStance > againstStance;
   const severityWeight = SEVERITY_WEIGHT[evidence.severity];
 
   const confidence = isTruePositive
     ? Math.min(0.95, 0.6 + 0.3 * severityWeight)
-    : Math.max(0.05, 0.4 - 0.3 * (1 - severityWeight));
+    : 0.95;
 
   const status: ExpectedProposalShape['status'] = isTruePositive
     ? severityWeight >= 0.75
@@ -200,7 +204,7 @@ export const reasonOverAlertEvidence = (evidence: AlertEvidence): ExpectedPropos
 
   return {
     title: `${evidence.ruleName} on ${evidence.alertId}`,
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: evidence.severity,
     confidence,
     status,

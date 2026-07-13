@@ -21,7 +21,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
+import { useProposalActions } from '../../hooks/use_proposal_actions';
 import type { DaybreakProposal, MissingRequirement } from '../../../services/proposals_service';
+import { ActionFlyout, type GatedAction } from '../action/action_flyout';
 import { GateTierBadge } from './gate_tier_badge';
 import { deriveGateTier } from './gate_tier';
 import { PROPOSAL_STATUS_META } from '../proposal/proposal_status';
@@ -51,6 +53,18 @@ const blastRadiusCopy: Partial<Record<MissingRequirement, string>> = {
     'A single-approval override removes the second-key safeguard for this proposal.',
 };
 
+const isolateGatedAction: GatedAction = {
+  label: 'Isolate host',
+  cta: 'Isolate host',
+  tone: 'danger',
+  permNote: 'requires endpoint containment privileges',
+  blast: [
+    { icon: 'desktop', text: 'Target host will be isolated from the network' },
+    { icon: 'alert', text: 'Active sessions on the host may be disrupted' },
+    { icon: 'check', text: 'Approved proposal audit trail is preserved', safe: true },
+  ],
+};
+
 const isTerminal = (status: DaybreakProposal['status']): boolean =>
   status === 'approved' || status === 'dismissed';
 
@@ -58,6 +72,9 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
   const tier = deriveGateTier(proposal);
   const statusMeta = PROPOSAL_STATUS_META[proposal.status];
   const { transition, isLoading, missingRequirements } = useProposalTransition();
+  const { actResponse, runResponseActionWorker } = useProposalActions();
+  const [responseResult, setResponseResult] = React.useState<string | undefined>();
+  const [isolateFlyout, setIsolateFlyout] = React.useState(false);
   const isApprovalReady = tier === 'approval-required' && !isTerminal(proposal.status);
   const isComplete = isTerminal(proposal.status);
   const requiredApproverCount = proposal.requiredApproverCount ?? 1;
@@ -71,6 +88,25 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
       targetStatus: 'approved',
       decisionType: 'approve',
     });
+  };
+
+  const dispatchResponse = (action: 'get_processes' | 'isolate') => {
+    setResponseResult(undefined);
+    actResponse.mutate(
+      { id: proposal.id, action },
+      {
+        onSuccess: (result) => setResponseResult(result.timelineEntry.description),
+        onError: (error) =>
+          setResponseResult(
+            error instanceof Error ? error.message : 'Response action failed.'
+          ),
+      }
+    );
+  };
+
+  const handleIsolateConfirm = () => {
+    setIsolateFlyout(false);
+    dispatchResponse('isolate');
   };
 
   return (
@@ -198,6 +234,101 @@ export const ApprovalGate: React.FC<{ proposal: DaybreakProposal }> = ({ proposa
             ))}
           </div>
         </>
+      )}
+
+
+      {(proposal.status === 'dismissed' || proposal.status === 'modified') && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            POST-DISMISS ACTIONS
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="tag"
+                onClick={() => runResponseActionWorker.mutate({ id: proposal.id })}
+                isLoading={runResponseActionWorker.isLoading}
+                data-test-subj="daybreakGateTagFpWorkerButton"
+              >
+                Tag FP (run worker)
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {responseResult && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="xs" color="subdued" data-test-subj="daybreakGateFpTagResult">
+                {responseResult}
+              </EuiText>
+            </>
+          )}
+        </>
+      )}
+
+      {proposal.status === 'approved' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            RESPONSE ACTIONS
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="inspect"
+                onClick={() => dispatchResponse('get_processes')}
+                isLoading={actResponse.isLoading}
+                data-test-subj="daybreakGateGetProcessesButton"
+              >
+                Get processes
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="warning"
+                iconType="lock"
+                onClick={() => setIsolateFlyout(true)}
+                isLoading={actResponse.isLoading}
+                data-test-subj="daybreakGateIsolateHostButton"
+              >
+                Isolate host
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="play"
+                onClick={() => runResponseActionWorker.mutate({ id: proposal.id })}
+                isLoading={runResponseActionWorker.isLoading}
+                data-test-subj="daybreakGateRunResponseWorkerButton"
+              >
+                Run worker
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {responseResult && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText size="xs" color="subdued" data-test-subj="daybreakGateResponseResult">
+                {responseResult}
+              </EuiText>
+            </>
+          )}
+        </>
+      )}
+
+      {isolateFlyout && (
+        <ActionFlyout
+          proposal={proposal}
+          action={isolateGatedAction}
+          onClose={() => setIsolateFlyout(false)}
+          onConfirm={handleIsolateConfirm}
+        />
       )}
     </EuiPanel>
   );

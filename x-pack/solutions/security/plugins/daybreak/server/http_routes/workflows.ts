@@ -28,7 +28,10 @@ const workflowBodySchema = {
 };
 
 const executeWorkflowBodySchema = schema.maybe(
-  schema.object({ rowId: schema.maybe(schema.string()) })
+  schema.object({
+    rowId: schema.maybe(schema.string()),
+    alertId: schema.maybe(schema.string()),
+  })
 );
 
 export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
@@ -104,6 +107,7 @@ export const registerWorkflowRoutes = (dependencies: RouteDependencies) => {
       }
       const workflowExecutionId = await dependencies.executeAlertAnalysisWorker(request, {
         rowId: request.body?.rowId,
+        alertId: request.body?.alertId,
       });
       const updated = await (
         await getClient(ctx, request)
@@ -201,6 +205,8 @@ interface WorkflowExecutionStatus {
   activeExecutionId?: string;
   status: 'idle' | 'in-motion' | 'completed' | 'failed';
   timestamp?: string;
+  error?: string;
+  lastLog?: string;
 }
 
 const getWorkflowExecutionStatus = async ({
@@ -237,6 +243,10 @@ const getWorkflowExecutionStatus = async ({
         log.transaction?.outcome === 'failure' ||
         log.level === 'error'
     );
+    const lastLog = logs[0];
+    const error =
+      terminal?.error?.message ??
+      (typeof terminal?.message === 'string' ? terminal.message : undefined);
     if (terminal) {
       return {
         workflowId: workflow.id,
@@ -246,6 +256,8 @@ const getWorkflowExecutionStatus = async ({
             ? 'completed'
             : 'failed',
         timestamp: terminal['@timestamp'],
+        error,
+        lastLog: lastLog?.message ?? lastLog?.event?.action,
       };
     }
     return {

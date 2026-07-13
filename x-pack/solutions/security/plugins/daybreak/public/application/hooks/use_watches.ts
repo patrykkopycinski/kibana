@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import React from 'react';
+import type { DaybreakWatch } from '../../services/watches_service';
 import { useKibana } from './use_kibana';
 
 export const useWatches = () => {

@@ -232,7 +232,7 @@ describe('ProposalClient (FR-004, FR-005)', () => {
       expect(result.confidence).toBe(0.42);
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'es-doc-id',
+          id: 'proposal-1',
           document: expect.objectContaining({ confidence: 0.42 }),
         })
       );

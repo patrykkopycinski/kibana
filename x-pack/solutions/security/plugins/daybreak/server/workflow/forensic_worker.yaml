@@ -1,0 +1,51 @@
+# Forensic Analysis Worker — hands off escalated investigations to endpoint-forensic-analysis.
+#
+# Setup → Load → Forensic → Confirm (Watch Officer Reason phase).
+version: "1"
+name: Daybreak Investigation Forensic Worker
+description: >-
+  Run endpoint forensic reconstruction for an escalated investigation by
+  discovering Defend telemetry scope and recording findings on the timeline.
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: setup
+    type: kibana.request
+    with:
+      debug: true
+      method: GET
+      path: "/internal/daybreak/config"
+      headers:
+        x-elastic-internal-origin: "kibana"
+
+  - name: load
+    type: kibana.request
+    with:
+      method: GET
+      path: "/api/daybreak/investigations/{{inputs.investigationId}}"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "true"
+
+  - name: forensic
+    type: kibana.request
+    with:
+      method: POST
+      path: "/api/daybreak/investigations/{{inputs.investigationId}}/forensic"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "true"
+        Content-Type: "application/json"
+      body:
+        hosts: "{{inputs.hosts}}"
+        timeWindowHours: "{{inputs.timeWindowHours}}"
+
+  - name: confirm
+    type: kibana.request
+    with:
+      method: GET
+      path: "/api/daybreak/investigations/{{inputs.investigationId}}"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "true"

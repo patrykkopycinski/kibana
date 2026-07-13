@@ -14,14 +14,14 @@ import {
   DEFAULT_ALERT_ANALYSIS_WORKER_ID,
 } from "./versions";
 
-const VERDICT_TO_TITLE_PREFIX: Record<string, string> = {
-  true_positive: "Investigate",
-  false_positive: "Tune",
-  benign_true_positive: "Document",
-  needs_evidence: "Gather evidence for",
-};
-
-/** Map Reason-phase verdict to initial proposal status. */
+/** Map Reason-phase verdict to initial proposal status.
+ *
+ * Aligned with the golden dataset (server/evals/golden_dataset.ts):
+ * - true_positive at high/critical severity → escalated
+ * - true_positive at low/medium severity → new
+ * - false_positive / benign_true_positive → dismissed
+ * - needs_evidence / empty stance → needs-evidence
+ */
 export const verdictToProposalStatus = (
   verdict: string,
   enriched: EnrichedAlertSchema,
@@ -29,22 +29,38 @@ export const verdictToProposalStatus = (
   if (verdict === "needs_evidence" || enriched.stanceSignals.length === 0) {
     return "needs-evidence";
   }
+  if (verdict === "true_positive") {
+    return enriched.severity === "high" || enriched.severity === "critical" ? "escalated" : "new";
+  }
+  if (verdict === "false_positive" || verdict === "benign_true_positive") {
+    return "dismissed";
+  }
   return deriveInitialStatus(enriched);
 };
 
-/** Build a human-readable proposal title from verdict + rule name. */
-export const buildProposalTitle = (verdict: string, ruleName: string): string => {
-  const prefix = VERDICT_TO_TITLE_PREFIX[verdict] ?? "Review";
-  return `${prefix}: ${ruleName}`;
-};
+/** Build a proposal title aligned with the golden dataset shape. */
+export const buildProposalTitle = (ruleName: string, alertId: string): string =>
+  `${ruleName} on ${alertId}`;
 
-/** Map verdict to actionable recommendation text. */
+/** Map verdict to actionable recommendation text aligned with the golden dataset shape.
+ *
+ * Golden dataset format:
+ * - true_positive → "Escalate — {summary}"
+ * - false_positive / benign_true_positive → "Dismiss — {summary}"
+ * - needs_evidence → "Gather additional evidence — {summary}"
+ */
 export const buildRecommendationFromReason = (
   reason: ReasonStructuredOutput,
   enriched: EnrichedAlertSchema,
 ): string => {
-  const host = enriched.hostSummary ? ` on ${enriched.hostSummary}` : "";
-  return `${reason.rationale} (verdict=${reason.verdict}, host${host})`;
+  const summary = enriched.summary;
+  if (reason.verdict === 'needs_evidence') {
+    return `Gather additional evidence — ${summary}`;
+  }
+  if (reason.verdict === 'false_positive' || reason.verdict === 'benign_true_positive') {
+    return `Dismiss — ${summary}`;
+  }
+  return `Escalate — ${summary}`;
 };
 
 export interface BuildProposalFromWorkerRunParams {
@@ -85,7 +101,7 @@ export const buildProposalFromWorkerRun = (
   return {
     id,
     schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
-    title: buildProposalTitle(reason.verdict, enriched.ruleName),
+    title: buildProposalTitle(enriched.ruleName, enriched.alertId),
     sourceWatch: sourceWatchId,
     sourceWorkerId,
     capability,

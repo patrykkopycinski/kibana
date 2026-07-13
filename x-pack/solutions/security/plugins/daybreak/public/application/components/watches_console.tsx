@@ -45,6 +45,30 @@ const proposalColor: Record<DaybreakProposal['severity'], 'success' | 'warning' 
   critical: 'danger',
 };
 
+interface AutonomyLabels {
+  throughline: string;
+  catalog: string;
+  operatingModel: string;
+}
+
+const AUTONOMY_LABELS: Record<DaybreakWatch['autonomyTier'], AutonomyLabels> = {
+  'proposed-diff': {
+    throughline: 'Suggest only / Reads auto',
+    catalog: 'Suggest only / Monitor-only',
+    operatingModel: 'Observe / Propose',
+  },
+  'auto-run': {
+    throughline: 'Drafts auto',
+    catalog: 'Human-on-the-loop / Supervised auto',
+    operatingModel: 'Prepare',
+  },
+  'approval-required': {
+    throughline: 'Acts · gated / Acts · trusted',
+    catalog: 'Human-in-the-loop',
+    operatingModel: 'Execute low-risk / Execute consequential',
+  },
+};
+
 const LinkedProposals: React.FC<{ watchId: string }> = ({ watchId }) => {
   const { proposals } = useProposals();
   const linked = proposals.filter((proposal) => proposal.sourceWatch === watchId);
@@ -418,6 +442,13 @@ export const WatchesConsole: React.FC = () => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      Throughline: {AUTONOMY_LABELS[selected.autonomyTier].throughline}
+                      <br />
+                      Catalog: {AUTONOMY_LABELS[selected.autonomyTier].catalog}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiButton
                       onClick={() => toggleWatch(selected)}
                       disabled={updatingWatchId === selected.id}
@@ -519,9 +550,9 @@ export const WatchesConsole: React.FC = () => {
                 })
               }
               options={[
-                { value: 'approval-required', text: 'Approval required' },
-                { value: 'proposed-diff', text: 'Proposed diff' },
-                { value: 'auto-run', text: 'Auto-run' },
+                { value: 'approval-required', text: 'Approval required (Human-in-the-loop)' },
+                { value: 'proposed-diff', text: 'Proposed diff (Suggest / Monitor)' },
+                { value: 'auto-run', text: 'Auto-run (Draft / Supervised)' },
               ]}
               data-test-subj="daybreakCreateWatchAutonomyInput"
             />

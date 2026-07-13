@@ -11,12 +11,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ApprovalGate } from './approval_gate';
 import { useProposalTransition } from '../../hooks/use_proposal_transition';
+import { useProposalActions } from '../../hooks/use_proposal_actions';
 import type { DaybreakProposal } from '../../../services/proposals_service';
 import { PROPOSAL_STATUS_VALUES, PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 
 jest.mock('../../hooks/use_proposal_transition');
+jest.mock('../../hooks/use_proposal_actions');
 
 const mockUseProposalTransition = useProposalTransition as jest.Mock;
+const mockUseProposalActions = useProposalActions as jest.Mock;
 
 const baseProposal: DaybreakProposal = {
   id: 'proposal-1',
@@ -41,6 +44,10 @@ describe('ApprovalGate (FR-016, FR-7, FR-018, FR-019)', () => {
 
   beforeEach(() => {
     transition = jest.fn();
+    mockUseProposalActions.mockReturnValue({
+      actResponse: { mutate: jest.fn(), isLoading: false },
+      runResponseActionWorker: { mutate: jest.fn(), isLoading: false },
+    });
     mockUseProposalTransition.mockReturnValue({
       transition,
       isLoading: false,
@@ -83,7 +90,11 @@ describe('ApprovalGate (FR-016, FR-7, FR-018, FR-019)', () => {
 
     fireEvent.click(screen.getByTestId('daybreakGateApproveButton'));
 
-    expect(transition).toHaveBeenCalledWith({ id: 'proposal-1', targetStatus: 'approved', decisionType: 'approve' });
+    expect(transition).toHaveBeenCalledWith({
+      id: 'proposal-1',
+      targetStatus: 'approved',
+      decisionType: 'approve',
+    });
   });
 
   it('renders the missingRequirements failure callout when the gate rejects the transition (FR-018)', () => {
@@ -129,5 +140,81 @@ describe('ApprovalGate (FR-016, FR-7, FR-018, FR-019)', () => {
         unmount();
       }
     );
+  });
+});
+
+describe('approved proposal response actions', () => {
+  let actResponseMutate: jest.Mock;
+  let runResponseActionWorkerMutate: jest.Mock;
+
+  beforeEach(() => {
+    actResponseMutate = jest.fn();
+    runResponseActionWorkerMutate = jest.fn();
+    mockUseProposalActions.mockReturnValue({
+      actResponse: { mutate: actResponseMutate, isLoading: false },
+      runResponseActionWorker: { mutate: runResponseActionWorkerMutate, isLoading: false },
+    });
+    mockUseProposalTransition.mockReturnValue({
+      transition: jest.fn(),
+      isLoading: false,
+      missingRequirements: undefined,
+    });
+  });
+
+  const approvedProposal: DaybreakProposal = {
+    ...baseProposal,
+    status: 'approved',
+    evidenceRefs: ['evidence-1'],
+    recommendation: 'Isolate FIN-WS-04 pending investigation.',
+  };
+
+  it('renders response action buttons when the proposal is approved', () => {
+    renderGate(approvedProposal);
+
+    expect(screen.getByTestId('daybreakGateGetProcessesButton')).toBeInTheDocument();
+    expect(screen.getByTestId('daybreakGateIsolateHostButton')).toBeInTheDocument();
+    expect(screen.getByTestId('daybreakGateRunResponseWorkerButton')).toBeInTheDocument();
+  });
+
+  it('does not render response action buttons for non-approved proposals', () => {
+    renderGate({ ...approvedProposal, status: 'escalated' });
+
+    expect(screen.queryByTestId('daybreakGateGetProcessesButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('daybreakGateIsolateHostButton')).not.toBeInTheDocument();
+  });
+
+  it('dispatches get_processes immediately when Get processes is clicked', () => {
+    renderGate(approvedProposal);
+
+    fireEvent.click(screen.getByTestId('daybreakGateGetProcessesButton'));
+
+    expect(actResponseMutate).toHaveBeenCalledWith(
+      { id: 'proposal-1', action: 'get_processes' },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+    );
+  });
+
+  it('opens the isolate confirmation flyout before dispatching isolate', () => {
+    renderGate(approvedProposal);
+
+    fireEvent.click(screen.getByTestId('daybreakGateIsolateHostButton'));
+
+    expect(screen.getByTestId('daybreakActionFlyout')).toBeInTheDocument();
+    expect(actResponseMutate).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('daybreakActionFlyoutConfirm'));
+
+    expect(actResponseMutate).toHaveBeenCalledWith(
+      { id: 'proposal-1', action: 'isolate' },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+    );
+  });
+
+  it('calls runResponseActionWorker when Run worker is clicked', () => {
+    renderGate(approvedProposal);
+
+    fireEvent.click(screen.getByTestId('daybreakGateRunResponseWorkerButton'));
+
+    expect(runResponseActionWorkerMutate).toHaveBeenCalledWith({ id: 'proposal-1' });
   });
 });

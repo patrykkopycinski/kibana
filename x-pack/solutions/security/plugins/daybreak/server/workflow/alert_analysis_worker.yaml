@@ -76,4 +76,5 @@ steps:
       body:
         enrichedJson: '{{ steps.enrich.output | json }}'
         reasonJson: '{{ steps.reason.output | json }}'
+        configJson: '{{ steps.setup.output | json }}'
         sourceWatchId: 'daybreak-alert-analysis-watch'

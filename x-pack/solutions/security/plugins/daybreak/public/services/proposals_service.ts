@@ -98,6 +98,23 @@ export interface TransitionGateFailureBody {
  * Thin HTTP client wrapping the Daybreak Proposal API (FR-010, FR-011). The
  * `public/` layer renders real PD-2 worker output — no mocked or seeded data.
  */
+
+export type ResponseAction = 'get_processes' | 'isolate';
+
+export interface ActResponseResult {
+  proposalId: string;
+  action: ResponseAction;
+  hostName: string;
+  toolId: string;
+  toolResult: unknown;
+  investigationId?: string;
+  timelineEntry: {
+    timestamp: string;
+    description: string;
+    evidenceRef?: string;
+  };
+}
+
 export class ProposalsService {
   private readonly http: HttpSetup;
 
@@ -108,6 +125,28 @@ export class ProposalsService {
   async list(): Promise<DaybreakProposal[]> {
     const { results } = await this.http.get<ListProposalsResponse>(`${daybreakApiPath}/proposals`);
     return results;
+  }
+
+
+  async actResponse(
+    id: string,
+    body: { action?: ResponseAction; hostName?: string; comment?: string } = {}
+  ): Promise<ActResponseResult> {
+    return this.http.post<ActResponseResult>(`${daybreakApiPath}/proposals/${id}/act/response`, {
+      body: JSON.stringify(body),
+    });
+  }
+
+  async runResponseActionWorker(
+    id: string,
+    body: { action?: ResponseAction; hostName?: string } = {}
+  ): Promise<{ workflowExecutionId: string }> {
+    return this.http.post<{ workflowExecutionId: string }>(
+      `${daybreakApiPath}/proposals/${id}/run-response-action`,
+      {
+        body: JSON.stringify(body),
+      }
+    );
   }
 
   async transitionStatus(

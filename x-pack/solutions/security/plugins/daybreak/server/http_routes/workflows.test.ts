@@ -100,7 +100,7 @@ describe('workflow lifecycle routes', () => {
 
     await handlers.get('POST /api/daybreak/workflows/{id}/execute')!(ctx, request, response);
 
-    expect(execute).toHaveBeenCalledWith(request);
+    expect(execute).toHaveBeenCalledWith(request, { rowId: undefined, alertId: undefined });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({ workflowExecutionId: 'execution-1' }),

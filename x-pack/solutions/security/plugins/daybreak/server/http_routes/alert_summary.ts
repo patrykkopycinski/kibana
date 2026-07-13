@@ -13,7 +13,20 @@ import { daybreakGoldenDataset } from '../evals/golden_dataset';
 
 const alertSummaryQuerySchema = schema.object({
   rowId: schema.maybe(schema.string()),
+  alertId: schema.maybe(schema.string()),
 });
+
+const findGoldenRow = (rowId?: string, alertId?: string) => {
+  if (rowId) {
+    return daybreakGoldenDataset.examples.find((row) => row.id === rowId);
+  }
+  if (alertId) {
+    return daybreakGoldenDataset.examples.find(
+      (row) => row.input.alertEvidence.alertId === alertId
+    );
+  }
+  return daybreakGoldenDataset.examples[0];
+};
 
 export const registerAlertSummaryRoute = ({ logger, router }: RouteDependencies) => {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -26,13 +39,12 @@ export const registerAlertSummaryRoute = ({ logger, router }: RouteDependencies)
       options: { access: 'public' },
     },
     wrapHandler(async (ctx, request, response) => {
-      const rowId = request.query.rowId;
-      const row = rowId
-        ? daybreakGoldenDataset.examples.find((r) => r.id === rowId)
-        : daybreakGoldenDataset.examples[0];
+      const { rowId, alertId } = request.query;
+      const row = findGoldenRow(rowId, alertId);
 
       if (!row) {
-        return response.notFound({ body: { message: `Golden dataset row not found: ${rowId}` } });
+        const key = rowId ?? alertId ?? '(default)';
+        return response.notFound({ body: { message: `Golden dataset row not found: ${key}` } });
       }
 
       const evidence = row.input.alertEvidence;
@@ -40,6 +52,7 @@ export const registerAlertSummaryRoute = ({ logger, router }: RouteDependencies)
         body: {
           total: 1,
           rowId: row.id,
+          alertId: evidence.alertId,
           alerts: [
             {
               _id: evidence.alertId,

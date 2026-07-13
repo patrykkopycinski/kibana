@@ -1,0 +1,68 @@
+# PD-2 Alert-triggered variant — same 5-phase worker as alert_analysis_worker.yaml
+# but wired to `type: alert` (AD triaging pattern) instead of manual-only execute.
+#
+# Enrich resolves golden evidence by alert document id from the trigger event:
+#   event.alerts[0]._id → GET /api/daybreak/alert-summary?alertId=...
+#
+# Manual smoke: run via runAlertAnalysisWorkerAlert({ alertId }) which injects a
+# synthetic alert event into the execution context.
+version: '1'
+name: Daybreak Alert Analysis Worker (Alert Trigger)
+description: >-
+  Alert-triggered 5-phase alert-analysis worker: Setup → Enrich → Reason → Act.
+  Fires on security alert triggers (type: alert) per AD automated triaging pattern.
+enabled: false
+triggers:
+  - type: alert
+    enabled: true
+steps:
+  - name: setup
+    type: kibana.request
+    with:
+      debug: true
+      method: GET
+      path: '/internal/daybreak/config'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+
+  - name: enrich
+    type: kibana.request
+    with:
+      method: GET
+      path: '/api/daybreak/alert-summary?alertId={{event.alerts[0]._id}}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
+
+  - name: reason
+    type: ai.agent
+    agent-id: daybreak-alert-analysis-agent
+    with:
+      message: >-
+        Analyze the following alert evidence and produce a structured
+        triage verdict: {{ steps.enrich.output | json }}
+    timeout: 600s
+    on-failure:
+      retry:
+        max-attempts: 3
+        strategy: exponential
+        delay: 2s
+        multiplier: 2
+        max-delay: 30s
+        jitter: true
+      continue: false
+
+  - name: act
+    type: kibana.request
+    with:
+      method: POST
+      path: '/api/daybreak/proposals/from-worker-run'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
+        Content-Type: 'application/json'
+      body:
+        enrichedJson: '{{ steps.enrich.output | json }}'
+        reasonJson: '{{ steps.reason.output | json }}'
+        configJson: '{{ steps.setup.output | json }}'
+        sourceWatchId: 'daybreak-alert-analysis-watch-alert-trigger'

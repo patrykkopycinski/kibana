@@ -160,7 +160,7 @@ const TRUE_POSITIVE_CRITICAL: DaybreakGoldenExample = {
   },
   output: {
     title: 'Credential Dumping - LSASS Memory - Mimikatz on alert-mimikatz-dc01',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'critical',
     confidence: 0.9,
     recommendation:
@@ -194,9 +194,9 @@ const BENIGN_SCANNER: DaybreakGoldenExample = {
   },
   output: {
     title: 'Network Scanning - Suspicious Port Sweep on alert-qualys-scan-app01',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'low',
-    confidence: 0.1,
+    confidence: 0.95,
     recommendation:
       'Dismiss — Port sweep from the approved Qualys vulnerability scanner during the weekly assessment window.',
     status: 'dismissed',
@@ -230,9 +230,9 @@ const FALSE_POSITIVE_AUTHORIZED_ADMIN: DaybreakGoldenExample = {
   },
   output: {
     title: 'PowerShell - Suspicious Script Block Execution on alert-powershell-admin-ws',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'low',
-    confidence: 0.1,
+    confidence: 0.95,
     recommendation:
       'Dismiss — Routine PowerShell remediation script executed by a member of the IT-Admins group during a scheduled maintenance window.',
     status: 'dismissed',
@@ -265,7 +265,7 @@ const RISKY_BROAD_EXCEPTION: DaybreakGoldenExample = {
   },
   output: {
     title: 'Lateral Movement - Remote Service Administration on alert-lateral-movement-dmz',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'high',
     confidence: 0.825,
     recommendation:
@@ -301,16 +301,16 @@ const TUNING_HIDES_SUSPICIOUS: DaybreakGoldenExample = {
   },
   output: {
     title: 'Data Exfiltration - Unusual Outbound Volume on alert-exfil-tuning-suppressed',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'medium',
-    confidence: 0.25,
+    confidence: 0.55,
     recommendation:
-      'Dismiss — Outbound volume spike suppressed by aggressive threshold tuning despite residual exfiltration indicators.',
-    status: 'dismissed',
+      'Gather additional evidence — Outbound volume spike suppressed by aggressive threshold tuning despite residual exfiltration indicators.',
+    status: 'needs-evidence',
   },
   metadata: {
-    description: 'Nominal false positive — suspicious activity hidden by aggressive detection tuning.',
-    verdict: 'false_positive',
+    description: 'Nominal needs-evidence — mixed signals after aggressive detection tuning hide the true verdict.',
+    verdict: 'needs_evidence',
     scenarioFamily: 'tuning-hides-suspicious',
   },
 };
@@ -336,7 +336,7 @@ const INSUFFICIENT_DATA: DaybreakGoldenExample = {
   },
   output: {
     title: 'Data Exfiltration - Unusual Outbound Volume on alert-incomplete-proxy-logs',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'medium',
     confidence: 0.5,
     recommendation:
@@ -371,7 +371,7 @@ const DUPLICATE_REPLAYED: DaybreakGoldenExample = {
   },
   output: {
     title: 'Credential Dumping - LSASS Memory - Mimikatz on alert-mimikatz-dc01-replay',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'critical',
     confidence: 0.9,
     recommendation:
@@ -419,7 +419,7 @@ const BROKEN_FLIPPED_RECOMMENDATION: DaybreakGoldenExample = {
   output: {
     // Intentionally wrong (flipped) — the gate MUST fail to match this.
     title: 'Routine maintenance on file server FILESERVER-03',
-    capability: 'detection',
+    capability: 'alert-analysis',
     severity: 'low',
     confidence: 0.1,
     recommendation: 'Dismiss as routine maintenance activity — no action required.',

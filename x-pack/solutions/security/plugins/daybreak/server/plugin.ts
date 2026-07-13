@@ -25,7 +25,12 @@ import type {
 import { registerRoutes } from './http_routes';
 import type { RouteDependencies } from './http_routes/types';
 import { runAlertAnalysisWorker } from './workflow/run_alert_analysis_worker';
+import { runAlertAnalysisWorkerAlert } from './workflow/run_alert_analysis_worker_alert';
+import { runInvestigationWorker } from './workflow/run_investigation_worker';
+import { runResponseActionWorker } from './workflow/run_response_action_worker';
+import { runForensicWorker } from './workflow/run_forensic_worker';
 import { runSpikeWorkflow } from './workflow/run_spike_workflow';
+import { executeSkillBoundedTool } from './workflow/execute_skill_bounded_tool';
 import { registerSkills } from './agent_builder/skills/register_skills';
 
 export class DaybreakPlugin
@@ -78,13 +83,67 @@ export class DaybreakPlugin
       return {};
     }
 
-    this.routeDependencies.executeAlertAnalysisWorker = (request, params) =>
-      runAlertAnalysisWorker({
+    this.routeDependencies.executeAlertAnalysisWorker = (request, params) => {
+      const runner = params?.alertId
+        ? runAlertAnalysisWorkerAlert({
+            executeWorkflow: engine.executeWorkflow,
+            logger: this.logger,
+            request,
+            enabled: true,
+            alertId: params.alertId,
+          })
+        : runAlertAnalysisWorker({
+            executeWorkflow: engine.executeWorkflow,
+            logger: this.logger,
+            request,
+            enabled: true,
+            rowId: params?.rowId,
+          });
+      return runner.then((result) => result.workflowExecutionId);
+    };
+
+    this.routeDependencies.executeInvestigationWorker = (request, params) =>
+      runInvestigationWorker({
         executeWorkflow: engine.executeWorkflow,
         logger: this.logger,
         request,
         enabled: true,
-        rowId: params?.rowId,
+        investigationId: params.investigationId,
+      }).then((result) => result.workflowExecutionId);
+
+
+    if (deps.agentBuilder) {
+      this.routeDependencies.executeSkillBoundedTool = (request, params, options) =>
+        executeSkillBoundedTool(
+          deps.agentBuilder!,
+          request,
+          this.routeDependencies.getSpaceId(request),
+          this.logger,
+          params,
+          options
+        );
+    }
+
+    this.routeDependencies.executeResponseActionWorker = (request, params) =>
+      runResponseActionWorker({
+        executeWorkflow: engine.executeWorkflow,
+        logger: this.logger,
+        request,
+        enabled: true,
+        proposalId: params.proposalId,
+        action: params.action,
+        hostName: params.hostName,
+      }).then((result) => result.workflowExecutionId);
+
+    this.routeDependencies.executeForensicWorker = (request, params) =>
+      runForensicWorker({
+        executeWorkflow: engine.executeWorkflow,
+        logger: this.logger,
+        request,
+        enabled: true,
+        investigationId: params.investigationId,
+        hosts: params.hosts,
+        timeWindowHours: params.timeWindowHours,
       }).then((result) => result.workflowExecutionId);
 
     this.routeDependencies.workflowEventLoggerService = engine.workflowEventLoggerService;

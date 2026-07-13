@@ -34,18 +34,19 @@ remains open before GA.
 Mapping implementation: `server/common/contracts/watch_floor_contract.ts`
 (`mapProposalToCwlStub`).
 
-## Autonomy taxonomy (unreconciled)
+## Autonomy taxonomy (reconciled for MVP)
 
-Three parallel taxonomies exist across docs:
+The four parallel taxonomies are now collapsed into the 3 spike runtime tiers:
 
-| Source | Levels |
-| --- | --- |
-| Throughline UI | 1–5: Suggest only · Reads auto · Drafts auto · Acts · gated · Acts · trusted |
-| Spike `WatchAutonomyTier` | `auto-run` · `proposed-diff` · `approval-required` |
-| Operating model | 0–5: Off · Observe · Propose · Prepare · Execute low-risk · Execute consequential |
+| Throughline UI | Watch catalog | Operating model | Spike tier | Runtime behavior |
+| --- | --- | --- | --- | --- |
+| 1 · Suggest only | Suggest only | 2 · Propose | `proposed-diff` | Produces proposals only; no action. |
+| 2 · Reads auto | Monitor-only | 1 · Observe | `proposed-diff` | Read-only observation; no enforcement. |
+| 3 · Drafts auto | Human-on-the-loop / Supervised auto | 3 · Prepare | `auto-run` | Non-destructive, reversible, audited actions. |
+| 4 · Acts · gated | Human-in-the-loop | 4 · Execute low-risk | `approval-required` | Consequential actions staged for approval. |
+| 5 · Acts · trusted | Supervised auto | 5 · Execute consequential | `approval-required` | Trusted capabilities still require approval for consequential actions. |
 
-POC mapping lives in `server/common/contracts/autonomy_mapping.ts`. Do not
-treat as GA naming until Watch-team reconciliation.
+Mapping module: `server/common/contracts/autonomy_mapping.ts`. Per-action granularity remains post-MVP.
 
 ## Evidence kinds (spike)
 

@@ -9,6 +9,7 @@ import { parse } from 'yaml';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import ALERT_ANALYSIS_WORKER_YAML from './alert_analysis_worker.yaml';
+import { daybreakGoldenDataset } from '../evals/golden_dataset';
 import {
   getAlertAnalysisWorkerWorkflow,
   runAlertAnalysisWorker,
@@ -121,7 +122,7 @@ describe('run_alert_analysis_worker', () => {
       expect(model.enabled).toBe(false);
       expect(model.yaml).toBe(ALERT_ANALYSIS_WORKER_YAML);
       expect(model.definition).toEqual(getAlertAnalysisWorkerWorkflow());
-      expect(context).toEqual({});
+      expect(context).toEqual({ inputs: { rowId: daybreakGoldenDataset.examples[0].id } });
       expect(request).toBeDefined();
     });
 

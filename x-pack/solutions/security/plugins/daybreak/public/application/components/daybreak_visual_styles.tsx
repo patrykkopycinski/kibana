@@ -289,6 +289,9 @@ const styles = `
 
 /* Inspector panel */
 .daybreakInspectorWrapper { width: 360px; min-width: 360px; background: var(--db-panel); border-left: 1px solid var(--db-line); }
+.daybreakInspectorColumn { height: 100%; display: flex; flex-direction: column; }
+.daybreakInspectorColumn .daybreakInspectorPanel { flex: 1; min-height: 0; }
+.daybreakInspectorGate { flex-shrink: 0; padding: 0 16px 16px; }
 .daybreakInspectorPanel { height: 100%; display: flex; flex-direction: column; }
 .daybreakInspectorAppBar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--db-line); padding: 8px 12px; }
 .daybreakInspectorTabs { flex: 1; }

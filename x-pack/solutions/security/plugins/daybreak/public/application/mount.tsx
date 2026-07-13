@@ -17,6 +17,8 @@ import { ProposalsService } from '../services/proposals_service';
 import { WatchesService } from '../services/watches_service';
 import { WorkflowsService } from '../services/workflows_service';
 import { WorkerEvalRecordsService } from '../services/worker_eval_records_service';
+import { InvestigationsService } from '../services/investigations_service';
+import { SseService } from '../services/sse_service';
 import { DaybreakRoutes } from './routes';
 
 export const mountApp = ({
@@ -36,6 +38,8 @@ export const mountApp = ({
     watchesService: new WatchesService(core.http),
     workflowsService: new WorkflowsService(core.http),
     workerEvalRecordsService: new WorkerEvalRecordsService({ http: core.http }),
+    investigationsService: new InvestigationsService(core.http),
+    sseService: new SseService(core.http),
   };
 
   ReactDOM.render(

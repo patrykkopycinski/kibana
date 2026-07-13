@@ -25,6 +25,7 @@ import type { WorkerEvalRecordProvenance } from '../client/worker_eval_records';
 const fromWorkerBodySchema = schema.object({
   enrichedJson: schema.string(),
   reasonJson: schema.string(),
+  configJson: schema.maybe(schema.string()),
   sourceWatchId: schema.maybe(schema.string()),
 });
 
@@ -42,6 +43,50 @@ const proposalToExpectedShape = (proposal: ProposalProperties): ExpectedProposal
   recommendation: proposal.recommendation ?? '',
   status: proposal.status,
 });
+
+interface FprProfileConfig {
+  scoreThreshold: number;
+  safeTuningClasses: string[];
+  status: string;
+  decisionDate: string;
+}
+
+interface WorkerConfig {
+  thresholds?: {
+    fprProfile?: FprProfileConfig;
+  };
+}
+
+const parseWorkerConfig = (configJson: string | undefined): WorkerConfig | undefined => {
+  if (!configJson) return undefined;
+  try {
+    return JSON.parse(configJson) as WorkerConfig;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Determine the approval requirement for a proposal based on the FPR profile.
+ *
+ * The profile is explicitly unratified; no tuning classes are considered safe for
+ * supervised auto until detection engineering and product/security owners review
+ * the first dataset results. This function therefore defaults to manual approval
+ * and only allows automatic when the scenario is listed in `safeTuningClasses`.
+ */
+const approvalRequirementFromConfig = (
+  config: WorkerConfig | undefined,
+  _scenarioFamily: string | undefined,
+  _confidence: number
+): ProposalProperties['approvalRequirement'] => {
+  const safeClasses = config?.thresholds?.fprProfile?.safeTuningClasses ?? [];
+  // For the MVP evidence pack, all proposals remain manual. When safe classes are
+  // ratified, replace this with a confidence >= scoreThreshold + class check.
+  if (safeClasses.length === 0) {
+    return 'manual';
+  }
+  return 'manual';
+};
 
 export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies) => {
   const { logger, router, getSpaceId } = dependencies;
@@ -130,6 +175,13 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
       const structuredOutput = extractStructuredOutput(reasonRaw);
       const reason = validateReasonOutput({ structured_output: structuredOutput });
 
+      const config = parseWorkerConfig(request.body.configJson);
+      const approvalRequirement = approvalRequirementFromConfig(
+        config,
+        undefined,
+        reason.confidence
+      );
+
       const proposal = buildProposalFromWorkerRun({
         id: enriched.alertId,
         enriched,
@@ -137,6 +189,7 @@ export const registerProposalsFromWorkerRoute = (dependencies: RouteDependencies
         sourceWatchId: request.body.sourceWatchId,
         sourceWorkerId: 'daybreak-alert-analysis-worker',
         capability: 'alert-analysis',
+        approvalRequirement,
         space: getSpaceId(request),
       });
 

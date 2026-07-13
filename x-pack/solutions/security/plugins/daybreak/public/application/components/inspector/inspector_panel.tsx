@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiAvatar,
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,8 @@ import {
 import type { IconType } from '@elastic/eui';
 import type { DaybreakEvidence } from '../../../services/evidence_service';
 import type { DaybreakProposal } from '../../../services/proposals_service';
+import { useProposalActions } from '../../hooks/use_proposal_actions';
+import { ActionFlyout, type GatedAction } from '../action/action_flyout';
 import { PROPOSAL_STATUS_META } from '../proposal/proposal_status';
 
 type AppKey = 'object' | 'discover' | 'records' | 'alerts' | 'entities' | 'dashboards';
@@ -32,6 +35,7 @@ type RecordTab = 'overview' | 'evidence' | 'timeline' | 'actions' | 'people';
 interface InspectorPanelProps {
   proposal: DaybreakProposal;
   evidence: DaybreakEvidence[];
+  onClose?: () => void;
 }
 
 const APP_META: Record<AppKey, { label: string; icon: IconType }> = {
@@ -50,6 +54,18 @@ const RECORD_TABS: { id: RecordTab; label: string; icon: IconType }[] = [
   { id: 'actions', label: 'Actions', icon: 'bolt' },
   { id: 'people', label: 'People', icon: 'users' },
 ];
+
+const isolateGatedAction: GatedAction = {
+  label: 'Isolate host',
+  cta: 'Isolate host',
+  tone: 'danger',
+  permNote: 'requires endpoint containment privileges',
+  blast: [
+    { icon: 'desktop', text: 'Target host will be isolated from the network' },
+    { icon: 'alert', text: 'Active sessions on the host may be disrupted' },
+    { icon: 'check', text: 'Approved proposal audit trail is preserved', safe: true },
+  ],
+};
 
 const PlaceholderApp: React.FC<{ app: AppKey }> = ({ app }) => (
   <div className="daybreakInspectorAppPlaceholder">
@@ -106,64 +122,153 @@ const TimelineTab: React.FC = () => (
   </div>
 );
 
-const ActionsTab: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => (
-  <div className="daybreakInspectorActions">
-    <EuiText size="xs" className="daybreakEyebrow">
-      DECISION HISTORY
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="document" size="s" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText size="s">Created · {new Date(proposal.createdAt).toLocaleDateString()}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    {proposal.status === 'approved' && (
+const ActionsTab: React.FC<{ proposal: DaybreakProposal }> = ({ proposal }) => {
+  const { actResponse, runResponseActionWorker } = useProposalActions();
+  const [responseResult, setResponseResult] = React.useState<string | undefined>();
+  const [isolateFlyout, setIsolateFlyout] = React.useState(false);
+
+  const dispatchResponse = (action: 'get_processes' | 'isolate') => {
+    setResponseResult(undefined);
+    actResponse.mutate(
+      { id: proposal.id, action },
+      {
+        onSuccess: (result) => setResponseResult(result.timelineEntry.description),
+        onError: (error) =>
+          setResponseResult(
+            error instanceof Error ? error.message : 'Response action failed.'
+          ),
+      }
+    );
+  };
+
+  const handleIsolateConfirm = () => {
+    setIsolateFlyout(false);
+    dispatchResponse('isolate');
+  };
+
+  return (
+    <div className="daybreakInspectorActions" data-test-subj="daybreakInspectorActionsTab">
+      <EuiText size="xs" className="daybreakEyebrow">
+        DECISION HISTORY
+      </EuiText>
+      <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="check" color="success" size="s" />
+          <EuiIcon type="document" size="s" />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText size="s" color="success">
-            Approved by Operator
-          </EuiText>
+          <EuiText size="s">Created · {new Date(proposal.createdAt).toLocaleDateString()}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    )}
-    {proposal.status === 'dismissed' && (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="cross" color="subdued" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            Dismissed by Operator
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    )}
-    <EuiSpacer size="m" />
-    <EuiText size="xs" className="daybreakEyebrow">
-      AVAILABLE ACTIONS
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {proposal.status !== 'approved' && (
-        <EuiButtonEmpty iconType="lock" size="s" disabled>
-          Isolate host
-        </EuiButtonEmpty>
+      {proposal.status === 'approved' && (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="check" color="success" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color="success">
+              Approved by Operator
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
-      <EuiButtonEmpty iconType="user" size="s" disabled>
-        Disable account
-      </EuiButtonEmpty>
-      <EuiButtonEmpty iconType="alert" size="s" disabled>
-        Convert to incident
-      </EuiButtonEmpty>
-    </EuiFlexGroup>
-  </div>
-);
+      {proposal.status === 'dismissed' && (
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="cross" color="subdued" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              Dismissed by Operator
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer size="m" />
+      <EuiText size="xs" className="daybreakEyebrow">
+        AVAILABLE ACTIONS
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {proposal.status === 'approved' ? (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiButton
+            size="s"
+            iconType="inspect"
+            onClick={() => dispatchResponse('get_processes')}
+            isLoading={actResponse.isLoading}
+            data-test-subj="daybreakInspectorGetProcessesButton"
+          >
+            Get processes
+          </EuiButton>
+          <EuiButton
+            size="s"
+            color="warning"
+            iconType="lock"
+            onClick={() => setIsolateFlyout(true)}
+            isLoading={actResponse.isLoading}
+            data-test-subj="daybreakInspectorIsolateHostButton"
+          >
+            Isolate host
+          </EuiButton>
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={() => runResponseActionWorker.mutate({ id: proposal.id })}
+            isLoading={runResponseActionWorker.isLoading}
+            data-test-subj="daybreakInspectorRunResponseWorkerButton"
+          >
+            Run worker
+          </EuiButton>
+          {responseResult && (
+            <EuiText size="xs" color="subdued" data-test-subj="daybreakInspectorResponseResult">
+              {responseResult}
+            </EuiText>
+          )}
+        </EuiFlexGroup>
+      ) : proposal.status === 'dismissed' || proposal.status === 'modified' ? (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiButton
+            size="s"
+            iconType="tag"
+            onClick={() => runResponseActionWorker.mutate({ id: proposal.id })}
+            isLoading={runResponseActionWorker.isLoading}
+            data-test-subj="daybreakInspectorTagFpWorkerButton"
+          >
+            Tag FP (run worker)
+          </EuiButton>
+          {responseResult && (
+            <EuiText size="xs" color="subdued" data-test-subj="daybreakInspectorFpTagResult">
+              {responseResult}
+            </EuiText>
+          )}
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiButtonEmpty iconType="lock" size="s" disabled>
+            Isolate host
+          </EuiButtonEmpty>
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer size="s" />
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiButtonEmpty iconType="user" size="s" disabled>
+          Disable account
+        </EuiButtonEmpty>
+        <EuiButtonEmpty iconType="alert" size="s" disabled>
+          Convert to incident
+        </EuiButtonEmpty>
+      </EuiFlexGroup>
+      {isolateFlyout && (
+        <ActionFlyout
+          proposal={proposal}
+          action={isolateGatedAction}
+          onClose={() => setIsolateFlyout(false)}
+          onConfirm={handleIsolateConfirm}
+        />
+      )}
+    </div>
+  );
+};
 
 const PeopleTab: React.FC<{ proposal: DaybreakProposal }> = () => (
   <div className="daybreakInspectorPeople">
@@ -269,12 +374,28 @@ const ObjectApp: React.FC<{ proposal: DaybreakProposal; evidence: DaybreakEviden
   );
 };
 
-export const InspectorPanel: React.FC<InspectorPanelProps> = ({ proposal, evidence }) => {
+export const InspectorPanel: React.FC<InspectorPanelProps> = ({ proposal, evidence, onClose }) => {
   const [activeApp, setActiveApp] = React.useState<AppKey>('object');
   const [openApps] = React.useState<AppKey[]>(['object']);
 
   return (
     <aside className="daybreakInspectorPanel" data-test-subj="daybreakInspectorPanel">
+      {onClose && (
+        <div className="daybreakInspectorAppBar">
+          <EuiText size="xs" className="daybreakEyebrow">
+            INSPECTOR
+          </EuiText>
+          <EuiButtonEmpty
+            iconType="cross"
+            size="xs"
+            onClick={onClose}
+            aria-label="Close inspector"
+            data-test-subj="daybreakInspectorClose"
+          >
+            Close
+          </EuiButtonEmpty>
+        </div>
+      )}
       <div className="daybreakInspectorAppBar">
         <EuiTabs size="s" className="daybreakInspectorTabs">
           {openApps.map((app) => (

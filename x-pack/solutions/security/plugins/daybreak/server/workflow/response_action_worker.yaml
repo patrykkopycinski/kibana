@@ -1,0 +1,88 @@
+# Response Action Worker — post-gate actions for approved and dismiss/tune outcomes.
+#
+# Setup → Load → (FP tag on dismiss/modified) | (endpoint act on approved) → Confirm
+version: "1"
+name: Daybreak Proposal Response Action Worker
+description: >-
+  Post-approval worker: tags alerts FP after dismiss/tune gate decisions, or
+  executes endpoint response actions (get_processes / isolate) for approved proposals.
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: setup
+    type: kibana.request
+    with:
+      debug: true
+      method: GET
+      path: "/internal/daybreak/config"
+      headers:
+        x-elastic-internal-origin: "kibana"
+
+  - name: load
+    type: kibana.request
+    with:
+      method: GET
+      path: "/api/daybreak/proposals/{{inputs.proposalId}}"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "true"
+
+  - name: tag_fp_on_dismiss
+    type: if
+    condition: "steps.load.output.status: dismissed"
+    steps:
+      - name: tag_fp
+        type: kibana.request
+        with:
+          method: POST
+          path: "/api/daybreak/alerts/tag-fp"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            kbn-xsrf: "true"
+            Content-Type: "application/json"
+          body:
+            proposalId: "{{inputs.proposalId}}"
+
+  - name: tag_fp_on_tune
+    type: if
+    condition: "steps.load.output.status: modified"
+    steps:
+      - name: tag_fp_tune
+        type: kibana.request
+        with:
+          method: POST
+          path: "/api/daybreak/alerts/tag-fp"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            kbn-xsrf: "true"
+            Content-Type: "application/json"
+          body:
+            proposalId: "{{inputs.proposalId}}"
+            tag: "FP-tune"
+
+  - name: act_on_approve
+    type: if
+    condition: "steps.load.output.status: approved"
+    steps:
+      - name: act
+        type: kibana.request
+        with:
+          method: POST
+          path: "/api/daybreak/proposals/{{inputs.proposalId}}/act/response"
+          headers:
+            x-elastic-internal-origin: "kibana"
+            kbn-xsrf: "true"
+            Content-Type: "application/json"
+          body:
+            action: "{{inputs.action}}"
+            hostName: "{{inputs.hostName}}"
+
+  - name: confirm
+    type: kibana.request
+    with:
+      method: GET
+      path: "/api/daybreak/proposals/{{inputs.proposalId}}"
+      headers:
+        x-elastic-internal-origin: "kibana"
+        kbn-xsrf: "true"

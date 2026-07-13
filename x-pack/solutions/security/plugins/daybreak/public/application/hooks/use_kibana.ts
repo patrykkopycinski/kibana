@@ -12,6 +12,8 @@ import type { ProposalsService } from '../../services/proposals_service';
 import type { WatchesService } from '../../services/watches_service';
 import type { WorkflowsService } from '../../services/workflows_service';
 import type { WorkerEvalRecordsService } from '../../services/worker_eval_records_service';
+import type { InvestigationsService } from '../../services/investigations_service';
+import type { SseService } from '../../services/sse_service';
 
 export interface DaybreakKibanaServices extends CoreStart {
   evidenceService: EvidenceService;
@@ -19,6 +21,8 @@ export interface DaybreakKibanaServices extends CoreStart {
   watchesService: WatchesService;
   workflowsService: WorkflowsService;
   workerEvalRecordsService: WorkerEvalRecordsService;
+  investigationsService: InvestigationsService;
+  sseService: SseService;
 }
 
 export const useKibana = () => useKibanaReact<DaybreakKibanaServices>();

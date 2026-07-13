@@ -61,8 +61,8 @@ describe("spike-canonical schemas", () => {
 
     expect(proposal.schemaVersion).toBe(DAYBREAK_PROPOSAL_SCHEMA_VERSION);
     expect(proposal.sourceWorkerId).toBe("daybreak-alert-analysis-worker");
-    expect(proposal.title).toContain("Investigate");
-    expect(proposal.status).toBe("new");
+    expect(proposal.title).toBe("Suspicious PowerShell on alert-1");
+    expect(proposal.status).toBe("escalated");
     expect(proposal.confidence).toBe(0.88);
   });
 

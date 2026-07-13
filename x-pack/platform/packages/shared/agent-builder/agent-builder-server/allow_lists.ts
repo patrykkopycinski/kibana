@@ -170,6 +170,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'find-security-rules',
   'pci-compliance',
   'siem-readiness',
+  'endpoint-response-actions',
+  'endpoint-forensic-analysis',
 
   // O11Y
   'observability.rca',

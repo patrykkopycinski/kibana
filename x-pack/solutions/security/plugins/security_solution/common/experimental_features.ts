@@ -315,6 +315,18 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.5
    */
   attacksPageTourEnabled: false,
+
+  /**
+   * Enables the Endpoint Response Actions Agent Builder skill (isolate, unisolate,
+   * status, running processes, scan) for the daybreak-spike worktree.
+   */
+  endpointResponseActionsSkill: true,
+
+  /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (read-only DFIR
+   * reconstruction via ES|QL on Defend telemetry) for the daybreak-spike worktree.
+   */
+  endpointForensicAnalysisSkill: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

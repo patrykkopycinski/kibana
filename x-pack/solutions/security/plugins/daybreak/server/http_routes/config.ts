@@ -18,6 +18,12 @@ const configResponseSchema = schema.object({
   thresholds: schema.object({
     minimumConfidence: schema.number(),
     maximumAlertsPerRun: schema.number(),
+    fprProfile: schema.object({
+      scoreThreshold: schema.number(),
+      safeTuningClasses: schema.arrayOf(schema.string()),
+      status: schema.string(),
+      decisionDate: schema.string(),
+    }),
   }),
   already_tagged: schema.boolean(),
 });
@@ -45,6 +51,12 @@ export const registerConfigRoute = ({ logger, router }: RouteDependencies) => {
           thresholds: {
             minimumConfidence: 0.7,
             maximumAlertsPerRun: 25,
+            fprProfile: {
+              scoreThreshold: 0.8,
+              safeTuningClasses: [],
+              status: 'unratified',
+              decisionDate: '2026-07-13',
+            },
           },
           already_tagged: false,
         },

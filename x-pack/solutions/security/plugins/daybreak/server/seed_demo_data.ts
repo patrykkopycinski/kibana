@@ -6,14 +6,19 @@
  */
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import { createEvidenceClient } from './client/evidence/client';
+import { createInvestigationClient } from './client/investigations/client';
 import { createProposalClient, type ProposalClient } from './client/proposals/client';
 import { createWatchClient, type WatchClient } from './client/watch/client';
 import { createWorkflowClient, type WorkflowClient } from './client/workflow/client';
+import { buildInvestigationFromProposal } from './common/schemas/investigation_builder';
 
 export interface SeedDemoDataResult {
   proposals: number;
   watches: number;
   workflows: number;
+  evidence: number;
+  investigations: number;
 }
 
 export const seedDemoData = async ({
@@ -26,6 +31,8 @@ export const seedDemoData = async ({
   esClient: ElasticsearchClient;
 }): Promise<SeedDemoDataResult> => {
   const proposalClient: ProposalClient = createProposalClient({ space, logger, esClient });
+  const evidenceClient = createEvidenceClient({ space, logger, esClient });
+  const investigationClient = createInvestigationClient({ space, logger, esClient });
   const watchClient: WatchClient = createWatchClient({ space, logger, esClient });
   const workflowClient: WorkflowClient = createWorkflowClient({ space, logger, esClient });
 
@@ -38,7 +45,7 @@ export const seedDemoData = async ({
     confidence: 0.85,
     status: 'new',
     owner: 'security-team',
-    recommendation: 'Isolate the source host and reset compromised credentials.',
+    recommendation: 'Isolate host FIN-WS-04 and reset compromised credentials.',
     evidenceRefs: ['demo-evidence-1'],
     expectedImpact: 'Prevents further lateral movement in the environment.',
     riskCaveats: ['Confirm host is not a jump server before isolation.'],
@@ -172,7 +179,7 @@ export const seedDemoData = async ({
     confidence: 0.88,
     status: 'new',
     owner: 'insider-risk',
-    recommendation: 'Escalate to HR and legal for review.',
+    recommendation: 'Escalate to HR and legal; scope host FIN-WS-09 for forensic review.',
     evidenceRefs: ['demo-evidence-6'],
     expectedImpact: 'Triggers formal insider-risk review process.',
     hypothesis: 'An employee may be exfiltrating sensitive customer data.',
@@ -249,6 +256,66 @@ export const seedDemoData = async ({
     requiredApproverCount: 1,
   });
 
+  const evidenceSeeds = [
+    {
+      id: 'demo-evidence-1',
+      summary: 'RDP logon from unusual subnet to finance workstation FIN-WS-04.',
+    },
+    {
+      id: 'demo-evidence-2',
+      summary: 'Encoded PowerShell cradle downloaded from external CDN.',
+    },
+    {
+      id: 'demo-evidence-3',
+      summary: 'Parent process spawned suspicious child with network callback.',
+    },
+    {
+      id: 'demo-evidence-4',
+      summary: 'Okta sign-in from new geography with impossible travel signal.',
+    },
+    {
+      id: 'demo-evidence-5',
+      summary: 'High-volume DNS queries to rare NXDOMAIN suffix.',
+    },
+    {
+      id: 'demo-evidence-6',
+      summary: 'Bulk file download from FIN-WS-09 exceeding user baseline.',
+    },
+    {
+      id: 'demo-evidence-7',
+      summary: 'Cloud IAM role assignment outside normal change window.',
+    },
+  ] as const;
+
+  for (const evidence of evidenceSeeds) {
+    await evidenceClient.create({
+      id: evidence.id,
+      kind: 'alert',
+      summary: evidence.summary,
+      provenance: 'capability',
+      confidence: 0.85,
+      stance: 'for',
+      sensitivityLabel: 'internal',
+      sourceRef: evidence.id,
+    });
+  }
+
+  const approvedProposalA = await proposalClient.get('demo-proposal-1');
+  await investigationClient.create(
+    buildInvestigationFromProposal({
+      investigationId: 'investigation-demo-proposal-1',
+      proposal: approvedProposalA,
+    })
+  );
+
+  const escalatedProposal5 = await proposalClient.get('demo-proposal-5');
+  await investigationClient.create(
+    buildInvestigationFromProposal({
+      investigationId: 'investigation-demo-proposal-5',
+      proposal: escalatedProposal5,
+    })
+  );
+
   const watchA = await watchClient.create({
     id: 'demo-watch-1',
     name: 'Lateral movement watch',
@@ -316,5 +383,7 @@ export const seedDemoData = async ({
     proposals: 7,
     watches: 3,
     workflows: 3,
+    evidence: evidenceSeeds.length,
+    investigations: 2,
   };
 };

@@ -113,4 +113,22 @@ export const registerWatchRoutes = ({ logger, router, getSpaceId }: RouteDepende
       return response.ok({ body: watch });
     })
   );
+
+  router.delete(
+    {
+      path: `${daybreakApiPath}/watches/{id}`,
+      security: daybreakRouteSecurity,
+      validate: { params: schema.object({ id: schema.string() }) },
+      options: { access: 'public' },
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const deleted = await (await getScopedClient(ctx, request)).delete(request.params.id);
+      if (!deleted) {
+        return response.notFound({
+          body: { message: `Watch "${request.params.id}" not found.` },
+        });
+      }
+      return response.ok({ body: { deleted: true } });
+    })
+  );
 };

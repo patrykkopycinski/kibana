@@ -48,4 +48,8 @@ export class WatchesService {
       body: JSON.stringify(updates),
     });
   }
+
+  async delete(id: string): Promise<{ deleted: boolean }> {
+    return this.http.delete<{ deleted: boolean }>(`${daybreakApiPath}/watches/${id}`);
+  }
 }

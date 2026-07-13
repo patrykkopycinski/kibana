@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 import React from 'react';
 import { useKibana } from './use_kibana';
+import type { DaybreakProposal } from '../../services/proposals_service';
 
 /**
  * Fetches real Proposal documents from the Daybreak HTTP API (FR-011). Exposes
@@ -27,7 +28,15 @@ export const useProposals = () => {
     refetchInterval: 5000,
   });
 
-  const uniqueProposals = React.useMemo(() => [...new Map((proposals ?? []).map((p) => [p.id, p])).values()], [proposals]);
+  const uniqueProposals = React.useMemo(() => {
+    const map = new Map<string, DaybreakProposal>();
+    for (const proposal of proposals ?? []) {
+      if (!map.has(proposal.id)) {
+        map.set(proposal.id, proposal);
+      }
+    }
+    return [...map.values()];
+  }, [proposals]);
   return {
     proposals: uniqueProposals,
     isLoading,

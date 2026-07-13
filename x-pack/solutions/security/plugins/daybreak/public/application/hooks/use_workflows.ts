@@ -6,7 +6,9 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import React from 'react';
 import { useKibana } from './use_kibana';
+import type { DaybreakWorkflow } from '../../services/workflows_service';
 
 export const useWorkflows = () => {
   const {
@@ -19,5 +21,14 @@ export const useWorkflows = () => {
     refetchInterval: 5000,
   });
 
-  return { workflows: query.data ?? [], isLoading: query.isLoading };
+  const uniqueWorkflows = React.useMemo(() => {
+    const map = new Map<string, DaybreakWorkflow>();
+    for (const workflow of query.data ?? []) {
+      if (!map.has(workflow.id)) {
+        map.set(workflow.id, workflow);
+      }
+    }
+    return [...map.values()];
+  }, [query.data]);
+  return { workflows: uniqueWorkflows, isLoading: query.isLoading };
 };

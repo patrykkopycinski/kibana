@@ -18,6 +18,7 @@ export interface WatchClient {
   list(): Promise<WatchProperties[]>;
   create(input: WatchCreateParams): Promise<WatchProperties>;
   update(id: string, updates: WatchUpdateParams): Promise<WatchProperties>;
+  delete(id: string): Promise<boolean>;
 }
 
 export interface WatchCreateParams {
@@ -73,16 +74,18 @@ class WatchClientImpl implements WatchClient {
   }
 
   async create(input: WatchCreateParams): Promise<WatchProperties> {
+    const existing = await this.getById(input.id);
     const now = new Date().toISOString();
     const watch: WatchProperties = {
       ...input,
       status: input.status ?? 'draft',
       skillIds: input.skillIds ?? [],
-      createdAt: now,
+      createdAt: existing?._source?.createdAt ?? now,
       updatedAt: now,
       space: this.space,
     };
-    await this.storage.getClient().index({ document: watch });
+    await this.deleteAllById(input.id);
+    await this.storage.getClient().index({ id: input.id, document: watch });
     return this.get(input.id);
   }
 
@@ -96,13 +99,42 @@ class WatchClientImpl implements WatchClient {
       space: document._source!.space,
       updatedAt: new Date().toISOString(),
     };
-    await this.storage.getClient().index({ id: document._id, document: watch });
-    return watch;
+    await this.deleteAllById(id);
+    await this.storage.getClient().index({ id, document: watch });
+    return this.get(id);
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const document = await this.getById(id);
+    if (!document) return false;
+    const result = await this.storage.getClient().delete({ id: document._id });
+    return result.result === 'deleted';
+  }
+
+  private async deleteAllById(id: string): Promise<void> {
+    const response = await this.storage.getClient().search({
+      query: { bool: { filter: [createSpaceFilter(this.space), { term: { id } }] } },
+      size: 100,
+      track_total_hits: true,
+    });
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+    if (total > 100) {
+      this.logger.warn(`More than 100 duplicate documents found for watch ${id}; truncating cleanup.`);
+    }
+    for (const hit of response.hits.hits) {
+      if (hit._id) {
+        await this.storage.getClient().delete({ id: hit._id });
+      }
+    }
   }
 
   private async getById(id: string): Promise<WatchDocument | undefined> {
     const response = await this.storage.getClient().search({
       query: { bool: { filter: [createSpaceFilter(this.space), { term: { id } }] } },
+      sort: [{ updatedAt: 'desc' }],
       size: 1,
       terminate_after: 1,
       track_total_hits: false,

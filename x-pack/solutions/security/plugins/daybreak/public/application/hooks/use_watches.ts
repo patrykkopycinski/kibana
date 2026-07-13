@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import React from 'react';
 import { useKibana } from './use_kibana';
 
 export const useWatches = () => {
@@ -19,5 +20,14 @@ export const useWatches = () => {
     refetchInterval: 5000,
   });
 
-  return { watches: query.data ?? [], isLoading: query.isLoading };
+  const uniqueWatches = React.useMemo(() => {
+    const map = new Map<string, DaybreakWatch>();
+    for (const watch of query.data ?? []) {
+      if (!map.has(watch.id)) {
+        map.set(watch.id, watch);
+      }
+    }
+    return [...map.values()];
+  }, [query.data]);
+  return { watches: uniqueWatches, isLoading: query.isLoading };
 };

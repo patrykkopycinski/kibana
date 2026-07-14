@@ -10,25 +10,45 @@ import {
   AD2_CLEAN_SCENARIOS,
   type Ad2CleanScenarioKey,
 } from './clean_scenarios';
+import {
+  buildBackgroundNoiseAlerts,
+  buildLoudClusterAlerts,
+  getBackgroundNoiseAlertIds,
+} from './background_noise';
+import {
+  AD2_FULL_ONLY_SCENARIO_KEYS,
+  AD2_FULL_ONLY_SCENARIOS,
+  type Ad2FullOnlyScenarioKey,
+} from './full_scenarios';
 import { AD2_SCENARIO_ID_PREFIX } from './constants';
 import { buildScenarioDocuments } from './build_documents';
 import type { Ad2ScenarioDefinition, Ad2SeedPlan, Ad2SeedProfile } from './types';
+
+export const AD2_FULL_SCENARIO_KEYS = [
+  ...AD2_CLEAN_SCENARIO_KEYS,
+  ...AD2_FULL_ONLY_SCENARIO_KEYS,
+] as const;
+
+export type Ad2FullScenarioKey = (typeof AD2_FULL_SCENARIO_KEYS)[number];
 
 export const listAd2ScenarioKeys = (profile: Ad2SeedProfile = 'clean'): readonly string[] => {
   if (profile === 'clean') {
     return AD2_CLEAN_SCENARIO_KEYS;
   }
-  return AD2_CLEAN_SCENARIO_KEYS;
+  return AD2_FULL_SCENARIO_KEYS;
 };
 
 export const getAd2Scenario = (
   scenarioKey: string,
   profile: Ad2SeedProfile = 'clean'
 ): Ad2ScenarioDefinition | undefined => {
-  if (profile !== 'clean') {
-    return undefined;
+  if (scenarioKey in AD2_CLEAN_SCENARIOS) {
+    return AD2_CLEAN_SCENARIOS[scenarioKey as Ad2CleanScenarioKey];
   }
-  return AD2_CLEAN_SCENARIOS[scenarioKey as Ad2CleanScenarioKey];
+  if (profile === 'full' && scenarioKey in AD2_FULL_ONLY_SCENARIOS) {
+    return AD2_FULL_ONLY_SCENARIOS[scenarioKey as Ad2FullOnlyScenarioKey];
+  }
+  return undefined;
 };
 
 export const buildAd2SeedPlan = ({
@@ -54,11 +74,19 @@ export const buildAd2SeedPlan = ({
     rawEvents.push(...built.rawEvents);
   }
 
-  return { profile, scenarioKeys, alerts, rawEvents };
+  let noiseAlertIds: readonly string[] = [];
+  if (profile === 'full' && !scenarioKey) {
+    const backgroundAlerts = buildBackgroundNoiseAlerts(baseTime);
+    const loudClusterAlerts = buildLoudClusterAlerts(baseTime);
+    alerts.push(...backgroundAlerts, ...loudClusterAlerts);
+    noiseAlertIds = [...backgroundAlerts, ...loudClusterAlerts].map((alert) => alert.id);
+  }
+
+  return { profile, scenarioKeys, alerts, rawEvents, noiseAlertIds };
 };
 
 export const getAd2ScenarioAlertIds = (scenarioKey: string): readonly string[] => {
-  const scenario = getAd2Scenario(scenarioKey);
+  const scenario = getAd2Scenario(scenarioKey, 'full');
   if (!scenario) {
     return [];
   }

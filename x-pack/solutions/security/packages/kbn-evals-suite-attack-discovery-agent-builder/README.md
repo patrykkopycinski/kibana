@@ -10,7 +10,7 @@ This package ships **two eval cohorts** plus a documented third profile that is 
 | --- | --- | --- | --- | --- |
 | **Golden-path** | `evals/attack_discovery_agent_builder.spec.ts` | `src/fixtures.ts` — 2 marker alerts | **Weekly** (`llm_evals.yml` sets `EVAL_GREP`) | Does the default agent **route**, **call AD tools**, and **complete the workflow**? |
 | **Clean profile** | `evals/clean_profile_provided_alerts.spec.ts` | `src/scenario_registry/` — 4 chains, 16 alerts + raw events | **On-demand** (full suite or `--grep "clean profile"`) | On realistic multi-stage chains, does AD produce **quality discoveries** with context gathering? |
-| **Full profile** | — (not in this package) | `ad-2.0-portable-seeder.py seed --profile full` | Manual / future follow-up | With ~150+ distractor alerts, does AD find real chains **without noise false positives**? |
+| **Full profile** | `full_profile_discrimination.spec.ts` | `scenario_registry/` full seed (7 chains + 150 noise alerts) | **On-demand** — `--grep "full profile"` | With noise present, does AD find real chains **without citing noise alerts**? |
 
 ### Golden-path (`fixtures.ts`)
 
@@ -40,9 +40,21 @@ Kibana-native reimplementation of portable seeder `seed --profile clean` (does *
 - **Seed label:** `ad-portable-seeder-2026-07`
 - One provided-alerts eval per chain; rubric/criteria are chain-specific.
 
-### Full profile (out of scope for this package)
+### Full profile (on-demand)
 
-Includes clean profile plus cloud scenarios (AWS, Azure, macOS) and background noise (~110 unrelated alerts + a 40-alert noisy rule cluster). Use the portable seeder locally until discrimination/FPR evaluators exist.
+Includes clean profile plus cloud scenarios (`aws-compromise`, `azure-oauth`, `macos-toolkit`) and noise:
+
+- ~110 unrelated background alerts
+- 40-alert Defender signature-update cluster
+
+**CI cadence:** on-demand only (`evals/full_profile_discrimination.spec.ts`). Not wired to weekly `llm_evals.yml`.
+
+**FPR evaluators:** `NoiseFalsePositive`, `DiscoveryCountCap`, `MinValidatedDiscovery` — insights must not cite noise alert IDs, discovery count must stay bounded, and at least one validated discovery is required.
+
+```bash
+node scripts/evals run --suite attack-discovery-agent-builder \
+  --grep "full profile"
+```
 
 ## Natural routing (default)
 

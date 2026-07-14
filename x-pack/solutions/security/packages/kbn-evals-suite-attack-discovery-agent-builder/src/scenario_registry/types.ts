@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type Ad2SeedProfile = 'clean';
+export type Ad2SeedProfile = 'clean' | 'full';
 
 export type Ad2ScenarioOs = 'windows' | 'linux' | 'macos';
 
@@ -53,6 +53,7 @@ export interface Ad2SeedPlan {
   readonly scenarioKeys: readonly string[];
   readonly alerts: readonly Ad2IndexedAlert[];
   readonly rawEvents: readonly Ad2IndexedRawEvent[];
+  readonly noiseAlertIds?: readonly string[];
 }
 
 export interface Ad2SeedSummary {
@@ -60,4 +61,5 @@ export interface Ad2SeedSummary {
   readonly scenarioKeys: readonly string[];
   readonly alertCount: number;
   readonly rawEventCount: number;
+  readonly noiseAlertCount?: number;
 }

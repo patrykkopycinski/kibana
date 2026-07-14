@@ -8,7 +8,12 @@
 import type { InvestigationProperties } from './investigation';
 import type { ProposalProperties } from '../../client/proposals/types';
 import { DAYBREAK_SSE_SCHEMA_VERSION } from './versions';
-import type { SseRecommendedAction, SignificantSecurityEventProperties, SseStatus } from './sse';
+import type {
+  SseFindingType,
+  SseRecommendedAction,
+  SignificantSecurityEventProperties,
+  SseStatus,
+} from './sse';
 
 export interface BuildSseFromInvestigationParams {
   sseId: string;
@@ -21,6 +26,17 @@ export interface BuildSseFromProposalParams {
   proposal: ProposalProperties;
   now?: Date;
 }
+
+/** Map proposal/investigation capability to SSE finding type (full MVP dark-watch slice). */
+export const resolveFindingType = (capability: string): SseFindingType => {
+  if (capability === 'dark-watch') {
+    return 'hunt_finding';
+  }
+  if (capability === 'coverage-gap' || capability.includes('coverage')) {
+    return 'coverage_gap';
+  }
+  return 'escalation_request';
+};
 
 const buildRecommendedActions = (sourceId: string): SseRecommendedAction[] => [
   {
@@ -48,7 +64,7 @@ export const buildSseFromInvestigation = (
     id: sseId,
     title: `SSE: ${investigation.title}`,
     description: investigation.summary,
-    findingType: 'escalation_request',
+    findingType: resolveFindingType(investigation.capability),
     sourceInvestigationId: investigation.id,
     sourceWatch: investigation.sourceWatch,
     sourceWorkerId: investigation.sourceWorkerId,
@@ -78,7 +94,7 @@ export const buildSseFromProposal = (
     id: sseId,
     title: `SSE: ${proposal.title}`,
     description: proposal.recommendation ?? `Proposal ${proposal.id} promoted to SSE.`,
-    findingType: 'escalation_request',
+    findingType: resolveFindingType(proposal.capability),
     sourceProposalId: proposal.id,
     sourceWatch: proposal.sourceWatch,
     sourceWorkerId: proposal.sourceWorkerId,

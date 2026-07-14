@@ -31,8 +31,7 @@ export const getNavCategories = (
               SecurityPageName.externalLinkDaybreak,
               SecurityPageName.externalLinkDiscover,
               SecurityPageName.dashboards,
-            ]
-        : [SecurityPageName.externalLinkDaybreak, SecurityPageName.dashboards],
+            ],
     },
     {
       type: LinkCategoryType.separator,

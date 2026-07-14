@@ -190,11 +190,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'pci-compliance',
   'investigate-rule',
   'siem-readiness',
-  endpoint-response-actions,
-  endpoint-forensic-analysis,
-  attack-discovery-alert-retrieval-builder,
-  attack-discovery-generator,
-  attack-discovery-workflow-troubleshooting,
+  'endpoint-response-actions',
+  'endpoint-forensic-analysis',
+  'attack-discovery-alert-retrieval-builder',
+  'attack-discovery-generator',
+  'attack-discovery-workflow-troubleshooting',
 
   // O11Y
   'observability.rca',

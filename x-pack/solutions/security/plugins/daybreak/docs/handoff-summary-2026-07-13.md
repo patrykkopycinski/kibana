@@ -47,7 +47,7 @@ Alert → Proposal → Approve → Response action (get_processes/isolate)
 | Shared Approval Gate (#17944) | **blocked** | Spike-local `gate.ts` only |
 | Buildkite eval gate wiring | **deferred** | Local gate green |
 | AD real 9.5 output shape | **partial** | Deadline 2026-07-31 |
-| UI buttons for Act-phase workers | **open** | API routes exist; console not wired |
+| UI buttons for Act-phase workers | **closed** | `use_proposal_actions`, `approval_gate`, `investigations_console` wired — see `watch-floor-gap-status.md` |
 
 ## Key commands
 

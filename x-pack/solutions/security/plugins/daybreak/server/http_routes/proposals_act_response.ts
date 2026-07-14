@@ -10,9 +10,11 @@ import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import { daybreakApiPath } from '../../common/http_api';
 import { createInvestigationClient } from '../client/investigations/client';
 import type { InvestigationClient } from '../client/investigations/client';
+import { createActionResultClient } from '../client/action_results/client';
 import { createProposalClient } from '../client/proposals/client';
 import type { ProposalClient } from '../client/proposals/client';
 import type { TimelineEntry } from '../common/schemas/investigation';
+import { buildActionResultFromResponse } from '../common/schemas/action_result_builder';
 import { DAYBREAK_STUB_ENDPOINT_ACTIONS } from '../common/demo_flags';
 import { ENDPOINT_RESPONSE_ACTIONS_SKILL_ID } from '../workflow/execute_skill_bounded_tool';
 import { resolveProposalHostName } from '../workflow/resolve_proposal_host';
@@ -201,6 +203,23 @@ export const registerProposalActResponseRoutes = (dependencies: RouteDependencie
         investigationId = updated.id;
       }
 
+      const {
+        elasticsearch: { client: esClient },
+      } = await ctx.core;
+      const actionResultClient = createActionResultClient({
+        space: getSpaceId(request),
+        logger,
+        esClient: esClient.asInternalUser,
+      });
+      const actionResult = buildActionResultFromResponse({
+        proposal,
+        action,
+        hostName,
+        toolResult,
+        investigationId,
+      });
+      await actionResultClient.create(actionResult);
+
       return response.ok({
         body: {
           proposalId: proposal.id,
@@ -210,6 +229,7 @@ export const registerProposalActResponseRoutes = (dependencies: RouteDependencie
           toolResult,
           investigationId,
           timelineEntry,
+          actionResultId: actionResult.id,
         },
       });
     })

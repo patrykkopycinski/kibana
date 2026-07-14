@@ -1,0 +1,42 @@
+# Investigation Enrichment Worker — enriches an investigation with related alerts and entities.
+#
+# Setup → Load → Enrich → Confirm (FR-006).
+version: '1'
+name: Daybreak Investigation Enrichment Worker
+description: >-
+  Enrich an investigation with related alerts and entities by correlating
+  proposals that share host/user entities (with sourceWatch fallback).
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: load
+    type: kibana.request
+    with:
+      method: GET
+      path: '/api/daybreak/investigations/{{inputs.investigationId}}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
+
+  # Phase 3 — Enrich: correlate related alerts and update the investigation.
+  - name: enrich
+    type: kibana.request
+    with:
+      method: POST
+      path: '/api/daybreak/investigations/{{inputs.investigationId}}/enrich'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'
+        Content-Type: 'application/json'
+      body: {}
+
+  # Phase 4 — Confirm: fetch the updated investigation.
+  - name: confirm
+    type: kibana.request
+    with:
+      method: GET
+      path: '/api/daybreak/investigations/{{inputs.investigationId}}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+        kbn-xsrf: 'true'

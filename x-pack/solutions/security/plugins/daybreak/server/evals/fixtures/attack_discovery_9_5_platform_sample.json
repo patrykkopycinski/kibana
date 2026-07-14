@@ -1,0 +1,52 @@
+{
+  "provenance": {
+    "source": "kbn-evals-suite-attack-discovery-agent-builder/src/dataset.ts goldenPathExamples + kbn-elastic-assistant-common AttackDiscovery / AttackDiscoveryApiAlert OpenAPI (9.5)",
+    "kibanaVersion": "9.5",
+    "note": "Representative 9.5 AD output — not a daybreak stub. discovery = generation camelCase; apiAlert = persisted public API snake_case."
+  },
+  "generation": {
+    "execution_uuid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "connector_id": ".inference:attack-discovery",
+    "connector_name": "Attack Discovery",
+    "status": "succeeded",
+    "alerts_context_count": 2,
+    "persisted_count": 1
+  },
+  "discovery": {
+    "id": "e6d1f8ef-7c1d-42d6-ba6a-11610bab72b1",
+    "title": "Defense Evasion and Credential Access on finance-ws-01",
+    "summaryMarkdown": "Encoded PowerShell execution and LSASS access on finance-ws-01 indicate a coordinated defense evasion and credential access chain.",
+    "detailsMarkdown": "Two alerts on finance-ws-01 — encoded PowerShell execution via powershell.exe and rundll32 accessing lsass.exe — suggest credential harvesting preceded by defense evasion.",
+    "entitySummaryMarkdown": "Encoded PowerShell and LSASS access on finance-ws-01",
+    "mitreAttackTactics": ["Defense Evasion", "Execution", "Credential Access"],
+    "alertIds": [
+      "ad2-agent-builder-eval-20260712-powershell",
+      "ad2-agent-builder-eval-20260712-lsass"
+    ],
+    "timestamp": "2026-07-14T18:00:00.000Z"
+  },
+  "apiAlert": {
+    "id": "e6d1f8ef-7c1d-42d6-ba6a-11610bab72b1",
+    "title": "Defense Evasion and Credential Access on finance-ws-01",
+    "generation_uuid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "connector_id": ".inference:attack-discovery",
+    "connector_name": "Attack Discovery",
+    "alert_ids": [
+      "ad2-agent-builder-eval-20260712-powershell",
+      "ad2-agent-builder-eval-20260712-lsass"
+    ],
+    "summary_markdown": "Encoded PowerShell execution and LSASS access on finance-ws-01 indicate a coordinated defense evasion and credential access chain.",
+    "details_markdown": "Two alerts on finance-ws-01 — encoded PowerShell execution via powershell.exe and rundll32 accessing lsass.exe — suggest credential harvesting preceded by defense evasion.",
+    "entity_summary_markdown": "Encoded PowerShell and LSASS access on finance-ws-01",
+    "mitre_attack_tactics": ["Defense Evasion", "Execution", "Credential Access"],
+    "alert_workflow_status": "open",
+    "risk_score": 85,
+    "timestamp": "2026-07-14T18:00:00.000Z",
+    "index": ".alerts-security.alerts-default"
+  },
+  "continuationContext": {
+    "investigationId": "INV-2026-AD2-001",
+    "caseId": "case-finance-ws-01",
+    "priorContinuationDecisionIds": []
+  }
+}

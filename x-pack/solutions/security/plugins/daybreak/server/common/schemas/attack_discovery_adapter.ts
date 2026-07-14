@@ -5,71 +5,156 @@
  * 2.0.
  */
 
-import type { ProposalProperties, ProposalStatus } from "../../client/proposals/types";
-import { DAYBREAK_PROPOSAL_SCHEMA_VERSION } from "./versions";
+import type { ProposalProperties, ProposalStatus } from '../../client/proposals/types';
+import type { EvidencePackage } from './evidence_package';
+import { DAYBREAK_EVIDENCE_SCHEMA_VERSION, DAYBREAK_PROPOSAL_SCHEMA_VERSION } from './versions';
+import {
+  normalizeAttackDiscoveryInput,
+  type AttackDiscoveryContinuationContext,
+  type AttackDiscoveryGenerationContext,
+  type AttackDiscoveryInput,
+  type AttackDiscoveryLegacyStub,
+  type NormalizedAttackDiscovery,
+} from './attack_discovery_platform_types';
 
-/**
- * Minimal Attack Discovery alert shape the spike adapter accepts.
- * Real AD payloads vary; this covers the fields we need for Proposal emission.
- */
-export interface AttackDiscoveryAlertSummary {
-  id: string;
-  title: string;
-  description?: string;
-  severity?: "low" | "medium" | "high" | "critical";
-  confidence?: number;
-  /** MITRE tactics / techniques surfaced by AD. */
-  tactics?: string[];
-  /** Related alert or entity ids AD correlated. */
-  relatedAlertIds?: string[];
-  /** AD-assigned triage hint when present. */
-  triageStatus?: "open" | "acknowledged" | "closed";
-  /** Explicit monitor-only / no-op flag for low-value findings. */
-  monitorOnly?: boolean;
-  /** Id of a previous AD finding this one duplicates. */
-  duplicateOf?: string;
-  /** Set when the finding lacks supporting evidence. */
-  missingEvidence?: boolean;
-  /** Sources of contradictory evidence that undermine the finding. */
-  contradicts?: string[];
-}
-
-const normalizeSeverity = (
-  value: string | undefined,
-): ProposalProperties["severity"] => {
-  if (value === "low" || value === "medium" || value === "high" || value === "critical") {
-    return value;
-  }
-  return "medium";
-};
+/** @deprecated Use {@link AttackDiscoveryInput} — re-exported for backward compatibility. */
+export type AttackDiscoveryAlertSummary = AttackDiscoveryLegacyStub;
 
 const adTriageToProposalStatus = (
-  triageStatus: AttackDiscoveryAlertSummary["triageStatus"],
+  triageStatus: NormalizedAttackDiscovery['triageStatus']
 ): ProposalStatus => {
-  if (triageStatus === "closed") return "dismissed";
-  if (triageStatus === "acknowledged") return "approved";
-  return "new";
+  if (triageStatus === 'closed') return 'dismissed';
+  if (triageStatus === 'acknowledged') return 'approved';
+  return 'new';
 };
 
-/**
- * Derive proposal status from the AD scenario flags in addition to triageStatus.
- * - monitor-only / duplicate → dismissed (no-op)
- * - missing evidence / contradictory evidence → needs-evidence
- * - otherwise fall back to triageStatus mapping
- */
-const adStatusFromScenario = (ad: AttackDiscoveryAlertSummary): ProposalStatus => {
-  if (ad.monitorOnly || ad.duplicateOf) {
-    return "dismissed";
+const adStatusFromScenario = (normalized: NormalizedAttackDiscovery): ProposalStatus => {
+  if (normalized.monitorOnly || normalized.duplicateOf) {
+    return 'dismissed';
   }
-  if (ad.missingEvidence || (ad.contradicts && ad.contradicts.length > 0)) {
-    return "needs-evidence";
+  if (normalized.missingEvidence || (normalized.contradicts && normalized.contradicts.length > 0)) {
+    return 'needs-evidence';
   }
-  return adTriageToProposalStatus(ad.triageStatus);
+  return adTriageToProposalStatus(normalized.triageStatus);
+};
+
+const buildRecommendation = (normalized: NormalizedAttackDiscovery): string => {
+  if (normalized.monitorOnly) {
+    return `Monitor only — ${normalized.summaryMarkdown}`;
+  }
+  if (normalized.duplicateOf) {
+    return `Duplicate of ${normalized.duplicateOf} — ${normalized.summaryMarkdown}`;
+  }
+  if (normalized.missingEvidence) {
+    return `Missing evidence — ${normalized.summaryMarkdown}`;
+  }
+  if (normalized.contradicts && normalized.contradicts.length > 0) {
+    return `Contradicted by ${normalized.contradicts.join(', ')} — ${normalized.summaryMarkdown}`;
+  }
+
+  const parts = ['Continue Attack Discovery investigation', normalized.summaryMarkdown];
+  if (normalized.evidenceDeltaMarkdown) {
+    parts.push(`New evidence: ${normalized.evidenceDeltaMarkdown}`);
+  }
+  return parts.join(' — ');
+};
+
+const buildRiskCaveats = (normalized: NormalizedAttackDiscovery): string[] => {
+  const caveats: string[] = [];
+  if (normalized.priorContinuationDecisionIds.length > 0) {
+    caveats.push(
+      `Prior continuation decisions: ${normalized.priorContinuationDecisionIds.join(', ')}`
+    );
+  }
+  if (normalized.inputKind === 'legacy-stub') {
+    caveats.push('Mapped from legacy spike stub — prefer 9.5 platform discovery or apiAlert input');
+  }
+  if (!normalized.generationUuid) {
+    caveats.push('generation_uuid not provided — audit linkage incomplete');
+  }
+  return caveats;
+};
+
+/** Build spike-canonical evidence packages from normalized 9.5 AD output. */
+export const buildEvidencePackagesFromNormalized = (
+  normalized: NormalizedAttackDiscovery,
+  now = new Date()
+): EvidencePackage[] => {
+  const createdAt = normalized.timestamp ?? now.toISOString();
+  const packages: EvidencePackage[] = [
+    {
+      id: `evidence-ad-${normalized.discoveryId}-source`,
+      schemaVersion: DAYBREAK_EVIDENCE_SCHEMA_VERSION,
+      kind: 'tool',
+      sourceRef: normalized.discoveryId,
+      summary: normalized.summaryMarkdown,
+      provenance: 'tool',
+      confidence: normalized.confidence ?? 0.85,
+      stance: 'for',
+      limitations: [
+        normalized.generationUuid ? `generation_uuid=${normalized.generationUuid}` : undefined,
+        normalized.connectorId ? `connector_id=${normalized.connectorId}` : undefined,
+        normalized.sourceIndex ? `index=${normalized.sourceIndex}` : undefined,
+        normalized.caseId ? `case_id=${normalized.caseId}` : undefined,
+        normalized.investigationId ? `investigation_id=${normalized.investigationId}` : undefined,
+      ].filter((value): value is string => Boolean(value)),
+      sensitivityLabel: 'internal',
+      createdAt,
+      tactics: normalized.mitreAttackTactics,
+      stanceSignals: [
+        { stance: 'for', note: normalized.detailsMarkdown.slice(0, 320) },
+        ...(normalized.evidenceDeltaMarkdown
+          ? [{ stance: 'for' as const, note: `Evidence delta: ${normalized.evidenceDeltaMarkdown}` }]
+          : []),
+      ],
+    },
+  ];
+
+  if (normalized.entitySummaryMarkdown) {
+    packages.push({
+      id: `evidence-ad-${normalized.discoveryId}-entities`,
+      schemaVersion: DAYBREAK_EVIDENCE_SCHEMA_VERSION,
+      kind: 'alert',
+      sourceRef: normalized.discoveryId,
+      summary: normalized.entitySummaryMarkdown,
+      provenance: 'capability',
+      confidence: normalized.confidence ?? 0.85,
+      stance: 'for',
+      sensitivityLabel: 'internal',
+      createdAt,
+      tactics: normalized.mitreAttackTactics,
+      stanceSignals: [{ stance: 'for', note: 'Entity summary from Attack Discovery output' }],
+    });
+  }
+
+  normalized.alertIds.forEach((alertId, index) => {
+    packages.push({
+      id: `evidence-ad-${normalized.discoveryId}-alert-${index}`,
+      schemaVersion: DAYBREAK_EVIDENCE_SCHEMA_VERSION,
+      kind: 'alert',
+      sourceRef: alertId,
+      summary: `Correlated source alert ${alertId} supporting discovery "${normalized.title}"`,
+      provenance: 'capability',
+      confidence: normalized.confidence ?? 0.85,
+      stance: 'for',
+      sensitivityLabel: 'internal',
+      createdAt,
+      alertId,
+      tactics: normalized.mitreAttackTactics,
+      stanceSignals: [
+        { stance: 'for', note: `Alert ${alertId} correlated by Attack Discovery` },
+      ],
+    });
+  });
+
+  return packages;
 };
 
 export interface MapAttackDiscoveryParams {
   proposalId: string;
-  ad: AttackDiscoveryAlertSummary;
+  ad: AttackDiscoveryInput;
+  generation?: AttackDiscoveryGenerationContext;
+  continuation?: AttackDiscoveryContinuationContext;
   sourceWatchId?: string;
   sourceWorkerId?: string;
   capability?: string;
@@ -77,63 +162,66 @@ export interface MapAttackDiscoveryParams {
   now?: Date;
 }
 
+export interface AttackDiscoveryMappingResult {
+  proposal: ProposalProperties;
+  evidencePackages: EvidencePackage[];
+  normalized: NormalizedAttackDiscovery;
+}
+
 /**
- * Map an Attack Discovery alert summary into a Daybreak {@link ProposalProperties}.
- * Gap #12 — AD output integration (spike-canonical adapter).
+ * Map 9.5 Attack Discovery output (generation, API alert, or legacy stub) into a
+ * Daybreak proposal + evidence packages.
  */
 export const mapAttackDiscoveryToProposal = (
-  params: MapAttackDiscoveryParams,
-): ProposalProperties => {
+  params: MapAttackDiscoveryParams
+): AttackDiscoveryMappingResult => {
   const {
     proposalId,
     ad,
-    sourceWatchId = "attack-discovery-watch",
-    sourceWorkerId = "attack-discovery-adapter",
-    capability = "attack-discovery",
+    generation,
+    continuation,
+    sourceWatchId = 'attack-discovery-watch',
+    sourceWorkerId = 'attack-discovery-adapter',
+    capability = 'attack-discovery',
     space,
     now = new Date(),
   } = params;
 
-  const severity = normalizeSeverity(ad.severity);
-  const confidence = ad.confidence ?? 0.7;
-  const status = adStatusFromScenario(ad);
+  const normalized = normalizeAttackDiscoveryInput({ input: ad, generation, continuation });
+  const evidencePackages = buildEvidencePackagesFromNormalized(normalized, now);
+  const severity = normalized.severity ?? 'medium';
+  const confidence = normalized.confidence ?? 0.7;
+  const status = adStatusFromScenario(normalized);
 
-  const recommendationParts: string[] = [];
-  if (ad.monitorOnly) {
-    recommendationParts.push("Monitor only");
-  } else if (ad.duplicateOf) {
-    recommendationParts.push(`Duplicate of ${ad.duplicateOf}`);
-  } else if (ad.missingEvidence) {
-    recommendationParts.push("Missing evidence");
-  } else if (ad.contradicts && ad.contradicts.length > 0) {
-    recommendationParts.push(`Contradicted by ${ad.contradicts.join(", ")}`);
-  } else {
-    recommendationParts.push("Review Attack Discovery finding");
-  }
-  recommendationParts.push(ad.description ?? `correlate related alerts for ${ad.id}.`);
-  const recommendation = recommendationParts.join(" — ");
-
-  return {
+  const proposal: ProposalProperties = {
     id: proposalId,
     schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
-    title: ad.title,
+    title: normalized.title,
     sourceWatch: sourceWatchId,
     sourceWorkerId,
     capability,
     severity,
     confidence,
     status,
-    recommendation,
-    evidenceRefs: ad.relatedAlertIds ?? [],
-    hypothesis: ad.description,
-    expectedImpact: ad.tactics?.length
-      ? `Tactics: ${ad.tactics.join(", ")}`
+    recommendation: buildRecommendation(normalized),
+    evidenceRefs: evidencePackages.map((pkg) => pkg.id),
+    hypothesis: normalized.entitySummaryMarkdown ?? normalized.summaryMarkdown,
+    expectedImpact: normalized.mitreAttackTactics.length
+      ? `Tactics: ${normalized.mitreAttackTactics.join(', ')}`
       : undefined,
-    approvalRequirement: "manual",
+    riskCaveats: buildRiskCaveats(normalized),
+    approvalRequirement: 'manual',
     requiredApproverCount: 1,
     approvals: [],
     decisionHistory: [],
     createdAt: now.toISOString(),
     space,
   };
+
+  return { proposal, evidencePackages, normalized };
 };
+
+/** Backward-compatible helper returning only the proposal document. */
+export const mapAttackDiscoveryToProposalOnly = (
+  params: MapAttackDiscoveryParams
+): ProposalProperties => mapAttackDiscoveryToProposal(params).proposal;

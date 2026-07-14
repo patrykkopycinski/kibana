@@ -1,8 +1,8 @@
 # Watch Floor contract ratification (spike)
 
 **Status:** POC draft — ratification pending [security-team#17942](https://github.com/elastic/security-team/issues/17942)  
-**Spike schema version:** `0.1.0-spike` (`SPIKE_PROPOSAL_SCHEMA_VERSION`)  
-**Ratification gate:** `pending-security-team-17942` (`RATIFICATION_STATUS`)
+**Spike schema version:** `1.0.0-spike` (`DAYBREAK_PROPOSAL_SCHEMA_VERSION`) (`SPIKE_PROPOSAL_SCHEMA_VERSION`)  
+**Ratification gate:** `spike-canonical` (`RATIFICATION_STATUS`)
 
 ## Purpose
 
@@ -33,6 +33,10 @@ remains open before GA.
 
 Mapping implementation: `server/common/contracts/watch_floor_contract.ts`
 (`mapProposalToCwlStub`).
+
+Golden examples + unknowns flush: `server/common/contracts/ratification_packet.ts`
+(`buildRatificationPacket`), exported via `scripts/export_ratification_packet.mjs`,
+served at `GET /api/daybreak/ratification-packet`.
 
 ## Autonomy taxonomy (reconciled for MVP)
 

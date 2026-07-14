@@ -32,6 +32,10 @@ import { runForensicWorker } from './workflow/run_forensic_worker';
 import { runSpikeWorkflow } from './workflow/run_spike_workflow';
 import { executeSkillBoundedTool } from './workflow/execute_skill_bounded_tool';
 import { registerSkills } from './agent_builder/skills/register_skills';
+import {
+  registerDaybreakWorker,
+  runDaybreakWorkerById,
+} from './workflow/worker_registry';
 
 export class DaybreakPlugin
   implements
@@ -70,7 +74,7 @@ export class DaybreakPlugin
       });
     }
 
-    return {};
+    return { registerDaybreakWorker };
   }
 
   public start(core: CoreStart, deps: DaybreakPluginStartDeps): DaybreakPluginStart {
@@ -149,6 +153,15 @@ export class DaybreakPlugin
     this.routeDependencies.workflowEventLoggerService = engine.workflowEventLoggerService;
 
     return {
+      executeDaybreakWorker: (request, workerId, params) =>
+        runDaybreakWorkerById({
+          workerId,
+          executeWorkflow: engine.executeWorkflow,
+          logger: this.logger,
+          request,
+          enabled: true,
+          params,
+        }),
       runSpikeWorkflow: (request: KibanaRequest) =>
         runSpikeWorkflow({
           executeWorkflow: engine.executeWorkflow,

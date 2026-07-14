@@ -1,0 +1,8 @@
+- name: setup
+  type: kibana.request
+  with:
+    debug: true
+    method: GET
+    path: /internal/daybreak/config
+    headers:
+      x-elastic-internal-origin: kibana

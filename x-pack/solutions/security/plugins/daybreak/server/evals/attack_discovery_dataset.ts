@@ -95,4 +95,19 @@ export const ATTACK_DISCOVERY_SCENARIOS: AttackDiscoveryScenario[] = [
       contradicts: ['proxy-logs', 'asset-owner-context'],
     },
   },
+  {
+    id: 'ad-acknowledged-continuation',
+    description:
+      'Analyst acknowledged the AD finding on-platform — maps to approved proposal status for continuation tracking.',
+    ad: {
+      id: 'ad-006',
+      title: 'Confirmed phishing campaign',
+      description: 'Attack Discovery finding acknowledged after email gateway corroboration.',
+      severity: 'high',
+      confidence: 0.9,
+      tactics: ['initial-access'],
+      relatedAlertIds: ['alert-phish-001'],
+      triageStatus: 'acknowledged',
+    },
+  },
 ];

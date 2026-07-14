@@ -73,7 +73,7 @@ describe("spike-canonical schemas", () => {
   });
 
   it("maps Attack Discovery alert to proposal", () => {
-    const proposal = mapAttackDiscoveryToProposal({
+    const { proposal } = mapAttackDiscoveryToProposal({
       proposalId: "ad-prop-1",
       ad: {
         id: "ad-99",
@@ -89,7 +89,8 @@ describe("spike-canonical schemas", () => {
 
     expect(proposal.capability).toBe("attack-discovery");
     expect(proposal.sourceWorkerId).toBe("attack-discovery-adapter");
-    expect(proposal.evidenceRefs).toEqual(["alert-a", "alert-b"]);
+    expect(proposal.evidenceRefs).toEqual(expect.arrayContaining(["evidence-ad-ad-99-source", "evidence-ad-ad-99-alert-0", "evidence-ad-ad-99-alert-1"]));
+    expect(proposal.evidenceRefs).not.toContain("alert-a");
     expect(proposal.severity).toBe("critical");
   });
 });

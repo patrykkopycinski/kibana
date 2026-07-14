@@ -18,7 +18,12 @@ import { registerAlertsTagFpRoute } from './alerts_tag_fp';
 import { registerProposalsFromWorkerRoute } from './proposals_from_worker';
 import { registerWorkerEvalRecordRoutes } from './worker_eval_records';
 import { registerInvestigationRoutes } from './investigations';
+import { registerActionResultRoutes } from './action_results';
+import { registerProposalsFromAttackDiscoveryRoute } from './proposals_from_attack_discovery';
+import { registerProposalsFromHuntRoute } from './proposals_from_hunt';
+import { registerSkiRoutes } from './ski';
 import { registerSseRoutes } from './sse';
+import { registerRatificationPacketRoute } from './ratification_packet';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalRoutes(dependencies);
@@ -33,5 +38,10 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerProposalsFromWorkerRoute(dependencies);
   registerWorkerEvalRecordRoutes(dependencies);
   registerInvestigationRoutes(dependencies);
+  registerActionResultRoutes(dependencies);
+  registerProposalsFromAttackDiscoveryRoute(dependencies);
+  registerProposalsFromHuntRoute(dependencies);
+  registerSkiRoutes(dependencies);
   registerSseRoutes(dependencies);
+  registerRatificationPacketRoute(dependencies);
 };

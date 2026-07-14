@@ -1,0 +1,14 @@
+# Daybreak offline eval gate — attach to monorepo pipeline when daybreak/** changes.
+# See docs/buildkite-daybreak-eval-gate.md for path-filter promotion notes.
+
+steps:
+  - label: ":jest: Daybreak offline eval gate"
+    command:
+      - .buildkite/scripts/bootstrap.sh
+      - bash x-pack/solutions/security/plugins/daybreak/scripts/ci_run_daybreak_gates.sh
+    agents:
+      queue: "default"
+    timeout_in_minutes: 20
+    artifact_paths:
+      - "data/daybreak-alert-analysis-eval-report.json"
+      - "data/daybreak-spike-schema-export.json"

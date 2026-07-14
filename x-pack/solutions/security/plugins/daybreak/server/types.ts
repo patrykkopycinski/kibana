@@ -6,6 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type {
+  DaybreakWorkerId,
+  DaybreakWorkerParams,
+  ExecuteWorkflowResult,
+} from './workflow/worker_registry';
+import { registerDaybreakWorker } from './workflow/worker_registry';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -15,7 +21,9 @@ import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 // ---------------------------------------------------------------------------
 
 /** Setup contract exposed to other plugins by the Daybreak plugin. */
-export type DaybreakPluginSetup = Record<string, never>;
+export interface DaybreakPluginSetup {
+  registerDaybreakWorker: typeof registerDaybreakWorker;
+}
 
 /** Optional plugin dependencies consumed during setup. */
 export interface DaybreakPluginSetupDeps {
@@ -33,7 +41,15 @@ export interface DaybreakPluginStartDeps {
 export type RunSpikeWorkflow = (request: KibanaRequest) => Promise<void>;
 
 /** Start contract exposed to other plugins by the Daybreak plugin. */
+export type ExecuteDaybreakWorker = (
+  request: KibanaRequest,
+  workerId: DaybreakWorkerId,
+  params: DaybreakWorkerParams
+) => Promise<ExecuteWorkflowResult>;
+
 export interface DaybreakPluginStart {
+  /** Dispatch a registered Daybreak worker through the workflows execution engine. */
+  executeDaybreakWorker?: ExecuteDaybreakWorker;
   /**
    * Trigger the PD-1 spike workflow once end-to-end through the existing
    * engine entry point (FR-008, FR-009, FR-010).

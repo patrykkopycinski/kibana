@@ -20,6 +20,9 @@ export const DAYBREAK_INVESTIGATION_SCHEMA_VERSION = '1.0.0-spike';
 /** Spike-owned Significant Security Event schema version. */
 export const DAYBREAK_SSE_SCHEMA_VERSION = '1.0.0-spike';
 
+/** Spike-owned Action Result schema version. */
+export const DAYBREAK_ACTION_RESULT_SCHEMA_VERSION = '1.0.0-spike';
+
 /**
  * Ownership model for spike schemas. The spike defines the working contract;
  * cross-team alignment (#17942) can adopt or diff against these exports later.

@@ -2,7 +2,7 @@
 
 **Worktree:** `/Users/mac/Projects/kibana.worktrees/daybreak-spike`  
 **Host:** `worker-m1max`  
-**Updated:** 2026-07-13  
+**Updated:** 2026-07-14  
 **Source handoff:** `project-daybreak/docs/working-groups/watch-floor-fpr/artifacts/watch-floor-gaps-handoff.md`
 
 This checklist tracks the 13 Watch Floor gaps against evidence in the spike plugin.
@@ -11,13 +11,13 @@ Statuses: **closed** (acceptance met), **partial** (scaffolding or subset done),
 
 | # | Gap | Status | Evidence |
 |---|---|---|---|
-| 1 | Proposal schema not ratified across teams | **partial** | `docs/watch-floor-contract-ratification.md` (`spike-canonical schemas in server/common/schemas/; CWL export via mapProposalToCwlStub`); CWL stub mapping in `server/common/contracts/watch_floor_contract.ts` |
+| 1 | Proposal schema not ratified across teams | **partial** | `server/common/contracts/ratification_packet.ts` + `docs/proposal-evidence-unknowns-flush.md` + `GET /api/daybreak/ratification-packet`; export `data/ratification-packet/`; CWL via `mapProposalToCwlStub` |
 | 2 | Evidence package schema undefined | **partial** | EvidencePackage + builders: `server/common/schemas/evidence_package.ts`; ES index: `server/client/evidence/` |
 | 3 | Golden dataset too small | **partial** | Expanded dataset (8 nominal + 1 broken, FPR families): `server/evals/golden_dataset.ts`; family coverage asserted in `server/evals/alert_analysis_eval.test.ts` |
 | 4 | Real agent output not validated | **closed** | Live `ai.agent` run scored 7/7 shape matches on EIS `anthropic-claude-5-sonnet` (2026-07-13). Harness: `.ao/daybreak_live_worker_smoke.mjs`; sequential scorer: `.ao/score_golden_sequential.mjs`; worker YAML: `server/workflow/alert_analysis_worker.yaml` |
 | 5 | Live-stack end-to-end not proven | **closed** | Fixture e2e: `server/integration_tests/alert_analysis_e2e.test.ts`; live smoke probes proposals + workflow execute: `.ao/daybreak_live_worker_smoke.mjs`; `WorkerEvaluationRecord` written from live agent runs and verified via `.ao/score_golden_sequential.mjs` |
 | 6 | Eval report lacks cost/token/latency provenance | **partial** | Schema v2 + `provenance` block: `server/evals/generate_eval_report.ts` (`EVAL_REPORT_SCHEMA_VERSION = 2`); offline defaults in `OFFLINE_GATE_DEFAULT_PROVENANCE`; L4 record: `server/evals/worker_evaluation_record.ts` |
-| 7 | Shared Approval Gate not integrated | **open** | Spike-local gate only: `server/client/proposals/gate.ts`; blocked on #17944 |
+| 7 | Shared Approval Gate not integrated | **partial** | Spike-local adapter closed (`shared_approval_gate_adapter.ts`); platform HITL upgrade blocked on #17944 |
 | 8 | CI gate for offline eval not wired | **partial** | Jest suite: `server/evals/alert_analysis_eval.test.ts`, `server/evals/l4_round_trip.test.ts`; CI entrypoint: `scripts/daybreak_eval_gate.mjs`; artifact: `data/daybreak-alert-analysis-eval-report.json`. Buildkite required-check wiring still pending |
 | 9 | Customer-zero plan not operational | **partial** | Template draft created: `project-daybreak/docs/working-groups/watch-floor-fpr/artifacts/customer-zero-plan-alert-analysis.md`; remains blocked on InfoSec / customer-zero reviewer sign-off (#17960) |
 | 10 | Demo environment not provisioned | **closed** | Scout stack on `:5631` with `xpack.daybreak.enabled=true` (`.scout/servers/local.json`); seed route: `server/http_routes/seed_demo_data.ts`; live smoke: `.ao/daybreak_live_worker_smoke.mjs`; polished demo walkthrough: `docs/demo-walkthrough.md` includes Watches UI, autonomy labels, troubleshooting, and 7/7 verified score |

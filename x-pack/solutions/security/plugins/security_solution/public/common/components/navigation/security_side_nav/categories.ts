@@ -13,15 +13,14 @@ export const getNavCategories = (
   chatExperience: AIChatExperience,
   enableAlertsAndAttacksAlignment?: boolean,
   isNewEAHomePageEnabled?: boolean,
-  securityClassicNavExternalLinks?: boolean,
   isAgentBuilderNavAtTop?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: securityClassicNavExternalLinks
-        ? // Agent builder for AI agent chat and at the top
-          chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
+      linkIds:
+        // Agent builder for AI agent chat and at the top
+        chatExperience === AIChatExperience.Agent && isAgentBuilderNavAtTop
           ? [
               SecurityPageName.externalLinkDaybreak,
               SecurityPageName.externalLinkAgentBuilder,
@@ -42,16 +41,12 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
-        ...(securityClassicNavExternalLinks
-          ? [
-              // Agent builder for AI agent chat and not classic AI experience
-              ...(chatExperience === AIChatExperience.Agent && !isAgentBuilderNavAtTop
-                ? [SecurityPageName.externalLinkAgentBuilder]
-                : []),
-              SecurityPageName.externalLinkWorkflows,
-            ]
+        // Agent builder for AI agent chat and not classic AI experience
+        ...(chatExperience === AIChatExperience.Agent && !isAgentBuilderNavAtTop
+          ? [SecurityPageName.externalLinkAgentBuilder]
           : []),
-        SecurityPageName.attackDiscovery,
+        SecurityPageName.externalLinkWorkflows,
+        ...(enableAlertsAndAttacksAlignment ? [] : [SecurityPageName.attackDiscovery]),
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],

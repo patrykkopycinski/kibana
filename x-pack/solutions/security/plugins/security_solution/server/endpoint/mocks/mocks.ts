@@ -111,9 +111,14 @@ export const createMockEndpointAppContextService = (
     fleetDependencies: fleetStartServices,
   }).service.asInternalUser();
   const endpointMetadataService = new EndpointMetadataService(
-    esClient,
-    savedObjectsClientMock.create(),
-    fleetServices
+    {
+      getInternalEsClient: () => esClient,
+      getInternalFleetServices: () => fleetServices,
+      savedObjects: { createInternalScopedSoClient: () => savedObjectsClientMock.create() },
+      createLogger: () => loggingSystemMock.create().get(),
+      isCcsEnabled: jest.fn().mockResolvedValue(false),
+    } as unknown as EndpointAppContextService,
+    DEFAULT_SPACE_ID
   );
   const casesClientMock = createCasesClientMock();
   const fleetFromHostFilesClientMock = createFleetFromHostFilesClientMock();
@@ -154,6 +159,7 @@ export const createMockEndpointAppContextService = (
     }),
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
+    isCcsEnabled: jest.fn().mockResolvedValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
     getActiveSpace: jest.fn(async (_) => ({
       id: DEFAULT_SPACE_ID,

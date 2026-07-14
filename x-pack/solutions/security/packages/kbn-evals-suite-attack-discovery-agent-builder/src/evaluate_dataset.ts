@@ -24,6 +24,11 @@ import { createAttackDiscoveryCriteriaEvaluator } from './evaluators/attack_disc
 import { createAttackDiscoveryRubricEvaluator } from './evaluators/attack_discovery_rubric_evaluator';
 import { createCostPerAlertEvaluator } from './evaluators/cost_per_alert_evaluator';
 import { createForbiddenToolsEvaluator } from './evaluators/forbidden_tools_evaluator';
+import {
+  createDiscoveryCountCapEvaluator,
+  createMinValidatedDiscoveryEvaluator,
+  createNoiseFalsePositiveEvaluator,
+} from './evaluators/noise_fpr_evaluator';
 
 type AdToolResult = NonNullable<AttackDiscoveryAgentBuilderTaskOutput['adToolResult']>;
 
@@ -369,6 +374,9 @@ export const createEvaluateAttackDiscoveryAgentBuilderDataset =
         createWorkflowEvidenceEvaluator(),
         trajectory,
         createForbiddenToolsEvaluator(),
+        createNoiseFalsePositiveEvaluator(),
+        createDiscoveryCountCapEvaluator(),
+        createMinValidatedDiscoveryEvaluator(),
         createCostPerAlertEvaluator(),
         createAttackDiscoveryBasicEvaluator(),
         createAttackDiscoveryCriteriaEvaluator({ evaluators }) as Evaluator<

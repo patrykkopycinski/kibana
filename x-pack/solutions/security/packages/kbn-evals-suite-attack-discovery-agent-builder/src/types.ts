@@ -33,6 +33,9 @@ export interface AttackDiscoveryAgentBuilderExpected extends Record<string, unkn
   expectedPassedAlertCount: number | null;
   attackDiscoveries?: AttackDiscovery[];
   criteria?: string[];
+  forbiddenAlertIds?: string[];
+  maxDiscoveryCount?: number;
+  minValidatedDiscoveryCount?: number;
 }
 
 export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unknown> {
@@ -42,9 +45,10 @@ export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unkn
     | 'live-retrieval'
     | 'status-only'
     | 'multiple-alert-sets'
-    | 'scenario-registry';
+    | 'scenario-registry'
+    | 'full-profile';
   scenarioKey?: string;
-  seedProfile?: 'clean';
+  seedProfile?: 'clean' | 'full';
 }
 
 export type AttackDiscoveryAgentBuilderExample = Example<

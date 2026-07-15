@@ -320,7 +320,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  describe('log rate analysis', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/278230
+  describe.skip('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {

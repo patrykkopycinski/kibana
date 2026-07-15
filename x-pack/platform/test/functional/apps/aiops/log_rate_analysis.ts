@@ -323,7 +323,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/278230
   describe.skip('log rate analysis', function () {
     for (const testData of logRateAnalysisTestData) {
-      describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
+      // Failing: See https://github.com/elastic/kibana/issues/261563
+      describe.skip(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 

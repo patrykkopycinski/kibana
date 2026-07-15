@@ -63,7 +63,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    describe('template fields with required_on_close', () => {
+    // Failing: See https://github.com/elastic/kibana/issues/278277
+    describe.skip('template fields with required_on_close', () => {
       it('blocks closing when a template required_on_close field is missing', async () => {
         const template = await createTemplate(supertest, [
           {

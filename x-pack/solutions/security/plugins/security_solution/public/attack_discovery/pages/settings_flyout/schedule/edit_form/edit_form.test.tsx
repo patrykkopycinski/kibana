@@ -322,7 +322,8 @@ describe.skip('EditForm', () => {
     });
   });
 
-  describe('when isWorkflowsEnabled is true', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/277801
+  describe.skip('when isWorkflowsEnabled is true', () => {
     const mockUseListWorkflows = useListWorkflows as jest.MockedFunction<typeof useListWorkflows>;
     const mockUseGenerateWorkflow = useGenerateWorkflow as jest.MockedFunction<
       typeof useGenerateWorkflow

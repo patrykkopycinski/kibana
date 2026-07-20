@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { SpanKind } from '@opentelemetry/api';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
@@ -71,9 +73,27 @@ export const selectSkills = async ({
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
 }): Promise<InternalSkillDefinition[]> => {
-  const agentSkills = await resolveAgentSkills({ skills, agentConfiguration, additionalSkillIds });
-  for (const skill of agentSkills) {
-    skillsStore.add(skill);
-  }
-  return agentSkills;
+  return withActiveInferenceSpan(
+    'select_skills',
+    {
+      kind: SpanKind.INTERNAL,
+      attributes: {
+        'agent_builder.skill_count.explicit': (agentConfiguration.skill_ids ?? []).length,
+        'agent_builder.elastic_capabilities_enabled':
+          agentConfiguration.enable_elastic_capabilities ?? false,
+        'agent_builder.additional_skill_ids': additionalSkillIds?.join(',') ?? '',
+      },
+    },
+    async () => {
+      const agentSkills = await resolveAgentSkills({
+        skills,
+        agentConfiguration,
+        additionalSkillIds,
+      });
+      for (const skill of agentSkills) {
+        skillsStore.add(skill);
+      }
+      return agentSkills;
+    }
+  );
 };

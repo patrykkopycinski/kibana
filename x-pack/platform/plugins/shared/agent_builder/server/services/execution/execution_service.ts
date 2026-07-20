@@ -25,6 +25,12 @@ import type {
   FindExecutionsOptions,
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
+import {
+  withActiveInferenceSpan,
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+} from '@kbn/inference-tracing';
+import { SpanKind } from '@opentelemetry/api';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
@@ -115,11 +121,34 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
-    if (useScheduledTask) {
-      return this.executeWithScheduledTask({ executionId, agentId, request });
-    } else {
-      return this.executeLocally({ execution, request });
-    }
+    return withActiveInferenceSpan(
+      `execute_agent_lifecycle`,
+      {
+        kind: SpanKind.INTERNAL,
+        attributes: {
+          [ElasticGenAIAttributes.InferenceSpanKind]: 'AGENT',
+          [GenAISemanticConventions.GenAIOperationName]: 'execute_agent_lifecycle',
+          [GenAISemanticConventions.GenAIAgentId]: agentId,
+          [GenAISemanticConventions.GenAIConversationId]: executionId,
+          ...(metadata?.runId ? { 'agent_builder.eval.run_id': metadata.runId } : {}),
+          ...(metadata?.exampleId ? { 'agent_builder.eval.example_id': metadata.exampleId } : {}),
+          ...(metadata?.modelId ? { 'agent_builder.eval.model_id': metadata.modelId } : {}),
+          ...(request.headers?.['x-eval-example-id']
+            ? { 'agent_builder.eval.example_id': String(request.headers['x-eval-example-id']) }
+            : {}),
+          ...(request.headers?.['x-eval-run-id']
+            ? { 'agent_builder.eval.run_id': String(request.headers['x-eval-run-id']) }
+            : {}),
+        },
+      },
+      async () => {
+        if (useScheduledTask) {
+          return this.executeWithScheduledTask({ executionId, agentId, request });
+        } else {
+          return this.executeLocally({ execution, request });
+        }
+      }
+    );
   }
 
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {

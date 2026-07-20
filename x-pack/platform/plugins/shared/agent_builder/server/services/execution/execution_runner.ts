@@ -46,7 +46,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import { withConverseSpan } from '../../tracing';
+import { withAgentSpan, withConverseSpan } from '../../tracing';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { MeteringService } from '../metering';
 import type { AgentExecutionClient } from './persistence';
@@ -447,20 +447,27 @@ const handleStandaloneExecution = async ({
     ...deps,
   });
 
-  const agentEvents$ = executeAgent$({
-    agentId,
-    executionId: execution.executionId,
-    request,
-    nextInput: execution.agentParams.nextInput,
-    capabilities: execution.agentParams.capabilities,
-    abortSignal,
-    conversation: undefined,
-    defaultConnectorId: selectedConnectorId,
-    telemetryMetadata,
-    maxContentLength,
-    runAgent,
-    executionMode: AgentExecutionMode.standalone,
-  });
+  const agentEvents$ = withAgentSpan(
+    {
+      agent: { id: agentId, name: 'standalone_agent' },
+      conversationId: execution.executionId,
+    },
+    () =>
+      executeAgent$({
+        agentId,
+        executionId: execution.executionId,
+        request,
+        nextInput: execution.agentParams.nextInput,
+        capabilities: execution.agentParams.capabilities,
+        abortSignal,
+        conversation: undefined,
+        defaultConnectorId: selectedConnectorId,
+        telemetryMetadata,
+        maxContentLength,
+        runAgent,
+        executionMode: AgentExecutionMode.standalone,
+      })
+  );
 
   return agentEvents$.pipe(
     handleCancellation(abortSignal),

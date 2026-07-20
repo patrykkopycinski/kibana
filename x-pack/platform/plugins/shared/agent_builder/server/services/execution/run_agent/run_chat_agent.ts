@@ -25,6 +25,8 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
+import { SpanKind } from '@opentelemetry/api';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { ProcessedConversation } from './utils/prepare_conversation';
 import { createResultTransformer } from './utils/create_result_transformer';
 import {
@@ -282,98 +284,120 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
-  const eventStream = agentGraph.streamEvents(
-    createInitializerCommand({
-      conversation: processedConversation,
-      agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
-      cycleLimit: CYCLE_LIMIT,
-      promptManager,
-      eventEmitter,
-    }),
+  const spanResult = await withActiveInferenceSpan(
+    'agent_reasoning_loop',
     {
-      version: 'v2',
-      signal: abortSignal,
-      runName: chatAgentGraphName,
-      metadata: {
-        graphName: chatAgentGraphName,
-        agentId,
+      kind: SpanKind.INTERNAL,
+      attributes: {
+        'agent_builder.execution_mode': context.executionMode ?? 'unknown',
+        'agent_builder.agent_id': agentId,
+        'agent_builder.cycle_limit': CYCLE_LIMIT,
+        'agent_builder.graph_name': chatAgentGraphName,
       },
-      recursionLimit: graphRecursionLimit,
-      callbacks: [],
-      // prevent LangGraph from inheriting the parent graph's
-      // abort signals via the __pregel_abort_signals configurable key. Without this,
-      // the parent graph's cleanup abort cascades to the standalone execution.
-      ...(context.executionMode === AgentExecutionMode.standalone
-        ? { configurable: { __pregel_abort_signals: undefined } }
-        : {}),
+    },
+    async (span) => {
+      const eventStream = agentGraph.streamEvents(
+        createInitializerCommand({
+          conversation: processedConversation,
+          agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
+          cycleLimit: CYCLE_LIMIT,
+          promptManager,
+          eventEmitter,
+        }),
+        {
+          version: 'v2',
+          signal: abortSignal,
+          runName: chatAgentGraphName,
+          metadata: {
+            graphName: chatAgentGraphName,
+            agentId,
+          },
+          recursionLimit: graphRecursionLimit,
+          callbacks: [],
+          // prevent LangGraph from inheriting the parent graph's
+          // abort signals via the __pregel_abort_signals configurable key. Without this,
+          // the parent graph's cleanup abort cascades to the standalone execution.
+          ...(context.executionMode === AgentExecutionMode.standalone
+            ? { configurable: { __pregel_abort_signals: undefined } }
+            : {}),
+        }
+      );
+
+      const graphEvents$ = from(eventStream).pipe(
+        filter(isStreamEvent),
+        convertGraphEvents({
+          graphName: chatAgentGraphName,
+          toolManager,
+          logger,
+          startTime,
+          pendingRound,
+          structuredOutput,
+        }),
+        finalize(() => manualEvents$.complete())
+      );
+
+      const processedInput: RoundInput = {
+        message: processedConversation.nextInput.message,
+        attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+      };
+
+      // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
+      const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
+
+      const events$ = merge(graphEvents$, manualEvents$).pipe(
+        addRoundCompleteEvent({
+          userInput: processedInput,
+          getConversationState: () =>
+            getConversationState({
+              promptManager,
+              toolManager,
+              compactionSummary: compactionResult.summary,
+              backgroundExecutionService,
+              todoStateManager,
+            }),
+          pendingRound,
+          startTime,
+          modelProvider,
+          stateManager,
+          attachmentStateManager: context.attachmentStateManager,
+          configurationOverrides: effectiveOverrides,
+          compactionResult,
+          roundId,
+          initialTodos,
+          getWorkspaceId: () => context.bashService?.getWorkspaceId(),
+        }),
+        evictInternalEvents(),
+        shareReplay()
+      );
+
+      events$.subscribe({
+        next: (event) => events.emit(event),
+        error: () => {
+          // error will be handled by function return, we just need to trap here
+        },
+      });
+
+      const round = await extractRound(events$);
+
+      if (span) {
+        span.setAttributes({
+          'agent_builder.round_status': round.status,
+          'agent_builder.steps_count': round.steps.length,
+          'agent_builder.tool_calls_count': round.steps.filter(isToolCallStep).length,
+        });
+      }
+
+      // Persist filesystem state for this round (today: the workspace volume).
+      try {
+        await context.filesystemService.flush();
+      } catch (err) {
+        logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
+      }
+      return { round };
     }
   );
 
-  const graphEvents$ = from(eventStream).pipe(
-    filter(isStreamEvent),
-    convertGraphEvents({
-      graphName: chatAgentGraphName,
-      toolManager,
-      logger,
-      startTime,
-      pendingRound,
-      structuredOutput,
-    }),
-    finalize(() => manualEvents$.complete())
-  );
-
-  const processedInput: RoundInput = {
-    message: processedConversation.nextInput.message,
-    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
-  };
-
-  // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
-  const effectiveOverrides = configurationOverrides ?? pendingRound?.configuration_overrides;
-
-  const events$ = merge(graphEvents$, manualEvents$).pipe(
-    addRoundCompleteEvent({
-      userInput: processedInput,
-      getConversationState: () =>
-        getConversationState({
-          promptManager,
-          toolManager,
-          compactionSummary: compactionResult.summary,
-          backgroundExecutionService,
-          todoStateManager,
-        }),
-      pendingRound,
-      startTime,
-      modelProvider,
-      stateManager,
-      attachmentStateManager: context.attachmentStateManager,
-      configurationOverrides: effectiveOverrides,
-      compactionResult,
-      roundId,
-      initialTodos,
-      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
-    }),
-    evictInternalEvents(),
-    shareReplay()
-  );
-
-  events$.subscribe({
-    next: (event) => events.emit(event),
-    error: () => {
-      // error will be handled by function return, we just need to trap here
-    },
-  });
-
-  const round = await extractRound(events$);
-
-  // Persist filesystem state for this round (today: the workspace volume).
-  try {
-    await context.filesystemService.flush();
-  } catch (err) {
-    logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
-  }
-  return {
-    round,
-  };
+  return spanResult;
 };
 
 const getConversationState = ({

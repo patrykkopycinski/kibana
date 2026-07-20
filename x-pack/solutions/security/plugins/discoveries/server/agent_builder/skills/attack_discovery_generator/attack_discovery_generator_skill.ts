@@ -49,7 +49,7 @@ export const ATTACK_DISCOVERY_GENERATOR_SKILL_BASE_PATH = 'skills/security/attac
 export const ATTACK_DISCOVERY_SEARCH_TOOL_ID = 'security.attack_discovery_search';
 
 const SKILL_DESCRIPTION =
-  'Run Attack Discovery: identify real attack chains in Elastic Security alerts, retrieve alerts for attack-chain analysis, or look up a prior generation by execution_uuid / status. In generate mode, gather and corroborate evidence (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), retrieve alerts via security.attack-discovery.get_default_esql_query plus platform.core.execute_esql (never attack-discovery-alert-retrieval-builder or generate_esql on the default query), then delegate to security.attack-discovery.run (sync; provided > esql > custom_only > custom_query — never bare invocations). Render an Attack Discovery Report plus insights JSON. In status-only mode, when the user supplies an execution_uuid, call security.attack-discovery.get_status only — never start a new generation.';
+  'Run Attack Discovery: identify real attack chains in Elastic Security alerts, retrieve alerts for attack-chain analysis, or look up a prior generation by execution_uuid / status. Triggered by: "run attack discovery", "analyze these alerts", "run across these alert sets", "what is the status of execution …". In generate mode, gather and corroborate evidence (threat hunting, entity analytics, alert analysis, threat intelligence, knowledge base), retrieve alerts via security.attack-discovery.get_default_esql_query plus platform.core.execute_esql (never attack-discovery-alert-retrieval-builder or generate_esql on the default query), then delegate to security.attack-discovery.run (sync; provided > esql > custom_only > custom_query — never bare invocations). Render an Attack Discovery Report plus insights JSON. In status-only mode, when the user supplies an execution_uuid, call security.attack-discovery.get_status only — never start a new generation.';
 
 const ANALYST_HEADER = `# Attack Discovery Generation Skill
 
@@ -414,11 +414,11 @@ const SKILL_CONTENT = [
   ANALYSIS_PROCESS,
   RUN_PIPELINE_GUIDE,
   STATUS_GUIDE,
-  GROUND_TRUTH_GUIDE,
   OUTPUT_REQUIREMENTS,
   JSON_OUTPUT_SCHEMA,
-  MISSED_DETECTION_CLOSURE,
   FIELD_SYNTAX_BLOCK,
+  GROUND_TRUTH_GUIDE,
+  MISSED_DETECTION_CLOSURE,
 ].join('\n\n');
 
 const REFERENCED_DEFAULT_PROMPT = `# Reference: Attack Discovery default analyst prompt

@@ -262,6 +262,22 @@ describe('attackDiscoveryGeneratorSkill', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('Retrieve alerts upstream');
     });
 
+    it('includes trigger phrases in the description for routing robustness', () => {
+      expect(attackDiscoveryGeneratorSkill.description).toContain('run across these alert sets');
+      expect(attackDiscoveryGeneratorSkill.description).toContain('analyze these alerts');
+    });
+
+    it('places field syntax before Mode C and missed-detection closure for context efficiency', () => {
+      const fieldSyntaxPos = attackDiscoveryGeneratorSkill.content.indexOf('## Field Syntax');
+      const groundTruthPos = attackDiscoveryGeneratorSkill.content.indexOf('## Mode C');
+      const missedDetectionPos = attackDiscoveryGeneratorSkill.content.indexOf(
+        '## Missed Detection Closure'
+      );
+      expect(fieldSyntaxPos).toBeGreaterThan(-1);
+      expect(fieldSyntaxPos).toBeLessThan(groundTruthPos);
+      expect(groundTruthPos).toBeLessThan(missedDetectionPos);
+    });
+
     it('frames the default ES|QL query as a baseline that the agent may adapt', () => {
       expect(attackDiscoveryGeneratorSkill.content).toContain('sensible **baseline**');
     });

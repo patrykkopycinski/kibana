@@ -158,7 +158,7 @@ The new execution-service lifecycle span (Fix F) and skill-selection span (Fix E
 | 6 | ⬜ Task Manager propagate (B) | `task_handler.ts` | 2–3d | Task Manager contract |
 | 7 | ✅ LangGraph spans (C) | `run_chat_agent.ts` | 3–5d | — |
 | 8 | ⬜ Workflow step spans (D) | `workflow_execute_step_tool.ts` | 2–3d | Workflows platform |
-| 9 | ⬜ Test harness header injection | `workflow_task.ts` | 0.5d | Gap G merged |
+| 9 | ✅ Test harness header injection | `workflow_task.ts` + spec | 0.5d | Gap G merged |
 | 10 | ⬜ Re-run eval with telemetry | Suite + Scout | 1d | Gaps C+D fixed |
 | 11 | ⬜ Confusion-matrix evaluator | `evaluators.ts` | 1d | — |
 | 12 | ⬜ Hard-case fine-tuning | Alert-analysis skill | 2–3d | Error pattern analysis |

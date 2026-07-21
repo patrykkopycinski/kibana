@@ -1,0 +1,15 @@
+Port the Throughline prototype's Watches + Workflows surfaces into the daybreak Kibana plugin — the 'set up a watch' experience. This is PD-5 in the full-prototype roadmap (see captured idea 2026-07-09-project-daybreak-throughline-full-prototype-roadma).
+
+GOAL: an analyst can create/configure a Watch, assign Workflows to it, and see live status — with full CRUD and fail-closed behavior where applicable. This UNBLOCKS the prototype's core management loop and is the critical-path gate for the 'set up a watch' goal.
+
+SURFACES (port from docs-site/prototype/throughline-app.js): renderWatchesPage (:5541), renderWatchDetail (:5661), renderWorkflowsPage (:5577), renderAgentsHubPage (:5433).
+
+DATA MODELS (currently STATIC DEMO ARRAYS in the prototype — this is the key gap): WATCHES (:2474) and WORKFLOWS (:2546) are hardcoded demo data. A real port MUST build server persistence mirroring PD-2's Evidence/Proposal pattern: common/types/watch.ts, common/types/workflow.ts, server/client/{watch,workflow} (space-scoped constructors + createSpaceFilter), server/http_routes/{watch,workflow} (thin pass-through wrappers registered in start() only when config.enabled).
+
+KNOWN GAPS THE CLARIFICATION LOOP MUST SURFACE (demo-vs-reality): (1) conflict resolution — two workflows target the same alert; (2) lifecycle — what happens when a watch is deactivated mid-investigation; (3) permission/autonomy changes — demoting a watch from approval-required to auto-run; (4) deletion safety — orphaned workflow references when a watch is deleted.
+
+DEPENDENCIES: parentPlanId = daybreak-s1-pd4-throughline-ui-alignment (reuses PD-4's theme.ts token system, app shell, and typed HTTP client/hooks pattern). Depends on PD-4 landing first.
+
+ROUTING: all tasks MUST pin @host:worker-m1max (the PD-4 lesson — without explicit pins, dispatch regresses to local heuristics and fails on the wrong worktree path).
+
+NON-GOALS: no prototype-only chrome (DC wrapper, props panel, accent/radius live-tuners — design-tool controls). No hand-duplicated demo data (anti-pattern #65): WATCHES/WORKFLOWS demo arrays stay in the prototype only; the server stores are canonical, demo fixtures generated/ported FROM them. Do NOT port Hunt, Discoveries, Dashboards, Skills, or other governance surfaces — those are PD-6/PD-7/PD-8.

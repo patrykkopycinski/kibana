@@ -1,0 +1,9 @@
+I don’t have working file/search/agent tools in this session. The only exposed tool (`ask_question`) returned “No such tool available,” so I can’t read the Daybreak plugin, the existing `@kbn/evals` FPR suite, or the project-daybreak evaluation-trust artifacts needed to ground the brief.
+
+To produce the `research.md` artifact, I need one of the following:
+
+1. **Enable repo tools** — file read, grep/glob, and agent spawn — so I can pull the real `file:line` anchors.
+2. **Paste the relevant files** — the key modules the proposal touches (PD-3 eval suite, existing worker/Proposal/Evidence clients, `@kbn/evals` storage/result metadata surface, and the canonical schema sketches under `project-daybreak/docs/working-groups/evaluation-trust/artifacts/`).
+3. **Point me to a working worktree/branch** — e.g., `kibana.worktrees/daybreak-spike` — and confirm I can run shell commands there.
+
+Which path works best for you?

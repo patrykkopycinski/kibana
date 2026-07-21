@@ -1,0 +1,89 @@
+All references verified, including the engine's transitive deps (`taskManager`, `actions`, `workflowsExtensions`, `licensing` at `kibana.jsonc:13-18`) and that its public API lives on the **start** contract (`plugin.ts:1345`). Writing the design doc.
+
+# Design
+
+## Approach
+
+PD-1 (A-2) is a capability-validation spike: prove the `workflows_execution_engine` plugin can express the three step primitives the NotDaybreak Alert-Analysis worker will need — HTTP fetch, conditional guard, and AI invocation with structured output — by building and running one trivial end-to-end workflow, then asserting on each step's output shape. The research brief establishes that the engine is real, shipped, and already owns all three primitives as first-class step types (Finding 2), and that a production workflow (`streams` continuous extraction) already composes two of them (Finding 3). PD-1 is therefore **confirmatory, not exploratory**: we are not building an orchestration substrate, we are exercising the existing one to retire A-2 before PD-2 invests in the real 5-phase worker (FR-1).
+
+Concretely, the spike stands up a **new, minimal `daybreak` plugin** under `x-pack/solutions/security/plugins/daybreak/` that depends on the engine plugin (`workflowsExecutionEngine`), declares a new `daybreak` experimental feature flag default-off (FR-12, NFR-2), and ships four artifacts: (1) an inline workflow definition exercising `kibana.request` → `if` → `connector` (structured output), (2) a thin runner that invokes the engine once end-to-end and logs per-step I/O, (3) an integration test `workflow_engine_shape.test.ts` that drives the workflow through the engine's own test harness and asserts each step's structured output, and (4) a README recording what validated, what didn't, and any engine limitations that change PD-2's plan. The engine's public `executeWorkflow` API (`server/plugin.ts:794`, exposed on the start contract at `:1347`) and the engine's reusable `WorkflowRunFixture` (`integration_tests/workflow_run_fixture.ts:29`) are the two engine surfaces we build on; we write no new step types and no new execution logic.
+
+One correction to the proposal is forced by verification: it gates the spike behind "the existing `daybreak` experimental feature flag," but no `daybreak` plugin or flag exists anywhere in the repo (the parent dir `x-pack/solutions/security/plugins/` contains `security_solution`, `elastic_assistant`, etc., but not `daybreak`; a repo-wide search returns `daybreak` only inside the OpenSpec proposal files). PD-1 is therefore greenfield on the plugin-and-flag axis and must scaffold both. The `experimentalFeatures` read pattern is real and grounded — `x-pack/solutions/security/plugins/security_solution/server/plugin.ts:246` threads `experimentalFeatures: this.config.experimentalFeatures` through setup/start (also `:221`, `:270`, `:307`) — so we mirror that pattern in the new plugin rather than inventing a new gating mechanism.
+
+## Components
+
+- **`daybreak` plugin (new)** — the spike's container. `x-pack/solutions/security/plugins/daybreak/` with `kibana.jsonc` (`type: plugin`, `server: true`, `requiredPlugins: ["workflowsExecutionEngine"]`, mirroring the manifest shape at `x-pack/solutions/security/plugins/elastic_assistant/kibana.jsonc:13-38`), `server/plugin.ts` + `server/index.ts`, and `common/config` declaring the `daybreak` experimental flag default-off. The engine's own `requiredPlugins` (`taskManager`, `actions`, `workflowsExtensions`, `licensing` at the engine's `kibana.jsonc:13-18`) come transitively; the spike declares only its direct `workflowsExecutionEngine` dependency.
+- **`daybreak/server/workflow/engine_shape_validation.workflow.yaml`** — the minimal three-step workflow definition (the thing being validated). `type: kibana.request` (HTTP fetch), `type: if` with `condition:` (guard), and a `connector` step (stub AI invocation with structured output). Authored in the shipped/tested YAML form (see Data Model), **not** the README's illustrative `action:`/`params:` form (research Finding 7).
+- **`daybreak/server/workflow/run_engine_shape_validation.ts`** — the runner. Builds/loads the workflow, calls `plugins.workflowsExecutionEngine.executeWorkflow(workflow, context, request)` from the engine's start contract (`server/plugin.ts:794,1347`), awaits completion, then reads back the per-step execution records and logs each step's input/output. Modeled on the Agent Builder completion-awaiting + tracing-span wrapper at `x-pack/platform/plugins/shared/agent_builder/server/services/workflow/execute_workflow.ts:30-57`, stripped to the minimum the spike needs.
+- **`daybreak/server/workflow/workflow_engine_shape.test.ts`** — the single integration test. Uses the engine's `WorkflowRunFixture` (`integration_tests/workflow_run_fixture.ts:29`) to run the workflow inline and asserts each step type produces the expected structured output, directly mirroring `integration_tests/tests/single_step_run.test.ts`.
+- **`daybreak/server/workflow/README.md`** — records what the spike validated, any engine limitations discovered, the stub-vs-real-connector decision, and (as a labeled suggestion) a one-paragraph custom-orchestration fallback sketch.
+
+## Data Model
+
+### Workflow definition (the three step types, shipped/tested syntax)
+
+Authored to match the engine's tested form, not its README illustrations (research Finding 7; verified at `integration_tests/tests/if_condition.test.ts:35-44`). Each step maps to a verified handler:
+
+| PD-1 primitive | Engine step type | Handler (file:line) |
+| --- | --- | --- |
+| HTTP fetch | `kibana.request` | `server/step/kibana_action_step.ts` — `KibanaActionStepImpl._run()` reads `node.configuration.type` + `node.configuration.with` and builds the request via `buildKibanaRequest`/`FetcherConfigSchema` |
+| Conditional guard | `if` + `condition:` + nested `steps:`/`else:` | `server/step/if_step/` (`enter_if_node_impl.ts`, condition-branch nodes) |
+| AI invocation (structured output) | `connector` + `connector-id:` + `with:` | `server/step/connector_step.ts:50` — `ConnectorStep { 'connector-id'?, with? }`; type split on `.` via `getConnectorSpec(\`.${type}\`)` |
+
+Minimal definition (illustrative; real file lives at the path above):
+
+```yaml
+steps:
+  - name: fetch_fixture            # HTTP-fetch step
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/daybreak/spike/fixture
+
+  - name: guard                    # conditional-guard step
+    type: if
+    condition: steps.fetch_fixture.output.eligible:"true"   # engine condition DSL
+    steps:
+      - name: invoke_model         # stub AI invocation, structured output
+        type: .inference           # connector type 'inference', split on '.'
+        connector-id: stub-inference
+        with:
+          input: '{"verdict":"benign","confidence":0.9}'   # JSON-shaped payload
+    else:
+      - name: skip
+        type: workflow.output
+        with: { skipped: true }
+```
+
+The `condition:` value uses the engine's condition DSL as exercised at `if_condition.test.ts:36` (`steps.setupStep.output.text:"ok"`). Note the streams production workflow wraps conditions in `${{ }}` templating (`continuous_extraction_workflow.yaml:74`); the spike validates the **raw condition DSL** form first and only reaches for `${{ }}` templating if a guard needs runtime interpolation — this is a real syntax fork the spike must resolve and record in the README. *(Forward: tasks — confirm whether the guard's real idempotency check (FR-3) needs raw-DSL or `${{ }}`-templated conditions, and pin the form before PD-2.)*
+
+### Structured-output contract
+
+The connector step returns its payload as `data` on the step's runtime context, reachable downstream as `steps.<name>.output` (e.g. `steps.invoke_model.output[0].result`, exactly the shape asserted at `single_step_run.test.ts:49`). The `echo_inference` stub (`integration_tests/mocks/actions_plugin_mock/fake_connectors.ts:24-29`, returning `data: [{ result: params.text }]` at `:72-80`) is what backs the `stub-inference` connector in the test. "Structured JSON output" is proven by passing a JSON-shaped payload through `with.input` and asserting the runner/test can reach into `steps.invoke_model.output[0].result` and parse it to the expected object shape — this is the substrate check for FR-6's output-validation guard in PD-2, without building that guard here.
+
+### Stub-vs-real-connector decision (resolves the proposal's open question)
+
+The workflow definition uses the **real** connector step shape (`type: .inference`, `connector-id`), and the spike runs it against the `echo_inference` stub. PD-2 swaps the `connector-id` to a real Agent Builder / Actions inference connector without touching the step shape. This keeps PD-1 a pure substrate validation while leaving a clean reuse seam for the leading edge of the A-1 wiring unknown — the spike validates the *envelope*, PD-2 fills in the *real connector*.
+
+### Feature flag shape
+
+New boolean experimental flag declared in `daybreak/common/config` and read in `daybreak/server/plugin.ts` as `this.config.experimentalFeatures.daybreak`, threaded through setup/start exactly as `security_solution/server/plugin.ts:246` does. Default-off (FR-12, NFR-2). The runner short-circuits (no-op return) when the flag is off, so the spike is safe to merge to a shared branch mid-spike.
+
+### Step I/O record (what the runner logs)
+
+After `executeWorkflow` completes, the runner reads the engine's step-execution records (the same `stepExecutionRepository` surface the fixture mocks at `workflow_run_fixture.ts`) and logs, per step: `stepId`, `type`, `status`, `input` (the rendered `with`), and `output` (the connector/parsed payload). This is the artifact the README summarizes.
+
+## Failure Modes
+
+- **Engine can't express one of the three step shapes (the A-2 worst case):** If any of `kibana.request` / `if` / `connector` fails to produce the expected structured output, the spike has refuted the substrate hypothesis. Reaction: the test fails loudly per step (one assertion block per step type, mirroring `single_step_run.test.ts`), the README records exactly which primitive failed and why, and the team pivots to the custom-orchestration fallback (see Alternatives + the suggested README sketch) **before** PD-2 begins. This is the entire point of PD-1 — failing here is a successful spike.
+- **`executeWorkflow` is fire-and-forget rather than completion-awaiting (open runner semantic):** The engine's start-contract `executeWorkflow` (`plugin.ts:794`) returns a `workflowExecutionId`; the Agent Builder wrapper adds explicit `waitForCompletion`/`completionTimeoutSec` (`execute_workflow.ts:25-26,36`) because it calls the *management* API. If the spike's direct engine call does not await completion, the runner's per-step I/O read-back will race the execution. Reaction: detect during the spike; if immediate, poll the step-execution repository until terminal status (bounded by a timeout) before logging — and record the exact completion semantic in the README. *(Forward: tasks — resolve completion semantic as the runner's first sub-step.)*
+- **Connector type-split mismatch:** `connector_step.ts` splits `step.type` on `.` and resolves via `getConnectorSpec(\`.${type}\`)`. If the spike's `.inference` type doesn't resolve to a registered spec in the test harness, the connector step errors at validation. Reaction: fall back to the exact `FakeConnectors.echo_inference.actionTypeId` (`'inference'`) form proven at `single_step_run.test.ts:44`, and record which form PD-2's real connector must use.
+- **Condition-DSL vs `${{ }}` templating fork:** A guard condition written in the wrong form either fails to compile or silently mis-evaluates (e.g. always-true guard → vacuous). Reaction: validate the guard's truthy **and** falsy branches in the test (both `steps:` and `else:`), as `if_condition.test.ts:35-44` does; record the chosen form.
+- **Flag/plugin scaffolding breaks the build (greenfield risk):** A new plugin's `kibana.jsonc` / config schema can fail Kibana's plugin loader or type check. Reaction: scope type check to the new plugin's `tsconfig.json` per project convention (`node scripts/type_check --project …`) before declaring the spike runnable; do not gate behind a full-repo type check.
+
+## Alternatives Considered
+
+- **Custom orchestration substrate (not the engine):** Write a bespoke Setup/Guard/Enrich/Reason/Act orchestrator rather than betting on `workflows_execution_engine`. Rejected as the *primary* path because research establishes all three primitives already exist as first-class step types (Finding 2) and ship composed in production (`streams` YAML, Finding 3). Kept as the **documented fallback** if PD-1 refutes the engine — the spike's value is precisely to make this call on evidence, not assumption. *(Suggested enhancement, labeled not-core: pre-stage a one-paragraph custom-orchestration fallback sketch in the README so a pivot doesn't start from a cold start.)*
+- **Build the stub AI step as a real Agent Builder skill now (collapse A-1 into PD-1):** Rejected. A-1 (Agent Builder skill wiring unknown) is explicitly PD-2's opening task (reconciliation row for FR-5 / PD-2); folding it into PD-1 violates the spike's hard constraint and bloats a time-boxed capability check. PD-1 uses the engine's existing `echo_inference` stub connector to validate the *envelope*; PD-2 fills the real skill. This is the stub-vs-real decision recorded above.
+- **Use the Agent Builder `execute_workflow.ts` wrapper as the spike's runner directly:** Rejected as the runner because it depends on `workflows_management`'s `workflowApi` (a saved-object/UI-layer contract heavier than a substrate check needs) and on Agent Builder's tracing machinery. The spike consumes the engine's own start-contract `executeWorkflow` directly, keeping the dependency surface to the single plugin it's validating. The wrapper is used only as the *model* for completion-awaiting and the tracing span shape.
+- **Validate each step type in isolation (three separate one-step workflows):** Rejected. A-2 is specifically whether the engine composes HTTP-fetch → conditional-guard → AI-invocation **in sequence** (the worker's real control flow). Isolated single-step runs would validate the primitives but not their composition — and the streams YAML already proves composition in production, so the spike gains nothing by decomposing. One composed workflow is the minimal faithful slice.

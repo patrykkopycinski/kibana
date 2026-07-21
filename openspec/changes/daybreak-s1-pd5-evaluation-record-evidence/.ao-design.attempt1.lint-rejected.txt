@@ -1,0 +1,117 @@
+# Design: PD-5 False Positive Reduction L4 Evaluation Record and Promotion Evidence
+
+## Approach
+
+We extend the existing PD-3 `@kbn/evals` harness and Daybreak worker modules in place rather than adding any new package, plugin, index, service, or store. The slice adds the smallest concrete `WorkerEvaluationRecord` runtime type/serializer needed to capture one complete whole-worker run, a deterministic scorer that separates hard-gate dimensions from weighted evidence-quality dimensions, and a versioned `fpr-golden-v0` seed manifest built from the existing PD-3 fixtures. The record is exported through the existing `@kbn/evals` dataset/experiment result metadata surface, and the scorecard is emitted as a run artifact with full provenance but no guessed cost figures. This mirrors the proposal's scope: "reuse and extend the PD-3 eval suite and existing daybreak plugin modules in place" (`proposal.md:2`, What Changes).
+
+The implementation is organized as three tightly scoped additions inside the existing Daybreak plugin boundary: (1) a record type/serializer, (2) a deterministic scorer and seed manifest, and (3) an eval-suite extension that wires both into the existing `@kbn/evals` result metadata. Feature-flag gating and the spike-local readiness gate remain unchanged from PD-2/PD-4 (FR-12, NFR-2).
+
+## Components
+
+- **`WorkerEvaluationRecord` serializer** — owns the runtime type, JSON serialization, and identity-key computation for exactly-one-record-per-run semantics. Lives adjacent to existing PD-3 Proposal/Evidence client modules, not in a new package (What Changes; proposal Open Questions).
+- **Deterministic scorer** — computes critical hard-gate dimensions (outcome correctness, action safety, idempotency, record coverage) and weighted dimensions (evidence completeness 0.4, confidence calibration 0.3, rationale/actionability 0.3). Emits the 0.80 weighted threshold as `proposed/unratified` in report metadata (What Changes).
+- **`fpr-golden-v0` seed manifest** — versioned fixture set covering benign expected behavior, insufficient/missing evidence, risky broad exception, duplicate/replay, malformed output, and a deliberately broken expected result. Reuses one canonical seed definition from existing PD-3 fixtures; no hand-duplicated demo data (FR-10, PD-3, PD-5).
+- **Eval-suite extension** — extends the existing `@kbn/evals` FPR suite to run the worker end-to-end, invoke the scorer, and attach the serialized record to the existing dataset/experiment result metadata (FR-8, FR-9, PD-3).
+- **Scorecard exporter** — produces the CLI-output + saved artifact report with capability/profile/dataset/model/worker provenance, dimension results, record/proposal counts, tokens/latency when trace data exists, and cost basis without guessed dollars (What Changes).
+
+## Data Model
+
+### `WorkerEvaluationRecord` (minimal concrete shape)
+
+The exact field list must be reconciled against the canonical schema sketch in `docs/working-groups/evaluation-trust/artifacts/` before implementation (proposal Open Questions). The initial concrete shape is:
+
+```typescript
+interface WorkerEvaluationRecord {
+  // Identity
+  recordId: string;           // deterministic hash of run + proposal + evidence + dataset + profile + version
+  runId: string;              // @kbn/evals run identifier
+  proposalId: string;           // worker Proposal identifier
+  evidenceId: string;         // worker Evidence identifier
+  datasetId: 'fpr-golden-v0';
+  profileId: string;          // capability/profile name
+  version: string;            // worker + eval suite version
+
+  // Provenance
+  capability: string;         // e.g. 'alert-analysis/false-positive-reduction'
+  workerName: string;         // daybreak alert-analysis worker identifier
+  modelId?: string;           // model connector id when trace data exists
+  startedAt: string;            // ISO timestamp
+  completedAt: string;          // ISO timestamp
+
+  // Scoring
+  dimensions: {
+    outcomeCorrectness: 'pass' | 'fail' | 'unknown';
+    actionSafety: 'pass' | 'fail' | 'unknown';
+    idempotency: 'pass' | 'fail' | 'unknown';
+    recordCoverage: 'pass' | 'fail' | 'unknown';
+    evidenceCompleteness: number;   // 0..1
+    confidenceCalibration: number;  // 0..1
+    rationaleActionability: number; // 0..1
+  };
+  weightedScore: number;      // 0..1
+  weightedThreshold: { value: 0.80; status: 'proposed' | 'unratified' };
+
+  // Raw references
+  proposalRef: string;
+  evidenceRef: string;
+}
+```
+
+The `recordId` is a stable hash of the identity tuple `(runId, proposalId, evidenceId, datasetId, profileId, version)` so duplicate runs of the same worker input produce the same record id and can be rejected by the scorer/exporter (FR-10, A-3).
+
+### Scorecard artifact
+
+```typescript
+interface FprScorecard {
+  provenance: {
+    capability: string;
+    profile: string;
+    dataset: string;
+    model?: string;
+    worker: string;
+    version: string;
+  };
+  summary: {
+    total: number;
+    passed: number;
+    failed: number;
+    recordsCreated: number;
+    recordsDeduped: number;
+  };
+  dimensions: Array<{
+    name: string;
+    kind: 'critical' | 'weighted';
+    result: 'pass' | 'fail' | 'unknown';
+    score?: number;
+    weight?: number;
+  }>;
+  records: WorkerEvaluationRecord[];
+  threshold: { value: 0.80; status: 'proposed' | 'unratified' };
+  tokens?: { input?: number; output?: number };
+  latencyMs?: number;
+  costBasis?: 'not-computed'; // never guessed dollars
+}
+```
+
+## Failure Modes
+
+- **Vacuous eval gate (A-3):** If the golden manifest contains only valid fixtures, a broken worker could still pass. Mitigation: the `fpr-golden-v0` manifest includes a deliberately broken expected-result fixture; the non-vacuity test asserts that the broken fixture fails while its valid counterpart passes (FR-10, PD-3).
+- **Duplicate records for the same run:** If the identity tuple is too narrow, re-running the same worker input creates multiple records. Mitigation: `recordId` hashes the full identity tuple and the exporter checks for existing records before persisting (FR-10).
+- **Existing `.evaluation-*` API cannot carry metadata:** If the `@kbn/evals` result metadata surface lacks a field or extension point needed for the record, we take the kill/pivot path: ship a tested serializer/contract seam plus a failing/self-skipping integration test that names the missing extension point, rather than adding a second storage layer (operator description, proposal Open Questions).
+- **Connector flakiness breaks offline gate (A-4):** Live model calls may time out or rate-limit. Mitigation: the offline dataset gate uses retry/backoff with exponential backoff and a fixed-seed/recorded-fixture fallback when trace data is unavailable (A-4, PD-3).
+- **Missing or unknown approval policy:** The scorer treats an unknown approval state as a hard failure on `actionSafety`, never defaulting to pass (Acceptance Criteria 1).
+- **Malformed worker output:** The existing PD-2 output validation guard (FR-6) already fails closed; the scorer maps such cases to `outcomeCorrectness: 'fail'` and `recordCoverage: 'fail'`.
+
+## Alternatives Considered
+
+- **New Elasticsearch index or saved-object service for records:** Rejected by explicit constraint — no new index, saved object, service, registry, package, or plugin (What Changes, Acceptance Criteria 8).
+- **Generic platform `EvaluationRecord` abstraction:** Rejected. The proposal calls for "the smallest concrete `WorkerEvaluationRecord` runtime type/serializer needed by this slice, based on the canonical schema sketch — not a competing generic platform record" (What Changes).
+- **Multi-judge fanout for rationale quality:** Rejected. If an LLM judge is needed, a single targeted judge is used for development and its identity preserved; broad multi-judge fanout is out of scope for this phase (Constraints).
+- **Forced `skill_ids` route in user-behavior evals:** Rejected. The default Elastic agent/router must select the skill naturally; isolation-only tests may remain as lower-layer diagnostics but cannot supply the promotion signal (Constraints).
+
+## Forward: specs
+
+- Confirm the exact file path and field list of the canonical schema sketch in `docs/working-groups/evaluation-trust/artifacts/` before finalizing `WorkerEvaluationRecord` (proposal Open Questions).
+- Confirm the exact `@kbn/evals` dataset/experiment result metadata API shape that will carry the serialized record (proposal Open Questions).
+- Confirm the existing PD-3 fixture schema and location so the `fpr-golden-v0` manifest can reuse one canonical seed definition (proposal Open Questions).
+- Confirm the existing Daybreak worker feature-flag name and default so the eval suite can skip cleanly when the flag is off (NFR-2, FR-12).

@@ -1,0 +1,31 @@
+---
+change_id: fpr-worker-evaluation-record-storage-round-trip
+status: draft
+created_at: 2026-07-12
+treadmill_artifact_version: 1
+research_topic: FPR WorkerEvaluationRecord storage round-trip in daybreak worker spike
+---
+# Research: FPR WorkerEvaluationRecord Storage Round-Trip
+
+## Research Question
+What existing `@kbn/evals` production-facing write/read APIs and which existing daybreak worker/eval module can support the first FPR `WorkerEvaluationRecord` storage round-trip for the alert-analysis worker spike?
+
+## Summary
+This research brief could not be grounded in live repository code because the current session does not expose file-read, grep, or glob tools. No architectural claims about the location or shape of the PD-3 FPR `@kbn/evals` suite, the production-facing dataset/experiment APIs, or the daybreak worker/eval module are made below; all remain open questions to be resolved once the repository can be read directly.
+
+## Detailed Findings
+
+(none — no code was read)
+
+## Code References
+
+(none — no code was read)
+
+## Open Questions
+
+- The research wave was unable to read the repository because file-read/grep/glob tools are not available in this session. Please provide the proposal frontmatter/code excerpts or enable those tools so the brief can be grounded in `file:line` references.
+- Where is the existing PD-3 FPR `@kbn/evals` suite located within the `daybreak-s1-alert-analysis-worker-spike` feature?
+- Which `@kbn/evals` module exposes the production-facing dataset/experiment write API?
+- Which `@kbn/evals` module exposes the production-facing query/read API?
+- Which existing daybreak worker/eval module should host the `WorkerEvaluationRecord` serializer/type?
+- Does the existing `@kbn/evals` result shape already support fields for stable capability/run identity, worker/profile/dataset version, actual outcome, evidence references, Proposal linkage, expected outcome or human decision label, and provenance?

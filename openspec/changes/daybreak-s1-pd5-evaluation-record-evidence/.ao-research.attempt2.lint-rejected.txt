@@ -1,0 +1,49 @@
+---
+change_id: fpr-l4-evaluation-record-promotion-evidence
+status: draft
+created_at: 2026-07-12
+treadmill_artifact_version: 1
+research_topic: Grounding PD-5 FPR L4 record in existing daybreak worker and @kbn/evals code
+---
+
+# Research: PD-5: False Positive Reduction L4 Evaluation Record and Promotion Evidence
+
+## Research Question
+What existing code paths in the `daybreak-s1-alert-analysis-worker-spike` feature and `@kbn/evals` harness can carry a deterministic `WorkerEvaluationRecord` through a whole-worker run without adding a new storage layer, package, plugin, or service?
+
+## Summary
+The proposal asserts that PD-1 through PD-4 are already complete in the existing feature worktree, and that PD-5 can be built by reusing and extending the PD-3 eval suite and daybreak plugin modules in place. The canonical schema direction is documented under `docs/daybreak-worker-testing-pyramid.md` and `docs/working-groups/evaluation-trust/artifacts/`. This pass surfaces the exact code-level anchors that the design wave must verify before implementation.
+
+## Detailed Findings
+
+### 1. Prior PD completion and worktree location
+The proposal states that PD-1 (workflow-engine validation), PD-2 (five-phase worker), PD-3 (`@kbn/evals` harness), and PD-4 (routes/UI) are already implemented in the `daybreak-s1-alert-analysis-worker-spike` feature branch/worktree. The spike is intended to run on the i9 dedicated worktree `kibana.worktrees/daybreak-spike` (NFR-1).
+
+### 2. Evaluation record must reuse existing `@kbn/evals` storage
+The proposal's central constraint is to persist/export the `WorkerEvaluationRecord` through existing `@kbn/evals` dataset/experiment result metadata, explicitly prohibiting a new Elasticsearch index, saved object, service, registry, package, or plugin. The shape notes list this as the kill/pivot boundary: if existing `.evaluation-*` APIs cannot carry required metadata without speculative or private coupling, the fallback is a tested serializer/contract seam plus a blocked integration test (A-1, PD-3 reconciliation).
+
+### 3. Scorer dimensions and threshold
+The proposed deterministic scorer has four critical hard-gate dimensions (outcome correctness, action safety, idempotency, record coverage) and three weighted dimensions (evidence completeness 0.4, confidence calibration 0.3, rationale/actionability 0.3). The 0.80 weighted threshold is explicitly marked as proposed/unratified in report metadata (FR-8, FR-10, proposal What Changes).
+
+### 4. Seed manifest scope
+The versioned `fpr-golden-v0` seed manifest must cover: benign expected behavior, insufficient/missing evidence, risky broad exception, duplicate/replay, malformed output, and a deliberately broken expected result. It must be built from existing PD-3 fixtures with one canonical seed definition and no hand-duplicated demo data (FR-10, proposal What Changes).
+
+### 5. Feature flag and no-new-dependency constraints
+The worker remains feature-flagged default-off via `experimentalFeatures` (NFR-2, FR-12). The spike accepts no new dependencies, no symlinks, and no new package/plugin/index/service/store (Constraints, Acceptance Criteria 8).
+
+### 6. Eval harness constraints
+User-behavior evals must not force a `skill_ids` route; the default Elastic agent/router selects the skill naturally. Isolation-only tests may remain as lower-layer diagnostics but cannot supply the promotion signal. Jest invocations must use `--maxWorkers=4 --workerIdleMemoryLimit=512MB` or `--runInBand` (Constraints).
+
+## Code References
+- No file:line anchors were collected in this session because repository search/read tools were not available. All architectural claims in Detailed Findings trace to the proposal and shape notes and must be verified against the actual worktree.
+
+## Open Questions
+- Where is the `daybreak-s1-alert-analysis-worker-spike` feature branch and worktree on disk, and which files implement PD-2's five-phase worker?
+- Which existing PD-3 eval files define the current `@kbn/evals` FPR suite, and what is their path relative to the daybreak plugin?
+- What is the exact shape of the existing `@kbn/evals` dataset/experiment result metadata API (the `.evaluation-*` surface) that should carry the `WorkerEvaluationRecord`?
+- Where is the canonical `WorkerEvaluationRecord` schema sketch documented in `docs/daybreak-worker-testing-pyramid.md` and `docs/working-groups/evaluation-trust/artifacts/`?
+- Which PD-3 fixtures already exist and how are they structured so the `fpr-golden-v0` manifest can be derived from them without duplication?
+- Where is the `experimentalFeatures` flag for this worker defined, and is it currently default-off?
+- Which Proposal/Evidence client modules exist in the daybreak plugin and what are their public types?
+- Does the existing worker already emit stable run/proposal/evidence identity fields sufficient to guarantee exactly one record per run, or does the serializer need to add them?
+- What is the current `@kbn/evals` `evaluate()` fixture set API used for live UI-journey/E2E evals (FR-9), and can it be extended to export scorecard metadata?

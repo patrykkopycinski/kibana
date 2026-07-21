@@ -1,0 +1,60 @@
+---
+change_id: fpr-l4-evaluation-record-promotion-evidence
+status: draft
+created_at: 2026-07-12
+treadmill_artifact_version: 1
+research_topic: FPR L4 evaluation record storage and scoring in daybreak worker eval suite
+---
+
+# Research: PD-5: False Positive Reduction L4 Evaluation Record and Promotion Evidence
+
+## Research Question
+How can the existing daybreak alert-analysis worker, PD-3 `@kbn/evals` harness, and existing evaluation-result metadata be extended in place to produce a deterministic L4 `WorkerEvaluationRecord` and scorecard without adding new storage, packages, plugins, or services?
+
+## Summary
+The proposal asks to reuse the PD-3 eval suite and daybreak plugin modules in place, add the smallest concrete `WorkerEvaluationRecord` runtime type/serializer, add a deterministic scorer with critical hard-gate dimensions and weighted evidence/calibration/rationale dimensions, and build a versioned `fpr-golden-v0` seed manifest from existing fixtures. All persistence must flow through existing `@kbn/evals` dataset/experiment result metadata. This research pass could not read the repository because file/search tools were unavailable, so the findings below are grounded solely in the proposal and shape notes; every claim about actual file locations or API shapes remains an Open Question.
+
+## Detailed Findings
+
+### 1. Scope is strictly limited to in-place extension
+The proposal explicitly forbids new Elasticsearch indices, saved objects, services, registries, packages, or plugins. Changes must reuse and extend the PD-3 eval suite and existing daybreak plugin modules. (proposal "What Changes" bullet 1; AC 8; NFR-2; FR-12)
+
+### 2. Record shape follows a canonical schema sketch
+The `WorkerEvaluationRecord` runtime type/serializer must be derived from the canonical schema sketch in the Evaluation & Trust artifacts, not a competing generic platform record. The forward work for the design wave is to resolve where this type lives relative to existing PD-3 modules without introducing a new package boundary. (proposal "What Changes" bullet 2; proposal "Open Questions")
+
+### 3. Scoring model combines critical hard gates with weighted dimensions
+Critical dimensions are outcome correctness, action safety, idempotency, and record coverage. Weighted dimensions are evidence completeness (0.4), confidence calibration (0.3), and rationale/actionability (0.3). The 0.80 weighted threshold must be explicitly marked as proposed/unratified in report metadata. (proposal "What Changes" bullet 3; AC 1)
+
+### 4. Persistence must reuse existing `@kbn/evals` metadata
+The record is to be persisted and exported through existing `@kbn/evals` dataset/experiment result metadata. The kill/pivot path, if existing `.evaluation-*` APIs cannot carry required metadata without speculative or private coupling, is a tested serializer/contract seam plus an explicit blocked integration test. (proposal "What Changes" bullet 4; proposal "Why"; AC 2, AC 8)
+
+### 5. Seed manifest must cover six scenario families plus a deliberately broken fixture
+The versioned `fpr-golden-v0` manifest must cover benign expected behavior, insufficient/missing evidence, risky broad exception, duplicate/replay, malformed output, and a deliberately broken expected result. It must be built from existing PD-3 fixtures with one canonical seed definition and no hand-duplicated demo data. (proposal "What Changes" bullet 5; AC 3; A-3)
+
+### 6. Non-vacuity must be demonstrated by a regression-flip test
+A valid fixture must pass while its deliberately broken counterpart fails the expected gate, proving the L4 gate is not vacuous. (AC 4; FR-10; A-3)
+
+### 7. Evidence artifact must include provenance and dimension results
+The scorecard/evidence artifact must include capability/profile/dataset/model/worker provenance, dimension results, record/proposal counts, tokens/latency when trace data exists, and cost basis without guessed dollars. (proposal "What Changes" bullet 6)
+
+### 8. Spike-local readiness gate is temporary and not a shared-behavior claim
+The existing spike-local readiness gate must remain explicit as temporary; the artifact must not claim it proves shared #17944 behavior. (proposal "What Changes" bullet 7)
+
+### 9. Constraints bound implementation and test execution
+The feature flag remains default off, no symlinks or new dependencies are introduced, user-behavior evals must not force `skill_ids`, deterministic evaluators are preferred, any LLM judge must be a single targeted judge with preserved identity, and Jest must run with bounded workers. (proposal "Constraints"; NFR-2)
+
+## Code References
+No code references could be collected during this pass because repository read/search tools were unavailable. Every architectural claim above requires a follow-up pass to anchor it to `file:line` references.
+
+## Open Questions
+- Where do the PD-3 eval suite files live relative to the daybreak plugin, and what is their current module/export structure?
+- What is the exact path and content of `docs/daybreak-worker-testing-pyramid.md` and the files under `docs/working-groups/evaluation-trust/artifacts/` that define the canonical `WorkerEvaluationRecord` schema?
+- What existing `@kbn/evals` APIs (dataset/experiment result metadata) are available for persisting the record, and what fields do they already expose?
+- Where are the existing PD-3 fixtures located, and what is their current shape so they can be reused for `fpr-golden-v0`?
+- What is the current feature-flag key for the daybreak alert-analysis worker, and where is it declared (likely `experimentalFeatures`)?
+- Where do the Proposal/Evidence client modules live in the daybreak plugin, and what runtime types do they already export?
+- What is the existing worker entry point, and how does it expose run/proposal/evidence identity for the "exactly one record per run" contract?
+- Does `@kbn/evals` already have a deterministic scorer pattern or dimension-reporting utility that can be reused?
+- What Jest config and tsconfig govern the affected daybreak and `@kbn/evals` modules so bounded-worker invocations can be scripted correctly?
+- Where is the existing `@kbn/evals` FPR suite located, and how does it currently export result metadata?
+- What is the current `@kbn/evals` storage shape for experiment results, and can it carry the required run/proposal/evidence/dataset/profile/version identity fields without speculative coupling?

@@ -1,0 +1,11 @@
+Implement and prove ONLY the first FPR WorkerEvaluationRecord storage round-trip in the existing Alert Analysis worker spike. This is a discovery/implementation seam, not full L4 scoring, dataset expansion, or docs/visual changes.
+
+Required outcome:
+1. Locate the existing PD-3 FPR @kbn/evals suite and its real production-facing dataset/experiment write and query/read APIs.
+2. Define the smallest FPR WorkerEvaluationRecord serializer/type in an existing daybreak worker/eval module. Include stable capability/run identity, worker/profile/dataset version, actual outcome, evidence references, Proposal linkage, expected outcome or human decision label, and provenance needed by the existing @kbn/evals result shape. Do NOT add an Elasticsearch index, Saved Object, new package, plugin, service, registry, or parallel record.
+3. Add one deterministic integration test that runs through the real @kbn/evals storage write path and reads the stored record back through the production-facing query API. Assert field fidelity for the fields above and exactly-one-record-per-run semantics.
+4. If a required field cannot be represented by supported existing APIs, stop at a tested contract seam: add a failing/blocked integration test naming the exact API and missing field, record the concrete extension gap in implementation-adjacent documentation, and do not workaround it with private coupling or separate storage.
+5. Use an FPR-shaped record/fixture and keep the feature flag default off. Do not force skill_ids in any behavior-evaluation path.
+6. Run focused tests plus typecheck/lint as supported by the affected package. Every Jest invocation must include --maxWorkers=4 --workerIdleMemoryLimit=512MB or use --runInBand.
+
+Plan requirements: generate complete proposal, research, design, specs, and tasks. Every task must end @host:worker-m1max. Explicitly include acceptance criteria for real write/read proof and no-parallel-storage invariant. Attach to the existing daybreak-s1-alert-analysis-worker-spike feature.

@@ -1,0 +1,43 @@
+# PD-4: Kibana UI Panel aligned to the Throughline (NotDaybreak) design prototype
+
+## Why
+The feature description explicitly promises "a real Kibana UI panel," but PD-1/PD-2/PD-3 are all server-side (workflow engine shape validation, the 5-phase Alert-Analysis worker core, and the @kbn/evals harness). The product's visual + interaction source-of-truth is the vendored Throughline prototype at `docs-site/prototype/` (entry `Throughline.dc.html`, app `throughline-app.js`, helpers `support.js`), which the docs site embeds. The worker's Evidence + Proposal output (from the PD-2 store modules under `x-pack/solutions/security/plugins/daybreak/server/client/`) has no surface to render into. This plan builds the `public/` layer of the daybreak plugin so the UI matches the prototype, not a generic Kibana chrome.
+
+## Design source-of-truth
+The prototype IS the spec. Do not invent layout, tokens, or interaction patterns — port them from `throughline-app.js`. Re-vendor / diff against the prototype before implementing each surface. The prototype README documents two local patches (presenter-script link, Daybreak→NotDaybreak rename) that do NOT apply to the real Kibana build — ignore them in the port.
+
+## What Changes — port these prototype surfaces into `x-pack/solutions/security/plugins/daybreak/public/`
+
+1. **Design token system + theming.** Port the prototype's CSS custom-property layer from `throughline-app.js` (`TL_CSS` const, ~line 3) and the theme overrides in `Throughline.dc.html` (`applyAccent`, `applyTheme`, `applyDayBg`, `applyRadius`, `applyShadow`):
+   - Neutrals: `--ink-0..5`, `--bg`, `--bg-2`, `--panel`, `--panel-2`, `--line*`
+   - Semantic: `--blue*`, `--green*`, `--teal*`, `--amber*`, `--red*`, `--violet*`
+   - Thread-type: `--t-case`, `--t-inv`, `--t-hunt`, `--t-incident`, `--t-custom`
+   - Shape: `--r-lg` (radius), `--panel-shadow`, shadow scale `--sh-xs..lg`
+   - Map these onto EUI theme tokens (`euiColor*`) where 1:1 equivalents exist; define the deltas in a `theme.ts` consumed by the plugin's React tree. Support BOTH light and dark (the prototype ships both via `body.theme-dark` + `mode-day`/`mode-night`). Default to the prototype's dark build (`window.__tlThemeOverride = true`).
+
+2. **Application shell** — port `TL_SHELL` (~line 4) + `renderApp()` (~line 5983): the left **rail** (`renderRail`, ~4897), **thread list / nav** (`renderNav`, ~1466, with `navMenuItem` + pinned/active/chat grouping + `STATUS_RANK` ordering), the **main stage** (`renderStage`, ~4960), and the **composer**. This becomes the plugin's top-level React route component.
+
+3. **Thread / conversation view** — port `renderStream` (~3798) + `renderMsg` (~3819) + `renderSpine` (~3759): message bubbles (user/assistant/tool), tool-call cards (`renderObjectApp`, ~3948), evidence/timeline/narrative/MITRE panels, status dots (`STATUS_DOT`), severity pills (`SEV`), and the **inspector** (`renderInspector`, ~5937, `renderInspBody`, ~3974). Thread types from `TYPE_META` (~1153): case / investigation / hunt / incident / chat.
+
+4. **Brief / radar dashboard** — port `briefView` (~2868) + `BRIEF_EXTRA_CSS` (~6) + the radar-page + chat-dock docking logic (`syncChatDock`, ~1519): the operator landing page summarizing open threads, awaiting-review items, and suggested next actions.
+
+5. **Permission / gate approval flow** — port the permission popover (`TL_SHELL` `#permPop`) + the gate UI (`renderSuggest`, ~4055, the `gate-yes`/`gate-ic` approval controls): the "read & gather auto-runs / assemble & draft proposed as a diff / world-changing actions need approval" model. Wire the approval actions to the worker's Proposal-emission output (PD-2 hook 6) so accepting a gate applies the proposal.
+
+6. **Data wiring (not mocked).** Replace the prototype's in-memory `freshState()` seed data with real data from the plugin's HTTP API → the PD-2 Evidence store (hook 3) and Proposal store (hook 6). The UI must render real worker output, not the demo seed (`DAY_EVIDENCE`, `NIGHT_EVIDENCE`, etc.).
+
+## Non-goals (explicitly defer)
+- `renderDiscoveriesPage` / `renderDeepWatchPage` / `renderStreamsPage` / `renderWatchesPage` / `renderWorkflowsPage` / `renderSkillsPage` / `renderActivityPage` / `renderPerformancePage` / `renderGuardrailsPage` / `renderAgentsHubPage` / `renderHuntPage` / `projectsView` / `templatesView` — these are future-app-surface stubs in the prototype. Land ONLY the analyst chat + brief + inspector + gates in this plan; file follow-up plans for the rest.
+- Prototype-only chrome (the DC `x-dc` wrapper, the `data-dc-script` props panel, the accent/radius/shadow live-tuners) — those are design-tool controls, not product UI.
+
+## Acceptance gates (mirror the feature's eval-gate philosophy)
+- The daybreak plugin `public/` directory exists and registers a Kibana application route under the existing `daybreak` experimental flag (default off).
+- `node scripts/type_check --project x-pack/solutions/security/plugins/daybreak/tsconfig.json` passes.
+- `node scripts/eslint --fix $(git diff --name-only HEAD)` passes on all new public/ files.
+- A UI-journey eval (consistent with the PD-3 @kbn/evals harness) covers: app loads → brief renders → thread opens → worker Evidence renders in inspector → a Proposal gate can be approved and the proposal is applied. Reuse the PD-3 eval primitives; do not build a parallel harness.
+- Visual diff: the rendered plugin matches the prototype's dark theme for at least the shell + one thread + the brief, captured as a screenshot assertion.
+
+## Routing
+This is UI-only work on the `public/` side of an existing plugin. Tasks MUST end `@host:worker-m1max` (the feature's dedicated M1 Max remote worker; i9 is retired as of PD-3). Do NOT route to kibana-i9. The worktree is `ao/feat-daybreak-s1-alert-analysis-worker-spike` (the feature's branch) — reuse it, do not create a new worktree.
+
+## Dependencies
+Depends on PD-2 worker-core output (Evidence + Proposal stores) existing and reachable via the plugin's server HTTP routes. If PD-2's code is not present in the worktree at dispatch time (the feature intent notes PD-2 output was uncommitted as of shaping), the first task must reconcile/reconstitute it before building UI against it.

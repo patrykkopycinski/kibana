@@ -1,0 +1,64 @@
+# Design
+
+## Approach
+
+PD-2 extends the `daybreak` plugin scaffolded by PD-1 with real source; no new plugin, package, or engine is introduced (Hard Constraints; Impact). The workflow shape is not novel — PD-1 already proved the Workflow Engine can express an HTTP-fetch + conditional-guard + AI-invocation pipeline end-to-end (`server/workflow/README.md` "What was validated"). PD-2 replaces the stub `analyze_alert` step (`type: inference`, `connector-id: inference_connector`, `server/workflow/spike_workflow.yaml:39-43`) with the purpose-built `ai.agent` step (`RunAgentStepTypeId = 'ai.agent'`, `x-pack/platform/plugins/shared/agent_builder/common/step_types/run_agent_step.ts:21`), registered against Workflows Extensions at plugin setup (`x-pack/platform/plugins/shared/agent_builder/server/plugin.ts:128-131`) and executed server-side via `executeAgent(...)` off a `round_complete` event stream (`x-pack/platform/plugins/shared/agent_builder/server/step_types/run_agent_step.ts:28-159`). This is not a style preference — raw `inference.*`/`gen-ai.*` connector steps are formally deprecated in favor of the `ai.*` family with `ai.prompt` as the documented replacement (`src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts:53-57`), so `ai.agent` is the only supported path for the Reason phase (FR-5).
+
+A-1's resolution is sequenced as the opening task, per the shape reconciliation table's flag that it is "the top execution risk of the whole spike" (PD-2 / A-1). Research confirms `agent-id: alert.triage` from `invoke_agent.yml:16-21` is illustrative only — no such agent, and no agent scoped to `skill_ids: ['alert-analysis']`, exists anywhere in the repo; the sole built-in agent is `elastic-ai-agent` (id defined at `x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts:23`, created with `skill_ids: []` — "all skills" — at `x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts:22-27`). Rather than route the Reason phase through `elastic-ai-agent` (which would expose every registered skill, not just `alert-analysis`, contradicting NFR-4's "verify, don't widen" allowlist constraint), PD-2 creates a minimal second agent scoped via `configuration.skill_ids: ['alert-analysis']` using `AgentConfiguration`'s documented field (`x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts:82-131`) and the agents service's `create` method (`x-pack/platform/plugins/shared/agent_builder/server/routes/agents.ts:312`). This bootstrap runs once, behind `experimentalFeatures.daybreak` (already wired by PD-1, FR-12/NFR-2 — no new flag), rather than exposing a new API surface.
+
+`server/client/evidence/` and `server/client/proposals/` are re-authored from scratch. The proposal's premise that this `.ts` source already exists, uncommitted, does not hold: only compiled `target/types/**/*.d.ts` declarations survive on the `daybreak-spike` worktree, `git log --all -- "server/client/*"` returns zero commits, and `git stash list` is empty. The `.d.ts` files are used strictly as a type-shape reference for the new source (Hard Constraints: "DO NOT treat the stale `.d.ts` files as a source scaffold to extend in place"), and are deleted once real source lands.
+
+## Components
+
+- **`server/client/evidence/{types,storage,client,index}.ts`** — Evidence store: `EvidenceClient.create/get/list/update/delete` against a `.daybreak-evidence` index, fields `id/kind/sourceRef/summary/provenance/confidence/stance/limitations/sensitivityLabel/createdAt`. Consumed by the Enrich phase (FR-4) to persist the packaged evidence block before it is handed to Reason.
+- **`server/client/proposals/{types,storage,client,gate,index}.ts`** — Proposal store, same re-authoring approach, plus the fail-closed `evaluateReadinessGate`/`requireReadinessGate` gate: an `approved` status requires non-empty `evidenceRefs` AND non-empty `recommendation`. Consumed by the Act phase (FR-7).
+- **Agent bootstrap (plugin start, gated by `experimentalFeatures.daybreak`)** — ensures a `daybreak-alert-analysis` Agent Builder agent exists with `skill_ids: ['alert-analysis']`, via `service.create(...)` (`agents.ts:312`), resolving A-1's open question without modifying `alert_analysis_skill.ts`.
+- **`server/workflow/alert_analysis_worker.yaml`** — the real 5-phase workflow: Setup (config load, FR-2) → Guard (idempotency/dedup, FR-3) → Enrich (evidence packaging via the Evidence client, FR-4) → Reason (`type: ai.agent`, `agent-id: daybreak-alert-analysis`, Zod-derived `with.schema` for structured output, FR-5) → Act (Proposal emission through the Proposal client's readiness gate + approval-gate-bounded action, FR-7).
+- **Output-validation guard step** — an explicit workflow step between Reason and Act (hook 5, FR-6), not an engine built-in (per PD-1's README, this is a boundary concern the engine does not handle for you). It inspects the Reason step's structured output against the same Zod schema and halts the run with a visible error on malformed/empty output rather than letting Act proceed.
+- **`server/workflow/run_alert_analysis_worker.ts`** — runner entry point extending PD-1's `run_spike_workflow.ts` pattern, reusing its `executeWorkflow` wrapper, now pointed at the 5-phase YAML.
+- **Integration test** — extends PD-1's `WorkflowRunFixture` pattern (`workflow_engine_shape.test.ts`), asserting each of the 5 phases' structured output and a fail-closed case (malformed AI output halts, no Proposal emitted).
+
+## Data Model
+
+**Evidence record** (evidence index, FR-4):
+
+| field | notes |
+| --- | --- |
+| `id` | store-assigned |
+| `kind` | evidence category |
+| `sourceRef` | pointer back to the source alert/document |
+| `summary` | compact ground-truth block — structurally separate from any reasoning framing (NFR-4) |
+| `provenance` | how the evidence was derived |
+| `confidence` | producer's confidence signal |
+| `stance` | supports/refutes/neutral framing for the Reason phase |
+| `limitations` | explicit caveats, carried through to the Proposal |
+| `sensitivityLabel` | handling constraint on the content |
+| `createdAt` | timestamp |
+
+**Proposal record** (proposals index, FR-7), gated by `evaluateReadinessGate`:
+
+| field | notes |
+| --- | --- |
+| `actor` / `timestamp` / `rationale` | auditable-shape requirement (FR-7) |
+| `evidenceRefs` | must be non-empty for `approved` status |
+| `recommendation` | must be non-empty for `approved` status |
+| `status` | `draft` \| `approved`; `requireReadinessGate` throws rather than allowing an under-specified `approved` record |
+
+**Workflow step contract** (`alert_analysis_worker.yaml`): five named steps — `setup`, `guard`, `enrich`, `reason`, `act` — with an unnamed validation step inserted between `reason` and `act`. `reason`'s `with.schema` is derived from the same Zod schema the validation step re-checks, so the two never drift independently.
+
+## Failure Modes
+
+- **Malformed or empty `ai.agent` output**: the validation guard step halts the workflow before Act runs; no Proposal is written (FR-6). This is the behavior the fail-closed integration test asserts directly.
+- **Guard-phase dedup hit**: an alert already carrying this worker's result tag short-circuits the workflow at Guard; Enrich/Reason/Act never execute (FR-3).
+- **Readiness-gate violation**: an attempt to mark a Proposal `approved` with empty `evidenceRefs` or empty `recommendation` is rejected by `requireReadinessGate` rather than silently persisted (FR-7).
+- **Approval-gate-bounded action without approval**: the consequential action in Act fails closed if approval is absent — it does not execute speculatively (FR-7).
+- **Wrong skill file referenced**: a structurally similar but unregistered `alert_analysis_skill.ts` sibling exists outside the `./alert_analysis` subdirectory and is not imported by `register_skills.ts:81` or `skills/index.ts:8`. The agent bootstrap and any workflow reference must resolve the skill by its registered id (`alert-analysis`) rather than a file import, so this dead file cannot be accidentally wired in.
+- **Connector-id availability unconfirmed (open question, no research backing)**: research did not confirm which `.inference`/`.eis-*` connector-id is configured in the i9 dev stack for `ai.agent` to route through. This is a real risk to PD-2 executing live, not just a design gap — Forward: tasks should make connector discovery/creation an explicit, verifiable opening step (check the dev stack's configured connectors; create one via the actions client if none exists) before the Reason phase is exercised.
+- **Stale `.d.ts` artifacts reappearing**: if the delete of `target/types/server/client/{evidence,proposals}` is skipped, a future build could regenerate declarations from partially-written source and mask a broken re-authoring. Deletion is treated as part of Definition of Done, not a cleanup afterthought.
+
+## Alternatives Considered
+
+- **Route the Reason phase through the default `elastic-ai-agent`** (`skill_ids: []`, all skills) instead of a scoped agent: rejected — it would expose every registered skill to the Reason phase, contradicting NFR-4's "allowlisted tool calls... verify, don't widen" constraint even though no code change to `alert_analysis_skill.ts` would be required.
+- **Keep the stub `type: inference` connector step and add a schema on top of it**: rejected — `inference.*` is explicitly deprecated in favor of `ai.*` (`deprecated_step_metadata.ts:53-57`), and the raw connector step was documented in PD-1's README as a stub only, never intended to carry the real Reason phase.
+- **Build a custom orchestration layer instead of the Workflow Engine**: rejected per the Hard Constraints and PD-1's resolution of A-2 — the engine already expresses the needed shape.
+- **Extend the stale `target/types/*.d.ts` files in place as if they were the missing source**: rejected per the Hard Constraints — they are compiled output with no corresponding committed `.ts`, and treating them as a scaffold risks propagating an unverifiable or drifted shape.

@@ -1,0 +1,32 @@
+# PD-1: Unknown-Flushing Spike — Kibana Workflow Engine Shape Validation (NotDaybreak S1)
+
+## MANDATORY ROUTING — READ FIRST
+EVERY task in tasks.md MUST end its checklist line with the literal marker `@host:kibana-i9`, e.g. `- [ ] [M] Build minimal workflow @host:kibana-i9`. This pins every task to the dedicated Intel i9 remote worker (attached worktree `daybreak-spike`, pre-bootstrapped via fleet.json attachedWorktree, branch `ao/feat-daybreak-s1-alert-analysis-worker-spike`). Do NOT run any task locally on M4.
+
+## Why
+The shaped BMAD session (da4f07f3) identified adversarial case A-2 as the #1 unknown to flush before any real worker investment: **does the Kibana Workflow engine support the exact step shape we need** (HTTP fetch + conditional guard + AI invocation with structured output)? If the engine can't express this shape, the entire S1 spike is blocked and we must find an alternative substrate before building PD-2+.
+
+This plan validates that in the smallest possible end-to-end slice: a trivial workflow with the three critical step types, run once to completion, proving the engine's expressive power and flushing the integration unknowns (connector wiring, step schema, execution API) early.
+
+## What Changes
+- **Add** a minimal experimental Kibana workflow definition (HTTP fetch step + conditional guard step + stub AI invocation step with structured JSON output) under `x-pack/solutions/security/plugins/daybreak/server/workflow/` — gated behind the existing `daybreak` experimental feature flag.
+- **Add** a minimal workflow runner/executor invocation that triggers the workflow once end-to-end and logs each step's input/output.
+- **Add** a single integration test (`workflow_engine_shape.test.ts`) that executes the workflow and asserts each step type produces the expected structured output shape.
+- **Add** a README under the workflow dir documenting what was validated and any engine limitations discovered.
+
+## Adversarial case resolved
+- **A-2** (Core): Kibana Workflow engine may not support the exact step shape needed — this plan validates it directly with a trivial workflow before building the full 5-phase worker.
+
+## Definition of Done
+- The minimal workflow executes end-to-end on the i9 daybreak-spike worktree without engine errors.
+- HTTP-fetch step, conditional-guard step, and AI-invocation-with-structured-output step all produce their expected output shapes.
+- Integration test passes (`workflow_engine_shape.test.ts`).
+- README documents findings (what works, what's limited, what PD-2 must account for).
+- All work happens on i9 via `@host:kibana-i9` routing — nothing runs locally.
+
+## Hard Constraints
+- This is a SPIKE to validate engine capability — do NOT build the full 5-phase Alert-Analysis worker here (that's PD-2).
+- Do NOT build the eval harness here (that's PD-3).
+- Do NOT build the UI panel here (that's PD-4).
+- Feature-flag behind `daybreak` experimental flag only.
+- Every task routes to `@host:kibana-i9`.

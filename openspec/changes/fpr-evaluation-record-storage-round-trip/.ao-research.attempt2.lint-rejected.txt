@@ -1,0 +1,32 @@
+---
+change_id: fpr-worker-evaluation-record-storage-round-trip
+status: draft
+created_at: 2026-07-12
+treadmill_artifact_version: 1
+research_topic: Locate existing daybreak worker eval storage APIs for FPR round-trip
+---
+
+# Research: FPR WorkerEvaluationRecord Storage Round-Trip
+
+## Research Question
+What existing @kbn/evals production-facing write and query APIs does the daybreak-s1-alert-analysis-worker-spike PD-3 suite already use, and which fields of a WorkerEvaluationRecord can be stored and read back through them without adding new indices, packages, or services?
+
+## Summary
+This research brief could not be grounded in live repository code because the file/search tools needed to read the Kibana worktree were unavailable in this session. Consequently, no architectural claim below is anchored to a file:line reference. All claims about the existing PD-3 suite, storage APIs, and daybreak worker module are recorded as Open Questions to be resolved by a follow-up code-reading pass.
+
+## Detailed Findings
+
+### 1. Investigation blocked pending tool access
+No repository files were read. The location of the PD-3 @kbn/evals suite, the daybreak worker/eval module, any existing WorkerEvaluationRecord or equivalent type, and the production-facing dataset/experiment storage APIs remain unverified. All downstream design/spec/task waves should treat the items below as required evidence to collect before proceeding.
+
+## Code References
+No code references could be collected in this session.
+
+## Open Questions
+- Where is the existing PD-3 @kbn/evals suite for the daybreak-s1-alert-analysis-worker-spike located, and what is its entry point/test file? (FR-8, FR-9, PD-3)
+- Which existing daybreak worker/eval module should host the smallest WorkerEvaluationRecord serializer/type? (What Changes §2)
+- What are the exact production-facing @kbn/evals APIs for writing and querying dataset/experiment records (function names, module paths, argument shapes)? (What Changes §1)
+- Does an existing WorkerEvaluationRecord or equivalent type already exist in the codebase? (What Changes §2)
+- Which fields required by the proposal — stable capability/run identity, worker/profile/dataset version, actual outcome, evidence references, Proposal linkage, expected outcome or human decision label, provenance — are natively supported by the existing APIs, and which are missing? (What Changes §2, Open Questions)
+- What is the existing feature-flag key/path for the daybreak alert-analysis worker, and is it currently default off under experimentalFeatures? (NFR-2, FR-12)
+- What Jest config and type-check project should be used for the affected package, and do existing tests already use `--maxWorkers=4 --workerIdleMemoryLimit=512MB` or `--runInBand`? (What Changes §7)

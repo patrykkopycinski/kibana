@@ -1,0 +1,50 @@
+{
+  "overall": "excellent",
+  "rec3GateReady": true,
+  "reasons": [],
+  "metrics": {
+    "proposal": {
+      "present": true,
+      "hasFrontmatter": true,
+      "frontmatterFields": [
+        "change_id",
+        "status",
+        "created_at",
+        "treadmill_artifact_version",
+        "feature_id",
+        "feature_slug"
+      ],
+      "bodyChars": 3533
+    },
+    "research": {
+      "present": true,
+      "hasFrontmatter": true,
+      "codeRefCount": 23,
+      "openQuestionCount": 4,
+      "bodyChars": 17701
+    },
+    "design": {
+      "present": true,
+      "researchCitationCount": 10,
+      "bodyChars": 18704
+    },
+    "specs": {
+      "present": true,
+      "specFiles": 1,
+      "bodyChars": 4911
+    },
+    "tasks": {
+      "present": true,
+      "phaseCount": 3,
+      "phasesWithIntent": 3,
+      "phasesWithContract": 3,
+      "phasesWithFile": 3,
+      "verificationItemsTotal": 14,
+      "automatedItems": 14,
+      "manualItems": 0,
+      "automatedPerPhaseMin": 4,
+      "bodyChars": 12810
+    }
+  },
+  "scoredAt": "2026-07-15T20:17:49.773Z"
+}

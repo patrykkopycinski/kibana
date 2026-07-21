@@ -1,0 +1,53 @@
+{
+  "overall": "fair",
+  "rec3GateReady": false,
+  "reasons": [
+    "contract coverage 0% (Intent/Contract/File on 0/5 phases)",
+    "at least one phase has 0 Automated criteria (min=0); need ≥1 per phase"
+  ],
+  "metrics": {
+    "proposal": {
+      "present": true,
+      "hasFrontmatter": true,
+      "frontmatterFields": [
+        "change_id",
+        "status",
+        "created_at",
+        "treadmill_artifact_version",
+        "feature_id",
+        "feature_slug"
+      ],
+      "bodyChars": 2588
+    },
+    "research": {
+      "present": false,
+      "hasFrontmatter": false,
+      "codeRefCount": 0,
+      "openQuestionCount": 0,
+      "bodyChars": 0
+    },
+    "design": {
+      "present": true,
+      "researchCitationCount": 0,
+      "bodyChars": 1109
+    },
+    "specs": {
+      "present": true,
+      "specFiles": 1,
+      "bodyChars": 997
+    },
+    "tasks": {
+      "present": true,
+      "phaseCount": 5,
+      "phasesWithIntent": 0,
+      "phasesWithContract": 0,
+      "phasesWithFile": 0,
+      "verificationItemsTotal": 8,
+      "automatedItems": 0,
+      "manualItems": 0,
+      "automatedPerPhaseMin": 0,
+      "bodyChars": 3231
+    }
+  },
+  "scoredAt": "2026-07-09T15:35:39.021Z"
+}

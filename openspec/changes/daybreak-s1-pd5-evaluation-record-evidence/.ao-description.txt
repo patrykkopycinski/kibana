@@ -1,0 +1,33 @@
+# PD-5: False Positive Reduction L4 Evaluation Record and promotion evidence
+
+## Why
+The existing `daybreak-s1-alert-analysis-worker-spike` feature has already completed PD-1 workflow-engine validation, PD-2 the real five-phase Alert Analysis worker, PD-3 an `@kbn/evals` offline/live harness, and PD-4 the Throughline-aligned routes/UI. The remaining Evaluation & Trust bet is not another framework: prove one complete Alert Analysis / False Positive Reduction run through L0-L4, record the outcome in the existing `@kbn/evals` storage shape, and produce machine-readable promotion evidence. The canonical direction is in `/Users/patrykkopycinski/Projects/project-daybreak/docs/daybreak-worker-testing-pyramid.md` and the execution/profile contracts under `/Users/patrykkopycinski/Projects/project-daybreak/docs/working-groups/evaluation-trust/artifacts/`.
+
+Hypothesis: the existing worker, Proposal/Evidence clients, and `@kbn/evals` harness can produce a deterministic whole-worker outcome score and one Evaluation Record per run without new storage, package, plugin, or orchestration.
+Resolution signal: the FPR seed cases execute through the real worker; every run produces exactly one record tied to run/proposal/evidence identity; critical correctness/action-safety/idempotency dimensions pass; weighted evidence/calibration/rationale dimensions are reported; and an intentionally broken fixture fails the expected gate.
+Kill/pivot: if existing `.evaluation-*` APIs cannot carry required metadata without speculative or private coupling, ship a tested serializer/contract seam and explicit blocked integration test rather than introducing another index or store.
+
+## What changes
+- Reuse and extend the PD-3 eval suite and existing daybreak plugin modules in place.
+- Add the smallest concrete `WorkerEvaluationRecord` runtime type/serializer needed by this slice, based on the canonical schema sketch. Do not define a competing generic platform record.
+- Add a deterministic scorer with critical dimensions: outcome correctness, action safety, idempotency, and record coverage. Add weighted dimensions: evidence completeness 0.4, confidence calibration 0.3, rationale/actionability 0.3. Keep the 0.80 weighted threshold explicitly marked as proposed/unratified in report metadata.
+- Persist/export the record through existing `@kbn/evals` dataset/experiment result metadata. Do not create an Elasticsearch index, saved object, service, registry, package, or plugin.
+- Build a versioned `fpr-golden-v0` seed manifest from existing PD-3 fixtures, covering at minimum benign expected behavior, insufficient/missing evidence, risky broad exception, duplicate/replay, malformed output, and a deliberately broken expected result. Reuse one canonical seed definition; no hand-duplicated demo data.
+- Produce a scorecard/evidence artifact from a test run with capability/profile/dataset/model/worker provenance, dimension results, record/proposal counts, tokens/latency when trace data exists, and cost basis without guessed dollars.
+- Keep the existing spike-local readiness gate explicit as temporary; do not claim it proves shared #17944 behavior.
+
+## Constraints
+Every task line in `tasks.md` MUST end with `@host:worker-m1max`. Work in the existing feature worktree and branch. Feature flag remains default off. No symlinks. No new dependency. No forced `skill_ids` route in user-behavior evals: the default Elastic agent/router must select the skill naturally; isolation-only tests may remain as lower-layer diagnostics but cannot supply the promotion signal. Use deterministic evaluators wherever possible. If an LLM judge is needed for rationale quality, use one targeted judge for development and preserve judge identity; do not add broad multi-judge fanout in this phase. All Jest invocations must include `--maxWorkers=4 --workerIdleMemoryLimit=512MB` or use `--runInBand`.
+
+## Acceptance criteria
+1. Unit tests prove score semantics: every critical dimension is a hard gate; weighted score is computed correctly; missing/unknown approval policy fails closed; duplicate runs do not create duplicate records.
+2. Contract tests prove exactly one Evaluation Record per whole-worker run with stable run/proposal/evidence/dataset/profile/version fields and no second storage layer.
+3. The versioned FPR fixture manifest has the required scenario families and one intentionally broken fixture.
+4. A non-vacuity test demonstrates the broken fixture fails while the valid counterpart passes.
+5. The real `@kbn/evals` FPR suite runs against the existing worker path and exports the scorecard/evidence metadata.
+6. Scoped Daybreak Jest, type check, eslint, and the affected eval/Scout behavioral path pass. Jest uses bounded workers.
+7. Documentation beside the implementation states what is proven, the proposed/unratified threshold, the #17944 dependency, and how human decisions later become replay labels.
+8. No new package/plugin/index/service/store is added and the feature flag remains default off.
+
+## Definition of done
+Code-green is necessary but not sufficient. The bet resolves only when a valid run and deliberately broken run demonstrate that the L4 gate discriminates correctly and a generated evidence record/scorecard can be inspected. If persistence is blocked, the plan completes only with a runnable discovery seam plus a failing/self-skipping integration test naming the missing existing extension point.

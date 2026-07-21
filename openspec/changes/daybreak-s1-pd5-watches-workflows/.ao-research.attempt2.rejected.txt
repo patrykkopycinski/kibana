@@ -1,0 +1,8 @@
+The research brief is written to `openspec/changes/notdaybreak-alert-analysis-worker-spike/research.md`.
+
+**Key findings:**
+- **Reused, not greenfield:** the Workflow engine's HTTP/guard/AI-invocation step shape (already composed in production in `streams`), the `ai.agent` step's Zod structured-output + fail-closed behavior, the registered `alert-analysis` skill with an allowlisted toolset (satisfies NFR-4 directly), the agent-create-with-`skill_ids` route, and the entire `@kbn/evals` harness (datasets, trace/tool-call evaluators, exponential-backoff retry) plus its per-suite `evaluate = base.extend(...)` convention.
+- **Genuinely greenfield:** the `daybreak` plugin + experimental flag, the FR-7 Proposal/Evidence stores and approval gate (no committed source or compiled types found despite PD-2's design citing `.d.ts` references — flagged as a discrepancy), the `fetch_runtime_config` reference (external to this repo), and the UI panel host plugin.
+- Five Open Questions were surfaced rather than guessed at, each forwarded to the appropriate downstream wave (design/tasks/PD-2/PD-3).
+
+All 24 Code References are direct `file:line` anchors I verified myself in this pass — I didn't relay PD-1's prior research uncritically; I re-confirmed its two most load-bearing claims (the HTTP step and the shipped `kibana.request`→`if` composition) directly.

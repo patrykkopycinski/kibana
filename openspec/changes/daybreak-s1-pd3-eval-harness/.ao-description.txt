@@ -1,0 +1,28 @@
+# PD-3: Eval Harness — @kbn/evals Offline Dataset Gate + Live UI-Journey Gate (NotDaybreak S1)
+
+## CRITICAL ROUTING INSTRUCTION
+Every task line in tasks.md MUST end with `@host:worker-m1max` so it dispatches to M1 Max (attached worktree `daybreak-spike`). Do NOT route to `kibana-i9`.
+
+## Why
+PD-2 delivered the real 5-phase worker. PD-3 is: eval harness with offline dataset gate + live UI-journey gate covering FR-8, FR-9, deliberately-broken golden variant for FR-10/A-3, and retry/backoff for A-4.
+
+## What Changes
+- Add `@kbn/evals` offline dataset gate for `alert_analysis_worker`: golden dataset + expected Proposal shape, scored via `@kbn/evals` primitives.
+- Add deliberately-broken golden variant asserting gate fails (FR-10/A-3).
+- Add retry/backoff for `ai.agent` calls: grep engine for step-level retry config first, cite and reuse.
+- Add live UI-journey gate (FR-9): Playwright/Scout test with role/label/text locators and state-based waits. If no UI panel yet, assert against API/ES document as interim proxy.
+- Add eval-report artifact at a path PD-5 can reference.
+- Update `server/workflow/README.md` documenting two-gate architecture.
+
+## Impact
+- All new code under existing `daybreak` plugin and `@kbn/evals` package. Gated behind `xpack.daybreak.enabled` (default false).
+
+## Hard Constraints
+- DO NOT introduce new plugin, package, or eval framework — reuse `@kbn/evals`.
+- DO NOT hand-roll retry/backoff if engine exposes it.
+
+## Definition of Done
+- Offline dataset gate runs with broken row, failure asserted.
+- Retry/backoff wired via existing config or scoped out with reasoning.
+- UI-journey or API proxy test exists, seeds alert, triggers workflow, asserts Proposal.
+- Eval-report artifact written. jest + type_check pass clean on M1 Max.

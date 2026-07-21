@@ -305,6 +305,14 @@ describe('Scripts library schemas', () => {
       expect(ListScriptsRequestSchema.query.validate({ kuery: 'name:foo' })).toBeTruthy();
     });
 
+    it('should error if `kuery` is longer than 30000 characters', () => {
+      expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'a'.repeat(30001) })).toThrow();
+    });
+
+    it('should accept `kuery` exactly 30000 characters long', () => {
+      expect(ListScriptsRequestSchema.query.validate({ kuery: 'a'.repeat(30000) })).toBeTruthy();
+    });
+
     it('should error if `kuery` uses invalid fields', () => {
       expect(() => ListScriptsRequestSchema.query.validate({ kuery: 'foo:bar' })).toThrow(
         '[kuery]: Invalid KQL filter field: foo'

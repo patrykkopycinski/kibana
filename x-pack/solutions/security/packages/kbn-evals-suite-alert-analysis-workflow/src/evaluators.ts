@@ -10,12 +10,12 @@ import { createTrajectoryEvaluator } from '@kbn/evals';
 import { CLASSIFICATIONS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
 
-interface ExpectedVerdict {
+export interface ExpectedVerdict {
   classification: Classification;
 }
 
-const asVerdict = (output: unknown): AlertAnalysisVerdict => output as AlertAnalysisVerdict;
-const asExpected = (expected: unknown): ExpectedVerdict | undefined =>
+export const asVerdict = (output: unknown): AlertAnalysisVerdict => output as AlertAnalysisVerdict;
+export const asExpected = (expected: unknown): ExpectedVerdict | undefined =>
   expected as ExpectedVerdict | undefined;
 
 /**
@@ -102,4 +102,40 @@ export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
       return inner.evaluate(args);
     },
   };
+};
+
+/**
+ * Cost/latency reporter (not a gate). Re-derives the deck's "cheaper / faster" claims from
+ * the workflow execution record: normalized token usage and wall-clock latency per run.
+ *
+ * Scores 1 whenever usage was captured and 0 (label "no-usage") when the execution reported
+ * none, so a run of missing-usage records is visible in the report rather than silently
+ * averaged as free. The per-run token/latency numbers live in `metadata`; the suite consumer
+ * sums them per model and multiplies by the documented price basis to compute cost.
+ */
+export const tokenUsage: Evaluator = {
+  name: 'TokenUsage',
+  kind: 'CODE',
+  evaluate: async ({ output }) => {
+    const verdict = asVerdict(output);
+    const usage = verdict.usage;
+
+    return {
+      score: usage ? 1 : 0,
+      label: usage ? 'captured' : 'no-usage',
+      explanation: usage
+        ? `in=${usage.inputTokens} out=${usage.outputTokens} total=${usage.totalTokens}` +
+          ` cached=${usage.cachedTokens ?? 0} latencyMs=${verdict.latencyMs ?? 'n/a'}`
+        : 'Workflow execution reported no token usage.',
+      metadata: {
+        inputTokens: usage?.inputTokens ?? null,
+        outputTokens: usage?.outputTokens ?? null,
+        cachedTokens: usage?.cachedTokens ?? null,
+        totalTokens: usage?.totalTokens ?? null,
+        latencyMs: verdict.latencyMs ?? null,
+        agentLatencyMs: verdict.agentLatencyMs ?? null,
+        executionStatus: verdict.executionStatus,
+      },
+    };
+  },
 };

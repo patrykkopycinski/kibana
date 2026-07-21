@@ -29,13 +29,18 @@
  *
  * Evaluators:
  *   - ClassificationAccuracy (CODE, primary): predicted verdict == golden label.
+ *   - Precision_/Recall_{true_positive,false_positive} (CODE): per-class precision & recall,
+ *     encoded so each evaluator's dataset MEAN equals the aggregate metric (non-applicable rows
+ *     return null and are excluded). Exposes the accuracy-vs-bias tradeoff the deck's single
+ *     accuracy number hides (e.g. a model that over-calls true_positive).
  *   - ValidVerdict (CODE): structured output conforms (enum classification + confidence in [0,1]).
  *   - trajectory (CODE): zero-tool guardrail — agent must not call tools after pre-built context.
  *   - RationaleQuality (LLM): the rationale is grounded in the alert's observable evidence and
  *     names the decision gate / confidence tier it applied.
- *
- * Trace-based metrics (latency/tokens) are intentionally omitted for v1; whether the workflow's
- * `ai.agent` conversation emits joinable OTel spans is verified during the runtime gate.
+ *   - TokenUsage (CODE, reporter): normalized token usage + wall-clock latency per run, read
+ *     from the workflow execution record. Not a gate — it captures the per-run cost/latency the
+ *     model-comparison deck claimed ("cheaper / faster"), so they can be re-derived against a
+ *     documented price basis rather than eyeballed.
  */
 
 import { randomUUID } from 'crypto';
@@ -52,13 +57,28 @@ import { configureAlertAnalysisWorkflow } from '../src/space_config';
 import {
   classificationAccuracy,
   createAlertAnalysisTrajectoryEvaluator,
+  tokenUsage,
   validVerdict,
 } from '../src/evaluators';
+import { createPrecisionRecallEvaluators } from '../src/precision_recall_evaluators';
+import { exportTokenUsageRow } from '../src/token_usage_exporter';
 import { ALERT_ANALYSIS_EVAL_ALERTS } from '../src/synthetic_alerts';
+import { ALERT_ANALYSIS_HARD_CASE_ALERTS } from '../src/hard_case_alerts';
 import { ALERTS_INDEX } from '../src/constants';
 
+/**
+ * Full eval set = easy base tiers + the hard-case (stealthy attack / convincing noise) alerts.
+ * The `stratum` on each example lets the concordance/scorecard analysis split agreement and
+ * accuracy by difficulty — the deck's "models agree" claim is expected to hold on `base` and be
+ * where models diverge on `hard-case`, which is the model-choice decision gate (deck claim C5).
+ */
+const ALL_EVAL_ALERTS = [
+  ...ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({ alert, stratum: 'base' as const })),
+  ...ALERT_ANALYSIS_HARD_CASE_ALERTS.map((alert) => ({ alert, stratum: 'hard-case' as const })),
+];
+
 /** Base label/doc keyed by the base alert id, so a task can rebuild a fresh doc per run. */
-const ALERT_BY_ID = new Map(ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => [alert.id, alert]));
+const ALERT_BY_ID = new Map(ALL_EVAL_ALERTS.map(({ alert }) => [alert.id, alert]));
 
 const RATIONALE_CRITERIA = [
   'The rationale references specific observable fields from the alert (such as the process name, ' +
@@ -70,7 +90,13 @@ const RATIONALE_CRITERIA = [
 interface AlertAnalysisExample extends Example {
   input: { alertId: string };
   output: { classification: string };
-  metadata: { alertId: string; alertIndex: string; expected: string; description: string };
+  metadata: {
+    alertId: string;
+    alertIndex: string;
+    expected: string;
+    description: string;
+    stratum: 'base' | 'hard-case';
+  };
 }
 
 evaluate.describe(
@@ -79,6 +105,11 @@ evaluate.describe(
   () => {
     // Alerts created by tasks, deleted after each run; afterAll sweeps any that slipped through.
     const createdAlertIds = new Set<string>();
+
+    // Connector under test, captured in beforeAll so the task can tag each exported
+    // token/latency row with its model id (the evaluate task closure doesn't receive
+    // the connector fixture directly).
+    let connectorUnderTestId = 'unknown';
 
     evaluate.beforeAll(
       async ({
@@ -90,6 +121,7 @@ evaluate.describe(
         connector: AvailableConnectorWithId;
         log: ToolingLog;
       }) => {
+        connectorUnderTestId = connector.id;
         // Point this space's alert-analysis workflow at the connector under test so the
         // workflow's `ai.agent` step is routed to the model being evaluated.
         await configureAlertAnalysisWorkflow({
@@ -117,7 +149,7 @@ evaluate.describe(
     evaluate(
       'classifies alerts with the expected true/false positive verdict',
       async ({ executorClient, evaluators, esClient, fetch, log, traceEsClient }) => {
-        const examples: AlertAnalysisExample[] = ALERT_ANALYSIS_EVAL_ALERTS.map((alert) => ({
+        const examples: AlertAnalysisExample[] = ALL_EVAL_ALERTS.map(({ alert, stratum }) => ({
           id: alert.id,
           input: { alertId: alert.id },
           output: { classification: alert.expected },
@@ -126,12 +158,15 @@ evaluate.describe(
             alertIndex: ALERTS_INDEX,
             expected: alert.expected,
             description: alert.description,
+            stratum,
           },
         }));
 
         const selectedEvaluators = selectEvaluators([
           classificationAccuracy,
           validVerdict,
+          ...createPrecisionRecallEvaluators(),
+          tokenUsage,
           createAlertAnalysisTrajectoryEvaluator(),
           evaluators.criteria(RATIONALE_CRITERIA),
         ]);
@@ -143,16 +178,19 @@ evaluate.describe(
                 name: 'security: alert-analysis-workflow-classification',
                 description:
                   'Runs the managed system-security-alert-analysis workflow end-to-end against ' +
-                  `${ALERT_ANALYSIS_EVAL_ALERTS.length} labeled synthetic alerts spanning the four ` +
-                  'confidence tiers (Tier 1/2 → true_positive, Tier 3/4 → false_positive) and grades ' +
-                  "the ai.agent step's classification against the golden label.",
+                  `${ALL_EVAL_ALERTS.length} labeled synthetic alerts: ${ALERT_ANALYSIS_EVAL_ALERTS.length} ` +
+                  'base alerts spanning the four confidence tiers (Tier 1/2 → true_positive, Tier 3/4 ' +
+                  `→ false_positive) plus ${ALERT_ANALYSIS_HARD_CASE_ALERTS.length} hard cases (stealthy ` +
+                  'attack / convincing noise) that defeat naive signed=benign / scary-technique=malicious ' +
+                  "shortcuts, and grades the ai.agent step's classification against the golden label.",
                 examples,
               } satisfies EvaluationDataset,
             ],
             task: async ({ metadata }) => {
-              const { alertId, alertIndex } = metadata as {
+              const { alertId, alertIndex, stratum } = metadata as {
                 alertId: string;
                 alertIndex: string;
+                stratum: 'base' | 'hard-case';
               };
               const base = ALERT_BY_ID.get(alertId);
               if (!base) {
@@ -187,13 +225,28 @@ evaluate.describe(
               });
 
               try {
-                return await runAlertAnalysisWorkflow({
+                const verdict = await runAlertAnalysisWorkflow({
                   fetch,
                   log,
                   traceEsClient,
                   alertId: uniqueAlertId,
                   alertIndex,
+                  metadata: {
+                    runId: randomUUID(),
+                    exampleId: alertId,
+                    modelId: connectorUnderTestId,
+                  },
                 });
+                // Export per-run tokens/latency to local JSONL so C2 (cost) and C3 (latency)
+                // ratios are computable post-hoc without read access to the golden cluster's
+                // score index. See src/token_usage_exporter.ts.
+                exportTokenUsageRow({
+                  connectorId: connectorUnderTestId,
+                  alertId,
+                  stratum,
+                  verdict,
+                });
+                return verdict;
               } finally {
                 await esClient
                   .delete({ index: alertIndex, id: uniqueAlertId, refresh: true })

@@ -36,11 +36,11 @@
 **LOE:** 2–3d  
 **Action:** Schedule platform-team discussion on Task Manager trace-propagation contract.
 
-### 1.6 ⬜ LangGraph internals spans (Gap C)
-**Problem:** `run_chat_agent.ts` has zero OpenTelemetry references. No visibility into tool-call loops, reasoning duration, or ReAct iterations.  
-**Fix:** Add `@opentelemetry/instrumentation` hook around the LangGraph stream, emitting per-iteration spans with `gen_ai.completion.*` attributes.  
+### 1.6 ✅ LangGraph internals spans (Gap C)
+**Problem:** `run_chat_agent.ts` had zero OpenTelemetry references. No visibility into tool-call loops, reasoning duration, or ReAct iterations.  
+**Fix:** `withActiveInferenceSpan('agent_reasoning_loop', ...)` wraps `agentGraph.streamEvents(...)`, recording `round_status`, `steps_count`, `tool_calls_count` per iteration.  
 **LOE:** 3–5d  
-**Action:** Spike LangGraph `stream` wrapper; verify with golden-cluster trace fetch.
+**Status:** ✅ Done — committed on `feat/alert-analysis-model-validation`.
 
 ### 1.7 ⬜ Workflow step spans (Gap D)
 **Problem:** `workflow_execute_step_tool.ts` is uninstrumented. Explains the Haiku 4.4× workflow overhead (20,540ms vs 4,627ms) — steps are invisible.  
@@ -156,7 +156,7 @@ The new execution-service lifecycle span (Fix F) and skill-selection span (Fix E
 | 4 | ✅ Eval metadata (G) | `execution_service.ts` | 1d | — |
 | 5 | ⬜ Token mapping (H) | Datastream admin | 1–2d | Platform infra |
 | 6 | ⬜ Task Manager propagate (B) | `task_handler.ts` | 2–3d | Task Manager contract |
-| 7 | ⬜ LangGraph spans (C) | `run_chat_agent.ts` | 3–5d | LangGraph API |
+| 7 | ✅ LangGraph spans (C) | `run_chat_agent.ts` | 3–5d | — |
 | 8 | ⬜ Workflow step spans (D) | `workflow_execute_step_tool.ts` | 2–3d | Workflows platform |
 | 9 | ⬜ Test harness header injection | `workflow_task.ts` | 0.5d | Gap G merged |
 | 10 | ⬜ Re-run eval with telemetry | Suite + Scout | 1d | Gaps C+D fixed |

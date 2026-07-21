@@ -13,6 +13,7 @@ import {
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
+  type WorkflowTokenUsage,
 } from '@kbn/workflows';
 import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import {
@@ -59,6 +60,17 @@ export interface AlertAnalysisVerdict {
   toolCallIds?: string[];
   /** True when trace ES was unreachable or the workflow trace id was invalid. */
   toolCallsUnavailable?: boolean;
+  /**
+   * Normalized LLM token usage for the run, read from the workflow execution record.
+   * The workflow sums per-step usage into `execution.usage`; we prefer that and fall
+   * back to the agent step's own `usage` when the summary is absent. Undefined when the
+   * execution reported no usage (e.g. the agent step never ran).
+   */
+  usage?: WorkflowTokenUsage;
+  /** Wall-clock duration of the whole workflow execution in ms (`execution.duration`). */
+  latencyMs?: number;
+  /** Wall-clock duration of just the graded `ai.agent` step in ms (`executionTimeMs`). */
+  agentLatencyMs?: number;
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -86,6 +98,45 @@ const readAgentStructuredOutput = (
 };
 
 /**
+ * Reads token usage for the run. Prefers the workflow-summed `execution.usage`, which the
+ * engine populates by summing per-step usage. When that summary is absent (older execution
+ * records), falls back to the agent step's own `usage`, then to the step output's
+ * `metadata.usage` (the shape the workflow YAML reads). Undefined when no source reported usage.
+ */
+export const readAgentUsage = (execution: WorkflowExecutionDto): WorkflowTokenUsage | undefined => {
+  if (execution.usage) {
+    return execution.usage;
+  }
+  for (const step of execution.stepExecutions.filter(isAgentStep)) {
+    if (step.usage) {
+      return step.usage;
+    }
+    const metadataUsage = (
+      step.output as { metadata?: { usage?: WorkflowTokenUsage } } | null | undefined
+    )?.metadata?.usage;
+    if (metadataUsage) {
+      return metadataUsage;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Wall-clock duration of the graded `ai.agent` step. Each step yields multiple execution
+ * records; we take the largest reported `executionTimeMs` across agent-step records so an
+ * enter/exit record pair (the enter record reports 0) does not undercount the step.
+ */
+export const readAgentStepLatency = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): number | undefined => {
+  const times = stepExecutions
+    .filter(isAgentStep)
+    .map((step) => step.executionTimeMs)
+    .filter((ms): ms is number => typeof ms === 'number');
+  return times.length > 0 ? Math.max(...times) : undefined;
+};
+
+/**
  * Runs the managed alert-analysis workflow end-to-end for a single seeded alert and
  * returns the agent's verdict.
  *
@@ -99,6 +150,7 @@ export const runAlertAnalysisWorkflow = async ({
   traceEsClient,
   alertId,
   alertIndex,
+  metadata,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
@@ -107,15 +159,29 @@ export const runAlertAnalysisWorkflow = async ({
   traceEsClient?: EsClient;
   alertId: string;
   alertIndex: string;
+  /** Optional eval metadata forwarded to the agent execution via x-eval-* headers so
+   *  golden-cluster traces can be correlated back to the specific example and run. */
+  metadata?: { runId?: string; exampleId?: string; modelId?: string };
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<AlertAnalysisVerdict> => {
+  const headers: Record<string, string> = { 'elastic-api-version': WORKFLOWS_API_VERSION };
+  if (metadata?.runId) {
+    headers['x-eval-run-id'] = metadata.runId;
+  }
+  if (metadata?.exampleId) {
+    headers['x-eval-example-id'] = metadata.exampleId;
+  }
+  if (metadata?.modelId) {
+    headers['x-eval-model-id'] = metadata.modelId;
+  }
+
   const { workflowExecutionId } = (await fetch(
     `/api/workflows/workflow/${ALERT_ANALYSIS_WORKFLOW_ID}/run`,
     {
       method: 'POST',
       version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      headers,
       body: JSON.stringify({
         inputs: {
           event: {
@@ -191,5 +257,8 @@ export const runAlertAnalysisWorkflow = async ({
     traceId: execution.traceId,
     toolCallIds,
     toolCallsUnavailable: unavailable,
+    usage: readAgentUsage(execution),
+    latencyMs: execution.duration ?? undefined,
+    agentLatencyMs: readAgentStepLatency(execution.stepExecutions),
   };
 };

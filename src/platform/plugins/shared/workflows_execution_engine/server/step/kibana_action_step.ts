@@ -48,6 +48,54 @@ interface FormDataFieldSpec {
   content_type?: string;
 }
 
+/**
+ * Parses a leading `/s/<space>/` prefix off a Kibana API path.
+ *
+ * Returns the parsed space id, or `null` when the path has no explicit space prefix.
+ */
+export function parseSpacePrefix(path: string): string | null {
+  const match = path.match(/^\/s\/([^/]+)(\/|$)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Enforces that a workflow step's resolved request path targets the same Kibana space as the
+ * workflow execution itself.
+ *
+ * `kibana.request` (and other raw-path) steps forward their `path` field to `fetch()` verbatim,
+ * so nothing previously stopped a step from reading/writing a different space than the one the
+ * workflow is executing in (e.g. a workflow running in space "custom" issuing a request to
+ * `/s/other/api/...`). This helper closes that gap:
+ *  - if the path has an explicit `/s/<space>/` prefix that does not match `spaceId`, the request
+ *    is rejected outright;
+ *  - if the path has an explicit `/s/<space>/` prefix that matches `spaceId`, it is left as-is;
+ *  - if the path has no space prefix, the execution's `spaceId` is injected (matching the
+ *    behavior of `applySpacePrefix` used by the connector-definition branch), unless `spaceId` is
+ *    the default space, which never needs a `/s/default` prefix.
+ *
+ * @throws Error when the path explicitly targets a space other than `spaceId`.
+ */
+export function enforceWorkflowRequestSpace(path: string, spaceId: string): string {
+  const pathSpaceId = parseSpacePrefix(path);
+
+  if (pathSpaceId !== null) {
+    if (pathSpaceId !== spaceId) {
+      throw new Error(
+        `Cross-space request blocked: step targets space "${pathSpaceId}" but execution is in space "${spaceId}".`
+      );
+    }
+    // Path already targets the correct space; leave untouched.
+    return path;
+  }
+
+  // No explicit space prefix. Default space doesn't need one.
+  if (spaceId === 'default') {
+    return path;
+  }
+
+  return `/s/${spaceId}${path}`;
+}
+
 export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
     private node: KibanaGraphNode,
@@ -241,6 +289,13 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       );
     }
     requestConfig.method = normalizedMethod;
+
+    // Enforce that the resolved path targets the same space this workflow is executing in.
+    // Covers all three branches above (raw `request`, `form_data`, and connector-definition
+    // paths) uniformly — the connector branch already applies the correct prefix via
+    // `applySpacePrefix`, so this is a no-op for it, but it is the hard backstop for the two
+    // raw-path branches which previously forwarded `path` to `fetch()` verbatim.
+    requestConfig.path = enforceWorkflowRequestSpace(requestConfig.path, spaceId);
 
     // Use the local implementation to handle all requests including multipart and fetcher options.
     const result = await this.makeHttpRequest(kibanaUrl, requestConfig, fetcherOptions);

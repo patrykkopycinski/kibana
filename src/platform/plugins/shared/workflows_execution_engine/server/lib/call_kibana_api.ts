@@ -54,7 +54,13 @@ export class CallKibanaApiResponseTooLargeError extends Error {
  */
 export interface CallKibanaApiParams {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  /** Route path starting with `/`, e.g. `/api/cases`. Space prefix is added automatically. */
+  /**
+   * Route path starting with `/`, e.g. `/api/cases`. When {@link CallKibanaApiDeps.spaceId} is
+   * set (and not `"default"`), a `/s/<spaceId>/` prefix is added automatically unless the path
+   * already carries one. A path that already carries an explicit `/s/<space>/` prefix targeting
+   * a *different* space than `spaceId` is rejected with an error rather than silently honored,
+   * to prevent a workflow executing in one space from reading/writing another.
+   */
   path: string;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined>;
@@ -92,6 +98,17 @@ export interface CallKibanaApiDeps {
    * already resolved a custom URL (e.g. with `use_server_info` / `use_localhost`).
    */
   baseUrlOverride?: string;
+  /**
+   * The Kibana space the calling workflow is executing in. When provided, a `/s/<space>/`
+   * prefix is injected into the request path (unless the path already carries a space prefix
+   * or the space is "default"). If the path already carries an explicit `/s/<space>/` prefix
+   * that targets a *different* space than `spaceId`, the call is rejected with an error instead
+   * of being silently sent cross-space. This aligns the helper with the `kibana.request` step's
+   * `enforceWorkflowRequestSpace` guard and the JSDoc on {@link CallKibanaApiParams.path}. When
+   * omitted, no prefix is injected and no cross-space check is performed (callers outside a
+   * workflow execution context are unaffected).
+   */
+  spaceId?: string;
 }
 
 /**
@@ -133,6 +150,52 @@ const buildQueryString = (query: CallKibanaApiParams['query']): string => {
   }
   const serialized = params.toString();
   return serialized === '' ? '' : `?${serialized}`;
+};
+
+/**
+ * Parses a leading `/s/<space>/` prefix off a Kibana API path.
+ *
+ * Returns the parsed space id, or `null` when the path has no explicit space prefix. Mirrors
+ * `parseSpacePrefix` in `../step/kibana_action_step` (kept as a local copy to avoid a
+ * cross-module dependency between the two HTTP entry points of the execution engine).
+ */
+const parseSpacePrefix = (path: string): string | null => {
+  const match = path.match(/^\/s\/([^/]+)(\/|$)/);
+  return match ? match[1] : null;
+};
+
+/**
+ * Applies the workflow execution's space prefix to a request path.
+ *  - if `spaceId` is not provided, the path is returned unchanged (no workflow space context);
+ *  - if the path has an explicit `/s/<space>/` prefix that does not match `spaceId`, the call is
+ *    rejected outright to prevent a cross-space request;
+ *  - if the path has an explicit `/s/<space>/` prefix that matches `spaceId`, it is left as-is
+ *    (not double-prefixed);
+ *  - if the path has no space prefix, `spaceId` is injected, unless `spaceId` is the default
+ *    space, which never needs a `/s/default` prefix.
+ *
+ * @throws Error when the path explicitly targets a space other than `spaceId`.
+ */
+const applyWorkflowSpacePrefix = (path: string, spaceId: string | undefined): string => {
+  if (!spaceId) {
+    return path;
+  }
+
+  const pathSpaceId = parseSpacePrefix(path);
+  if (pathSpaceId !== null) {
+    if (pathSpaceId !== spaceId) {
+      throw new Error(
+        `callKibanaApi: cross-space request blocked: path targets space "${pathSpaceId}" but the workflow is executing in space "${spaceId}".`
+      );
+    }
+    return path;
+  }
+
+  if (spaceId === 'default') {
+    return path;
+  }
+
+  return `/s/${spaceId}${path}`;
 };
 
 const getAuthorizationHeader = (request: KibanaRequest): string => {
@@ -219,6 +282,10 @@ const stringifyErrorBodyForMessage = (body: unknown): string => {
  * and it additionally exposes the parsed `status`, `headers`, and `body` so callers can recover
  * a structured partial-success response via `try/catch` + `instanceof KibanaApiCallError`.
  *
+ * When {@link CallKibanaApiDeps.spaceId} is supplied, `params.path` is prefixed with
+ * `/s/<spaceId>/` (see {@link CallKibanaApiParams.path}); a path that already targets a
+ * different space throws synchronously before any network call is made.
+ *
  * This helper backs both the `kibana.request` YAML step (for its JSON-body / connector-definition
  * branches) and the `callKibanaApi` tool exposed to custom step handlers. Behavior is intentionally
  * kept narrow (no multipart, no fetcher options, no streaming) so the underlying transport can be
@@ -228,11 +295,13 @@ export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
-  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride } = deps;
+  const { fakeRequest, workflowRunId, coreStart, cloudSetup, baseUrlOverride, spaceId } = deps;
   const maxResponseBytes = deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 
   const baseUrl = baseUrlOverride ?? getKibanaUrl(coreStart, cloudSetup);
-  const url = `${baseUrl}${params.path}${buildQueryString(params.query)}`;
+  const resolvedPath = applyWorkflowSpacePrefix(params.path, spaceId);
+
+  const url = `${baseUrl}${resolvedPath}${buildQueryString(params.query)}`;
 
   const callerHeaders = stripReservedHeaders(params.headers);
   const outboundHeaders: Record<string, string> = {

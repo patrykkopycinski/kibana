@@ -445,4 +445,76 @@ describe('callKibanaApi', () => {
     expect(result.headers['content-type']).toBe('application/json');
     expect(result.headers['x-trace-id']).toBe('trace-xyz');
   });
+
+  describe('space prefixing', () => {
+    it('does not prefix the path when spaceId is omitted', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/api/cases' }
+      );
+
+      const [url] = mockedFetch.mock.calls[0];
+      expect(url).toBe('https://kibana.example.com/api/cases');
+    });
+
+    it('does not prefix the path when spaceId is "default"', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'default' },
+        { method: 'GET', path: '/api/cases' }
+      );
+
+      const [url] = mockedFetch.mock.calls[0];
+      expect(url).toBe('https://kibana.example.com/api/cases');
+    });
+
+    it('injects the /s/<space>/ prefix when spaceId is a non-default space', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'custom' },
+        { method: 'GET', path: '/api/cases', query: { perPage: 20 } }
+      );
+
+      const [url] = mockedFetch.mock.calls[0];
+      expect(url).toBe('https://kibana.example.com/s/custom/api/cases?perPage=20');
+    });
+
+    it('does not double-prefix a path that already targets the workflow space', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'custom' },
+        { method: 'GET', path: '/s/custom/api/cases' }
+      );
+
+      const [url] = mockedFetch.mock.calls[0];
+      expect(url).toBe('https://kibana.example.com/s/custom/api/cases');
+    });
+
+    it('rejects an explicit path targeting a different space than the workflow space', async () => {
+      await expect(
+        callKibanaApi(
+          { fakeRequest: createFakeRequest(), coreStart: createCoreStart(), spaceId: 'custom' },
+          { method: 'GET', path: '/s/other/api/cases' }
+        )
+      ).rejects.toThrow(/cross-space request blocked.*"other".*"custom"/i);
+      expect(mockedFetch).not.toHaveBeenCalled();
+    });
+
+    it('does not perform a cross-space check when spaceId is omitted', async () => {
+      mockedFetch.mockResolvedValue(createMockResponse({ body: { ok: true } }));
+
+      await callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+        { method: 'GET', path: '/s/other/api/cases' }
+      );
+
+      const [url] = mockedFetch.mock.calls[0];
+      expect(url).toBe('https://kibana.example.com/s/other/api/cases');
+    });
+  });
 });

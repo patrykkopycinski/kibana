@@ -409,10 +409,47 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
+/**
+ * Extracts HTTP method and path from a `kibana.request` step's YAML node,
+ * and detects cross-space targeting when the path contains `/s/<space>/`
+ * that differs from the execution space.
+ */
+const extractKibanaRequestInfo = (
+  stepInfo: StepInfo,
+  executionSpaceId?: string
+): { method?: string; path?: string; isCrossSpace?: boolean; targetSpace?: string } => {
+  if (stepInfo.stepType !== 'kibana.request') return {};
+
+  const yamlNode = stepInfo.stepYamlNode;
+  if (!yamlNode) return {};
+
+  // The `with` block holds the step parameters
+  const withNode = yamlNode.get('with');
+  if (!withNode || typeof withNode.toJSON !== 'function') return {};
+
+  const withData = withNode.toJSON() as Record<string, unknown>;
+  const method =
+    (withData.method as string) ??
+    ((withData.request as Record<string, unknown>)?.method as string);
+  const path =
+    (withData.path as string) ?? ((withData.request as Record<string, unknown>)?.path as string);
+
+  if (!path) return { method };
+
+  // Detect cross-space targeting
+  const spaceMatch = path.match(/^\/s\/([^/]+)(\/|$)/);
+  const targetSpace = spaceMatch?.[1];
+  const isCrossSpace =
+    targetSpace != null && executionSpaceId != null && targetSpace !== executionSpaceId;
+
+  return { method, path, isCrossSpace, targetSpace };
+};
+
 const buildFallbackPreview = (
   stepInfo: StepInfo,
   unsafeStep: StepInfo,
-  contextOverride?: Record<string, unknown>
+  contextOverride?: Record<string, unknown>,
+  executionSpaceId?: string
 ): string => {
   const lines: string[] = [
     i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.step', {
@@ -424,6 +461,32 @@ const buildFallbackPreview = (
       values: { stepType: stepInfo.stepType },
     }),
   ];
+
+  // Surface HTTP method/path for kibana.request steps
+  const reqInfo = extractKibanaRequestInfo(unsafeStep, executionSpaceId);
+  if (reqInfo.method) {
+    lines.push(`**HTTP Method:** \`${reqInfo.method}\``);
+  }
+  if (reqInfo.path) {
+    lines.push(`**Path:** \`${reqInfo.path}\``);
+  }
+
+  // Cross-space warning
+  if (reqInfo.isCrossSpace) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.crossSpaceWarning', {
+        defaultMessage:
+          '⚠️ **Cross-space operation detected:** This request targets space `{targetSpace}`, ' +
+          'but the current session is in space `{executionSpace}`. ' +
+          'Approving this will modify data in a different space.',
+        values: {
+          targetSpace: reqInfo.targetSpace,
+          executionSpace: executionSpaceId,
+        },
+      })
+    );
+  }
+
   if (unsafeStep.stepId !== stepInfo.stepId) {
     lines.push(
       i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.unsafeDescendant', {
@@ -680,7 +743,8 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
             // `||` (not `??`) so empty-string `confirmation_body` falls back to
             // the generated preview instead of rendering a blank dialog body.
             message:
-              confirmationBody || buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
+              confirmationBody ||
+              buildFallbackPreview(stepInfo, unsafeStep, contextOverride, context.spaceId),
             confirm_text: i18n.translate(
               'workflows.agentBuilder.executeStep.confirmation.confirmText',
               { defaultMessage: 'Run step' }

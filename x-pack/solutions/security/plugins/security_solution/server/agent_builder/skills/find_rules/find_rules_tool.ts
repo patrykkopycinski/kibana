@@ -202,11 +202,12 @@ interface FindRulesToolDeps {
 
 type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 
-function summarizeRule(rule: RuleFromFind) {
+function summarizeRule(rule: RuleFromFind, spaceId?: string) {
   const params = (rule.params ?? {}) as Record<string, unknown>;
 
   return {
     id: rule.id,
+    spaceId, // lets the LLM detect cross-space results
     ruleId: params.rule_id ?? params.ruleId,
     name: rule.name,
     tags: rule.tags,
@@ -258,7 +259,10 @@ export const createFindRulesInlineTool = ({
         fields: undefined,
       });
 
-      const rules = findResult.data.map(summarizeRule);
+      const currentSpaceId = startPlugins.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+      const rules = findResult.data.map((rule: RuleFromFind) =>
+        summarizeRule(rule, currentSpaceId)
+      );
       const hasTagFilter = Boolean(input.tags?.length || input.excludeTags?.length);
       const truncated = findResult.total > rules.length;
 

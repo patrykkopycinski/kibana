@@ -1287,4 +1287,125 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(result.output).toEqual({ id: 'case-1', title: 'Helper Test' });
     });
   });
+
+  describe('cross-space request enforcement', () => {
+    it('rejects a raw-path request whose /s/<space>/ prefix does not match the execution space', async () => {
+      mockContextManager.getWorkflowSpaceId.mockReturnValue('custom');
+
+      const stepWith = {
+        request: { method: 'GET', path: '/s/other/api/status' },
+      };
+      const step = {
+        id: 'cross_space',
+        type: 'kibana.request',
+        stepId: 'cross_space',
+        stepType: 'kibana.request',
+        configuration: { name: 'cross_space', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(mockedFetch).not.toHaveBeenCalled();
+      expect(result.error).toBeDefined();
+      expect(result.error?.message).toContain(
+        'Cross-space request blocked: step targets space "other" but execution is in space "custom".'
+      );
+    });
+
+    it('allows a raw-path request whose /s/<space>/ prefix matches the execution space', async () => {
+      mockContextManager.getWorkflowSpaceId.mockReturnValue('custom');
+
+      const stepWith = {
+        request: { method: 'GET', path: '/s/custom/api/status' },
+      };
+      const step = {
+        id: 'same_space',
+        type: 'kibana.request',
+        stepId: 'same_space',
+        stepType: 'kibana.request',
+        configuration: { name: 'same_space', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(result.error).toBeUndefined();
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toContain('/s/custom/api/status');
+    });
+
+    it('injects the execution space prefix when the path has none and the space is not default', async () => {
+      mockContextManager.getWorkflowSpaceId.mockReturnValue('custom');
+
+      const stepWith = {
+        request: { method: 'GET', path: '/api/foo' },
+      };
+      const step = {
+        id: 'inject_space',
+        type: 'kibana.request',
+        stepId: 'inject_space',
+        stepType: 'kibana.request',
+        configuration: { name: 'inject_space', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(result.error).toBeUndefined();
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).toContain('/s/custom/api/foo');
+    });
+
+    it('leaves an unprefixed path untouched when the execution space is default', async () => {
+      mockContextManager.getWorkflowSpaceId.mockReturnValue('default');
+
+      const stepWith = {
+        request: { method: 'GET', path: '/api/foo' },
+      };
+      const step = {
+        id: 'default_space',
+        type: 'kibana.request',
+        stepId: 'default_space',
+        stepType: 'kibana.request',
+        configuration: { name: 'default_space', type: 'kibana.request', with: stepWith },
+      } as unknown as KibanaGraphNode;
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await runStep(kibanaStep, stepWith);
+
+      expect(result.error).toBeUndefined();
+      const fetchCall = mockedFetch.mock.calls[0];
+      const fetchedUrl = fetchCall[0] as string;
+      expect(fetchedUrl).not.toContain('/s/default');
+      expect(fetchedUrl).toContain('/api/foo');
+      expect(fetchedUrl).not.toMatch(/\/s\/[^/]+\/api\/foo/);
+    });
+  });
 });

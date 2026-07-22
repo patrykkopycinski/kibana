@@ -25,7 +25,7 @@ import type {
 import { useKibana } from '../../../utils/kibana_react';
 import { formatTimestamp } from '../format_timestamp';
 
-export interface EventInvestigationsProps {
+export interface EventInvestigationProps {
   event: SignificantEvent;
 }
 
@@ -110,7 +110,7 @@ function InvestigationRow({
   );
 }
 
-export function EventInvestigations({ event }: EventInvestigationsProps): React.ReactElement {
+export function EventInvestigation({ event }: EventInvestigationProps): React.ReactElement {
   const investigations = event.investigations ?? [];
 
   return (

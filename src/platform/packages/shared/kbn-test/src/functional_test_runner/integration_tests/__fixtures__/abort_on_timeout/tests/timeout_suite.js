@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+export default function () {
+  describe('abort on timeout suite', () => {
+    // never resolves, so Mocha times out after mochaOpts.timeout
+    it('$HANGING_TEST$', () => new Promise(() => {}));
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+    it('$SHOULD_NOT_RUN$', () => {
+      console.log('$SHOULD_NOT_RUN_RAN$');
+    });
 
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    mochaOpts: {
-      ...functionalConfig.get('mochaOpts'),
-      // matching test timeout
-      hookTimeout: 360000,
-    },
-  };
+    // never resolves; would hang for the full hookTimeout without the abort's fast-fail
+    after('$SLOW_AFTER_ALL_HOOK$', () => new Promise(() => {}));
+  });
 }

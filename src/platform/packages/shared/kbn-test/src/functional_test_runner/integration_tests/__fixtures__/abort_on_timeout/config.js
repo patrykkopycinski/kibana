@@ -7,18 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
-
-  return {
-    ...functionalConfig.getAll(),
-    testFiles: [require.resolve('.')],
-    mochaOpts: {
-      ...functionalConfig.get('mochaOpts'),
-      // matching test timeout
-      hookTimeout: 360000,
+export default () => ({
+  testFiles: [resolve(__dirname, 'tests/timeout_suite.js')],
+  mochaOpts: {
+    timeout: 200,
+    hookTimeout: 3000,
+  },
+  mochaReporter: {
+    sendToCiStats: false,
+  },
+  servers: {
+    elasticsearch: {
+      port: 1234,
     },
-  };
-}
+  },
+});

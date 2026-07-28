@@ -22,10 +22,15 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
+      // gen_ai.usage.output_tokens is mapped as integer in some traces-agent_builder.otel
+      // backing indices and long in others (schema drift across data stream rollovers).
+      // ES|QL's STATS SUM() over a field with ambiguous types across shards throws
+      // verification_exception; TO_LONG() normalizes the type before aggregation so the
+      // query runs regardless of which backing index a given trace's docs live in.
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 
-        output_tokens = SUM(attributes.gen_ai.usage.output_tokens)`,
+        output_tokens = SUM(TO_LONG(attributes.gen_ai.usage.output_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -52,7 +57,7 @@ export function createInputTokensEvaluator({
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 
-        input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
+        input_tokens = SUM(TO_LONG(attributes.gen_ai.usage.input_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];
@@ -79,7 +84,7 @@ export function createCachedTokensEvaluator({
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 
-        cached_tokens = SUM(attributes.gen_ai.usage.cache_read.input_tokens)`,
+        cached_tokens = SUM(TO_LONG(attributes.gen_ai.usage.cache_read.input_tokens))`,
       extractResult: (response) => {
         const { columns, values } = response;
         const row = values[0];

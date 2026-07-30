@@ -26,6 +26,29 @@ import type {
 import type { PersonaMatrixChatClient } from './chat_client';
 
 /**
+ * Default runner concurrency (see kbn-evals-runner's `client.ts`, `concurrency ?? 5`)
+ * assumes a frontier cloud connector that can absorb 5 parallel long-context
+ * agentic conversations. A single local vLLM deploy (e.g. an L4 GPU running a
+ * 30B MoE model) cannot: 5 concurrent multi-turn converse calls saturate its
+ * request queue faster than it can drain them, so Kibana's client-side
+ * timeout fires before vLLM replies and every example fails with a
+ * `fetch failed` transport error — not a real evaluation failure, a resource
+ * exhaustion death spiral (queue depth climbs monotonically, never recovers,
+ * because retries add more load to an already-backed-up queue).
+ *
+ * Override with SECURITY_PERSONA_MATRIX_EVAL_CONCURRENCY=N when targeting a
+ * resource-constrained backend (e.g. =1 or =2 for a single local GPU). Same
+ * pattern as ATTACK_DISCOVERY_EVAL_CONCURRENCY / LEAD_GENERATION_EVAL_CONCURRENCY.
+ */
+const resolveConcurrency = (): number | undefined => {
+  const raw = process.env.SECURITY_PERSONA_MATRIX_EVAL_CONCURRENCY;
+  if (!raw) return undefined;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.max(1, Math.floor(parsed));
+};
+
+/**
  * ExpectedToolCalled — verifies the primary expected tool was invoked.
  * Reads `expectedTools` from example metadata (first entry) or `tool_sequence`
  * from the expected output.
@@ -247,6 +270,7 @@ export function createEvaluatePersonaMatrixDataset({
       {
         datasets: [dataset],
         metadata: { suite: 'security-persona-matrix', source: 'persona-matrix-eval' },
+        concurrency: resolveConcurrency(),
         task: async (example) => {
           const input = example.input as PersonaMatrixExampleInput;
           const question = input?.question;

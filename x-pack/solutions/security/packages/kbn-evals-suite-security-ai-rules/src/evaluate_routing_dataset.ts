@@ -356,7 +356,7 @@ export const buildRuleRoutingEvaluators = ({
               }
 
               const query = `FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS skill_invoked = COUNT(
     CASE(
       ${buildSkillInvokedCaseExpression(shouldNotActivate)},

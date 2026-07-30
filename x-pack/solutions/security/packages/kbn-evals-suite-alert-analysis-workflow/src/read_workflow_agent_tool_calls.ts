@@ -20,7 +20,7 @@ interface EsqlResponse {
 const buildOrderedToolQuery = (traceId: string, indexPattern: string) =>
   `
 FROM ${indexPattern}
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
   AND attributes.elastic.inference.span.kind == "TOOL"
 | SORT @timestamp ASC
 | EVAL tool_id = COALESCE(attributes.gen_ai.tool.name, name)
@@ -32,7 +32,7 @@ FROM ${indexPattern}
 const buildSpanProbeQuery = (traceId: string) =>
   `
 FROM traces-*
-| WHERE trace.id == "${traceId}"
+| WHERE trace_id == "${traceId}"
 | STATS span_count = COUNT(*)
 `.trim();
 

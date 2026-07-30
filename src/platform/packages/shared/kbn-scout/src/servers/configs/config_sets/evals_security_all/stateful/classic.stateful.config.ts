@@ -36,6 +36,28 @@ export const servers: ScoutServerConfig = {
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',
       '--feature_flags.overrides.streams.significantEventsMemoryEnabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // Enable Agent Builder inference tracing so gen_ai.* spans (tool name,
+      // token usage, latency) reach the OTLP exporter. Without this,
+      // AgentBuilderSpanProcessor.onStart() bails early and Skill Invoked /
+      // ExpectedToolCalled / token evaluators all return 0/null.
+      '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
+      // Without includeToolDetails, AgentBuilderSpanProcessor.onEnd() calls
+      // stripToolCallIO() and deletes gen_ai.tool.call.arguments/result from
+      // every span before export (privacy-by-default). The SkillInvoked
+      // evaluator (kbn-evals-suite-security-persona-matrix) queries
+      // `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`
+      // to see which skill a `load_skill` tool call loaded — the tool name
+      // alone ("load_skill") never reveals which skill, only the stripped
+      // arguments do. Without this override SkillInvoked always returns
+      // null/"Unknown column" even with tracing:enabled=true and correct ES
+      // mappings. Matches the reference `agent_builder` config set.
+      '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+      // includeRealNames/includeRealIds: without these, tool/agent names and
+      // ids are anonymized to 'custom' for non-builtin tools before export —
+      // also breaks skill/tool-name-based trace evaluators. Matches the
+      // reference `agent_builder` config set.
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealNames=true',
+      '--uiSettings.overrides.agentBuilder:tracing:includeRealIds=true',
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       // Workflows
       '--uiSettings.overrides.workflows:ui:enabled=true',
@@ -44,8 +66,11 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
       // Alerting v2
       '--xpack.alerting_v2.enabled=true',
-      // Actions timeout (entity analytics needs longer)
-      '--xpack.actions.responseTimeout=120s',
+      // Actions timeout (entity analytics needs longer; L4-class local vLLM
+      // deploys under concurrent load can exceed 120s per request — bumped
+      // to 300s after observing genuine 500 "Request timed out" failures
+      // on Qwen3-14B-AWQ at KV-cache saturation, not a connector defect)
+      '--xpack.actions.responseTimeout=300s',
       // Fleet endpoint package
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',

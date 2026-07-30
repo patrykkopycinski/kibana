@@ -966,6 +966,24 @@ module.exports = {
     },
 
     /**
+     * scripts/edot_collector_lite.js is a standalone dev-only OTLP-to-ES
+     * bridge invoked directly via `node scripts/edot_collector_lite.js`
+     * (kbn-evals Docker-free EDOT alternative for hosts without
+     * Docker/Colima). It is never sourced before Kibana's own Node-version
+     * check the way the rest of scripts/ is, so the ES5-only constraint
+     * above doesn't apply to it -- exempt it from `no-restricted-syntax`
+     * like the other scripts directory overrides elsewhere in this file
+     * (kbn-esql-language, inference, apm, observability_ai_assistant_app,
+     * synthetics).
+     */
+    {
+      files: ['scripts/edot_collector_lite.js'],
+      rules: {
+        'no-restricted-syntax': 'off',
+      },
+    },
+
+    /**
      * Files that run in the browser with only node-level transpilation
      */
     {

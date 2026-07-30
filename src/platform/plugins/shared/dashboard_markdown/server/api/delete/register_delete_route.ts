@@ -26,7 +26,7 @@ export function registerDeleteRoute(
 ) {
   const deleteRoute = router.delete({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Delete a markdown library item.`,
+    summary: `Delete a markdown library item`,
     ...commonRouteConfig,
     description: 'Permanently deletes a markdown library item by ID.',
   });
@@ -62,7 +62,7 @@ export function registerDeleteRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           await deleteMarkdown(ctx, req.params.id);
         } catch (e) {

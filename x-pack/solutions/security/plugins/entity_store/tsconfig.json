@@ -48,6 +48,7 @@
     "@kbn/workflows-extensions",
     "@kbn/i18n",
     "@kbn/workflows",
-    "@kbn/index-adapter",
+    "@kbn/es",
+    "@kbn/test-es-server",
   ]
 }

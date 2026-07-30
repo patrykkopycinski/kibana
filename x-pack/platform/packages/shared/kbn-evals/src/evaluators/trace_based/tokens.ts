@@ -22,11 +22,7 @@ export function createOutputTokensEvaluator({
     log,
     config: {
       name: 'Output Tokens',
-      // gen_ai.usage.output_tokens is mapped as integer in some traces-agent_builder.otel
-      // backing indices and long in others (schema drift across data stream rollovers).
-      // ES|QL's STATS SUM() over a field with ambiguous types across shards throws
-      // verification_exception; TO_LONG() normalizes the type before aggregation so the
-      // query runs regardless of which backing index a given trace's docs live in.
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 
@@ -54,6 +50,7 @@ export function createInputTokensEvaluator({
     log,
     config: {
       name: 'Input Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 
@@ -81,6 +78,7 @@ export function createCachedTokensEvaluator({
     log,
     config: {
       name: 'Cached Tokens',
+      // TO_LONG resolves union types (integer vs long across trace index generations).
       buildQuery: (traceId) => `FROM traces-*
         | WHERE trace_id == "${traceId}"
         | STATS 

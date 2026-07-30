@@ -170,6 +170,7 @@ describe('findRulesSkill', () => {
       'TA0040',
       'TA0042',
       'TA0043',
+      'TA0112',
     ]) {
       expect(skill.content).toContain(tactic);
     }
@@ -178,7 +179,7 @@ describe('findRulesSkill', () => {
       'Execution',
       'Persistence',
       'Privilege Escalation',
-      'Defense Evasion',
+      'Stealth',
       'Credential Access',
       'Discovery',
       'Lateral Movement',
@@ -188,6 +189,7 @@ describe('findRulesSkill', () => {
       'Impact',
       'Resource Development',
       'Reconnaissance',
+      'Defense Impairment',
     ]) {
       expect(skill.content).toContain(name);
     }

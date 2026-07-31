@@ -21,16 +21,19 @@ describe('detectionRuleEditSkill', () => {
     expect(isAllowedBuiltinSkill(skill.id)).toBe(true);
   });
 
-  it('description excludes read-only rule inventory (routes to find-security-rules)', () => {
-    expect(skill.description).toMatch(/find-security-rules/i);
-    expect(skill.description).toMatch(/list.*count.*filter/i);
-    expect(skill.description).not.toMatch(/Use when the user asks to list/i);
+  it('description has explicit routing boundaries for authoring vs non-authoring intent', () => {
+    // AutoDEX (8a00675c5011) dropped the find-security-rules disambiguation clause;
+    // evidence across 3 models (Haiku/Sonnet/Opus, 94 clean find-rules executions,
+    // zero misroutes) shows the clause is unnecessary. Assert against actual content.
+    expect(skill.description).toMatch(/author or modify a detection rule/i);
+    expect(skill.description).toMatch(/implied authoring intent/i);
+    expect(skill.description).toMatch(/not for alert triage/i);
   });
 
-  it('content redirects MITRE list/inventory questions to find-security-rules', () => {
-    expect(skill.content).toMatch(/When NOT to Use/i);
-    expect(skill.content).toMatch(/find-security-rules/);
-    expect(skill.content).toMatch(/List all enabled detection rules tagged with MITRE/);
+  it('content has a "Do NOT use" section with clear exclusions', () => {
+    expect(skill.content).toMatch(/Do NOT use this skill when/i);
+    expect(skill.content).toMatch(/alerts or alert triage/i);
+    expect(skill.content).toMatch(/threat hunting without any intent/i);
   });
 
   it('description stays under 1024 characters', () => {

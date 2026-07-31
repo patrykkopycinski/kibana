@@ -116,6 +116,40 @@ describe('ruleRoutingExamples', () => {
       expect(example.expected.tool_sequence).toBeUndefined();
     }
   });
+
+  it('includes an adversarial find-rules split that competes with detection-rule-edit', () => {
+    const adversarial = ruleRoutingExamples.filter((ex) =>
+      ex.metadata.dataset_split.includes('adversarial')
+    );
+    // The base find-rules prompts open with unambiguous read-only verbs and cannot
+    // discriminate a catalog with vs without a disambiguation clause. The adversarial
+    // split exists to make that measurable.
+    expect(adversarial.length).toBeGreaterThanOrEqual(3);
+
+    for (const example of adversarial) {
+      // Adversarial prompts are still strictly read-only: find-rules is correct and
+      // rule creation is always forbidden, no matter how much authoring vocabulary
+      // the prompt carries.
+      expect(example.metadata.category).toBe('find-rules');
+      expect(example.expected.expectedSkill).toBe('find-security-rules');
+      expect(example.metadata.forbiddenToolId).toBe('security.create_detection_rule');
+      expect(example.metadata.expectedOnlyToolId).toBe('security.find_rules');
+    }
+  });
+
+  it('loads adversarial prompts with authoring signal that base prompts lack', () => {
+    const adversarial = ruleRoutingExamples.filter((ex) =>
+      ex.metadata.dataset_split.includes('adversarial')
+    );
+    // Each adversarial prompt must carry at least one token that pulls toward the
+    // competing detection-rule-edit skill. Without this the example is not adversarial
+    // and would silently rejoin the base split's ceiling behavior.
+    const authoringSignal =
+      /\b(creat\w*|edit\w*|tun\w*|sever\w*|risk score|index pattern\w*|interval|quer\w*|audit|review)\b/i;
+    for (const example of adversarial) {
+      expect(example.input.question).toMatch(authoringSignal);
+    }
+  });
 });
 
 describe('routing evaluator behavior', () => {

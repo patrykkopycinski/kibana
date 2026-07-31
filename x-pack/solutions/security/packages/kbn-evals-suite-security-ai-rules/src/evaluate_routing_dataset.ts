@@ -54,6 +54,7 @@ export type RuleRoutingDatasetExample = Example<
 >;
 
 export const toRoutingDatasetExample = (ex: RuleRoutingExample): RuleRoutingDatasetExample => ({
+  id: ex.id,
   input: { question: ex.input.question },
   output: {
     reference: ex.expected.reference,
@@ -459,6 +460,23 @@ export const createEvaluateRuleRoutingDataset = ({
       log.info(`[security-ai-rules routing] question="${preview}"`);
 
       const response = await chatClient.converseNaturalLanguage(question);
+
+      // DIAGNOSTIC (temporary): emit each example's full domain tool sequence so a
+      // failing aggregate can be attributed to a specific example + tool without
+      // re-running. load_skill steps include their params (which skill was loaded)
+      // so skill-routing failures can be told apart from tool-selection failures.
+      // Remove once the ToolUsageOnly failure mode is identified.
+      const seq = (response.steps ?? [])
+        .filter((s) => s?.type === 'tool_call' && typeof s?.tool_id === 'string')
+        .map((s) => {
+          if (s.tool_id === 'load_skill') {
+            return `load_skill(${JSON.stringify((s as { params?: unknown }).params ?? {})})`;
+          }
+          return s.tool_id;
+        });
+      log.info(
+        `[security-ai-rules routing] TOOLSEQ id="${example.id ?? '?'}" tools=[${seq.join(', ')}]`
+      );
 
       return {
         messages: response.messages,

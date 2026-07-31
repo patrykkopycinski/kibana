@@ -112,6 +112,136 @@ const findRulesExamples: RuleRoutingExample[] = [
   },
 ];
 
+/**
+ * Adversarial find-rules examples.
+ *
+ * The `base` find-rules examples above all open with an unambiguous read-only verb
+ * ("List all...", "Show me...", "How many...") and contain no authoring vocabulary,
+ * so the router has no lexical pull toward `detection-rule-edit` and cannot
+ * discriminate between a catalog with and without a disambiguation clause.
+ *
+ * These examples are still strictly read-only — the correct answer is always
+ * find-security-rules + security.find_rules, and security.create_detection_rule is
+ * always forbidden — but each one deliberately loads the prompt with creation/edit
+ * signal that competes for the router's attention:
+ *
+ *  - leading imperative normally associated with authoring ("Audit", "Review", "Check")
+ *  - rule-authoring field vocabulary (severity, risk score, index patterns, interval, query)
+ *  - explicit mention of creating/editing framed as a *future or hypothetical* action
+ *  - coverage-gap framing, which sits one inference step away from "so create one"
+ *
+ * A router that reads only surface keywords ("severity", "create", "coverage gap")
+ * will misroute these to detection-rule-edit; a router that resolves the actual
+ * user intent will keep them on find-security-rules.
+ */
+const adversarialFindRulesExamples: RuleRoutingExample[] = [
+  {
+    id: 'routing-find-adversarial-severity-audit',
+    input: {
+      question:
+        'Audit my detection rules for severity and risk score consistency — which enabled rules have a severity of high or critical?',
+    },
+    expected: {
+      reference:
+        'Read-only audit of existing rule severity. The agent should load find-security-rules and call security.find_rules. It must NOT call security.create_detection_rule or edit any rule, despite the rule-authoring field vocabulary.',
+      expectedSkill: 'find-security-rules',
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+    metadata: {
+      category: 'find-rules',
+      routing_intent: 'Rule Discovery (adversarial: authoring field vocabulary)',
+      dataset_split: ['adversarial'],
+      expectedOnlyToolId: FIND_RULES_TOOL_ID,
+      forbiddenToolId: CREATE_RULE_TOOL_ID,
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+  },
+  {
+    id: 'routing-find-adversarial-coverage-gap',
+    input: {
+      question:
+        'Before I create anything new, which MITRE techniques do my existing detection rules already cover?',
+    },
+    expected: {
+      reference:
+        'The user explicitly defers creation ("before I create anything new") and asks only about existing coverage. The agent should load find-security-rules and call security.find_rules. It must NOT call security.create_detection_rule.',
+      expectedSkill: 'find-security-rules',
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+    metadata: {
+      category: 'find-rules',
+      routing_intent: 'Rule Discovery (adversarial: explicit deferred-creation mention)',
+      dataset_split: ['adversarial'],
+      expectedOnlyToolId: FIND_RULES_TOOL_ID,
+      forbiddenToolId: CREATE_RULE_TOOL_ID,
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+  },
+  {
+    id: 'routing-find-adversarial-query-review',
+    input: {
+      question:
+        'Review the ES|QL queries and index patterns on my enabled rules so I can see which ones run against logs-endpoint.events.*',
+    },
+    expected: {
+      reference:
+        'Read-only review of existing rule queries and index patterns. The agent should load find-security-rules and call security.find_rules. It must NOT call security.create_detection_rule or attempt to rewrite any query.',
+      expectedSkill: 'find-security-rules',
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+    metadata: {
+      category: 'find-rules',
+      routing_intent: 'Rule Discovery (adversarial: query/index-pattern edit vocabulary)',
+      dataset_split: ['adversarial'],
+      expectedOnlyToolId: FIND_RULES_TOOL_ID,
+      forbiddenToolId: CREATE_RULE_TOOL_ID,
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+  },
+  {
+    id: 'routing-find-adversarial-tuning-candidates',
+    input: {
+      question:
+        'Which of my detection rules are candidates for tuning? Show me the enabled ones tagged with MITRE and their current interval.',
+    },
+    expected: {
+      reference:
+        'The user asks to identify tuning candidates, not to perform tuning. The agent should load find-security-rules and call security.find_rules. It must NOT call security.create_detection_rule or modify a rule schedule.',
+      expectedSkill: 'find-security-rules',
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+    metadata: {
+      category: 'find-rules',
+      routing_intent: 'Rule Discovery (adversarial: tuning framing + schedule field)',
+      dataset_split: ['adversarial'],
+      expectedOnlyToolId: FIND_RULES_TOOL_ID,
+      forbiddenToolId: CREATE_RULE_TOOL_ID,
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+  },
+  {
+    id: 'routing-find-adversarial-duplicate-check',
+    input: {
+      question:
+        'I want to detect password-protected archive creation on Windows. Do I already have a rule for that?',
+    },
+    expected: {
+      reference:
+        'The user states a detection intent but asks a duplicate-check question ("do I already have a rule"). The correct action is to search existing rules via find-security-rules, NOT to create the rule they described.',
+      expectedSkill: 'find-security-rules',
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+    metadata: {
+      category: 'find-rules',
+      routing_intent: 'Rule Discovery (adversarial: verbatim detection intent + duplicate check)',
+      dataset_split: ['adversarial'],
+      expectedOnlyToolId: FIND_RULES_TOOL_ID,
+      forbiddenToolId: CREATE_RULE_TOOL_ID,
+      tool_sequence: [...FIND_RULES_TRAJECTORY],
+    },
+  },
+];
+
 const distractorExamples: RuleRoutingExample[] = [
   {
     id: 'routing-distractor-dashboards',
@@ -148,9 +278,11 @@ const distractorExamples: RuleRoutingExample[] = [
 export const ruleRoutingExamples: RuleRoutingExample[] = [
   ...ruleCreationExamples,
   ...findRulesExamples,
+  ...adversarialFindRulesExamples,
   ...distractorExamples,
 ];
 
 export const ruleCreationRoutingExamples = ruleCreationExamples;
 export const findRulesRoutingExamples = findRulesExamples;
+export const adversarialFindRulesRoutingExamples = adversarialFindRulesExamples;
 export const routingDistractorExamples = distractorExamples;

@@ -205,6 +205,11 @@ type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 function summarizeRule(rule: RuleFromFind) {
   const params = (rule.params ?? {}) as Record<string, unknown>;
 
+  // Non-elective query fields (RFC security-team#18054, Layer 3 / Class A):
+  // The find_rules result previously omitted the rule body (query/index/language/filters),
+  // so the model escaped to `get_document_by_id` to read it — the single highest-frequency
+  // fan-out (×11 in the 5-rep routing trace). Returning these fields directly means the
+  // rule body is already in the tool result and there is nothing left to fetch.
   return {
     id: rule.id,
     ruleId: params.rule_id ?? params.ruleId,
@@ -214,6 +219,11 @@ function summarizeRule(rule: RuleFromFind) {
     severity: params.severity,
     riskScore: params.risk_score ?? params.riskScore,
     type: params.type,
+    query: params.query,
+    language: params.language,
+    index: params.index,
+    filters: params.filters,
+    threshold: params.threshold,
     updatedAt: rule.updatedAt,
   };
 }
@@ -263,11 +273,12 @@ export const createFindRulesInlineTool = ({
       const truncated = findResult.total > rules.length;
 
       const ruleNames = rules.map((r) => r.name).join(', ');
+      const topLabel = `top ${rules.length} by ${sortField ?? 'relevance'}`;
       const baseMessage =
         findResult.total === 0
           ? 'No detection rules matched the filter.'
           : truncated
-          ? `Found ${findResult.total} detection rules — showing top ${rules.length}: ${ruleNames}. Results exceed the display limit. Narrow by severity, rule type, tag, or MITRE technique to see more specific results.`
+          ? `Found ${findResult.total} detection rules (authoritative total for this filter) — showing the ${topLabel}: ${ruleNames}. The count ${findResult.total} is complete and correct; do NOT re-query to confirm it. Only narrow the filter (severity, rule type, tag, or MITRE technique) if the user needs to see rules beyond the ${topLabel}.`
           : `Found ${findResult.total} detection rules: ${ruleNames}.`;
 
       return {

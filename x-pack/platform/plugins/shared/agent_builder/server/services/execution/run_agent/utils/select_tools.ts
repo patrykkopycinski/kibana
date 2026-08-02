@@ -14,7 +14,11 @@ import type {
   ScopedRunner,
   BuiltinToolDefinition,
 } from '@kbn/agent-builder-server';
-import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
+import type {
+  AgentConfiguration,
+  ResolvableToolSelection,
+  ToolSelection,
+} from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
@@ -75,6 +79,28 @@ export const selectTools = async ({
     runner,
   });
 
+  // Gather builtin tool IDs that any *loaded* skill shadows while active, so the subtract pass in
+  // `filterToolsBySelection` removes them and the model prefers the skill's dedicated tools.
+  // See subtractive tool binding (RFC security-team#18054).
+  //
+  // Exclusion is load-scoped, not availability-scoped: a skill only shadows builtins once the
+  // model has actually loaded it (its inline tools are present in `previousDynamicToolIds`).
+  // This keeps the default Elastic agent's builtins intact on turns that never touch the skill —
+  // e.g. `find-security-rules` being *available* must not strip `get_document_by_id` from an
+  // unrelated question; it only does so after `load_skill` has activated it.
+  const loadedInlineToolIdsBySkill = await Promise.all(
+    filteredSkills
+      .filter((skill) => skill.getExcludedToolIds !== undefined)
+      .map(async (skill) => {
+        const inlineTools = skill.getInlineTools ? await skill.getInlineTools() : [];
+        const isLoaded =
+          inlineTools.length === 0 ||
+          inlineTools.some((tool) => previousDynamicToolIds.includes(tool.id));
+        return isLoaded ? await skill.getExcludedToolIds!() : [];
+      })
+  );
+  const skillExcludedToolIds = loadedInlineToolIdsBySkill.flat();
+
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
     selection: [
@@ -83,6 +109,7 @@ export const selectTools = async ({
       ...(agentConfiguration.enable_elastic_capabilities
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
+      ...(skillExcludedToolIds.length > 0 ? [{ exclude_tool_ids: skillExcludedToolIds }] : []),
     ],
     toolProvider,
     request,
@@ -261,7 +288,7 @@ export const pickTools = async ({
   request,
 }: {
   toolProvider: ToolProvider;
-  selection: ToolSelection[];
+  selection: ResolvableToolSelection[];
   request: KibanaRequest;
 }): Promise<ExecutableTool[]> => {
   const tools = await toolProvider.list({ request });

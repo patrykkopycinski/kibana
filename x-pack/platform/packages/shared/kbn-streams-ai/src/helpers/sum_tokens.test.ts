@@ -51,4 +51,31 @@ describe('sumTokens', () => {
       cached: 2,
     });
   });
+
+  // `executeAsReasoningAgent` accumulates `thinking` across every reasoning
+  // step, and `identifyFeatures` passes that total straight through this
+  // helper. Dropping the field here would silently discard it again for the
+  // providers that do report it.
+  it('sums thinking when both sides report it', () => {
+    expect(
+      sumTokens({
+        accumulated: { prompt: 10, completion: 20, total: 35, cached: 5, thinking: 5 },
+        added: { prompt: 3, completion: 7, total: 14, cached: 2, thinking: 4 },
+      })
+    ).toEqual({ prompt: 13, completion: 27, total: 49, cached: 7, thinking: 9 });
+  });
+
+  it('carries thinking through when only one side reports it', () => {
+    expect(sumTokens({ accumulated: a, added: { ...b, thinking: 4 } })).toEqual({
+      prompt: 13,
+      completion: 27,
+      total: 40,
+      cached: 7,
+      thinking: 4,
+    });
+  });
+
+  it('omits thinking entirely when neither side reports it', () => {
+    expect(sumTokens({ accumulated: a, added: b })).not.toHaveProperty('thinking');
+  });
 });

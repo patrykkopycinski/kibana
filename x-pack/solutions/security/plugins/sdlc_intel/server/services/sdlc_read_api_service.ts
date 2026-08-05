@@ -131,53 +131,70 @@ export const fetchTeamDimensionRecords = async ({
 export const fetchSyncStatus = async (
   esClient: ElasticsearchClient
 ): Promise<SdlcSyncStatusResponse> => {
-  try {
-    const [syncStateResponse, epicCountResponse, relationshipCountResponse] = await Promise.all([
-      esClient.search<{ last_run_at?: string; last_run_status?: string }>({
+  const safeCount = async (
+    index: string,
+    query?: Record<string, unknown>
+  ): Promise<number | null> => {
+    try {
+      const response = await esClient.count(query ? { index, query } : { index });
+      return response.count;
+    } catch (error) {
+      if (isIndexMissingError(error)) {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+  const safeSearch = async (): Promise<
+    | { hits: { hits: Array<{ _source?: { last_run_at?: string; last_run_status?: string } }> } }
+    | null
+  > => {
+    try {
+      return await esClient.search<{ last_run_at?: string; last_run_status?: string }>({
         index: SDLC_INDEX_NAMES.GITHUB_SYNC_STATE,
         size: 1,
         sort: [{ last_run_at: { order: 'desc', unmapped_type: 'date' } }],
         _source: ['last_run_at', 'last_run_status'],
+      });
+    } catch (error) {
+      if (isIndexMissingError(error)) {
+        return null;
+      }
+      throw error;
+    }
+  };
+
+  const [syncStateResponse, completedProjectsResponse, epicCountResponse, relationshipCountResponse] =
+    await Promise.all([
+      safeSearch(),
+      safeCount(SDLC_INDEX_NAMES.GITHUB_SYNC_STATE, {
+        bool: {
+          must: [
+            { term: { entity_type: 'project' } },
+            { term: { last_run_status: 'completed' } },
+          ],
+        },
       }),
-      esClient.count({ index: SDLC_INDEX_NAMES.SDLC_EPIC_PHASES }),
-      esClient.count({ index: SDLC_INDEX_NAMES.GITHUB_INTEL_RELATIONSHIPS }),
+      safeCount(SDLC_INDEX_NAMES.SDLC_EPIC_PHASES),
+      safeCount(SDLC_INDEX_NAMES.GITHUB_INTEL_RELATIONSHIPS),
     ]);
 
-    const completedProjectsResponse = await esClient.count({
-      index: SDLC_INDEX_NAMES.GITHUB_SYNC_STATE,
-      query: {
-        bool: {
-          must: [{ term: { entity_type: 'project' } }, { term: { last_run_status: 'completed' } }],
-        },
-      },
-    });
+  const latestSync = syncStateResponse?.hits.hits[0]?._source;
+  const lastSyncAt = latestSync?.last_run_at;
+  const staleThresholdMs = 6 * 60 * 60 * 1000;
+  const healthy =
+    Boolean(lastSyncAt) &&
+    latestSync?.last_run_status !== 'failed' &&
+    Date.now() - new Date(lastSyncAt as string).getTime() < staleThresholdMs;
 
-    const latestSync = syncStateResponse.hits.hits[0]?._source;
-    const lastSyncAt = latestSync?.last_run_at;
-    const staleThresholdMs = 6 * 60 * 60 * 1000;
-    const healthy =
-      Boolean(lastSyncAt) &&
-      latestSync?.last_run_status !== 'failed' &&
-      Date.now() - new Date(lastSyncAt as string).getTime() < staleThresholdMs;
-
-    return {
-      healthy,
-      lastSyncAt,
-      completedProjects: completedProjectsResponse.count,
-      epicPhaseCount: epicCountResponse.count,
-      relationshipCount: relationshipCountResponse.count,
-    };
-  } catch (error) {
-    if (isIndexMissingError(error)) {
-      return {
-        healthy: false,
-        completedProjects: 0,
-        epicPhaseCount: 0,
-        relationshipCount: 0,
-      };
-    }
-    throw error;
-  }
+  return {
+    healthy,
+    lastSyncAt,
+    completedProjects: completedProjectsResponse,
+    epicPhaseCount: epicCountResponse,
+    relationshipCount: relationshipCountResponse,
+  };
 };
 
 export const getRoadmapsResponse = async ({

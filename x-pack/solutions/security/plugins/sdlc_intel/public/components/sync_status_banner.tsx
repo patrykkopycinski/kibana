@@ -94,8 +94,8 @@ export const SyncStatusBanner = () => {
             id="xpack.sdlcIntel.syncStatus.counts"
             defaultMessage="{epicCount} epics · {relationshipCount} relationships"
             values={{
-              epicCount: data.epicPhaseCount,
-              relationshipCount: data.relationshipCount,
+              epicCount: data.epicPhaseCount ?? '—',
+              relationshipCount: data.relationshipCount ?? '—',
             }}
           />
         </EuiText>

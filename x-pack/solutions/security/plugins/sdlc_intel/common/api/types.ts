@@ -8,9 +8,9 @@
 export interface SdlcSyncStatusResponse {
   readonly healthy: boolean;
   readonly lastSyncAt?: string;
-  readonly completedProjects: number;
-  readonly epicPhaseCount: number;
-  readonly relationshipCount: number;
+  readonly completedProjects: number | null;
+  readonly epicPhaseCount: number | null;
+  readonly relationshipCount: number | null;
 }
 
 export interface SdlcTicketByRepoItem {

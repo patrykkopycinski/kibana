@@ -361,13 +361,6 @@ export interface SlackConversationsHistoryMessage {
   files?: SlackConversationsHistoryFile[];
 }
 
-export interface SlackConversationsHistoryResponse extends SlackErrorFields {
-  ok: boolean;
-  messages?: SlackConversationsHistoryMessage[];
-  has_more?: boolean;
-  response_metadata?: { next_cursor?: string };
-}
-
 export const SlackGetConversationInfoInputSchema = lazySchema(() =>
   z.object({
     channel: z
@@ -414,37 +407,6 @@ export type SlackLookupUserByEmailInput = z.infer<typeof SlackLookupUserByEmailI
 const SLACK_MAX_USERS_LIST_LIMIT = 1000;
 const SLACK_DEFAULT_USERS_LIST_LIMIT = 200;
 
-export const SlackListUsersInputSchema = lazySchema(() =>
-  z.object({
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(SLACK_MAX_USERS_LIST_LIMIT)
-      .default(SLACK_DEFAULT_USERS_LIST_LIMIT)
-      .describe(
-        `Number of users to return per page (1-${SLACK_MAX_USERS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_USERS_LIST_LIMIT}.`
-      ),
-    cursor: z
-      .string()
-      .max(SLACK_MAX_CURSOR_LENGTH)
-      .optional()
-      .describe(
-        'Pagination cursor from a previous listUsers response (nextCursor). Omit for the first page.'
-      ),
-    includeLocale: z.boolean().optional().describe('Set to true to include the user locale.'),
-    raw: z
-      .boolean()
-      .optional()
-      .describe(
-        'Return the full raw Slack API response instead of a compact result. Defaults to false.'
-      ),
-  })
-);
-export type SlackListUsersInput = z.infer<typeof SlackListUsersInputSchema>;
-
-// For "what conversations is this user in?", DMs and private channels are usually
-// the more interesting answer. Unlike listChannels (a discovery action), this
 // defaults to all four conversation types.
 const slackConversationTypesAllDefault = () =>
   z
@@ -652,8 +614,6 @@ export const SlackSendMessageInputSchema = lazySchema(() =>
 );
 export type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 
-const SLACK_MAX_USERS_LIST_LIMIT = 200;
-const SLACK_DEFAULT_USERS_LIST_LIMIT = 200;
 const SLACK_MAX_CONVERSATIONS_HISTORY_LIMIT = 200;
 const SLACK_DEFAULT_CONVERSATIONS_HISTORY_LIMIT = 200;
 
@@ -675,15 +635,6 @@ export interface SlackUsersListResponse extends SlackErrorFields {
   response_metadata?: { next_cursor?: string };
 }
 
-export interface SlackConversationHistoryMessage {
-  type?: string;
-  user?: string;
-  text?: string;
-  ts?: string;
-  thread_ts?: string;
-  reply_count?: number;
-}
-
 export interface SlackConversationsRepliesResponse extends SlackErrorFields {
   ok: boolean;
   messages?: Array<Record<string, unknown>>;
@@ -693,7 +644,7 @@ export interface SlackConversationsRepliesResponse extends SlackErrorFields {
 
 export interface SlackConversationsHistoryResponse extends SlackErrorFields {
   ok: boolean;
-  messages?: SlackConversationHistoryMessage[];
+  messages?: SlackConversationsHistoryMessage[];
   has_more?: boolean;
   response_metadata?: { next_cursor?: string };
 }

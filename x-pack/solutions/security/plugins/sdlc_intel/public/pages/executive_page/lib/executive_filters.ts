@@ -47,6 +47,17 @@ const toEpicSubteamMatchInput = (epic: SdlcEpicPhaseSummary) => ({
   phases: epic.phases,
 });
 
+/**
+ * groupEpicsBySubteam matches on FLAT team fields, but SdlcEpicPhaseSummary
+ * nests them under `.teams`. Spreading the summary together with the flat
+ * projection lets the generic infer an intersection, so grouped results keep
+ * every SdlcEpicPhaseSummary property (notably `id`).
+ */
+const toSubteamMatchableEpic = (epic: SdlcEpicPhaseSummary) => ({
+  ...epic,
+  ...toEpicSubteamMatchInput(epic),
+});
+
 export const epicBelongsToSecurityOrg = (epic: SdlcEpicPhaseSummary): boolean =>
   SECURITY_ORG_TEAM_KEYS.some((orgTeamKey) =>
     epicBelongsToOrgTeam(toEpicSubteamMatchInput(epic), orgTeamKey)
@@ -70,9 +81,7 @@ const groupEpicsIntoRoadmaps = (epics: readonly SdlcEpicPhaseSummary[]): SdlcRoa
     groups.set(roadmapId, {
       id: roadmapId,
       title:
-        roadmapId === 'unmapped'
-          ? UNMAPPED_ROADMAP_GROUP_TITLE
-          : epic.roadmap.title ?? roadmapId,
+        roadmapId === 'unmapped' ? UNMAPPED_ROADMAP_GROUP_TITLE : epic.roadmap.title ?? roadmapId,
       product: epic.roadmap.product ?? 'Unknown',
       coveragePct: 0,
       epicCount: 1,
@@ -127,7 +136,10 @@ const epicMatchesEngineeringTeam = (
   return teams.some((team) => team === engineeringTeam);
 };
 
-const epicMatchesDeckBucket = (epic: SdlcEpicPhaseSummary, deckBucket: DeckBucketFilter): boolean => {
+const epicMatchesDeckBucket = (
+  epic: SdlcEpicPhaseSummary,
+  deckBucket: DeckBucketFilter
+): boolean => {
   if (!deckBucket) {
     return true;
   }
@@ -159,8 +171,7 @@ const epicMatchesSearch = (epic: SdlcEpicPhaseSummary, search: string): boolean 
   return epic.ticketsByRepo.some((repoGroup) =>
     (repoGroup.items ?? []).some(
       (ticket) =>
-        ticket.title.toLowerCase().includes(query) ||
-        ticket.issueRef.toLowerCase().includes(query)
+        ticket.title.toLowerCase().includes(query) || ticket.issueRef.toLowerCase().includes(query)
     )
   );
 };
@@ -234,7 +245,7 @@ export const groupRoadmapsByOrgTeamSubteam = (
       continue;
     }
 
-    const subteamEpicsMap = groupEpicsBySubteam(orgEpics, teamRecord);
+    const subteamEpicsMap = groupEpicsBySubteam(orgEpics.map(toSubteamMatchableEpic), teamRecord);
     const subteamDefinitions = resolveSubteamDefinitionsForOrg(orgTeamKey, teamRecord.subteams);
     const subteams: ExecutiveSubteamGroup[] = [];
     const assignedEpicIds = new Set<string>();

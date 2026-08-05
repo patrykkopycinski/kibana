@@ -20,17 +20,13 @@ import { saveKibanaAssetsRefs } from '../../install';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 
-const GITHUB_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GITHUB_CONNECTOR_ID';
-const SLACK_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SLACK_CONNECTOR_ID';
-const SALESFORCE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CONNECTOR_ID';
-const SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD';
-const SALESFORCE_PRODUCT_AREA_FIELD_PLACEHOLDER = 'REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD';
-const SDH_REPO_PATTERN_PLACEHOLDER = 'REPLACE_WITH_SDH_REPO_PATTERN';
-const SDH_LABEL_PLACEHOLDER = 'REPLACE_WITH_SDH_LABEL';
-const GDRIVE_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_CONNECTOR_ID';
-const GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER = 'REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS';
-const AI_CONNECTOR_PLACEHOLDER = 'REPLACE_WITH_AI_CONNECTOR_ID';
-const ORG_LOGIN_PLACEHOLDER = 'REPLACE_WITH_ORG_LOGIN';
+const VAR_PLACEHOLDER_PREFIX = 'REPLACE_WITH_';
+
+// Legacy var names whose placeholder does not follow the convention.
+// New vars should use REPLACE_WITH_<VAR_NAME_UPPERCASED> and need no entry here.
+const LEGACY_VAR_PLACEHOLDER_OVERRIDES: Record<string, string> = {
+  google_drive_connector_id: 'REPLACE_WITH_GDRIVE_CONNECTOR_ID',
+};
 
 const formatManifestVarForSubstitution = (value: unknown): string | undefined => {
   if (Array.isArray(value)) {
@@ -48,58 +44,23 @@ const formatManifestVarForSubstitution = (value: unknown): string | undefined =>
   return undefined;
 };
 
+const getPlaceholderForVarName = (varName: string): string =>
+  LEGACY_VAR_PLACEHOLDER_OVERRIDES[varName] ??
+  `${VAR_PLACEHOLDER_PREFIX}${varName.toUpperCase()}`;
+
 export const substituteWorkflowConnectorIds = (
   yaml: string,
   vars: Record<string, unknown>
 ): string => {
   let result = yaml;
-  const githubConnectorId = vars.github_connector_id;
-  const slackConnectorId = vars.slack_connector_id;
-  const salesforceConnectorId = vars.salesforce_connector_id;
-  const salesforceCaseGithubField = vars.salesforce_case_github_field;
-  const salesforceProductAreaField = vars.salesforce_product_area_field;
-  const sdhRepoPattern = vars.sdh_repo_pattern;
-  const sdhLabel = vars.sdh_label;
-  const googleDriveConnectorId = vars.google_drive_connector_id;
-  const gdriveRoadmapFolderIds = formatManifestVarForSubstitution(vars.gdrive_roadmap_folder_ids);
-  const aiConnectorId = vars.ai_connector_id;
-  const orgLogin = vars.org_login;
 
-  if (typeof githubConnectorId === 'string' && githubConnectorId.length > 0) {
-    result = result.replaceAll(GITHUB_CONNECTOR_PLACEHOLDER, githubConnectorId);
-  }
-  if (typeof slackConnectorId === 'string' && slackConnectorId.length > 0) {
-    result = result.replaceAll(SLACK_CONNECTOR_PLACEHOLDER, slackConnectorId);
-  }
-  if (typeof salesforceConnectorId === 'string' && salesforceConnectorId.length > 0) {
-    result = result.replaceAll(SALESFORCE_CONNECTOR_PLACEHOLDER, salesforceConnectorId);
-  }
-  if (typeof salesforceCaseGithubField === 'string' && salesforceCaseGithubField.length > 0) {
-    result = result.replaceAll(SALESFORCE_CASE_GITHUB_FIELD_PLACEHOLDER, salesforceCaseGithubField);
-  }
-  if (typeof salesforceProductAreaField === 'string' && salesforceProductAreaField.length > 0) {
-    result = result.replaceAll(
-      SALESFORCE_PRODUCT_AREA_FIELD_PLACEHOLDER,
-      salesforceProductAreaField
-    );
-  }
-  if (typeof sdhRepoPattern === 'string' && sdhRepoPattern.length > 0) {
-    result = result.replaceAll(SDH_REPO_PATTERN_PLACEHOLDER, sdhRepoPattern);
-  }
-  if (typeof sdhLabel === 'string' && sdhLabel.length > 0) {
-    result = result.replaceAll(SDH_LABEL_PLACEHOLDER, sdhLabel);
-  }
-  if (typeof googleDriveConnectorId === 'string' && googleDriveConnectorId.length > 0) {
-    result = result.replaceAll(GDRIVE_CONNECTOR_PLACEHOLDER, googleDriveConnectorId);
-  }
-  if (gdriveRoadmapFolderIds) {
-    result = result.replaceAll(GDRIVE_ROADMAP_FOLDER_IDS_PLACEHOLDER, gdriveRoadmapFolderIds);
-  }
-  if (typeof aiConnectorId === 'string' && aiConnectorId.length > 0) {
-    result = result.replaceAll(AI_CONNECTOR_PLACEHOLDER, aiConnectorId);
-  }
-  if (typeof orgLogin === 'string' && orgLogin.length > 0) {
-    result = result.replaceAll(ORG_LOGIN_PLACEHOLDER, orgLogin);
+  for (const [varName, value] of Object.entries(vars)) {
+    const formatted = formatManifestVarForSubstitution(value);
+    if (formatted === undefined) {
+      continue;
+    }
+
+    result = result.replaceAll(getPlaceholderForVarName(varName), formatted);
   }
 
   return result;

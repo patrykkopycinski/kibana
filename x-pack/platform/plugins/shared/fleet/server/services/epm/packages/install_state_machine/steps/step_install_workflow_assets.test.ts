@@ -10,7 +10,6 @@ import { isValidId } from '@kbn/human-readable-id';
 import {
   getFleetPackageWorkflowId,
   substituteWorkflowConnectorIds,
-  substituteFleetAgentIds,
 } from './step_install_workflow_assets';
 
 describe('getFleetPackageWorkflowId', () => {
@@ -79,6 +78,58 @@ consts:
     expect(result).not.toContain('REPLACE_WITH_GDRIVE_CONNECTOR_ID');
     expect(result).not.toContain('REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS');
     expect(result).not.toContain('REPLACE_WITH_AI_CONNECTOR_ID');
+  });
+
+  it('substitutes all placeholders byte-identically for the SDLC package', () => {
+    const yaml = `
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  slackConnectorId: REPLACE_WITH_SLACK_CONNECTOR_ID
+  salesforceConnectorId: REPLACE_WITH_SALESFORCE_CONNECTOR_ID
+  caseGithubField: REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD
+  productAreaField: REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD
+  sdhRepoPattern: REPLACE_WITH_SDH_REPO_PATTERN
+  sdhLabel: REPLACE_WITH_SDH_LABEL
+  gdriveConnectorId: REPLACE_WITH_GDRIVE_CONNECTOR_ID
+  roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS
+  aiConnectorId: REPLACE_WITH_AI_CONNECTOR_ID
+`;
+    const result = substituteWorkflowConnectorIds(yaml, {
+      github_connector_id: 'github-conn-1',
+      slack_connector_id: 'slack-conn-2',
+      salesforce_connector_id: 'salesforce-conn-3',
+      salesforce_case_github_field: 'Engineering_Issue_URL__c',
+      salesforce_product_area_field: 'Product_Area__c',
+      sdh_repo_pattern: 'sdh-*',
+      sdh_label: 'sdh',
+      google_drive_connector_id: 'gdrive-conn-4',
+      gdrive_roadmap_folder_ids: ['folder-roadmap-1', 'folder-okrs-2'],
+      ai_connector_id: 'ai-conn-5',
+      org_login: 'my-org',
+    });
+
+    expect(result).toBe(`
+consts:
+  orgLogin: my-org
+  githubConnectorId: github-conn-1
+  slackConnectorId: slack-conn-2
+  salesforceConnectorId: salesforce-conn-3
+  caseGithubField: Engineering_Issue_URL__c
+  productAreaField: Product_Area__c
+  sdhRepoPattern: sdh-*
+  sdhLabel: sdh
+  gdriveConnectorId: gdrive-conn-4
+  roadmapFolderIds: folder-roadmap-1,folder-okrs-2
+  aiConnectorId: ai-conn-5
+`);
+  });
+
+  it('substitutes a new var using only the convention', () => {
+    const result = substituteWorkflowConnectorIds('jiraConnectorId: REPLACE_WITH_JIRA_CONNECTOR_ID', {
+      jira_connector_id: 'jira-conn-1',
+    });
+    expect(result).toBe('jiraConnectorId: jira-conn-1');
   });
 
   it('joins multi-value roadmap folder IDs for workflow substitution', () => {

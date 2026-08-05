@@ -46,6 +46,11 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW,
 } from './significant_events/memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
+import {
+  SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW,
+  SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW,
+  SDLC_SETUP_INDICES_WORKFLOW,
+} from './sdlc_intel';
 
 export {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
@@ -90,6 +95,11 @@ export {
   PND_WATCH_OFFICER_WORKFLOW_ID,
   PND_WATCH_WORKFLOW_IDS,
 } from './pnd';
+export {
+  SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW_ID,
+  SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW_ID,
+  SDLC_SETUP_INDICES_WORKFLOW_ID,
+} from './sdlc_intel';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the
@@ -130,4 +140,7 @@ export const managedWorkflowDefinitions = [
   PND_WATCH_OFFICER_WORKFLOW,
   PND_WATCH_DARK_WORKFLOW,
   PND_WATCH_DEEP_WORKFLOW,
+  SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW,
+  SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW,
+  SDLC_SETUP_INDICES_WORKFLOW,
 ] as const;

@@ -36,6 +36,7 @@
     ],
     "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
     "runtimePluginDependencies": ["agentBuilder"],
+    "runtimePluginDependencies": ["agentBuilder", "agentContextLayer", "sdlcIntel"],
     "extraPublicDirs": ["common"]
   }
 }

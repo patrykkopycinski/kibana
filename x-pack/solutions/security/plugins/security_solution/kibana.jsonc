@@ -86,6 +86,8 @@
       "serverless",
       "agentBuilder",
       "llmTasks",
+      "workflowsExtensions",
+      "sdlcIntel",
       "cps",
       "searchInferenceEndpoints",
       "esql"

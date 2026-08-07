@@ -25,6 +25,7 @@ import {
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
   type DatasetMaturity,
+  type EvaluationExperimentSummary,
   type EvaluationScoreDocument,
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
@@ -58,6 +59,16 @@ interface GetExperimentFilters {
   suiteId?: string;
   executionId?: string;
 }
+
+export interface ListExperimentsFilters {
+  suiteId?: string;
+  taskModelId?: string;
+  branch?: string;
+  datasetId?: string;
+  buildId?: string;
+}
+
+const LIST_EXPERIMENTS_PER_PAGE = 100;
 
 export interface UpsertDatasetInput {
   name: string;
@@ -300,6 +311,45 @@ export class EvalsClient {
       }
       throw error;
     }
+  }
+
+  /**
+   * Lists every experiment matching the given filters, transparently paging
+   * through the experiments API until the full set has been retrieved.
+   *
+   * Used by the security LLM performance matrix generator, which needs the
+   * complete experiment set for a branch/build rather than a single page.
+   */
+  async listExperiments(filters?: ListExperimentsFilters): Promise<EvaluationExperimentSummary[]> {
+    const all: EvaluationExperimentSummary[] = [];
+    let page = 1;
+
+    for (;;) {
+      const response = await this.kbnClient.request({
+        path: EVALS_EXPERIMENTS_URL,
+        method: 'GET',
+        query: {
+          suite_id: filters?.suiteId,
+          model_id: filters?.taskModelId,
+          branch: filters?.branch,
+          dataset_id: filters?.datasetId,
+          build_id: filters?.buildId,
+          page,
+          per_page: LIST_EXPERIMENTS_PER_PAGE,
+        },
+        headers: VERSIONED_HEADERS,
+      });
+
+      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+      all.push(...parsed.experiments);
+
+      if (parsed.experiments.length === 0 || all.length >= parsed.total) {
+        break;
+      }
+      page += 1;
+    }
+
+    return all;
   }
 
   async findLatestExperimentForBuild({

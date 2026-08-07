@@ -39,6 +39,30 @@ export interface MatrixRow {
   overall: MatrixCell;
 }
 
+/** Aggregated token magnitudes for one (model, column) pair, in native units. */
+export interface TokenCostCell {
+  /** Base column id (matches `MatrixDisplayColumn.id`). */
+  columnId: string;
+  inputTokens?: TokenStat;
+  outputTokens?: TokenStat;
+  /** Sum of the input + output means; `undefined` when neither is present. */
+  totalMean?: number;
+}
+
+export interface TokenStat {
+  mean: number;
+  min: number;
+  max: number;
+  count: number;
+}
+
+export interface TokenCostModel {
+  modelId: string;
+  modelLabel: string;
+  openSource: boolean;
+  cells: TokenCostCell[];
+}
+
 export interface Matrix {
   columns: Array<{ id: string; label: string; group?: string }>;
   composites?: Array<{ id: string; label: string; group?: string }>;
@@ -47,6 +71,8 @@ export interface Matrix {
   overallLabel: string;
   proprietary: MatrixRow[];
   openSource: MatrixRow[];
+  /** Present only when the config opts into the token axis. */
+  tokenCost?: { models: TokenCostModel[] };
 }
 
 const roundTo = (value: number, decimals: number): number => {
@@ -260,6 +286,63 @@ const buildDisplayColumns = (config: MatrixConfig): MatrixDisplayColumn[] => {
 };
 
 /**
+ * Aggregates the raw-magnitude token evaluators for one (model, column) pair.
+ *
+ * Deliberately parallel to {@link computeColumnMean} rather than reusing it: the
+ * quality path scales its mean by `defaultScale` and collapses everything into a
+ * single number, whereas the token axis must stay in native units and preserve
+ * the observed min/max spread. Values are weighted by sample count so a column
+ * spanning suites of unequal size reports a true per-task mean.
+ */
+const computeTokenStat = (
+  modelScores: AggregatedModelScores,
+  column: MatrixColumnConfig,
+  evaluatorPrefix: string
+): TokenStat | undefined => {
+  const suiteSet = new Set(column.suites);
+  const datasetSet = column.datasetIds ? new Set(column.datasetIds) : undefined;
+
+  let weightedSum = 0;
+  let totalCount = 0;
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  let contributing = 0;
+
+  for (const suite of modelScores.suites) {
+    if (!suiteSet.has(suite.suiteId)) {
+      continue;
+    }
+    for (const dataset of suite.datasets) {
+      if (datasetSet && !datasetSet.has(dataset.datasetId)) {
+        continue;
+      }
+      for (const evaluator of dataset.evaluators) {
+        if (
+          evaluator.evaluatorName !== evaluatorPrefix &&
+          !evaluator.evaluatorName.startsWith(evaluatorPrefix)
+        ) {
+          continue;
+        }
+        const weight = evaluator.count > 0 ? evaluator.count : 1;
+        weightedSum += evaluator.mean * weight;
+        totalCount += weight;
+        // `min`/`max` are the per-experiment extremes reported by the stats API;
+        // fall back to the mean when a stats payload omits them.
+        min = Math.min(min, evaluator.min ?? evaluator.mean);
+        max = Math.max(max, evaluator.max ?? evaluator.mean);
+        contributing += 1;
+      }
+    }
+  }
+
+  if (contributing === 0 || totalCount === 0) {
+    return undefined;
+  }
+
+  return { mean: weightedSum / totalCount, min, max, count: totalCount };
+};
+
+/**
  * Pure transform from aggregated eval scores + config into a renderable matrix.
  * Models are emitted in config order; models absent from the data are skipped.
  */
@@ -320,6 +403,55 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
 
   const sortByPrimaryDesc = (a: MatrixRow, b: MatrixRow): number => sortValue(b) - sortValue(a);
 
+  // Token axis: opt-in, computed over base columns only (composites are derived
+  // quality scores and have no meaningful token aggregate).
+  let tokenCost: { models: TokenCostModel[] } | undefined;
+  if (config.tokenCost) {
+    const tokenColumnIds = config.tokenCost.columns;
+    const tokenColumns = tokenColumnIds
+      ? config.columns.filter((column) => tokenColumnIds.includes(column.id))
+      : config.columns;
+
+    const models: TokenCostModel[] = [];
+    for (const modelConfig of config.models) {
+      const modelScores =
+        byModelId.get(modelConfig.id) ??
+        aggregated.find((entry) => matchesModel(modelConfig, entry.modelId));
+      if (!modelScores) {
+        continue;
+      }
+
+      const cells: TokenCostCell[] = [];
+      for (const column of tokenColumns) {
+        const inputTokens = computeTokenStat(modelScores, column, config.tokenCost.inputEvaluator);
+        const outputTokens = computeTokenStat(
+          modelScores,
+          column,
+          config.tokenCost.outputEvaluator
+        );
+        if (!inputTokens && !outputTokens) {
+          continue;
+        }
+        cells.push({
+          columnId: column.id,
+          inputTokens,
+          outputTokens,
+          totalMean: (inputTokens?.mean ?? 0) + (outputTokens?.mean ?? 0),
+        });
+      }
+
+      if (cells.length > 0) {
+        models.push({
+          modelId: modelConfig.id,
+          modelLabel: modelConfig.label,
+          openSource: modelConfig.openSource,
+          cells,
+        });
+      }
+    }
+    tokenCost = { models };
+  }
+
   return {
     columns: config.columns.map((column) => ({
       id: column.id,
@@ -335,5 +467,6 @@ export const buildMatrix = (aggregated: AggregatedModelScores[], config: MatrixC
     overallLabel: config.overall.label,
     proprietary: proprietary.sort(sortByPrimaryDesc),
     openSource: openSource.sort(sortByPrimaryDesc),
+    ...(tokenCost ? { tokenCost } : {}),
   };
 };

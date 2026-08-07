@@ -8,6 +8,8 @@
 import { renderMatrix } from './render_matrix';
 import { parseMatrixConfig } from './load_matrix_config';
 import type { Matrix } from './build_matrix';
+import { buildMatrix } from './build_matrix';
+import type { AggregatedModelScores } from './query_matrix_scores';
 
 const config = parseMatrixConfig({
   title: 'Test Matrix',
@@ -143,5 +145,67 @@ describe('renderMatrix', () => {
 
     const { proprietaryCsv } = renderMatrix(m, cfgWithComma);
     expect(proprietaryCsv.split('\n')[0]).toBe('Model,"Col, with comma",Overall');
+  });
+});
+
+describe('renderMatrix token axis', () => {
+  const tokenConfig = parseMatrixConfig({
+    title: 'Token Matrix',
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [{ id: 'm1', label: 'M1' }],
+    tokenCost: {},
+  });
+
+  const withTokens: AggregatedModelScores[] = [
+    {
+      modelId: 'm1',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'r1',
+          datasets: [
+            {
+              datasetId: 'd1',
+              datasetName: 'D1',
+              evaluators: [
+                { evaluatorName: 'correctness', mean: 0.9, count: 2 },
+                {
+                  evaluatorName: 'Input Tokens',
+                  mean: 120_000,
+                  count: 2,
+                  min: 90_000,
+                  max: 150_000,
+                },
+                { evaluatorName: 'Output Tokens', mean: 3_000, count: 2, min: 2_000, max: 4_000 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  it('serializes tokenCost into matrix.json', () => {
+    const { json } = renderMatrix(buildMatrix(withTokens, tokenConfig), tokenConfig);
+    const parsed = JSON.parse(json);
+
+    expect(parsed.tokenCost.models).toHaveLength(1);
+    expect(parsed.tokenCost.models[0].modelId).toBe('m1');
+    expect(parsed.tokenCost.models[0].cells[0]).toEqual({
+      columnId: 'triage',
+      inputTokens: { mean: 120_000, min: 90_000, max: 150_000, count: 2 },
+      outputTokens: { mean: 3_000, min: 2_000, max: 4_000, count: 2 },
+      totalMean: 123_000,
+    });
+  });
+
+  it('omits the tokenCost key entirely when not configured', () => {
+    const plain = parseMatrixConfig({
+      title: 'Plain',
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+      models: [{ id: 'm1', label: 'M1' }],
+    });
+    const { json } = renderMatrix(buildMatrix(withTokens, plain), plain);
+    expect(JSON.parse(json)).not.toHaveProperty('tokenCost');
   });
 });

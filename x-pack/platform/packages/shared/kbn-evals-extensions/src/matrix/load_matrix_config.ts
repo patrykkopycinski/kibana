@@ -184,9 +184,43 @@ export const matrixConfigSchema = schema.object({
     })
   ),
   models: schema.arrayOf(modelSchema, { minSize: 1, maxSize: MAX_ARRAY_SIZE }),
+  /**
+   * Opt-in token/cost axis. The quality matrix deliberately drops the
+   * observability-tier evaluators (see {@link DEFAULT_EXCLUDED_EVALUATORS})
+   * because their raw magnitudes would blow out the 0-10 scale. This block
+   * re-admits them on a *separate* axis: instead of being folded into a column
+   * mean, the named evaluators are aggregated per (model, column) into
+   * `matrix.tokenCost`, preserving mean/min/max in native units.
+   *
+   * Omitted by default, so existing configs are unaffected.
+   */
+  tokenCost: schema.maybe(
+    schema.object({
+      /** Evaluator name (prefix-matched) contributing input-token magnitudes. */
+      inputEvaluator: schema.string({
+        defaultValue: 'Input Tokens',
+        maxLength: MAX_STRING_LENGTH,
+      }),
+      /** Evaluator name (prefix-matched) contributing output-token magnitudes. */
+      outputEvaluator: schema.string({
+        defaultValue: 'Output Tokens',
+        maxLength: MAX_STRING_LENGTH,
+      }),
+      /**
+       * Column ids the token axis is aggregated over. Defaults to every base
+       * column in the config when omitted.
+       */
+      columns: schema.maybe(
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+          maxSize: MAX_ARRAY_SIZE,
+        })
+      ),
+    })
+  ),
 });
 
 export type MatrixConfig = TypeOf<typeof matrixConfigSchema>;
+export type MatrixTokenCostConfig = NonNullable<MatrixConfig['tokenCost']>;
 export type MatrixColumnConfig = TypeOf<typeof columnSchema>;
 export type MatrixCompositeConfig = TypeOf<typeof compositeSchema>;
 export type MatrixModelConfig = TypeOf<typeof modelSchema>;

@@ -14,6 +14,9 @@ export interface AggregatedEvaluatorScore {
   evaluatorName: string;
   mean: number;
   count: number;
+  /** Observed spread across the experiment's examples (used by the token axis). */
+  min?: number;
+  max?: number;
 }
 
 export interface AggregatedDatasetScores {
@@ -91,6 +94,8 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
       evaluatorName: stat.evaluatorName,
       mean: stat.stats.mean,
       count: stat.stats.count,
+      min: stat.stats.min,
+      max: stat.stats.max,
     });
   }
 

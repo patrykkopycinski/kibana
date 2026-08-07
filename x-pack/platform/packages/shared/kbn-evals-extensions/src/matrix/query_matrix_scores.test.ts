@@ -96,14 +96,14 @@ describe('experimentStatsToDatasets', () => {
         datasetId: 'd1',
         datasetName: 'D1',
         evaluators: [
-          { evaluatorName: 'correctness', mean: 0.9, count: 10 },
-          { evaluatorName: 'groundedness', mean: 0.8, count: 10 },
+          { evaluatorName: 'correctness', mean: 0.9, count: 10, min: 0.9, max: 0.9 },
+          { evaluatorName: 'groundedness', mean: 0.8, count: 10, min: 0.8, max: 0.8 },
         ],
       },
       {
         datasetId: 'd2',
         datasetName: 'D2',
-        evaluators: [{ evaluatorName: 'correctness', mean: 0.7, count: 5 }],
+        evaluators: [{ evaluatorName: 'correctness', mean: 0.7, count: 5, min: 0.7, max: 0.7 }],
       },
     ]);
   });

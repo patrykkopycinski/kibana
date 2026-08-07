@@ -142,6 +142,10 @@ export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatr
       overallLabel: matrix.overallLabel,
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,
+      // Emitted only when the config opts into the token axis; the token
+      // reports consume this rather than re-deriving magnitudes from the
+      // 0-10 quality cells.
+      ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),
     },
     null,
     2

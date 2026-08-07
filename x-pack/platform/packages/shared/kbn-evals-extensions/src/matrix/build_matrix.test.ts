@@ -317,3 +317,111 @@ describe('buildMatrix', () => {
     expect(matrix.proprietary.map((row) => row.modelLabel)).toEqual(['Higher', 'Lower']);
   });
 });
+
+describe('buildMatrix token axis', () => {
+  const tokenEvaluator = (name: string, mean: number, min: number, max: number, count = 3) => ({
+    evaluatorName: name,
+    mean,
+    count,
+    min,
+    max,
+  });
+
+  const tokenAggregated: AggregatedModelScores[] = [
+    {
+      modelId: 'model-good',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'run-1',
+          datasets: [
+            {
+              datasetId: 'd1',
+              datasetName: 'D1',
+              evaluators: [
+                evaluator(0.9),
+                tokenEvaluator('Input Tokens', 100_000, 50_000, 150_000),
+                tokenEvaluator('Output Tokens', 2_000, 1_000, 3_000),
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const tokenConfig: MatrixConfig = parseMatrixConfig({
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [{ id: 'model-good', label: 'Good Model' }],
+    tokenCost: {},
+  });
+
+  it('is omitted entirely when the config does not opt in', () => {
+    expect(buildMatrix(tokenAggregated, config).tokenCost).toBeUndefined();
+  });
+
+  it('aggregates token evaluators in native units with min/max preserved', () => {
+    const matrix = buildMatrix(tokenAggregated, tokenConfig);
+    const cell = matrix.tokenCost!.models[0].cells[0];
+
+    expect(cell.columnId).toBe('triage');
+    expect(cell.inputTokens).toEqual({ mean: 100_000, min: 50_000, max: 150_000, count: 3 });
+    expect(cell.outputTokens).toEqual({ mean: 2_000, min: 1_000, max: 3_000, count: 3 });
+    expect(cell.totalMean).toBe(102_000);
+  });
+
+  it('does not let token evaluators leak into quality cells', () => {
+    const matrix = buildMatrix(tokenAggregated, tokenConfig);
+    // 0.9 * defaultScale(10) — unaffected by the 100k-magnitude token evaluators.
+    expect(matrix.proprietary[0].cells.triage).toEqual({ kind: 'score', value: 9 });
+  });
+
+  it('weights the mean by sample count across suites', () => {
+    const twoSuite: MatrixConfig = parseMatrixConfig({
+      columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a', 'suite-b'], weight: 1 }],
+      models: [{ id: 'model-good', label: 'Good Model' }],
+      tokenCost: {},
+    });
+    const matrix = buildMatrix(
+      [
+        {
+          modelId: 'model-good',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'r1',
+              datasets: [
+                {
+                  datasetId: 'd1',
+                  datasetName: 'D1',
+                  evaluators: [tokenEvaluator('Input Tokens', 100, 100, 100, 1)],
+                },
+              ],
+            },
+            {
+              suiteId: 'suite-b',
+              experimentId: 'r2',
+              datasets: [
+                {
+                  datasetId: 'd2',
+                  datasetName: 'D2',
+                  evaluators: [tokenEvaluator('Input Tokens', 200, 200, 200, 3)],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      twoSuite
+    );
+    // (100*1 + 200*3) / 4 = 175, not the unweighted 150.
+    expect(matrix.tokenCost!.models[0].cells[0].inputTokens!.mean).toBe(175);
+    expect(matrix.tokenCost!.models[0].cells[0].inputTokens!.min).toBe(100);
+    expect(matrix.tokenCost!.models[0].cells[0].inputTokens!.max).toBe(200);
+  });
+
+  it('omits cells with no token data', () => {
+    const matrix = buildMatrix(aggregated, tokenConfig);
+    expect(matrix.tokenCost!.models).toEqual([]);
+  });
+});

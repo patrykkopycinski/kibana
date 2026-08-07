@@ -54,13 +54,16 @@ export const substituteWorkflowConnectorIds = (
 ): string => {
   let result = yaml;
 
-  for (const [varName, value] of Object.entries(vars)) {
-    const formatted = formatManifestVarForSubstitution(value);
-    if (formatted === undefined) {
-      continue;
-    }
+  const substitutions = Object.entries(vars)
+    .map(([varName, value]): [string, string | undefined] => [
+      getPlaceholderForVarName(varName),
+      formatManifestVarForSubstitution(value),
+    ])
+    .filter((entry): entry is [string, string] => entry[1] !== undefined)
+    .sort(([a], [b]) => b.length - a.length);
 
-    result = result.replaceAll(getPlaceholderForVarName(varName), formatted);
+  for (const [placeholder, formatted] of substitutions) {
+    result = result.replaceAll(placeholder, formatted);
   }
 
   return result;

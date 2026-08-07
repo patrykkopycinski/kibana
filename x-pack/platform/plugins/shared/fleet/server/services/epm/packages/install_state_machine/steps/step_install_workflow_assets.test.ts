@@ -177,6 +177,22 @@ consts:
     expect(result).toBe('orgLogin: REPLACE_WITH_ORG_LOGIN');
   });
 
+  it('substitutes the longest matching placeholder even when a shorter one is a prefix', () => {
+    const result = substituteWorkflowConnectorIds('orgLogin: REPLACE_WITH_ORG_LOGIN', {
+      org: 'SHORT',
+      org_login: 'my-org',
+    });
+    expect(result).toBe('orgLogin: my-org');
+  });
+
+  it('is independent of vars insertion order for prefix placeholders', () => {
+    const result = substituteWorkflowConnectorIds('orgLogin: REPLACE_WITH_ORG_LOGIN', {
+      org_login: 'my-org',
+      org: 'SHORT',
+    });
+    expect(result).toBe('orgLogin: my-org');
+  });
+
   it('leaves placeholders when vars are missing', () => {
     const result = substituteWorkflowConnectorIds(sampleYaml, {});
 

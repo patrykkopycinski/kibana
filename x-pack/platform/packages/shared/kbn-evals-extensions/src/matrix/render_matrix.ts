@@ -14,6 +14,25 @@ import {
   type MatrixRow,
 } from './build_matrix';
 
+/**
+ * Where the numbers came from. Without this, a published matrix is an
+ * undated table of scores with no way to tell which eval run, branch, or
+ * lookback window produced it — so a stale artifact is indistinguishable
+ * from a fresh one.
+ */
+export interface MatrixProvenance {
+  /** Branch filter applied to the query (undefined = any branch). */
+  branch?: string;
+  /** Lookback window in days used to select experiments. */
+  lookbackDays?: number;
+  /** Suite ids the scores were drawn from. */
+  suiteIds?: string[];
+  /** Commit the generator ran against, when known. */
+  commitSha?: string;
+  /** CI build URL that produced the artifact, when known. */
+  buildUrl?: string;
+}
+
 export interface RenderedMatrix {
   /** CSV for the proprietary-models table (first row = header). */
   proprietaryCsv: string;
@@ -105,15 +124,34 @@ const renderMarkdownTable = (
   return [toRow(header), toRow(separator), ...body.map(toRow)].join('\n');
 };
 
-export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatrix => {
+export const renderMatrix = (
+  matrix: Matrix,
+  config: MatrixConfig,
+  provenance: MatrixProvenance = {}
+): RenderedMatrix => {
   const { notRecommendedLabel } = config;
   const displayColumns = resolveDisplayColumns(matrix);
+  const generatedAt = new Date().toISOString();
 
   const proprietaryCsv = renderCsv(displayColumns, matrix.proprietary, notRecommendedLabel);
   const openSourceCsv = renderCsv(displayColumns, matrix.openSource, notRecommendedLabel);
 
+  // Rendered as a plain line rather than a comment so it survives into the
+  // published docs — a provenance footer nobody can see defeats the purpose.
+  const provenanceLine = [
+    `Generated ${generatedAt}`,
+    provenance.branch ? `branch \`${provenance.branch}\`` : undefined,
+    provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
+    provenance.commitSha ? `commit \`${provenance.commitSha}\`` : undefined,
+    provenance.buildUrl ? `[build](${provenance.buildUrl})` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   const markdown = [
     `# ${config.title}`,
+    '',
+    provenanceLine,
     '',
     'Higher scores indicate better performance. A score of 10 on a task means the model met or exceeded all task-specific benchmarks. ' +
       `Models with a score of "${notRecommendedLabel}" failed testing.`,
@@ -135,7 +173,8 @@ export const renderMatrix = (matrix: Matrix, config: MatrixConfig): RenderedMatr
   const json = JSON.stringify(
     {
       title: config.title,
-      generatedAt: new Date().toISOString(),
+      generatedAt,
+      provenance,
       columns: matrix.columns,
       composites: matrix.composites ?? [],
       displayColumns,

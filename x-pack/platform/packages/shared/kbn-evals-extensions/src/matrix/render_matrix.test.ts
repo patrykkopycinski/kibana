@@ -209,3 +209,80 @@ describe('renderMatrix token axis', () => {
     expect(JSON.parse(json)).not.toHaveProperty('tokenCost');
   });
 });
+
+describe('renderMatrix provenance', () => {
+  const provConfig = parseMatrixConfig({
+    title: 'Prov Matrix',
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [{ id: 'm1', label: 'M1' }],
+  });
+
+  const scores: AggregatedModelScores[] = [
+    {
+      modelId: 'm1',
+      suites: [
+        {
+          suiteId: 'suite-a',
+          experimentId: 'r1',
+          datasets: [
+            {
+              datasetId: 'd1',
+              datasetName: 'D1',
+              evaluators: [{ evaluatorName: 'correctness', mean: 0.9, count: 2 }],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  const render = (provenance?: Parameters<typeof renderMatrix>[2]) =>
+    renderMatrix(buildMatrix(scores, provConfig), provConfig, provenance);
+
+  it('stamps the filters that produced the numbers into markdown and json', () => {
+    const { markdown, json } = render({
+      branch: 'main',
+      lookbackDays: 14,
+      suiteIds: ['suite-a'],
+      commitSha: 'abc123',
+      buildUrl: 'https://buildkite.com/b/1',
+    });
+
+    expect(markdown).toContain('branch `main`');
+    expect(markdown).toContain('14-day lookback');
+    expect(markdown).toContain('commit `abc123`');
+    expect(markdown).toContain('[build](https://buildkite.com/b/1)');
+
+    const parsed = JSON.parse(json);
+    expect(parsed.provenance).toEqual({
+      branch: 'main',
+      lookbackDays: 14,
+      suiteIds: ['suite-a'],
+      commitSha: 'abc123',
+      buildUrl: 'https://buildkite.com/b/1',
+    });
+    expect(parsed.generatedAt).toEqual(expect.any(String));
+  });
+
+  it('omits unknown fields rather than stamping placeholders', () => {
+    const { markdown, json } = render({ branch: 'main', lookbackDays: 7 });
+
+    expect(markdown).toContain('branch `main`');
+    expect(markdown).not.toContain('commit');
+    expect(markdown).not.toContain('undefined');
+    expect(JSON.parse(json).provenance).toEqual({ branch: 'main', lookbackDays: 7 });
+  });
+
+  it('still renders a dated line when no provenance is supplied', () => {
+    const { markdown, json } = render();
+
+    expect(markdown).toContain('Generated ');
+    expect(markdown).not.toContain('undefined');
+    expect(JSON.parse(json).provenance).toEqual({});
+  });
+
+  it('uses one timestamp for both markdown and json', () => {
+    const { markdown, json } = render();
+    expect(markdown).toContain(`Generated ${JSON.parse(json).generatedAt}`);
+  });
+});

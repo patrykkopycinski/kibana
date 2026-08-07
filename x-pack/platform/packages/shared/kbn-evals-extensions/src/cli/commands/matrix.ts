@@ -118,9 +118,7 @@ export const matrixCmd: Command<void> = {
     });
 
     if (aggregated.length === 0) {
-      // Fail loudly instead of publishing an empty matrix. The generated CSVs feed
-      // customer-facing docs via the docs-content sync workflow, so writing empty
-      // artifacts here would silently blank the published matrix on a green build.
+      // Empty CSVs would publish as a blank matrix in customer-facing docs.
       throw createFailError(
         [
           'No experiments matched the configured filters, refusing to write an empty matrix.',
@@ -133,7 +131,15 @@ export const matrixCmd: Command<void> = {
     }
 
     const matrix = buildMatrix(aggregated, config);
-    const rendered = renderMatrix(matrix, config);
+    const rendered = renderMatrix(matrix, config, {
+      branch,
+      lookbackDays,
+      suiteIds,
+      // Set by Buildkite; absent on local runs, in which case the fields are
+      // simply omitted rather than stamped with a misleading placeholder.
+      commitSha: process.env.BUILDKITE_COMMIT,
+      buildUrl: process.env.BUILDKITE_BUILD_URL,
+    });
 
     Fs.mkdirSync(outDir, { recursive: true });
     const writes: Array<[string, string]> = [

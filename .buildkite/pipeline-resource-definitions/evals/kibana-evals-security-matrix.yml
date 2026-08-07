@@ -53,7 +53,9 @@ spec:
         everyone:
           access_level: READ_ONLY
       schedules:
-        # Runs after the Monday weekly evals so it picks up fresh results. Should technically expand to sync to serverless release schedule
+        # Runs after the weekly LLM evals (Sat 20:00 GMT, typically 12-21h) so it
+        # picks up fresh results. Should technically expand to sync to serverless
+        # release schedule
         Weekly matrix:
           cronline: 0 6 * * 2 GMT
           message: Weekly Security LLM performance matrix

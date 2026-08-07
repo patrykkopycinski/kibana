@@ -7,7 +7,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { createFlagError } from '@kbn/dev-cli-errors';
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
   createEvaluationsEvalsClient,
@@ -118,9 +118,17 @@ export const matrixCmd: Command<void> = {
     });
 
     if (aggregated.length === 0) {
-      log.warning(
-        'No experiments matched the configured filters. ' +
-          'Check the branch/lookback filters and that suites have results.'
+      // Fail loudly instead of publishing an empty matrix. The generated CSVs feed
+      // customer-facing docs via the docs-content sync workflow, so writing empty
+      // artifacts here would silently blank the published matrix on a green build.
+      throw createFailError(
+        [
+          'No experiments matched the configured filters, refusing to write an empty matrix.',
+          `Filters: suites=[${suiteIds.join(', ')}] branch=${
+            branch ?? 'any'
+          } lookbackDays=${lookbackDays}`,
+          'Check that the weekly eval run published results for these suites in the lookback window.',
+        ].join('\n')
       );
     }
 

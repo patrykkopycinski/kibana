@@ -227,6 +227,67 @@ export type MatrixModelConfig = TypeOf<typeof modelSchema>;
 
 export const parseMatrixConfig = (raw: unknown): MatrixConfig => matrixConfigSchema.validate(raw);
 
+/**
+ * Parses a `--model` CLI value into a model config entry.
+ *
+ * Format: `id[:label][:open-source]`, e.g.
+ *   `gpt-5-preview`
+ *   `gpt-5-preview:GPT-5 Preview`
+ *   `qwen3-72b:Qwen3 72B:open-source`
+ *
+ * Labels may contain spaces but not colons; the third segment is an explicit
+ * open-source marker rather than a substring guess at the model name.
+ */
+export const parseModelOverride = (raw: string): MatrixModelConfig => {
+  const segments = raw.split(':').map((segment) => segment.trim());
+  const [id, label, openSourceFlag] = segments;
+
+  if (!id) {
+    throw new Error(
+      `Invalid --model value "${raw}": model id is required (format: id[:label][:open-source]).`
+    );
+  }
+  if (segments.length > 3) {
+    throw new Error(
+      `Invalid --model value "${raw}": expected at most 3 colon-separated segments (id[:label][:open-source]).`
+    );
+  }
+  if (openSourceFlag !== undefined && openSourceFlag !== 'open-source') {
+    throw new Error(
+      `Invalid --model value "${raw}": third segment must be the literal "open-source", got "${openSourceFlag}".`
+    );
+  }
+
+  return { id, label: label || id, openSource: openSourceFlag === 'open-source' };
+};
+
+/**
+ * Replaces the config's model set with an ad-hoc one for on-demand runs.
+ *
+ * The weekly matrix is a fixed, reviewed model set that must stay stable
+ * across runs, so this deliberately does not mutate the config file — an
+ * on-demand run with `--model` is a throwaway view over the same score data.
+ */
+export const applyModelOverrides = (
+  config: MatrixConfig,
+  rawModels: readonly string[]
+): MatrixConfig => {
+  if (rawModels.length === 0) {
+    return config;
+  }
+
+  const models = rawModels.map(parseModelOverride);
+  const seen = new Set<string>();
+  for (const model of models) {
+    if (seen.has(model.id)) {
+      throw new Error(`Duplicate --model id "${model.id}".`);
+    }
+    seen.add(model.id);
+  }
+
+  return { ...config, models };
+};
+
 export const loadMatrixConfig = (configPath: string): MatrixConfig => {
   if (!Fs.existsSync(configPath)) {
     throw new Error(`Matrix config not found at: ${configPath}`);

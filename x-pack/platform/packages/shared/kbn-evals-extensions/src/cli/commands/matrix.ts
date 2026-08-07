@@ -14,7 +14,8 @@ import {
   envFromDatasetsProfile,
   DEFAULT_EVALUATIONS_KBN_URL,
 } from '@kbn/evals';
-import { loadMatrixConfig } from '../../matrix/load_matrix_config';
+import { loadMatrixConfig, applyModelOverrides } from '../../matrix/load_matrix_config';
+import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
@@ -40,12 +41,25 @@ export const matrixCmd: Command<void> = {
       --profile dev-vault --branch main --out target/llm_matrix
   `,
   flags: {
-    string: ['config', 'out', 'branch', 'lookback-days', 'profile', 'kbn-url', 'kbn-api-key'],
+    string: [
+      'config',
+      'out',
+      'branch',
+      'lookback-days',
+      'profile',
+      'kbn-url',
+      'kbn-api-key',
+      'model',
+    ],
+    allowUnexpected: false,
     help: `
     --config           Path to the matrix config JSON (required).
     --out              Output directory for artifacts (default: ${DEFAULT_OUT_DIR}).
     --branch           Git branch filter override (default: config.branch).
     --lookback-days    Only consider experiments newer than now-<n>d (default: config.lookbackDays).
+    --model            Replace the config's model set for an on-demand run.
+                       Format: id[:label][:open-source]. Repeatable.
+                       e.g. --model gpt-5-preview:GPT-5 --model qwen3:Qwen3:open-source
     --profile          Golden-cluster config profile providing EVALUATIONS_KBN_URL/API_KEY
                        (e.g. 'dev-vault' for runtime Vault, or a config.<name>.json file).
     --kbn-url          Kibana URL override.
@@ -59,7 +73,24 @@ export const matrixCmd: Command<void> = {
     }
 
     const repoRoot = process.cwd();
-    const config = loadMatrixConfig(Path.resolve(repoRoot, configPath));
+    const baseConfig = loadMatrixConfig(Path.resolve(repoRoot, configPath));
+
+    // On-demand runs swap in an ad-hoc model set without touching the reviewed
+    // weekly config on disk.
+    const modelOverrides = flagsReader.arrayOfStrings('model') ?? [];
+    let config: MatrixConfig;
+    try {
+      config = applyModelOverrides(baseConfig, modelOverrides);
+    } catch (error) {
+      throw createFlagError(error instanceof Error ? error.message : String(error));
+    }
+    if (modelOverrides.length > 0) {
+      log.info(
+        `Overriding config model set with ${
+          config.models.length
+        } on-demand model(s): ${config.models.map((model) => model.id).join(', ')}`
+      );
+    }
 
     const profile = flagsReader.string('profile') ?? undefined;
     const profileEnv = envFromDatasetsProfile(repoRoot, profile);

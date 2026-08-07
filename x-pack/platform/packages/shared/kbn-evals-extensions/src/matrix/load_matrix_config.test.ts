@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { parseMatrixConfig, DEFAULT_EXCLUDED_EVALUATORS } from './load_matrix_config';
+import {
+  parseMatrixConfig,
+  DEFAULT_EXCLUDED_EVALUATORS,
+  applyModelOverrides,
+  parseModelOverride,
+} from './load_matrix_config';
 
 describe('parseMatrixConfig', () => {
   const minimalConfig = {
@@ -83,5 +88,62 @@ describe('parseMatrixConfig', () => {
 
   it('rejects an invalid overall mode', () => {
     expect(() => parseMatrixConfig({ ...minimalConfig, overall: { mode: 'nope' } })).toThrow();
+  });
+});
+
+describe('applyModelOverrides', () => {
+  const base = parseMatrixConfig({
+    title: 'Weekly',
+    columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+    models: [
+      { id: 'weekly-1', label: 'Weekly One' },
+      { id: 'weekly-2', label: 'Weekly Two' },
+    ],
+  });
+
+  it('returns the config untouched when no overrides are given', () => {
+    expect(applyModelOverrides(base, [])).toBe(base);
+  });
+
+  it('replaces rather than appends, so an on-demand run shows only what was asked for', () => {
+    const result = applyModelOverrides(base, ['custom-a']);
+    expect(result.models).toEqual([{ id: 'custom-a', label: 'custom-a', openSource: false }]);
+  });
+
+  it('does not mutate the weekly config', () => {
+    applyModelOverrides(base, ['custom-a']);
+    expect(base.models.map((m) => m.id)).toEqual(['weekly-1', 'weekly-2']);
+  });
+
+  it('parses label and explicit open-source marker', () => {
+    expect(applyModelOverrides(base, ['qwen3-72b:Qwen3 72B:open-source']).models[0]).toEqual({
+      id: 'qwen3-72b',
+      label: 'Qwen3 72B',
+      openSource: true,
+    });
+  });
+
+  it('defaults the label to the id and openSource to false', () => {
+    expect(parseModelOverride('gpt-5')).toEqual({
+      id: 'gpt-5',
+      label: 'gpt-5',
+      openSource: false,
+    });
+  });
+
+  it('rejects a bogus third segment instead of silently treating it as proprietary', () => {
+    expect(() => parseModelOverride('gpt-5:GPT-5:oss')).toThrow(/literal "open-source"/);
+  });
+
+  it('rejects too many segments', () => {
+    expect(() => parseModelOverride('a:b:open-source:c')).toThrow(/at most 3/);
+  });
+
+  it('rejects an empty id', () => {
+    expect(() => parseModelOverride(':Label')).toThrow(/model id is required/);
+  });
+
+  it('rejects duplicate ids', () => {
+    expect(() => applyModelOverrides(base, ['dup', 'dup:Other'])).toThrow(/Duplicate --model id/);
   });
 });

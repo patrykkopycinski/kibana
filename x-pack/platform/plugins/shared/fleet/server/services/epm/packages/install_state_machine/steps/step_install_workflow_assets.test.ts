@@ -143,6 +143,40 @@ consts:
     expect(result).toContain('roadmapFolderIds: folder-a, folder-b');
   });
 
+  it('trims leading and trailing whitespace from string vars', () => {
+    const result = substituteWorkflowConnectorIds('orgLogin: REPLACE_WITH_ORG_LOGIN', {
+      org_login: '  my-org  ',
+    });
+    expect(result).toBe('orgLogin: my-org');
+  });
+
+  it('trims whitespace around array elements and joins with commas', () => {
+    const result = substituteWorkflowConnectorIds(
+      'roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS',
+      {
+        gdrive_roadmap_folder_ids: ['  folder-a  ', 'folder-b'],
+      }
+    );
+    expect(result).toBe('roadmapFolderIds: folder-a,folder-b');
+  });
+
+  it('drops empty or whitespace-only array elements', () => {
+    const result = substituteWorkflowConnectorIds(
+      'roadmapFolderIds: REPLACE_WITH_GDRIVE_ROADMAP_FOLDER_IDS',
+      {
+        gdrive_roadmap_folder_ids: ['folder-a', '', '   ', 'folder-b'],
+      }
+    );
+    expect(result).toBe('roadmapFolderIds: folder-a,folder-b');
+  });
+
+  it('leaves placeholder untouched when string var is whitespace-only', () => {
+    const result = substituteWorkflowConnectorIds('orgLogin: REPLACE_WITH_ORG_LOGIN', {
+      org_login: '   ',
+    });
+    expect(result).toBe('orgLogin: REPLACE_WITH_ORG_LOGIN');
+  });
+
   it('leaves placeholders when vars are missing', () => {
     const result = substituteWorkflowConnectorIds(sampleYaml, {});
 

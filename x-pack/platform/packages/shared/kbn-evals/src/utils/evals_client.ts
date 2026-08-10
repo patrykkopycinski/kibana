@@ -69,6 +69,7 @@ export interface ListExperimentsFilters {
 }
 
 const LIST_EXPERIMENTS_PER_PAGE = 100;
+const MAX_LIST_EXPERIMENTS_PAGES = 100;
 
 export interface UpsertDatasetInput {
   name: string;
@@ -314,17 +315,13 @@ export class EvalsClient {
   }
 
   /**
-   * Lists every experiment matching the given filters, transparently paging
-   * through the experiments API until the full set has been retrieved.
-   *
-   * Used by the security LLM performance matrix generator, which needs the
-   * complete experiment set for a branch/build rather than a single page.
+   * Lists every experiment matching the given filters, paging through the
+   * experiments API until the full set has been retrieved.
    */
   async listExperiments(filters?: ListExperimentsFilters): Promise<EvaluationExperimentSummary[]> {
     const all: EvaluationExperimentSummary[] = [];
-    let page = 1;
 
-    for (;;) {
+    for (let page = 1; page <= MAX_LIST_EXPERIMENTS_PAGES; page++) {
       const response = await this.kbnClient.request({
         path: EVALS_EXPERIMENTS_URL,
         method: 'GET',
@@ -344,12 +341,14 @@ export class EvalsClient {
       all.push(...parsed.experiments);
 
       if (parsed.experiments.length === 0 || all.length >= parsed.total) {
-        break;
+        return all;
       }
-      page += 1;
     }
 
-    return all;
+    throw new Error(
+      `Exceeded ${MAX_LIST_EXPERIMENTS_PAGES} pages while listing experiments; ` +
+        `the experiments API may be ignoring the page parameter.`
+    );
   }
 
   async findLatestExperimentForBuild({

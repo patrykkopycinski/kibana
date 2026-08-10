@@ -5,34 +5,20 @@
  * 2.0.
  */
 
-import Fs from 'fs';
-import Path from 'path';
-import Os from 'os';
-
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 import { parseMatrixConfig } from '../../matrix/load_matrix_config';
 import type { AggregatedModelScores } from '../../matrix/query_matrix_scores';
 
-/**
- * The matrix CLI writes CSVs that are uploaded to GCS and published to
- * customer-facing docs by the docs-content sync workflow. An empty result set
- * must abort before anything is written, otherwise a green pipeline silently
- * blanks the published matrix.
- *
- * `matrixCmd.run` needs a live evals client, so these tests cover the guard's
- * contract against the same render/write path the command uses.
- */
 describe('matrix command empty-result guard', () => {
   const config = parseMatrixConfig({
     columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
     models: [{ id: 'model-a', label: 'Model A' }],
   });
 
-  it('renders empty CSV bodies when no experiments match', () => {
+  it('renders header-only CSVs when no experiments match', () => {
     const rendered = renderMatrix(buildMatrix([], config), config);
 
-    // Header-only CSVs are exactly what would get published without the guard.
     expect(rendered.proprietaryCsv.trim().split('\n')).toHaveLength(1);
     expect(rendered.openSourceCsv.trim().split('\n')).toHaveLength(1);
   });
@@ -63,12 +49,10 @@ describe('matrix command empty-result guard', () => {
     expect(rendered.proprietaryCsv.trim().split('\n').length).toBeGreaterThan(1);
   });
 
-  it('does not leave partial artifacts behind when the guard aborts', () => {
-    const outDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'matrix-guard-'));
-    Fs.rmSync(outDir, { recursive: true, force: true });
+  it('produces no model rows when no experiments match', () => {
+    const matrix = buildMatrix([], config);
 
-    // The guard throws before `Fs.mkdirSync(outDir)`, so the directory the
-    // upload step reads from is never created.
-    expect(Fs.existsSync(outDir)).toBe(false);
+    expect(matrix.proprietary).toHaveLength(0);
+    expect(matrix.openSource).toHaveLength(0);
   });
 });

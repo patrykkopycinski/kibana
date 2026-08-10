@@ -75,8 +75,6 @@ export const matrixCmd: Command<void> = {
     const repoRoot = process.cwd();
     const baseConfig = loadMatrixConfig(Path.resolve(repoRoot, configPath));
 
-    // On-demand runs swap in an ad-hoc model set without touching the reviewed
-    // weekly config on disk.
     const modelOverrides = flagsReader.arrayOfStrings('model') ?? [];
     let config: MatrixConfig;
     try {
@@ -166,8 +164,6 @@ export const matrixCmd: Command<void> = {
       branch,
       lookbackDays,
       suiteIds,
-      // Set by Buildkite; absent on local runs, in which case the fields are
-      // simply omitted rather than stamped with a misleading placeholder.
       commitSha: process.env.BUILDKITE_COMMIT,
       buildUrl: process.env.BUILDKITE_BUILD_URL,
     });
@@ -178,9 +174,8 @@ export const matrixCmd: Command<void> = {
       ['open-source-models.csv', rendered.openSourceCsv],
       ['matrix.md', rendered.markdown],
       ['matrix.json', rendered.json],
-      // Raw, pre-scaling per-evaluator means/counts grouped by model > suite >
-      // dataset > evaluator. Lets reviewers audit exactly which evaluators feed
-      // each cell (e.g. why a column saturates at 10) without re-querying.
+      // Raw, pre-scaling per-evaluator means/counts, so reviewers can audit which
+      // evaluators feed a cell without re-querying.
       ['scores.debug.json', `${JSON.stringify(aggregated, null, 2)}\n`],
     ];
     for (const [fileName, contents] of writes) {

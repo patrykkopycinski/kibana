@@ -28,9 +28,8 @@ export interface CreateEvaluationsEvalsClientParams {
 }
 
 /**
- * Thin factory that wires the default {@link TestKbnClient} through
- * {@link getEvaluationsKbnClient} (URL/API-key/version/retry handling) and
- * returns a ready-to-use {@link EvalsClient}.
+ * Thin factory wiring the default {@link TestKbnClient} through
+ * {@link getEvaluationsKbnClient} (URL/API-key/version/retry handling).
  */
 export function createEvaluationsEvalsClient({
   log,

@@ -8,7 +8,7 @@
 import { renderMatrix } from './render_matrix';
 import { parseMatrixConfig } from './load_matrix_config';
 import type { Matrix } from './build_matrix';
-import { buildMatrix } from './build_matrix';
+import { buildMatrix, OVERALL_COLUMN_ID } from './build_matrix';
 import type { AggregatedModelScores } from './query_matrix_scores';
 
 const config = parseMatrixConfig({
@@ -24,6 +24,12 @@ const matrix: Matrix = {
   columns: [
     { id: 'triage', label: 'Alert Triage' },
     { id: 'detect', label: 'Detection Engineering' },
+  ],
+  composites: [],
+  displayColumns: [
+    { id: 'triage', label: 'Alert Triage', kind: 'base' },
+    { id: 'detect', label: 'Detection Engineering', kind: 'base' },
+    { id: OVERALL_COLUMN_ID, label: 'Overall', kind: 'overall' },
   ],
   overallLabel: 'Overall',
   proprietary: [
@@ -130,6 +136,11 @@ describe('renderMatrix', () => {
     });
     const m: Matrix = {
       columns: [{ id: 'c', label: 'Col, with comma' }],
+      composites: [],
+      displayColumns: [
+        { id: 'c', label: 'Col, with comma', kind: 'base' },
+        { id: OVERALL_COLUMN_ID, label: 'Overall', kind: 'overall' },
+      ],
       overallLabel: 'Overall',
       proprietary: [
         {

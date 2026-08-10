@@ -55,7 +55,7 @@ export const pickLatestExperimentPerModel = (
   { lookbackDays, now = Date.now() }: { lookbackDays?: number; now?: number } = {}
 ): Map<string, EvaluationExperimentSummary> => {
   const cutoff = lookbackDays ? now - lookbackDays * 24 * 60 * 60 * 1000 : undefined;
-  const latestByModel = new Map<string, EvaluationExperimentSummary>();
+  const latestByModel = new Map<string, { experiment: EvaluationExperimentSummary; at: number }>();
 
   for (const experiment of experiments) {
     const modelId = experiment.task_model?.id;
@@ -63,18 +63,18 @@ export const pickLatestExperimentPerModel = (
       continue;
     }
 
-    const timestampMs = Date.parse(experiment.timestamp);
-    if (cutoff !== undefined && Number.isFinite(timestampMs) && timestampMs < cutoff) {
+    const at = Date.parse(experiment.timestamp);
+    if (cutoff !== undefined && Number.isFinite(at) && at < cutoff) {
       continue;
     }
 
     const existing = latestByModel.get(modelId);
-    if (!existing || Date.parse(experiment.timestamp) > Date.parse(existing.timestamp)) {
-      latestByModel.set(modelId, experiment);
+    if (!existing || at > existing.at) {
+      latestByModel.set(modelId, { experiment, at });
     }
   }
 
-  return latestByModel;
+  return new Map([...latestByModel].map(([modelId, { experiment }]) => [modelId, experiment]));
 };
 
 /**

@@ -6,13 +6,7 @@
  */
 
 import type { MatrixConfig } from './load_matrix_config';
-import {
-  OVERALL_COLUMN_ID,
-  type Matrix,
-  type MatrixCell,
-  type MatrixDisplayColumn,
-  type MatrixRow,
-} from './build_matrix';
+import type { Matrix, MatrixCell, MatrixDisplayColumn, MatrixRow } from './build_matrix';
 
 /**
  * Where the numbers came from. Without this, a published matrix is an
@@ -64,23 +58,6 @@ const csvEscape = (value: string): string => {
   return value;
 };
 
-/**
- * Resolves the ordered render columns. Prefers the explicit `displayColumns`
- * computed by {@link buildMatrix}; falls back to base columns + a trailing
- * Overall for matrices constructed without it (e.g. in tests).
- */
-const resolveDisplayColumns = (matrix: Matrix): MatrixDisplayColumn[] => {
-  if (matrix.displayColumns) {
-    return matrix.displayColumns;
-  }
-  return [
-    ...matrix.columns.map(
-      (column): MatrixDisplayColumn => ({ id: column.id, label: column.label, kind: 'base' })
-    ),
-    { id: OVERALL_COLUMN_ID, label: matrix.overallLabel, kind: 'overall' },
-  ];
-};
-
 const cellForColumn = (row: MatrixRow, column: MatrixDisplayColumn): MatrixCell =>
   column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
 
@@ -130,7 +107,7 @@ export const renderMatrix = (
   provenance: MatrixProvenance = {}
 ): RenderedMatrix => {
   const { notRecommendedLabel } = config;
-  const displayColumns = resolveDisplayColumns(matrix);
+  const displayColumns = matrix.displayColumns;
   const generatedAt = new Date().toISOString();
 
   const proprietaryCsv = renderCsv(displayColumns, matrix.proprietary, notRecommendedLabel);
@@ -181,9 +158,6 @@ export const renderMatrix = (
       overallLabel: matrix.overallLabel,
       proprietary: matrix.proprietary,
       openSource: matrix.openSource,
-      // Emitted only when the config opts into the token axis; the token
-      // reports consume this rather than re-deriving magnitudes from the
-      // 0-10 quality cells.
       ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),
     },
     null,

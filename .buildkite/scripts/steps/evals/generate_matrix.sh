@@ -27,13 +27,26 @@ if [[ -z "${EVALUATIONS_KBN_URL:-}" ]]; then
 fi
 
 echo "--- Generating LLM performance matrix ($MATRIX_DOMAIN)"
+# Keep going on failure so partial output still reaches the artifact upload below.
+set +e
 node scripts/evals ext matrix \
   --config "$MATRIX_CONFIG" \
   --out "$MATRIX_OUT_DIR" \
   ${MATRIX_BRANCH:+--branch "$MATRIX_BRANCH"}
+matrix_exit_code=$?
+set -e
 
-echo "--- Uploading matrix artifacts to Buildkite"
-buildkite-agent artifact upload "$MATRIX_OUT_DIR/*"
+if [[ -d "$MATRIX_OUT_DIR" ]] && [[ -n "$(ls -A "$MATRIX_OUT_DIR" 2>/dev/null)" ]]; then
+  echo "--- Uploading matrix artifacts to Buildkite"
+  buildkite-agent artifact upload "$MATRIX_OUT_DIR/*"
+else
+  echo "No matrix artifacts to upload from $MATRIX_OUT_DIR"
+fi
+
+if [[ "$matrix_exit_code" -ne 0 ]]; then
+  echo "Matrix generation failed (exit $matrix_exit_code); skipping GCS upload."
+  exit "$matrix_exit_code"
+fi
 
 if [[ -n "${MATRIX_GCS_BUCKET:-}" ]]; then
   echo "--- Uploading matrix artifacts to GCS ($MATRIX_GCS_BUCKET)"

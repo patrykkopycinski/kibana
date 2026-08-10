@@ -21,8 +21,8 @@ MATRIX_OUT_DIR="${MATRIX_OUT_DIR:-target/llm_matrix}"
 
 .buildkite/scripts/bootstrap.sh
 
-if [[ -z "${EVALUATIONS_KBN_URL:-}" ]]; then
-  echo "EVALUATIONS_KBN_URL is not set. Ensure KBN_EVALS=1 so the CI env hook exposes evals credentials."
+if [[ -z "${EVAL_KBN_URL:-}" ]]; then
+  echo "EVAL_KBN_URL is not set. Ensure KBN_EVALS=1 so the CI env hook exposes evals credentials."
   exit 1
 fi
 

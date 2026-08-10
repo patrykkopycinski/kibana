@@ -1,5 +1,5 @@
 env:
-  # Exposes EVALUATIONS_KBN_URL / EVALUATIONS_KBN_API_KEY via the CI env hook
+  # Exposes EVAL_KBN_URL / EVAL_KBN_API_KEY via the CI env hook
   # (see .buildkite/scripts/common/setup_job_env.sh).
   KBN_EVALS: '1'
 steps:

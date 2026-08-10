@@ -31,7 +31,7 @@ export const matrixCmd: Command<void> = {
   target Kibana, maps suites/datasets/evaluators onto matrix columns via a config
   file, normalizes scores onto a 0-10 scale, and writes markdown + CSV + JSON.
 
-  Configure target/auth with EVALUATIONS_KBN_URL and EVALUATIONS_KBN_API_KEY,
+  Configure target/auth with EVAL_KBN_URL and EVAL_KBN_API_KEY,
   with --kbn-url/--kbn-api-key, or with --profile (e.g. dev-vault for the golden
   cluster, or a config.<name>.json file).
 
@@ -60,7 +60,7 @@ export const matrixCmd: Command<void> = {
     --model            Replace the config's model set for an on-demand run.
                        Format: id[:label][:open-source]. Repeatable.
                        e.g. --model gpt-5-preview:GPT-5 --model qwen3:Qwen3:open-source
-    --profile          Golden-cluster config profile providing EVALUATIONS_KBN_URL/API_KEY
+    --profile          Golden-cluster config profile providing EVAL_KBN_URL/API_KEY
                        (e.g. 'dev-vault' for runtime Vault, or a config.<name>.json file).
     --kbn-url          Kibana URL override.
     --kbn-api-key      Kibana API key override.
@@ -94,17 +94,15 @@ export const matrixCmd: Command<void> = {
     const profileEnv = envFromDatasetsProfile(repoRoot, profile);
 
     const evaluationsKbnUrl =
-      flagsReader.string('kbn-url') ??
-      profileEnv.EVALUATIONS_KBN_URL ??
-      process.env.EVALUATIONS_KBN_URL;
+      flagsReader.string('kbn-url') ?? profileEnv.EVAL_KBN_URL ?? process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVALUATIONS_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
     }
 
     const evaluationsKbnApiKey =
       flagsReader.string('kbn-api-key') ??
-      profileEnv.EVALUATIONS_KBN_API_KEY ??
-      process.env.EVALUATIONS_KBN_API_KEY;
+      profileEnv.EVAL_KBN_API_KEY ??
+      process.env.EVAL_KBN_API_KEY;
 
     const branch = flagsReader.string('branch') ?? config.branch;
     const lookbackDaysFlag = flagsReader.string('lookback-days');
@@ -128,8 +126,8 @@ export const matrixCmd: Command<void> = {
       throw createFlagError(
         [
           error instanceof Error ? error.message : String(error),
-          'Set EVALUATIONS_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
-          'Set EVALUATIONS_KBN_API_KEY when authenticating to a non-local target.',
+          'Set EVAL_KBN_URL to a Kibana instance with xpack.evals.enabled=true.',
+          'Set EVAL_KBN_API_KEY when authenticating to a non-local target.',
         ].join('\n')
       );
     }

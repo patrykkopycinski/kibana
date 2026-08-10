@@ -186,6 +186,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableAttackDiscoveryWorkflows': {
+    type: 'boolean',
+    _meta: { description: 'Enables Attack Discovery Workflows for this space.' },
+  },
   'securitySolution:enableRuleChangesHistory': {
     type: 'boolean',
     _meta: { description: 'Allows users to enable/disable Rule Changes History.' },
@@ -256,6 +260,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:defaultEsqlQuery': {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The default ES|QL query Discover opens with in ES|QL mode. Redacted as it may contain sensitive user data.',
+    },
   },
   'discover:maxDocFieldsDisplayed': {
     type: 'long',

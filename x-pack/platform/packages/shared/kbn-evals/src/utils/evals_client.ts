@@ -66,10 +66,18 @@ export interface ListExperimentsFilters {
   branch?: string;
   datasetId?: string;
   buildId?: string;
+  /** Maximum number of experiments to return (newest first). Defaults to and capped at 100 (the route's per_page maximum). */
+  limit?: number;
 }
 
-const LIST_EXPERIMENTS_PER_PAGE = 100;
-const MAX_LIST_EXPERIMENTS_PAGES = 100;
+/**
+ * Upper bound accepted by the experiments route (per_page <= 100). The route is
+ * not a paged search: it re-runs a terms aggregation whose size grows with
+ * `page * per_page`, so paging through it re-scans an ever-growing bucket set
+ * and hits ES bucket limits long before any useful depth. Callers must filter
+ * (suite, model, build, ...) so a single bounded page covers what they need.
+ */
+export const MAX_LIST_EXPERIMENTS = 100;
 
 export interface UpsertDatasetInput {
   name: string;
@@ -315,40 +323,41 @@ export class EvalsClient {
   }
 
   /**
-   * Lists every experiment matching the given filters, paging through the
-   * experiments API until the full set has been retrieved.
+   * Lists the newest experiments matching the given filters via a single
+   * bounded request.
+   *
+   * The experiments route is not a paged search: it re-runs a terms
+   * aggregation whose bucket size grows with `page * per_page`, so paging
+   * through it re-scans an ever-growing bucket set and hits ES bucket limits
+   * long before any useful page depth. Callers that need the full history must
+   * narrow the query with filters (suite, model, build, ...) instead.
+   *
+   * The route's `branch` filter is a case-insensitive substring match, so this
+   * method additionally applies an exact (case-sensitive) client-side match on
+   * the resolved `git_branch` when a branch filter is provided.
    */
   async listExperiments(filters?: ListExperimentsFilters): Promise<EvaluationExperimentSummary[]> {
-    const all: EvaluationExperimentSummary[] = [];
+    const limit = Math.min(filters?.limit ?? MAX_LIST_EXPERIMENTS, MAX_LIST_EXPERIMENTS);
+    const response = await this.kbnClient.request({
+      path: EVALS_EXPERIMENTS_URL,
+      method: 'GET',
+      query: {
+        suite_id: filters?.suiteId,
+        model_id: filters?.taskModelId,
+        branch: filters?.branch,
+        dataset_id: filters?.datasetId,
+        build_id: filters?.buildId,
+        page: 1,
+        per_page: limit,
+      },
+      headers: VERSIONED_HEADERS,
+    });
 
-    for (let page = 1; page <= MAX_LIST_EXPERIMENTS_PAGES; page++) {
-      const response = await this.kbnClient.request({
-        path: EVALS_EXPERIMENTS_URL,
-        method: 'GET',
-        query: {
-          suite_id: filters?.suiteId,
-          model_id: filters?.taskModelId,
-          branch: filters?.branch,
-          dataset_id: filters?.datasetId,
-          build_id: filters?.buildId,
-          page,
-          per_page: LIST_EXPERIMENTS_PER_PAGE,
-        },
-        headers: VERSIONED_HEADERS,
-      });
-
-      const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
-      all.push(...parsed.experiments);
-
-      if (parsed.experiments.length === 0 || all.length >= parsed.total) {
-        return all;
-      }
+    const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
+    if (!filters?.branch) {
+      return parsed.experiments;
     }
-
-    throw new Error(
-      `Exceeded ${MAX_LIST_EXPERIMENTS_PAGES} pages while listing experiments; ` +
-        `the experiments API may be ignoring the page parameter.`
-    );
+    return parsed.experiments.filter((experiment) => experiment.git_branch === filters.branch);
   }
 
   async findLatestExperimentForBuild({
@@ -381,7 +390,13 @@ export class EvalsClient {
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
       const match = parsed.experiments.find(
-        (exp) => exp.execution_id != null && exp.execution_id.startsWith(`${baseExecutionId}::`)
+        (exp) =>
+          // The route's branch filter is a case-insensitive substring match;
+          // require an exact client-side match so sibling branches like
+          // `feature/main-cleanup` are never picked as this build's experiment.
+          exp.execution_id != null &&
+          exp.execution_id.startsWith(`${baseExecutionId}::`) &&
+          (branch == null || exp.git_branch === branch)
       );
 
       if (!match || !match.execution_id) {
@@ -431,7 +446,13 @@ export class EvalsClient {
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
       const match = parsed.experiments.find(
-        (exp) => exp.execution_id != null && exp.execution_id !== excludeExecutionId
+        (exp) =>
+          // The route's branch filter is a case-insensitive substring match;
+          // require an exact client-side match so a baseline from a sibling
+          // branch (e.g. `feature/main-cleanup`) is never selected.
+          exp.execution_id != null &&
+          exp.execution_id !== excludeExecutionId &&
+          exp.git_branch === branch
       );
 
       if (!match || !match.execution_id) {

@@ -123,6 +123,7 @@ export type {
 export { createTable } from './src/utils/reporting/report_table';
 export {
   EvalsClient,
+  MAX_LIST_EXPERIMENTS,
   type EvaluatorStats,
   type ExperimentStats,
   type UpsertDatasetInput,

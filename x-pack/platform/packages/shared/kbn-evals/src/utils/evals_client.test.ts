@@ -458,6 +458,71 @@ describe('EvalsClient', () => {
     );
   });
 
+  describe('listExperiments', () => {
+    const makeSummary = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
+      execution_id: 'bk-1::smoke-tests::haiku',
+      experiment_id: 'exp-1',
+      timestamp: '2026-07-01T10:00:00.000Z',
+      git_branch: 'main',
+      ...overrides,
+    });
+
+    it('issues a single bounded request instead of paging the aggregation', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeSummary()], total: 500 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.listExperiments({ suiteId: 'smoke-tests' });
+
+      expect(kbnClient.request).toHaveBeenCalledTimes(1);
+      expect(kbnClient.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: EVALS_EXPERIMENTS_URL,
+          method: 'GET',
+          query: expect.objectContaining({ page: 1, per_page: 100, suite_id: 'smoke-tests' }),
+        })
+      );
+      expect(result).toHaveLength(1);
+    });
+
+    it('caps per_page at the route maximum', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(asKbnResponse({ experiments: [], total: 0 }));
+      const client = new EvalsClient(kbnClient, createLog());
+
+      await client.listExperiments({ suiteId: 'smoke-tests', limit: 500 });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query.per_page).toBe(100);
+    });
+
+    it('drops substring branch matches that the route wildcard lets through', async () => {
+      const kbnClient = createMockKbnClient();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeSummary({ execution_id: 'bk-1::smoke-tests::haiku', git_branch: 'main' }),
+            makeSummary({
+              execution_id: 'bk-2::smoke-tests::haiku',
+              git_branch: 'feature/main-cleanup',
+            }),
+          ],
+          total: 2,
+        })
+      );
+      const client = new EvalsClient(kbnClient, createLog());
+
+      const result = await client.listExperiments({ suiteId: 'smoke-tests', branch: 'main' });
+
+      expect(result.map((experiment) => experiment.execution_id)).toEqual([
+        'bk-1::smoke-tests::haiku',
+      ]);
+    });
+  });
+
   describe('findLatestBaselineExperiment', () => {
     const makeExperiment = (
       executionId: string,
@@ -531,6 +596,28 @@ describe('EvalsClient', () => {
       });
 
       expect(result).toBeUndefined();
+    });
+
+    it('skips experiments from sibling branches matched by the route wildcard', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-newer::smoke-tests::haiku', { git_branch: 'feature/main-cleanup' }),
+            makeExperiment('bk-older::smoke-tests::haiku'),
+          ],
+          total: 2,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestBaselineExperiment({
+        suiteId: 'smoke-tests',
+        branch: 'main',
+      });
+
+      expect(result?.executionId).toBe('bk-older::smoke-tests::haiku');
     });
 
     it('forwards suite_id, branch, and model_id query params', async () => {
@@ -640,6 +727,30 @@ describe('EvalsClient', () => {
 
       const result = await client.findLatestExperimentForBuild({
         suiteId: 'smoke-tests',
+        baseExecutionId: 'bk-build-123',
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('skips prefix matches from sibling branches matched by the route wildcard', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({
+          experiments: [
+            makeExperiment('bk-build-123::smoke-tests::haiku', {
+              git_branch: 'feature/main-cleanup',
+            }),
+          ],
+          total: 1,
+        })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      const result = await client.findLatestExperimentForBuild({
+        suiteId: 'smoke-tests',
+        branch: 'main',
         baseExecutionId: 'bk-build-123',
       });
 

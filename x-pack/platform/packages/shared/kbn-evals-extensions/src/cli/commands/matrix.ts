@@ -113,6 +113,12 @@ export const matrixCmd: Command<void> = {
 
     const outDir = Path.resolve(repoRoot, flagsReader.string('out') ?? DEFAULT_OUT_DIR);
     const suiteIds = [...new Set(config.columns.flatMap((column) => column.suites))];
+    // Query per (suite, model) pair: the experiments route answers from a
+    // terms aggregation that grows with the page number, so the listing must
+    // stay bounded per pair. Include matchIds so aliased model rows are found.
+    const modelIds = [
+      ...new Set(config.models.flatMap((model) => [model.id, ...(model.matchIds ?? [])])),
+    ];
 
     const evalsClient = createEvaluationsEvalsClient({
       log,
@@ -140,6 +146,7 @@ export const matrixCmd: Command<void> = {
 
     const aggregated = await queryMatrixScores(evalsClient, log, {
       suiteIds,
+      modelIds,
       branch,
       lookbackDays,
     });
@@ -149,7 +156,7 @@ export const matrixCmd: Command<void> = {
       throw createFailError(
         [
           'No experiments matched the configured filters, refusing to write an empty matrix.',
-          `Filters: suites=[${suiteIds.join(', ')}] branch=${
+          `Filters: suites=[${suiteIds.join(', ')}] models=[${modelIds.join(', ')}] branch=${
             branch ?? 'any'
           } lookbackDays=${lookbackDays}`,
           'Check that the weekly eval run published results for these suites in the lookback window.',

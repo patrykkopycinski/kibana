@@ -7,7 +7,7 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
-import type { EvalsClient, ExperimentStats } from '@kbn/evals';
+import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@kbn/evals';
 
 /** Aggregated evaluator score for a single dataset within a suite. */
 export interface AggregatedEvaluatorScore {
@@ -41,14 +41,22 @@ export interface AggregatedModelScores {
 
 export interface QueryMatrixScoresOptions {
   suiteIds: string[];
+  /**
+   * Task model ids to include (the config's `id` + `matchIds` per model).
+   * Each (suite, model) pair is queried separately via the route's `model_id`
+   * term filter, so a bounded single-page listing covers the full history for
+   * that pair instead of paging an ever-growing cross-model aggregation.
+   */
+  modelIds: string[];
   branch?: string;
   lookbackDays?: number;
 }
 
 /**
- * Selects, per task model, the most recent experiment from a list (typically all
- * experiments for one suite). Experiments without a model id or timestamp older
- * than the lookback window are ignored. Pure for unit testing.
+ * Selects, per task model, the most recent experiment from a list (typically
+ * the newest experiments for one suite + model). Experiments without a model
+ * id or timestamp older than the lookback window are ignored. Pure for unit
+ * testing.
  */
 export const pickLatestExperimentPerModel = (
   experiments: EvaluationExperimentSummary[],
@@ -64,7 +72,9 @@ export const pickLatestExperimentPerModel = (
     }
 
     const at = Date.parse(experiment.timestamp);
-    if (cutoff !== undefined && Number.isFinite(at) && at < cutoff) {
+    // An unparseable timestamp must not be treated as epoch 0, or stale
+    // experiments would silently survive the lookback cutoff.
+    if (!Number.isFinite(at) || (cutoff !== undefined && at < cutoff)) {
       continue;
     }
 
@@ -105,34 +115,51 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
 /**
  * Queries the evals plugin for the latest experiment per (model, suite) and
  * returns mean evaluator scores grouped by dataset, ready for `buildMatrix`.
+ *
+ * Each (suite, model) pair is listed separately through the route's `model_id`
+ * term filter: the route answers with a terms aggregation whose bucket size
+ * grows with `page * per_page`, so a bounded single page per pair is the only
+ * query shape that scales. The newest experiment within the lookback window is
+ * then picked client-side (a bare `per_page: 1` request could not express the
+ * lookback fallback).
  */
 export const queryMatrixScores = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
-  { suiteIds, branch, lookbackDays }: QueryMatrixScoresOptions
+  { suiteIds, modelIds, branch, lookbackDays }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
 
   for (const suiteId of suiteIds) {
-    const experiments = await evalsClient.listExperiments({ suiteId, branch });
-    const latestByModel = pickLatestExperimentPerModel(experiments, { lookbackDays });
+    for (const modelId of modelIds) {
+      const experiments = await evalsClient.listExperiments({
+        suiteId,
+        taskModelId: modelId,
+        branch,
+        limit: MAX_LIST_EXPERIMENTS,
+      });
+      const [latest] = [...pickLatestExperimentPerModel(experiments, { lookbackDays }).values()];
 
-    log.debug(
-      `Suite ${suiteId}: ${experiments.length} experiment(s), ${latestByModel.size} model(s) after latest+lookback selection`
-    );
+      log.debug(
+        `Suite ${suiteId}, model ${modelId}: ${experiments.length} experiment(s)` +
+          (latest ? '' : ', none within the lookback window')
+      );
 
-    for (const [modelId, experiment] of latestByModel) {
+      if (!latest) {
+        continue;
+      }
+
       // The experiments listing returns `execution_id` as its grouping key; the
       // detail/stats route must be filtered by execution_id (+ suite + model),
       // since a bare experiment_id path lookup targets a different field and 404s.
-      const stats = await evalsClient.getExperimentStats(experiment.experiment_id, {
+      const stats = await evalsClient.getExperimentStats(latest.experiment_id, {
         suiteId,
         taskModelId: modelId,
-        executionId: experiment.execution_id ?? experiment.experiment_id,
+        executionId: latest.execution_id ?? latest.experiment_id,
       });
       if (!stats) {
         log.warning(
-          `No stats for experiment ${experiment.experiment_id} (suite ${suiteId}, model ${modelId})`
+          `No stats for experiment ${latest.experiment_id} (suite ${suiteId}, model ${modelId})`
         );
         continue;
       }
@@ -141,8 +168,8 @@ export const queryMatrixScores = async (
       if (!model) {
         model = {
           modelId,
-          family: experiment.task_model?.family,
-          provider: experiment.task_model?.provider,
+          family: latest.task_model?.family,
+          provider: latest.task_model?.provider,
           suites: [],
         };
         byModel.set(modelId, model);
@@ -150,8 +177,8 @@ export const queryMatrixScores = async (
 
       model.suites.push({
         suiteId,
-        experimentId: experiment.experiment_id,
-        timestamp: experiment.timestamp,
+        experimentId: latest.experiment_id,
+        timestamp: latest.timestamp,
         datasets: experimentStatsToDatasets(stats),
       });
     }

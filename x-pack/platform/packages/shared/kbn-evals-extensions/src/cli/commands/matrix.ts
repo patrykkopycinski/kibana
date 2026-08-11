@@ -9,11 +9,8 @@ import Fs from 'fs';
 import Path from 'path';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
-import {
-  createEvaluationsEvalsClient,
-  envFromDatasetsProfile,
-  DEFAULT_EVALUATIONS_KBN_URL,
-} from '@kbn/evals';
+import { KbnClient } from '@kbn/kbn-client';
+import { EvalsClient, envFromDatasetsProfile, getEvaluationsKbnClient } from '@kbn/evals';
 import { loadMatrixConfig, applyModelOverrides } from '../../matrix/load_matrix_config';
 import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
@@ -21,6 +18,7 @@ import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
+const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
 export const matrixCmd: Command<void> = {
   name: 'matrix',
@@ -96,7 +94,7 @@ export const matrixCmd: Command<void> = {
     const evaluationsKbnUrl =
       flagsReader.string('kbn-url') ?? profileEnv.EVAL_KBN_URL ?? process.env.EVAL_KBN_URL;
     if (!evaluationsKbnUrl) {
-      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVALUATIONS_KBN_URL}.`);
+      log.warning(`EVAL_KBN_URL not set; defaulting to ${DEFAULT_EVAL_KBN_URL}.`);
     }
 
     const evaluationsKbnApiKey =
@@ -120,11 +118,14 @@ export const matrixCmd: Command<void> = {
       ...new Set(config.models.flatMap((model) => [model.id, ...(model.matchIds ?? [])])),
     ];
 
-    const evalsClient = createEvaluationsEvalsClient({
+    const defaultKbnClient = new KbnClient({ log, url: DEFAULT_EVAL_KBN_URL });
+    const kbnClient = getEvaluationsKbnClient({
+      kbnClient: defaultKbnClient,
       log,
-      url: evaluationsKbnUrl,
-      apiKey: evaluationsKbnApiKey,
+      evaluationsKbnUrl,
+      evaluationsKbnApiKey,
     });
+    const evalsClient = new EvalsClient(kbnClient, log);
 
     try {
       await evalsClient.assertPluginEnabled();
@@ -139,7 +140,7 @@ export const matrixCmd: Command<void> = {
     }
 
     log.info(
-      `Querying matrix scores from ${evaluationsKbnUrl ?? DEFAULT_EVALUATIONS_KBN_URL} (branch: ${
+      `Querying matrix scores from ${evaluationsKbnUrl ?? DEFAULT_EVAL_KBN_URL} (branch: ${
         branch ?? 'any'
       })`
     );

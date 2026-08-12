@@ -237,7 +237,11 @@ export class EvalsClient {
 
       return mapStatsResponse(GetEvaluationExperimentResponse.parse(getResponseData(response)));
     } catch (error: unknown) {
-      this.log.error(`Failed to retrieve stats for experiment ID ${experimentId}:`, error);
+      this.log.error(
+        `Failed to retrieve stats for experiment ID ${experimentId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return null;
     }
   }
@@ -266,7 +270,11 @@ export class EvalsClient {
 
       return parsed.scores;
     } catch (error: unknown) {
-      this.log.error(`Failed to retrieve scores for experiment ID ${experimentId}:`, error);
+      this.log.error(
+        `Failed to retrieve scores for experiment ID ${experimentId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
       return [];
     }
   }

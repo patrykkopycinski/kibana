@@ -308,6 +308,14 @@
       "ciLabels": ["evals:security-alert-analysis-workflow"]
     },
     {
+      "id": "security-detection-watch-rule-creation",
+      "name": "Detection Watch Rule Creation Worker",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
+      "tags": ["security", "detection-rule-creation"],
+      "ciLabels": ["evals:security-detection-watch-rule-creation"]
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",

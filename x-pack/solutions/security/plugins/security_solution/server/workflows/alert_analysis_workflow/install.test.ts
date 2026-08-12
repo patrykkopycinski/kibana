@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  SECURITY_RULE_CREATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -85,9 +88,12 @@ describe('alert analysis workflow install', () => {
       expect(managed.install).toHaveBeenCalledWith(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID, {
         spaceId: GLOBAL_WORKFLOW_SPACE_ID,
       });
-      // ready() must run only after install resolves, else it closes the startup window and
-      // reconciles before the workflow is installed.
-      expect(order).toEqual(['install', 'ready']);
+      expect(managed.install).toHaveBeenCalledWith(SECURITY_RULE_CREATION_WORKFLOW_ID, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      });
+      // ready() must run only after every install resolves, else it closes the startup window and
+      // reconciles before the workflows are installed.
+      expect(order).toEqual(['install', 'install', 'ready']);
     });
 
     it('logs a warning and does not throw, and does not mark ready, when the install fails', async () => {
@@ -103,7 +109,7 @@ describe('alert analysis workflow install', () => {
 
       expect(managed.ready).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to install the alert analysis workflow'),
+        expect.stringContaining('Failed to install the security managed workflows'),
         expect.objectContaining({ error: expect.any(Error) })
       );
     });

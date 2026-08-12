@@ -91,7 +91,11 @@ export const validateInterval = (interval: unknown): boolean =>
 export const resolveDateMathSeconds = (expr: unknown, now: Date): number | null => {
   if (typeof expr !== 'string') return null;
   const ms = parseDateMath(expr, { forceNow: now })?.valueOf();
-  return ms != null ? ms / 1000 : null;
+  // parseDateMath returns an invalid moment (valueOf() === NaN) for an unparseable expression
+  // rather than undefined. Without the isFinite guard NaN escapes here, the `=== null` checks in
+  // the Lookback Gap evaluator never fire, and every NaN comparison is false — so a rule with an
+  // unparseable `from` scores 1 (no gap) instead of being flagged.
+  return ms != null && Number.isFinite(ms) ? ms / 1000 : null;
 };
 
 const REQUIRED_FIELDS = ['name', 'description', 'query', 'severity', 'tags', 'risk_score'] as const;

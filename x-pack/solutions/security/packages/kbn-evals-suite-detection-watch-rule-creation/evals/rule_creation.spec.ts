@@ -5,30 +5,19 @@
  * 2.0.
  */
 
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import type { HttpHandler } from '@kbn/core/public';
-import type { ToolingLog } from '@kbn/tooling-log';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluate_dataset';
-import { ensureConnectorAccessible, ensureWorkflowInstalled } from '../src/workflow_fixture';
+import { assertWorkflowInstalled, ensureConnectorAccessible } from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/rule_creation_golden';
 import { hardCases } from '../datasets/hard_cases';
 
 evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.complete }, () => {
-  evaluate.beforeAll(
-    async ({
-      fetch,
-      connector,
-      log,
-    }: {
-      fetch: HttpHandler;
-      connector: AvailableConnectorWithId;
-      log: ToolingLog;
-    }) => {
-      await ensureConnectorAccessible({ fetch, connector, log });
-      await ensureWorkflowInstalled({ fetch, log });
-    }
-  );
+  // Fixture types are inferred from the extended `evaluate` — do not hand-annotate the bag, or it
+  // silently diverges from the real fixture shape.
+  evaluate.beforeAll(async ({ fetch, connector, log }) => {
+    await ensureConnectorAccessible({ fetch, connector, log });
+    await assertWorkflowInstalled({ fetch, log });
+  });
 
   evaluate(
     'generates a valid ES|QL detection rule for the stated gap',
@@ -48,6 +37,11 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
           examples: goldenDataset,
         },
       });
+
+      // Scores are recorded to ES, not asserted here, so this test passes as long as nothing
+      // throws. Without this guard an all-N/A run (trace ES down, ids not correlating) reports
+      // "2 passed" and is indistinguishable from a perfect run.
+      ruleCreationClient.assertRoutingWasMeasured();
     }
   );
 
@@ -70,6 +64,8 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
           examples: hardCases,
         },
       });
+
+      ruleCreationClient.assertRoutingWasMeasured();
     }
   );
 });

@@ -1,0 +1,167 @@
+version: "1"
+name: Detection Rule Creation Worker
+description: >
+  Drafts an ES|QL detection rule for a reported detection gap and creates it
+  disabled once an analyst approves. Creation is gated on explicit human
+  approval — the workflow never writes a rule autonomously.
+enabled: true
+tags:
+  - security
+  - detection-rule-creation
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        technique:
+          type: string
+          description: MITRE ATT&CK technique id the new rule should cover.
+        gap_description:
+          type: string
+          description: Detection gap the new rule should cover.
+        evidence:
+          type: string
+          description: Hunt findings or event examples supporting the gap.
+        confidence:
+          type: number
+          description: Confidence in the detection gap from 0 to 1.
+      required:
+        - technique
+      additionalProperties: false
+outputs:
+  - name: created
+    type: boolean
+  - name: rule_name
+    type: string
+steps:
+  - name: draft_creation
+    type: ai.agent
+    timeout: "10m"
+    create-conversation: true
+    with:
+      message: |-
+        Use the [/detection-rule-edit](skill://detection-rule-edit) skill and call
+        security.create_detection_rule to create a new ES|QL rule draft now. The
+        supplied context is sufficient; do not ask a follow-up question.
+
+        ATT&CK technique: {{ inputs.technique }}
+        Detection gap: {{ inputs.gap_description }}
+        Evidence: {{ inputs.evidence }}
+        Confidence: {{ inputs.confidence }}
+
+        Echo the tool's returned rule fields and attachment metadata into the
+        structured output. Never return id or rule_id.
+      schema:
+        type: object
+        properties:
+          name:
+            type: string
+          description:
+            type: string
+          query:
+            type: string
+          language:
+            type: string
+            enum: [esql]
+          type:
+            type: string
+            enum: [esql]
+          interval:
+            type: string
+          from:
+            type: string
+          to:
+            type: string
+          severity:
+            type: string
+            enum: [low, medium, high, critical]
+          risk_score:
+            type: number
+          threat:
+            type: array
+            items:
+              type: object
+              additionalProperties: true
+          tags:
+            type: array
+            items:
+              type: string
+          attachment_id:
+            type: string
+          attachment_version:
+            type: number
+        required:
+          - name
+          - description
+          - query
+          - language
+          - type
+          - interval
+          - from
+          - to
+          - severity
+          - risk_score
+          - threat
+          - tags
+          - attachment_id
+
+  # Human approval gate. `create_rule` below is conditioned on the analyst
+  # explicitly approving here, so an unattended run halts at WAITING_FOR_INPUT
+  # and never reaches the detection-engine write. This is the enforcement point
+  # for the "no auto-execution without approval" kill criterion in
+  # CAPABILITY_PROFILE.md; the eval suite asserts on it.
+  - name: review_creation
+    type: waitForApproval
+    if: >-
+      ${{ steps.draft_creation.output.structured_output.query != null
+        and steps.draft_creation.output.structured_output.query != ''
+        and steps.draft_creation.output.structured_output.attachment_id != null }}
+    timeout: "72h"
+    with:
+      approveLabel: Create rule
+      rejectLabel: Dismiss
+      message: |-
+        New ES|QL detection rule: {{ steps.draft_creation.output.structured_output.name }}
+
+        {{ steps.draft_creation.output.structured_output.description }}
+
+        Query:
+        {{ steps.draft_creation.output.structured_output.query }}
+
+        ATT&CK technique: {{ inputs.technique }}
+        Severity: {{ steps.draft_creation.output.structured_output.severity }}
+        Risk score: {{ steps.draft_creation.output.structured_output.risk_score }}
+
+        Review the draft: /app/agent_builder/conversations/{{ steps.draft_creation.output.conversation_id }}
+
+  - name: create_rule
+    type: kibana.request
+    if: ${{ steps.review_creation.output.response.approved == true }}
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body:
+        name: "{{ steps.draft_creation.output.structured_output.name }}"
+        description: "{{ steps.draft_creation.output.structured_output.description }}"
+        query: "{{ steps.draft_creation.output.structured_output.query }}"
+        language: esql
+        type: esql
+        interval: "{{ steps.draft_creation.output.structured_output.interval }}"
+        from: "{{ steps.draft_creation.output.structured_output.from }}"
+        to: "{{ steps.draft_creation.output.structured_output.to }}"
+        severity: "{{ steps.draft_creation.output.structured_output.severity }}"
+        risk_score: "${{ steps.draft_creation.output.structured_output.risk_score }}"
+        threat: "${{ steps.draft_creation.output.structured_output.threat }}"
+        tags: "${{ steps.draft_creation.output.structured_output.tags }}"
+        enabled: false
+        building_block_type: default
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      created: "${{ steps.create_rule.error == null and steps.create_rule.output.id != null }}"
+      rule_name: "{{ steps.draft_creation.output.structured_output.name }}"

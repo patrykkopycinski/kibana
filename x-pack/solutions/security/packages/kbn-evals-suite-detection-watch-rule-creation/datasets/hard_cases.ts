@@ -40,13 +40,14 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.8,
     },
     output: {
-      mitreIds: ['T1195', 'T1195.002', 'T1059', 'T1204', 'T1543'],
+      mitreIds: ['T1195', 'T1195.002'],
+      optionalMitreIds: ['T1059', 'T1204', 'T1543'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type IN ("linux", "macos")
   AND event.type == "start"
   AND (
-    (process.name == "node" AND process.args == "install")
+    (process.name == "node" AND MV_CONTAINS(process.args, "install"))
     OR process.parent.name == "node"
   )
 | STATS child_count = COUNT(*) BY host.id, process.parent.name, host.name
@@ -99,20 +100,62 @@ export const hardCases: RuleCreationExample[] = [
       confidence: 0.75,
     },
     output: {
-      mitreIds: ['T1609', 'T1611', 'T1059', 'T1053'],
+      mitreIds: ['T1609'],
+      optionalMitreIds: ['T1611', 'T1059', 'T1053'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "linux"
   AND event.type == "start"
   AND process.name IN ("kubectl", "docker")
-  AND process.args == "run"
+  AND MV_CONTAINS(process.args, "run")
   AND (
-    process.command_line LIKE "%bash%"
-    OR process.command_line LIKE "%sh -c%"
-    OR process.command_line LIKE "%wget%"
-    OR process.command_line LIKE "%curl%"
+    process.command_line LIKE "*bash*"
+    OR process.command_line LIKE "*sh -c*"
+    OR process.command_line LIKE "*wget*"
+    OR process.command_line LIKE "*curl*"
   )
 | STATS run_count = COUNT(*) BY host.name, user.name, process.command_line`,
+    },
+  },
+
+  // Hard 4 — T1078.004 (Valid Accounts: Cloud Accounts) + T1059.001 (PowerShell)
+  //
+  // Cross-source correlation: the gap spans cloud audit logs and Windows PowerShell logs, and the
+  // evidence names neither index.
+  //
+  // Intent vs. measured result: this was written to exercise the thrashing branch of Trajectory
+  // Efficiency by withholding the data source. It does NOT — measured over 3 reps on 2026-08-11,
+  // this case behaves like every other one, `load_skill` then `create_detection_rule`, 2 calls and
+  // no repeats. The agent writes ES|QL from model knowledge rather than discovering indices, so
+  // prompt wording cannot induce a multi-step trajectory here; that needs a schema the model
+  // cannot guess. Kept because cross-source correlation is genuine coverage, but it is NOT
+  // trajectory coverage — the thrashing branch remains unit-tested only.
+  {
+    id: 'hard-t1078-004-cross-source-cloud-to-endpoint',
+    input: {
+      technique: 'T1078.004',
+      gap_description:
+        'No coverage correlating cloud credential use with follow-on host activity. An operator ' +
+        'who obtains cloud credentials and then executes tooling on a managed host is invisible ' +
+        'to existing rules, which examine cloud and endpoint telemetry in isolation.',
+      evidence:
+        'Incident review found an access-key-driven API call followed within minutes by encoded ' +
+        'script execution on a corporate desktop under the same user identity. The analyst who ' +
+        'wrote the ticket did not record which data sources they searched.',
+      confidence: 0.6,
+    },
+    output: {
+      mitreIds: ['T1078', 'T1078.004'],
+      optionalMitreIds: ['T1059', 'T1059.001'],
+      language: 'esql',
+      esqlQuery: `FROM logs-windows.powershell_operational*
+| WHERE event.code == "4104"
+  AND (
+    file.script_block_text LIKE "*Invoke-WebRequest*"
+    OR file.script_block_text LIKE "*IEX*"
+    OR process.command_line LIKE "*-enc*"
+  )
+| STATS script_count = COUNT(*) BY host.name, user.name`,
     },
   },
 ];

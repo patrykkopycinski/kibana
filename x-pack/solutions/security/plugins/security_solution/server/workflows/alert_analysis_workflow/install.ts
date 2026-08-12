@@ -23,6 +23,7 @@ import {
   initSecurityManagedWorkflowsClient,
   type SecurityManagedWorkflowsClient,
 } from '../managed_workflows';
+import { installSecurityRuleCreationWorkflow } from '../rule_creation_workflow/install';
 
 /**
  * The alert-analysis settings. Read from a space-scoped `uiSettings` client (by the settings
@@ -87,10 +88,10 @@ export const installSecurityAlertAnalysisWorkflow = async ({
 };
 
 /**
- * Plugin-start entry point: install the workflow, then mark managed workflows ready. `ready()` must
- * run only after the install resolves (it closes the startup window and triggers reconciliation), so
- * this awaits the install first, reusing a single client, in one try/catch. Intended to be called
- * once, fire-and-forget, from the plugin's `start()`.
+ * Plugin-start entry point: install the security managed workflows, then mark managed workflows
+ * ready. `ready()` must run only after every install resolves (it closes the startup window and
+ * triggers reconciliation), so this awaits all installs first, reusing a single client, in one
+ * try/catch. Intended to be called once, fire-and-forget, from the plugin's `start()`.
  */
 export const installSecurityAlertAnalysisWorkflowAndMarkReady = async ({
   workflowsExtensions,
@@ -102,8 +103,9 @@ export const installSecurityAlertAnalysisWorkflowAndMarkReady = async ({
   try {
     const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(workflowsExtensions);
     await installSecurityAlertAnalysisWorkflow({ managedWorkflowsClient });
+    await installSecurityRuleCreationWorkflow({ managedWorkflowsClient });
     await managedWorkflowsClient.ready();
   } catch (error) {
-    logger.warn('Failed to install the alert analysis workflow', { error });
+    logger.warn('Failed to install the security managed workflows', { error });
   }
 };

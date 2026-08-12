@@ -28,7 +28,28 @@ export interface RuleCreationExample {
     confidence: number;
   };
   output: {
+    /**
+     * Techniques the agent MUST tag. Drives MITRE Accuracy recall.
+     *
+     * Keep this to the technique named in `input.technique` plus its parent. Anything the prompt
+     * does not ask for belongs in `optionalMitreIds` — see the note there.
+     */
     mitreIds: string[];
+    /**
+     * Related techniques that are CREDITED but never REQUIRED.
+     *
+     * WHY (measured 2026-08-12): every example asks the agent to close exactly one gap
+     * (`input.technique`), but MITRE Accuracy graded F1 against up to 5 techniques, several of
+     * which the prompt never mentions — `hard-t1609` asked for T1609 and also graded T1611, T1059
+     * and T1053. Those are unguessable from the input, so recall was capped by dataset
+     * construction rather than agent quality: a PERFECTLY precise answer scored a mean F1 of only
+     * 0.71, and as low as 0.40. The two examples with no unrequested techniques
+     * (`gap-t1078-001`, `hard-t1562-008`) were exactly the two scoring 1.00.
+     *
+     * Listing a technique here means "correct to include, not wrong to omit": it cannot lower the
+     * score, so a sound rule is not punished for declining to enumerate tangential techniques.
+     */
+    optionalMitreIds?: string[];
     language: 'esql';
     esqlQuery?: string;
     isBrokenFixture?: boolean;
@@ -80,7 +101,8 @@ export const goldenDataset: RuleCreationExample[] = [
       confidence: 0.9,
     },
     output: {
-      mitreIds: ['T1548', 'T1548.002', 'T1218'],
+      mitreIds: ['T1548', 'T1548.002'],
+      optionalMitreIds: ['T1218'],
       language: 'esql',
       esqlQuery: `FROM logs-endpoint.events.process-*
 | WHERE host.os.type == "windows"
@@ -107,7 +129,8 @@ export const goldenDataset: RuleCreationExample[] = [
       confidence: 0.75,
     },
     output: {
-      mitreIds: ['T1027', 'T1140', 'T1059.001'],
+      mitreIds: ['T1027'],
+      optionalMitreIds: ['T1140', 'T1059.001'],
       language: 'esql',
       esqlQuery: `FROM logs-windows.powershell_operational*
 | WHERE event.code == "4104"
@@ -118,8 +141,14 @@ export const goldenDataset: RuleCreationExample[] = [
     },
   },
 
-  // BROKEN FIXTURE — required. The catch-all query must score 0 on Query Syntax Validity.
-  // Do not remove. A 100% pass rate means the quality gate was never tested.
+  // NEGATIVE CONTROL — required. A sparse, vague gap with no evidence, where the correct
+  // behaviour is a narrowly-scoped rule and the tempting failure is a catch-all. Do not remove:
+  // a dataset where every example is well-specified never exercises the quality gate.
+  //
+  // Note this fixture cannot *guarantee* a failing score — the model is free to do the right
+  // thing here, and should. The property it depends on (a bare-wildcard FROM scores 0) is
+  // asserted deterministically in src/helpers.test.ts; this entry measures whether the worker
+  // degrades gracefully on thin input.
   {
     id: 'broken-fixture-catch-all-query',
     input: {
@@ -131,7 +160,7 @@ export const goldenDataset: RuleCreationExample[] = [
     output: {
       mitreIds: ['T1059'],
       language: 'esql',
-      esqlQuery: 'FROM * | LIMIT 1000', // catch-all — must fail Query Syntax Validity
+      esqlQuery: 'FROM * | LIMIT 1000', // the catch-all this input tempts, kept as documentation
       isBrokenFixture: true,
     },
   },

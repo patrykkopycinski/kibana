@@ -12,11 +12,41 @@ import { z } from '@kbn/zod';
 import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import {
   ExecutionStatus,
-  extractAgentConversationIds,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+
+interface AgentConversationId {
+  conversationId: string;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const extractAgentConversationIds = (
+  stepExecutions: WorkflowStepExecutionDto[]
+): AgentConversationId[] => {
+  const seen = new Set<string>();
+  const conversationIds: AgentConversationId[] = [];
+
+  for (const step of stepExecutions) {
+    if (step.stepType === 'ai.agent' && isRecord(step.output)) {
+      const conversationId = step.output.conversation_id;
+      if (
+        typeof conversationId === 'string' &&
+        conversationId.length > 0 &&
+        !seen.has(conversationId)
+      ) {
+        seen.add(conversationId);
+        conversationIds.push({ conversationId });
+      }
+    }
+  }
+
+  return conversationIds;
+};
+
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
 

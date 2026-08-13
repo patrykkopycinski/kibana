@@ -313,8 +313,7 @@
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
       "tags": ["security", "detection-rule-creation"],
-      "ciLabels": ["evals:security-detection-watch-rule-creation"],
-      "serverConfigSet": "evals_workflows"
+      "ciLabels": ["evals:security-detection-watch-rule-creation"]
     },
     {
       "id": "skill-selection-benchmark",

@@ -9,7 +9,6 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod';
-import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
@@ -17,6 +16,7 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import { readWorkflowAgentToolCalls } from './read_workflow_agent_tool_calls';
 import { draftRuleSchema, type DraftRule } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -63,32 +63,16 @@ const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | un
  * wrapper (whose output is null) and once as the real `ai.agent` step. Filtering on stepId alone
  * can pick the wrapper and silently yield undefined, so key off the output shape.
  */
-/**
- * Every non-empty `conversation_id` from step executions, first-seen order.
- * Multi-`ai.agent` workflows produce one id per step — taking only the first
- * silently drops later steps' tool spans.
- */
-export const extractAgentConversationIds = (steps: WorkflowStepExecutionDto[]): string[] => {
-  const seen = new Set<string>();
-  const ids: string[] = [];
+export const extractConversationId = (steps: WorkflowStepExecutionDto[]): string | undefined => {
   for (const step of steps) {
     const conversationId = (step.output as { conversation_id?: unknown } | undefined)
       ?.conversation_id;
-    if (
-      typeof conversationId === 'string' &&
-      conversationId.length > 0 &&
-      !seen.has(conversationId)
-    ) {
-      seen.add(conversationId);
-      ids.push(conversationId);
+    if (typeof conversationId === 'string' && conversationId.length > 0) {
+      return conversationId;
     }
   }
-  return ids;
+  return undefined;
 };
-
-/** @deprecated Prefer {@link extractAgentConversationIds} for multi-agent workflows. */
-export const extractConversationId = (steps: WorkflowStepExecutionDto[]): string | undefined =>
-  extractAgentConversationIds(steps)[0];
 
 export interface RuleCreationResult {
   rule: DraftRule | undefined;
@@ -221,17 +205,12 @@ export class RuleCreationClient {
       );
     }
 
-    const conversationIds = extractAgentConversationIds(stepExecutions);
+    const conversationId = extractConversationId(stepExecutions);
 
-    const {
-      toolCallIds,
-      failedToolCallIds = [],
-      unavailable,
-    } = await readAgentToolCallsFromTraces({
+    const { toolCallIds, failedToolCallIds, unavailable } = await readWorkflowAgentToolCalls({
       traceEsClient: this.traceEsClient,
-      conversationIds,
+      conversationId,
       log: this.log,
-      includeFailures: true,
     });
 
     // Track routing coverage so the suite can distinguish "routing was measured and passed" from

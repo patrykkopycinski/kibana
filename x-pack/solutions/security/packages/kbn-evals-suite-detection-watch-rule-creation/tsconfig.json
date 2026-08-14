@@ -8,7 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/datemath",
-    "@kbn/es-archiver",
     "@kbn/evals",
     "@kbn/esql-language",
     "@kbn/scout",

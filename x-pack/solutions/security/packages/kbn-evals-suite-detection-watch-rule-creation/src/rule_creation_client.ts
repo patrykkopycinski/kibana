@@ -12,7 +12,6 @@ import { z } from '@kbn/zod';
 import { readAgentToolCallsFromTraces } from '@kbn/security-evals-workflow-traces';
 import {
   ExecutionStatus,
-  extractAgentConversationIds,
   TerminalExecutionStatuses,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
@@ -64,6 +63,33 @@ const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | un
  * wrapper (whose output is null) and once as the real `ai.agent` step. Filtering on stepId alone
  * can pick the wrapper and silently yield undefined, so key off the output shape.
  */
+/**
+ * Every non-empty `conversation_id` from step executions, first-seen order.
+ * Multi-`ai.agent` workflows produce one id per step — taking only the first
+ * silently drops later steps' tool spans.
+ */
+export const extractAgentConversationIds = (steps: WorkflowStepExecutionDto[]): string[] => {
+  const seen = new Set<string>();
+  const ids: string[] = [];
+  for (const step of steps) {
+    const conversationId = (step.output as { conversation_id?: unknown } | undefined)
+      ?.conversation_id;
+    if (
+      typeof conversationId === 'string' &&
+      conversationId.length > 0 &&
+      !seen.has(conversationId)
+    ) {
+      seen.add(conversationId);
+      ids.push(conversationId);
+    }
+  }
+  return ids;
+};
+
+/** @deprecated Prefer {@link extractAgentConversationIds} for multi-agent workflows. */
+export const extractConversationId = (steps: WorkflowStepExecutionDto[]): string | undefined =>
+  extractAgentConversationIds(steps)[0];
+
 export interface RuleCreationResult {
   rule: DraftRule | undefined;
   /** True when the workflow halted at the human approval gate, as it must for an unattended run. */
@@ -195,9 +221,7 @@ export class RuleCreationClient {
       );
     }
 
-    const conversationIds = extractAgentConversationIds(stepExecutions).map(
-      ({ conversationId }) => conversationId
-    );
+    const conversationIds = extractAgentConversationIds(stepExecutions);
 
     const {
       toolCallIds,

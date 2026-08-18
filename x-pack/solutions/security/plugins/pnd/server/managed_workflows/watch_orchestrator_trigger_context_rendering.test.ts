@@ -81,7 +81,38 @@ describe('PND orchestrator dead trigger.context fallback fix', () => {
     expect(rendered.escalation).toEqual(escalation);
   });
 
-  it('watch_ad_continuation_orchestrator: discovery falls back to inputs.discovery when event.discovery is absent', () => {
+  it('watch_ad_continuation_orchestrator: alert trigger payload takes priority (event.alert.attackDiscovery)', () => {
+    const doc = loadYaml('watch_ad_continuation_orchestrator.yaml');
+    const step = (doc.steps as any[]).find((s: any) => s.name === 'run_ad_continuation_worker');
+    expect(step).toBeDefined();
+
+    const alertDiscovery = { id: 'from-alert', title: 'AD alert discovery' };
+    const rendered = engine.render(step.with.inputs, {
+      event: {
+        alert: { attackDiscovery: alertDiscovery },
+        discovery: { id: 'should-not-be-used' },
+      },
+      inputs: { discovery: { id: 'also-should-not-be-used' } },
+    });
+
+    expect(rendered.discovery).toEqual(alertDiscovery);
+  });
+
+  it('watch_ad_continuation_orchestrator: discovery falls back to event.discovery when alert is absent', () => {
+    const doc = loadYaml('watch_ad_continuation_orchestrator.yaml');
+    const step = (doc.steps as any[]).find((s: any) => s.name === 'run_ad_continuation_worker');
+    expect(step).toBeDefined();
+
+    const eventDiscovery = { id: 'from-event' };
+    const rendered = engine.render(step.with.inputs, {
+      event: { discovery: eventDiscovery },
+      inputs: { discovery: { id: 'should-not-be-used' } },
+    });
+
+    expect(rendered.discovery).toEqual(eventDiscovery);
+  });
+
+  it('watch_ad_continuation_orchestrator: discovery falls back to inputs.discovery when event is absent', () => {
     const doc = loadYaml('watch_ad_continuation_orchestrator.yaml');
     const step = (doc.steps as any[]).find((s: any) => s.name === 'run_ad_continuation_worker');
     expect(step).toBeDefined();
@@ -92,17 +123,11 @@ describe('PND orchestrator dead trigger.context fallback fix', () => {
     expect(rendered.discovery).toEqual(discovery);
   });
 
-  it('watch_ad_continuation_orchestrator: event.discovery still takes priority over inputs.discovery', () => {
+  it('watch_ad_continuation_orchestrator: declares an alert trigger for AD discovery persistence', () => {
     const doc = loadYaml('watch_ad_continuation_orchestrator.yaml');
-    const step = (doc.steps as any[]).find((s: any) => s.name === 'run_ad_continuation_worker');
-
-    const eventDiscovery = { id: 'from-event' };
-    const rendered = engine.render(step.with.inputs, {
-      event: { discovery: eventDiscovery },
-      inputs: { discovery: { id: 'should-not-be-used' } },
-    });
-
-    expect(rendered.discovery).toEqual(eventDiscovery);
+    const triggerTypes = (doc.triggers as any[]).map((t: any) => t.type);
+    expect(triggerTypes).toContain('alert');
+    expect(triggerTypes).toContain('manual');
   });
 
   it('none of the 4 fixed orchestrator YAMLs still reference the dead trigger.context path in a live template expression', () => {

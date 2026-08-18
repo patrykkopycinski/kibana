@@ -40,12 +40,18 @@ export const sourceWatchSchema = z.enum([
 ]);
 export type SourceWatch = z.infer<typeof sourceWatchSchema>;
 
-/** Canonical Daybreak Proposal (spike-compatible). */
+/** Canonical Daybreak Proposal (spike-compatible, D17-corrected). */
 export const proposalSchema = z.object({
   id: z.string(),
+  // D17: a Proposal is a `template_id: 'proposal'` Conversation created at the
+  // human-input gate, carrying `parentConversationId` back to its Investigation.
+  // Not a relabeled Worker thread — the Worker thread continues unchanged.
+  template_id: z.literal('proposal'),
   schemaVersion: z.string(),
   sourceWatch: sourceWatchSchema,
   investigationId: z.string(),
+  // D17: parent pointer to the Investigation Conversation this Proposal belongs to.
+  parentConversationId: z.string(),
   title: z.string(),
   status: proposalStatusSchema,
   confidence: z.number().min(0).max(1),
@@ -145,9 +151,13 @@ export interface BuildProposalArgs {
 export const buildProposalFromWorkerRun = (args: BuildProposalArgs): Proposal =>
   proposalSchema.parse({
     id: args.id,
+    // D17: Proposal is created at the gate as a `template_id: 'proposal'`
+    // Conversation with parentConversationId → its Investigation.
+    template_id: 'proposal',
     schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
     sourceWatch: args.sourceWatch,
     investigationId: args.investigationId,
+    parentConversationId: args.investigationId,
     title: buildProposalTitle(args.ruleName, args.alertId),
     status: verdictToProposalStatus(args.verdict, args.severity),
     confidence: args.confidence,

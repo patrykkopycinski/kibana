@@ -148,9 +148,12 @@ export const registerAcceptProposalRoute = ({
             : [];
           const gateInput: Proposal = {
             id: proposalId,
+            // D17: Proposal carries template_id and parentConversationId.
+            template_id: 'proposal',
             schemaVersion: '1',
             sourceWatch: 'watch-floor',
             investigationId,
+            parentConversationId: investigationId,
             title: proposal?.summary ?? proposalId,
             status: 'new',
             confidence: typeof proposal?.confidence === 'number' ? proposal.confidence : 0,

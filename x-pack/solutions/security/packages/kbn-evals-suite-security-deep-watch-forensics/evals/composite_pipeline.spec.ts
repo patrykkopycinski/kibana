@@ -13,6 +13,10 @@
  *   3. produce_draft generates report with all sections
  *
  * Fixture: seeded endpoint docs matching DEFAULT_ESCALATION_CONTEXT.
+ * The forensic telemetry seeder (../src/data_generators/forensic_data.ts)
+ * seeds `logs-endpoint.events.*` with a matching APT29 lateral-movement
+ * kill chain so ES|QL queries return real rows — without it, every
+ * reconstruction returns zero events and the pipeline is untestable.
  */
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
@@ -21,11 +25,25 @@ import {
   DEEP_WATCH_FORENSICS_SKILL_ID,
   agentBuilderDefaultAgentId,
 } from '../src/constants';
+import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { cleanupSeededData } from '../src/data_generators/cleanup';
 
 evaluate.describe(
   'C3:L3 | Deep Watch Forensics — Composite pipeline',
   { tag: tags.stateful.classic },
   () => {
+    // Seed endpoint telemetry so ES|QL reconstruction returns real rows.
+    // Without this, execute_esql always returns zero events and the pipeline
+    // is untestable — same root cause as leaf_quality/durable_outcome.
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      await cleanupSeededData({ esClient });
+      await seedForensicTimeline({ esClient }, log);
+    });
+
+    evaluate.afterAll(async ({ esClient }) => {
+      await cleanupSeededData({ esClient });
+    });
+
     // Replicates the real Watch invocation path from `watch_deep_worker.yaml`'s
     // `forensic_investigation` ai.agent step. Per CWL Option 2 (Slack
     // C0BHGGA6PHC/p1784742716537469, elastic/kibana#280617), that step performs

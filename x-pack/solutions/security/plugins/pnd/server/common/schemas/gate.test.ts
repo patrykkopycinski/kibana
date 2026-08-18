@@ -15,9 +15,11 @@ import {
 
 const buildProposal = (overrides: Partial<Proposal> = {}): Proposal => ({
   id: 'prop-1',
+  template_id: 'proposal',
   schemaVersion: '1',
   sourceWatch: 'watch-floor',
   investigationId: 'inv-1',
+  parentConversationId: 'inv-1',
   title: 'Suspicious auth burst on FIN-WS-04',
   status: 'new',
   confidence: 0.9,

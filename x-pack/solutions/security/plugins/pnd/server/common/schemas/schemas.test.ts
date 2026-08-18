@@ -35,6 +35,9 @@ describe('PND canonical Daybreak schemas', () => {
       expect(p.status).toBe('escalated');
       expect(p.title).toBe('Suspicious Process on alert-1');
       expect(p.recommendation).toMatch(/^Escalate —/);
+      // D17: Proposal carries template_id and parentConversationId.
+      expect(p.template_id).toBe('proposal');
+      expect(p.parentConversationId).toBe('inv-1');
     });
 
     it('maps verdict + severity to status', () => {

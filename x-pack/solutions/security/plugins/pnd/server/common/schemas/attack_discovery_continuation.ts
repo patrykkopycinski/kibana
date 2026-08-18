@@ -87,9 +87,13 @@ export const buildProposalFromAttackDiscovery = (
 
   return {
     id: proposalId,
+    // D17: Proposal is a `template_id: 'proposal'` Conversation with
+    // parentConversationId → its Investigation, created at the gate.
+    template_id: 'proposal',
     schemaVersion: DAYBREAK_PROPOSAL_SCHEMA_VERSION,
     sourceWatch: 'watch-ad',
     investigationId,
+    parentConversationId: investigationId,
     title,
     status: 'new',
     // AD 2.0 emits no numeric confidence; fail-closed to 0 so the readiness

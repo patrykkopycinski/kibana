@@ -48,6 +48,9 @@ describe('attack_discovery_continuation (D11)', () => {
       expect(proposal.investigationId).toBe('inv-1');
       expect(proposal.id).toBe('prop-1');
       expect(proposal.title).toBe('Credential access then lateral movement on web-01');
+      // D17: Proposal carries template_id and parentConversationId.
+      expect(proposal.template_id).toBe('proposal');
+      expect(proposal.parentConversationId).toBe('inv-1');
     });
 
     it('carries the real alert ids through as evidence provenance (never synthesised)', () => {

@@ -2,8 +2,9 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "rootDir": "."
   },
   "include": ["src/**/*", "evals/**/*"],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*", "node_modules/**/*"]
 }

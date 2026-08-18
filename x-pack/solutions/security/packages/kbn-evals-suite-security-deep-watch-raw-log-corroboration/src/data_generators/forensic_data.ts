@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+
 
 interface SeedParams {
   esClient: { bulk: (params: { index: string; body: unknown[] }) => Promise<unknown> };

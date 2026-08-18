@@ -1,0 +1,130 @@
+version: '1'
+name: Deep Watch Raw Log Corroboration Worker
+description: >
+  Deep Watch raw log corroboration worker. Takes an investigation narrative
+  built from alerts and pivots into raw telemetry (process trees, network,
+  file, auth events) to either corroborate the story or show where it doesn't
+  hold. Uses the threat-hunting skill and platform.core.search for raw log
+  queries. Never executes response actions.
+enabled: true
+tags:
+  - watch-worker
+  - watch-deep-raw-log-corroboration-worker
+triggers:
+  - type: manual
+steps:
+  - name: watch_policy
+    type: data.set
+    with:
+      watch:
+        skill_allowlist:
+          - threat-hunting
+  - name: raw_log_corroboration
+    type: ai.agent
+    timeout: '15m'
+    with:
+      configuration_overrides:
+        skill_ids: '${{ steps.watch_policy.output.watch.skill_allowlist }}'
+      message: >
+        Use the [/threat-hunting](skill://threat-hunting) skill and
+        platform.core.search to query logs-* for raw telemetry that
+        corroborates or contradicts the given investigation narrative.
+        Do NOT ask questions. Do NOT execute response actions.
+
+        The narrative below was built from SIEM alerts. Alerts inherit the
+        detection engine's blind spots — a stage that produced no alert leaves
+        a hole. Your job is to find raw telemetry evidence for EACH stage of
+        the narrative, and explicitly flag stages where no raw logs exist.
+
+        For each stage in the narrative:
+        1. Search logs-* for process events (process.name, process.parent.name,
+           process.command_line, process.pid)
+        2. Search for network events (source.ip, destination.ip, destination.port,
+           network.protocol)
+        3. Search for file events (file.path, file.hash, process.name)
+        4. Search for authentication events (user.name, source.ip, event.outcome)
+
+        Return structured output with:
+        - corroborated_events: stages where raw telemetry confirms the narrative
+        - gap_events: stages where NO raw telemetry was found (the blind spots)
+        - confidence: overall confidence (0-1) in the narrative's accuracy
+        - unresolved_questions: questions that raw logs could not answer
+
+        Investigation context:
+        - investigationId: {{ inputs.investigationId }}
+        - narrative: {{ inputs.narrative }}
+        - alertIds: {{ inputs.alertIds | json }}
+        - scope: {{ inputs.scope | json }}
+
+        All conclusions are DRAFT - for specialist review only.
+      schema:
+        type: object
+        properties:
+          corroborated_events:
+            type: array
+            description: Stages where raw telemetry confirms the narrative.
+            items:
+              type: object
+              properties:
+                stage:
+                  type: string
+                evidence:
+                  type: string
+                query:
+                  type: string
+                  description: ES|QL or KQL query used to find the evidence
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+              required:
+                - stage
+                - evidence
+                - confidence
+          gap_events:
+            type: array
+            description: Stages where NO raw telemetry was found.
+            items:
+              type: object
+              properties:
+                stage:
+                  type: string
+                expected:
+                  type: string
+                  description: What raw telemetry was expected but not found
+                possible_causes:
+                  type: string
+              required:
+                - stage
+                - expected
+          confidence:
+            type: number
+            minimum: 0
+            maximum: 1
+            description: Overall confidence in the narrative's accuracy given raw log corroboration
+          unresolved_questions:
+            type: array
+            items:
+              type: string
+        required:
+          - corroborated_events
+          - gap_events
+          - confidence
+  - name: worker_output
+    type: data.set
+    with:
+      workerRun:
+        watch: watch-deep-raw-log-corroboration
+        confidence: '${{ steps.raw_log_corroboration.output.structured_output.confidence | default: 0 }}'
+        draft: true
+        report: '{{ steps.raw_log_corroboration.output.structured_output | json }}'
+        corroboratedEvents: '{{ steps.raw_log_corroboration.output.structured_output.corroborated_events | json }}'
+        gapEvents: '{{ steps.raw_log_corroboration.output.structured_output.gap_events | json }}'
+        unresolvedQuestions: '{{ steps.raw_log_corroboration.output.structured_output.unresolved_questions | json }}'
+        investigationId: '{{ inputs.investigationId }}'
+        modelId: '{{ steps.raw_log_corroboration.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.raw_log_corroboration.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.raw_log_corroboration.output.metadata.usage.latencyMs | default: 0 }}'
+        inputTokens: '${{ steps.raw_log_corroboration.output.metadata.usage.inputTokens | default: 0 }}'
+        outputTokens: '${{ steps.raw_log_corroboration.output.metadata.usage.outputTokens | default: 0 }}'
+        totalTokens: '${{ steps.raw_log_corroboration.output.metadata.usage.totalTokens | default: 0 }}'

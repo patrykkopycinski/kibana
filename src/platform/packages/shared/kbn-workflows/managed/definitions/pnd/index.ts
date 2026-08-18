@@ -18,6 +18,7 @@ import WATCH_DARK_CONTINUOUS_HUNT_WORKER_YAML from './watch_dark_continuous_hunt
 import WATCH_DARK_ORCHESTRATOR_YAML from './watch_dark_orchestrator.yaml';
 import WATCH_DARK_WORKER_YAML from './watch_dark_worker.yaml';
 import WATCH_DEEP_ORCHESTRATOR_YAML from './watch_deep_orchestrator.yaml';
+import WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_YAML from './watch_deep_raw_log_corroboration_worker.yaml';
 import WATCH_DEEP_WORKER_YAML from './watch_deep_worker.yaml';
 import WATCH_DETECTION_ORCHESTRATOR_YAML from './watch_detection_orchestrator.yaml';
 import WATCH_DETECTION_RULE_CREATION_WORKER_YAML from './watch_detection_rule_creation_worker.yaml';
@@ -41,6 +42,8 @@ export const PND_WATCH_DARK_WORKER_WORKFLOW_ID = 'system-security-watch-dark-wor
 export const PND_WATCH_DARK_CONTINUOUS_HUNT_WORKER_WORKFLOW_ID =
   'system-security-watch-dark-continuous-hunt-worker';
 export const PND_WATCH_DEEP_WORKER_WORKFLOW_ID = 'system-security-watch-deep-worker';
+export const PND_WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_WORKFLOW_ID =
+  'system-security-watch-deep-raw-log-corroboration-worker';
 export const PND_WATCH_DETECTION_RULE_CREATION_WORKER_WORKFLOW_ID =
   'system-security-watch-detection-rule-creation-worker';
 export const PND_WATCH_DETECTION_RULE_TUNING_WORKER_WORKFLOW_ID =
@@ -198,6 +201,16 @@ export const PND_WATCH_AD_CONTINUATION_WORKER_WORKFLOW = {
   yaml: WATCH_AD_CONTINUATION_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+export const PND_WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_WORKFLOW = {
+  billable: false,
+  id: PND_WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 1,
+  visibility: WORKER_VISIBILITY,
+  yaml: WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
 export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_FLOOR_WORKFLOW,
   PND_WATCH_FLOOR_WORKER_WORKFLOW,
@@ -207,6 +220,7 @@ export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_DARK_CONTINUOUS_HUNT_WORKER_WORKFLOW,
   PND_WATCH_DEEP_WORKFLOW,
   PND_WATCH_DEEP_WORKER_WORKFLOW,
+  PND_WATCH_DEEP_RAW_LOG_CORROBORATION_WORKER_WORKFLOW,
   PND_WATCH_DETECTION_WORKFLOW,
   PND_WATCH_DETECTION_RULE_CREATION_WORKER_WORKFLOW,
   PND_WATCH_DETECTION_RULE_TUNING_WORKER_WORKFLOW,

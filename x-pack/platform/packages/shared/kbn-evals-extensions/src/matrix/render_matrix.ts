@@ -36,6 +36,8 @@ export interface RenderedMatrix {
   markdown: string;
   /** Structured JSON artifact (machine-readable). */
   json: string;
+  /** Self-contained HTML report (agent_eval_smoke style). Only when --html flag is used. */
+  html?: string;
 }
 
 const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => {

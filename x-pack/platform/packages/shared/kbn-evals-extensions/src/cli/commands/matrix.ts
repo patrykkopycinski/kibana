@@ -16,6 +16,9 @@ import type { MatrixConfig } from '../../matrix/load_matrix_config';
 import { queryMatrixScores } from '../../matrix/query_matrix_scores';
 import { buildMatrix } from '../../matrix/build_matrix';
 import { renderMatrix } from '../../matrix/render_matrix';
+import { renderMatrixHtml } from '../../matrix/render_matrix_html';
+import { queryMatrixTraces } from '../../matrix/query_matrix_traces';
+import type { MatrixTraceData } from '../../matrix/trace_types';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix';
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
@@ -49,6 +52,7 @@ export const matrixCmd: Command<void> = {
       'kbn-api-key',
       'model',
     ],
+    boolean: ['html'],
     allowUnexpected: false,
     help: `
     --config           Path to the matrix config JSON (required).
@@ -62,6 +66,7 @@ export const matrixCmd: Command<void> = {
                        (e.g. 'dev-vault' for runtime Vault, or a config.<name>.json file).
     --kbn-url          Kibana URL override.
     --kbn-api-key      Kibana API key override.
+    --html             Also generate a self-contained HTML report (matrix.html).
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -186,6 +191,26 @@ export const matrixCmd: Command<void> = {
     ];
     for (const [fileName, contents] of writes) {
       Fs.writeFileSync(Path.join(outDir, fileName), contents);
+    }
+
+    const generateHtml = flagsReader.boolean('html');
+    if (generateHtml) {
+      log.info('Querying trace data for HTML report...');
+      const traces: MatrixTraceData = await queryMatrixTraces(evalsClient, log, aggregated);
+      const htmlContent = renderMatrixHtml(
+        matrix,
+        config,
+        {
+          branch,
+          lookbackDays,
+          suiteIds,
+          commitSha: process.env.BUILDKITE_COMMIT,
+          buildUrl: process.env.BUILDKITE_BUILD_URL,
+        },
+        traces
+      );
+      Fs.writeFileSync(Path.join(outDir, 'matrix.html'), htmlContent);
+      log.info(`Wrote matrix.html to ${outDir}`);
     }
 
     log.info(

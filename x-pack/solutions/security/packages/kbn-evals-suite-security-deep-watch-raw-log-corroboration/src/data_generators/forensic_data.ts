@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-
-
 interface SeedParams {
   esClient: { bulk: (params: { index: string; body: unknown[] }) => Promise<unknown> };
   scenarioId: string;
@@ -25,7 +23,12 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
   for (const host of hosts) {
     // Process events
     events.push(
-      { index: { _index: 'logs-endpoint.events.process-default', _id: `${scenarioId}-proc-${host}` } },
+      {
+        index: {
+          _index: 'logs-endpoint.events.process-default',
+          _id: `${scenarioId}-proc-${host}`,
+        },
+      },
       {
         '@timestamp': timeRange.from,
         host: { name: host },
@@ -41,7 +44,9 @@ export const seedForensicTimeline = async (params: SeedParams): Promise<void> =>
 
     // Network events
     events.push(
-      { index: { _index: 'logs-endpoint.events.network-default', _id: `${scenarioId}-net-${host}` } },
+      {
+        index: { _index: 'logs-endpoint.events.network-default', _id: `${scenarioId}-net-${host}` },
+      },
       {
         '@timestamp': timeRange.from,
         host: { name: host },

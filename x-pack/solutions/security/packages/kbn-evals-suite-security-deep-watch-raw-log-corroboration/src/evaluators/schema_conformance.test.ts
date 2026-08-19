@@ -25,9 +25,7 @@ describe('raw_log_corroboration schema conformance (L1)', () => {
       corroboratedEvents: [
         { stage: 'initial-access', evidence: 'PowerShell execution found', confidence: 0.9 },
       ],
-      gapEvents: [
-        { stage: 'lateral-movement', expected: 'WMI connection logs' },
-      ],
+      gapEvents: [{ stage: 'lateral-movement', expected: 'WMI connection logs' }],
       confidence: 0.5,
       unresolvedQuestions: ['Was WMI used for lateral movement?'],
     };

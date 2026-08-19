@@ -12,7 +12,8 @@ export const SCENARIOS: CorroborationScenario[] = [
     id: 'full-corroboration',
     name: 'Full corroboration',
     description: 'All narrative stages have matching raw telemetry',
-    narrative: 'Phishing email delivered to WKSTN-EVAL01, PowerShell download cradle executed, C2 beacon established to 192.168.1.50:443',
+    narrative:
+      'Phishing email delivered to WKSTN-EVAL01, PowerShell download cradle executed, C2 beacon established to 192.168.1.50:443',
     alertIds: ['alert-001', 'alert-002'],
     scope: {
       hosts: ['WKSTN-EVAL01'],
@@ -28,7 +29,8 @@ export const SCENARIOS: CorroborationScenario[] = [
     id: 'partial-gap',
     name: 'Partial gap',
     description: 'One stage has no raw telemetry (detection blind spot)',
-    narrative: 'Phishing email delivered, PowerShell executed, lateral movement to SRV-DC01 via WMI, C2 beacon from SRV-DC01',
+    narrative:
+      'Phishing email delivered, PowerShell executed, lateral movement to SRV-DC01 via WMI, C2 beacon from SRV-DC01',
     alertIds: ['alert-003', 'alert-004'],
     scope: {
       hosts: ['WKSTN-EVAL01', 'SRV-DC01'],

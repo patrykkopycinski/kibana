@@ -28,17 +28,23 @@ evaluate.describe(
   { tag: tags.stateful.classic },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      await seedForensicTimeline({ esClient });
+      const scenario = SCENARIOS[0];
+      await seedForensicTimeline({
+        esClient,
+        scenarioId: scenario.id,
+        hosts: scenario.scope.hosts,
+        timeRange: scenario.scope.timeRange,
+      });
     });
 
     evaluate.afterAll(async ({ esClient }) => {
       // Cleanup handled by seeder
     });
 
-    const scenario = SCENARIOS.find((s: { id: string }) => s.id === 'full-corroboration') ?? SCENARIOS[0];
+    const scenario = SCENARIOS.find((s) => s.id === 'full-corroboration') ?? SCENARIOS[0];
 
     evaluate(
-      'composite-pipeline-full-corroboration',
+      'should execute full pipeline: discovery → esql → corroboration',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
         const prompt =
@@ -71,27 +77,17 @@ evaluate.describe(
         const hasSearch = toolIds.has(TOOL_IDS.SEARCH);
         const hasSkillInvoke = [...toolIds].some((id) => (id as string).includes(SKILL_ID));
 
-        evaluators.add('pipelineDiscovery', hasDiscovery ? 1 : 0);
-        evaluators.add('pipelineEsql', hasEsql ? 1 : 0);
-        evaluators.add('pipelineSearch', hasSearch ? 1 : 0);
-        evaluators.add('pipelineSkillInvoked', hasSkillInvoke ? 1 : 0);
-
         // Multi-step: at least 2 tool calls (discovery + query)
         const minToolCalls = 2;
-        evaluators.add('pipelineMultiStep', toolCallSteps.length >= minToolCalls ? 1 : 0);
+        const multiStep = toolCallSteps.length >= minToolCalls;
 
-        // Structured output: response should contain corroboration report fields
+        // Structured output
         const responseText = JSON.stringify(response);
         const hasCorroborated = responseText.toLowerCase().includes('corroborat');
         const hasGaps = responseText.toLowerCase().includes('gap');
         const hasConfidence = responseText.toLowerCase().includes('confidence');
 
-        evaluators.add(
-          'pipelineStructuredOutput',
-          hasCorroborated && hasGaps && hasConfidence ? 1 : 0
-        );
-
-        // Pivot logic: if process events found, should also check persistence/lateral
+        // Pivot logic
         const hasProcessQuery =
           responseText.includes('process') || responseText.includes('logs-endpoint.events.process');
         const hasPersistenceCheck =
@@ -101,16 +97,32 @@ evaluate.describe(
         const hasLateralCheck =
           responseText.includes('lateral') || responseText.includes('network');
 
-        evaluators.add(
-          'pipelinePivotLogic',
-          hasProcessQuery && (hasPersistenceCheck || hasLateralCheck) ? 1 : 0
-        );
+        const structuredOutput = hasCorroborated && hasGaps && hasConfidence;
+        const pivotLogic = hasProcessQuery && (hasPersistenceCheck || hasLateralCheck);
+
+        const success = hasEsql && multiStep && structuredOutput && pivotLogic;
 
         log.info(
-          `[L3] tools=${toolIds.size}, esql=${hasEsql}, structured=${
-            hasCorroborated && hasGaps && hasConfidence
-          }, pivot=${hasProcessQuery && (hasPersistenceCheck || hasLateralCheck)}`
+          `[L3] tools=${toolIds.size}, esql=${hasEsql}, multiStep=${multiStep}, ` +
+            `structured=${structuredOutput}, pivot=${pivotLogic}`
         );
+
+        return {
+          success,
+          explanation:
+            `Esql: ${hasEsql}. MultiStep: ${multiStep} (${toolCallSteps.length} calls). ` +
+            `Structured: ${structuredOutput}. Pivot: ${pivotLogic}. ` +
+            `Discovery: ${hasDiscovery}, Search: ${hasSearch}, Skill: ${hasSkillInvoke}.`,
+          scorecard: {
+            pipelineDiscovery: hasDiscovery ? 1 : 0,
+            pipelineEsql: hasEsql ? 1 : 0,
+            pipelineSearch: hasSearch ? 1 : 0,
+            pipelineSkillInvoked: hasSkillInvoke ? 1 : 0,
+            pipelineMultiStep: multiStep ? 1 : 0,
+            pipelineStructuredOutput: structuredOutput ? 1 : 0,
+            pipelinePivotLogic: pivotLogic ? 1 : 0,
+          },
+        };
       }
     );
   }

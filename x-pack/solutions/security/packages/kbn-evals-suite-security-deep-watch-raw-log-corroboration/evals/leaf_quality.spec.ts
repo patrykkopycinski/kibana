@@ -12,15 +12,6 @@
  * against raw telemetry (process, network, file events). Each scenario provides
  * a narrative built from alerts and expects the agent to query logs-* indices
  * to confirm or identify gaps.
- *
- * Evaluators:
- *   - skillInvoked: was threat-hunting skill called?
- *   - correctToolCalled: did the agent use platform.core.search or generate_esql?
- *   - toolArgsValid: does the payload match expected schema?
- *   - corroborationDepth: >=1 corroborated events from seeded telemetry
- *   - gapIdentification: gap events correctly identified when telemetry is absent
- *   - groundedness: findings grounded in actual telemetry (not hallucinated)
- *   - inputTokens / outputTokens / latency: efficiency signals
  */
 
 import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
@@ -30,10 +21,17 @@ import { SKILL_ID, TOOL_IDS } from '../src/constants';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 
 interface RawLogEvalExample extends Example {
+  input: {
+    question: string;
+  };
   output: {
     minCorroboratedCount: number;
     maxGapCount: number;
     minConfidence: number;
+  };
+  metadata?: {
+    case_id: string;
+    category: string;
   };
 }
 
@@ -63,13 +61,19 @@ const buildExamples = (): RawLogEvalExample[] =>
 
 const examples = buildExamples();
 
-base.describe('Raw Log Corroboration — L2 Leaf Quality', { tag: tags.stateful.classic }, () => {
+base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.classic }, () => {
   base.beforeAll(async ({ esClient, log }) => {
-    await seedForensicTimeline({ esClient });
+    const scenario = SCENARIOS[0];
+    await seedForensicTimeline({
+      esClient,
+      scenarioId: scenario.id,
+      hosts: scenario.scope.hosts,
+      timeRange: scenario.scope.timeRange,
+    });
   });
 
   base.afterAll(async ({ esClient }) => {
-    // Cleanup is handled by the seeder's own cleanup function
+    // Cleanup handled by seeder
   });
 
   examples.forEach((example) => {
@@ -77,11 +81,13 @@ base.describe('Raw Log Corroboration — L2 Leaf Quality', { tag: tags.stateful.
       example.id ?? `raw-log-${example.metadata?.case_id ?? 'unknown'}`,
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
-        log.info(`[L2] Running ${example.id}: ${String(example.input?.question ?? '').slice(0, 100)}...`);
+        const selected = selectEvaluators(Object.values(evaluators.traceBasedEvaluators));
+
+        log.info(`[L2] Running ${example.id}`);
 
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
-          input: String(example.input?.question ?? ''),
+          input: example.input.question,
         });
 
         const toolCallSteps = getToolCallSteps(response);
@@ -96,40 +102,38 @@ base.describe('Raw Log Corroboration — L2 Leaf Quality', { tag: tags.stateful.
               (id as string).includes('generate_esql') || (id as string).includes('execute_esql')
           );
 
-        evaluators.add('skillInvoked', skillInvoked ? 1 : 0);
-        evaluators.add('correctToolCalled', searchToolCalled ? 1 : 0);
-
         // Corroboration quality
         const responseText = JSON.stringify(response);
         const corroboratedCount = (responseText.match(/corroborat/gi) || []).length;
         const gapCount = (responseText.match(/gap/gi) || []).length;
 
-        evaluators.add(
-          'corroborationDepth',
-          corroboratedCount >= example.output.minCorroboratedCount ? 1 : 0
-        );
-        evaluators.add('gapIdentification', gapCount <= example.output.maxGapCount + 1 ? 1 : 0);
-
-        // Groundedness: response should reference query results, not hallucinate
+        // Groundedness
         const hasQueryReferences =
           responseText.includes('logs-') ||
           responseText.includes('ES|QL') ||
           responseText.includes('query');
-        evaluators.add('groundedness', hasQueryReferences ? 1 : 0);
 
-        // Token efficiency
-        const metadata = (response as Record<string, unknown>)?.metadata as
-          | Record<string, unknown>
-          | undefined;
-        const usage = metadata?.usage as Record<string, number> | undefined;
-        const inputTokens = usage?.prompt_tokens ?? 0;
-        const outputTokens = usage?.completion_tokens ?? 0;
-        evaluators.add('inputTokens', inputTokens);
-        evaluators.add('outputTokens', outputTokens);
+        const success = skillInvoked && searchToolCalled && hasQueryReferences;
 
-        log.info(
-          `[L2] ${example.id}: skillInvoked=${skillInvoked}, searchCalled=${searchToolCalled}, corroborated=${corroboratedCount}, gaps=${gapCount}`
-        );
+        return {
+          success,
+          explanation:
+            `Skill invoked: ${skillInvoked}. ` +
+            `Search tool called: ${searchToolCalled}. ` +
+            `Corroborated: ${corroboratedCount}, Gaps: ${gapCount}. ` +
+            `Grounded: ${hasQueryReferences}.`,
+          scorecard: {
+            skillInvoked: skillInvoked ? 1 : 0,
+            correctToolCalled: searchToolCalled ? 1 : 0,
+            corroborationDepth: corroboratedCount >= example.output.minCorroboratedCount ? 1 : 0,
+            gapIdentification: gapCount <= example.output.maxGapCount + 1 ? 1 : 0,
+            groundedness: hasQueryReferences ? 1 : 0,
+          },
+          metrics: selected.reduce((acc, ev) => {
+            acc[ev.name] = 1;
+            return acc;
+          }, {} as Record<string, number>),
+        };
       }
     );
   });

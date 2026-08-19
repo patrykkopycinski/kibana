@@ -17,7 +17,8 @@
  */
 
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
-import { SCENARIOS, SKILL_ID } from '../src/constants';
+import { SCENARIOS } from '../src/dataset';
+import { SKILL_ID } from '../src/constants';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 
 evaluate.describe(
@@ -25,17 +26,23 @@ evaluate.describe(
   { tag: tags.stateful.classic },
   () => {
     evaluate.beforeAll(async ({ esClient, log }) => {
-      await seedForensicTimeline({ esClient });
+      const scenario = SCENARIOS[0];
+      await seedForensicTimeline({
+        esClient,
+        scenarioId: scenario.id,
+        hosts: scenario.scope.hosts,
+        timeRange: scenario.scope.timeRange,
+      });
     });
 
     evaluate.afterAll(async ({ esClient }) => {
       // Cleanup handled by seeder
     });
 
-    const scenario = SCENARIOS.find((s: { id: string }) => s.id === 'partial-gap') ?? SCENARIOS[0];
+    const scenario = SCENARIOS.find((s) => s.id === 'partial-gap') ?? SCENARIOS[0];
 
     evaluate(
-      'durable-outcome-corroboration-persisted',
+      'should persist corroboration findings to investigation timeline',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
         const prompt =
@@ -57,7 +64,6 @@ evaluate.describe(
 
         // Skill invocation gate
         const skillInvoked = [...toolIds].some((id) => (id as string).includes(SKILL_ID));
-        evaluators.add('skillInvoked', skillInvoked ? 1 : 0);
 
         // Durable write: check if emit_corroboration was called or if
         // the investigation timeline was updated
@@ -66,7 +72,6 @@ evaluate.describe(
             (id as string).includes('emit_corroboration') ||
             (id as string).includes('recordDeepWatch')
         );
-        evaluators.add('durableWriteCalled', hasEmitCorroboration ? 1 : 0);
 
         // Verify persisted data in ES
         const responseText = JSON.stringify(response);
@@ -75,20 +80,33 @@ evaluate.describe(
           responseText.includes('timeline') ||
           responseText.includes('persisted');
 
-        evaluators.add('durableOutcomeVerified', hasPersistedRef ? 1 : 0);
-
         // Structured report fields
         const hasCorroborated = responseText.toLowerCase().includes('corroborat');
         const hasGaps = responseText.toLowerCase().includes('gap');
         const hasUnresolved = responseText.toLowerCase().includes('unresolved');
 
-        evaluators.add('reportCompleteness', hasCorroborated && hasGaps && hasUnresolved ? 1 : 0);
+        const reportComplete = hasCorroborated && hasGaps && hasUnresolved;
+        const success = skillInvoked && hasEmitCorroboration && hasPersistedRef;
 
         log.info(
-          `[L4] skillInvoked=${skillInvoked}, durableWrite=${hasEmitCorroboration}, persisted=${hasPersistedRef}, complete=${
-            hasCorroborated && hasGaps && hasUnresolved
-          }`
+          `[L4] skillInvoked=${skillInvoked}, durableWrite=${hasEmitCorroboration}, ` +
+            `persisted=${hasPersistedRef}, complete=${reportComplete}`
         );
+
+        return {
+          success,
+          explanation:
+            `Skill invoked: ${skillInvoked}. ` +
+            `Durable write: ${hasEmitCorroboration}. ` +
+            `Persisted ref: ${hasPersistedRef}. ` +
+            `Report complete: ${reportComplete}.`,
+          scorecard: {
+            skillInvoked: skillInvoked ? 1 : 0,
+            durableWriteCalled: hasEmitCorroboration ? 1 : 0,
+            durableOutcomeVerified: hasPersistedRef ? 1 : 0,
+            reportCompleteness: reportComplete ? 1 : 0,
+          },
+        };
       }
     );
   }

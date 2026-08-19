@@ -1,0 +1,17 @@
+import type { ScoutTestTarget } from '@kbn/scout-info';
+/**
+ * Detects if the playwright config path indicates a custom config directory.
+ * Custom configs are detected when the path contains 'scout_<name>' instead of 'scout/'.
+ * @param playwrightConfigPath Path to the playwright config file
+ * @returns The custom config directory name if detected, null otherwise
+ */
+export declare function detectCustomConfigDir(playwrightConfigPath: string): string | null;
+/**
+ * Determines the config root directory based on playwright config path, optional config dir, and mode.
+ * Returns the root directory where the config file should be located.
+ * @param playwrightConfigPath path to the playwright config file
+ * @param testTarget The test target definition (based on location, architecture and domain)
+ * @param serverConfigSet Server configuration set to use (e.g., 'uiam_local')
+ * @returns The root directory path for the config (e.g., 'default/serverless', 'uiam_local/serverless')
+ */
+export declare function getConfigRootDir(playwrightConfigPath: string, testTarget: ScoutTestTarget, serverConfigSet?: string): string;

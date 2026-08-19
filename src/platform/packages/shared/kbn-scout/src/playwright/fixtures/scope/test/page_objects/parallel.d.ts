@@ -1,0 +1,22 @@
+import type { PageObjects } from '../../../../page_objects';
+import type { ScoutSpaceParallelFixture, ScoutTestConfig } from '../../worker';
+/**
+ * The "pageObjects" fixture provides a centralized and consistent way to access and
+ * interact with reusable Page Objects in tests. This fixture automatically
+ * initializes core Page Objects and makes them available to tests, promoting
+ * modularity and reducing redundant setup.
+ *
+ * Note: Page Objects are lazily instantiated on first access.
+ */
+export declare const pageObjectsParallelFixture: import("playwright/test").TestType<import("playwright/test").PlaywrightTestArgs & import("playwright/test").PlaywrightTestOptions & {
+    page: import("..").ScoutPage;
+} & {
+    pageObjects: PageObjects;
+}, import("playwright/test").PlaywrightWorkerArgs & import("playwright/test").PlaywrightWorkerOptions & {
+    log: import("../../worker").ScoutLogger;
+    kbnUrl: import("../../worker").KibanaUrl;
+    scoutSpace: ScoutSpaceParallelFixture;
+} & {
+    scoutSpace: ScoutSpaceParallelFixture;
+    config: ScoutTestConfig;
+}>;

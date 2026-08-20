@@ -18,6 +18,5 @@
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
     "@kbn/tooling-log",
-    "@kbn/test"
   ]
 }

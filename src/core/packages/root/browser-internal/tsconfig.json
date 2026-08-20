@@ -75,7 +75,6 @@
     "@kbn/core-di-mocks",
     "@kbn/core-notifications-browser",
     "@kbn/core-user-storage-browser-internal",
-    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",

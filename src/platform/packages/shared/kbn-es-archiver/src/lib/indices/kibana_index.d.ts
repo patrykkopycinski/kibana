@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -14,16 +5,11 @@ import type { Stats } from '../stats';
 /**
  * Deletes all saved object indices, or if onlyTaskManager==true, it deletes task_manager indices
  */
-export declare function deleteSavedObjectIndices({
-  client,
-  stats,
-  onlyTaskManager,
-  log,
-}: {
-  client: Client;
-  stats: Stats;
-  onlyTaskManager?: boolean;
-  log: ToolingLog;
+export declare function deleteSavedObjectIndices({ client, stats, onlyTaskManager, log, }: {
+    client: Client;
+    stats: Stats;
+    onlyTaskManager?: boolean;
+    log: ToolingLog;
 }): Promise<string[] | undefined>;
 /**
  * Given an elasticsearch client, and a logger, migrates the `.kibana` index. This
@@ -32,21 +18,13 @@ export declare function deleteSavedObjectIndices({
  */
 export declare function migrateSavedObjectIndices(kbnClient: KbnClient): Promise<void>;
 export declare function isSavedObjectIndex(index?: string): index is string;
-export declare function cleanSavedObjectIndices({
-  client,
-  stats,
-  log,
-  index,
-}: {
-  client: Client;
-  stats: Stats;
-  log: ToolingLog;
-  index?: string | string[];
+export declare function cleanSavedObjectIndices({ client, stats, log, index, }: {
+    client: Client;
+    stats: Stats;
+    log: ToolingLog;
+    index?: string | string[];
 }): Promise<void>;
-export declare function createDefaultSpace({
-  index,
-  client,
-}: {
-  index: string;
-  client: Client;
+export declare function createDefaultSpace({ index, client }: {
+    index: string;
+    client: Client;
 }): Promise<void>;

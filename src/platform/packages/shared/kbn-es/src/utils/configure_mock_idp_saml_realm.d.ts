@@ -1,25 +1,16 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ToolingLog } from '@kbn/tooling-log';
 export interface ConfigureMockIdpSamlRealmOptions {
-  /** User-provided `-E` Elasticsearch args. */
-  userEsArgs: string[];
-  /** License the cluster is started with. SAML requires a `trial` (or higher) license. */
-  license?: string;
-  log: ToolingLog;
+    /** User-provided `-E` Elasticsearch args. */
+    userEsArgs: string[];
+    /** License the cluster is started with. SAML requires a `trial` (or higher) license. */
+    license?: string;
+    log: ToolingLog;
 }
 export interface ConfigureMockIdpSamlRealmResult {
-  /** The Elasticsearch args to start the cluster with (SAML args prepended to user args). */
-  esArgs: string[];
-  /** Additional resources (e.g. `roles.yml`) to copy into the cluster's config directory. */
-  resources: string[];
+    /** The Elasticsearch args to start the cluster with (SAML args prepended to user args). */
+    esArgs: string[];
+    /** Additional resources (e.g. `roles.yml`) to copy into the cluster's config directory. */
+    resources: string[];
 }
 /**
  * Auto-configures a mock SAML realm so the Kibana Mock IdP works out-of-the-box, mirroring what we
@@ -29,8 +20,4 @@ export interface ConfigureMockIdpSamlRealmResult {
  * Returns the final Elasticsearch args (with SAML args prepended so user `-E` args can override
  * them) and any additional resources that must be copied into the cluster's config directory.
  */
-export declare function configureMockIdpSamlRealm({
-  userEsArgs,
-  license,
-  log,
-}: ConfigureMockIdpSamlRealmOptions): Promise<ConfigureMockIdpSamlRealmResult>;
+export declare function configureMockIdpSamlRealm({ userEsArgs, license, log, }: ConfigureMockIdpSamlRealmOptions): Promise<ConfigureMockIdpSamlRealmResult>;

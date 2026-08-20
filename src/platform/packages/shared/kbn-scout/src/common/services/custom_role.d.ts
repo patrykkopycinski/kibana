@@ -1,52 +1,33 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { EsClient, KbnClient } from '.';
 export interface KibanaRole {
-  elasticsearch: {
-    cluster: string[];
-    indices?: Array<{
-      names: string[];
-      privileges: string[];
-      allow_restricted_indices?: boolean | undefined;
+    elasticsearch: {
+        cluster: string[];
+        indices?: Array<{
+            names: string[];
+            privileges: string[];
+            allow_restricted_indices?: boolean | undefined;
+        }>;
+    };
+    kibana: Array<{
+        base: string[];
+        feature: Record<string, string[]>;
+        spaces: string[];
     }>;
-  };
-  kibana: Array<{
-    base: string[];
-    feature: Record<string, string[]>;
-    spaces: string[];
-  }>;
 }
 export interface ElasticsearchRoleDescriptor {
-  cluster?: string[];
-  indices?: Array<{
-    names: string[];
-    privileges: string[];
-    allow_restricted_indices?: boolean;
-  }>;
-  applications?: Array<{
-    application: string;
-    privileges: string[];
-    resources: string[];
-  }>;
-  run_as?: string[];
+    cluster?: string[];
+    indices?: Array<{
+        names: string[];
+        privileges: string[];
+        allow_restricted_indices?: boolean;
+    }>;
+    applications?: Array<{
+        application: string;
+        privileges: string[];
+        resources: string[];
+    }>;
+    run_as?: string[];
 }
-export declare const createCustomRole: (
-  kbnClient: KbnClient,
-  customRoleName: string,
-  role: KibanaRole
-) => Promise<void>;
-export declare const createElasticsearchCustomRole: (
-  client: EsClient,
-  customRoleName: string,
-  role: ElasticsearchRoleDescriptor
-) => Promise<void>;
-export declare const isElasticsearchRole: (
-  role: KibanaRole | ElasticsearchRoleDescriptor
-) => role is ElasticsearchRoleDescriptor;
+export declare const createCustomRole: (kbnClient: KbnClient, customRoleName: string, role: KibanaRole) => Promise<void>;
+export declare const createElasticsearchCustomRole: (client: EsClient, customRoleName: string, role: ElasticsearchRoleDescriptor) => Promise<void>;
+export declare const isElasticsearchRole: (role: KibanaRole | ElasticsearchRoleDescriptor) => role is ElasticsearchRoleDescriptor;

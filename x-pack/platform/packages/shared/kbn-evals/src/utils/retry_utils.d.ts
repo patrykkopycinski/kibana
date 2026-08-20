@@ -1,41 +1,34 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 export interface RetryOptions {
-  /**
-   * Total number of attempts (initial try + retries).
-   */
-  maxAttempts?: number;
-  /**
-   * Minimum delay for exponential backoff (ms).
-   */
-  minDelayMs?: number;
-  /**
-   * Maximum delay cap (ms).
-   */
-  maxDelayMs?: number;
-  /**
-   * If true, add a small random jitter to the delay.
-   */
-  jitter?: boolean;
-  /**
-   * Optional label for error messages/logging.
-   */
-  label?: string;
-  /**
-   * Optional hook invoked before sleeping between retries.
-   */
-  onRetry?: (params: {
-    attempt: number;
-    maxAttempts: number;
-    delayMs: number;
-    error: unknown;
-    label: string;
-  }) => void;
+    /**
+     * Total number of attempts (initial try + retries).
+     */
+    maxAttempts?: number;
+    /**
+     * Minimum delay for exponential backoff (ms).
+     */
+    minDelayMs?: number;
+    /**
+     * Maximum delay cap (ms).
+     */
+    maxDelayMs?: number;
+    /**
+     * If true, add a small random jitter to the delay.
+     */
+    jitter?: boolean;
+    /**
+     * Optional label for error messages/logging.
+     */
+    label?: string;
+    /**
+     * Optional hook invoked before sleeping between retries.
+     */
+    onRetry?: (params: {
+        attempt: number;
+        maxAttempts: number;
+        delayMs: number;
+        error: unknown;
+        label: string;
+    }) => void;
 }
 export declare function getStatusCode(error: any): number | undefined;
 /**

@@ -1,16 +1,7 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { MessageDescriptor, Formatters } from '@formatjs/intl';
 import type { Translation, TranslationInput } from '../translation';
 import type { FormatXMLElementFn, PrimitiveType } from './types';
-export declare const EN_LOCALE = 'en';
+export declare const EN_LOCALE = "en";
 export declare const getIsInitialized: () => boolean;
 /**
  * Provides a way to register translations with the engine
@@ -25,34 +16,31 @@ export declare function getTranslation(): Translation;
  * Shortcut to getTranslation().locale
  */
 export declare function getLocale(): string;
-type MessageFormatters = Pick<
-  Formatters,
-  'getNumberFormat' | 'getDateTimeFormat' | 'getPluralRules'
->;
+type MessageFormatters = Pick<Formatters, 'getNumberFormat' | 'getDateTimeFormat' | 'getPluralRules'>;
 export interface TranslateArguments {
-  /**
-   * Will be used unless translation was successful
-   */
-  defaultMessage: MessageDescriptor['defaultMessage'];
-  /**
-   * Message description, used by translators and other devs to understand the message context.
-   */
-  description?: MessageDescriptor['description'];
-  /**
-   * values to pass into translation
-   */
-  values?: Record<string, PrimitiveType | FormatXMLElementFn<string, string>>;
-  /**
-   * Whether to treat HTML/XML tags as string literal
-   * instead of parsing them as tag token.
-   * When this is false we only allow simple tags without
-   * any attributes
-   */
-  ignoreTag?: boolean;
-  /**
-   * Custom formatters to override the default intl formatters
-   */
-  formatters?: MessageFormatters;
+    /**
+     * Will be used unless translation was successful
+     */
+    defaultMessage: MessageDescriptor['defaultMessage'];
+    /**
+     * Message description, used by translators and other devs to understand the message context.
+     */
+    description?: MessageDescriptor['description'];
+    /**
+     * values to pass into translation
+     */
+    values?: Record<string, PrimitiveType | FormatXMLElementFn<string, string>>;
+    /**
+     * Whether to treat HTML/XML tags as string literal
+     * instead of parsing them as tag token.
+     * When this is false we only allow simple tags without
+     * any attributes
+     */
+    ignoreTag?: boolean;
+    /**
+     * Custom formatters to override the default intl formatters
+     */
+    formatters?: MessageFormatters;
 }
 /**
  * Translate message by id
@@ -64,20 +52,14 @@ export interface TranslateArguments {
  * @param [options.ignoreTag] - Whether to treat HTML/XML tags as string literal instead of parsing them as tag token. When this is false we only allow simple tags without any attributes
  * @param [options.formatters] - Custom formatters to override the default intl formatters
  */
-export declare function translate(
-  id: string,
-  { values, description, defaultMessage, ignoreTag, formatters }: TranslateArguments
-): string;
+export declare function translate(id: string, { values, description, defaultMessage, ignoreTag, formatters }: TranslateArguments): string;
 /**
  * Formats a list of values using the current locale.
  * @param type - The type of list formatting (e.g., 'conjunction', 'disjunction', 'unit').
  * @param value - The array of string values to format.
  * @returns The formatted list string.
  */
-export declare function formatList(
-  type: 'conjunction' | 'disjunction' | 'unit',
-  value: string[]
-): string;
+export declare function formatList(type: 'conjunction' | 'disjunction' | 'unit', value: string[]): string;
 /**
  * Initializes the engine
  * @param newTranslation

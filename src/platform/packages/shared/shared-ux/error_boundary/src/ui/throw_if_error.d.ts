@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { FC } from 'react';
 /**
  * This component allows errors to be caught outside of a render tree, and re-thrown within a render tree
@@ -16,5 +7,5 @@ import type { FC } from 'react';
  * @public
  */
 export declare const ThrowIfError: FC<{
-  error: Error | null;
+    error: Error | null;
 }>;

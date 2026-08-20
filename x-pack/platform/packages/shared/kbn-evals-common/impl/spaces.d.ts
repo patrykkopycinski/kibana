@@ -1,21 +1,14 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 /**
  * Restated rather than taken from the spaces plugin, which neither this package
  * nor its offline callers can depend on.
  */
-export declare const DEFAULT_SPACE_ID = 'default';
+export declare const DEFAULT_SPACE_ID = "default";
 /**
  * The spaces wildcard. Evaluations data is never assigned to it: a dataset for
  * several spaces names each one. Kept so the wildcard can be recognised and
  * refused rather than stored as if it were a space id.
  */
-export declare const ALL_SPACES_ID = '*';
+export declare const ALL_SPACES_ID = "*";
 /**
  * The space a dataset belongs to, which its id is derived from. The active space
  * whenever the dataset will be visible there, so an edit made in place keeps the
@@ -24,7 +17,4 @@ export declare const ALL_SPACES_ID = '*';
  * Lives beside {@link getDatasetId} because the two decide one thing between
  * them: which space a dataset's id comes from.
  */
-export declare const resolveDatasetHomeSpace: (
-  activeSpaceId: string,
-  targetSpaceIds: string[]
-) => string;
+export declare const resolveDatasetHomeSpace: (activeSpaceId: string, targetSpaceIds: string[]) => string;

@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from '@jest/types';
 /**
@@ -19,8 +10,8 @@ import type { Config } from '@jest/types';
  */
 export declare function runJest(configName?: string): Promise<void>;
 interface ParsedJestArguments {
-  parsedArguments: any;
-  unknownFlags: string[];
+    parsedArguments: any;
+    unknownFlags: string[];
 }
 /**
  * Parses command line arguments and validates Jest flags.
@@ -37,10 +28,7 @@ export declare function parseJestArguments(): ParsedJestArguments;
  * @param configNames - Array of config file names to search for (in priority order)
  * @returns Path to the first config file found, or null if none found
  */
-export declare function findConfigInDirectoryTree(
-  startPath: string,
-  configNames: string[]
-): string | null;
+export declare function findConfigInDirectoryTree(startPath: string, configNames: string[]): string | null;
 /**
  * Discovers Jest configuration file by searching the directory tree.
  *
@@ -51,12 +39,7 @@ export declare function findConfigInDirectoryTree(
  * @returns Path to discovered config file
  * @throws Error if no config file is found
  */
-export declare function discoverJestConfig(
-  testFiles: string[],
-  currentWorkingDirectory: string,
-  configName: string,
-  log: ToolingLog
-): string;
+export declare function discoverJestConfig(testFiles: string[], currentWorkingDirectory: string, configName: string, log: ToolingLog): string;
 /**
  * Resolve the Jest configuration from either an inline JSON value (via `--config`)
  * or from a filesystem config file path.
@@ -75,16 +58,13 @@ export declare function discoverJestConfig(
  * @throws If neither a valid inline config nor a readable config file path can be determined,
  *   or if the supplied file path does not exist.
  */
-export declare function resolveJestConfig(
-  parsedArguments: any,
-  resolvedConfigPath?: string
-): Promise<{
-  config: Config.InitialOptions;
-  configPath: string | undefined;
+export declare function resolveJestConfig(parsedArguments: any, resolvedConfigPath?: string): Promise<{
+    config: Config.InitialOptions;
+    configPath: string | undefined;
 }>;
 interface JestExecutionContext {
-  jestArgv: string[];
-  originalArgv: string[];
+    jestArgv: string[];
+    originalArgv: string[];
 }
 /**
  * Prepares Jest execution context by setting up configuration and arguments.
@@ -93,9 +73,7 @@ interface JestExecutionContext {
  * @param baseConfig - Base Jest configuration
  * @returns Jest execution context with processed arguments (already sliced for Jest consumption)
  */
-export declare function prepareJestExecution(
-  baseConfig: Config.InitialOptions
-): Promise<JestExecutionContext>;
+export declare function prepareJestExecution(baseConfig: Config.InitialOptions): Promise<JestExecutionContext>;
 /**
  * Finds the common base path by sorting the array and comparing the first and last element.
  * This leverages the fact that string sorting ensures the first and last elements
@@ -105,7 +83,7 @@ export declare function prepareJestExecution(
  * @param sep - Path separator (defaults to OS separator)
  * @returns Common base path shared by all input paths
  */
-export declare function commonBasePath(paths?: string[], sep?: '/' | '\\'): string;
+export declare function commonBasePath(paths?: string[], sep?: "/" | "\\"): string;
 /**
  * Removes occurrences of a CLI flag (and its following value if present) from argv array.
  * Supports both --flag value and --flag=value forms.

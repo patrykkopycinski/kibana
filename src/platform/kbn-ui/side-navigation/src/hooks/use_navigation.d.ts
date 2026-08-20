@@ -1,20 +1,11 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { MenuItem, NavigationStructure } from '../../types';
 interface NavigationState {
-  actualActiveItemId: string | undefined;
-  visuallyActivePageId: string | undefined;
-  visuallyActiveSubpageId: string | undefined;
-  openerNode: MenuItem | null;
-  isCollapsed: boolean;
-  isSidePanelOpen: boolean;
+    actualActiveItemId: string | undefined;
+    visuallyActivePageId: string | undefined;
+    visuallyActiveSubpageId: string | undefined;
+    openerNode: MenuItem | null;
+    isCollapsed: boolean;
+    isSidePanelOpen: boolean;
 }
 /**
  * Hook for managing the main navigation state.
@@ -31,10 +22,5 @@ interface NavigationState {
  * - `isCollapsed` - whether the side nav is collapsed.
  * - `isSidePanelOpen` - whether the side panel is open.
  */
-export declare const useNavigation: (
-  isCollapsed: boolean,
-  items: NavigationStructure,
-  logoId: string | undefined,
-  activeItemId?: string
-) => NavigationState;
+export declare const useNavigation: (isCollapsed: boolean, items: NavigationStructure, logoId: string | undefined, activeItemId?: string) => NavigationState;
 export {};

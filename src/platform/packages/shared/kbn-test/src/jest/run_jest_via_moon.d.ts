@@ -1,56 +1,40 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-export declare const JEST_CONFIG_NAMES: readonly [
-  'jest.config.dev.js',
-  'jest.config.js',
-  'jest.config.cjs',
-  'jest.config.mjs',
-  'jest.config.ts',
-  'jest.config.json'
-];
+export declare const JEST_CONFIG_NAMES: readonly ['jest.config.dev.js', 'jest.config.js', 'jest.config.cjs', 'jest.config.mjs', 'jest.config.ts', 'jest.config.json'];
 export interface JestFailedTest {
-  file: string;
-  line?: number;
-  name: string;
-  message: string;
-  /** True when the failure message matches a known Jest worker OOM/crash signature. */
-  oom?: boolean;
+    file: string;
+    line?: number;
+    name: string;
+    message: string;
+    /** True when the failure message matches a known Jest worker OOM/crash signature. */
+    oom?: boolean;
 }
 export interface MoonJestTaskResult {
-  project: string;
-  configPath?: string;
-  cached: boolean;
-  passed: boolean;
-  testCount: number;
-  failures: JestFailedTest[];
+    project: string;
+    configPath?: string;
+    cached: boolean;
+    passed: boolean;
+    testCount: number;
+    failures: JestFailedTest[];
 }
 export interface MoonJestResult {
-  taskCount: number;
-  cachedCount: number;
-  totalTests: number;
-  failed: MoonJestTaskResult[];
-  exitCode: number;
-  verboseDetail?: string;
-  failureExcerpt?: string[];
-  warnings?: string[];
-  /** REPO_ROOT-relative path to the full captured Moon/Jest output, written on failure. */
-  logPath?: string;
+    taskCount: number;
+    cachedCount: number;
+    totalTests: number;
+    failed: MoonJestTaskResult[];
+    exitCode: number;
+    verboseDetail?: string;
+    failureExcerpt?: string[];
+    warnings?: string[];
+    /** REPO_ROOT-relative path to the full captured Moon/Jest output, written on failure. */
+    logPath?: string;
 }
 export interface MoonJestProgress {
-  completedCount: number;
+    completedCount: number;
 }
 export interface MoonJestParseResult {
-  tasks: MoonJestTaskResult[];
-  parseFailures: string[];
+    tasks: MoonJestTaskResult[];
+    parseFailures: string[];
 }
-export declare const MOON_JEST_LOG_PATH = 'target/kibana-check-jest-output.log';
+export declare const MOON_JEST_LOG_PATH = "target/kibana-check-jest-output.log";
 /** Mirrors CI's unit-test heap cap (`.buildkite/scripts/steps/test/jest_parallel.sh`). */
 export declare const JEST_WORKER_MAX_OLD_SPACE_MB = 4096;
 /**
@@ -77,8 +61,8 @@ export declare const findJestConfig: (testFilePath: string) => string | undefine
  * - Moon concurrency caps at 2
  */
 export declare const computeJestParallelism: (estimatedTasks: number) => {
-  concurrency: number;
-  maxWorkers: number;
+    concurrency: number;
+    maxWorkers: number;
 };
 export declare const parseMoonJestOutput: (output: string) => MoonJestParseResult;
 /**
@@ -87,25 +71,15 @@ export declare const parseMoonJestOutput: (output: string) => MoonJestParseResul
  * V8 crash signature jest-worker itself looks for (RAW_OOM_SIGNATURE_RE) so we can tell
  * the user "this was OOM" instead of a generic "no output parsed" message.
  */
-export declare const buildMoonJestWarnings: ({
-  output,
-  exitCode,
-  taskCount,
-  parseFailures,
-}: {
-  output: string;
-  exitCode: number;
-  taskCount: number;
-  parseFailures: string[];
+export declare const buildMoonJestWarnings: ({ output, exitCode, taskCount, parseFailures, }: {
+    output: string;
+    exitCode: number;
+    taskCount: number;
+    parseFailures: string[];
 }) => string[] | undefined;
-export declare const runJestViaMoon: ({
-  changedFiles,
-  verbose,
-  downstream,
-  onProgress,
-}: {
-  changedFiles: string[];
-  verbose?: boolean;
-  downstream?: string;
-  onProgress?: (progress: MoonJestProgress) => void;
+export declare const runJestViaMoon: ({ changedFiles, verbose, downstream, onProgress, }: {
+    changedFiles: string[];
+    verbose?: boolean;
+    downstream?: string;
+    onProgress?: (progress: MoonJestProgress) => void;
 }) => Promise<MoonJestResult>;

@@ -1,23 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { z } from '@kbn/zod/v4';
-export declare function createIsNarrowSchema<
-  TBaseSchema extends z.ZodType,
-  TNarrowSchema extends z.ZodType
->(
-  _base: TBaseSchema,
-  narrow: TNarrowSchema
-): <TValue extends z.input<TBaseSchema>>(
-  value: TValue
-) => value is Extract<TValue, z.input<TNarrowSchema>>;
-export declare function isSchema<TSchema extends z.ZodType>(
-  schema: TSchema,
-  value: unknown
-): value is z.input<TSchema>;
+export declare function createIsNarrowSchema<TBaseSchema extends z.ZodType, TNarrowSchema extends z.ZodType>(_base: TBaseSchema, narrow: TNarrowSchema): <TValue extends z.input<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.input<TNarrowSchema>>;
+export declare function isSchema<TSchema extends z.ZodType>(schema: TSchema, value: unknown): value is z.input<TSchema>;

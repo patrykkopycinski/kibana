@@ -1,22 +1,10 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
-import type {
-  ChromeProjectNavigationNode,
-  NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser';
+import type { ChromeProjectNavigationNode, NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
 import type { NavigationStructure, SideNavLogo } from '@kbn/ui-side-navigation/types';
 import type { PanelStateManager } from './panel_state_manager';
 export interface NavigationItems {
-  logoItem?: SideNavLogo;
-  navItems: NavigationStructure;
-  activeItemId?: string;
+    logoItem?: SideNavLogo;
+    navItems: NavigationStructure;
+    activeItemId?: string;
 }
 /**
  * Converts the navigation tree definition and nav links into a format for new navigation.
@@ -41,10 +29,4 @@ export interface NavigationItems {
  * @param panelStateManager - Manager for panel opener state
  * @param isNextChrome - Whether the navigation is in the next chrome
  */
-export declare const toNavigationItems: (
-  navigationTree: NavigationTreeDefinitionUI,
-  activeNodes: ChromeProjectNavigationNode[][],
-  overflowItemIds: string[] | undefined,
-  panelStateManager: PanelStateManager,
-  isNextChrome?: boolean
-) => NavigationItems;
+export declare const toNavigationItems: (navigationTree: NavigationTreeDefinitionUI, activeNodes: ChromeProjectNavigationNode[][], overflowItemIds: string[] | undefined, panelStateManager: PanelStateManager, isNextChrome?: boolean) => NavigationItems;

@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { InferenceTaskEventBase } from '../inference_task';
 import type { AnonymizationResponseMetadata, DeanonymizedMessageData } from './anonymization';
 import type { ToolOptions } from './tools';
@@ -13,44 +6,40 @@ import type { ToolCallOfToolOptions } from './tools_of';
  * List possible values of {@link ChatCompletionEvent} types.
  */
 export declare enum ChatCompletionEventType {
-  ChatCompletionChunk = 'chatCompletionChunk',
-  ChatCompletionTokenCount = 'chatCompletionTokenCount',
-  ChatCompletionMessage = 'chatCompletionMessage',
+    ChatCompletionChunk = "chatCompletionChunk",
+    ChatCompletionTokenCount = "chatCompletionTokenCount",
+    ChatCompletionMessage = "chatCompletionMessage"
 }
 /**
  * Message event, sent only once, after all the chunks were emitted, and containing
  * the whole text content and potential tool calls of the response.
  */
-export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
-  InferenceTaskEventBase<
-    ChatCompletionEventType.ChatCompletionMessage,
-    {
-      /**
-       * The text content of the LLM response.
-       */
-      content: string;
-      /**
-       * Optional refusal reason returned by the model when content is filtered.
-       */
-      refusal?: string;
-      /**
-       * Optional deanonymized input messages metadata
-       */
-      deanonymized_input?: DeanonymizedMessageData[];
-      /**
-       * Optional deanonymized output metadata
-       */
-      deanonymized_output?: DeanonymizedMessageData;
-      /**
-       * Optional metadata attached by inference runtime.
-       */
-      metadata?: AnonymizationResponseMetadata;
-      /**
-       * Tool calls from the LLM
-       */
-      toolCalls: ToolCallOfToolOptions<TToolOptions>[];
-    }
-  >;
+export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> = InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage, {
+    /**
+     * The text content of the LLM response.
+     */
+    content: string;
+    /**
+     * Optional refusal reason returned by the model when content is filtered.
+     */
+    refusal?: string;
+    /**
+     * Optional deanonymized input messages metadata
+     */
+    deanonymized_input?: DeanonymizedMessageData[];
+    /**
+     * Optional deanonymized output metadata
+     */
+    deanonymized_output?: DeanonymizedMessageData;
+    /**
+     * Optional metadata attached by inference runtime.
+     */
+    metadata?: AnonymizationResponseMetadata;
+    /**
+     * Tool calls from the LLM
+     */
+    toolCalls: ToolCallOfToolOptions<TToolOptions>[];
+}>;
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -58,32 +47,30 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
  * are partial and must be aggregated.
  */
 export interface ChatCompletionChunkToolCall {
-  /**
-   * The tool call index (position in the tool call array).
-   */
-  index: number;
-  /**
-   * chunk of tool call id.
-   */
-  toolCallId: string;
-  function: {
     /**
-     * chunk of tool name.
+     * The tool call index (position in the tool call array).
      */
-    name: string;
+    index: number;
     /**
-     * chunk of tool call arguments.
+     * chunk of tool call id.
      */
-    arguments: string;
-  };
+    toolCallId: string;
+    function: {
+        /**
+         * chunk of tool name.
+         */
+        name: string;
+        /**
+         * chunk of tool call arguments.
+         */
+        arguments: string;
+    };
 }
 /**
  * Chunk event, containing a fragment of the total content,
  * and potentially chunks of tool calls.
  */
-export type ChatCompletionChunkEvent = InferenceTaskEventBase<
-  ChatCompletionEventType.ChatCompletionChunk,
-  {
+export type ChatCompletionChunkEvent = InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionChunk, {
     /**
      * The content chunk
      */
@@ -108,47 +95,43 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * Optional metadata attached by inference runtime.
      */
     metadata?: AnonymizationResponseMetadata;
-  }
->;
+}>;
 /**
  * Token count structure for the chatComplete API.
  */
 export interface ChatCompletionTokenCount {
-  /**
-   * Input token count
-   */
-  prompt: number;
-  /**
-   * Output token count
-   */
-  completion: number;
-  /**
-   * Thinking token count, if available
-   */
-  thinking?: number;
-  /**
-   * Total token count (prompt + completion + thinking)
-   */
-  total: number;
-  /**
-   * Cached prompt tokens
-   */
-  cached?: number;
+    /**
+     * Input token count
+     */
+    prompt: number;
+    /**
+     * Output token count
+     */
+    completion: number;
+    /**
+     * Thinking token count, if available
+     */
+    thinking?: number;
+    /**
+     * Total token count (prompt + completion + thinking)
+     */
+    total: number;
+    /**
+     * Cached prompt tokens
+     */
+    cached?: number;
 }
 /**
  * Token count event, send only once, usually (but not necessarily)
  * before the message event
  */
-export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
-  ChatCompletionEventType.ChatCompletionTokenCount,
-  {
+export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount, {
     /**
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
     model?: string;
-  }
->;
+}>;
 /**
  * Events emitted from the {@link ChatCompleteResponse} observable
  * returned from the {@link ChatCompleteAPI}.
@@ -163,7 +146,4 @@ export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
  * event will be emitted ex
  *
  */
-export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> =
-  | ChatCompletionChunkEvent
-  | ChatCompletionTokenCountEvent
-  | ChatCompletionMessageEvent<TToolOptions>;
+export type ChatCompletionEvent<TToolOptions extends ToolOptions = ToolOptions> = ChatCompletionChunkEvent | ChatCompletionTokenCountEvent | ChatCompletionMessageEvent<TToolOptions>;

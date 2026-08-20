@@ -1,34 +1,13 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ReactNode } from 'react';
-import type React from 'react';
+import React from 'react';
 import type { LayoutAppearance } from './layout.types';
 import type { LayoutDimensions } from './layout.types';
 /**
  * Configuration for the layout.
  * @public
  */
-export type LayoutConfig = Pick<
-  Partial<LayoutDimensions>,
-  | 'bannerHeight'
-  | 'headerHeight'
-  | 'footerHeight'
-  | 'navigationWidth'
-  | 'sidebarWidth'
-  | 'applicationTopBarHeight'
-  | 'applicationBottomBarHeight'
-  | 'applicationMarginTop'
-  | 'applicationMarginBottom'
-  | 'applicationMarginRight'
-> & {
-  appearance?: LayoutAppearance;
+export type LayoutConfig = Pick<Partial<LayoutDimensions>, 'bannerHeight' | 'headerHeight' | 'footerHeight' | 'navigationWidth' | 'sidebarWidth' | 'applicationTopBarHeight' | 'applicationBottomBarHeight' | 'applicationMarginTop' | 'applicationMarginBottom' | 'applicationMarginRight'> & {
+    appearance?: LayoutAppearance;
 };
 /** Update function type for layout config */
 type LayoutUpdateFn = (updates: Partial<LayoutConfig>) => void;
@@ -37,17 +16,14 @@ type LayoutUpdateFn = (updates: Partial<LayoutConfig>) => void;
  * @public
  */
 export interface LayoutConfigProviderProps {
-  value: LayoutConfig;
-  children: ReactNode;
+    value: LayoutConfig;
+    children: ReactNode;
 }
 /**
  * Provider of the layout config
  * @public
  */
-export declare const LayoutConfigProvider: ({
-  value: initialValue,
-  children,
-}: LayoutConfigProviderProps) => React.JSX.Element;
+export declare const LayoutConfigProvider: ({ value: initialValue, children, }: LayoutConfigProviderProps) => React.JSX.Element;
 /**
  * Hook to access the layout configuration.
  * @internal

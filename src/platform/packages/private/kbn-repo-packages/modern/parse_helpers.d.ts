@@ -1,20 +1,11 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 declare const _exports: {
-  PACKAGE_TYPES: import('./types').KibanaPackageType[];
-  isSomeString: typeof isSomeString;
-  isObj: typeof isObj;
-  isValidPluginId: typeof isValidPluginId;
-  isValidPkgType: typeof isValidPkgType;
-  isArrOfIds: typeof isArrOfIds;
-  isArrOfStrings: typeof isArrOfStrings;
+    PACKAGE_TYPES: import("./types").KibanaPackageType[];
+    isSomeString: typeof isSomeString;
+    isObj: typeof isObj;
+    isValidPluginId: typeof isValidPluginId;
+    isValidPkgType: typeof isValidPkgType;
+    isArrOfIds: typeof isArrOfIds;
+    isArrOfStrings: typeof isArrOfStrings;
 };
 export = _exports;
 /**

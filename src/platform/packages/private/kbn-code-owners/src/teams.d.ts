@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { CodeOwnerArea } from './code_owner_areas';
 /** Path to the canonical public team registry. */
 export declare const TEAMS_FILE: string;
@@ -16,26 +7,26 @@ export declare const TEAMS_FILE: string;
  * This is the public-only view of a team.
  */
 export interface Team {
-  /** Stable, unique identifier used to join with private team overlays. */
-  id: string;
-  /** Human-readable team name. */
-  name: string;
-  /**
-   * Kibana solution/area(s) this team belongs to, when applicable.
-   *
-   * A team can belong to more than one area).
-   */
-  areas?: readonly CodeOwnerArea[];
-  /** Optional longer description of the team. */
-  description?: string;
-  github: {
-    /** GitHub team handle, e.g. `elastic/kibana-core`. */
-    team?: string;
-    /** GitHub issue label used to route work to this team. */
-    label?: string;
-  };
-  /** Free-form list of areas this team is responsible for. */
-  responsibilities?: readonly string[];
+    /** Stable, unique identifier used to join with private team overlays. */
+    id: string;
+    /** Human-readable team name. */
+    name: string;
+    /**
+     * Kibana solution/area(s) this team belongs to, when applicable.
+     *
+     * A team can belong to more than one area).
+     */
+    areas?: readonly CodeOwnerArea[];
+    /** Optional longer description of the team. */
+    description?: string;
+    github: {
+        /** GitHub team handle, e.g. `elastic/kibana-core`. */
+        team?: string;
+        /** GitHub issue label used to route work to this team. */
+        label?: string;
+    };
+    /** Free-form list of areas this team is responsible for. */
+    responsibilities?: readonly string[];
 }
 /**
  * Get the full list of teams from the public registry.

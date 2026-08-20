@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ScoutPage } from '../../fixtures/scope/test';
 /**
  * Creates a lazily instantiated proxy for a Page Object class, deferring the creation of the instance until
@@ -18,8 +9,4 @@ import type { ScoutPage } from '../../fixtures/scope/test';
  * @param constructorArgs - Additional arguments to be passed to the page object class constructor.
  * @returns A proxy object that behaves like an instance of the page object class, instantiating it on demand.
  */
-export declare function createLazyPageObject<T extends object, Args extends any[]>(
-  PageObjectClass: new (page: ScoutPage, ...args: Args) => T,
-  scoutPage: ScoutPage,
-  ...constructorArgs: Args
-): T;
+export declare function createLazyPageObject<T extends object, Args extends any[]>(PageObjectClass: new (page: ScoutPage, ...args: Args) => T, scoutPage: ScoutPage, ...constructorArgs: Args): T;

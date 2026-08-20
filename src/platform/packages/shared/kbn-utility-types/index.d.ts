@@ -1,20 +1,5 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
-export type {
-  JsonArray,
-  JsonObject,
-  JsonValue,
-  Serializable,
-  SerializableRecord,
-} from './src/serializable';
+export type { JsonArray, JsonObject, JsonValue, Serializable, SerializableRecord, } from './src/serializable';
 /**
  * A type that may or may not be a `Promise`.
  */
@@ -27,34 +12,27 @@ export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promis
  * Unwrap all promise attributes of the given type
  */
 export type AwaitedProperties<T> = {
-  [K in keyof T]: Awaited<T[K]>;
+    [K in keyof T]: Awaited<T[K]>;
 };
 /**
  * Minimal interface for an object resembling an `Observable`.
  */
 export interface ObservableLike<T> {
-  subscribe(observer: (value: T) => void): void;
+    subscribe(observer: (value: T) => void): void;
 }
 /**
  * Returns wrapped type of an observable.
  */
-export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
-  ? U
-  : never;
+export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U> ? U : never;
 /**
  * Ensures T is of type X.
  */
 export type Ensure<T, X> = T extends X ? T : never;
-export type RecursiveReadonlyArray<T> = ReadonlyArray<RecursiveReadonly<T>>;
-export type RecursiveReadonly<T> = T extends (...args: any) => any
-  ? T
-  : T extends any[]
-  ? RecursiveReadonlyArray<T[number]>
-  : T extends object
-  ? Readonly<{
-      [K in keyof T]: RecursiveReadonly<T[K]>;
-    }>
-  : T;
+export interface RecursiveReadonlyArray<T> extends ReadonlyArray<RecursiveReadonly<T>> {
+}
+export type RecursiveReadonly<T> = T extends (...args: any) => any ? T : T extends any[] ? RecursiveReadonlyArray<T[number]> : T extends object ? Readonly<{
+    [K in keyof T]: RecursiveReadonly<T[K]>;
+}> : T;
 /**
  * Returns types or array or object values.
  */
@@ -66,11 +44,7 @@ export type Values<T> = T extends any[] ? T[number] : T extends object ? T[keyof
  * type.  This is necessary in the case of distinguishing one collection from
  * another.
  */
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
-  k: infer I
-) => void
-  ? I
-  : never;
+export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (k: infer I) => void ? I : never;
 /**
  * Returns public keys of an object.
  */
@@ -83,7 +57,7 @@ export type PublicContract<T> = Pick<T, PublicKeys<T>>;
  * Returns public method names
  */
 export type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+    [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
 }[keyof T];
 /**
  *  Returns an object with public methods only.
@@ -93,13 +67,13 @@ export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
  *  Makes an object with readonly properties mutable.
  */
 export type Writable<T> = {
-  -readonly [K in keyof T]: T[K];
+    -readonly [K in keyof T]: T[K];
 };
 /**
  *  Makes an object with readonly properties mutable.
  */
 export type RecursiveWritable<T> = {
-  -readonly [K in keyof T]: RecursiveWritable<T[K]>;
+    -readonly [K in keyof T]: RecursiveWritable<T[K]>;
 };
 /**
  * XOR for some properties applied to a type
@@ -110,23 +84,19 @@ export type RecursiveWritable<T> = {
  * To require aria-label or aria-labelledby but not both
  * Example: OneOf<Type, 'aria-label' | 'aria-labelledby'>
  */
-export type OneOf<T, K extends keyof T> = Omit<T, K> &
-  {
+export type OneOf<T, K extends keyof T> = Omit<T, K> & {
     [k in K]: Pick<Required<T>, k> & {
-      [k1 in Exclude<K, k>]?: never;
+        [k1 in Exclude<K, k>]?: never;
     };
-  }[K];
+}[K];
 /**
  * Deep partial version of a type.
  */
-export type DeepPartial<T> = T extends any[]
-  ? DeepPartialArray<T[number]>
-  : T extends object
-  ? DeepPartialObject<T>
-  : T;
-export type DeepPartialArray<T> = Array<DeepPartial<T>>;
+export type DeepPartial<T> = T extends any[] ? DeepPartialArray<T[number]> : T extends object ? DeepPartialObject<T> : T;
+export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {
+}
 export type DeepPartialObject<T> = {
-  [P in keyof T]+?: DeepPartial<T[P]>;
+    [P in keyof T]+?: DeepPartial<T[P]>;
 };
 export type { DedotObject, DotObject, DotKeysOf, PickDotted } from './src/dot';
 export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
@@ -138,24 +108,10 @@ export type ArrayElement<A> = A extends ReadonlyArray<infer T> ? T : never;
  * const foo: WithRequiredProperty<Foo, 'bar'> = { bar: 'baz' }
  */
 export type WithRequiredProperty<Type, Key extends keyof Type> = Omit<Type, Key> & {
-  [Property in Key]-?: Type[Property];
+    [Property in Key]-?: Type[Property];
 };
 export type RecursivePartial<T> = {
-  [P in keyof T]?: T[P] extends NonAny[]
-    ? T[P]
-    : T[P] extends readonly NonAny[]
-    ? T[P]
-    : T[P] extends Array<infer U>
-    ? Array<RecursivePartial<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<RecursivePartial<U>>
-    : T[P] extends Set<infer V>
-    ? Set<RecursivePartial<V>>
-    : T[P] extends Map<infer K, infer V>
-    ? Map<K, RecursivePartial<V>>
-    : T[P] extends NonAny
-    ? T[P]
-    : RecursivePartial<T[P]>;
+    [P in keyof T]?: T[P] extends NonAny[] ? T[P] : T[P] extends readonly NonAny[] ? T[P] : T[P] extends Array<infer U> ? Array<RecursivePartial<U>> : T[P] extends ReadonlyArray<infer U> ? ReadonlyArray<RecursivePartial<U>> : T[P] extends Set<infer V> ? Set<RecursivePartial<V>> : T[P] extends Map<infer K, infer V> ? Map<K, RecursivePartial<V>> : T[P] extends NonAny ? T[P] : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
 export { maybe } from './src/maybe';

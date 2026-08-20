@@ -1,10 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
@@ -20,6 +13,6 @@ import type { Evaluator } from '../../types';
  * @param config.log - Logger for retry warnings and error reporting
  */
 export declare function createConversationCoherenceEvaluator(config: {
-  inferenceClient: BoundInferenceClient;
-  log: ToolingLog;
+    inferenceClient: BoundInferenceClient;
+    log: ToolingLog;
 }): Evaluator;

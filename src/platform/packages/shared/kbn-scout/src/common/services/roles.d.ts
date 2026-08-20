@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ServerlessProjectType } from '@kbn/es';
 import type { Role } from '@kbn/test-saml-auth';
 /**
@@ -14,6 +5,6 @@ import type { Role } from '@kbn/test-saml-auth';
  * Returns `'developer'` for serverless Elasticsearch projects, `'editor'` for all others.
  */
 export declare function getPrivilegedRoleName(config: {
-  serverless: boolean;
-  projectType: ServerlessProjectType;
+    serverless: boolean;
+    projectType: ServerlessProjectType;
 }): Role;

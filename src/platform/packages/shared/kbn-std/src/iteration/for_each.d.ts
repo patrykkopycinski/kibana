@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { IterableInput, AsyncMapFn } from './types';
 /**
  * Creates a promise which resolves with `undefined` after calling `fn` for each
@@ -16,10 +7,7 @@ import type { IterableInput, AsyncMapFn } from './types';
  * @param iterable Items to iterate
  * @param fn Function to call for each item
  */
-export declare function asyncForEach<T>(
-  iterable: IterableInput<T>,
-  fn: AsyncMapFn<T, any>
-): Promise<void>;
+export declare function asyncForEach<T>(iterable: IterableInput<T>, fn: AsyncMapFn<T, any>): Promise<void>;
 /**
  * Creates a promise which resolves with `undefined` after calling `fn` for each
  * item in `iterable`. `fn` can return either a Promise or Observable. If `fn`
@@ -31,8 +19,4 @@ export declare function asyncForEach<T>(
  * @param limit Maximum number of operations to run in parallel
  * @param fn Function to call for each item
  */
-export declare function asyncForEachWithLimit<T>(
-  iterable: IterableInput<T>,
-  limit: number,
-  fn: AsyncMapFn<T, any>
-): Promise<void>;
+export declare function asyncForEachWithLimit<T>(iterable: IterableInput<T>, limit: number, fn: AsyncMapFn<T, any>): Promise<void>;

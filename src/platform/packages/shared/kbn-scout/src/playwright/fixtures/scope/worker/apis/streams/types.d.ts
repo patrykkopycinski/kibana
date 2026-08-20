@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 /**
  * Local shapes for the Streams HTTP API (no @kbn/streams-schema / @kbn/streamlang dependency).
  *
@@ -24,123 +15,109 @@
 export type RoutingStatus = 'enabled' | 'disabled';
 export type StringOrNumberOrBoolean = string | number | boolean;
 export interface RangeCondition {
-  gt?: StringOrNumberOrBoolean;
-  gte?: StringOrNumberOrBoolean;
-  lt?: StringOrNumberOrBoolean;
-  lte?: StringOrNumberOrBoolean;
+    gt?: StringOrNumberOrBoolean;
+    gte?: StringOrNumberOrBoolean;
+    lt?: StringOrNumberOrBoolean;
+    lte?: StringOrNumberOrBoolean;
 }
 export interface ShorthandBinaryFilterCondition {
-  field: string;
-  eq?: StringOrNumberOrBoolean;
-  neq?: StringOrNumberOrBoolean;
-  lt?: StringOrNumberOrBoolean;
-  lte?: StringOrNumberOrBoolean;
-  gt?: StringOrNumberOrBoolean;
-  gte?: StringOrNumberOrBoolean;
-  contains?: StringOrNumberOrBoolean;
-  startsWith?: StringOrNumberOrBoolean;
-  endsWith?: StringOrNumberOrBoolean;
-  range?: RangeCondition;
-  includes?: StringOrNumberOrBoolean;
+    field: string;
+    eq?: StringOrNumberOrBoolean;
+    neq?: StringOrNumberOrBoolean;
+    lt?: StringOrNumberOrBoolean;
+    lte?: StringOrNumberOrBoolean;
+    gt?: StringOrNumberOrBoolean;
+    gte?: StringOrNumberOrBoolean;
+    contains?: StringOrNumberOrBoolean;
+    startsWith?: StringOrNumberOrBoolean;
+    endsWith?: StringOrNumberOrBoolean;
+    range?: RangeCondition;
+    includes?: StringOrNumberOrBoolean;
 }
 export interface ShorthandUnaryFilterCondition {
-  field: string;
-  exists?: boolean;
+    field: string;
+    exists?: boolean;
 }
 export type FilterCondition = ShorthandBinaryFilterCondition | ShorthandUnaryFilterCondition;
 export interface AndCondition {
-  and: Condition[];
+    and: Condition[];
 }
 export interface OrCondition {
-  or: Condition[];
+    or: Condition[];
 }
 export interface AlwaysCondition {
-  always: {};
+    always: {};
 }
 export interface NeverCondition {
-  never: {};
+    never: {};
 }
 export interface NotCondition {
-  not: Condition;
+    not: Condition;
 }
-export type Condition =
-  | FilterCondition
-  | AndCondition
-  | OrCondition
-  | NotCondition
-  | NeverCondition
-  | AlwaysCondition;
+export type Condition = FilterCondition | AndCondition | OrCondition | NotCondition | NeverCondition | AlwaysCondition;
 export interface StreamlangDSL {
-  steps: unknown[];
+    steps: unknown[];
 }
 export interface StreamlangIngestStreamProcessing extends StreamlangDSL {
-  updated_at?: string;
+    updated_at?: string;
 }
 export interface NativeIngestStreamProcessing {
-  processors: Array<Record<string, unknown>>;
-  updated_at?: string;
+    processors: Array<Record<string, unknown>>;
+    updated_at?: string;
 }
-export type IngestStreamProcessing =
-  | StreamlangIngestStreamProcessing
-  | NativeIngestStreamProcessing;
+export type IngestStreamProcessing = StreamlangIngestStreamProcessing | NativeIngestStreamProcessing;
 export type StreamlangIngestStreamProcessingUpsert = StreamlangDSL;
 export interface NativeIngestStreamProcessingUpsert {
-  processors: Array<Record<string, unknown>>;
+    processors: Array<Record<string, unknown>>;
 }
-export type IngestStreamProcessingUpsert =
-  | StreamlangIngestStreamProcessingUpsert
-  | NativeIngestStreamProcessingUpsert;
+export type IngestStreamProcessingUpsert = StreamlangIngestStreamProcessingUpsert | NativeIngestStreamProcessingUpsert;
 export interface WiredRoutingEntry {
-  destination: string;
-  where?: Condition;
-  status?: RoutingStatus;
+    destination: string;
+    where?: Condition;
+    status?: RoutingStatus;
 }
 export interface WiredIngestShape<TProcessing = IngestStreamProcessing> {
-  wired: {
-    routing: WiredRoutingEntry[];
-    fields: Record<string, unknown>;
-  };
-  processing: TProcessing;
-  lifecycle?: unknown;
-  settings?: unknown;
-  failure_store?: unknown;
+    wired: {
+        routing: WiredRoutingEntry[];
+        fields: Record<string, unknown>;
+    };
+    processing: TProcessing;
+    lifecycle?: unknown;
+    settings?: unknown;
+    failure_store?: unknown;
 }
 export interface ClassicIngestShape<TProcessing = IngestStreamProcessing> {
-  classic: {
-    field_overrides?: Record<string, unknown>;
-  };
-  processing: TProcessing;
-  lifecycle?: unknown;
-  settings?: unknown;
-  failure_store?: unknown;
+    classic: {
+        field_overrides?: Record<string, unknown>;
+    };
+    processing: TProcessing;
+    lifecycle?: unknown;
+    settings?: unknown;
+    failure_store?: unknown;
 }
 export interface WiredStreamDefinition {
-  ingest: WiredIngestShape;
+    ingest: WiredIngestShape;
 }
 export interface ClassicStreamDefinition {
-  ingest: ClassicIngestShape;
+    ingest: ClassicIngestShape;
 }
 export type IngestStreamDefinition = WiredStreamDefinition | ClassicStreamDefinition;
 /** Common fields present in every stream GET response beyond the ingest shape. */
 export interface StreamCommonResponseFields {
-  name?: string;
-  type?: string;
-  description?: string;
-  dashboards?: string[];
-  rules?: string[];
+    name?: string;
+    type?: string;
+    description?: string;
+    dashboards?: string[];
+    rules?: string[];
 }
 export interface StreamsIngestGetResponse {
-  stream: IngestStreamDefinition & StreamCommonResponseFields;
+    stream: IngestStreamDefinition & StreamCommonResponseFields;
 }
-export type IngestUpsertRequest =
-  | WiredIngestShape<IngestStreamProcessingUpsert>
-  | ClassicIngestShape<IngestStreamProcessingUpsert>;
-export declare const stripProcessingUpdatedAt: (
-  processing: IngestStreamProcessing | IngestStreamProcessingUpsert
-) => IngestStreamProcessingUpsert;
+export type IngestUpsertRequest = WiredIngestShape<IngestStreamProcessingUpsert> | ClassicIngestShape<IngestStreamProcessingUpsert>;
+export declare const stripProcessingUpdatedAt: (processing: IngestStreamProcessing | IngestStreamProcessingUpsert) => IngestStreamProcessingUpsert;
 export declare const isWiredStreamDefinition: (stream: {
-  ingest?: unknown;
+    ingest?: unknown;
 }) => stream is WiredStreamDefinition;
 export declare const isClassicStreamDefinition: (stream: {
-  ingest?: unknown;
+    ingest?: unknown;
 }) => stream is ClassicStreamDefinition;

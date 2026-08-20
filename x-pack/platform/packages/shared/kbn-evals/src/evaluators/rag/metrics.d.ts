@@ -1,30 +1,9 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import type { GroundTruth, RetrievedDoc } from './types';
 export declare const DEFAULT_RELEVANCE_THRESHOLD = 1;
-export declare function isRelevant(
-  doc: RetrievedDoc,
-  groundTruth: GroundTruth,
-  threshold: number
-): boolean;
-export declare function getRelevantDocs(
-  retrievedDocs: RetrievedDoc[],
-  groundTruth: GroundTruth,
-  threshold: number
-): RetrievedDoc[];
-export declare function countRelevantInGroundTruth(
-  groundTruth: GroundTruth,
-  threshold: number
-): number;
-export declare function filterDocsByGroundTruthIndices(
-  docs: RetrievedDoc[],
-  groundTruth: GroundTruth
-): RetrievedDoc[];
+export declare function isRelevant(doc: RetrievedDoc, groundTruth: GroundTruth, threshold: number): boolean;
+export declare function getRelevantDocs(retrievedDocs: RetrievedDoc[], groundTruth: GroundTruth, threshold: number): RetrievedDoc[];
+export declare function countRelevantInGroundTruth(groundTruth: GroundTruth, threshold: number): number;
+export declare function filterDocsByGroundTruthIndices(docs: RetrievedDoc[], groundTruth: GroundTruth): RetrievedDoc[];
 /**
  * Precision@K = (number of relevant docs in top K) / K
  * Measures noise: what fraction of retrieved docs are relevant

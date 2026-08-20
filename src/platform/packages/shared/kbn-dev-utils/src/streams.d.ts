@@ -1,18 +1,9 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { Transform } from 'stream';
 import type File from 'vinyl';
 import type { DirectoryFile } from 'vinyl';
 interface BufferedFile extends File {
-  contents: Buffer;
-  isDirectory(): this is DirectoryFile;
+    contents: Buffer;
+    isDirectory(): this is DirectoryFile;
 }
 /**
  * Create a transform stream that processes Vinyl fs streams and
@@ -20,7 +11,5 @@ interface BufferedFile extends File {
  * mutate the file, replace it with another file (return a new File
  * object), or drop it from the stream (return null)
  */
-export declare const transformFileStream: (
-  fn: (file: BufferedFile) => File | void | null | Promise<File | void | null>
-) => Transform;
+export declare const transformFileStream: (fn: (file: BufferedFile) => File | void | null | Promise<File | void | null>) => Transform;
 export {};

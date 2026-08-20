@@ -1,22 +1,5 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ReactNode } from 'react';
-import type {
-  ChromeBreadcrumb,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-  ChromeNavLink,
-  GlobalSearchConfig,
-} from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumb, ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension, ChromeHelpMenuLink, ChromeNavControl, ChromeNavLink, GlobalSearchConfig } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
@@ -63,7 +46,7 @@ export declare function useNavLinks(): ChromeNavLink[];
  * Returns the recently accessed items list.
  * Used by `CollapsibleNav` (classic layout).
  */
-export declare function useRecentlyAccessed(): import('@kbn/core-chrome-browser').ChromeRecentlyAccessedHistoryItem[];
+export declare function useRecentlyAccessed(): import("@kbn/core-chrome-browser").ChromeRecentlyAccessedHistoryItem[];
 /**
  * Returns the current custom nav link (e.g. cloud deployment link).
  * Used by `CollapsibleNav` (classic layout).
@@ -76,10 +59,10 @@ export type NavControlPosition = 'left' | 'center' | 'right';
  */
 export declare function useNavControls(position: NavControlPosition): ChromeNavControl[];
 interface HelpMenuState {
-  menuLinks: ChromeHelpMenuLink[];
-  extension: ChromeHelpExtension | undefined;
-  supportUrl: string;
-  globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
+    menuLinks: ChromeHelpMenuLink[];
+    extension: ChromeHelpExtension | undefined;
+    supportUrl: string;
+    globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
 }
 /**
  * Returns all help menu state as a single object (single subscription).
@@ -91,8 +74,8 @@ export declare function useHelpMenu(): HelpMenuState;
  * Used by `GridLayoutProjectSideNav`.
  */
 export declare function useSideNavCollapsed(): {
-  isCollapsed: boolean;
-  toggle: (collapsed: boolean) => void;
+    isCollapsed: boolean;
+    toggle: (collapsed: boolean) => void;
 };
 /**
  * Returns the current app ID from `application.currentAppId$`.
@@ -103,19 +86,17 @@ export declare function useCurrentAppId(): string | undefined;
  * Returns the breadcrumb append extensions (including badge extensions).
  * Used by `BreadcrumbsWithExtensionsWrapper`.
  */
-export declare function useBreadcrumbsAppendExtensions(): import('@kbn/core-chrome-browser').ChromeBreadcrumbsAppendExtension[];
+export declare function useBreadcrumbsAppendExtensions(): import("@kbn/core-chrome-browser").ChromeBreadcrumbsAppendExtension[];
 /**
  * Returns the current header banner, or `undefined` if none is set.
  * Used by `HeaderTopBanner`.
  */
-export declare function useHeaderBanner():
-  | import('@kbn/core-chrome-browser').ChromeUserBanner
-  | undefined;
+export declare function useHeaderBanner(): import("@kbn/core-chrome-browser").ChromeUserBanner | undefined;
 /**
  * Returns the current app menu config, or `undefined` if none is set.
  * Used by `HeaderAppMenu`.
  */
-export declare function useAppMenu(): import('@kbn/ui-app-menu').AppMenuConfig | undefined;
+export declare function useAppMenu(): import("@kbn/ui-app-menu").AppMenuConfig | undefined;
 /**
  * Whether a legacy action menu mount point is currently set.
  * @deprecated Legacy action menus use imperative mount points. Prefer `chrome.setAppMenu()`.

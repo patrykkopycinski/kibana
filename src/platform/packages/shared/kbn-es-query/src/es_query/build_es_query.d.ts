@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, Query, AggregateQuery } from '../filters';
 import type { BoolQuery, DataViewBase } from './types';
@@ -17,11 +8,10 @@ type AnyQuery = Query | AggregateQuery;
  * Configurations to be used while constructing an ES query.
  * @public
  */
-export type EsQueryConfig = KueryQueryOptions &
-  EsQueryFiltersConfig & {
+export type EsQueryConfig = KueryQueryOptions & EsQueryFiltersConfig & {
     allowLeadingWildcards?: boolean;
     queryStringOptions?: SerializableRecord;
-  };
+};
 /**
  * @param indexPattern
  * @param queries - a query object or array of query objects. Each query has a language property and a query property.
@@ -33,12 +23,7 @@ export type EsQueryConfig = KueryQueryOptions &
  *
  * @public
  */
-export declare function buildEsQuery(
-  indexPattern: DataViewBase | DataViewBase[] | undefined,
-  queries: AnyQuery | AnyQuery[],
-  filters: Filter | Filter[],
-  config?: EsQueryConfig
-): {
-  bool: BoolQuery;
+export declare function buildEsQuery(indexPattern: DataViewBase | DataViewBase[] | undefined, queries: AnyQuery | AnyQuery[], filters: Filter | Filter[], config?: EsQueryConfig): {
+    bool: BoolQuery;
 };
 export {};

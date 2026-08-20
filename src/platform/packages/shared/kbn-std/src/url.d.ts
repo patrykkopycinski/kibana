@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ParsedQuery } from 'query-string';
 /**
  * We define our own typings because the current version of @types/node
@@ -16,14 +7,14 @@ import type { ParsedQuery } from 'query-string';
  * @public
  */
 export interface URLMeaningfulParts {
-  auth?: string | null;
-  hash?: string | null;
-  hostname?: string | null;
-  pathname?: string | null;
-  protocol?: string | null;
-  slashes?: boolean | null;
-  port?: string | null;
-  query: ParsedQuery;
+    auth?: string | null;
+    hash?: string | null;
+    hostname?: string | null;
+    pathname?: string | null;
+    protocol?: string | null;
+    slashes?: boolean | null;
+    port?: string | null;
+    query: ParsedQuery;
 }
 /**
  *  Takes a URL and a function that takes the meaningful parts
@@ -55,10 +46,7 @@ export interface URLMeaningfulParts {
  *  @returns The modified and reformatted url
  *  @public
  */
-export declare function modifyUrl(
-  url: string,
-  urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void
-): string;
+export declare function modifyUrl(url: string, urlModifier: (urlParts: URLMeaningfulParts) => Partial<URLMeaningfulParts> | void): string;
 /**
  * Determine if a url is relative. Any url including a protocol, hostname, or
  * port is not considered relative. This means that absolute *paths* are considered

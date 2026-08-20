@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
 export { Type } from './type';
 export { AnyType } from './any_type';
@@ -28,13 +19,7 @@ export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
-export type {
-  ObjectTypeOptions,
-  Props,
-  NullableProps,
-  TypeOf,
-  ObjectResultType,
-} from './object_type';
+export type { ObjectTypeOptions, Props, NullableProps, TypeOf, ObjectResultType, } from './object_type';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';

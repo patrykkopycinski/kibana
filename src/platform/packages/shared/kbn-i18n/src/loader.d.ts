@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { TranslationInput } from './translation';
 /**
  * Registers translation file with i18n loader
@@ -35,7 +26,7 @@ export declare function getTranslationsByLocale(locale: string): Promise<Transla
  * where keys are the locale and values are objects of translation messages
  */
 export declare function getAllTranslations(): Promise<{
-  [key: string]: TranslationInput;
+    [key: string]: TranslationInput;
 }>;
 /**
  * Registers passed translations files, loads them and returns promise with
@@ -45,5 +36,5 @@ export declare function getAllTranslations(): Promise<{
  * keys are the locale and values are objects of translation messages
  */
 export declare function getAllTranslationsFromPaths(paths: string[]): Promise<{
-  [key: string]: TranslationInput;
+    [key: string]: TranslationInput;
 }>;

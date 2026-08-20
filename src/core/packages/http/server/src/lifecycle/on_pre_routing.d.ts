@@ -1,23 +1,14 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { IKibanaResponse, KibanaRequest, LifecycleResponseFactory } from '../router';
 export declare enum OnPreRoutingResultType {
-  next = 'next',
-  rewriteUrl = 'rewriteUrl',
+    next = "next",
+    rewriteUrl = "rewriteUrl"
 }
 export interface OnPreRoutingResultNext {
-  type: OnPreRoutingResultType.next;
+    type: OnPreRoutingResultType.next;
 }
 export interface OnPreRoutingResultRewriteUrl {
-  type: OnPreRoutingResultType.rewriteUrl;
-  url: string;
+    type: OnPreRoutingResultType.rewriteUrl;
+    url: string;
 }
 export type OnPreRoutingResult = OnPreRoutingResultNext | OnPreRoutingResultRewriteUrl;
 /**
@@ -27,10 +18,10 @@ export type OnPreRoutingResult = OnPreRoutingResultNext | OnPreRoutingResultRewr
  * @deprecated See {@link HttpServiceSetup.registerOnPreRouting}.
  */
 export interface OnPreRoutingToolkit {
-  /** To pass request to the next handler */
-  next: () => OnPreRoutingResult;
-  /** Rewrite requested resources url before is was authenticated and routed to a handler */
-  rewriteUrl: (url: string) => OnPreRoutingResult;
+    /** To pass request to the next handler */
+    next: () => OnPreRoutingResult;
+    /** Rewrite requested resources url before is was authenticated and routed to a handler */
+    rewriteUrl: (url: string) => OnPreRoutingResult;
 }
 /**
  * See {@link OnPreRoutingToolkit}.
@@ -39,8 +30,4 @@ export interface OnPreRoutingToolkit {
  * @deprecated No remaining consumers in Kibana plugins. See
  * {@link HttpServiceSetup.registerOnPreRouting} for the full deprecation note.
  */
-export type OnPreRoutingHandler = (
-  request: KibanaRequest,
-  response: LifecycleResponseFactory,
-  toolkit: OnPreRoutingToolkit
-) => OnPreRoutingResult | IKibanaResponse | Promise<OnPreRoutingResult | IKibanaResponse>;
+export type OnPreRoutingHandler = (request: KibanaRequest, response: LifecycleResponseFactory, toolkit: OnPreRoutingToolkit) => OnPreRoutingResult | IKibanaResponse | Promise<OnPreRoutingResult | IKibanaResponse>;

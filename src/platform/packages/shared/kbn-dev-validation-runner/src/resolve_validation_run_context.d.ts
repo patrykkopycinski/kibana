@@ -1,76 +1,55 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { type ResolvedValidationContract } from '@kbn/dev-utils';
 import { type MoonAffectedBase } from '@kbn/moon';
 /** Raw CLI flag inputs used to resolve a validation run contract. */
 export interface ValidationRunFlagsInput {
-  profile?: string;
-  scope?: string;
-  testMode?: string;
-  downstream?: string;
-  baseRef?: string;
-  headRef?: string;
+    profile?: string;
+    scope?: string;
+    testMode?: string;
+    downstream?: string;
+    baseRef?: string;
+    headRef?: string;
 }
 interface ValidationRunContextBase {
-  contract: ResolvedValidationContract;
+    contract: ResolvedValidationContract;
 }
 type ValidationRunSkipContext = ValidationRunContextBase & {
-  kind: 'skip';
-  reason: 'no_staged_changes';
+    kind: 'skip';
+    reason: 'no_staged_changes';
 };
 type ValidationRunFullContext = ValidationRunContextBase & {
-  kind: 'full';
-  reason?: 'resolve_branch_scope_failed';
+    kind: 'full';
+    reason?: 'resolve_branch_scope_failed';
 };
 type ValidationRunAffectedContext = ValidationRunContextBase & {
-  kind: 'affected';
-  resolvedBase?: MoonAffectedBase;
-  branchCommitCount?: number;
-  changedFiles: string[];
+    kind: 'affected';
+    resolvedBase?: MoonAffectedBase;
+    branchCommitCount?: number;
+    changedFiles: string[];
 };
-export type ValidationRunContext =
-  | ValidationRunSkipContext
-  | ValidationRunFullContext
-  | ValidationRunAffectedContext;
+export type ValidationRunContext = ValidationRunSkipContext | ValidationRunFullContext | ValidationRunAffectedContext;
 export interface ValidationAffectedProjectsContext {
-  affectedSourceRoots: string[];
-  isRootProjectAffected: boolean;
+    affectedSourceRoots: string[];
+    isRootProjectAffected: boolean;
 }
 /** Inputs for resolving a contract-driven validation run context. */
 export interface ResolveValidationRunContextOptions {
-  flags: ValidationRunFlagsInput;
-  runnerDescription?: string;
-  onWarning?: (message: string) => void;
+    flags: ValidationRunFlagsInput;
+    runnerDescription?: string;
+    onWarning?: (message: string) => void;
 }
 export interface ResolveValidationAffectedProjectsOptions {
-  changedFilesJson: string;
-  downstream?: 'none' | 'direct' | 'deep';
+    changedFilesJson: string;
+    downstream?: 'none' | 'direct' | 'deep';
 }
 /** Rejects validation-contract flags when a command is running in direct-target mode. */
-export declare const assertNoValidationRunFlagsForDirectTarget: (
-  flags: ValidationRunFlagsInput
-) => void;
+export declare const assertNoValidationRunFlagsForDirectTarget: (flags: ValidationRunFlagsInput) => void;
 /** Resolves a concrete validation run context from CLI flags, including changed-file scope data. */
-export declare const resolveValidationRunContext: ({
-  flags,
-  runnerDescription,
-  onWarning,
-}: ResolveValidationRunContextOptions) => Promise<ValidationRunContext>;
+export declare const resolveValidationRunContext: ({ flags, runnerDescription, onWarning, }: ResolveValidationRunContextOptions) => Promise<ValidationRunContext>;
 /**
  * Resolves Moon-affected project roots from pre-resolved changed files.
  *
  * Accepts `changedFilesJson` (Moon JSON format) to pipe directly into
  * `moon query projects --affected`, avoiding duplicate Moon queries.
  */
-export declare const resolveValidationAffectedProjects: ({
-  changedFilesJson,
-  downstream,
-}: ResolveValidationAffectedProjectsOptions) => Promise<ValidationAffectedProjectsContext>;
+export declare const resolveValidationAffectedProjects: ({ changedFilesJson, downstream, }: ResolveValidationAffectedProjectsOptions) => Promise<ValidationAffectedProjectsContext>;
 export {};

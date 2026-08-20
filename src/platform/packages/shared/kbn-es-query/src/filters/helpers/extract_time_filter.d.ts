@@ -1,25 +1,10 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { Filter, RangeFilter } from '../build_filters';
 import type { TimeRange } from './types';
-export declare function extractTimeFilter(
-  timeFieldName: string,
-  filters: Filter[]
-): {
-  restOfFilters: Filter[];
-  timeRangeFilter?: RangeFilter;
+export declare function extractTimeFilter(timeFieldName: string, filters: Filter[]): {
+    restOfFilters: Filter[];
+    timeRangeFilter?: RangeFilter;
 };
-export declare function extractTimeRange(
-  filters: Filter[],
-  timeFieldName?: string
-): {
-  restOfFilters: Filter[];
-  timeRange?: TimeRange;
+export declare function extractTimeRange(filters: Filter[], timeFieldName?: string): {
+    restOfFilters: Filter[];
+    timeRange?: TimeRange;
 };

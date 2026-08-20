@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type React from 'react';
 /**
  * Dimensions for each layout section in the Chrome UI.
@@ -15,28 +6,28 @@ import type React from 'react';
  * navigation, and sidebar
  */
 export interface LayoutDimensions {
-  bannerHeight: number;
-  footerHeight: number;
-  headerHeight: number;
-  navigationWidth: number;
-  sidebarWidth: number;
-  applicationTopBarHeight: number;
-  applicationBottomBarHeight: number;
-  applicationMarginTop: number;
-  applicationMarginBottom: number;
-  applicationMarginRight: number;
+    bannerHeight: number;
+    footerHeight: number;
+    headerHeight: number;
+    navigationWidth: number;
+    sidebarWidth: number;
+    applicationTopBarHeight: number;
+    applicationBottomBarHeight: number;
+    applicationMarginTop: number;
+    applicationMarginBottom: number;
+    applicationMarginRight: number;
 }
 /**
  * The state of the layout.
  */
 export interface LayoutState extends LayoutDimensions {
-  hasBanner: boolean;
-  hasFooter: boolean;
-  hasSidebar: boolean;
-  hasHeader: boolean;
-  hasNavigation: boolean;
-  hasApplicationTopBar: boolean;
-  hasApplicationBottomBar: boolean;
+    hasBanner: boolean;
+    hasFooter: boolean;
+    hasSidebar: boolean;
+    hasHeader: boolean;
+    hasNavigation: boolean;
+    hasApplicationTopBar: boolean;
+    hasApplicationBottomBar: boolean;
 }
 /**
  * Props for the slots.
@@ -50,13 +41,13 @@ export type Slot = React.ReactNode | ((props: SlotProps) => React.ReactNode);
  * Supported slots for the layout
  */
 export interface ChromeLayoutSlots {
-  header?: Slot | null;
-  navigation?: Slot | null;
-  banner?: Slot | null;
-  footer?: Slot | null;
-  sidebar?: Slot | null;
-  applicationTopBar?: Slot | null;
-  applicationBottomBar?: Slot | null;
+    header?: Slot | null;
+    navigation?: Slot | null;
+    banner?: Slot | null;
+    footer?: Slot | null;
+    sidebar?: Slot | null;
+    applicationTopBar?: Slot | null;
+    applicationBottomBar?: Slot | null;
 }
 /**
  * Visual appearance of the application shell.

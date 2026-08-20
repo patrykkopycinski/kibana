@@ -1,39 +1,30 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { estypes } from '@elastic/elasticsearch';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta } from './types';
 import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
 export type PhraseFilterValue = string | number | boolean;
 export interface PhraseFilterMetaParams extends SerializableRecord {
-  query: PhraseFilterValue;
+    query: PhraseFilterValue;
 }
 export type PhraseFilterMeta = FilterMeta & {
-  params?: PhraseFilterMetaParams;
-  field?: string;
-  index?: string;
+    params?: PhraseFilterMetaParams;
+    field?: string;
+    index?: string;
 };
 export type PhraseFilter = Filter & {
-  meta: PhraseFilterMeta;
-  query: {
-    match_phrase?: NonNullable<estypes.QueryDslQueryContainer>['match_phrase'];
-    match?: NonNullable<estypes.QueryDslQueryContainer>['match'];
-  };
+    meta: PhraseFilterMeta;
+    query: {
+        match_phrase?: NonNullable<estypes.QueryDslQueryContainer>['match_phrase'];
+        match?: NonNullable<estypes.QueryDslQueryContainer>['match'];
+    };
 };
 export type ScriptedPhraseFilter = Filter & {
-  meta: PhraseFilterMeta;
-  query: {
-    script: {
-      script: estypes.Script;
+    meta: PhraseFilterMeta;
+    query: {
+        script: {
+            script: estypes.Script;
+        };
     };
-  };
 };
 /**
  * @param filter
@@ -54,9 +45,7 @@ export declare const getPhraseFilterField: (filter: PhraseFilter | ScriptedPhras
 /**
  * @internal
  */
-export declare const getPhraseFilterValue: (
-  filter: PhraseFilter | ScriptedPhraseFilter
-) => PhraseFilterValue;
+export declare const getPhraseFilterValue: (filter: PhraseFilter | ScriptedPhraseFilter) => PhraseFilterValue;
 /**
  * Creates a filter where the given field matches a given value
  * @param field
@@ -66,17 +55,10 @@ export declare const getPhraseFilterValue: (
  *
  * @public
  */
-export declare const buildPhraseFilter: (
-  field: DataViewFieldBase,
-  value: PhraseFilterValue,
-  indexPattern: DataViewBaseNoFields
-) => PhraseFilter | ScriptedPhraseFilter;
+export declare const buildPhraseFilter: (field: DataViewFieldBase, value: PhraseFilterValue, indexPattern: DataViewBaseNoFields) => PhraseFilter | ScriptedPhraseFilter;
 /** @internal */
-export declare const getPhraseScript: (
-  field: DataViewFieldBase,
-  value: PhraseFilterValue
-) => {
-  script: estypes.Script;
+export declare const getPhraseScript: (field: DataViewFieldBase, value: PhraseFilterValue) => {
+    script: estypes.Script;
 };
 /**
  * @internal

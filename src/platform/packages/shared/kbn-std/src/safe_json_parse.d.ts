@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 /**
  * Safely parses a JSON string. If the string cannot be parsed, for instance
  * if it is not valid JSON, it will return `undefined`. If `handleError` is
@@ -19,7 +10,4 @@
  *                      function.
  * @returns             The parsed object, or `undefined` if an error occurs.
  */
-export declare function safeJsonParse<T = unknown>(
-  value: string,
-  handleError?: (error: Error) => T
-): T;
+export declare function safeJsonParse<T = unknown>(value: string, handleError?: (error: Error) => T): T;

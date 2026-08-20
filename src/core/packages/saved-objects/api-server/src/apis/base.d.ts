@@ -1,20 +1,11 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { SavedObjectBulkResult } from '../..';
 /**
  * Base options used by most of the savedObject APIs.
  * @public
  */
 export interface SavedObjectsBaseOptions {
-  /** Specify the namespace for this operation */
-  namespace?: string;
+    /** Specify the namespace for this operation */
+    namespace?: string;
 }
 /**
  * Elasticsearch Refresh setting for mutating operation
@@ -27,6 +18,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
-  /** array of saved objects, each of which is either a successful result or an error result */
-  saved_objects: Array<SavedObjectBulkResult<T>>;
+    /** array of saved objects, each of which is either a successful result or an error result */
+    saved_objects: Array<SavedObjectBulkResult<T>>;
 }

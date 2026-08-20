@@ -1,19 +1,10 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 export declare enum KbnZodTypes {
-  BooleanFromString = 'BooleanFromString',
-  PassThroughAny = 'PassThroughAny',
+    BooleanFromString = "BooleanFromString",
+    PassThroughAny = "PassThroughAny"
 }
 export interface KbnZodType {
-  /**
-   * The type name to identify the custom KbnZodType.
-   */
-  readonly kbnTypeName: KbnZodTypes;
+    /**
+     * The type name to identify the custom KbnZodType.
+     */
+    readonly kbnTypeName: KbnZodTypes;
 }

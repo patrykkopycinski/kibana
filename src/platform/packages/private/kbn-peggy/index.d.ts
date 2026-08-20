@@ -1,18 +1,9 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 declare const _exports: {
-  findConfigFile: typeof findConfigFile;
-  getJsSource: typeof getJsSource;
-  getJsSourceSync: typeof getJsSourceSync;
-  requireHook: typeof requireHook;
-  version: string;
+    findConfigFile: typeof findConfigFile;
+    getJsSource: typeof getJsSource;
+    getJsSourceSync: typeof getJsSourceSync;
+    requireHook: typeof requireHook;
+    version: string;
 };
 export = _exports;
 /**
@@ -31,15 +22,15 @@ declare function getJsSource(options: import('./types').Options): Promise<import
  * @returns
  */
 declare function getJsSourceSync(options: import('./types').SyncOptions): {
-  /**
-   * The source code of the module which parses expressions in the format
-   * defined by the peggy grammar file
-   */
-  source: string;
-  /**
-   * The loaded config if it was found
-   */
-  config: import('./types').Config | null;
+    /**
+     * The source code of the module which parses expressions in the format
+     * defined by the peggy grammar file
+     */
+    source: string;
+    /**
+     * The loaded config if it was found
+     */
+    config: import("./types").Config | null;
 };
 /**
  * Registers a Node require hook for `.peggy` files.
@@ -58,4 +49,6 @@ declare function getJsSourceSync(options: import('./types').SyncOptions): {
  * standalone handler compiles the grammar itself and calls `module._compile` directly, which
  * bypasses the load hook, so it must win over `@kbn/swc-register`'s chaining handler.
  */
-declare function requireHook(options?: { force?: boolean }): void;
+declare function requireHook(options?: {
+    force?: boolean;
+}): void;

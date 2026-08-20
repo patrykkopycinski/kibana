@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { UseEuiTheme } from '@elastic/eui';
 /**
  * Helper function to get container border styles for high contrast mode.
@@ -18,14 +9,14 @@ import type { UseEuiTheme } from '@elastic/eui';
  */
 export declare const getHighContrastBorder: (euiThemeContext: UseEuiTheme) => string;
 export interface HighContrastSeparatorOptions {
-  /** The side to place the border separator ('top' or 'bottom'). Default: 'bottom' */
-  side?: 'top' | 'bottom';
-  /** Width of the separator line. Default: theme.size.xl */
-  width?: string;
-  /** Left position for the separator. Default: '0' */
-  left?: string;
-  /** Right position for the separator. Default: '0' */
-  right?: string;
+    /** The side to place the border separator ('top' or 'bottom'). Default: 'bottom' */
+    side?: 'top' | 'bottom';
+    /** Width of the separator line. Default: theme.size.xl */
+    width?: string;
+    /** Left position for the separator. Default: '0' */
+    left?: string;
+    /** Right position for the separator. Default: '0' */
+    right?: string;
 }
 /**
  * Helper function to get separator border styles for high contrast mode.
@@ -36,7 +27,4 @@ export interface HighContrastSeparatorOptions {
  * @param options - Configuration options for the separator
  * @returns CSS string for the separator
  */
-export declare const getHighContrastSeparator: (
-  euiThemeContext: UseEuiTheme,
-  options?: HighContrastSeparatorOptions
-) => string;
+export declare const getHighContrastSeparator: (euiThemeContext: UseEuiTheme, options?: HighContrastSeparatorOptions) => string;

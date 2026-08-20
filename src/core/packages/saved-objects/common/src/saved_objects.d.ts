@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type * as serverTypes from './server_types';
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -24,8 +15,8 @@ import type * as serverTypes from './server_types';
  * @public
  */
 export interface SavedObjectsMigrationVersion {
-  /** The plugin name and version string */
-  [pluginName: string]: string;
+    /** The plugin name and version string */
+    [pluginName: string]: string;
 }
 /**
  * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
@@ -41,10 +32,10 @@ export interface SavedObjectsMigrationVersion {
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 export interface SavedObjectError {
-  error: string;
-  message: string;
-  statusCode: number;
-  metadata?: Record<string, unknown>;
+    error: string;
+    message: string;
+    statusCode: number;
+    metadata?: Record<string, unknown>;
 }
 /**
  * @public

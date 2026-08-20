@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 export { Package };
 export { readHashOfPackageMap };
 export { readPackageMap };
@@ -37,16 +28,7 @@ export type KbnImportReq = import('./modern/types').KbnImportReq;
 export type PluginCategoryInfo = import('./modern/types').PluginCategoryInfo;
 export type PackageMap = Map<string, string>;
 export type PkgDirMap = import('./modern/get_packages').PkgDirMap;
-import {
-  getPackages,
-  findPackageForPath,
-  getPkgDirMap,
-  getPkgsById,
-  updatePackageMap,
-  removePackagesFromPackageMap,
-  readHashOfPackageMap,
-  readPackageMap,
-} from './modern/get_packages';
+import { getPackages, findPackageForPath, getPkgDirMap, getPkgsById, updatePackageMap, removePackagesFromPackageMap, readHashOfPackageMap, readPackageMap } from './modern/get_packages';
 import { readPackageManifest } from './modern/parse_package_manifest';
 import { Package } from './modern/package';
 import { parseKbnImportReq } from './modern/parse_kbn_import_req';

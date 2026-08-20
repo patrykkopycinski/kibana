@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 /**
  * Constant for the Kibana Observability solution.
  */
@@ -30,13 +21,7 @@ export declare const KIBANA_VECTORDB_SOLUTION: 'vectordb';
 /**
  * A list of all Kibana solutions.
  */
-export declare const KIBANA_SOLUTIONS: readonly [
-  'observability',
-  'security',
-  'search',
-  'workplaceai',
-  'vectordb'
-];
+export declare const KIBANA_SOLUTIONS: readonly ["observability", "security", "search", "workplaceai", "vectordb"];
 /**
  * A type that defines the existing solutions.
  */
@@ -65,11 +50,11 @@ export declare const KIBANA_SECURITY_SEARCH_AI_LAKE_TIER: 'search_ai_lake';
  * Possible product tiers for Kibana solutions.
  */
 export declare const KIBANA_PRODUCT_TIERS: {
-  readonly observability: readonly ['complete', 'logs_essentials'];
-  readonly security: readonly ['complete', 'essentials', 'search_ai_lake'];
-  readonly search: readonly [];
-  readonly workplaceai: readonly [];
-  readonly vectordb: readonly [];
+    readonly observability: readonly ["complete", "logs_essentials"];
+    readonly security: readonly ["complete", "essentials", "search_ai_lake"];
+    readonly search: readonly [];
+    readonly workplaceai: readonly [];
+    readonly vectordb: readonly [];
 };
 /**
  * Existing product tiers for all Kibana solutions.

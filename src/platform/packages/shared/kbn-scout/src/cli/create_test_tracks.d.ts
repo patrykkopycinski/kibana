@@ -1,12 +1,3 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ScoutTestChannel } from '@kbn/scout-info';
@@ -21,48 +12,33 @@ import type { TestTrack } from '../execution/test_track';
  * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
  * - `kind: 'channels'` → keep configs that match any of the test channels in `channels`
  */
-export type TestLoadFilter =
-  | {
-      kind: 'modules';
-      ids: ReadonlySet<string>;
-    }
-  | {
-      kind: 'configs';
-      paths: ReadonlySet<string>;
-    }
-  | {
-      kind: 'channels';
-      channels: ReadonlySet<ScoutTestChannel>;
-    };
+export type TestLoadFilter = {
+    kind: 'modules';
+    ids: ReadonlySet<string>;
+} | {
+    kind: 'configs';
+    paths: ReadonlySet<string>;
+} | {
+    kind: 'channels';
+    channels: ReadonlySet<ScoutTestChannel>;
+};
 export interface ScoutCIConfig {
-  plugins: {
-    enabled: string[];
-    disabled: string[];
-  };
-  packages: {
-    enabled: string[];
-    disabled: string[];
-  };
-  excluded_configs: string[];
+    plugins: {
+        enabled: string[];
+        disabled: string[];
+    };
+    packages: {
+        enabled: string[];
+        disabled: string[];
+    };
+    excluded_configs: string[];
 }
 export interface ScoutCITestLoad {
-  config: ScoutTestConfig;
-  enabled: boolean;
-  stats?: ScoutTestConfigStats['data']['configs'][0];
+    config: ScoutTestConfig;
+    enabled: boolean;
+    stats?: ScoutTestConfigStats['data']['configs'][0];
 }
-export declare function identifyTestLoads(
-  scoutCIConfig: ScoutCIConfig,
-  testConfigStats: ScoutTestConfigStats,
-  testTarget: ScoutTestTarget,
-  testLoadFilters: TestLoadFilter[],
-  log: ToolingLog
-): ScoutCITestLoad[];
-export declare function buildTrack(
-  runtimeTarget: number,
-  estimatedLaneSetupDuration: number,
-  testTarget: ScoutTestTarget,
-  testLoads: ScoutCITestLoad[],
-  log: ToolingLog
-): TestTrack;
+export declare function identifyTestLoads(scoutCIConfig: ScoutCIConfig, testConfigStats: ScoutTestConfigStats, testTarget: ScoutTestTarget, testLoadFilters: TestLoadFilter[], log: ToolingLog): ScoutCITestLoad[];
+export declare function buildTrack(runtimeTarget: number, estimatedLaneSetupDuration: number, testTarget: ScoutTestTarget, testLoads: ScoutCITestLoad[], log: ToolingLog): TestTrack;
 export declare function msToHuman(ms: number): string;
 export declare const createTestTracks: Command<void>;

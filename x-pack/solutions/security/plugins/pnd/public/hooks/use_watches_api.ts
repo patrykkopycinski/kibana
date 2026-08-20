@@ -141,8 +141,8 @@ const applyWatchPatch = (
               ...settings.scopeRouting,
               dataSources: applySelect(settings.scopeRouting.dataSources, scopeRouting.dataSources),
               assigneeQueue: applySelect(
-                settings.scopeRouting.assigneeQueue,
-                scopeRouting.assigneeQueue
+                settings.scopeRouting?.assigneeQueue,
+                scopeRouting?.assigneeQueue
               ),
               escalationContact: applySelect(
                 settings.scopeRouting.escalationContact,

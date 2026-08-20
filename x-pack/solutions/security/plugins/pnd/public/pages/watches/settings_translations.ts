@@ -288,12 +288,12 @@ export const DATA_SOURCES_HELP = i18n.translate(
 );
 
 export const ASSIGNEE_QUEUE_LABEL = i18n.translate(
-  'xpack.pnd.watches.settings.scope.assigneeQueue',
+  'xpack.pnd.watches.settings.scope?.assigneeQueue',
   { defaultMessage: 'Default assignee queue' }
 );
 
 export const ASSIGNEE_QUEUE_HELP = i18n.translate(
-  'xpack.pnd.watches.settings.scope.assigneeQueueHelp',
+  'xpack.pnd.watches.settings.scope?.assigneeQueueHelp',
   { defaultMessage: 'Where proposals land for review.' }
 );
 
@@ -330,20 +330,20 @@ export const DATA_SOURCE_OPTION_LABELS: Record<string, string> = {
 };
 
 export const ASSIGNEE_QUEUE_OPTION_LABELS: Record<string, string> = {
-  unassigned: i18n.translate('xpack.pnd.watches.settings.assigneeQueue.unassigned', {
+  unassigned: i18n.translate('xpack.pnd.watches.settings?.assigneeQueue.unassigned', {
     defaultMessage: 'Unassigned',
   }),
-  'tier-1-alert-triage': i18n.translate('xpack.pnd.watches.settings.assigneeQueue.tier1', {
+  'tier-1-alert-triage': i18n.translate('xpack.pnd.watches.settings?.assigneeQueue.tier1', {
     defaultMessage: 'Tier 1 — Alert triage',
   }),
-  'tier-2-escalations': i18n.translate('xpack.pnd.watches.settings.assigneeQueue.tier2', {
+  'tier-2-escalations': i18n.translate('xpack.pnd.watches.settings?.assigneeQueue.tier2', {
     defaultMessage: 'Tier 2 — Escalations',
   }),
   'detection-engineering': i18n.translate(
-    'xpack.pnd.watches.settings.assigneeQueue.detectionEngineering',
+    'xpack.pnd.watches.settings?.assigneeQueue.detectionEngineering',
     { defaultMessage: 'Detection engineering' }
   ),
-  'threat-hunting': i18n.translate('xpack.pnd.watches.settings.assigneeQueue.threatHunting', {
+  'threat-hunting': i18n.translate('xpack.pnd.watches.settings?.assigneeQueue.threatHunting', {
     defaultMessage: 'Threat hunting',
   }),
 };

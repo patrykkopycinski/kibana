@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { API_VERSIONS, INTERNAL_API_ACCESS, PND_PROPOSALS_URL } from '@kbn/pnd-common';
+import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/pnd-common';
 import type { ListInvestigationProposalsResponse } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import { realProposals } from './real_data';
+
+const PND_PROPOSALS_URL = '/internal/pnd/proposals';
 
 export const registerListAllProposalsRoute = ({
   router,
@@ -19,7 +21,7 @@ export const registerListAllProposalsRoute = ({
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: PND_PROPOSALS_URL,
+      path: '/internal/pnd/proposals',
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [PND_API_PRIVILEGE_READ] },

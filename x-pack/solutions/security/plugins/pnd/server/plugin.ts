@@ -121,7 +121,7 @@ export class PndPlugin
       getWatchProjection: () => this.watchProjection,
       getWorkflowsManagement: () => this.workflowsManagementApi,
       getInvestigationStore: () => this.investigationStore,
-      getConversationClient: (request) =>
+      getConversationPublicClient: (request) =>
         this.agentBuilder && typeof this.agentBuilder.conversations?.getScopedClient === 'function'
           ? this.agentBuilder.conversations.getScopedClient({ request })
           : undefined,
@@ -181,14 +181,14 @@ export class PndPlugin
       if (
         this.config.conversationShadowWrite &&
         plugins.agentBuilder &&
-        typeof plugins.agentBuilder.conversations?.getScopedWriterClient === 'function'
+        typeof plugins.agentBuilder.conversations?.getScopedClient === 'function'
       ) {
         const conversationStore = new PndConversationStore(
           this.logger.get('conversation-shadow'),
           legacyStore,
           // Resolver: obtain a scoped writer client using the request context.
           // The DualWriteStore passes the route's KibanaRequest through.
-          (request) => plugins.agentBuilder!.conversations.getScopedWriterClient({ request })
+          (request) => plugins.agentBuilder!.conversations.getScopedClient({ request })
         );
         this.investigationStore = new DualWriteStore(
           this.logger.get('dual-write'),

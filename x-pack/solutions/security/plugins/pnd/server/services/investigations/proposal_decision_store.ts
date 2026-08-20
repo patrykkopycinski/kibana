@@ -29,8 +29,8 @@ export type ProposalStatusUpdate =
   | { status: 'approved' }
   | { status: 'dismissed'; rejectionReason?: string; dismissalReason?: DismissalReason }
   | { status: 'modified'; analystReasoning: string }
-  | { status: 'escalated'; caseRef?: string }
-  | { status: 'deferred'; sla?: string }
+  | { status: 'approved'; caseRef?: string }
+  | { status: 'pending'; sla?: string }
   | { status: 'pending'; assignee: string | null };
 
 interface ProposalDoc extends Proposal {
@@ -146,19 +146,19 @@ export class ProposalDecisionStore {
     };
     if (update.status === 'dismissed') {
       if (update.rejectionReason != null) doc.rejectionReason = update.rejectionReason;
-      if (update.dismissalReason != null) doc.dismissalReason = update.dismissalReason;
+      if (update.reasoning != null) doc.reasoning = update.reasoning;
     }
     if (update.status === 'modified') {
       doc.analystReasoning = update.analystReasoning;
     }
-    if (update.status === 'escalated' && update.caseRef != null) {
-      doc.caseRef = update.caseRef;
+    if (update.status === 'approved' && update?.caseRef != null) {
+      doc['caseRef'] = update.caseRef;
     }
-    if (update.status === 'deferred' && update.sla != null) {
-      doc.sla = update.sla;
+    if (update.status === 'pending' && update?.sla != null) {
+      doc['sla'] = update.sla;
     }
     if (update.status === 'pending') {
-      doc.assignee = update.assignee;
+      doc['assignee'] = update.assignee ?? null;
     }
 
     try {

@@ -7,7 +7,7 @@
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { PndConfig } from '../config';
 import type { PndSpaceIdResolver } from '../types';
 import type { WatchWorkflowProjectionService } from '../services/watches/watch_workflow_projection_service';
@@ -50,9 +50,9 @@ export interface RouteDependencies {
    * `conversations` service is only populated on the plugin's `start()`
    * (see plugin.ts), while routes are registered during `setup()`.
    */
-  getConversationClient?: (
+  getConversationPublicClient?: (
     request: KibanaRequest
-  ) => Promise<ReadOnlyConversationClient> | undefined;
+  ) => Promise<ConversationPublicClient> | undefined;
 }
 
 export const registerRoutes = (deps: RouteDependencies): void => {

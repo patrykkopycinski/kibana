@@ -30,7 +30,7 @@ export const registerUpdateSkillRoute = ({
   router,
   logger,
   config,
-  getWatchesService,
+  getWatchProjection,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -60,7 +60,7 @@ export const registerUpdateSkillRoute = ({
           }
 
           const { skillId } = request.params;
-          const skill = getWatchesService().setSkillEnabled(skillId, request.body.enabled);
+          const skill = getWatchProjection().setSkillEnabled(skillId, request.body.enabled);
           if (!skill) {
             return response.notFound({
               body: { message: `Skill "${skillId}" not found` },

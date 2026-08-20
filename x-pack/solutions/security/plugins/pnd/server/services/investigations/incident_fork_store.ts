@@ -174,7 +174,7 @@ export class IncidentForkStore {
       ...(investigation.watch_id ? { watch_id: investigation.watch_id } : {}),
       status: 'open',
       ...(investigation.severity ? { severity: investigation.severity } : {}),
-      assignee: investigation.assignee ?? null,
+      assignee: investigation?.assignee ?? null,
       events: [...carriedEvents, forkEvent],
     };
 

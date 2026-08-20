@@ -25,13 +25,13 @@ const inv = (overrides: Partial<Investigation>): Investigation =>
  */
 describe('isDecidedInvestigation', () => {
   it('is false while a proposal is still pending, even on an escalated investigation', () => {
-    expect(isDecidedInvestigation(inv({ status: 'escalated', pendingProposalCount: 1 }))).toBe(
+    expect(isDecidedInvestigation(inv({ status: 'approved', pendingProposalCount: 1 }))).toBe(
       false
     );
   });
 
   it('is true once nothing is pending on a decided status', () => {
-    expect(isDecidedInvestigation(inv({ status: 'escalated', pendingProposalCount: 0 }))).toBe(
+    expect(isDecidedInvestigation(inv({ status: 'approved', pendingProposalCount: 0 }))).toBe(
       true
     );
     expect(isDecidedInvestigation(inv({ status: 'dismissed', pendingProposalCount: 0 }))).toBe(
@@ -50,10 +50,10 @@ describe('isDecidedInvestigation', () => {
 describe('briefActionLabel', () => {
   it('reproduces the ransom-008 bug shape before the fix and asserts the fixed behaviour', () => {
     // Same shape as inv-floor-ransom-008: investigation status stuck at the
-    // pre-decision 'escalated' value, but its one proposal is already
+    // pre-decision 'approved' value, but its one proposal is already
     // decided (pendingProposalCount recomputed to 0 by the reconciler).
     const decided = inv({
-      status: 'escalated',
+      status: 'approved',
       pendingProposalCount: 0,
       primaryActionLabel: 'Isolate endpoint',
     });
@@ -63,7 +63,7 @@ describe('briefActionLabel', () => {
 
   it('still surfaces the Watch-recommended action while a decision is pending', () => {
     const pending = inv({
-      status: 'escalated',
+      status: 'approved',
       pendingProposalCount: 1,
       primaryActionLabel: 'Isolate endpoint',
     });

@@ -52,8 +52,8 @@ export const registerListApprovedProposalsRoute = ({
             .flat()
             .filter((p) => p.status === 'approved')
             .sort((a, b) => {
-              const aTime = a.decidedAt ? new Date(a.decidedAt).getTime() : 0;
-              const bTime = b.decidedAt ? new Date(b.decidedAt).getTime() : 0;
+              const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+              const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
               return bTime - aTime;
             })
             .slice(0, MAX_RESULTS);

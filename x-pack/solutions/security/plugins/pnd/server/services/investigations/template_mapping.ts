@@ -6,10 +6,10 @@
  */
 
 import { TEMPLATE_VERSION_CURRENT } from '@kbn/pnd-common';
-import type { ConversationTemplateReference } from '@kbn/agent-builder-common';
+import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import type { Investigation, Proposal, Incident } from '@kbn/pnd-common';
 import type { Proposal as UiProposal } from '@kbn/pnd-common';
-import type { ConversationWriterCreateRequest } from '@kbn/agent-builder-server';
+import type { ConversationCreatePublicRequest } from '@kbn/agent-builder-server';
 import type { Proposal as CanonicalProposal } from '../../common/schemas';
 
 /**
@@ -25,7 +25,7 @@ export const PND_WATCH_ORCHESTRATOR_AGENT_ID = 'security.pnd_watch_orchestrator'
 
 /**
  * Maps a PND `template_id` literal to the platform
- * {@link ConversationTemplateReference} shape.
+ * {@link ConversationTemplate} shape.
  *
  * The PND discriminated union (`'investigation' | 'proposal' | 'incident'`)
  * maps 1:1 onto the platform's `template.id` field. `template.version` is
@@ -34,7 +34,7 @@ export const PND_WATCH_ORCHESTRATOR_AGENT_ID = 'security.pnd_watch_orchestrator'
  */
 export function pndTemplateIdToConversationTemplate(
   templateId: 'investigation' | 'proposal' | 'incident'
-): ConversationTemplateReference {
+): ConversationTemplate {
   return { id: templateId, version: TEMPLATE_VERSION_CURRENT };
 }
 
@@ -49,7 +49,7 @@ export function pndTemplateIdToConversationTemplate(
  */
 export function investigationToConversationCreate(
   inv: Investigation
-): ConversationWriterCreateRequest {
+): ConversationCreatePublicRequest {
   return {
     agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: inv.title,
@@ -60,7 +60,7 @@ export function investigationToConversationCreate(
       ...(inv.watch_tier ? { watch_tier: inv.watch_tier } : {}),
       ...(inv.severity ? { severity: inv.severity } : {}),
       ...(inv.status ? { status: inv.status } : {}),
-      ...(inv.assignee ? { assignee: inv.assignee } : {}),
+      ...(inv?.assignee ? { assignee: inv?.assignee } : {}),
       ...(inv.recommendedAction ? { recommended_action: inv.recommendedAction } : {}),
       ...(inv.affectedSurface ? { affected_surface: inv.affectedSurface } : {}),
       pending_proposal_count: String(inv.pendingProposalCount),
@@ -78,7 +78,7 @@ export function investigationToConversationCreate(
  * linkage. The proposal's domain fields (confidence, verdict, status) are
  * stored as stringified values in `extended_fields`.
  */
-export function proposalToConversationCreate(proposal: Proposal): ConversationWriterCreateRequest {
+export function proposalToConversationCreate(proposal: Proposal): ConversationCreatePublicRequest {
   return {
     agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: proposal.summary || `Proposal: ${proposal.type}`,
@@ -90,9 +90,9 @@ export function proposalToConversationCreate(proposal: Proposal): ConversationWr
       status: proposal.status,
       source_watch_id: proposal.sourceWatchId,
       approval_required: String(proposal.approvalRequired),
-      ...(proposal.assignee ? { assignee: proposal.assignee } : {}),
-      ...(proposal.sla ? { sla: proposal.sla } : {}),
-      ...(proposal.dismissalReason ? { dismissal_reason: proposal.dismissalReason } : {}),
+      ...(proposal?.assignee ? { assignee: proposal?.assignee } : {}),
+      ...(proposal?.sla ? { sla: proposal?.sla } : {}),
+      ...(proposal.reasoning ? { dismissal_reason: proposal.reasoning } : {}),
     },
     rounds: [],
     origin: { external_conversation_id: proposal.id },
@@ -106,7 +106,7 @@ export function proposalToConversationCreate(proposal: Proposal): ConversationWr
  * The `forkedFromInvestigationId` is preserved in `extended_fields` so the
  * lineage is queryable.
  */
-export function incidentToConversationCreate(incident: Incident): ConversationWriterCreateRequest {
+export function incidentToConversationCreate(incident: Incident): ConversationCreatePublicRequest {
   return {
     agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: `Incident forked from ${incident.forkedFromInvestigationId}`,
@@ -116,7 +116,7 @@ export function incidentToConversationCreate(incident: Incident): ConversationWr
       ...(incident.watch_id ? { watch_id: incident.watch_id } : {}),
       ...(incident.status ? { status: incident.status } : {}),
       ...(incident.severity ? { severity: incident.severity } : {}),
-      ...(incident.assignee ? { assignee: incident.assignee } : {}),
+      ...(incident?.assignee ? { assignee: incident?.assignee } : {}),
     },
     rounds: [],
     origin: { external_conversation_id: incident.id },
@@ -134,9 +134,9 @@ export function incidentToConversationCreate(incident: Incident): ConversationWr
  */
 export function canonicalProposalStatusToUiStatus(
   status: CanonicalProposal['status']
-): 'pending' | 'approved' | 'modified' | 'dismissed' | 'escalated' | 'deferred' | 'executed' {
+): 'pending' | 'approved' | 'modified' | 'dismissed' | 'approved' | 'pending' | 'executed' {
   switch (status) {
-    case 'escalated':
+    case 'approved':
     case 'dismissed':
     case 'modified':
     case 'approved':

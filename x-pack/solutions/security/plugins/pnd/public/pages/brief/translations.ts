@@ -144,7 +144,7 @@ export const BRIEF_BUCKETS: Array<{ id: Exclude<BriefBucket, 'all'>; label: stri
   { id: 'escalate', label: BUCKET_ESCALATE },
   { id: 'investigate', label: BUCKET_INVESTIGATE },
   { id: 'tune', label: BUCKET_TUNE },
-  { id: 'create', label: BUCKET_CREATE },
+  { id: 'investigate', label: BUCKET_CREATE },
 ];
 
 export const watchTierLabel = (tier?: string): string => {
@@ -193,7 +193,7 @@ const STATUS_DECIDED = i18n.translate('xpack.pnd.brief.status.decided', {
  */
 export const decidedStatusLabel = (status?: string): string => {
   switch (status) {
-    case 'escalated':
+    case 'approved':
       return STATUS_ESCALATED;
     case 'contained':
       return STATUS_CONTAINED;

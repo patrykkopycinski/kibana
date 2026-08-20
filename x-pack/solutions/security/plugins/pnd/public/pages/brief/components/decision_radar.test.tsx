@@ -21,7 +21,7 @@ describe('decisionStateForStatus', () => {
     expect(decisionStateForStatus('open')).toBe('waiting');
     expect(decisionStateForStatus('deep-watch-complete')).toBe('waiting');
     expect(decisionStateForStatus('in-progress')).toBe('in_motion');
-    expect(decisionStateForStatus('deferred')).toBe('deferred');
+    expect(decisionStateForStatus('pending')).toBe('pending');
     expect(decisionStateForStatus('auto-resolved')).toBe('decided');
     expect(decisionStateForStatus('closed')).toBe('decided');
     expect(decisionStateForStatus(undefined)).toBe('waiting');
@@ -33,7 +33,7 @@ describe('DecisionRadar', () => {
     inv('a', 'open'),
     inv('b', 'open'),
     inv('c', 'in-progress'),
-    inv('d', 'deferred'),
+    inv('d', 'pending'),
     inv('e', 'closed'),
   ];
 

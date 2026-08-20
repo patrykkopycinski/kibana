@@ -58,7 +58,7 @@ export const AssignActionModal = memo<AssignActionModalProps>(
         <EuiSelect
           fullWidth
           isInvalid={hasBeenTouched && assignee === ''}
-          aria-label={MODAL_TRANSLATIONS.assign.assigneeSelectAriaLabel}
+          aria-label={MODAL_TRANSLATIONS.assign?.assigneeSelectAriaLabel}
           options={assignOptions}
           value={assignee}
           onChange={onChangeAssignee}

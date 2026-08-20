@@ -168,7 +168,7 @@ describe('PndPlugin feature-flag gating', () => {
       const features = { registerKibanaFeature: jest.fn() };
       const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
 
-      // setup() registers routes with a getConversationClient closure that
+      // setup() registers routes with a getConversationPublicClient closure that
       // reads `this.agentBuilder` lazily — capture it here, before
       // agentBuilder is actually assigned in start().
       plugin.setup(
@@ -180,9 +180,9 @@ describe('PndPlugin feature-flag gating', () => {
         } as never
       );
 
-      const { getConversationClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
+      const { getConversationPublicClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
       // Before start(), this.agentBuilder is still undefined.
-      expect(getConversationClient(httpServerRequest())).toBeUndefined();
+      expect(getConversationPublicClient(httpServerRequest())).toBeUndefined();
 
       const scopedClient = { some: 'client' };
       const getScopedClient = jest.fn().mockReturnValue(scopedClient);
@@ -191,15 +191,15 @@ describe('PndPlugin feature-flag gating', () => {
       plugin.start(coreStart, {
         spaces: undefined,
         workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
-        agentBuilder: { conversations: { getScopedClient, getScopedWriterClient: jest.fn() } },
+        agentBuilder: { conversations: { getScopedClient, getScopedClient: jest.fn() } },
       } as never);
 
       const request = httpServerRequest();
-      expect(getConversationClient(request)).toBe(scopedClient);
+      expect(getConversationPublicClient(request)).toBe(scopedClient);
       expect(getScopedClient).toHaveBeenCalledWith({ request });
     });
 
-    it('degrades getConversationClient to undefined when agentBuilder is unavailable', () => {
+    it('degrades getConversationPublicClient to undefined when agentBuilder is unavailable', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreSetup = coreMock.createSetup();
       const features = { registerKibanaFeature: jest.fn() };
@@ -214,7 +214,7 @@ describe('PndPlugin feature-flag gating', () => {
         } as never
       );
 
-      const { getConversationClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
+      const { getConversationPublicClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
 
       const coreStart = coreMock.createStart();
       // agentBuilder plugin not enabled — start() leaves it undefined.
@@ -224,8 +224,8 @@ describe('PndPlugin feature-flag gating', () => {
         agentBuilder: undefined,
       } as never);
 
-      expect(() => getConversationClient(httpServerRequest())).not.toThrow();
-      expect(getConversationClient(httpServerRequest())).toBeUndefined();
+      expect(() => getConversationPublicClient(httpServerRequest())).not.toThrow();
+      expect(getConversationPublicClient(httpServerRequest())).toBeUndefined();
     });
   });
 });

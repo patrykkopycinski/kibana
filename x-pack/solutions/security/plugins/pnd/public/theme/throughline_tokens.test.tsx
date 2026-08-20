@@ -36,7 +36,7 @@ describe('Throughline design tokens', () => {
 
     expect(decisionStateColor('waiting')).toBe(euiTheme.colors.warning);
     expect(decisionStateColor('in_motion')).toBe(euiTheme.colors.primary);
-    expect(decisionStateColor('deferred')).toBe(euiTheme.colors.subduedText);
+    expect(decisionStateColor('pending')).toBe(euiTheme.colors.subduedText);
     expect(decisionStateColor('decided')).toBe(euiTheme.colors.success);
 
     expect(decisionStateLabel.waiting).toBe('Waiting');

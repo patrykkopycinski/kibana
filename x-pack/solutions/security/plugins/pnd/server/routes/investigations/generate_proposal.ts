@@ -10,7 +10,6 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   PND_INVESTIGATION_URL_TEMPLATE,
-  TEMPLATE_VERSION_CURRENT,
 } from '@kbn/pnd-common';
 
 import type { Proposal } from '@kbn/pnd-common';
@@ -271,11 +270,10 @@ export const registerGenerateProposalRoute = ({
           const proposal: Proposal = {
             id: `prop-llm-${Date.now()}`,
             template_id: 'proposal',
-            template_version: TEMPLATE_VERSION_CURRENT,
             parentConversationId: id,
             type: decision.type,
             confidence: decision.confidence,
-            reasoning: decision.reasoning,
+            reasoning: decision.dismissalReason,
             evidenceRefs: [],
             status: 'pending',
             assignee: null,
@@ -284,7 +282,7 @@ export const registerGenerateProposalRoute = ({
             sourceWatchId: investigation.watch_id,
             approvalRequired: true,
             summary: `LLM-recommended action: ${decision.type}`,
-            recommendation: decision.reasoning,
+            recommendation: decision.dismissalReason,
           };
 
           logger.info(

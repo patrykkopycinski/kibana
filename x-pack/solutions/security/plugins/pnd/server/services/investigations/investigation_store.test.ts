@@ -38,7 +38,6 @@ describe('InvestigationStore index migration', () => {
     return {
       indices: {
         exists: jest.fn().mockResolvedValue(opts.exists),
-        create: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
         getMapping,
       },
@@ -124,7 +123,6 @@ describe('InvestigationStore#reconcileInvestigationAfterDecision', () => {
     return {
       indices: {
         exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
         getMapping: jest.fn().mockResolvedValue({
           'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
@@ -235,7 +233,6 @@ describe('InvestigationStore#getWatchActivityMetrics', () => {
     return {
       indices: {
         exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
         getMapping: jest.fn().mockResolvedValue({
           'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
@@ -343,7 +340,6 @@ describe('InvestigationStore#listAllProposals', () => {
     return {
       indices: {
         exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
         getMapping: jest.fn().mockResolvedValue({
           'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
@@ -466,7 +462,6 @@ describe('InvestigationStore#listApprovedProposals', () => {
     return {
       indices: {
         exists: jest.fn().mockResolvedValue(true),
-        create: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
         getMapping: jest.fn().mockResolvedValue({
           'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },

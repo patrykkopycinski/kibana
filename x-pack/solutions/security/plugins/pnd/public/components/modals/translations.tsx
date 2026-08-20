@@ -18,7 +18,7 @@ export const MODAL_TRANSLATIONS = Object.freeze({
     actionButtonLabel: i18n.translate('xpack.pnd.assignModal.actionButtonLabel', {
       defaultMessage: 'Assign',
     }),
-    assigneeSelectAriaLabel: i18n.translate('xpack.pnd.assignModal.assigneeSelectAriaLabel', {
+    assigneeSelectAriaLabel: i18n.translate('xpack.pnd.assignModal?.assigneeSelectAriaLabel', {
       defaultMessage: 'Select assignee',
     }),
   },

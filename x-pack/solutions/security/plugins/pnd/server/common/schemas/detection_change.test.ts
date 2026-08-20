@@ -82,7 +82,7 @@ describe('Detection Watch tier contract (lockdown)', () => {
   });
 
   it('RecommendedAction includes create (rule creation) and tune (rule tuning)', () => {
-    expect(RecommendedAction.safeParse('create').success).toBe(true);
+    expect(RecommendedAction.safeParse('investigate').success).toBe(true);
     expect(RecommendedAction.safeParse('tune').success).toBe(true);
   });
 

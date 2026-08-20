@@ -19,7 +19,7 @@ export const registerListWorkersRoute = ({
   router,
   logger,
   config,
-  getWatchesService,
+  getWatchProjection,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -45,7 +45,7 @@ export const registerListWorkersRoute = ({
             return storeUnavailableResponse(response);
           }
 
-          const body: ListWorkersResponse = { workers: getWatchesService().listWorkers() };
+          const body: ListWorkersResponse = { workers: getWatchProjection().listWorkers() };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list workers: ${error}`);

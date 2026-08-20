@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCH_URL_TEMPLATE } from '@kbn/pnd-common';
 import type { GetWatchResponse } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { getMockWatchById } from '@kbn/pnd-common';
+import { WATCHES_SEED } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
 import { getWatchRoutePrivileges } from './watch_route_security';
 
@@ -50,7 +50,7 @@ export const registerGetWatchRoute = ({
           const { watchId } = request.params;
 
           if (config.ui.useMockData) {
-            const watch = getMockWatchById(watchId);
+            const watch = (WATCHES_SEED.find((w) => w.id === watchId));
             if (!watch) {
               return response.notFound({
                 body: { message: `Watch "${watchId}" not found` },

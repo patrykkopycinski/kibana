@@ -19,7 +19,7 @@ export const registerListSkillsRoute = ({
   router,
   logger,
   config,
-  getWatchesService,
+  getWatchProjection,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -45,7 +45,7 @@ export const registerListSkillsRoute = ({
             return storeUnavailableResponse(response);
           }
 
-          const body: ListSkillsResponse = { skills: getWatchesService().listSkills() };
+          const body: ListSkillsResponse = { skills: getWatchProjection().listSkills() };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list skills: ${error}`);

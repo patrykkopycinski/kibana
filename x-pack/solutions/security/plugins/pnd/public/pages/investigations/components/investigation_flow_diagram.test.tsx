@@ -167,7 +167,7 @@ describe('InvestigationFlowDiagram', () => {
 
   it('marks the Decided stage current once a proposal has left the pending state', () => {
     const investigation = makeInvestigation({ pendingProposalCount: 0 });
-    const proposals = [makeProposal({ status: 'escalated' })];
+    const proposals = [makeProposal({ status: 'approved' })];
 
     render(<InvestigationFlowDiagram investigation={investigation} proposals={proposals} />);
 

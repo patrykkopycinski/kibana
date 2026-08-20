@@ -129,7 +129,7 @@ describe('buildQueueItems — ratified queue model', () => {
     const proposals = [
       prop({ id: 'prop-f1', parentConversationId: 'inv-f', status: 'approved' }),
       prop({ id: 'prop-f2', parentConversationId: 'inv-f', status: 'dismissed' }),
-      prop({ id: 'prop-f3', parentConversationId: 'inv-f', status: 'escalated' }),
+      prop({ id: 'prop-f3', parentConversationId: 'inv-f', status: 'approved' }),
     ];
 
     const items = buildQueueItems([investigation], proposals);

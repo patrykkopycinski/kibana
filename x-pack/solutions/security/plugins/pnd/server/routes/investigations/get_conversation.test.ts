@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
 import type { IRouter, Logger, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
-import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { PndConfig } from '../../config';
 import { registerGetConversationRoute } from './get_conversation';
 
@@ -50,7 +50,7 @@ const BASE_CONFIG: PndConfig = {
 
 // RouteDependencies requires config/getSpaceId/getWatchProjection/
 // getWorkflowsManagement/getInvestigationStore even though this route only
-// exercises getConversationClient — these are unused no-ops for this suite.
+// exercises getConversationPublicClient — these are unused no-ops for this suite.
 const BASE_DEPS = {
   config: BASE_CONFIG,
   getSpaceId: () => 'default',
@@ -69,7 +69,7 @@ describe('GET conversation route', () => {
       ...BASE_DEPS,
       router,
       logger: createLogger(),
-      getConversationClient: undefined,
+      getConversationPublicClient: undefined,
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
@@ -87,7 +87,7 @@ describe('GET conversation route', () => {
       ...BASE_DEPS,
       router,
       logger: createLogger(),
-      getConversationClient: (): Promise<ReadOnlyConversationClient> | undefined => undefined,
+      getConversationPublicClient: (): Promise<ConversationPublicClient> | undefined => undefined,
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
@@ -111,7 +111,7 @@ describe('GET conversation route', () => {
       ...BASE_DEPS,
       router,
       logger: createLogger(),
-      getConversationClient: () => Promise.resolve(mockClient as any),
+      getConversationPublicClient: () => Promise.resolve(mockClient as any),
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
@@ -143,7 +143,7 @@ describe('GET conversation route', () => {
       ...BASE_DEPS,
       router,
       logger: createLogger(),
-      getConversationClient: () => Promise.resolve(mockClient as any),
+      getConversationPublicClient: () => Promise.resolve(mockClient as any),
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
@@ -165,7 +165,7 @@ describe('GET conversation route', () => {
       ...BASE_DEPS,
       router,
       logger,
-      getConversationClient: () => Promise.reject(new Error('down')),
+      getConversationPublicClient: () => Promise.reject(new Error('down')),
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({

@@ -39,7 +39,7 @@ export const WatchesActivityPage: React.FC = () => {
   const rows = useMemo(() => buildActivityFeed(data?.watches ?? []), [data]);
 
   return (
-    <WatchesSectionLayout active="activity">
+    <WatchesSectionLayout active="activity" title={i18n.SUBNAV_ACTIVITY}>
       <PndPageSection>
         <PndPageHeader
           title={i18n.SUBNAV_ACTIVITY}
@@ -48,7 +48,6 @@ export const WatchesActivityPage: React.FC = () => {
               <EuiText size="s">{i18n.ACTIVITY_TOTAL_COUNT(rows.length)}</EuiText>
             )
           }
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
         />
         {isLoading ? (
           <EuiLoadingSpinner size="l" />

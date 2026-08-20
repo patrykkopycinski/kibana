@@ -45,7 +45,7 @@ describe('isBrowsableReportUrl', () => {
   });
 
   it('returns false for javascript URLs', () => {
-    expect(isBrowsableReportUrl('java' + 'script:alert(1)')).toBe(false);
+    expect(isBrowsableReportUrl(['java', 'script:alert(1)'].join(''))).toBe(false);
   });
 
   it('returns false for invalid URLs', () => {
@@ -124,7 +124,7 @@ describe('getSourceFaviconUrl', () => {
   });
 
   it('returns undefined for javascript URLs', () => {
-    expect(getSourceFaviconUrl('java' + 'script:alert(1)')).toBeUndefined();
+    expect(getSourceFaviconUrl(['java', 'script:alert(1)'].join(''))).toBeUndefined();
   });
 
   it('returns undefined for invalid URLs', () => {

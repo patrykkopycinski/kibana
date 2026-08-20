@@ -25,7 +25,7 @@ export const registerUpdateWatchRoute = ({
   router,
   logger,
   getSpaceId,
-  getWatchesService,
+  getWatchProjection,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -51,7 +51,7 @@ export const registerUpdateWatchRoute = ({
       async (_context, request, response) => {
         try {
           const { watchId } = request.params;
-          const result = await getWatchesService().update(
+          const result = await getWatchProjection().update(
             watchId,
             request.body,
             getSpaceId(request),

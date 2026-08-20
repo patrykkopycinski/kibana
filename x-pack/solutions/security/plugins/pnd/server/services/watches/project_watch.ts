@@ -7,8 +7,8 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
-  ScheduleCadence,
   WatchAutonomyLevel,
+  ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
   ScopeAccess,
@@ -25,6 +25,7 @@ import { coverageFromSchedule } from '@kbn/pnd-common';
 /** Temporary policy bag on the workflow watch_policy data.set step. */
 interface WatchAgentStepAttrs {
   mandate?: string;
+  autonomyLevel?: WatchAutonomyLevel;
   handoff?: ScheduleHandoff;
   scopes?: WatchScope[];
   onDemand?: boolean;
@@ -57,11 +58,6 @@ const asNumber = (value: unknown, fallback: number): number =>
 
 const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
-
-const asWatchAutonomyLevel = (value: unknown): WatchAutonomyLevel => {
-  if (value === 'manual' || value === 'assisted' || value === 'supervised') return value;
-  return 'manual';
-};
 
 const asScopeAccess = (value: unknown): ScopeAccess => {
   if (value === 'full' || value === 'masked' || value === 'denied') return value;

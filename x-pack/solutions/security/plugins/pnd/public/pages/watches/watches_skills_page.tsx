@@ -34,7 +34,7 @@ export const WatchesSkillsPage: React.FC = () => {
   const rows = useMemo(() => buildCallableRows(data?.watches ?? [], 'skill'), [data]);
 
   return (
-    <WatchesSectionLayout active="skills">
+    <WatchesSectionLayout active="skills" title={i18n.SUBNAV_SKILLS}>
       <PndPageSection>
         <PndPageHeader
           title={i18n.SUBNAV_SKILLS}
@@ -43,7 +43,6 @@ export const WatchesSkillsPage: React.FC = () => {
               <EuiText size="s">{i18n.SKILLS_TOTAL_COUNT(rows.length)}</EuiText>
             )
           }
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
         />
         {isLoading ? (
           <EuiLoadingSpinner size="l" />

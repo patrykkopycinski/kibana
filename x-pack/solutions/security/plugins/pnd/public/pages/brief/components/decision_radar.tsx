@@ -26,16 +26,16 @@ export const decisionStateForStatus = (status: string | undefined): DecisionStat
     case 'in-progress':
     case 'investigating':
       return 'in_motion';
-    case 'deferred':
+    case 'pending':
     case 'snoozed':
-      return 'deferred';
+      return 'pending';
     case 'auto-resolved':
     case 'closed':
     case 'contained':
     case 'dismissed':
       return 'decided';
     case 'open':
-    case 'escalated':
+    case 'approved':
     case 'deep-watch-complete':
     default:
       // Anything the human still owns (incl. Deep-Watch-complete awaiting the
@@ -44,7 +44,7 @@ export const decisionStateForStatus = (status: string | undefined): DecisionStat
   }
 };
 
-const ORDER: DecisionState[] = ['waiting', 'in_motion', 'deferred', 'decided'];
+const ORDER: DecisionState[] = ['waiting', 'in_motion', 'pending', 'decided'];
 
 export interface DecisionRadarProps {
   investigations: Investigation[];
@@ -69,7 +69,6 @@ export const DecisionRadar: React.FC<DecisionRadarProps> = ({
     const acc: Record<DecisionState, number> = {
       waiting: 0,
       in_motion: 0,
-      deferred: 0,
       decided: 0,
     };
     for (const investigation of investigations) {

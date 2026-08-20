@@ -7,7 +7,7 @@
 
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_WATCHES_URL } from '@kbn/pnd-common';
 import type { ListWatchesResponse } from '@kbn/pnd-common';
-import { MOCK_MANAGED_WATCHES } from '@kbn/pnd-common';
+import { WATCHES_SEED } from '@kbn/pnd-common';
 import type { RouteDependencies } from '../register_routes';
 import { getWatchRoutePrivileges } from './watch_route_security';
 
@@ -40,7 +40,7 @@ export const registerListWatchesRoute = ({
       async (context, request, response) => {
         try {
           if (config.ui.useMockData) {
-            const body: ListWatchesResponse = { watches: MOCK_MANAGED_WATCHES };
+            const body: ListWatchesResponse = { watches: WATCHES_SEED };
             return response.ok({ body });
           }
 

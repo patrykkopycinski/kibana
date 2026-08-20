@@ -29,9 +29,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  AUTONOMY_LABELS,
   coverageFromSchedule,
-  type AutonomyLevel,
   type Watch,
   type WatchCallableRef,
   type WatchSchedule,
@@ -106,7 +104,7 @@ export const WatchDetailPage: React.FC = () => {
     );
   }, []);
 
-  const onAutonomyChange = useCallback((level: AutonomyLevel) => {
+  const onAutonomyChange = useCallback((level: unknown) => {
     setLocalWatch((prev) => (prev ? { ...prev, autonomyLevel: level } : prev));
   }, []);
 
@@ -202,9 +200,6 @@ export const WatchDetailPage: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          subtitle={watch.mandate}
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
           rightSideItems={[
             <EuiButton key="save" fill onClick={stubToast}>
               {i18n.SAVE}
@@ -318,11 +313,11 @@ export const WatchDetailPage: React.FC = () => {
             <div>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
+                  <AutonomyMeter level={undefined} color={watch.color} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {watch.autonomyLevel} / 5
+                    
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -333,13 +328,13 @@ export const WatchDetailPage: React.FC = () => {
                 step={1}
                 value={watch.autonomyLevel}
                 onChange={(e) =>
-                  onAutonomyChange(Number((e.target as HTMLInputElement).value) as AutonomyLevel)
+                  onAutonomyChange(undefined)
                 }
                 showTicks
-                ticks={AUTONOMY_LABELS.map((label, i) => ({
-                  value: i + 1,
-                  label: i === 0 || i === 4 ? label : '',
-                }))}
+                ticks={[
+                  { value: 1, label: 'Manual' },
+                  { value: 5, label: 'Autonomous' },
+                ]}
                 fullWidth
                 compressed
               />
@@ -364,7 +359,6 @@ export const WatchDetailPage: React.FC = () => {
           <EuiFlexItem>
             <SectionHeading
               title={i18n.AGENT_CAPABILITIES_TITLE}
-              subtitle={i18n.agentCapabilitiesSubtitle(callablesOn, watch.callables.length)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

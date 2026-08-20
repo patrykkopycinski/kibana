@@ -17,7 +17,7 @@ import { ruleTuningTriggerSchema } from './detection_change';
 /** Proposal lifecycle status (spike-canonical). */
 export const proposalStatusSchema = z.enum([
   'new',
-  'escalated',
+  'approved',
   'dismissed',
   'needs-evidence',
   'modified',
@@ -99,7 +99,7 @@ export const verdictToProposalStatus = (verdict: string, severity?: string): Pro
     return 'needs-evidence';
   }
   if (verdict === 'true_positive') {
-    return severity === 'high' || severity === 'critical' ? 'escalated' : 'new';
+    return severity === 'high' || severity === 'critical' ? 'approved' : 'new';
   }
   if (verdict === 'false_positive' || verdict === 'benign_true_positive') {
     return 'dismissed';

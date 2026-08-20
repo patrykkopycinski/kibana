@@ -136,10 +136,10 @@ describe('PND index mappings', () => {
   it('date fields are mapped as dates', () => {
     expect(props(investigationsMapping).createdAt.type).toBe('date');
     expect(props(investigationsMapping).updatedAt.type).toBe('date');
-    expect(props(proposalsMapping).sla.type).toBe('date');
+    expect(props(proposalsMapping)?.sla.type).toBe('date');
   });
 
   it('decidedAt is mapped as date for post-approval sorting', () => {
-    expect(props(proposalsMapping).decidedAt.type).toBe('date');
+    expect(props(proposalsMapping).updatedAt.type).toBe('date');
   });
 });

@@ -30,7 +30,7 @@ export const registerUpdateWorkerRoute = ({
   router,
   logger,
   config,
-  getWatchesService,
+  getWatchProjection,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -60,7 +60,7 @@ export const registerUpdateWorkerRoute = ({
           }
 
           const { workerId } = request.params;
-          const worker = getWatchesService().setWorkerEnabled(workerId, request.body.enabled);
+          const worker = getWatchProjection().setWorkerEnabled(workerId, request.body.enabled);
           if (!worker) {
             return response.notFound({
               body: { message: `Worker "${workerId}" not found` },

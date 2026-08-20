@@ -96,7 +96,7 @@ describe('readiness gate (gap #7)', () => {
     it('does not gate non-approved transitions', () => {
       const bare = buildProposal({ evidenceRefs: [], recommendation: '', approvals: [] });
       expect(evaluateReadinessGate(bare, 'dismissed').approved).toBe(true);
-      expect(evaluateReadinessGate(bare, 'escalated').approved).toBe(true);
+      expect(evaluateReadinessGate(bare, 'approved').approved).toBe(true);
       expect(evaluateReadinessGate(bare, undefined).approved).toBe(true);
     });
   });

@@ -86,7 +86,6 @@ describe('extractWatchPolicy', () => {
           with: {
             watch: {
               mandate: 'Hunt',
-              autonomyLevel: 3,
               onDemand: true,
               cadence: 'sweep',
             },

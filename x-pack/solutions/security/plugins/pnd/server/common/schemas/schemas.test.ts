@@ -32,14 +32,14 @@ describe('PND canonical Daybreak schemas', () => {
         summary: 'Malicious beaconing to known C2.',
       });
       expect(() => proposalSchema.parse(p)).not.toThrow();
-      expect(p.status).toBe('escalated');
+      expect(p.status).toBe('approved');
       expect(p.title).toBe('Suspicious Process on alert-1');
       expect(p.recommendation).toMatch(/^Escalate —/);
     });
 
     it('maps verdict + severity to status', () => {
       expect(verdictToProposalStatus('true_positive', 'low')).toBe('new');
-      expect(verdictToProposalStatus('true_positive', 'critical')).toBe('escalated');
+      expect(verdictToProposalStatus('true_positive', 'critical')).toBe('approved');
       expect(verdictToProposalStatus('false_positive')).toBe('dismissed');
       expect(verdictToProposalStatus('inconclusive')).toBe('needs-evidence');
     });

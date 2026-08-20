@@ -28,7 +28,7 @@ const PATH = `${PND_INVESTIGATION_URL_TEMPLATE}/conversation` as const;
 export const registerGetConversationRoute = ({
   router,
   logger,
-  getConversationClient,
+  getConversationPublicClient,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -50,7 +50,7 @@ export const registerGetConversationRoute = ({
         try {
           const { id: investigationId } = request.params;
 
-          const client = await getConversationClient?.(request);
+          const client = await getConversationPublicClient?.(request);
           if (client == null) {
             return response.notFound({
               body: {

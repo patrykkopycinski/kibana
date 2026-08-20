@@ -24,7 +24,7 @@ export type ThreadType =
  * Decision states from the Throughline prototype's decision radar.
  * A proposal / investigation moves through these as the analyst acts.
  */
-export type DecisionState = 'waiting' | 'in_motion' | 'deferred' | 'decided';
+export type DecisionState = 'waiting' | 'in_motion' | 'pending' | 'decided';
 
 /**
  * Map a Throughline thread type to an EUI-theme color. We deliberately resolve
@@ -66,7 +66,7 @@ export const decisionStateColor = (euiTheme: EuiThemeComputed, state: DecisionSt
       return euiTheme.colors.warning;
     case 'in_motion':
       return euiTheme.colors.primary;
-    case 'deferred':
+    case 'pending':
       return euiTheme.colors.subduedText;
     case 'decided':
     default:
@@ -78,6 +78,5 @@ export const decisionStateColor = (euiTheme: EuiThemeComputed, state: DecisionSt
 export const decisionStateLabel: Record<DecisionState, string> = {
   waiting: 'Waiting',
   in_motion: 'In motion',
-  deferred: 'Deferred',
   decided: 'Decided',
 };

@@ -44,7 +44,7 @@ const QUEUE_STATUSES = new Set([
   'open',
   'investigating',
   'in-progress',
-  'escalated',
+  'approved',
   // Deep Watch finished its forensic analysis and handed a recommendation back
   // to the analyst. The investigation stays on the queue because the human
   // still owns the containment decision (pending proposal awaiting approval).
@@ -61,7 +61,7 @@ const AUTO_RESOLVED_STATUSES = new Set(['auto-resolved', 'closed']);
  * `escalated`, `executed`, `dismissed`). See `briefActionLabel`.
  */
 const DECIDED_STATUSES = new Set([
-  'escalated',
+  'approved',
   'contained',
   'dismissed',
   ...AUTO_RESOLVED_STATUSES,
@@ -99,7 +99,6 @@ const BUCKET_COLORS: Record<Exclude<i18n.BriefBucket, 'all'>, string> = {
   escalate: 'warning',
   investigate: 'primary',
   tune: 'accent',
-  create: 'success',
 };
 
 const isQueueRow = (investigation: Investigation): boolean =>
@@ -330,7 +329,7 @@ const BriefCard: React.FC<{
             {isDecided ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge
-                  color={investigation.status === 'escalated' ? 'warning' : 'default'}
+                  color={investigation.status === 'approved' ? 'warning' : 'default'}
                   data-test-subj="pndBriefCardDecidedBadge"
                 >
                   {i18n.decidedStatusLabel(investigation.status)}
@@ -426,7 +425,6 @@ export const BriefPage: React.FC = () => {
       escalate: 0,
       investigate: 0,
       tune: 0,
-      create: 0,
     };
     for (const item of queueItems) {
       if (item.recommendedAction && item.recommendedAction in counts) {
@@ -488,7 +486,7 @@ export const BriefPage: React.FC = () => {
         return euiTheme.colors.primary;
       case 'tune':
         return euiTheme.colors.accent;
-      case 'create':
+      case 'investigate':
         return euiTheme.colors.success;
       default:
         return euiTheme.border.color;
@@ -509,7 +507,7 @@ export const BriefPage: React.FC = () => {
         return euiTheme.colors.textPrimary;
       case 'tune':
         return euiTheme.colors.textAccent;
-      case 'create':
+      case 'investigate':
         return euiTheme.colors.textSuccess;
       default:
         return euiTheme.colors.textSubdued;
@@ -739,9 +737,9 @@ const RecentlyApprovedSection = () => {
                   <EuiText size="xs">{proposal.recommendation ?? proposal.id}</EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {proposal.decidedAt && (
+                  {proposal.updatedAt && (
                     <EuiText size="xs" color="subdued">
-                      <FormattedRelative value={new Date(proposal.decidedAt)} />
+                      <FormattedRelative value={new Date(proposal.updatedAt)} />
                     </EuiText>
                   )}
                 </EuiFlexItem>

@@ -11,7 +11,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
   PND_INVESTIGATIONS_URL,
-  PND_PROPOSALS_URL,
   buildInvestigationUrl,
 } from '@kbn/pnd-common';
 import type {
@@ -21,6 +20,8 @@ import type {
   Proposal,
 } from '@kbn/pnd-common';
 import { queryKeys } from '../query_keys';
+
+const PND_PROPOSALS_URL = '/internal/pnd/proposals';
 
 const retryOnTransientError = (failureCount: number, error: unknown): boolean => {
   if (failureCount >= 3) {
@@ -97,7 +98,7 @@ export const useAllProposals = () => {
   return useQuery({
     queryKey: ['pnd', 'proposals', 'all'],
     queryFn: async (): Promise<ListInvestigationProposalsResponse> =>
-      services.http!.get<ListInvestigationProposalsResponse>(PND_PROPOSALS_URL, {
+      services.http!.get<ListInvestigationProposalsResponse>('/internal/pnd/proposals', {
         version: API_VERSIONS.internal.v1,
       }),
     keepPreviousData: true,

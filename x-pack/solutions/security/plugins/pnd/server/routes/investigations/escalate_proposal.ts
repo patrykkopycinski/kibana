@@ -60,7 +60,7 @@ export const registerEscalateProposalRoute = ({
                 esClient,
                 proposalId,
                 {
-                  status: 'escalated',
+                  status: 'approved',
                   caseRef,
                 },
                 request
@@ -91,7 +91,7 @@ export const registerEscalateProposalRoute = ({
           }
 
           return response.ok({
-            body: { proposalId, status: 'escalated', caseRef, message: 'Proposal escalated' },
+            body: { proposalId, status: 'approved', caseRef, message: 'Proposal escalated' },
           });
         } catch (error) {
           logger.error(`Failed to escalate proposal: ${error}`);

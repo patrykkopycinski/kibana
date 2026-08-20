@@ -579,3 +579,69 @@ export const KIND_SKILL = i18n.translate('xpack.pnd.watches.capability.kind.skil
 export const KIND_WORKFLOW = i18n.translate('xpack.pnd.watches.capability.kind.workflow', {
   defaultMessage: 'Workflow',
 });
+
+export const LIFECYCLE_BETA = i18n.translate('xpack.pnd.watches.lifecycle.beta', {
+  defaultMessage: 'Beta',
+});
+
+export const LIFECYCLE_PILOT = i18n.translate('xpack.pnd.watches.lifecycle.pilot', {
+  defaultMessage: 'Pilot',
+});
+
+export const secondsAgoLabel = (n: number) =>
+  i18n.translate('xpack.pnd.watches.time.secondsAgo', {
+    defaultMessage: '{n, plural, one {# second ago} other {# seconds ago}}',
+    values: { n },
+  });
+
+export const minutesAgoLabel = (n: number) =>
+  i18n.translate('xpack.pnd.watches.time.minutesAgo', {
+    defaultMessage: '{n, plural, one {# minute ago} other {# minutes ago}}',
+    values: { n },
+  });
+
+export const hoursAgoLabel = (n: number) =>
+  i18n.translate('xpack.pnd.watches.time.hoursAgo', {
+    defaultMessage: '{n, plural, one {# hour ago} other {# hours ago}}',
+    values: { n },
+  });
+
+export const daysAgoLabel = (n: number) =>
+  i18n.translate('xpack.pnd.watches.time.daysAgo', {
+    defaultMessage: '{n, plural, one {# day ago} other {# days ago}}',
+    values: { n },
+  });
+
+export const NOT_RUN_YET = i18n.translate('xpack.pnd.watches.workers.notRunYet', {
+  defaultMessage: 'Not run yet',
+});
+
+export const RUN_STATE_OK = i18n.translate('xpack.pnd.watches.workers.runState.ok', {
+  defaultMessage: 'OK',
+});
+
+export const RUN_STATE_PAUSED = i18n.translate('xpack.pnd.watches.workers.runState.paused', {
+  defaultMessage: 'Paused',
+});
+
+export const RUN_STATE_DEGRADED = i18n.translate('xpack.pnd.watches.workers.runState.degraded', {
+  defaultMessage: 'Degraded',
+});
+
+export const RUN_STATE_UNAVAILABLE = i18n.translate('xpack.pnd.watches.workers.runState.unavailable', {
+  defaultMessage: 'Unavailable',
+});
+
+export const HEADER_MENU_DOCUMENTATION = i18n.translate('xpack.pnd.watches.headerMenu.documentation', {
+  defaultMessage: 'Documentation',
+});
+
+export const HEADER_MENU_GIVE_FEEDBACK = i18n.translate('xpack.pnd.watches.headerMenu.giveFeedback', {
+  defaultMessage: 'Give feedback',
+});
+
+export const viewWatchAriaLabel = (name: string) =>
+  i18n.translate('xpack.pnd.watches.viewWatchAriaLabel', {
+    defaultMessage: 'View watch {name}',
+    values: { name },
+  });

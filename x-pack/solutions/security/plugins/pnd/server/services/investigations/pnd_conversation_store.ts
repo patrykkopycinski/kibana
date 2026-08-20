@@ -6,24 +6,24 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { ConversationWriterClient } from '@kbn/agent-builder-server';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { PndStore } from './pnd_store';
 import { proposalToConversationCreate } from './template_mapping';
 import type { ProposalStatusUpdate } from './proposal_decision_store';
 
 /**
- * Resolver that obtains a {@link ConversationWriterClient}. The plugin wires
- * this to a scoped call on `agentBuilder.getScopedWriterClient` using the
+ * Resolver that obtains a {@link ConversationPublicClient}. The plugin wires
+ * this to a scoped call on `agentBuilder.getScopedClient` using the
  * internal user context (shadow writes are service-account-initiated, not
  * per-request — consistent with D10's run-as identity model).
  */
 export type ConversationWriterResolver = (
   request: KibanaRequest
-) => Promise<ConversationWriterClient>;
+) => Promise<ConversationPublicClient>;
 
 /**
  * Adapter that satisfies the {@link PndStore} interface but is backed by the
- * platform Conversation store (via {@link ConversationWriterClient}) instead
+ * platform Conversation store (via {@link ConversationPublicClient}) instead
  * of the PND-specific Elasticsearch indices.
  *
  * STATUS: active shadow-write. Read methods delegate to the legacy
@@ -112,11 +112,11 @@ export class PndConversationStore implements PndStore {
       try {
         const client = await this.writerResolver(request);
         const extendedFields: Record<string, string> = { status: update.status };
-        if (update.status === 'dismissed' && update.dismissalReason) {
-          extendedFields.dismissal_reason = update.dismissalReason;
+        if (update.status === 'dismissed' && update.rejectionReason) {
+          extendedFields.dismissal_reason = update.rejectionReason;
         }
-        if (update.status === 'escalated' && update.caseRef) {
-          extendedFields.case_ref = update.caseRef;
+        if (update.status === 'approved' && update?.caseRef) {
+          extendedFields.case_ref = update?.caseRef;
         }
         await client.update({
           id: proposalId,

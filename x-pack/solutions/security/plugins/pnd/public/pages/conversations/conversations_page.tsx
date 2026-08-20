@@ -26,7 +26,7 @@ import {
 import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 
-const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
+const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'approved']);
 
 const isQueueRow = (investigation: Investigation): boolean =>
   QUEUE_STATUSES.has(investigation.status ?? 'open');
@@ -104,7 +104,7 @@ export const ConversationsPage: React.FC = () => {
       {modalState.type === 'assign' && modalState.recordId && (
         <AssignActionModal
           recordId={modalState.recordId}
-          initialAssignee={modalState.assignee}
+          initialAssignee={modalState?.assignee}
           onClose={() => setModalState({ type: null, recordId: null })}
           onAssign={() => {
             // TODO: use assign action API call hook

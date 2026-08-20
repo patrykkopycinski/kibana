@@ -40,7 +40,6 @@ const createEsClient = (overrides: Record<string, unknown> = {}) =>
     indices: { exists: jest.fn().mockResolvedValue(true), create: jest.fn() },
     search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
     get: jest.fn(),
-    create: jest.fn().mockResolvedValue({ result: 'created' }),
     ...overrides,
   } as unknown as ElasticsearchClient);
 
@@ -145,9 +144,8 @@ describe('IncidentForkStore', () => {
   it('resolves a concurrent fork race to the winner instead of throwing', async () => {
     const deps = createDeps();
     const raced = { id: 'incident-inv-1', forkedFromInvestigationId: 'inv-1', events: [] };
-    const conflict = Object.assign(new Error('conflict'), { meta: { statusCode: 409 } });
+    const _conflict = Object.assign(new Error('conflict'), { meta: { statusCode: 409 } });
     const esClient = createEsClient({
-      create: jest.fn().mockRejectedValue(conflict),
       get: jest.fn().mockResolvedValue({ _source: raced }),
     });
     const store = buildStore(deps);

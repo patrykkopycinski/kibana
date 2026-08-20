@@ -191,17 +191,17 @@ export const ProposalRow: React.FC<{
         endpoint = `${endpoint}/reject`;
         newStatus = 'dismissed';
         // MVP requirement: dismissal reasons are structured.
-        body.dismissalReason = opts?.dismissalReason ?? 'other';
+        body.reasoning = opts?.reasoning ?? 'other';
       } else if (action === 'escalate') {
         endpoint = `${endpoint}/escalate`;
-        newStatus = 'escalated';
+        newStatus = 'approved';
       } else if (action === 'defer') {
         endpoint = `${endpoint}/defer`;
-        newStatus = 'deferred';
+        newStatus = 'pending';
       } else if (action === 'assign') {
         endpoint = `${endpoint}/assign`;
         newStatus = 'pending';
-        body.assignee = opts?.assignee ?? null;
+        body?.assignee = opts?.assignee ?? null;
       } else {
         endpoint = `${endpoint}/modify`;
         newStatus = 'modified';
@@ -224,7 +224,7 @@ export const ProposalRow: React.FC<{
         );
       } else if (action === 'assign') {
         notifications?.toasts.addSuccess(
-          opts?.assignee != null ? `Assigned to ${opts.assignee}` : 'Unassigned'
+          opts?.assignee != null ? `Assigned to ${opts?.assignee}` : 'Unassigned'
         );
       } else {
         notifications?.toasts.addSuccess(`Proposal ${newStatus}`);
@@ -248,10 +248,10 @@ export const ProposalRow: React.FC<{
     opts?: { dismissalReason?: DismissalReasonValue; assignee?: string | null }
   ) => {
     if (action === 'dismiss') {
-      // opts.dismissalReason is always set here; dismiss only ever calls
+      // opts.reasoning is always set here; dismiss only ever calls
       // requestConfirmation from a context-menu item.
       const reasonLabel =
-        DISMISSAL_REASONS.find((r) => r.value === opts?.dismissalReason)?.label ??
+        DISMISSAL_REASONS.find((r) => r.value === opts?.reasoning)?.label ??
         i18n.DISMISS_REASON_OTHER;
       setPendingConfirmation({
         action,
@@ -264,7 +264,7 @@ export const ProposalRow: React.FC<{
       return;
     }
     if (action === 'assign') {
-      // opts.assignee is always set (possibly null for unassign) here; assign
+      // opts?.assignee is always set (possibly null for unassign) here; assign
       // only ever calls requestConfirmation from a context-menu item.
       setPendingConfirmation({
         action,
@@ -289,8 +289,6 @@ export const ProposalRow: React.FC<{
     approved: 'Approved',
     modified: 'Modified',
     dismissed: 'Dismissed',
-    escalated: 'Escalated',
-    deferred: 'Deferred',
     executed: 'Executed',
   };
 
@@ -300,8 +298,6 @@ export const ProposalRow: React.FC<{
     approved: euiTheme.colors.backgroundBaseSuccess,
     dismissed: euiTheme.colors.backgroundBaseSubdued,
     modified: euiTheme.colors.backgroundBasePrimary,
-    escalated: euiTheme.colors.backgroundBaseWarning,
-    deferred: euiTheme.colors.backgroundBaseSubdued,
     executed: euiTheme.colors.backgroundBaseSuccess,
   };
 
@@ -416,7 +412,7 @@ export const ProposalRow: React.FC<{
                 </EuiText>
               </div>
             )}
-            {(proposal as any).dismissalReason && (proposal as any).status === 'dismissed' && (
+            {(proposal as any).reasoning && (proposal as any).status === 'dismissed' && (
               <p
                 css={css`
                   color: ${euiTheme.colors.subduedText};
@@ -424,10 +420,10 @@ export const ProposalRow: React.FC<{
                   margin-top: 0.5rem;
                 `}
               >
-                Dismissed: <strong>{(proposal as any).dismissalReason}</strong>
+                Dismissed: <strong>{(proposal as any).reasoning}</strong>
               </p>
             )}
-            {(proposal as any).assignee != null && (
+            {(proposal as any)?.assignee != null && (
               <p
                 css={css`
                   color: ${euiTheme.colors.subduedText};
@@ -436,7 +432,7 @@ export const ProposalRow: React.FC<{
                 `}
                 data-test-subj={`pndProposalAssignee-${proposal.id}`}
               >
-                Assigned to: <strong>{(proposal as any).assignee}</strong>
+                Assigned to: <strong>{(proposal as any)?.assignee}</strong>
               </p>
             )}
             {proposal.status !== 'pending' && (
@@ -829,8 +825,6 @@ export const InvestigationDetailPage: React.FC = () => {
     <PndPageSection>
       <PndPageHeader
         title={investigation.title}
-        subtitle={investigation.affectedSurface}
-        backTo={{ path: '/', label: i18n.BACK_TO_BRIEF }}
       />
       <CoverageGapChip
         events={investigation.events}

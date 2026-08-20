@@ -58,7 +58,7 @@ export const registerDeferProposalRoute = ({
                 esClient,
                 proposalId,
                 {
-                  status: 'deferred',
+                  status: 'pending',
                   sla,
                 },
                 request
@@ -87,7 +87,7 @@ export const registerDeferProposalRoute = ({
           }
 
           return response.ok({
-            body: { proposalId, status: 'deferred', sla, message: 'Proposal deferred' },
+            body: { proposalId, status: 'pending', sla, message: 'Proposal deferred' },
           });
         } catch (error) {
           logger.error(`Failed to defer proposal: ${error}`);

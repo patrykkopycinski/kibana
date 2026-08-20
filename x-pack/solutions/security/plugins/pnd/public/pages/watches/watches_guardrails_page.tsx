@@ -67,7 +67,7 @@ export const WatchesGuardrailsPage: React.FC = () => {
       },
       {
         name: i18n.COL_AUTONOMY,
-        render: (watch: Watch) => <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />,
+        render: (watch: Watch) => <AutonomyMeter level={undefined} color={watch.color} />,
       },
       {
         name: i18n.COL_GATED_CAPABILITIES,
@@ -101,12 +101,10 @@ export const WatchesGuardrailsPage: React.FC = () => {
   );
 
   return (
-    <WatchesSectionLayout active="guardrails">
+    <WatchesSectionLayout active="guardrails" title={i18n.SUBNAV_GUARDRAILS}>
       <PndPageSection>
         <PndPageHeader
           title={i18n.SUBNAV_GUARDRAILS}
-          subtitle={i18n.STUB_GUARDRAILS_SUBTITLE}
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
         />
         {isLoading ? (
           <EuiLoadingSpinner size="l" />

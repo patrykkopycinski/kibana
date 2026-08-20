@@ -50,7 +50,6 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-chrome-layout'
   - '@kbn/app-header'
-  - '@kbn/ui-app-menu'
 tags:
   - shared-browser
   - package

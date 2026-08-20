@@ -1,4 +1,16 @@
-import type { SavedObjectsFullModelVersionSchemaDefinitions, SavedObjectsModelVersionSchemaDefinitions } from './schemas';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  SavedObjectsFullModelVersionSchemaDefinitions,
+  SavedObjectsModelVersionSchemaDefinitions,
+} from './schemas';
 import type { SavedObjectsModelChange } from './model_change';
 /**
  * Represents a model version of a given saved object type.
@@ -10,64 +22,64 @@ import type { SavedObjectsModelChange } from './model_change';
  * @deprecated Use {@link SavedObjectsFullModelVersion} instead.
  */
 export interface SavedObjectsModelVersion {
-    /**
-     * The list of changes associated with this version.
-     *
-     * Model version changes are defined via low-level components, allowing to use composition
-     * to describe the list of changes bound to a given version.
-     *
-     * @remark Having multiple changes of the same type in a version's list of change is supported
-     *         by design to allow merging different sources.
-     *
-     * @example Adding a new indexed field with a default value
-     * ```ts
-     * const version1: SavedObjectsModelVersion = {
-     *   changes: [
-     *     {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         someNewField: { type: 'text' },
-     *       },
-     *     },
-     *     {
-     *       type: 'data_backfill',
-     *       backfillFn: (doc) => {
-     *         return { attributes: { someNewField: 'some default value' } };
-     *       },
-     *     },
-     *   ],
-     * };
-     * ```
-     *
-     * @example A version with multiple mappings addition coming from different changes
-     * ```ts
-     * const version1: SavedObjectsModelVersion = {
-     *   changes: [
-     *     {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         someNewField: { type: 'text' },
-     *       },
-     *     },
-     *    {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         anotherNewField: { type: 'text' },
-     *       },
-     *     },
-     *   ],
-     * };
-     * ```
-     *
-     * See {@link SavedObjectsModelChange | changes} for more information and examples.
-     */
-    changes: SavedObjectsModelChange[];
-    /**
-     * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
-     *
-     * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
-     */
-    schemas?: SavedObjectsModelVersionSchemaDefinitions;
+  /**
+   * The list of changes associated with this version.
+   *
+   * Model version changes are defined via low-level components, allowing to use composition
+   * to describe the list of changes bound to a given version.
+   *
+   * @remark Having multiple changes of the same type in a version's list of change is supported
+   *         by design to allow merging different sources.
+   *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * See {@link SavedObjectsModelChange | changes} for more information and examples.
+   */
+  changes: SavedObjectsModelChange[];
+  /**
+   * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
+   *
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
+   */
+  schemas?: SavedObjectsModelVersionSchemaDefinitions;
 }
 /**
  * Represents a model version of a given saved object type.
@@ -78,65 +90,65 @@ export interface SavedObjectsModelVersion {
  * @public
  */
 export interface SavedObjectsFullModelVersion {
-    /**
-     * The list of changes associated with this version.
-     *
-     * Model version changes are defined via low-level components, allowing to use composition
-     * to describe the list of changes bound to a given version.
-     *
-     * @remark Having multiple changes of the same type in a version's list of change is supported
-     *         by design to allow merging different sources.
-     *
-     * @example Adding a new indexed field with a default value
-     * ```ts
-     * const version1: SavedObjectsModelVersion = {
-     *   changes: [
-     *     {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         someNewField: { type: 'text' },
-     *       },
-     *     },
-     *     {
-     *       type: 'data_backfill',
-     *       backfillFn: (doc) => {
-     *         return { attributes: { someNewField: 'some default value' } };
-     *       },
-     *     },
-     *   ],
-     * };
-     * ```
-     *
-     * @example A version with multiple mappings addition coming from different changes
-     * ```ts
-     * const version1: SavedObjectsModelVersion = {
-     *   changes: [
-     *     {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         someNewField: { type: 'text' },
-     *       },
-     *     },
-     *    {
-     *       type: 'mappings_addition',
-     *       addedMappings: {
-     *         anotherNewField: { type: 'text' },
-     *       },
-     *     },
-     *   ],
-     * };
-     * ```
-     *
-     * See {@link SavedObjectsModelChange | changes} for more information and examples.
-     */
-    changes: SavedObjectsModelChange[];
-    /**
-     * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
-     *
-     * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
-     * Required for rollback safety
-     */
-    schemas: SavedObjectsFullModelVersionSchemaDefinitions;
+  /**
+   * The list of changes associated with this version.
+   *
+   * Model version changes are defined via low-level components, allowing to use composition
+   * to describe the list of changes bound to a given version.
+   *
+   * @remark Having multiple changes of the same type in a version's list of change is supported
+   *         by design to allow merging different sources.
+   *
+   * @example Adding a new indexed field with a default value
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *     {
+   *       type: 'data_backfill',
+   *       backfillFn: (doc) => {
+   *         return { attributes: { someNewField: 'some default value' } };
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * @example A version with multiple mappings addition coming from different changes
+   * ```ts
+   * const version1: SavedObjectsModelVersion = {
+   *   changes: [
+   *     {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         someNewField: { type: 'text' },
+   *       },
+   *     },
+   *    {
+   *       type: 'mappings_addition',
+   *       addedMappings: {
+   *         anotherNewField: { type: 'text' },
+   *       },
+   *     },
+   *   ],
+   * };
+   * ```
+   *
+   * See {@link SavedObjectsModelChange | changes} for more information and examples.
+   */
+  changes: SavedObjectsModelChange[];
+  /**
+   * The {@link SavedObjectsModelVersionSchemaDefinitions | schemas} associated with this version.
+   *
+   * Schemas are used to validate / convert the shape and/or content of the documents at various stages of their usages.
+   * Required for rollback safety
+   */
+  schemas: SavedObjectsFullModelVersionSchemaDefinitions;
 }
 /**
  * A record of {@link SavedObjectsModelVersion | model versions} for a given savedObjects type.
@@ -153,9 +165,49 @@ export interface SavedObjectsFullModelVersion {
  *
  * @public
  */
-export type ModelVersionIdentifier = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16' | '17' | '18' | '19' | '20' | '21' | '22' | '23' | '24' | '25' | '26' | '27' | '28' | '29' | '30' | '31' | '32' | '33' | '34' | '35' | '36' | '37' | '38' | '39' | '40';
+export type ModelVersionIdentifier =
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '10'
+  | '11'
+  | '12'
+  | '13'
+  | '14'
+  | '15'
+  | '16'
+  | '17'
+  | '18'
+  | '19'
+  | '20'
+  | '21'
+  | '22'
+  | '23'
+  | '24'
+  | '25'
+  | '26'
+  | '27'
+  | '28'
+  | '29'
+  | '30'
+  | '31'
+  | '32'
+  | '33'
+  | '34'
+  | '35'
+  | '36'
+  | '37'
+  | '38'
+  | '39'
+  | '40';
 export type SavedObjectsModelVersionMap = {
-    [mv in ModelVersionIdentifier]?: SavedObjectsModelVersion | SavedObjectsFullModelVersion;
+  [mv in ModelVersionIdentifier]?: SavedObjectsModelVersion | SavedObjectsFullModelVersion;
 };
 /**
  * A function returning a {@link SavedObjectsModelVersionMap | model version map}

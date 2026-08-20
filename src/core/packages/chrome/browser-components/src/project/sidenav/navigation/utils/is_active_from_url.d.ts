@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 /**
  * Predicate to check if a nodePath is active
@@ -7,4 +16,8 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
  * @param onlyIfHighestMatch Flag to indicate if we should only return true if the nodePath is the highest match
  * @returns Boolean indicating if the nodePath is active
  */
-export declare function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][], onlyIfHighestMatch?: boolean): boolean;
+export declare function isActiveFromUrl(
+  nodePath: string,
+  activeNodes: ChromeProjectNavigationNode[][],
+  onlyIfHighestMatch?: boolean
+): boolean;

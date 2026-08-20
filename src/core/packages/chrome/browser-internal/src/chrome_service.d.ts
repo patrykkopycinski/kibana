@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -13,42 +22,54 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalChromeSetup, InternalChromeStart } from './types';
 interface ConstructorParams {
-    browserSupportsCsp: boolean;
-    kibanaVersion: string;
-    basePath: string;
-    coreContext: CoreContext;
+  browserSupportsCsp: boolean;
+  kibanaVersion: string;
+  basePath: string;
+  coreContext: CoreContext;
 }
 export interface SetupDeps {
-    analytics: AnalyticsServiceSetup;
+  analytics: AnalyticsServiceSetup;
 }
 export interface StartDeps {
-    application: InternalApplicationStart;
-    docLinks: DocLinksStart;
-    http: InternalHttpStart;
-    injectedMetadata: InternalInjectedMetadataStart;
-    getNotifications: () => Promise<NotificationsStart>;
-    customBranding: CustomBrandingStart;
-    i18n: I18nStart;
-    theme: ThemeServiceStart;
-    userProfile: UserProfileService;
-    uiSettings: IUiSettingsClient;
-    featureFlags: FeatureFlagsStart;
+  application: InternalApplicationStart;
+  docLinks: DocLinksStart;
+  http: InternalHttpStart;
+  injectedMetadata: InternalInjectedMetadataStart;
+  getNotifications: () => Promise<NotificationsStart>;
+  customBranding: CustomBrandingStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+  userProfile: UserProfileService;
+  uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
 }
 /** @internal */
 export declare class ChromeService {
-    private readonly params;
-    private readonly stop$;
-    private readonly navControls;
-    private readonly navLinks;
-    private readonly recentlyAccessed;
-    private readonly docTitle;
-    private readonly projectNavigation;
-    private readonly sidebar;
-    private readonly logger;
-    private readonly isServerless;
-    constructor(params: ConstructorParams);
-    setup({ analytics }: SetupDeps): InternalChromeSetup;
-    start({ application, docLinks, http, injectedMetadata, getNotifications, customBranding, i18n, theme, userProfile, uiSettings, featureFlags, }: StartDeps): Promise<InternalChromeStart>;
-    stop(): void;
+  private readonly params;
+  private readonly stop$;
+  private readonly navControls;
+  private readonly navLinks;
+  private readonly recentlyAccessed;
+  private readonly docTitle;
+  private readonly projectNavigation;
+  private readonly sidebar;
+  private readonly logger;
+  private readonly isServerless;
+  constructor(params: ConstructorParams);
+  setup({ analytics }: SetupDeps): InternalChromeSetup;
+  start({
+    application,
+    docLinks,
+    http,
+    injectedMetadata,
+    getNotifications,
+    customBranding,
+    i18n,
+    theme,
+    userProfile,
+    uiSettings,
+    featureFlags,
+  }: StartDeps): Promise<InternalChromeStart>;
+  stop(): void;
 }
 export {};

@@ -1,7 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type React from 'react';
-export type LayoutComponent = 'banner' | 'header' | 'footer' | 'navigation' | 'sidebar' | 'application';
+export type LayoutComponent =
+  | 'banner'
+  | 'header'
+  | 'footer'
+  | 'navigation'
+  | 'sidebar'
+  | 'application';
 export type ApplicationComponent = 'topBar' | 'bottomBar' | 'content';
-export type LayoutProperty = keyof Pick<React.CSSProperties, 'top' | 'bottom' | 'left' | 'right' | 'height' | 'width' | 'marginBottom' | 'marginRight' | 'marginTop'>;
+export type LayoutProperty = keyof Pick<
+  React.CSSProperties,
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'height'
+  | 'width'
+  | 'marginBottom'
+  | 'marginRight'
+  | 'marginTop'
+>;
 export type LayoutVarName = `${LayoutComponent}.${LayoutProperty}`;
 export type ApplicationVarName = `application.${ApplicationComponent}.${LayoutProperty}`;
 export type CSSVarName = LayoutVarName | ApplicationVarName;

@@ -1,7 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 interface BuildExecutionIdArgs {
-    baseExecutionId?: string;
-    suiteId?: string;
-    modelId?: string;
+  baseExecutionId?: string;
+  suiteId?: string;
+  modelId?: string;
 }
 /**
  * Composes the `metadata.execution_id` used to group score documents into a
@@ -21,5 +28,9 @@ interface BuildExecutionIdArgs {
  * Returns `baseExecutionId` unchanged when it is not set (e.g. local runs), which
  * lets downstream code fall back to a random per-task experiment id.
  */
-export declare function buildExecutionId({ baseExecutionId, suiteId, modelId, }: BuildExecutionIdArgs): string | undefined;
+export declare function buildExecutionId({
+  baseExecutionId,
+  suiteId,
+  modelId,
+}: BuildExecutionIdArgs): string | undefined;
 export {};

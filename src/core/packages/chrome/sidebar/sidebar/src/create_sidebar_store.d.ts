@@ -1,26 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { z } from '@kbn/zod/v4';
 /** Set state - accepts partial state or updater function */
-export type SetState<TState> = (partial: Partial<TState> | ((state: TState) => Partial<TState>)) => void;
+export type SetState<TState> = (
+  partial: Partial<TState> | ((state: TState) => Partial<TState>)
+) => void;
 /** Get current state */
 export type GetState<TState> = () => TState;
 /** Sidebar control passed to actions */
 export interface SidebarContext {
-    /** Open this sidebar app */
-    open: () => void;
-    /** Close sidebar */
-    close: () => void;
-    /** Check if this app is currently shown */
-    isCurrent: () => boolean;
+  /** Open this sidebar app */
+  open: () => void;
+  /** Close sidebar */
+  close: () => void;
+  /** Check if this app is currently shown */
+  isCurrent: () => boolean;
 }
 /** Store configuration - schema and actions factory */
 export interface SidebarStoreConfig<TState, TActions> {
-    schema: z.ZodType<TState>;
-    actions: (set: SetState<TState>, get: GetState<TState>, sidebar: SidebarContext) => TActions;
-    /** Type helpers for inference - never used at runtime */
-    readonly types: {
-        readonly state: TState;
-        readonly actions: TActions;
-    };
+  schema: z.ZodType<TState>;
+  actions: (set: SetState<TState>, get: GetState<TState>, sidebar: SidebarContext) => TActions;
+  /** Type helpers for inference - never used at runtime */
+  readonly types: {
+    readonly state: TState;
+    readonly actions: TActions;
+  };
 }
 /**
  * Create a sidebar store configuration with schema and actions.
@@ -38,6 +49,6 @@ export interface SidebarStoreConfig<TState, TActions> {
  * ```
  */
 export declare function createSidebarStore<TState, TActions>(config: {
-    schema: z.ZodType<TState>;
-    actions: (set: SetState<TState>, get: GetState<TState>, sidebar: SidebarContext) => TActions;
+  schema: z.ZodType<TState>;
+  actions: (set: SetState<TState>, get: GetState<TState>, sidebar: SidebarContext) => TActions;
 }): SidebarStoreConfig<TState, TActions>;

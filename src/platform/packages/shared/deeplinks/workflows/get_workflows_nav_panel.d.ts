@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { WORKFLOWS_APP_ID } from './constants';
 import type { DeepLinkId } from '.';
 /**
@@ -7,20 +16,20 @@ import type { DeepLinkId } from '.';
  * `@kbn/core-chrome-browser` already imports this package for `AppDeepLinkId` typing.
  */
 export interface WorkflowsNavPanelCore {
-    settings: {
-        globalClient: {
-            get: <T>(key: string, defaultValue: T) => T;
-        };
+  settings: {
+    globalClient: {
+      get: <T>(key: string, defaultValue: T) => T;
     };
+  };
 }
 interface WorkflowsNavNode {
-    link: typeof WORKFLOWS_APP_ID;
-    id?: typeof WORKFLOWS_APP_ID;
-    renderAs?: 'panelOpener';
-    children?: Array<{
-        link: DeepLinkId;
-        breadcrumbStatus?: 'hidden';
-    }>;
+  link: typeof WORKFLOWS_APP_ID;
+  id?: typeof WORKFLOWS_APP_ID;
+  renderAs?: 'panelOpener';
+  children?: Array<{
+    link: DeepLinkId;
+    breadcrumbStatus?: 'hidden';
+  }>;
 }
 /**
  * Returns Workflows side-nav entries for solution navigation trees.

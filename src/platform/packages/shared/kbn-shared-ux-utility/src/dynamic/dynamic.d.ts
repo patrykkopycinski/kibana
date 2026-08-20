@@ -1,12 +1,21 @@
-import React from 'react';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type React from 'react';
 type Loader<TElement extends React.ComponentType<any>> = () => Promise<{
-    default: TElement;
+  default: TElement;
 }>;
 /**
  * Options for the lazy loaded component
  */
 export interface DynamicOptions {
-    fallback?: React.SuspenseProps['fallback'];
+  fallback?: React.SuspenseProps['fallback'];
 }
 /**
  * Lazy load and wrap with Suspense any component.
@@ -19,5 +28,10 @@ export interface DynamicOptions {
  * // Lazy load a named exported component
  * const MobileHeader = dynamic<MobileHeaderProps>(() => import('./components/header').then(mod => ({default: mod.MobileHeader})))
  */
-export declare function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(loader: Loader<TElement>, options?: DynamicOptions): React.ForwardRefExoticComponent<React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>>;
+export declare function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(
+  loader: Loader<TElement>,
+  options?: DynamicOptions
+): React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<React.ComponentPropsWithRef<TElement>> & React.RefAttributes<TRef>
+>;
 export {};

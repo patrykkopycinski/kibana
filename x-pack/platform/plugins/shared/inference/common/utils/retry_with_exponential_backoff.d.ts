@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Returns an operator that retries the source observable with exponential backoff,
  * but only for errors that match the provided filter.
@@ -7,9 +14,14 @@
  * @param backoffMultiplier - Factor by which the delay increases each time. Defaults to 2.
  * @param errorFilter - Function to decide whether an error is eligible for a retry. Defaults to retrying any error.
  */
-export declare function retryWithExponentialBackoff<T>({ maxRetry, initialDelay, backoffMultiplier, errorFilter, }: {
-    maxRetry?: number;
-    initialDelay?: number;
-    backoffMultiplier?: number;
-    errorFilter?: (error: Error) => boolean;
-}): import("rxjs").MonoTypeOperatorFunction<T>;
+export declare function retryWithExponentialBackoff<T>({
+  maxRetry,
+  initialDelay,
+  backoffMultiplier,
+  errorFilter,
+}: {
+  maxRetry?: number;
+  initialDelay?: number;
+  backoffMultiplier?: number;
+  errorFilter?: (error: Error) => boolean;
+}): import('rxjs').MonoTypeOperatorFunction<T>;

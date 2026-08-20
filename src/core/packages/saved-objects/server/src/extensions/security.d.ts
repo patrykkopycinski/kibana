@@ -1,4 +1,19 @@
-import type { Either, SavedObjectAccessControl, SavedObjectReferenceWithContext, SavedObjectsFindResult, SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  Either,
+  SavedObjectAccessControl,
+  SavedObjectReferenceWithContext,
+  SavedObjectsFindResult,
+  SavedObjectsResolveResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { Payload } from '@hapi/boom';
@@ -8,15 +23,15 @@ import type { SavedObject, BulkResolveError } from '../..';
  * for CheckAuthorizationResults.
  */
 export interface AuthorizationTypeEntry {
-    /**
-     * An array of authorized spaces for the associated type/action
-     * in the associated record/map.
-     */
-    authorizedSpaces: string[];
-    /**
-     * Is the associated type/action globally authorized?
-     */
-    isGloballyAuthorized?: boolean;
+  /**
+   * An array of authorized spaces for the associated type/action
+   * in the associated record/map.
+   */
+  authorizedSpaces: string[];
+  /**
+   * Is the associated type/action globally authorized?
+   */
+  isGloballyAuthorized?: boolean;
 }
 /**
  * The AuthorizationTypeMap type is a map of saved object type
@@ -29,16 +44,16 @@ export type AuthorizationTypeMap<A extends string> = Map<string, Record<A, Autho
  * AuthorizationTypeMap.
  */
 export interface CheckAuthorizationResult<A extends string> {
-    /**
-     * The overall status of the authorization check as a string:
-     * 'fully_authorized' | 'partially_authorized' | 'unauthorized'
-     */
-    status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
-    /**
-     * The specific authorized privileges: a map of type to record
-     * of action/AuthorizationTypeEntry (spaces/globallyAuthz'd)
-     */
-    typeMap: AuthorizationTypeMap<A>;
+  /**
+   * The overall status of the authorization check as a string:
+   * 'fully_authorized' | 'partially_authorized' | 'unauthorized'
+   */
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
+  /**
+   * The specific authorized privileges: a map of type to record
+   * of action/AuthorizationTypeEntry (spaces/globallyAuthz'd)
+   */
+  typeMap: AuthorizationTypeMap<A>;
 }
 /**
  * The AuthorizationResult interface contains the overall status of an
@@ -47,10 +62,10 @@ export interface CheckAuthorizationResult<A extends string> {
  * due to access control.
  */
 export interface AuthorizationResult<A extends string> extends CheckAuthorizationResult<A> {
-    /**
-     * A set of all inaccessible objects that were restricted due to access control
-     */
-    inaccessibleObjects?: Set<ObjectRequiringPrivilegeCheckResult>;
+  /**
+   * A set of all inaccessible objects that were restricted due to access control
+   */
+  inaccessibleObjects?: Set<ObjectRequiringPrivilegeCheckResult>;
 }
 /**
  * The AuthorizeObject interface contains information to specify an
@@ -58,14 +73,14 @@ export interface AuthorizationResult<A extends string> extends CheckAuthorizatio
  * extended by other interfaces for specific actions.
  */
 export interface AuthorizeObject {
-    /** The type of object */
-    type: string;
-    /** The id of the object */
-    id: string;
-    /** The name of the object */
-    name?: string;
-    /** Access control information for the object */
-    accessControl?: SavedObjectAccessControl;
+  /** The type of object */
+  type: string;
+  /** The id of the object */
+  id: string;
+  /** The name of the object */
+  name?: string;
+  /** Access control information for the object */
+  accessControl?: SavedObjectAccessControl;
 }
 /**
  * The AuthorizeObjectWithExistingSpaces extends AuthorizeObject and contains
@@ -74,11 +89,11 @@ export interface AuthorizeObject {
  * authorizeCheckConflicts, and getFindRedactTypeMap methods.
  */
 export interface AuthorizeObjectWithExistingSpaces extends AuthorizeObject {
-    /**
-     * Spaces where the object is known to exist. Usually populated
-     * by document data from the result of an es query.
-     */
-    existingNamespaces: string[];
+  /**
+   * Spaces where the object is known to exist. Usually populated
+   * by document data from the result of an es query.
+   */
+  existingNamespaces: string[];
 }
 /**
  * The AuthorizeBulkGetObject interface extends AuthorizeObjectWithExistingSpaces
@@ -86,28 +101,28 @@ export interface AuthorizeObjectWithExistingSpaces extends AuthorizeObject {
  * authorizeBulkGet method.
  */
 export interface AuthorizeBulkGetObject extends AuthorizeObjectWithExistingSpaces {
-    /**
-     * The namespaces to include when retrieving this object. Populated by options
-     * passed to the repository's update or bulkUpdate method.
-     */
-    objectNamespaces?: string[];
-    /**
-     * Whether or not an error occurred when getting this object. Populated by
-     * the result of a query. Default is false.
-     */
-    error?: boolean;
+  /**
+   * The namespaces to include when retrieving this object. Populated by options
+   * passed to the repository's update or bulkUpdate method.
+   */
+  objectNamespaces?: string[];
+  /**
+   * Whether or not an error occurred when getting this object. Populated by
+   * the result of a query. Default is false.
+   */
+  error?: boolean;
 }
 /**
  * The AuthorizeParams interface is a base interface for parameters to several
  * public authorize methods within the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeParams {
-    /**
-     * The namespace in which to perform the authorization operation.
-     * If undefined, the current space will be used unless spaces are disabled,
-     * in which case the default space will be used.
-     */
-    namespace: string | undefined;
+  /**
+   * The namespace in which to perform the authorization operation.
+   * If undefined, the current space will be used unless spaces are disabled,
+   * in which case the default space will be used.
+   */
+  namespace: string | undefined;
 }
 /**
  * The AuthorizeCreateObject interface extends AuthorizeObjectWithExistingSpaces
@@ -115,11 +130,11 @@ export interface AuthorizeParams {
  * the authorizeCreate and authorizeBulkCreate methods.
  */
 export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces {
-    /**
-     * Initial spaces to include the created object. Populated by options
-     * passed to the repository's bulkCreate method.
-     */
-    initialNamespaces?: string[];
+  /**
+   * Initial spaces to include the created object. Populated by options
+   * passed to the repository's bulkCreate method.
+   */
+  initialNamespaces?: string[];
 }
 /**
  * The AuthorizeUpdateObject interface extends AuthorizeObjectWithExistingSpaces
@@ -127,11 +142,11 @@ export interface AuthorizeCreateObject extends AuthorizeObjectWithExistingSpaces
  * and authorizeBulkUpdate methods.
  */
 export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces {
-    /**
-     * The namespace in which to update this object. Populated by options
-     * passed to the repository's update or bulkUpdate method.
-     */
-    objectNamespace?: string;
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's update or bulkUpdate method.
+   */
+  objectNamespace?: string;
 }
 /**
  * The AuthorizeChangeAccessControlObject interface extends AuthorizeObjectWithExistingSpaces
@@ -139,11 +154,11 @@ export interface AuthorizeUpdateObject extends AuthorizeObjectWithExistingSpaces
  * method.
  */
 export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithExistingSpaces {
-    /**
-     * The namespace in which to update this object. Populated by options
-     * passed to the repository's changeOwnership method.
-     */
-    objectNamespace?: string;
+  /**
+   * The namespace in which to update this object. Populated by options
+   * passed to the repository's changeOwnership method.
+   */
+  objectNamespace?: string;
 }
 /**
  * The ObjectRequiringPrivilegeCheckResult interface represents the authorization
@@ -151,10 +166,10 @@ export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithE
  * requires a check for the manage access control privilege.
  */
 export interface ObjectRequiringPrivilegeCheckResult {
-    type: string;
-    id: string;
-    name?: string;
-    requiresManageAccessControl: boolean;
+  type: string;
+  id: string;
+  name?: string;
+  requiresManageAccessControl: boolean;
 }
 /**
  * The GetObjectsRequiringPrivilegeCheckResult interface represents the authorization
@@ -163,103 +178,103 @@ export interface ObjectRequiringPrivilegeCheckResult {
  * and individual requiresManageAccessControl flag.
  */
 export interface GetObjectsRequiringPrivilegeCheckResult {
-    types: Set<string>;
-    objects: ObjectRequiringPrivilegeCheckResult[];
+  types: Set<string>;
+  objects: ObjectRequiringPrivilegeCheckResult[];
 }
 /**
  * The MultiNamespaceReferencesOptions interface contains options
  * specific for authorizing CollectMultiNamespaceReferences actions.
  */
 export interface MultiNamespaceReferencesOptions {
-    /**
-     * The purpose of the call to 'collectMultiNamespaceReferences'.
-     * Default is 'collectMultiNamespaceReferences'.
-     */
-    purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+  /**
+   * The purpose of the call to 'collectMultiNamespaceReferences'.
+   * Default is 'collectMultiNamespaceReferences'.
+   */
+  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
 }
 /**
  * The AuthorizeCreateParams interface extends AuthorizeParams and is
  * used for the AuthorizeCreate method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeCreateParams extends AuthorizeParams {
-    /** The object to authorize */
-    object: AuthorizeCreateObject;
+  /** The object to authorize */
+  object: AuthorizeCreateObject;
 }
 /**
  * The AuthorizeBulkCreateParams interface extends AuthorizeParams and is
  * used for the AuthorizeBulkCreate method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeBulkCreateParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeCreateObject[];
+  /** The objects to authorize */
+  objects: AuthorizeCreateObject[];
 }
 /**
  * The AuthorizeUpdateParams interface extends AuthorizeParams and is
  * used for the AuthorizeUpdate method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeUpdateParams extends AuthorizeParams {
-    /** The object to authorize */
-    object: AuthorizeUpdateObject;
+  /** The object to authorize */
+  object: AuthorizeUpdateObject;
 }
 /**
  * The AuthorizeBulkUpdateParams interface extends AuthorizeParams and is
  * used for the AuthorizeBulkUpdate method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeBulkUpdateParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeUpdateObject[];
+  /** The objects to authorize */
+  objects: AuthorizeUpdateObject[];
 }
 /**
  * The AuthorizeDeleteParams interface extends AuthorizeParams and is
  * used for the AuthorizeDelete method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeDeleteParams extends AuthorizeParams {
-    /** The object to authorize */
-    object: AuthorizeObject;
+  /** The object to authorize */
+  object: AuthorizeObject;
 }
 /**
  * The AuthorizeBulkDeleteParams interface extends AuthorizeParams and is
  * used for the AuthorizeBulkDelete method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeBulkDeleteParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeObjectWithExistingSpaces[];
+  /** The objects to authorize */
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 /**
  * The AuthorizeGetParams interface extends AuthorizeParams and is
  * used for the AuthorizeGet method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeGetParams extends AuthorizeParams {
-    /** The object to authorize */
-    object: AuthorizeObjectWithExistingSpaces;
-    /** Whether or not the object was not found, defaults to false */
-    objectNotFound?: boolean;
+  /** The object to authorize */
+  object: AuthorizeObjectWithExistingSpaces;
+  /** Whether or not the object was not found, defaults to false */
+  objectNotFound?: boolean;
 }
 /**
  * The AuthorizeBulkGetParams interface extends AuthorizeParams and is
  * used for the AuthorizeBulkGet method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeBulkGetParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeBulkGetObject[];
+  /** The objects to authorize */
+  objects: AuthorizeBulkGetObject[];
 }
 /**
  * The AuthorizeCheckConflictsParams interface extends AuthorizeParams and is
  * used for the AuthorizeCheckConflicts method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeCheckConflictsParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeObject[];
+  /** The objects to authorize */
+  objects: AuthorizeObject[];
 }
 /**
  * The AuthorizeFindParams interface is used for the AuthorizeFind method
  * of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeFindParams {
-    /** The namespaces in which to find objects */
-    namespaces: Set<string>;
-    /** The types of objects to find */
-    types: Set<string>;
+  /** The namespaces in which to find objects */
+  namespaces: Set<string>;
+  /** The types of objects to find */
+  types: Set<string>;
 }
 /**
  * The AuthorizeOpenPointInTimeParams interface is used for the
@@ -272,8 +287,8 @@ export type AuthorizeOpenPointInTimeParams = AuthorizeFindParams;
  * used for the AuthorizeChangeAccessControl method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeChangeAccessControlParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: AuthorizeChangeAccessControlObject[];
+  /** The objects to authorize */
+  objects: AuthorizeChangeAccessControlObject[];
 }
 /**
  * The AuthorizeAndRedactMultiNamespaceReferencesParams interface extends
@@ -281,14 +296,14 @@ export interface AuthorizeChangeAccessControlParams extends AuthorizeParams {
  * method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeAndRedactMultiNamespaceReferencesParams extends AuthorizeParams {
-    /** The objects to authorize */
-    objects: Array<WithAuditName<SavedObjectReferenceWithContext>>;
-    /**
-     * options for the operation
-     * - purpose: 'collectMultiNamespaceReferences' or 'updateObjectsSpaces'
-     * default purpose is 'collectMultiNamespaceReferences'.
-     */
-    options?: MultiNamespaceReferencesOptions;
+  /** The objects to authorize */
+  objects: Array<WithAuditName<SavedObjectReferenceWithContext>>;
+  /**
+   * options for the operation
+   * - purpose: 'collectMultiNamespaceReferences' or 'updateObjectsSpaces'
+   * default purpose is 'collectMultiNamespaceReferences'.
+   */
+  options?: MultiNamespaceReferencesOptions;
 }
 /**
  * The AuthorizeAndRedactInternalBulkResolveParams interface extends
@@ -296,52 +311,52 @@ export interface AuthorizeAndRedactMultiNamespaceReferencesParams extends Author
  * method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeAndRedactInternalBulkResolveParams<T> extends AuthorizeParams {
-    /**
-     * The objects to authorize
-     */
-    objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
+  /**
+   * The objects to authorize
+   */
+  objects: Array<SavedObjectsResolveResponse<T> | BulkResolveError>;
 }
 /**
  * The GetFindRedactTypeMapParams interface is used for the GetFindRedactTypeMap
  * method of the ISavedObjectsSecurityExtension.
  */
 export interface GetFindRedactTypeMapParams {
-    /** The namespaces previously checked by the AuthorizeFind method */
-    previouslyCheckedNamespaces: Set<string>;
-    /**
-     * The objects to authorize in order to generate the type map
-     * this should be populated by the result of the es query
-     */
-    objects: AuthorizeObjectWithExistingSpaces[];
+  /** The namespaces previously checked by the AuthorizeFind method */
+  previouslyCheckedNamespaces: Set<string>;
+  /**
+   * The objects to authorize in order to generate the type map
+   * this should be populated by the result of the es query
+   */
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 /**
  * The AuthorizeUpdateSpacesParams interface extends AuthorizeParams and is
  * used for the AuthorizeUpdateSpaces method of the ISavedObjectsSecurityExtension.
  */
 export interface AuthorizeUpdateSpacesParams extends AuthorizeParams {
-    /** The spaces in which to add the objects */
-    spacesToAdd: string[];
-    /** The spaces from which to remove the objects */
-    spacesToRemove: string[];
-    /** The objects to authorize */
-    objects: AuthorizeObjectWithExistingSpaces[];
+  /** The spaces in which to add the objects */
+  spacesToAdd: string[];
+  /** The spaces from which to remove the objects */
+  spacesToRemove: string[];
+  /** The objects to authorize */
+  objects: AuthorizeObjectWithExistingSpaces[];
 }
 /**
  * The RedactNamespacesParams interface contains settings for filtering
  * namespace access via the ISavedObjectsSecurityExtension.
  */
 export interface RedactNamespacesParams<T, A extends string> {
-    /** Relevant saved object */
-    savedObject: SavedObject<T>;
-    /**
-     * The authorization map from CheckAuthorizationResult: a map of
-     * type to record of action/AuthorizationTypeEntry
-     * (spaces/globallyAuthz'd)
-     */
-    typeMap: AuthorizationTypeMap<A>;
+  /** Relevant saved object */
+  savedObject: SavedObject<T>;
+  /**
+   * The authorization map from CheckAuthorizationResult: a map of
+   * type to record of action/AuthorizationTypeEntry
+   * (spaces/globallyAuthz'd)
+   */
+  typeMap: AuthorizationTypeMap<A>;
 }
 export type WithAuditName<T> = T & {
-    name?: string;
+  name?: string;
 };
 /**
  * The SetAccessControlToWriteParams interface defines the parameters for the setAccessControlToWrite
@@ -349,183 +364,224 @@ export type WithAuditName<T> = T & {
  * (current user profile ID if it exists), and the accessControl attributes from the prfelight check.
  */
 export interface SetAccessControlToWriteParams {
-    /** The access control mode (default | write_restricted) */
-    accessMode: SavedObjectAccessControl['accessMode'] | undefined;
-    /** The saved object type */
-    type: string;
-    /** The relevant user profile ID for the operation - used in create and bulk create */
-    createdBy?: string;
-    /** The existing access control metadata from the operation's preflight check */
-    preflightAccessControl?: SavedObjectAccessControl;
+  /** The access control mode (default | write_restricted) */
+  accessMode: SavedObjectAccessControl['accessMode'] | undefined;
+  /** The saved object type */
+  type: string;
+  /** The relevant user profile ID for the operation - used in create and bulk create */
+  createdBy?: string;
+  /** The existing access control metadata from the operation's preflight check */
+  preflightAccessControl?: SavedObjectAccessControl;
 }
 /**
  * The ISavedObjectsSecurityExtension interface defines the functions of a saved objects repository security extension.
  * It contains functions for checking & enforcing authorization, adding audit events, and redacting namespaces.
  */
 export interface ISavedObjectsSecurityExtension {
-    /**
-     * Performs authorization for the CREATE security action
-     * @param params the namespace and object to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeCreate: <A extends string>(params: AuthorizeCreateParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the BULK_CREATE security action
-     * @param params the namespace and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeBulkCreate: <A extends string>(params: AuthorizeBulkCreateParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the UPDATE security action
-     * @param params the namespace and object to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeUpdate: <A extends string>(params: AuthorizeUpdateParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the BULK_UPDATE security action
-     * @param params the namespace and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeBulkUpdate: <A extends string>(params: AuthorizeBulkUpdateParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the DELETE security action
-     * @param params the namespace and object to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeDelete: <A extends string>(params: AuthorizeDeleteParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the BULK_DELETE security action
-     * @param params the namespace and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeBulkDelete: <A extends string>(params: AuthorizeBulkDeleteParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the GET security action
-     * @param params the namespace, object to authorize, and whether or not the object was found
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeGet: <A extends string>(params: AuthorizeGetParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the BULK_GET security action
-     * @param params the namespace and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeBulkGet: <A extends string>(params: AuthorizeBulkGetParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the CHECK_CONFLICTS security action
-     * @param params the namespace and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeCheckConflicts: <A extends string>(params: AuthorizeCheckConflictsParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the REMOVE_REFERENCES security action. Checks for authorization
-     * to delete the object to which references are to be removed. In reality, the operation is an
-     * UPDATE to all objects that reference the given object, but the intended use for the
-     * removeReferencesTo method is to clean up any references to an object which is being deleted
-     * (e.g. deleting a tag).
-     * See discussion here: https://github.com/elastic/kibana/issues/135259#issuecomment-1482515139
-     * @param params the namespace and object to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeRemoveReferences: <A extends string>(params: AuthorizeDeleteParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the OPEN_POINT_IN_TIME security action
-     * @param params the namespaces and types to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeOpenPointInTime: <A extends string>(params: AuthorizeOpenPointInTimeParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
-     * @param params the namespace and object to authorize for changing ownership
-     * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeChangeAccessControl: <A extends string>(params: AuthorizeChangeAccessControlParams, operation: 'changeAccessMode' | 'changeOwnership') => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs audit logging for the CLOSE_POINT_IN_TIME security action
-     */
-    auditClosePointInTime: () => void;
-    /**
-     * Handles all security operations for the COLLECT_MULTINAMESPACE_REFERENCES security action
-     * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
-     * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
-     * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
-     * auditing, filtering, and redaction all afterwards.
-     * @param params - the namespace, objects to authorize, and purpose of the operation
-     * @returns SavedObjectReferenceWithContext[] - array of collected references
-     */
-    authorizeAndRedactMultiNamespaceReferences: (params: AuthorizeAndRedactMultiNamespaceReferencesParams) => Promise<SavedObjectReferenceWithContext[]>;
-    /**
-     * Handles all security operations for the INTERNAL_BULK_RESOLVE security action
-     * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
-     * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
-     * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
-     * @param params - the namespace and objects to authorize
-     * @returns Array of SavedObjectsResolveResponses or BulkResolveErrors - the redacted resolve responses or errors
-     */
-    authorizeAndRedactInternalBulkResolve: <T = unknown>(params: AuthorizeAndRedactInternalBulkResolveParams<T>) => Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>>;
-    /**
-     * Performs authorization for the UPDATE_OBJECTS_SPACES security action
-     * @param params - namespace, spacesToAdd, spacesToRemove, and objects to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeUpdateSpaces: <A extends string>(params: AuthorizeUpdateSpacesParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Performs authorization for the FIND security action
-     * This method is the first of two security steps for the find operation (saved objects repository's find method)
-     * This method should be called first in order to provide data needed to construct the type-to-namespace map for the search DSL
-     * @param params - namespaces and types to authorize
-     * @returns AuthorizationResult - the resulting authorization level and authorization map
-     */
-    authorizeFind: <A extends string>(params: AuthorizeFindParams) => Promise<AuthorizationResult<A>>;
-    /**
-     * Gets an updated type map for redacting results of the FIND security action
-     * This method is the second of two security steps for the find operation (saved objects repository's find method)
-     * This method should be called last in order to update the type map used to redact namespaces in the results
-     * @param params - namespace, spacesToAdd, spacesToRemove, and objects to authorize
-     * @returns - the updated type map used for redaction
-     */
-    getFindRedactTypeMap: <A extends string>(params: GetFindRedactTypeMapParams) => Promise<AuthorizationTypeMap<A> | undefined>;
-    /**
-     * Filters a saved object's spaces based on an authorization map (from CheckAuthorizationResult)
-     * @param params - the saved object and an authorization map
-     * @returns SavedObject - saved object with filtered spaces
-     */
-    redactNamespaces: <T, A extends string>(params: RedactNamespacesParams<T, A>) => SavedObject<T>;
-    /**
-     * Performs authorization for the disableLegacyUrlAliases method of the SecureSpacesClientWrapper
-     * There is no return for this method. If unauthorized the method with throw, otherwise will resolve.
-     * @param aliases - array of legacy url alias targets
-     */
-    authorizeDisableLegacyUrlAliases: (aliases: LegacyUrlAliasTarget[]) => void;
-    /**
-     * Performs saved object audit logging for the delete method of the SecureSpacesClientWrapper
-     * @param spaceId - the id of the space being deleted
-     * @param objects - the objects to audit
-     */
-    auditObjectsForSpaceDeletion: <T = unknown>(spaceId: string, objects: Array<SavedObjectsFindResult<T>>) => void;
-    /**
-     * Retrieves the current user from the request context if available
-     */
-    getCurrentUser: () => AuthenticatedUser | null;
-    /**
-     * Retrieves whether we need to include save objects names in the audit out
-     */
-    includeSavedObjectNames: () => boolean;
-    /**
-     * Filters bulk operation expected results array to filter inaccessible object left
-     */
-    filterInaccessibleObjectsForBulkAction<L extends {
-        type: string;
-        id?: string;
-        error: Payload;
-    }, R extends {
-        type: string;
-        id: string;
-        esRequestIndex?: number;
-    }>(expectedResults: Array<Either<L, R>>, inaccessibleObjects: Array<{
-        type: string;
-        id: string;
-    }>, action: 'bulk_create' | 'bulk_update' | 'bulk_delete', // could alternatively move the SecurityAction definition to a core package to reference here
-    reindex?: boolean): Promise<Array<Either<L, R>>>;
+  /**
+   * Performs authorization for the CREATE security action
+   * @param params the namespace and object to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeCreate: <A extends string>(
+    params: AuthorizeCreateParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the BULK_CREATE security action
+   * @param params the namespace and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeBulkCreate: <A extends string>(
+    params: AuthorizeBulkCreateParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the UPDATE security action
+   * @param params the namespace and object to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeUpdate: <A extends string>(
+    params: AuthorizeUpdateParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the BULK_UPDATE security action
+   * @param params the namespace and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeBulkUpdate: <A extends string>(
+    params: AuthorizeBulkUpdateParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the DELETE security action
+   * @param params the namespace and object to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeDelete: <A extends string>(
+    params: AuthorizeDeleteParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the BULK_DELETE security action
+   * @param params the namespace and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeBulkDelete: <A extends string>(
+    params: AuthorizeBulkDeleteParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the GET security action
+   * @param params the namespace, object to authorize, and whether or not the object was found
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeGet: <A extends string>(params: AuthorizeGetParams) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the BULK_GET security action
+   * @param params the namespace and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeBulkGet: <A extends string>(
+    params: AuthorizeBulkGetParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the CHECK_CONFLICTS security action
+   * @param params the namespace and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeCheckConflicts: <A extends string>(
+    params: AuthorizeCheckConflictsParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the REMOVE_REFERENCES security action. Checks for authorization
+   * to delete the object to which references are to be removed. In reality, the operation is an
+   * UPDATE to all objects that reference the given object, but the intended use for the
+   * removeReferencesTo method is to clean up any references to an object which is being deleted
+   * (e.g. deleting a tag).
+   * See discussion here: https://github.com/elastic/kibana/issues/135259#issuecomment-1482515139
+   * @param params the namespace and object to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeRemoveReferences: <A extends string>(
+    params: AuthorizeDeleteParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the OPEN_POINT_IN_TIME security action
+   * @param params the namespaces and types to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeOpenPointInTime: <A extends string>(
+    params: AuthorizeOpenPointInTimeParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
+   * @param params the namespace and object to authorize for changing ownership
+   * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeChangeAccessControl: <A extends string>(
+    params: AuthorizeChangeAccessControlParams,
+    operation: 'changeAccessMode' | 'changeOwnership'
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs audit logging for the CLOSE_POINT_IN_TIME security action
+   */
+  auditClosePointInTime: () => void;
+  /**
+   * Handles all security operations for the COLLECT_MULTINAMESPACE_REFERENCES security action
+   * Checks/enforces authorization, writes audit events, filters the object graph, and redacts spaces from the share_to_space/bulk_get
+   * response. In other SavedObjectsRepository functions we do this before decrypting attributes. However, because of the
+   * share_to_space/bulk_get response logic involved in deciding between the exact match or alias match, it's cleaner to do authorization,
+   * auditing, filtering, and redaction all afterwards.
+   * @param params - the namespace, objects to authorize, and purpose of the operation
+   * @returns SavedObjectReferenceWithContext[] - array of collected references
+   */
+  authorizeAndRedactMultiNamespaceReferences: (
+    params: AuthorizeAndRedactMultiNamespaceReferencesParams
+  ) => Promise<SavedObjectReferenceWithContext[]>;
+  /**
+   * Handles all security operations for the INTERNAL_BULK_RESOLVE security action
+   * Checks authorization, writes audit events, and redacts namespaces from the bulkResolve response. In other SavedObjectsRepository
+   * functions we do this before decrypting attributes. However, because of the bulkResolve logic involved in deciding between the exact match
+   * or alias match, it's cleaner to do authorization, auditing, and redaction all afterwards.
+   * @param params - the namespace and objects to authorize
+   * @returns Array of SavedObjectsResolveResponses or BulkResolveErrors - the redacted resolve responses or errors
+   */
+  authorizeAndRedactInternalBulkResolve: <T = unknown>(
+    params: AuthorizeAndRedactInternalBulkResolveParams<T>
+  ) => Promise<Array<SavedObjectsResolveResponse<T> | BulkResolveError>>;
+  /**
+   * Performs authorization for the UPDATE_OBJECTS_SPACES security action
+   * @param params - namespace, spacesToAdd, spacesToRemove, and objects to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeUpdateSpaces: <A extends string>(
+    params: AuthorizeUpdateSpacesParams
+  ) => Promise<AuthorizationResult<A>>;
+  /**
+   * Performs authorization for the FIND security action
+   * This method is the first of two security steps for the find operation (saved objects repository's find method)
+   * This method should be called first in order to provide data needed to construct the type-to-namespace map for the search DSL
+   * @param params - namespaces and types to authorize
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
+   */
+  authorizeFind: <A extends string>(params: AuthorizeFindParams) => Promise<AuthorizationResult<A>>;
+  /**
+   * Gets an updated type map for redacting results of the FIND security action
+   * This method is the second of two security steps for the find operation (saved objects repository's find method)
+   * This method should be called last in order to update the type map used to redact namespaces in the results
+   * @param params - namespace, spacesToAdd, spacesToRemove, and objects to authorize
+   * @returns - the updated type map used for redaction
+   */
+  getFindRedactTypeMap: <A extends string>(
+    params: GetFindRedactTypeMapParams
+  ) => Promise<AuthorizationTypeMap<A> | undefined>;
+  /**
+   * Filters a saved object's spaces based on an authorization map (from CheckAuthorizationResult)
+   * @param params - the saved object and an authorization map
+   * @returns SavedObject - saved object with filtered spaces
+   */
+  redactNamespaces: <T, A extends string>(params: RedactNamespacesParams<T, A>) => SavedObject<T>;
+  /**
+   * Performs authorization for the disableLegacyUrlAliases method of the SecureSpacesClientWrapper
+   * There is no return for this method. If unauthorized the method with throw, otherwise will resolve.
+   * @param aliases - array of legacy url alias targets
+   */
+  authorizeDisableLegacyUrlAliases: (aliases: LegacyUrlAliasTarget[]) => void;
+  /**
+   * Performs saved object audit logging for the delete method of the SecureSpacesClientWrapper
+   * @param spaceId - the id of the space being deleted
+   * @param objects - the objects to audit
+   */
+  auditObjectsForSpaceDeletion: <T = unknown>(
+    spaceId: string,
+    objects: Array<SavedObjectsFindResult<T>>
+  ) => void;
+  /**
+   * Retrieves the current user from the request context if available
+   */
+  getCurrentUser: () => AuthenticatedUser | null;
+  /**
+   * Retrieves whether we need to include save objects names in the audit out
+   */
+  includeSavedObjectNames: () => boolean;
+  /**
+   * Filters bulk operation expected results array to filter inaccessible object left
+   */
+  filterInaccessibleObjectsForBulkAction<
+    L extends {
+      type: string;
+      id?: string;
+      error: Payload;
+    },
+    R extends {
+      type: string;
+      id: string;
+      esRequestIndex?: number;
+    }
+  >(
+    expectedResults: Array<Either<L, R>>,
+    inaccessibleObjects: Array<{
+      type: string;
+      id: string;
+    }>,
+    action: 'bulk_create' | 'bulk_update' | 'bulk_delete', // could alternatively move the SecurityAction definition to a core package to reference here
+    reindex?: boolean
+  ): Promise<Array<Either<L, R>>>;
 }

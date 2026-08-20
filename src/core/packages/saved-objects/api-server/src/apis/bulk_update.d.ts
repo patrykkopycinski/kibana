@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectErrorResult } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './update';
@@ -6,27 +15,28 @@ import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './up
  *
  * @public
  */
-export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
-    /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
-    id: string;
-    /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
-    type: string;
-    /** The data for a Saved Object is stored as an object in the `attributes` property. **/
-    attributes: Partial<T>;
-    /**
-     * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in
-     * {@link SavedObjectsBulkUpdateOptions}.
-     *
-     * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
-     **/
-    namespace?: string;
-    /**
-     * By default, update will merge the provided attributes with the ones present on the document
-     * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
-     * a "full" update instead, where the provided attributes will fully replace the existing ones.
-     * Defaults to `true`.
-     */
-    mergeAttributes?: boolean;
+export interface SavedObjectsBulkUpdateObject<T = unknown>
+  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
+  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
+  id: string;
+  /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
+  type: string;
+  /** The data for a Saved Object is stored as an object in the `attributes` property. **/
+  attributes: Partial<T>;
+  /**
+   * Optional namespace string to use when searching for this object. If this is defined, it will supersede the namespace ID that is in
+   * {@link SavedObjectsBulkUpdateOptions}.
+   *
+   * Note: the default namespace's string representation is `'default'`, and its ID representation is `undefined`.
+   **/
+  namespace?: string;
+  /**
+   * By default, update will merge the provided attributes with the ones present on the document
+   * (performing a standard partial update). Setting this option to `false` will change the behavior, performing
+   * a "full" update instead, where the provided attributes will fully replace the existing ones.
+   * Defaults to `true`.
+   */
+  mergeAttributes?: boolean;
 }
 /**
  * Options for the saved objects bulk update operation
@@ -34,10 +44,10 @@ export interface SavedObjectsBulkUpdateObject<T = unknown> extends Pick<SavedObj
  * @public
  */
 export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
-    /** The Elasticsearch Refresh setting for this operation */
-    refresh?: MutatingOperationRefreshSetting;
-    /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
-    migrationVersionCompatibility?: 'compatible' | 'raw';
+  /** The Elasticsearch Refresh setting for this operation */
+  refresh?: MutatingOperationRefreshSetting;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 /**
  * Return type of the Saved Objects `bulkUpdate()` method.
@@ -45,6 +55,6 @@ export interface SavedObjectsBulkUpdateOptions extends SavedObjectsBaseOptions {
  * @public
  */
 export interface SavedObjectsBulkUpdateResponse<T = unknown> {
-    /** array of {@link SavedObjectsUpdateResponse}, each of which is either a successful result or an error result */
-    saved_objects: Array<SavedObjectsUpdateResponse<T> | SavedObjectErrorResult>;
+  /** array of {@link SavedObjectsUpdateResponse}, each of which is either a successful result or an error result */
+  saved_objects: Array<SavedObjectsUpdateResponse<T> | SavedObjectErrorResult>;
 }

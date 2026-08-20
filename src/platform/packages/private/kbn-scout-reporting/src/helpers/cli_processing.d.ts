@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ScoutTestTarget } from '@kbn/scout-info';
 export declare const stripRunCommand: (commandArgs: string[]) => string;
 /**
@@ -16,4 +25,6 @@ export declare function getRunCommand(argv?: string[]): string;
  *
  * This won't return a target if '--grep' is not provided in the command line
  */
-export declare function getTestTargetFromProcessArguments(argv?: string[]): ScoutTestTarget | undefined;
+export declare function getTestTargetFromProcessArguments(
+  argv?: string[]
+): ScoutTestTarget | undefined;

@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Security evaluators for adversarial testing and guardrail validation.
  *
@@ -17,8 +24,8 @@ import type { Evaluator } from '../../types';
  * Unauthorized tool names are included in the result metadata for investigation.
  */
 export declare function createToolPoisoningEvaluator(config: {
-    allowedTools: string[];
-    extractToolCalls: (output: unknown) => string[];
+  allowedTools: string[];
+  extractToolCalls: (output: unknown) => string[];
 }): Evaluator;
 /**
  * Detects potential system prompt leakage in model output using configurable regex patterns.
@@ -28,8 +35,8 @@ export declare function createToolPoisoningEvaluator(config: {
  * 0.0 with detected pattern details when leaks are identified.
  */
 export declare function createPromptLeakDetectionEvaluator(config?: {
-    patterns?: RegExp[];
-    excludePatterns?: RegExp[];
+  patterns?: RegExp[];
+  excludePatterns?: RegExp[];
 }): Evaluator;
 /**
  * Validates that model output stays within defined scope boundaries using regex patterns.
@@ -39,5 +46,5 @@ export declare function createPromptLeakDetectionEvaluator(config?: {
  * unauthorized domains.
  */
 export declare function createScopeViolationEvaluator(config: {
-    allowedPatterns: RegExp[];
+  allowedPatterns: RegExp[];
 }): Evaluator;

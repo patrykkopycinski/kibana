@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export { getEsClient, getLinkedEsClient, getKbnClient } from './clients';
 export { createScoutConfig } from './config';
 export { getEsArchiver, getLinkedEsArchiver } from './es_archiver';
@@ -8,6 +17,10 @@ export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/kbn-client';
 export type { Client as EsClient } from '@elastic/elasticsearch';
-export { createCustomRole, createElasticsearchCustomRole, isElasticsearchRole, } from './custom_role';
+export {
+  createCustomRole,
+  createElasticsearchCustomRole,
+  isElasticsearchRole,
+} from './custom_role';
 export type { ElasticsearchRoleDescriptor, KibanaRole } from './custom_role';
 export { getPrivilegedRoleName } from './roles';

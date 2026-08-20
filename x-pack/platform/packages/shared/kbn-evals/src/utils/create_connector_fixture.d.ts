@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -13,14 +20,23 @@ export declare function getConnectorIdAsUuid(connectorId: string): string;
  * Otherwise, a deterministic UUID is generated.
  */
 export declare function resolveConnectorId(connectorId: string): string;
-export declare function deleteConnectorById({ fetch, connectorId, log, }: {
-    fetch: HttpHandler;
-    connectorId: string;
-    log: ToolingLog;
+export declare function deleteConnectorById({
+  fetch,
+  connectorId,
+  log,
+}: {
+  fetch: HttpHandler;
+  connectorId: string;
+  log: ToolingLog;
 }): Promise<void>;
-export declare function createConnectorFixture({ predefinedConnector, fetch, log, use, }: {
-    predefinedConnector: AvailableConnectorWithId;
-    fetch: HttpHandler;
-    log: ToolingLog;
-    use: (connector: AvailableConnectorWithId) => Promise<void>;
+export declare function createConnectorFixture({
+  predefinedConnector,
+  fetch,
+  log,
+  use,
+}: {
+  predefinedConnector: AvailableConnectorWithId;
+  fetch: HttpHandler;
+  log: ToolingLog;
+  use: (connector: AvailableConnectorWithId) => Promise<void>;
 }): Promise<void>;

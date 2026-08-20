@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { Filter } from '../build_filters';
 /**
@@ -23,23 +32,26 @@ export declare const isFilterDisabled: (filter: Filter) => boolean;
  * @public
  */
 export declare const toggleFilterDisabled: (filter: Filter) => {
-    $state?: {
-        store: FilterStateStore;
-    };
-    query?: Record<string, any>;
-    meta: {
-        alias?: string | null;
-        negate?: boolean;
-        controlledBy?: string;
-        group?: string;
-        index?: string;
-        isMultiIndex?: boolean;
-        type?: string;
-        key?: string;
-        params?: import("../build_filters").FilterMetaParams;
-        value?: string | import("..").RangeFilterParams | import("../build_filters").PhraseFilterValue[];
-        disabled: boolean;
-    };
+  $state?: {
+    store: FilterStateStore;
+  };
+  query?: Record<string, any>;
+  meta: {
+    alias?: string | null;
+    negate?: boolean;
+    controlledBy?: string;
+    group?: string;
+    index?: string;
+    isMultiIndex?: boolean;
+    type?: string;
+    key?: string;
+    params?: import('../build_filters').FilterMetaParams;
+    value?:
+      | string
+      | import('..').RangeFilterParams
+      | import('../build_filters').PhraseFilterValue[];
+    disabled: boolean;
+  };
 };
 /**
  *
@@ -49,23 +61,26 @@ export declare const toggleFilterDisabled: (filter: Filter) => {
  * @public
  */
 export declare const toggleFilterNegated: (filter: Filter) => {
-    $state?: {
-        store: FilterStateStore;
-    };
-    query?: Record<string, any>;
-    meta: {
-        alias?: string | null;
-        disabled?: boolean;
-        controlledBy?: string;
-        group?: string;
-        index?: string;
-        isMultiIndex?: boolean;
-        type?: string;
-        key?: string;
-        params?: import("../build_filters").FilterMetaParams;
-        value?: string | import("..").RangeFilterParams | import("../build_filters").PhraseFilterValue[];
-        negate: boolean;
-    };
+  $state?: {
+    store: FilterStateStore;
+  };
+  query?: Record<string, any>;
+  meta: {
+    alias?: string | null;
+    disabled?: boolean;
+    controlledBy?: string;
+    group?: string;
+    index?: string;
+    isMultiIndex?: boolean;
+    type?: string;
+    key?: string;
+    params?: import('../build_filters').FilterMetaParams;
+    value?:
+      | string
+      | import('..').RangeFilterParams
+      | import('../build_filters').PhraseFilterValue[];
+    negate: boolean;
+  };
 };
 /**
  *
@@ -75,11 +90,11 @@ export declare const toggleFilterNegated: (filter: Filter) => {
  * @public
  */
 export declare const toggleFilterPinned: (filter: Filter) => {
-    meta: import("..").FilterMeta;
-    query?: Record<string, any>;
-    $state: {
-        store: FilterStateStore;
-    };
+  meta: import('..').FilterMeta;
+  query?: Record<string, any>;
+  $state: {
+    store: FilterStateStore;
+  };
 };
 /**
  * @param filter

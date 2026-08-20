@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientImportExport } from './kbn_client_import_export';
 import type { KbnClientPlugins } from './kbn_client_plugins';
@@ -9,31 +18,31 @@ import type { UiSettingValues } from './kbn_client_ui_settings';
 import type { KbnClientUiSettings } from './kbn_client_ui_settings';
 import type { KbnClientVersion } from './kbn_client_version';
 export interface KbnClientOptions {
-    url: string;
-    certificateAuthorities?: Buffer[];
-    log: ToolingLog;
-    uiSettingDefaults?: UiSettingValues;
-    importExportBaseDir?: string;
+  url: string;
+  certificateAuthorities?: Buffer[];
+  log: ToolingLog;
+  uiSettingDefaults?: UiSettingValues;
+  importExportBaseDir?: string;
 }
 export declare class KbnClient {
-    readonly status: KbnClientStatus;
-    readonly plugins: KbnClientPlugins;
-    readonly version: KbnClientVersion;
-    readonly savedObjects: KbnClientSavedObjects;
-    readonly spaces: KbnClientSpaces;
-    readonly uiSettings: KbnClientUiSettings;
-    readonly importExport: KbnClientImportExport;
-    private readonly requester;
-    private readonly log;
-    private readonly uiSettingDefaults?;
-    /**
-     * Basic Kibana server client that implements common behaviors for talking
-     * to the Kibana server from dev tooling.
-     */
-    constructor(options: KbnClientOptions);
-    /**
-     * Make a direct request to the Kibana server
-     */
-    request<T>(options: ReqOptions): Promise<import("@kbn/test").KbnClientResponse<T>>;
-    resolveUrl(relativeUrl: string): string;
+  readonly status: KbnClientStatus;
+  readonly plugins: KbnClientPlugins;
+  readonly version: KbnClientVersion;
+  readonly savedObjects: KbnClientSavedObjects;
+  readonly spaces: KbnClientSpaces;
+  readonly uiSettings: KbnClientUiSettings;
+  readonly importExport: KbnClientImportExport;
+  private readonly requester;
+  private readonly log;
+  private readonly uiSettingDefaults?;
+  /**
+   * Basic Kibana server client that implements common behaviors for talking
+   * to the Kibana server from dev tooling.
+   */
+  constructor(options: KbnClientOptions);
+  /**
+   * Make a direct request to the Kibana server
+   */
+  request<T>(options: ReqOptions): Promise<import('@kbn/test').KbnClientResponse<T>>;
+  resolveUrl(relativeUrl: string): string;
 }

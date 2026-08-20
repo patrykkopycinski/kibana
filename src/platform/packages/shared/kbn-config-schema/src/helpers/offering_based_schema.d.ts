@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Type, TypeOptions } from '../types';
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
@@ -44,7 +53,7 @@ import type { Type, TypeOptions } from '../types';
  * @param opts.options Any options to pass down in the types.
  */
 export declare function offeringBasedSchema<V>(opts: {
-    serverless?: Type<V>;
-    traditional?: Type<V>;
-    options?: TypeOptions<V>;
-}): import("../types").ConditionalType<true, V, V>;
+  serverless?: Type<V>;
+  traditional?: Type<V>;
+  options?: TypeOptions<V>;
+}): import('../types').ConditionalType<true, V, V>;

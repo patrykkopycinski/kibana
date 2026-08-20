@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/repo-info'
   - '@kbn/tooling-log'
+  - '@kbn/test'
 tags:
   - shared-common
   - package

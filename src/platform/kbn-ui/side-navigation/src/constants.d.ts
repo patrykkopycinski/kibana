@@ -1,8 +1,17 @@
-export declare const NAVIGATION_SELECTOR_PREFIX = "kbnChromeNav";
-export declare const NAVIGATION_ROOT_SELECTOR = "kbnChromeNav-root";
-export declare const PRIMARY_NAVIGATION_ID = "kbnChromeNav-primaryNavigation";
-export declare const MORE_MENU_ID = "kbnChromeNav-moreMenu";
-export declare const MAIN_PANEL_ID = "kbnChromeNav-mainPanel";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export declare const NAVIGATION_SELECTOR_PREFIX = 'kbnChromeNav';
+export declare const NAVIGATION_ROOT_SELECTOR = 'kbnChromeNav-root';
+export declare const PRIMARY_NAVIGATION_ID = 'kbnChromeNav-primaryNavigation';
+export declare const MORE_MENU_ID = 'kbnChromeNav-moreMenu';
+export declare const MAIN_PANEL_ID = 'kbnChromeNav-mainPanel';
 export declare const MAX_MENU_ITEMS = 12;
 export declare const MAX_FOOTER_ITEMS = 5;
 export declare const POPOVER_HOVER_DELAY = 300;

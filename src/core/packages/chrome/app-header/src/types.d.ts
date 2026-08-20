@@ -1,5 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { AppMenuConfig } from '@kbn/app-menu';
-import type { AppHeaderBack as CoreAppHeaderBack, AppHeaderBadge as CoreAppHeaderBadge, AppHeaderBadgeItem as CoreAppHeaderBadgeItem, AppHeaderConfig as CoreAppHeaderConfig, ChromeAppHeaderConfig as CoreChromeAppHeaderConfig, AppHeaderDescription as CoreAppHeaderDescription, AppHeaderEditableTitle as CoreAppHeaderEditableTitle, AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction, AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus, AppHeaderShareAction as CoreAppHeaderShareAction, AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem, AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem, AppHeaderMetadataItem as CoreAppHeaderMetadataItem, AppHeaderMetadataItems as CoreAppHeaderMetadataItems, AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem, AppHeaderSpacing as CoreAppHeaderSpacing, AppHeaderTab as CoreAppHeaderTab, AppHeaderTabAction as CoreAppHeaderTabAction, AppHeaderTabActions as CoreAppHeaderTabActions, AppHeaderTabBadge as CoreAppHeaderTabBadge, AppHeaderTabIconBadge as CoreAppHeaderTabIconBadge, AppHeaderTitle as CoreAppHeaderTitle, AppHeaderTitleSaveResult as CoreAppHeaderTitleSaveResult } from '@kbn/core-chrome-browser';
+import type {
+  AppHeaderBack as CoreAppHeaderBack,
+  AppHeaderBadge as CoreAppHeaderBadge,
+  AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
+  AppHeaderConfig as CoreAppHeaderConfig,
+  ChromeAppHeaderConfig as CoreChromeAppHeaderConfig,
+  AppHeaderDescription as CoreAppHeaderDescription,
+  AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
+  AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus,
+  AppHeaderShareAction as CoreAppHeaderShareAction,
+  AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
+  AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
+  AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
+  AppHeaderSpacing as CoreAppHeaderSpacing,
+  AppHeaderTab as CoreAppHeaderTab,
+  AppHeaderTabAction as CoreAppHeaderTabAction,
+  AppHeaderTabActions as CoreAppHeaderTabActions,
+  AppHeaderTabBadge as CoreAppHeaderTabBadge,
+  AppHeaderTabIconBadge as CoreAppHeaderTabIconBadge,
+  AppHeaderTitle as CoreAppHeaderTitle,
+  AppHeaderTitleSaveResult as CoreAppHeaderTitleSaveResult,
+} from '@kbn/core-chrome-browser';
 export type AppHeaderMenu = AppMenuConfig;
 export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;

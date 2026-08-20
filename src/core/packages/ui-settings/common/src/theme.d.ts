@@ -1,4 +1,13 @@
-export declare const DEFAULT_THEME_NAME = "borealis";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export declare const DEFAULT_THEME_NAME = 'borealis';
 export declare const SUPPORTED_THEME_NAMES: readonly ['borealis'];
 export type ThemeName = (typeof SUPPORTED_THEME_NAMES)[number];
 /**
@@ -9,7 +18,7 @@ export declare const ThemeBorealisTags: readonly ['borealislight', 'borealisdark
  * An array of all theme tags supported by Kibana. Note that this list doesn't
  * reflect what theme tags are available in a Kibana build.
  */
-export declare const SUPPORTED_THEME_TAGS: readonly ["borealislight", "borealisdark"];
+export declare const SUPPORTED_THEME_TAGS: readonly ['borealislight', 'borealisdark'];
 export type ThemeTag = (typeof SUPPORTED_THEME_TAGS)[number];
 export type ThemeTags = readonly ThemeTag[];
 /**

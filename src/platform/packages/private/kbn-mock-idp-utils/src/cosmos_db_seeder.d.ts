@@ -1,22 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * User data structure for seeding
  */
 export interface TestUserData {
-    userId: string;
-    email?: string;
-    firstName: string;
-    lastName?: string;
-    organizationId: string;
-    roleId: string;
-    projectType: string;
-    applicationRoles: string[];
+  userId: string;
+  email?: string;
+  firstName: string;
+  lastName?: string;
+  organizationId: string;
+  roleId: string;
+  projectType: string;
+  applicationRoles: string[];
 }
 /**
  * Api key data structure for seeding.
  */
 export interface TestApiKeyData {
-    creator: string;
-    organizationId: string;
+  creator: string;
+  organizationId: string;
 }
 /**
  * Seed a test user in Cosmos DB
@@ -39,9 +48,9 @@ export interface TestApiKeyData {
  * ```
  */
 export declare function seedTestUser(userData: TestUserData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 /**
  * Update an existing test user in Cosmos DB
@@ -64,9 +73,9 @@ export declare function seedTestUser(userData: TestUserData): Promise<{
  * ```
  */
 export declare function updateTestUser(userData: TestUserData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 /**
  * Seed a test Api Key in Cosmos DB
@@ -83,9 +92,9 @@ export declare function updateTestUser(userData: TestUserData): Promise<{
  * ```
  */
 export declare function seedTestApiKey(apiKeyData: TestApiKeyData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 /**
  * Update an existing API key in Cosmos DB.
@@ -102,22 +111,22 @@ export declare function seedTestApiKey(apiKeyData: TestApiKeyData): Promise<{
  * ```
  */
 export declare function updateTestApiKey(apiKeyData: TestApiKeyData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 interface TestOAuthConnectionData {
-    connectionId: string;
-    clientId: string;
-    organizationId: string;
-    userId: string;
-    resource: string;
-    name?: string;
-    nameOrigin?: 'generated' | 'user-defined';
-    scopes?: string[];
-    revoked?: boolean;
-    expired?: boolean;
-    created?: string;
+  connectionId: string;
+  clientId: string;
+  organizationId: string;
+  userId: string;
+  resource: string;
+  name?: string;
+  nameOrigin?: 'generated' | 'user-defined';
+  scopes?: string[];
+  revoked?: boolean;
+  expired?: boolean;
+  created?: string;
 }
 /**
  * Seed a test OAuth connection in Cosmos DB.
@@ -139,9 +148,9 @@ interface TestOAuthConnectionData {
  * ```
  */
 export declare function seedTestOAuthConnection(connectionData: TestOAuthConnectionData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 /**
  * Update (replace) an existing OAuth connection in Cosmos DB.
@@ -149,10 +158,12 @@ export declare function seedTestOAuthConnection(connectionData: TestOAuthConnect
  * @param connectionData - Connection data to update.
  * @returns Promise that resolves when the connection is updated.
  */
-export declare function updateTestOAuthConnection(connectionData: TestOAuthConnectionData): Promise<{
-    success: boolean;
-    message: string;
-    response?: any;
+export declare function updateTestOAuthConnection(
+  connectionData: TestOAuthConnectionData
+): Promise<{
+  success: boolean;
+  message: string;
+  response?: any;
 }>;
 /**
  * Delete a seeded OAuth connection from Cosmos DB.
@@ -161,11 +172,14 @@ export declare function updateTestOAuthConnection(connectionData: TestOAuthConne
  * @param clientId - The owning client id (partition key).
  * @returns Promise that resolves when the connection is deleted or absent.
  */
-export declare function deleteTestOAuthConnection({ connectionId, clientId, }: {
-    connectionId: string;
-    clientId: string;
+export declare function deleteTestOAuthConnection({
+  connectionId,
+  clientId,
+}: {
+  connectionId: string;
+  clientId: string;
 }): Promise<{
-    success: boolean;
-    message: string;
+  success: boolean;
+  message: string;
 }>;
 export {};

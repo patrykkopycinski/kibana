@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { IterableInput, AsyncMapFn } from './types';
 /**
  * Creates an observable whose values are the result of calling `fn` for each
@@ -10,7 +19,10 @@ import type { IterableInput, AsyncMapFn } from './types';
  * @param iterable Items to iterate
  * @param fn Function to call for each item. Result is added/concatenated into the result array in place of the input value
  */
-export declare function map$<T1, T2>(iterable: IterableInput<T1>, fn: AsyncMapFn<T1, T2>): import("rxjs").Observable<T2>;
+export declare function map$<T1, T2>(
+  iterable: IterableInput<T1>,
+  fn: AsyncMapFn<T1, T2>
+): import('rxjs').Observable<T2>;
 /**
  * Creates an observable whose values are the result of calling `fn` for each
  * item in `iterable`. `fn` can return either a Promise or an Observable. If
@@ -25,4 +37,8 @@ export declare function map$<T1, T2>(iterable: IterableInput<T1>, fn: AsyncMapFn
  * @param limit Maximum number of operations to run in parallel
  * @param fn Function to call for each item. Result is added/concatenated into the result array in place of the input value
  */
-export declare function mapWithLimit$<T1, T2>(iterable: IterableInput<T1>, limit: number, fn: AsyncMapFn<T1, T2>): import("rxjs").Observable<T2>;
+export declare function mapWithLimit$<T1, T2>(
+  iterable: IterableInput<T1>,
+  limit: number,
+  fn: AsyncMapFn<T1, T2>
+): import('rxjs').Observable<T2>;

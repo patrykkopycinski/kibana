@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CodeChanges } from './code_changes';
 /**
@@ -26,13 +35,20 @@ export declare const isScoutTestsOnlyDiff: (changedFiles: readonly string[]) => 
  *
  * The resolver never crosses ui ↔ api or scout ↔ scout_<custom> scopes.
  */
-export declare const deriveScoutConfigsForFile: (file: string, repoRoot: string, existsCache?: Map<string, boolean>) => string[];
+export declare const deriveScoutConfigsForFile: (
+  file: string,
+  repoRoot: string,
+  existsCache?: Map<string, boolean>
+) => string[];
 /**
  * Map a list of changed files to the union of owning Playwright configs.
  * Used as the affected-configs filter in `discover-playwright-configs` and
  * `create-test-tracks`.
  */
-export declare const deriveScoutConfigsForFiles: (files: readonly string[], repoRoot: string) => Set<string>;
+export declare const deriveScoutConfigsForFiles: (
+  files: readonly string[],
+  repoRoot: string
+) => Set<string>;
 /**
  * Outcome of the Scout selective-testing decision. Consumers
  * (`discover-playwright-configs`, `create-test-tracks`) dispatch on `kind` to
@@ -46,16 +62,19 @@ export declare const deriveScoutConfigsForFiles: (files: readonly string[], repo
  *   - 'dependency-tree'  : run configs whose owning @kbn/ module appears in
  *                          `affectedModuleIds` (graph-traversal mode).
  */
-export type ScoutTestingScope = {
-    kind: 'full';
-    reason: 'selective-disabled' | 'critical-files';
-} | {
-    kind: 'tests-only';
-    affectedConfigPaths: ReadonlySet<string>;
-} | {
-    kind: 'dependency-tree';
-    affectedModuleIds: ReadonlySet<string>;
-};
+export type ScoutTestingScope =
+  | {
+      kind: 'full';
+      reason: 'selective-disabled' | 'critical-files';
+    }
+  | {
+      kind: 'tests-only';
+      affectedConfigPaths: ReadonlySet<string>;
+    }
+  | {
+      kind: 'dependency-tree';
+      affectedModuleIds: ReadonlySet<string>;
+    };
 /**
  * Decide which Scout testing scope to apply for a given diff.
  *
@@ -69,7 +88,12 @@ export type ScoutTestingScope = {
  * marking is NOT part of the scope — consumers derive it from
  * `codeChanges.affectedModules` independently.
  */
-export declare const resolveScoutTestingScope: (codeChanges: CodeChanges | null, selectiveTesting: boolean, log: ToolingLog, repoRoot?: string) => ScoutTestingScope;
+export declare const resolveScoutTestingScope: (
+  codeChanges: CodeChanges | null,
+  selectiveTesting: boolean,
+  log: ToolingLog,
+  repoRoot?: string
+) => ScoutTestingScope;
 /**
  * JSON shape produced by `scout resolve-testing-scope` and read by every
  * downstream step (configs CLI, lanes CLI).
@@ -83,22 +107,29 @@ export declare const resolveScoutTestingScope: (codeChanges: CodeChanges | null,
  *                         set of Playwright configs to run.
  */
 export interface SerializedScoutTestingScope {
-    kind: ScoutTestingScope['kind'];
-    reason?: 'selective-disabled' | 'critical-files';
-    affectedModules: readonly string[];
-    affectedConfigs?: readonly string[];
+  kind: ScoutTestingScope['kind'];
+  reason?: 'selective-disabled' | 'critical-files';
+  affectedModules: readonly string[];
+  affectedConfigs?: readonly string[];
 }
 /**
  * Convert a `ScoutTestingScope` into the JSON shape shared across pipeline
  * steps. `affectedModules` is always included (even for `full` / `tests-only`
  * scopes) so consumers can label items as "affected" regardless of kind.
  */
-export declare const serializeScoutTestingScope: (scope: ScoutTestingScope, affectedModules: ReadonlySet<string>) => SerializedScoutTestingScope;
+export declare const serializeScoutTestingScope: (
+  scope: ScoutTestingScope,
+  affectedModules: ReadonlySet<string>
+) => SerializedScoutTestingScope;
 /**
  * Write the serialised scope to `outputPath`, creating the parent directory
  * if needed. Called by `scout resolve-testing-scope`.
  */
-export declare const writeScoutTestingScope: (scope: ScoutTestingScope, affectedModules: ReadonlySet<string>, outputPath: string) => void;
+export declare const writeScoutTestingScope: (
+  scope: ScoutTestingScope,
+  affectedModules: ReadonlySet<string>,
+  outputPath: string
+) => void;
 /**
  * Read and validate a testing-scope JSON file produced by `scout
  * resolve-testing-scope`. Throws on missing/invalid input — downstream

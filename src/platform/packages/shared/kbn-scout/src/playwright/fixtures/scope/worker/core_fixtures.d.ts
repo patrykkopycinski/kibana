@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { KbnClient } from '@kbn/kbn-client';
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaUrl } from '../../../../common/services';
@@ -10,31 +19,31 @@ export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
 export type { ScoutLogger } from '../../../../common/services/logger';
 export interface CookieHeader {
-    [Cookie: string]: string;
+  [Cookie: string]: string;
 }
 export interface RoleSessionCredentials {
-    cookieValue: string;
-    cookieHeader: CookieHeader;
+  cookieValue: string;
+  cookieHeader: CookieHeader;
 }
 export interface BaseWorkerFixtures {
-    log: ScoutLogger;
-    config: ScoutTestConfig;
-    kbnUrl: KibanaUrl;
-    esClient: Client;
-    kbnClient: KbnClient;
-    /**
-     * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
-     * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
-     * are unavailable in release builds. Use this to gate tests that rely on
-     * those features:
-     *
-     * @example
-     * test('uses shard_delay agg', async ({ esClient, isSnapshotBuild }) => {
-     *   test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT only)');
-     *   // ...
-     * });
-     */
-    isSnapshotBuild: boolean;
+  log: ScoutLogger;
+  config: ScoutTestConfig;
+  kbnUrl: KibanaUrl;
+  esClient: Client;
+  kbnClient: KbnClient;
+  /**
+   * `true` when the target Elasticsearch cluster is a SNAPSHOT build. SNAPSHOT
+   * builds bundle test-only modules (e.g. the `shard_delay` aggregation) that
+   * are unavailable in release builds. Use this to gate tests that rely on
+   * those features:
+   *
+   * @example
+   * test('uses shard_delay agg', async ({ esClient, isSnapshotBuild }) => {
+   *   test.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT only)');
+   *   // ...
+   * });
+   */
+  isSnapshotBuild: boolean;
 }
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -46,4 +55,9 @@ export interface BaseWorkerFixtures {
  * Note: `samlAuth` is added by the `samlAuthFixture` in `./saml_auth/index.ts`, which
  * extends this base. The combined fixture (with samlAuth) is what `worker/index.ts` exports.
  */
-export declare const coreWorkerFixtures: import("playwright/test").TestType<import("playwright/test").PlaywrightTestArgs & import("playwright/test").PlaywrightTestOptions, import("playwright/test").PlaywrightWorkerArgs & import("playwright/test").PlaywrightWorkerOptions & BaseWorkerFixtures>;
+export declare const coreWorkerFixtures: import('playwright/test').TestType<
+  import('playwright/test').PlaywrightTestArgs & import('playwright/test').PlaywrightTestOptions,
+  import('playwright/test').PlaywrightWorkerArgs &
+    import('playwright/test').PlaywrightWorkerOptions &
+    BaseWorkerFixtures
+>;

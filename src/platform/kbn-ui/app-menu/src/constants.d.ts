@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * The maximum number of item slots on the left side of the app menu.
  * - If the number of items is within this limit, all items are shown.
@@ -8,6 +17,6 @@
 export declare const APP_MENU_ITEM_LIMIT = 3;
 export declare const DEFAULT_POPOVER_WIDTH = 200;
 /** Fixed `data-ebt-element` for all AppMenu controls. */
-export declare const APP_MENU_EBT_ELEMENT = "appMenu";
+export declare const APP_MENU_EBT_ELEMENT = 'appMenu';
 /** Fixed `data-ebt-action` for the built-in AppMenu overflow ("More") button. */
-export declare const APP_MENU_EBT_OPEN_MORE_ACTION = "openMoreMenu";
+export declare const APP_MENU_EBT_OPEN_MORE_ACTION = 'openMoreMenu';

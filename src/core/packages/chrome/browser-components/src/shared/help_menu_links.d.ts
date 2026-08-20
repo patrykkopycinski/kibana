@@ -1,47 +1,74 @@
-import type { ChromeGlobalHelpExtensionMenuLink, ChromeHelpExtension, ChromeHelpMenuLink, ChromeStyle } from '@kbn/core-chrome-browser';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpExtension,
+  ChromeHelpMenuLink,
+  ChromeStyle,
+} from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 interface HelpData {
-    menuLinks: ChromeHelpMenuLink[];
-    extension: ChromeHelpExtension | undefined;
-    supportUrl: string;
-    globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
-    docLinks: DocLinksStart;
-    feedbackHandler?: () => void;
-    newsfeedHandler?: () => void;
-    newsfeedHasNew?: boolean;
+  menuLinks: ChromeHelpMenuLink[];
+  extension: ChromeHelpExtension | undefined;
+  supportUrl: string;
+  globalExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
+  docLinks: DocLinksStart;
+  feedbackHandler?: () => void;
+  newsfeedHandler?: () => void;
+  newsfeedHasNew?: boolean;
 }
 export interface HelpMenuLinkItem {
-    name: string;
-    key: string;
-    icon?: IconType;
-    href?: string;
-    target?: string;
-    rel?: string;
-    onClick?: () => void;
-    isExternal?: boolean;
-    hasNewIndicator?: boolean;
-    dataTestSubj?: string;
+  name: string;
+  key: string;
+  icon?: IconType;
+  href?: string;
+  target?: string;
+  rel?: string;
+  onClick?: () => void;
+  isExternal?: boolean;
+  hasNewIndicator?: boolean;
+  dataTestSubj?: string;
 }
 export interface HelpLinks {
-    global: HelpMenuLinkItem[];
-    default: HelpMenuLinkItem[];
-    extension?: {
-        label?: string;
-        items: HelpMenuLinkItem[];
-    };
+  global: HelpMenuLinkItem[];
+  default: HelpMenuLinkItem[];
+  extension?: {
+    label?: string;
+    items: HelpMenuLinkItem[];
+  };
 }
-export declare const toContextMenuItem: (options: HelpMenuLinkItem, navigateToUrl: (url: string) => Promise<void> | void, closeMenu: () => void) => EuiContextMenuPanelItemDescriptor;
-export declare const buildDefaultContentLinks: ({ chromeStyle, docLinks, helpSupportUrl, feedbackHandler, newsfeedHandler, }: {
-    chromeStyle: ChromeStyle;
-    docLinks: DocLinksStart;
-    helpSupportUrl: string;
-    feedbackHandler?: () => void;
-    newsfeedHandler?: () => void;
-    newsfeedHasNew?: boolean;
+export declare const toContextMenuItem: (
+  options: HelpMenuLinkItem,
+  navigateToUrl: (url: string) => Promise<void> | void,
+  closeMenu: () => void
+) => EuiContextMenuPanelItemDescriptor;
+export declare const buildDefaultContentLinks: ({
+  chromeStyle,
+  docLinks,
+  helpSupportUrl,
+  feedbackHandler,
+  newsfeedHandler,
+}: {
+  chromeStyle: ChromeStyle;
+  docLinks: DocLinksStart;
+  helpSupportUrl: string;
+  feedbackHandler?: () => void;
+  newsfeedHandler?: () => void;
+  newsfeedHasNew?: boolean;
 }) => ChromeHelpMenuLink[];
-export declare const buildHelpLinks: ({ chromeStyle, helpData, }: {
-    chromeStyle: ChromeStyle;
-    helpData: HelpData;
+export declare const buildHelpLinks: ({
+  chromeStyle,
+  helpData,
+}: {
+  chromeStyle: ChromeStyle;
+  helpData: HelpData;
 }) => HelpLinks;
 export {};

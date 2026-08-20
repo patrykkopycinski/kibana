@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { Evaluator } from '../../types';
 /**
  * Evaluates tool-call sequence alignment against a golden path using Longest Common
@@ -12,8 +19,8 @@ import type { Evaluator } from '../../types';
  * @param config.coverageWeight - Weight for set-based coverage score (default: 0.5)
  */
 export declare function createTrajectoryEvaluator(config: {
-    extractToolCalls: (output: unknown) => string[];
-    goldenPathExtractor: (expected: unknown) => string[];
-    orderWeight?: number;
-    coverageWeight?: number;
+  extractToolCalls: (output: unknown) => string[];
+  goldenPathExtractor: (expected: unknown) => string[];
+  orderWeight?: number;
+  coverageWeight?: number;
 }): Evaluator;

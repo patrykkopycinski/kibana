@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 /**
@@ -5,10 +14,10 @@ import type { ScoutPage } from '..';
  * `kbn-content-list-provider` URL sync (`q` and `sort`).
  */
 export interface ContentListUrlState {
-    /** Free-text query (the `q` URL param). */
-    q?: string;
-    /** Sort spec, e.g. `'title:asc'` (the `sort` URL param). */
-    sort?: string;
+  /** Free-text query (the `q` URL param). */
+  q?: string;
+  /** Sort spec, e.g. `'title:asc'` (the `sort` URL param). */
+  sort?: string;
 }
 /**
  * Builds the URL search string (including a leading `?`) for a Content List
@@ -35,7 +44,10 @@ export declare const buildContentListSearch: (params: ContentListUrlState) => st
  * @example
  *   await expect(page).toHaveURL(buildContentListUrlRegex('#/home', { q: 'Alpha' }));
  */
-export declare const buildContentListUrlRegex: (hash: string, params: ContentListUrlState) => RegExp;
+export declare const buildContentListUrlRegex: (
+  hash: string,
+  params: ContentListUrlState
+) => RegExp;
 /**
  * Page-object wrapper for the `@kbn/content-list` listing UI (toolbar, table,
  * selection bar). Centralizes the `data-test-subj` selectors emitted by the
@@ -60,48 +72,48 @@ export declare const buildContentListUrlRegex: (hash: string, params: ContentLis
  *   }
  */
 export declare class ContentListWrapper {
-    private readonly page;
-    readonly pageHeader: Locator;
-    readonly toolbar: Locator;
-    readonly searchBox: Locator;
-    readonly clearSearchButton: Locator;
-    readonly sortFilterButton: Locator;
-    readonly tagsFilterButton: Locator;
-    readonly createdByFilterButton: Locator;
-    readonly favoritesFilterButton: Locator;
-    readonly itemLinks: Locator;
-    readonly noResultsPanel: Locator;
-    readonly tableSelectAllCheckbox: Locator;
-    readonly selectionBarDeleteButton: Locator;
-    readonly deleteConfirmButton: Locator;
-    constructor(page: ScoutPage);
-    /** Wait for the listing page header to render — a stable readiness signal. */
-    waitForReady(): Promise<void>;
-    /**
-     * Type characters into the toolbar search box one at a time. Mirrors
-     * real-user input so `EuiSearchBar`'s controlled `onChange` fires
-     * incrementally.
-     */
-    typeIntoSearch(text: string): Promise<void>;
-    /** Replace the search box value (no Enter; commit happens on debounce). */
-    setSearch(text: string): Promise<void>;
-    /**
-     * Replace the search box value and submit with Enter. Mirrors the typical
-     * "search and apply" flow surfaced by `EuiSearchBar`.
-     */
-    searchFor(text: string): Promise<void>;
-    /** Clear the search box via its built-in clear-input button. */
-    clearSearch(): Promise<void>;
-    /** Open the sort filter popover and select the option with the given label. */
-    selectSortOption(label: string): Promise<void>;
-    /**
-     * Open the tags filter popover and select the option for the given tag name.
-     *
-     * The subject is derived inline to mirror `getContentListTagOptionSubj` from
-     * `@kbn/content-list-common`; it isn't imported because `@kbn/scout` is on the
-     * Scout selective-testing critical path and must not depend on that package.
-     */
-    selectTag(name: string): Promise<void>;
-    /** Select all items via the table header checkbox and confirm the bulk-delete dialog. */
-    selectAllAndDelete(): Promise<void>;
+  private readonly page;
+  readonly pageHeader: Locator;
+  readonly toolbar: Locator;
+  readonly searchBox: Locator;
+  readonly clearSearchButton: Locator;
+  readonly sortFilterButton: Locator;
+  readonly tagsFilterButton: Locator;
+  readonly createdByFilterButton: Locator;
+  readonly favoritesFilterButton: Locator;
+  readonly itemLinks: Locator;
+  readonly noResultsPanel: Locator;
+  readonly tableSelectAllCheckbox: Locator;
+  readonly selectionBarDeleteButton: Locator;
+  readonly deleteConfirmButton: Locator;
+  constructor(page: ScoutPage);
+  /** Wait for the listing page header to render — a stable readiness signal. */
+  waitForReady(): Promise<void>;
+  /**
+   * Type characters into the toolbar search box one at a time. Mirrors
+   * real-user input so `EuiSearchBar`'s controlled `onChange` fires
+   * incrementally.
+   */
+  typeIntoSearch(text: string): Promise<void>;
+  /** Replace the search box value (no Enter; commit happens on debounce). */
+  setSearch(text: string): Promise<void>;
+  /**
+   * Replace the search box value and submit with Enter. Mirrors the typical
+   * "search and apply" flow surfaced by `EuiSearchBar`.
+   */
+  searchFor(text: string): Promise<void>;
+  /** Clear the search box via its built-in clear-input button. */
+  clearSearch(): Promise<void>;
+  /** Open the sort filter popover and select the option with the given label. */
+  selectSortOption(label: string): Promise<void>;
+  /**
+   * Open the tags filter popover and select the option for the given tag name.
+   *
+   * The subject is derived inline to mirror `getContentListTagOptionSubj` from
+   * `@kbn/content-list-common`; it isn't imported because `@kbn/scout` is on the
+   * Scout selective-testing critical path and must not depend on that package.
+   */
+  selectTag(name: string): Promise<void>;
+  /** Select all items via the table header checkbox and confirm the bulk-delete dialog. */
+  selectAllAndDelete(): Promise<void>;
 }

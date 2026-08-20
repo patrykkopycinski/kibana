@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { estypes } from '@elastic/elasticsearch';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta, FilterMetaParams } from './types';
@@ -8,45 +17,45 @@ import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
  * @public
  */
 export interface RangeFilterParams extends SerializableRecord {
-    from?: number | string;
-    to?: number | string;
-    gt?: number | string;
-    lt?: number | string;
-    gte?: number | string;
-    lte?: number | string;
-    format?: string;
+  from?: number | string;
+  to?: number | string;
+  gt?: number | string;
+  lt?: number | string;
+  gte?: number | string;
+  lte?: number | string;
+  format?: string;
 }
 export declare const hasRangeKeys: (params: RangeFilterParams) => boolean;
 export type RangeFilterMeta = FilterMeta & {
-    params?: RangeFilterParams;
-    field?: string;
-    formattedValue?: string;
-    type: 'range';
+  params?: RangeFilterParams;
+  field?: string;
+  formattedValue?: string;
+  type: 'range';
 };
 export type ScriptedRangeFilter = Filter & {
-    meta: RangeFilterMeta;
-    query: {
-        script: {
-            script: estypes.Script;
-        };
+  meta: RangeFilterMeta;
+  query: {
+    script: {
+      script: estypes.Script;
     };
+  };
 };
 export type MatchAllRangeFilter = Filter & {
-    meta: RangeFilterMeta;
-    query: {
-        match_all: NonNullable<estypes.QueryDslQueryContainer>['match_all'];
-    };
+  meta: RangeFilterMeta;
+  query: {
+    match_all: NonNullable<estypes.QueryDslQueryContainer>['match_all'];
+  };
 };
 /**
  * @public
  */
 export type RangeFilter = Filter & {
-    meta: RangeFilterMeta;
-    query: {
-        range: {
-            [key: string]: RangeFilterParams;
-        };
+  meta: RangeFilterMeta;
+  query: {
+    range: {
+      [key: string]: RangeFilterParams;
     };
+  };
 };
 /**
  * @param filter
@@ -55,7 +64,9 @@ export type RangeFilter = Filter & {
  * @public
  */
 export declare function isRangeFilter(filter?: Filter): filter is RangeFilter;
-export declare function isRangeFilterParams(params: FilterMetaParams | undefined): params is RangeFilterParams;
+export declare function isRangeFilterParams(
+  params: FilterMetaParams | undefined
+): params is RangeFilterParams;
 /**
  *
  * @param filter
@@ -80,15 +91,29 @@ export declare const getRangeFilterField: (filter: RangeFilter | ScriptedRangeFi
  *
  * @public
  */
-export declare const buildRangeFilter: (field: DataViewFieldBase, params: RangeFilterParams, indexPattern?: DataViewBaseNoFields, formattedValue?: string) => RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter;
-export declare const buildSimpleNumberRangeFilter: (fieldName: string, fieldType: 'number' | 'date', params: RangeFilterParams, value: string, dataViewId: string) => MatchAllRangeFilter | RangeFilter | ScriptedRangeFilter;
+export declare const buildRangeFilter: (
+  field: DataViewFieldBase,
+  params: RangeFilterParams,
+  indexPattern?: DataViewBaseNoFields,
+  formattedValue?: string
+) => RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter;
+export declare const buildSimpleNumberRangeFilter: (
+  fieldName: string,
+  fieldType: 'number' | 'date',
+  params: RangeFilterParams,
+  value: string,
+  dataViewId: string
+) => MatchAllRangeFilter | RangeFilter | ScriptedRangeFilter;
 /**
  * @internal
  */
-export declare const getRangeScript: (field: DataViewFieldBase, params: RangeFilterParams) => {
-    script: {
-        source: string;
-        params: Record<string, any>;
-        lang: string;
-    };
+export declare const getRangeScript: (
+  field: DataViewFieldBase,
+  params: RangeFilterParams
+) => {
+  script: {
+    source: string;
+    params: Record<string, any>;
+    lang: string;
+  };
 };

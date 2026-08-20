@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import type { CorrectnessAnalysis } from './types';
 /**
  * Calculates the Factual Accuracy score using geometric mean of individual claim scores.
@@ -21,4 +28,6 @@ export declare function calculateRelevanceScore(correctnessEvaluation: Correctne
  * claims or steps from the ground truth. If sequence is not critical for the query,
  * it returns a perfect score of 1.0, as there is no order to evaluate.
  */
-export declare function calculateProceduralFidelityScore(correctnessEvaluation: CorrectnessAnalysis): number;
+export declare function calculateProceduralFidelityScore(
+  correctnessEvaluation: CorrectnessAnalysis
+): number;

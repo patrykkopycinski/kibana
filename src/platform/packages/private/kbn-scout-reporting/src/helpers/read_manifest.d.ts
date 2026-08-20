@@ -1,19 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export interface KibanaJsoncMetadata {
+  id: string;
+  type: string;
+  group: string;
+  owner: string | string[];
+  visibility: string;
+  plugin?: {
     id: string;
-    type: string;
-    group: string;
-    owner: string | string[];
-    visibility: string;
-    plugin?: {
-        id: string;
-    };
+  };
 }
 export interface KibanaModuleMetadata {
-    id: string;
-    type: string;
-    group: string;
-    owner: string[];
-    visibility: string;
+  id: string;
+  type: string;
+  group: string;
+  owner: string[];
+  visibility: string;
 }
 /**
  * Resolves the path to the `kibana.jsonc` manifest based on the Playwright configuration file path.

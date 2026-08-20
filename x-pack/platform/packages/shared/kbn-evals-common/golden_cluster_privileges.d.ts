@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 /**
  * Shared privilege descriptors for the golden cluster API key.
  *
@@ -6,28 +13,54 @@
  * `metadata` to suit their context.
  */
 export declare const goldenClusterPrivileges: {
-    readonly kibana_role_descriptors: {
-        readonly 'kbn-evals-all': {
-            readonly elasticsearch: {
-                readonly cluster: readonly ['manage_index_templates'];
-                readonly indices: readonly [{
-                    readonly names: readonly [".evaluation-scores*"];
-                    readonly privileges: readonly ['auto_configure', 'create_index', 'create_doc', 'read', 'view_index_metadata'];
-                }, {
-                    readonly names: readonly ['traces-*'];
-                    readonly privileges: readonly ['auto_configure', 'create_index', 'create_doc', 'read', 'view_index_metadata'];
-                }, {
-                    readonly names: readonly [".evaluation-datasets*", ".evaluation-dataset-examples*"];
-                    readonly privileges: readonly ['auto_configure', 'create_index', 'create_doc', 'read', 'view_index_metadata', 'delete', 'index'];
-                }];
-            };
-            readonly kibana: readonly [{
-                readonly base: readonly [];
-                readonly spaces: readonly ['*'];
-                readonly feature: {
-                    readonly evals: readonly ['all'];
-                };
-            }];
-        };
+  readonly kibana_role_descriptors: {
+    readonly 'kbn-evals-all': {
+      readonly elasticsearch: {
+        readonly cluster: readonly ['manage_index_templates'];
+        readonly indices: readonly [
+          {
+            readonly names: readonly ['.evaluation-scores*'];
+            readonly privileges: readonly [
+              'auto_configure',
+              'create_index',
+              'create_doc',
+              'read',
+              'view_index_metadata'
+            ];
+          },
+          {
+            readonly names: readonly ['traces-*'];
+            readonly privileges: readonly [
+              'auto_configure',
+              'create_index',
+              'create_doc',
+              'read',
+              'view_index_metadata'
+            ];
+          },
+          {
+            readonly names: readonly ['.evaluation-datasets*', '.evaluation-dataset-examples*'];
+            readonly privileges: readonly [
+              'auto_configure',
+              'create_index',
+              'create_doc',
+              'read',
+              'view_index_metadata',
+              'delete',
+              'index'
+            ];
+          }
+        ];
+      };
+      readonly kibana: readonly [
+        {
+          readonly base: readonly [];
+          readonly spaces: readonly ['*'];
+          readonly feature: {
+            readonly evals: readonly ['all'];
+          };
+        }
+      ];
     };
+  };
 };

@@ -1,5 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type { SavedObjectModelDataBackfillFn, SavedObjectModelTransformationFn, SavedObjectModelUnsafeTransformFn } from './transformations';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationFn,
+  SavedObjectModelUnsafeTransformFn,
+} from './transformations';
 /**
  * Represents a change of model associated with a given {@link SavedObjectsModelVersion}.
  *
@@ -15,7 +28,12 @@ import type { SavedObjectModelDataBackfillFn, SavedObjectModelTransformationFn, 
  *
  * @public
  */
-export type SavedObjectsModelChange = SavedObjectsModelMappingsAdditionChange | SavedObjectsModelMappingsDeprecationChange | SavedObjectsModelDataBackfillChange | SavedObjectsModelDataRemovalChange | SavedObjectsModelUnsafeTransformChange;
+export type SavedObjectsModelChange =
+  | SavedObjectsModelMappingsAdditionChange
+  | SavedObjectsModelMappingsDeprecationChange
+  | SavedObjectsModelDataBackfillChange
+  | SavedObjectsModelDataRemovalChange
+  | SavedObjectsModelUnsafeTransformChange;
 /**
  * A {@link SavedObjectsModelChange | model change} adding new mappings.
  *
@@ -41,11 +59,11 @@ export type SavedObjectsModelChange = SavedObjectsModelMappingsAdditionChange | 
  * @public
  */
 export interface SavedObjectsModelMappingsAdditionChange {
-    type: 'mappings_addition';
-    /**
-     * The new mappings introduced in this version.
-     */
-    addedMappings: SavedObjectsMappingProperties;
+  type: 'mappings_addition';
+  /**
+   * The new mappings introduced in this version.
+   */
+  addedMappings: SavedObjectsMappingProperties;
 }
 /**
  * A {@link SavedObjectsModelChange | model change} flagging mappings as being no longer used.
@@ -61,11 +79,11 @@ export interface SavedObjectsModelMappingsAdditionChange {
  * @remark Deprecated mappings will eventually be deleted later.
  */
 export interface SavedObjectsModelMappingsDeprecationChange {
-    type: 'mappings_deprecation';
-    /**
-     * A list of paths to mappings to flag as deprecated.
-     */
-    deprecatedMappings: string[];
+  type: 'mappings_deprecation';
+  /**
+   * A list of paths to mappings to flag as deprecated.
+   */
+  deprecatedMappings: string[];
 }
 /**
  * A {@link SavedObjectsModelChange | model change} backfilling fields introduced in the same model version.
@@ -86,12 +104,15 @@ export interface SavedObjectsModelMappingsDeprecationChange {
  *         Even if no check is performed to ensure that, using such transformations to mutate
  *         existing data of the document can lead to data corruption or inconsistency.
  */
-export interface SavedObjectsModelDataBackfillChange<PreviousAttributes = any, NewAttributes = any> {
-    type: 'data_backfill';
-    /**
-     * The backfill function to run.
-     */
-    backfillFn: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
+export interface SavedObjectsModelDataBackfillChange<
+  PreviousAttributes = any,
+  NewAttributes = any
+> {
+  type: 'data_backfill';
+  /**
+   * The backfill function to run.
+   */
+  backfillFn: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
 }
 /**
  * A {@link SavedObjectsModelChange | model change} removing data from all documents of the type.
@@ -109,11 +130,11 @@ export interface SavedObjectsModelDataBackfillChange<PreviousAttributes = any, N
  *         for more information and examples.
  */
 export interface SavedObjectsModelDataRemovalChange {
-    type: 'data_removal';
-    /**
-     * The list of attribute paths to remove.
-     */
-    removedAttributePaths: string[];
+  type: 'data_removal';
+  /**
+   * The list of attribute paths to remove.
+   */
+  removedAttributePaths: string[];
 }
 /**
  * A {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.
@@ -146,9 +167,13 @@ export interface SavedObjectsModelDataRemovalChange {
  *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
  */
 export interface SavedObjectsModelUnsafeTransformChange {
-    type: 'unsafe_transform';
-    /**
-     * The transform function to execute.
-     */
-    transformFn: (typeSafeGuard: <PreviousAttributes, NewAttributes>(fn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>) => SavedObjectModelTransformationFn) => SavedObjectModelTransformationFn;
+  type: 'unsafe_transform';
+  /**
+   * The transform function to execute.
+   */
+  transformFn: (
+    typeSafeGuard: <PreviousAttributes, NewAttributes>(
+      fn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>
+    ) => SavedObjectModelTransformationFn
+  ) => SavedObjectModelTransformationFn;
 }

@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { FC, PropsWithChildren } from 'react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -9,24 +18,24 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { type KibanaEuiProviderProps } from './eui_provider';
 /** Props for the KibanaRootContextProvider */
 export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
-    /** The `I18nStart` API from `CoreStart`. */
-    i18n: I18nStart;
-    /** The `AnalyticsServiceStart` API from `CoreStart`. */
-    analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
-    /** The `ExecutionContextStart` API from `CoreStart`. */
-    executionContext?: ExecutionContextStart;
-    /** `CoreEnv` from core */
-    coreEnv?: CoreEnv;
-    /** Chrome service for wrapping children in Chrome context providers */
-    chrome?: Pick<ChromeStart, 'withProvider'>;
-    /**
-     * Core's authentication service (`coreStart.security.authc`).
-     */
-    authc?: CoreAuthenticationService;
-    /**
-     * User profile service.
-     */
-    userProfile?: Pick<UserProfileService, 'getCurrent' | 'getDataUpdates$' | 'getUserProfile$'>;
+  /** The `I18nStart` API from `CoreStart`. */
+  i18n: I18nStart;
+  /** The `AnalyticsServiceStart` API from `CoreStart`. */
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  /** The `ExecutionContextStart` API from `CoreStart`. */
+  executionContext?: ExecutionContextStart;
+  /** `CoreEnv` from core */
+  coreEnv?: CoreEnv;
+  /** Chrome service for wrapping children in Chrome context providers */
+  chrome?: Pick<ChromeStart, 'withProvider'>;
+  /**
+   * Core's authentication service (`coreStart.security.authc`).
+   */
+  authc?: CoreAuthenticationService;
+  /**
+   * User profile service.
+   */
+  userProfile?: Pick<UserProfileService, 'getCurrent' | 'getDataUpdates$' | 'getUserProfile$'>;
 }
 /**
  * The `KibanaRootContextProvider` provides the necessary context at the root of Kibana, including
@@ -42,4 +51,6 @@ export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
  * - Consider `KibanaThemeContextProvider` for altering the theme of a component or tree of components.
  *
  */
-export declare const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextProviderProps>>;
+export declare const KibanaRootContextProvider: FC<
+  PropsWithChildren<KibanaRootContextProviderProps>
+>;

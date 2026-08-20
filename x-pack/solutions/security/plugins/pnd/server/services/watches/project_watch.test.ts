@@ -413,7 +413,6 @@ describe('projectWorkflowToWatch — full projection', () => {
     expect(watch.enabled).toBe(true);
     expect(watch.color).toBe('#6b7280');
     expect(watch.icon).toBe('email');
-    expect(watch.autonomyLevel).toBe(1);
     expect(watch.schedule.mode).toBe('demand');
     expect(watch.scopes).toEqual([]);
     expect(watch.metrics.runs7d).toBeNull();

@@ -7,8 +7,8 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
-  AutonomyLevel,
   ScheduleCadence,
+  WatchAutonomyLevel,
   ScheduleHandoff,
   ScheduleMode,
   ScopeAccess,
@@ -25,7 +25,6 @@ import { coverageFromSchedule } from '@kbn/pnd-common';
 /** Temporary policy bag on the workflow watch_policy data.set step. */
 interface WatchAgentStepAttrs {
   mandate?: string;
-  autonomyLevel?: AutonomyLevel;
   handoff?: ScheduleHandoff;
   scopes?: WatchScope[];
   onDemand?: boolean;
@@ -59,10 +58,9 @@ const asNumber = (value: unknown, fallback: number): number =>
 const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
 
-const asAutonomyLevel = (value: unknown): AutonomyLevel => {
-  const n = asNumber(value, 1);
-  if (n >= 1 && n <= 5) return n as AutonomyLevel;
-  return 1;
+const asWatchAutonomyLevel = (value: unknown): WatchAutonomyLevel => {
+  if (value === 'manual' || value === 'assisted' || value === 'supervised') return value;
+  return 'manual';
 };
 
 const asScopeAccess = (value: unknown): ScopeAccess => {
@@ -338,7 +336,6 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     scopeSummary: asString(policy?.scopeSummary, '—'),
     scopes: projectScopes(policy),
     callables: projectCallablesFromDefinition(definition, policy),
-    autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.
       runs7d: null,

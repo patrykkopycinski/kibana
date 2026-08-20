@@ -1,6 +1,6 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
-import { Config } from './config';
+import type { Config } from './config';
 import type { EsVersion } from '../es_version';
 interface Journey {
     config: {

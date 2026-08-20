@@ -1,7 +1,7 @@
 import type { ForwardRefExoticComponent, ReactNode, RefAttributes } from 'react';
 import type { BadgeType } from '../../../types';
-import { SecondaryMenuItemComponent } from './item';
-import { SecondaryMenuSectionComponent } from './section';
+import type { SecondaryMenuItemComponent } from './item';
+import type { SecondaryMenuSectionComponent } from './section';
 export interface SecondaryMenuProps {
     badgeType?: BadgeType;
     children: ReactNode;

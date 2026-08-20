@@ -1,5 +1,5 @@
 import type { Logger } from 'elastic-apm-node';
-import agent from 'elastic-apm-node';
+import type agent from 'elastic-apm-node';
 export interface SpanOptions {
     name: string;
     type?: string;

@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 export type GetArgsType<T extends LifecyclePhase<any>> = T extends LifecyclePhase<infer X> ? X : never;
 export declare class LifecyclePhase<Args extends readonly any[]> {
     private readonly options;

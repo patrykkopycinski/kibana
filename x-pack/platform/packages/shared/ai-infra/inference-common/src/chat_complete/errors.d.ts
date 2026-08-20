@@ -1,4 +1,4 @@
-import { InferenceTaskError } from '../errors';
+import type { InferenceTaskError } from '../errors';
 import type { UnvalidatedToolCall } from './tools';
 /**
  * List of code of error that are specific to the {@link ChatCompleteAPI}

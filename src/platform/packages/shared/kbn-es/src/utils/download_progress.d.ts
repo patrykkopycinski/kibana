@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 export declare function formatBytes(bytes: number): string;
 export interface DownloadProgress {
     /** Passthrough stream to place in the download pipeline; counts bytes seen. */

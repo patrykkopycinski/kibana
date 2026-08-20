@@ -1,5 +1,5 @@
 import type { api } from '@elastic/opentelemetry-node/sdk';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 export declare abstract class BaseInferenceSpanProcessor implements tracing.SpanProcessor {
     private delegate;

@@ -1,4 +1,4 @@
-import { ModelFamily, ModelProvider } from '../model_provider';
+import type { ModelFamily, ModelProvider } from '../model_provider';
 export interface ModelDefinition {
     id: string;
     provider: ModelProvider;

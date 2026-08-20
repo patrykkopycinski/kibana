@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const IngestScoresRequestBody: z.ZodObject<{
     experiment_id: z.ZodString;
     experiment_name: z.ZodOptional<z.ZodString>;

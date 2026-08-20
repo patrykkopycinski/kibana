@@ -1,10 +1,10 @@
-import * as is from './is';
-import * as and from './and';
-import * as or from './or';
-import * as not from './not';
-import * as range from './range';
-import * as exists from './exists';
-import * as nested from './nested';
+import type * as is from './is';
+import type * as and from './and';
+import type * as or from './or';
+import type * as not from './not';
+import type * as range from './range';
+import type * as exists from './exists';
+import type * as nested from './nested';
 export { KQL_FUNCTION_AND } from './and';
 export { KQL_FUNCTION_EXISTS } from './exists';
 export { KQL_FUNCTION_IS } from './is';

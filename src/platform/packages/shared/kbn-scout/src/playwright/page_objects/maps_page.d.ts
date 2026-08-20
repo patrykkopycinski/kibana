@@ -1,5 +1,5 @@
 import type { ScoutPage } from '..';
-import { SavedObjectSaveModal } from './saved_object_save_modal';
+import type { SavedObjectSaveModal } from './saved_object_save_modal';
 export declare class MapsPage {
     private readonly page;
     readonly mapContainer: import("playwright-core").Locator;

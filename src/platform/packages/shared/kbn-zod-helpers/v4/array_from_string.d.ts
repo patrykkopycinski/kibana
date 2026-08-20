@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * This is a helper schema to convert comma separated strings to arrays. Useful
  * for processing query params.

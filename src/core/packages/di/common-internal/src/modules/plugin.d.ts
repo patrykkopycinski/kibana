@@ -1,4 +1,5 @@
-import { Container, ContainerModule, type ContainerOptions, type ResolutionContext, type ServiceIdentifier } from 'inversify';
+import type { Container} from 'inversify';
+import { ContainerModule, type ContainerOptions, type ResolutionContext, type ServiceIdentifier } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 /**

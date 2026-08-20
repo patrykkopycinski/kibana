@@ -3,7 +3,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NotificationCoordinator } from '@kbn/core-notifications-browser';
-import { ToastsApi } from './toasts_api';
+import type { ToastsApi } from './toasts_api';
 interface SetupDeps {
     analytics: AnalyticsServiceSetup;
     uiSettings: IUiSettingsClient;

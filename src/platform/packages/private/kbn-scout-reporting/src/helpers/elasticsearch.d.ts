@@ -1,5 +1,5 @@
 import type { ClientOptions as ESClientOptions } from '@elastic/elasticsearch/lib/client';
-import { Client as ESClient } from '@elastic/elasticsearch';
+import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 /**
  * Get an Elasticsearch client for which connectivity has been validated

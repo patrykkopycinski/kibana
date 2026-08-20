@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const EvaluationExperimentSummary: z.ZodObject<{
     execution_id: z.ZodOptional<z.ZodString>;
     experiment_id: z.ZodString;

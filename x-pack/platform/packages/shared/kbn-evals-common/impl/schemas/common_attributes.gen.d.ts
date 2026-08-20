@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Free-form labels used to organize datasets. Tags are lowercased and deduplicated on write, so `Golden` and `golden` are the same tag. Commas are not allowed because tag filters are comma-separated. Tags describe what a dataset is about; they never affect who can see it.
  */

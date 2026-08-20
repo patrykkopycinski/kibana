@@ -1,6 +1,6 @@
-import { FilterStateStore } from '@kbn/es-query-constants';
+import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { Filter, FilterMeta } from './types';
-import { FILTERS } from './types';
+import type { FILTERS } from './types';
 import type { DataViewBase } from '../../es_query';
 /**
  * @public

@@ -1,7 +1,7 @@
 import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
-import { KibanaCodeEditorWrapper } from '../ui_components';
+import type { KibanaCodeEditorWrapper } from '../ui_components';
 export type DiscoverQueryMode = 'esql' | 'classic';
 export interface DiscoverGotoOptions {
     queryMode: DiscoverQueryMode;

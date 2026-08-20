@@ -1,4 +1,4 @@
-import semver from 'semver';
+import type semver from 'semver';
 export declare class EsVersion {
     static getDefault(): EsVersion;
     readonly parsed: semver.SemVer;

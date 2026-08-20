@@ -1,4 +1,4 @@
-import { ContainerModule } from 'inversify';
+import type { ContainerModule } from 'inversify';
 import type { LoggerFactory } from '@kbn/logging';
 import type { ServiceToken } from '@kbn/core-di';
 /** @internal */

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const timeRangeSchema: z.ZodObject<{
     from: z.ZodString;
     to: z.ZodString;

@@ -1,6 +1,6 @@
-import * as functionType from './function';
-import * as literal from './literal';
-import * as wildcard from './wildcard';
+import type * as functionType from './function';
+import type * as literal from './literal';
+import type * as wildcard from './wildcard';
 export { nodeBuilder } from './node_builder';
 export { type KqlFunctionNode, KQL_NODE_TYPE_FUNCTION } from './function';
 export { type KqlLiteralNode, KQL_NODE_TYPE_LITERAL } from './literal';

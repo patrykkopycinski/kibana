@@ -2,7 +2,8 @@ import type { Observable } from 'rxjs';
 import type { FC } from 'react';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { AppStatus, type AppLeaveHandler, type ScopedHistory } from '@kbn/core-application-browser';
+import type { AppStatus} from '@kbn/core-application-browser';
+import { type AppLeaveHandler, type ScopedHistory } from '@kbn/core-application-browser';
 import type { Mounter } from '../types';
 interface Props {
     /** Path application is mounted on without the global basePath */

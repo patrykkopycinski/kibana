@@ -1,4 +1,4 @@
-import { KbnClient } from '@kbn/kbn-client';
+import type { KbnClient } from '@kbn/kbn-client';
 import type { ScoutLogger } from './logger';
 import type { ScoutTestConfig, EsClient } from '../../types';
 export declare function getEsClient(config: ScoutTestConfig, log: ScoutLogger): EsClient;

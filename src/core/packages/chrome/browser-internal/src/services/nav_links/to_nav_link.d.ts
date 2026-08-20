@@ -1,6 +1,6 @@
 import type { IBasePath } from '@kbn/core-http-browser';
 import { type PublicAppInfo, type PublicAppDeepLinkInfo } from '@kbn/core-application-browser';
-import { NavLinkWrapper } from './nav_link';
+import type { NavLinkWrapper } from './nav_link';
 export declare function toNavLink(app: PublicAppInfo, basePath: IBasePath, deepLink?: PublicAppDeepLinkInfo): NavLinkWrapper | null;
 /**
  * @param {string} url - a relative or root relative url.  If a relative path is given then the

@@ -1,13 +1,13 @@
 import type { ToolingLog } from '@kbn/tooling-log';
-import { KbnClientImportExport } from './kbn_client_import_export';
-import { KbnClientPlugins } from './kbn_client_plugins';
+import type { KbnClientImportExport } from './kbn_client_import_export';
+import type { KbnClientPlugins } from './kbn_client_plugins';
 import type { ReqOptions } from './kbn_client_requester';
-import { KbnClientSavedObjects } from './kbn_client_saved_objects';
-import { KbnClientSpaces } from './kbn_client_spaces';
-import { KbnClientStatus } from './kbn_client_status';
+import type { KbnClientSavedObjects } from './kbn_client_saved_objects';
+import type { KbnClientSpaces } from './kbn_client_spaces';
+import type { KbnClientStatus } from './kbn_client_status';
 import type { UiSettingValues } from './kbn_client_ui_settings';
-import { KbnClientUiSettings } from './kbn_client_ui_settings';
-import { KbnClientVersion } from './kbn_client_version';
+import type { KbnClientUiSettings } from './kbn_client_ui_settings';
+import type { KbnClientVersion } from './kbn_client_version';
 export interface KbnClientOptions {
     url: string;
     certificateAuthorities?: Buffer[];

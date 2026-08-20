@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import type { UserProvidedValues } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient, UiSettingsState, PublicUiSettingsParams } from '@kbn/core-ui-settings-browser';
 import type { UiSettingsApi } from './ui_settings_api';

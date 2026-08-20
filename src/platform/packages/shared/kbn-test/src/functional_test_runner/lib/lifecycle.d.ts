@@ -1,6 +1,6 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { LifecyclePhase } from './lifecycle_phase';
+import type { LifecyclePhase } from './lifecycle_phase';
 import type { Suite, Test } from '../fake_mocha_types';
 export declare class Lifecycle {
     /** root subscription to cleanup lifecycle phases when lifecycle completes */

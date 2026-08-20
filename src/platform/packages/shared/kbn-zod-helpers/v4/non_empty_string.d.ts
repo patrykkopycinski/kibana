@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { RefinementCtx } from '@kbn/zod/v4';
 export declare function isNonEmptyString(input: string, ctx: RefinementCtx): void;
 export declare const NonEmptyString: z.ZodString;

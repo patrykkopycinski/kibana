@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 import type File from 'vinyl';
 import type { DirectoryFile } from 'vinyl';
 interface BufferedFile extends File {

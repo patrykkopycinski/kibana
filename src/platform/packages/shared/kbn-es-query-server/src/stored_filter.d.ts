@@ -1,6 +1,6 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import type { Serializable } from '@kbn/utility-types';
-import { FilterStateStore } from '@kbn/es-query-constants';
+import type { FilterStateStore } from '@kbn/es-query-constants';
 export declare const filterStateStoreSchema: z.ZodUnion<readonly [z.ZodLiteral<FilterStateStore.APP_STATE>, z.ZodLiteral<FilterStateStore.GLOBAL_STATE>]>;
 export declare const storedFilterMetaSchema: z.ZodObject<{
     alias: z.ZodOptional<z.ZodNullable<z.ZodString>>;

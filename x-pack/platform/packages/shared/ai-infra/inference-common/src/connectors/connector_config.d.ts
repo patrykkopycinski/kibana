@@ -1,4 +1,4 @@
-import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
+import type { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector } from './connectors';
 export declare const DEFAULT_OPENAI_MODEL = "gpt-4.1";
 /**

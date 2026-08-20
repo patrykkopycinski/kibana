@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const DeleteEvaluationDatasetRequestQuery: z.ZodObject<{
     intent: z.ZodOptional<z.ZodEnum<{
         delete: "delete";

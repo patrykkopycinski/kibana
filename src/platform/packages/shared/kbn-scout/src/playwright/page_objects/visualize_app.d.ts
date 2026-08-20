@@ -1,5 +1,5 @@
 import type { ScoutPage } from '..';
-import { SavedObjectSaveModal } from './saved_object_save_modal';
+import type { SavedObjectSaveModal } from './saved_object_save_modal';
 type VisType = 'lens' | 'vega' | 'metrics' | 'aggbased' | 'maps';
 export declare class VisualizeApp {
     private readonly page;

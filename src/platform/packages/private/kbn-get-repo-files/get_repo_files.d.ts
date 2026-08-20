@@ -1,4 +1,4 @@
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 /**
  * List the files in the repo, only including files which are manged by version
  * control or "untracked" (new, not committed, and not ignored).

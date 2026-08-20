@@ -1,2 +1,2 @@
-import { ContainerModule } from 'inversify';
+import type { ContainerModule } from 'inversify';
 export declare const core: ContainerModule;

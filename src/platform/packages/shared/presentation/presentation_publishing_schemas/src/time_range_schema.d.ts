@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const serializedTimeRangeSchema: z.ZodObject<{
     time_range: z.ZodOptional<z.ZodObject<{
         from: z.ZodString;

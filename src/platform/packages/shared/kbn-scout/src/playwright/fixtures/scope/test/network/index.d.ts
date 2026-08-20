@@ -1,5 +1,5 @@
 import type { ScoutPage } from '../scout_page';
-import { Network } from './network';
+import type { Network } from './network';
 export declare const networkFixture: import("playwright/test").TestType<import("playwright/test").PlaywrightTestArgs & import("playwright/test").PlaywrightTestOptions & {
     network: Network;
     page: ScoutPage;

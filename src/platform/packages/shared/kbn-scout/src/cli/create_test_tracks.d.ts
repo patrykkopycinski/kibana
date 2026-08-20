@@ -1,9 +1,10 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
 import type { ScoutTestChannel } from '@kbn/scout-info';
-import { ScoutTestTarget } from '@kbn/scout-info';
-import { type ScoutTestConfig, ScoutTestConfigStats } from '@kbn/scout-reporting';
-import { TestTrack } from '../execution/test_track';
+import type { ScoutTestTarget } from '@kbn/scout-info';
+import type { ScoutTestConfigStats } from '@kbn/scout-reporting';
+import { type ScoutTestConfig } from '@kbn/scout-reporting';
+import type { TestTrack } from '../execution/test_track';
 /**
  * Selects which Scout test configs are eligible for distribution into lanes.
  *

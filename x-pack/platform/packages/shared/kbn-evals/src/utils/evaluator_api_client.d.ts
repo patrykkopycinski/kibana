@@ -1,6 +1,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { EvaluateResponse, type EvaluateRequestBodyInput } from '@kbn/evals-common';
+import type { EvaluateResponse} from '@kbn/evals-common';
+import { type EvaluateRequestBodyInput } from '@kbn/evals-common';
 import type { Evaluator, EvaluatorKind, EvaluatorParams, Example, TaskOutput } from '../types';
 export type MapContextFn<TOutput = TaskOutput> = (params: EvaluatorParams<Example, TOutput>) => {
     trace_id: string;

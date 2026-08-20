@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { DockerServer, DockerServerSpec } from '@kbn/test-docker-servers';
 import type { Lifecycle } from '../lifecycle';

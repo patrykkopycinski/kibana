@@ -1,6 +1,6 @@
 import type { Client as ESClient } from '@elastic/elasticsearch';
-import { z } from '@kbn/zod/v4';
-import { ScoutTestTarget } from '@kbn/scout-info';
+import type { z } from '@kbn/zod/v4';
+import type { ScoutTestTarget } from '@kbn/scout-info';
 export declare const ScoutTestConfigStatsEntrySchema: z.ZodObject<{
     path: z.ZodString;
     test_target: z.ZodPipe<z.ZodObject<{

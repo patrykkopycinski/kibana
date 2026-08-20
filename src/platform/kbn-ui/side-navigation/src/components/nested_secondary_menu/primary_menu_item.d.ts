@@ -1,5 +1,5 @@
 import type { ComponentProps, FC, ReactNode } from 'react';
-import { SecondaryMenu } from '../secondary_menu';
+import type { SecondaryMenu } from '../secondary_menu';
 export interface PrimaryMenuItemProps extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'children' | 'isHighlighted'> {
     children: ReactNode;
     hasSubmenu?: boolean;

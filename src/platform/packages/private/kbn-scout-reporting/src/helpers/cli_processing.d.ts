@@ -1,4 +1,4 @@
-import { ScoutTestTarget } from '@kbn/scout-info';
+import type { ScoutTestTarget } from '@kbn/scout-info';
 export declare const stripRunCommand: (commandArgs: string[]) => string;
 /**
  * Returns the command line used to run Scout tests.

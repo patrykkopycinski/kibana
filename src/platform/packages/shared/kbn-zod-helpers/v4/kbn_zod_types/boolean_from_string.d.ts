@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { KbnZodType } from './kbn_zod_type';
 /**
  * This is a helper schema to convert a boolean string ("true" or "false") to a

@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from '@jest/types';
 /**
  * Runs Jest tests with automatic config discovery and argument forwarding.

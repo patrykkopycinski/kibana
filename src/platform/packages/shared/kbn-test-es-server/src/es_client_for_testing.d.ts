@@ -1,5 +1,5 @@
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { Client as EsClient } from '@elastic/elasticsearch';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 /** options for creating es instances used in functional testing scenarios */
 export interface EsClientForTestingOptions extends Omit<ClientOptions, 'node' | 'nodes' | 'tls'> {
     /** url of es instance */

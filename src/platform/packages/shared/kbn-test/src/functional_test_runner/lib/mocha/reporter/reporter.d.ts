@@ -1,7 +1,6 @@
 export declare function MochaReporterProvider({ getService }: {
     getService: any;
-}): {
-    new (runner: any, options: any): {
+}): new (runner: any, options: any) => {
         onStart: () => void;
         onHookStart: (hook: any) => void;
         onHookEnd: () => void;
@@ -14,4 +13,3 @@ export declare function MochaReporterProvider({ getService }: {
         onFail: (runnable: any) => void;
         onEnd: () => void;
     };
-};

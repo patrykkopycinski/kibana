@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { IUserStorageClient } from '@kbn/core-user-storage-browser';
 import type { UserStorageApi } from './user_storage_api';
 export interface UserStorageClientParams {

@@ -1,5 +1,5 @@
 import type { ZodError } from '@kbn/zod/v4';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Schema for the JSON config files consumed by Scout (`local.json`,
  * `cloud_ech.json`, `cloud_mki.json`).

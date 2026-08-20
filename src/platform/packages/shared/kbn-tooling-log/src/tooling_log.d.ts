@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { ToolingLogTextWriterConfig } from './tooling_log_text_writer';
 import type { Writer } from './writer';

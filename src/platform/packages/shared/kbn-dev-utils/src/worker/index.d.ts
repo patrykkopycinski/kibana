@@ -1,5 +1,6 @@
-import ChildProcess, { type ForkOptions } from 'child_process';
-import * as Rx from 'rxjs';
+import type ChildProcess from 'child_process';
+import { type ForkOptions } from 'child_process';
+import type * as Rx from 'rxjs';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 interface StartTSWorkerArgs extends ForkOptions {
     log: SomeDevLog;

@@ -1,5 +1,5 @@
 import type { ScoutServerConfig } from '../../../types';
-import { Config } from '../config';
+import type { Config } from '../config';
 /**
  * Dynamically loads the raw server configuration object from a config file.
  * @param configPath Path to the configuration file to be loaded.

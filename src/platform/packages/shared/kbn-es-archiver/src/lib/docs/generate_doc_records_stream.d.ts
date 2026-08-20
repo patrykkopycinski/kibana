@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import type { Stats } from '../stats';
 import type { Progress } from '../progress';

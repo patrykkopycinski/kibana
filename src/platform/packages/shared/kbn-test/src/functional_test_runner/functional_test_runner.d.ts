@@ -1,5 +1,5 @@
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Config, EsVersion } from './lib';
+import type { Config, EsVersion } from './lib';
 export declare class FunctionalTestRunner {
     private readonly log;
     private readonly config;

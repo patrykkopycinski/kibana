@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import type { exec } from 'child_process';
 import { type ScoutTestTarget } from '@kbn/scout-info';
 export declare const execPromise: typeof exec.__promisify__;
 /**

@@ -1,4 +1,4 @@
-import { WORKFLOWS_APP_ID } from './constants';
+import type { WORKFLOWS_APP_ID } from './constants';
 import type { DeepLinkId } from '.';
 /**
  * Minimal `CoreStart` shape for nav gating. Satisfied by `CoreStart` at call sites.

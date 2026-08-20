@@ -1,5 +1,5 @@
 import type { ServerSentEventBase } from './events';
-import { ServerSentEventType } from './events';
+import type { ServerSentEventType } from './events';
 export declare enum ServerSentEventErrorCode {
     internalError = "internalError",
     requestError = "requestError"

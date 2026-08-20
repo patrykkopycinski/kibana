@@ -1,11 +1,11 @@
 import type { FC, ReactNode } from 'react';
-import { Footer } from '../footer';
-import { Logo } from './logo';
-import { NestedSecondaryMenu } from '../nested_secondary_menu';
-import { Popover } from './popover';
-import { PrimaryMenu } from '../primary_menu';
-import { SecondaryMenu } from '../secondary_menu';
-import { SidePanel } from './side_panel';
+import type { Footer } from '../footer';
+import type { Logo } from './logo';
+import type { NestedSecondaryMenu } from '../nested_secondary_menu';
+import type { Popover } from './popover';
+import type { PrimaryMenu } from '../primary_menu';
+import type { SecondaryMenu } from '../secondary_menu';
+import type { SidePanel } from './side_panel';
 export interface SideNavProps {
     children: ReactNode;
     isCollapsed: boolean;

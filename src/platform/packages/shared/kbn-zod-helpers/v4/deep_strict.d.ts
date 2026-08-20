@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 /**
  * Wraps a Zod schema to deeply reject any unrecognized keys in the input.
  *

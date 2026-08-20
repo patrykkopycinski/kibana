@@ -1,5 +1,5 @@
 import type { Metric } from './metrics';
-import { METRIC_TYPE } from './metrics';
+import type { METRIC_TYPE } from './metrics';
 declare const REPORT_VERSION = 3;
 import type { UiCounterMetricType } from './metrics/ui_counter';
 export interface Report {

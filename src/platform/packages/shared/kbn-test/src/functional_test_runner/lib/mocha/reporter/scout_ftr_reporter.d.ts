@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Runner, Test } from '../../../fake_mocha_types';
 import type { Config as FTRConfig } from '../../config';
 /**

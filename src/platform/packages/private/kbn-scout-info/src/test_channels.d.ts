@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const ScoutTestChannelSchema: z.ZodEnum<{
     "ci-batch-3h": "ci-batch-3h";
     "ci-batch-daily": "ci-batch-daily";

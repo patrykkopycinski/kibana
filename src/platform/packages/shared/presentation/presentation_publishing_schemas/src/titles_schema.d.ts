@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const serializedTitlesSchema: z.ZodObject<{
     description: z.ZodOptional<z.ZodString>;
     hide_title: z.ZodOptional<z.ZodBoolean>;

@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 /**
  * Generic error raised by a Scout report
  */

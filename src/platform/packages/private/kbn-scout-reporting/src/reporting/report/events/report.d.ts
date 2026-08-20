@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutReportEvent } from './event';
 import { ScoutReport } from '../base';
 /**

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare class TestTrackError extends Error {
 }
 export declare const TestTrackSpecSchema: z.ZodObject<{

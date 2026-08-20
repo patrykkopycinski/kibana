@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const optionsListDisplaySettingsSchema: z.ZodObject<{
     placeholder: z.ZodOptional<z.ZodString>;
     hide_action_bar: z.ZodOptional<z.ZodBoolean>;

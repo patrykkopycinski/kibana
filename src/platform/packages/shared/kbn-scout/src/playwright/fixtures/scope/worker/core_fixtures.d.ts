@@ -1,7 +1,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaUrl } from '../../../../common/services';
-import { ScoutLogger } from '../../../../common/services';
+import type { ScoutLogger } from '../../../../common/services';
 import type { ScoutTestConfig } from '.';
 export type { KbnClient } from '@kbn/kbn-client';
 export type { SamlSessionManager } from '@kbn/test-saml-auth';

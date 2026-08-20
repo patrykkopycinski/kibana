@@ -1,5 +1,5 @@
-import { z } from '@kbn/zod';
-import { ControlValuesSource } from '@kbn/controls-constants';
+import type { z } from '@kbn/zod';
+import type { ControlValuesSource } from '@kbn/controls-constants';
 export declare const controlTitleSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
 }, z.core.$strict>;

@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import type fs from 'node:fs';
 /** CODEOWNERS file path **/
 export declare const CODE_OWNERS_FILE: string;
 /**

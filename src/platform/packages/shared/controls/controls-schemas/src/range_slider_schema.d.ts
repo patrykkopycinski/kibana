@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const rangeValueSchema: z.ZodArray<z.ZodString>;
 export declare const rangeSliderControlSchema: z.ZodPreprocess<z.ZodDiscriminatedUnion<[z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;

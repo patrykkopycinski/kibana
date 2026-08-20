@@ -3,7 +3,8 @@ import type { History } from 'history';
 import type { Observable } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import { type AppLeaveHandler, AppStatus } from '@kbn/core-application-browser';
+import type { AppStatus } from '@kbn/core-application-browser';
+import { type AppLeaveHandler } from '@kbn/core-application-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { Mounter } from '../types';
 interface Props {

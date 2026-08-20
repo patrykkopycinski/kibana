@@ -1,5 +1,5 @@
 import type { estypes } from '@elastic/elasticsearch';
-import { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
+import type { toElasticsearchQuery as astToElasticsearchQuery } from './ast';
 /**
  * @params {String} indexPattern
  * @params {Object} config - contains the dateFormatTZ

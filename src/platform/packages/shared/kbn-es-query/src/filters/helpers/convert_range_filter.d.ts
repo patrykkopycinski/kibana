@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 import type { RangeFilter } from '../build_filters';
 import type { TimeRange } from './types';
 export declare function convertRangeFilterToTimeRange(filter: RangeFilter): {

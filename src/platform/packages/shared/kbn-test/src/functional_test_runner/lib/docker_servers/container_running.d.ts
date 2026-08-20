@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 /**
  * Create an observable that errors if a docker

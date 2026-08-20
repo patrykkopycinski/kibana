@@ -1,4 +1,4 @@
-import { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
+import type { default as borealisLight } from '@elastic/eui-theme-borealis/lib/eui_theme_borealis_light.json';
 /**
  * The shape of EUI theme variables, derived from the Borealis light theme token set.
  */

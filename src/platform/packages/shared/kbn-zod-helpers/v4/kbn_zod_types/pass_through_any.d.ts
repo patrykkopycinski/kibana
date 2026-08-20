@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { KbnZodType } from './kbn_zod_type';
 /**
  * This is a helper schema to pass through any value without validation.

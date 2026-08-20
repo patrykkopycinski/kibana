@@ -1,9 +1,9 @@
 import type { ReactNode, FC } from 'react';
-import { Header } from './header';
-import { Item } from './menu_item';
-import { Panel } from './menu_panel';
-import { PrimaryMenuItem } from './primary_menu_item';
-import { SecondaryMenu } from '../secondary_menu';
+import type { Header } from './header';
+import type { Item } from './menu_item';
+import type { Panel } from './menu_panel';
+import type { PrimaryMenuItem } from './primary_menu_item';
+import type { SecondaryMenu } from '../secondary_menu';
 interface NestedSecondaryMenuProps {
     children: ReactNode;
     initialPanel?: string;

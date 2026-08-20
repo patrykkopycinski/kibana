@@ -1,6 +1,6 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestTarget } from '@kbn/scout-info';
-import { Config } from '../config';
+import type { Config } from '../config';
 /**
  * Loads server configuration based on the mode, creates "kbn-test" compatible Config
  * instance, that can be used to start local servers and saves its "Scout"-format copy

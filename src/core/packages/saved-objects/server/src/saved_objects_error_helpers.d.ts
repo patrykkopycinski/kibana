@@ -1,4 +1,4 @@
-import Boom from '@hapi/boom';
+import type Boom from '@hapi/boom';
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 declare const code: unique symbol;
 /**

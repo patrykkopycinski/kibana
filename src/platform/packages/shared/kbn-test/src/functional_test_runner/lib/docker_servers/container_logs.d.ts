@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 /**
  * Observe the logs for a container, reflecting the log lines

@@ -1,5 +1,5 @@
 import type { ScoutPage } from '..';
-import { KibanaCodeEditorWrapper } from '../ui_components';
+import type { KibanaCodeEditorWrapper } from '../ui_components';
 interface ChartSwitchPopoverOptions {
     search?: string;
     visType?: string;

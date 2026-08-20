@@ -1,4 +1,4 @@
-import moment from 'moment';
+import type moment from 'moment';
 export type Unit = 'ms' | 's' | 'm' | 'h' | 'd' | 'w' | 'M' | 'y';
 export type UnitsMap = {
     [k in Unit]: {

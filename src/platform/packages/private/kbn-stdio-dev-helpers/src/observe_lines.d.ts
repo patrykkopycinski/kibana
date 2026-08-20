@@ -1,5 +1,5 @@
 import type { Readable } from 'stream';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 /**
  *  Creates an Observable from a Readable Stream that:
  *   - splits data from `readable` into lines

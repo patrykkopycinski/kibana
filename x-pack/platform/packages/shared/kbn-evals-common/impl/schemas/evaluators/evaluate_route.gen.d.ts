@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const EvaluateRequestBody: z.ZodObject<{
     subject: z.ZodObject<{
         mode: z.ZodDefault<z.ZodOptional<z.ZodEnum<{

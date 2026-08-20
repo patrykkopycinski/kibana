@@ -1,4 +1,4 @@
-import { FilterStateStore } from '@kbn/es-query-constants';
+import type { FilterStateStore } from '@kbn/es-query-constants';
 import type { Filter } from '../build_filters';
 /**
  *

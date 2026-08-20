@@ -1,5 +1,5 @@
 import type { RawInferenceConnector, RawConnector } from './connectors';
-import { InferenceConnectorType } from './connectors';
+import type { InferenceConnectorType } from './connectors';
 export declare const COMPLETION_TASK_TYPE = "chat_completion";
 /**
  * Checks if a given connector type is compatible for inference.

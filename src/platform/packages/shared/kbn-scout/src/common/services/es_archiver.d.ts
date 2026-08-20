@@ -1,4 +1,4 @@
-import { EsArchiver } from '@kbn/es-archiver';
+import type { EsArchiver } from '@kbn/es-archiver';
 import type { EsClient } from '../../types';
 import type { ScoutLogger } from './logger';
 export declare function getEsArchiver(esClient: EsClient, log: ScoutLogger): EsArchiver;

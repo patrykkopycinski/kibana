@@ -1,5 +1,5 @@
-import { Cluster } from '@kbn/es';
-import { Client } from '@elastic/elasticsearch';
+import type { Cluster } from '@kbn/es';
+import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';

@@ -1,6 +1,7 @@
 import type { ESQLMap, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ESQLMessage, SupportedDataType } from '../../..';
-import { UnmappedFieldsStrategy, type ESQLColumnData } from '../../../registry/types';
+import type { UnmappedFieldsStrategy} from '../../../registry/types';
+import { type ESQLColumnData } from '../../../registry/types';
 export declare const TypeMap: Record<SupportedDataType, string>;
 export declare function validateMap(mapValue: ESQLSingleAstItem, mapDefinition: string): ESQLMessage | null;
 /**

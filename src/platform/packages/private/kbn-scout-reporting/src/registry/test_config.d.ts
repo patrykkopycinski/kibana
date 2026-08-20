@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestableModule } from './testable_module';
 import type { ScoutConfigManifest } from './manifest';
 export interface ScoutTestConfig {

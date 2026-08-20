@@ -1,5 +1,5 @@
 import type { Appender, LogRecord, LoggerFactory, LogMeta, Logger, LogMessageSource, LogLevelId, MetaFilterConfig } from '@kbn/logging';
-import { LogLevel } from '@kbn/logging';
+import type { LogLevel } from '@kbn/logging';
 /**
  * @internal
  */

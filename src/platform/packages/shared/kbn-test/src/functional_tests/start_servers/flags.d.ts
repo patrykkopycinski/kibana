@@ -1,5 +1,5 @@
 import type { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
-import { EsVersion } from '../../functional_test_runner';
+import type { EsVersion } from '../../functional_test_runner';
 export type StartServerOptions = ReturnType<typeof parseFlags>;
 export declare const FLAG_OPTIONS: FlagOptions;
 export declare function parseFlags(flags: FlagsReader): {

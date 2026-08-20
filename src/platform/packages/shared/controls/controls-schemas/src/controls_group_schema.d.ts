@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 export declare const controlWidthSchema: z.ZodDefault<z.ZodUnion<readonly [z.ZodLiteral<"small">, z.ZodLiteral<"medium">, z.ZodLiteral<"large">]>>;
 export declare const pinnedControlSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodString>;

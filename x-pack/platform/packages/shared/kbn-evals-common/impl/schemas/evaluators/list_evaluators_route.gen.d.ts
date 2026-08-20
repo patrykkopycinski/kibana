@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const ListEvaluatorsResponse: z.ZodObject<{
     evaluators: z.ZodArray<z.ZodObject<{
         name: z.ZodString;

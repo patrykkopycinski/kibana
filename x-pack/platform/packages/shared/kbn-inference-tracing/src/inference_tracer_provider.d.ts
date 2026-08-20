@@ -1,4 +1,4 @@
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { resources } from '@elastic/opentelemetry-node/sdk';
 import type { Tracer } from '@opentelemetry/api';
 export declare const initInferenceTracerProvider: ({ processors, resource, }: {

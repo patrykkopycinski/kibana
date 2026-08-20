@@ -1,5 +1,5 @@
 import type { AppDeepLinkId, ChromeNavLinks, ChromeBreadcrumb, ChromeSetProjectBreadcrumbsParams, CloudURLs, NavigationCustomization, NavigationTreeDefinition, SolutionId } from '@kbn/core-chrome-browser';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { History } from 'history';
 import type { Logger } from '@kbn/logging';
 interface StartDeps {

@@ -1,4 +1,4 @@
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ScoutReportEvent } from '../event';
 export declare class ScoutReportDataStream {

@@ -1,4 +1,4 @@
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 export declare const SCOUT_TARGET_LOCATION: string;
 export declare const SCOUT_TARGET_ARCH: string;
 export declare const SCOUT_TARGET_DOMAIN: string;

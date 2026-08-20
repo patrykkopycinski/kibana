@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 interface PersistedLogOptions<T = any> {
     maxLength: number | string;
     isEqual?: (oldItem: T, newItem: T) => boolean;

@@ -9,7 +9,9 @@
  * Judge-agreement analysis: does a matrix score describe the model, or the
  * judge that graded it?
  *
- * Every persona-matrix score doc carries the judge in `evaluator_model` (per
+ * Every persona-matrix score doc carries the judge in `evaluator.model.id` (per
+ * score) alongside the graded model in `task.model.id`. NOTE: the request-level
+ * `evaluator_model` / `task_model` fields ...[truncated]
  * request) and `evaluator.model` (per score). When the same task model, example
  * and evaluator have been graded by more than one judge, the disagreement
  * between those judges is a lower bound on how much of the published number is

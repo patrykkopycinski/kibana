@@ -1,0 +1,37 @@
+name: Label PND PRs
+
+# Applies the `reviewer:pnd` label to PRs that touch AlertZero/PND managed workflow
+# definitions, the PND plugin, or the shared PND contracts package, which triggers the
+# AlertZero PND Reviewer (reviewer-pnd). The matching globs live in .github/labeler-pnd.yml.
+#
+# The label is added with KIBANAMACHINE_TOKEN (a User account, not a Bot) so the
+# resulting `labeled` event passes the reviewer's `sender.type != 'Bot'` gate.
+#
+# Unlike label-scout-prs.yml this workflow does NOT gate on `draft == false`: most
+# AlertZero work sits in long-lived draft PRs, and the reviewer-pnd activation rules
+# (cloned from reviewer-scout) have no draft condition, so drafts are reviewable.
+
+on:
+  # pull_request_target runs against the base branch's workflow with a read/write
+  # token and secrets, so it works for fork PRs. This workflow must never check out
+  # PR code, which would expose those secrets to untrusted contributions.
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  label_pnd_prs:
+    name: Add reviewer:pnd label when PND files change
+    if: >-
+      !contains(github.event.pull_request.labels.*.name, 'backport') &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:pnd') &&
+      !contains(github.event.pull_request.labels.*.name, 'reviewer:skip-ai')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+        with:
+          repo-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          configuration-path: .github/labeler-pnd.yml
+          sync-labels: false

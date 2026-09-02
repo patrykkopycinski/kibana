@@ -33,6 +33,10 @@ jobs:
               contains(github.event.comment.body, '@scout')
               && contains(github.event.issue.labels.*.name, 'reviewer:scout')
             )
+            || (
+              contains(github.event.comment.body, '@pnd')
+              && contains(github.event.issue.labels.*.name, 'reviewer:pnd')
+            )
           )
         )
         || (
@@ -49,6 +53,10 @@ jobs:
             || (
               contains(github.event.comment.body, '@scout')
               && contains(github.event.pull_request.labels.*.name, 'reviewer:scout')
+            )
+            || (
+              contains(github.event.comment.body, '@pnd')
+              && contains(github.event.pull_request.labels.*.name, 'reviewer:pnd')
             )
           )
         )

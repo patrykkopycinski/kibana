@@ -36,6 +36,13 @@ const REVIEWERS = Object.freeze({
     requiresLabel: true,
     workflowId: 'reviewer-scout.lock.yml',
   }),
+  pnd: Object.freeze({
+    id: 'pnd',
+    command: '@pnd',
+    label: 'reviewer:pnd',
+    requiresLabel: true,
+    workflowId: 'reviewer-pnd.lock.yml',
+  }),
 });
 
 const allowedPermissions = new Set(['admin', 'write']);

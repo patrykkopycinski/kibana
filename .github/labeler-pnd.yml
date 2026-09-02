@@ -1,0 +1,7 @@
+'reviewer:pnd':
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/**'
+          - 'x-pack/solutions/security/plugins/pnd/**'
+          - 'x-pack/solutions/security/packages/kbn-pnd-common/**'
+          - 'x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-*/**'

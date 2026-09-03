@@ -30,7 +30,7 @@ import { RULE_TUNING_WORKFLOW_ID, WORKFLOWS_API_VERSION, type ChangeType } from 
 const AGENT_STEP_TYPE = 'ai.agent';
 
 /** Structured output the diagnose step is schema-constrained to return. */
-export interface TuningProposal {
+export interface RuleTuningProposal {
   change_type?: ChangeType;
   summary?: string;
   exception_entries?: Array<{
@@ -51,10 +51,10 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 
 const readDiagnoseStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
-): TuningProposal | undefined => {
+): RuleTuningProposal | undefined => {
   const agentSteps = stepExecutions.filter((step) => step.stepType === AGENT_STEP_TYPE);
   for (const step of agentSteps) {
-    const output = step.output as { structured_output?: TuningProposal } | null | undefined;
+    const output = step.output as { structured_output?: RuleTuningProposal } | null | undefined;
     if (output?.structured_output) {
       return output.structured_output;
     }
@@ -80,7 +80,7 @@ export const runRuleTuningWorkflow = async ({
 }): Promise<{
   executionId: string;
   executionStatus: ExecutionStatus;
-  proposal?: TuningProposal;
+  proposal?: RuleTuningProposal;
 }> => {
   const { workflowExecutionId } = (await fetch(
     `/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/run`,

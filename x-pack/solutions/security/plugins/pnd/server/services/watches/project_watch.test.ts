@@ -752,6 +752,90 @@ describe('project watch', () => {
         expect(applied.if).not.toContain('classify_proposal');
       });
 
+      // These conditions hold the destructive half of the worker: every apply step
+      // must individually require the analyst's approval before it runs.
+      const APPLY_STEPS = [
+        'apply_query_tuning',
+        'apply_exception_tuning',
+        'apply_suppression_tuning',
+        'apply_risk_score_tuning',
+        'apply_disable_tuning',
+      ] as const;
+
+      it('requires analyst approval in every apply step condition', () => {
+        for (const name of APPLY_STEPS) {
+          const step = tuningSteps.find((s) => s.name === name);
+          expect(step).toBeDefined();
+          expect(String(step!.if)).toContain(
+            'steps.review_tuning.output.response.approved == true'
+          );
+        }
+      });
+
+      // A skipped apply step leaves no execution record, so the failure flags must
+      // pair each apply step with the gate that ran it. Dropping one pairing lets a
+      // failed apply surface an earlier iteration's error (or hide its own).
+      it('pairs every failure flag with its own apply step gate and error', () => {
+        const failures = tuningSteps.find(({ name }) => name === 'classify_apply_failures')!;
+        const withEntries = failures.with as Record<string, string>;
+
+        for (const name of APPLY_STEPS) {
+          const flag = name.replace('apply_', '').replace('_tuning', '') + '_failed';
+          expect(withEntries[flag]).toBeDefined();
+          expect(withEntries[flag]).toContain(`steps.classify_proposal.output.can_apply_${flag.replace('_failed', '')} == true`);
+          expect(withEntries[flag]).toContain(`steps.${name}.error != null`);
+        }
+      });
+
+      // Alerts behind a failed apply must stay untagged so the next sweep re-harvests
+      // them; every failure flag must block mark_alerts_applied, not just some.
+      it('blocks mark_alerts_applied on every individual failure flag', () => {
+        const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
+        const ifExpr = String(applied.if);
+        for (const flag of [
+          'query_failed',
+          'exception_failed',
+          'suppression_failed',
+          'risk_score_failed',
+          'disable_failed',
+        ]) {
+          expect(ifExpr).toContain(
+            `steps.classify_apply_failures.output.${flag} != true`
+          );
+        }
+      });
+
+      // The tag API replaces the whole tag list, so omitting tags_to_remove would
+      // drop the reviewed/dismissed tags the harvest filter relies on.
+      it('always passes an explicit tags_to_remove array', () => {
+        for (const step of tagSteps) {
+          expect(step.with?.tags_to_remove).toEqual([]);
+        }
+      });
+
+      // classify_proposal is the single decision point for which apply step runs;
+      // each condition must bind its change_type to the payload fields it needs.
+      it('binds each can_apply_* gate to its change_type and payload fields', () => {
+        const classify = tuningSteps.find(({ name }) => name === 'classify_proposal')!;
+        const withEntries = classify.with as Record<string, string>;
+
+        expect(withEntries.can_apply_query).toContain("change_type == 'query'");
+        expect(withEntries.can_apply_query).toContain("proposed_query != ''");
+        expect(withEntries.can_apply_query).toContain("steps.fetch_rule.output.type == 'query'");
+
+        expect(withEntries.can_apply_exception).toContain("change_type == 'exception'");
+        expect(withEntries.can_apply_exception).toContain('exception_entries != null');
+
+        expect(withEntries.can_apply_suppression).toContain("change_type == 'suppression'");
+        expect(withEntries.can_apply_suppression).toContain('suppression_group_by != null');
+
+        expect(withEntries.can_apply_risk_score).toContain("change_type == 'risk_score'");
+        expect(withEntries.can_apply_risk_score).toContain('proposed_risk_score != null');
+        expect(withEntries.can_apply_risk_score).toContain('proposed_severity != null');
+
+        expect(withEntries.can_apply_disable).toContain("change_type == 'disable'");
+      });
+
       // The harvest projects its columns positionally, so reordering KEEP would make the
       // tag step read some other column as the alert ids.
       it('reads the alert ids from the column position KEEP assigns them', () => {

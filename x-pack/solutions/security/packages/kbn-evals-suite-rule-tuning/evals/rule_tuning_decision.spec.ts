@@ -169,7 +169,7 @@ evaluate.describe(
               );
 
               try {
-                return await runRuleTuningWorkflow({ fetch, log, minFpCount: 1 });
+                return await runRuleTuningWorkflow({ fetch, log });
               } finally {
                 await esClient
                   .deleteByQuery({

@@ -45,6 +45,12 @@ export interface RuleTuningProposal {
   proposed_severity?: string;
 }
 
+/** Verdict graded by the suite's evaluators: the diagnose proposal plus run metadata. */
+export interface RuleTuningVerdict extends RuleTuningProposal {
+  executionId: string;
+  executionStatus: ExecutionStatus;
+}
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
@@ -133,8 +139,8 @@ export const runRuleTuningWorkflow = async ({
   }
 
   return {
+    ...proposal,
     executionId: workflowExecutionId,
     executionStatus: execution.status,
-    proposal,
   };
 };

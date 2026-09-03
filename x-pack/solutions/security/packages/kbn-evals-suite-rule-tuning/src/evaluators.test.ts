@@ -14,13 +14,13 @@
  */
 
 import { changeTypeAccuracy, validProposal } from './evaluators';
-import type { RuleTuningProposal } from './workflow_task';
+import type { RuleTuningVerdict } from './workflow_task';
 import type { ChangeType } from './constants';
 
 describe('rule-tuning evaluators', () => {
   describe('changeTypeAccuracy', () => {
     it('scores 1 when the predicted change_type matches the golden label', async () => {
-      const output: RuleTuningProposal = {
+      const output: RuleTuningVerdict = {
         change_type: 'exception',
         executionId: 'exec-1',
         executionStatus: 'completed' as never,
@@ -33,7 +33,7 @@ describe('rule-tuning evaluators', () => {
     });
 
     it('scores 0 when the predicted change_type differs from the golden label', async () => {
-      const output: RuleTuningProposal = {
+      const output: RuleTuningVerdict = {
         change_type: 'manual',
         executionId: 'exec-2',
         executionStatus: 'completed' as never,
@@ -47,7 +47,7 @@ describe('rule-tuning evaluators', () => {
     });
 
     it('scores 0 when the workflow failed and no proposal exists', async () => {
-      const output: RuleTuningProposal = {
+      const output: RuleTuningVerdict = {
         executionId: 'exec-3',
         executionStatus: 'failed' as never,
       };
@@ -61,7 +61,7 @@ describe('rule-tuning evaluators', () => {
   });
 
   describe('validProposal', () => {
-    const base: RuleTuningProposal = {
+    const base: RuleTuningVerdict = {
       change_type: 'exception',
       exception_entries: [{ field: 'host.name', operator: 'is', value: 'web-01' }],
       executionId: 'exec-4',

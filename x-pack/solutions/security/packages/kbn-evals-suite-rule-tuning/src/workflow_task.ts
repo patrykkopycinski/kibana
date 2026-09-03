@@ -95,7 +95,7 @@ export const runRuleTuningWorkflow = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       body: JSON.stringify({
-        inputs: { settings: { min_fp_count: 1 } },
+        inputs: { min_fp_count: 1 },
       }),
     }
   )) as { workflowExecutionId: string };

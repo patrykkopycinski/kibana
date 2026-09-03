@@ -38,7 +38,6 @@
  * names verified against a live stack.
  */
 
-import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -160,7 +159,7 @@ evaluate.describe(
               // Unique rule uuid + alert ids per run: the workflow's re-harvest guard tags
               // reviewed alerts with NOT MV_CONTAINS(workflow_tags, ...) filtering, so a
               // reused uuid would make repetitions after the first harvest nothing.
-              const uniqueRuleId = `${fixture.id}-${randomUUID()}`;
+              const uniqueRuleId = `${fixture.id}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
               createdRuleIds.add(uniqueRuleId);
 
               // TODO: index the rule + dismissed FP alert cluster for `uniqueRuleId`

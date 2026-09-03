@@ -13,18 +13,18 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
   PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_FLOOR_WORKFLOW_ID,
   PND_WATCH_OFFICER_WORKFLOW_ID,
-  PND_RULE_TUNING_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
 import RULE_TUNING_YAML from './definitions/pnd/rule_tuning.yaml';
+import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
 import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
 import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
 import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';

@@ -782,7 +782,9 @@ describe('project watch', () => {
         for (const name of APPLY_STEPS) {
           const flag = name.replace('apply_', '').replace('_tuning', '') + '_failed';
           expect(withEntries[flag]).toBeDefined();
-          expect(withEntries[flag]).toContain(`steps.classify_proposal.output.can_apply_${flag.replace('_failed', '')} == true`);
+          expect(withEntries[flag]).toContain(
+            `steps.classify_proposal.output.can_apply_${flag.replace('_failed', '')} == true`
+          );
           expect(withEntries[flag]).toContain(`steps.${name}.error != null`);
         }
       });
@@ -799,9 +801,7 @@ describe('project watch', () => {
           'risk_score_failed',
           'disable_failed',
         ]) {
-          expect(ifExpr).toContain(
-            `steps.classify_apply_failures.output.${flag} != true`
-          );
+          expect(ifExpr).toContain(`steps.classify_apply_failures.output.${flag} != true`);
         }
       });
 

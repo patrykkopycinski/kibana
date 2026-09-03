@@ -204,7 +204,7 @@
     },
     {
       "id": "security-persona-matrix-attack-discovery",
-      "name": "Security Persona Matrix — Attack Discovery (Chrysalis kill-chains)",
+      "name": "Security Persona Matrix \u2014 Attack Discovery (Chrysalis kill-chains)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/attack_discovery.playwright.config.ts",
       "tags": [
@@ -428,6 +428,19 @@
       ],
       "ciLabels": [
         "evals:security-alert-analysis-workflow"
+      ]
+    },
+    {
+      "id": "security-rule-tuning",
+      "name": "Rule Tuning Workflow",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-rule-tuning/playwright.config.ts",
+      "tags": [
+        "security",
+        "rule-tuning"
+      ],
+      "ciLabels": [
+        "evals:security-rule-tuning"
       ]
     },
     {

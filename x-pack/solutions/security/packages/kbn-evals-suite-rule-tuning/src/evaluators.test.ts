@@ -1,15 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
  * Public License v1 as approved by ....... Use, modification, and distribution
  * are permitted under the Elastic License 2.0.
  */
 
-import {
-  changeTypeAccuracy,
-  validProposal,
-} from './evaluators';
+import { changeTypeAccuracy, validProposal } from './evaluators';
 import type { RuleTuningProposal } from './workflow_task';
 import type { ChangeType } from './constants';
 
@@ -21,7 +25,10 @@ describe('rule-tuning evaluators', () => {
         executionId: 'exec-1',
         executionStatus: 'completed' as never,
       };
-      const result = await changeTypeAccuracy.evaluate!({ output, expected: { change_type: 'exception' } } as never);
+      const result = await changeTypeAccuracy.evaluate!({
+        output,
+        expected: { change_type: 'exception' },
+      } as never);
       expect(result.score).toBe(1);
     });
 
@@ -31,7 +38,10 @@ describe('rule-tuning evaluators', () => {
         executionId: 'exec-2',
         executionStatus: 'completed' as never,
       };
-      const result = await changeTypeAccuracy.evaluate!({ output, expected: { change_type: 'exception' } } as never);
+      const result = await changeTypeAccuracy.evaluate!({
+        output,
+        expected: { change_type: 'exception' },
+      } as never);
       expect(result.score).toBe(0);
       expect(result.explanation).toContain('expected="exception"');
     });
@@ -41,7 +51,10 @@ describe('rule-tuning evaluators', () => {
         executionId: 'exec-3',
         executionStatus: 'failed' as never,
       };
-      const result = await changeTypeAccuracy.evaluate!({ output, expected: { change_type: 'query' } } as never);
+      const result = await changeTypeAccuracy.evaluate!({
+        output,
+        expected: { change_type: 'query' },
+      } as never);
       expect(result.score).toBe(0);
       expect(result.label).toBe('none');
     });
@@ -91,7 +104,12 @@ describe('rule-tuning evaluators', () => {
 
     it('accepts a risk_score proposal with both score and severity', async () => {
       const result = await validProposal.evaluate!({
-        output: { ...base, change_type: 'risk_score', proposed_risk_score: 20, proposed_severity: 'low' },
+        output: {
+          ...base,
+          change_type: 'risk_score',
+          proposed_risk_score: 20,
+          proposed_severity: 'low',
+        },
       } as never);
       expect(result.score).toBe(1);
     });

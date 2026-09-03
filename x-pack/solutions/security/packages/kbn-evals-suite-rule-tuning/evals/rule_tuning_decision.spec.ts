@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
  * Public License v1 as approved by ....... Use, modification, and distribution
  * are permitted under the Elastic License 2.0.
@@ -34,13 +41,12 @@
 import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
-import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { selectEvaluators, type EvaluationDataset, type Example } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { runRuleTuningWorkflow } from '../src/workflow_task';
 import { changeTypeAccuracy, validProposal } from '../src/evaluators';
-import { RULE_TUNING_WORKFLOW_ID, type ChangeType } from '../src/constants';
+import { type ChangeType } from '../src/constants';
 
 const SUMMARY_CRITERIA = [
   'The summary references the specific alert entities or rule behavior that drove the false positives, ' +
@@ -84,7 +90,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-unfixable-noise',
     expected: 'disable',
     ruleType: 'query',
-    description: 'Rule fires exclusively on benign activity with no discriminating signal — disable',
+    description:
+      'Rule fires exclusively on benign activity with no discriminating signal — disable',
   },
 ];
 
@@ -158,7 +165,9 @@ evaluate.describe(
 
               // TODO: index the rule + dismissed FP alert cluster for `uniqueRuleId`
               // (seed shapes ported from the worker PR's fpr_produce_paths script).
-              log.info(`seeded rule ${uniqueRuleId} for fixture ${fixture.id} (${fixture.ruleType})`);
+              log.info(
+                `seeded rule ${uniqueRuleId} for fixture ${fixture.id} (${fixture.ruleType})`
+              );
 
               try {
                 return await runRuleTuningWorkflow({ fetch, log, minFpCount: 1 });

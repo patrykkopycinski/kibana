@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
  * Public License v1 as approved by ....... Use, modification, and distribution
  * are permitted under the Elastic License 2.0.
@@ -8,7 +15,11 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ExecutionStatus, WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+} from '@kbn/workflows';
 import { RULE_TUNING_WORKFLOW_ID, WORKFLOWS_API_VERSION, type ChangeType } from './constants';
 
 /**
@@ -19,7 +30,12 @@ import { RULE_TUNING_WORKFLOW_ID, WORKFLOWS_API_VERSION, type ChangeType } from 
 export interface TuningStructuredOutput {
   change_type?: ChangeType;
   summary?: string;
-  exception_entries?: Array<{ field?: string; operator?: string; value?: string; values?: string[] }>;
+  exception_entries?: Array<{
+    field?: string;
+    operator?: string;
+    value?: string;
+    values?: string[];
+  }>;
   proposed_query?: string;
   suppression_group_by?: string[];
   proposed_risk_score?: number;
@@ -40,8 +56,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const readDiagnoseStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
 ): TuningStructuredOutput | undefined => {
-  for (const step of stepExecutions) {
-    if (step.stepId !== DIAGNOSE_STEP_ID) continue;
+  const diagnoseSteps = stepExecutions.filter((step) => step.stepId === DIAGNOSE_STEP_ID);
+  for (const step of diagnoseSteps) {
     const output = step.output as { structured_output?: TuningStructuredOutput } | null | undefined;
     if (output?.structured_output) {
       return output.structured_output;
@@ -69,7 +85,7 @@ export const runRuleTuningWorkflow = async ({
   minFpCount?: number;
   timeoutMs?: number;
 }): Promise<RuleTuningProposal> => {
-  const startResponse = await fetch!.post<{ id: string }>({
+  const startResponse = await fetch.post<{ id: string }>({
     path: `/internal/workflows/${RULE_TUNING_WORKFLOW_ID}/run`,
     headers: { 'Elastic-Api-Version': WORKFLOWS_API_VERSION },
     body: { inputs: { min_fp_count: minFpCount } },
@@ -80,7 +96,7 @@ export const runRuleTuningWorkflow = async ({
   const deadline = Date.now() + timeoutMs;
   let execution: WorkflowExecutionDto | undefined;
   while (Date.now() < deadline) {
-    const pollResponse = await fetch!.get<WorkflowExecutionDto>({
+    const pollResponse = await fetch.get<WorkflowExecutionDto>({
       path: `/internal/workflows/executions/${executionId}`,
       headers: { 'Elastic-Api-Version': WORKFLOWS_API_VERSION },
     });

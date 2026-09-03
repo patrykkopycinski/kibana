@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
  * Public License v1 as approved by ....... Use, modification, and distribution
  * are permitted under the Elastic License 2.0.
@@ -60,10 +67,12 @@ export const validProposal: Evaluator = {
     let payloadValid = true;
     switch (proposal.change_type) {
       case 'exception':
-        payloadValid = Array.isArray(proposal.exception_entries) && proposal.exception_entries.length > 0;
+        payloadValid =
+          Array.isArray(proposal.exception_entries) && proposal.exception_entries.length > 0;
         break;
       case 'query':
-        payloadValid = typeof proposal.proposed_query === 'string' && proposal.proposed_query !== '';
+        payloadValid =
+          typeof proposal.proposed_query === 'string' && proposal.proposed_query !== '';
         break;
       case 'suppression':
         payloadValid =

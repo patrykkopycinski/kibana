@@ -739,9 +739,17 @@ describe('project watch', () => {
         expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
       });
 
-      it('does not use classify_proposal or can_apply', () => {
-        expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(false);
-        expect(JSON.stringify(tuningSteps)).not.toContain('can_apply');
+      // classify_proposal centralises the apply gates so mark_alerts_applied and
+      // record_failed_apply read flags instead of duplicating the conditions.
+      it('uses classify_proposal to compute apply gates', () => {
+        expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(true);
+        expect(JSON.stringify(tuningSteps)).toContain('can_apply');
+      });
+
+      it('gates mark_alerts_applied on no apply failure', () => {
+        const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
+        expect(applied.if).toContain('classify_apply_failures');
+        expect(applied.if).not.toContain('classify_proposal');
       });
 
       // The harvest projects its columns positionally, so reordering KEEP would make the

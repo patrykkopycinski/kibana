@@ -46,6 +46,7 @@ import { evaluate } from '../src/evaluate';
 import { runRuleTuningWorkflow } from '../src/workflow_task';
 import { changeTypeAccuracy, validProposal } from '../src/evaluators';
 import { type ChangeType } from '../src/constants';
+import { seedRuleAndFpAlerts, cleanupSeededArtifacts } from './seed_fp_cluster';
 
 const SUMMARY_CRITERIA = [
   'The summary references the specific alert entities or rule behavior that drove the false positives, ' +
@@ -162,25 +163,12 @@ evaluate.describe(
               const uniqueRuleId = `${fixture.id}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
               createdRuleIds.add(uniqueRuleId);
 
-              // TODO: index the rule + dismissed FP alert cluster for `uniqueRuleId`
-              // (seed shapes ported from the worker PR's fpr_produce_paths script).
-              log.info(
-                `seeded rule ${uniqueRuleId} for fixture ${fixture.id} (${fixture.ruleType})`
-              );
+              await seedRuleAndFpAlerts({ fetch, esClient, log }, fixture, uniqueRuleId);
 
               try {
                 return await runRuleTuningWorkflow({ fetch, log });
               } finally {
-                await esClient
-                  .deleteByQuery({
-                    index: '.alerts-security.alerts-default',
-                    query: { term: { 'kibana.alert.rule.uuid': uniqueRuleId } },
-                    refresh: true,
-                    conflicts: 'proceed',
-                  })
-                  .catch(() => {
-                    // Leave it in createdRuleIds so afterAll sweeps it.
-                  });
+                await cleanupSeededArtifacts({ fetch, esClient }, uniqueRuleId, fixture);
               }
             },
           },

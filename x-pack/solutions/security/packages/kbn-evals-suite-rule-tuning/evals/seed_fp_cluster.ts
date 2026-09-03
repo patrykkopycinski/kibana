@@ -35,7 +35,7 @@ export interface SeedFixtureSpec {
 }
 
 interface SeedContext {
-  fetch: <T = any>(path: string, options?: Record<string, any>) => Promise<T>;
+  fetch: <T = unknown>(path: string, options?: Record<string, unknown>) => Promise<T>;
   esClient: EsClient;
   log: ToolingLog;
 }
@@ -120,7 +120,7 @@ export const seedRuleAndFpAlerts = async (
   const ruleId = `eval-rt-${fixture.id}`;
 
   // 1. Create the detection rule via the detection engine API.
-  const rule = await fetch('/api/detection_engine/rules?spaceId=default', {
+  const rule = await fetch<{ id?: string }>('/api/detection_engine/rules?spaceId=default', {
     method: 'POST',
     headers: { 'kbn-xsrf': 'true', 'Content-Type': 'application/json' },
     body: JSON.stringify({

@@ -18,11 +18,13 @@ import {
   PND_WATCH_DETECTION_WORKFLOW_ID,
   PND_WATCH_FLOOR_WORKFLOW_ID,
   PND_WATCH_OFFICER_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
+import RULE_TUNING_YAML from './definitions/pnd/rule_tuning.yaml';
 import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
 import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
 import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
@@ -149,6 +151,7 @@ it.each([
   [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
+  [PND_RULE_TUNING_WORKFLOW_ID, RULE_TUNING_YAML, '4:778215a3'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {

@@ -312,7 +312,11 @@ steps:
               and steps.diagnose_rule.output.structured_output.exception_entries != null }}
           can_apply_suppression: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
-              and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
+              and steps.diagnose_rule.output.structured_output.suppression_group_by != null
+              and (steps.fetch_rule.output.type == 'query'
+                or steps.fetch_rule.output.type == 'saved_query'
+                or steps.fetch_rule.output.type == 'eql'
+                or steps.fetch_rule.output.type == 'threshold') }}
           can_apply_risk_score: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
               and steps.diagnose_rule.output.structured_output.proposed_risk_score != null

@@ -105,6 +105,13 @@ export const runRuleTuningWorkflow = async ({
   const deadline = Date.now() + maxWaitMs;
   let execution: WorkflowExecutionDto | undefined;
 
+  // The workflow's review_tuning step is a 72h human-approval gate; a run parks in a
+  // non-terminal `waiting` status there. Because schedule_workflow skips new runs while
+  // a non-terminal execution exists, an un-approved run also poisons every later run.
+  // The eval drives the full production path, then auto-approves the gate exactly like
+  // the external resume URL does (input: { approved: true }).
+  let approvalResumed = false;
+
   while (Date.now() < deadline) {
     execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
       method: 'GET',
@@ -117,8 +124,23 @@ export const runRuleTuningWorkflow = async ({
       break;
     }
 
-    await sleep(pollIntervalMs);
+    if (!approvalResumed && execution.status === 'waiting') {
+      await fetch(`/api/workflows/executions/${workflowExecutionId}/resume`, {
+        method: 'POST',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        body: JSON.stringify({ input: { approved: true } }),
+      });
+      approvalResumed = true;
+      log.info(`Auto-approved review_tuning gate for execution ${workflowExecutionId}`);
+      await sleep(pollIntervalMs); // resume is async; give it a beat before re-poll
+    } else {
+      await sleep(pollIntervalMs);
+    }
   }
+
+  // The diagnose proposal is already persisted in stepExecutions at approval time, but
+  // read it after the run settles so post-gate steps (mark_alerts_applied) cannot race.
 
   if (!execution) {
     throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);

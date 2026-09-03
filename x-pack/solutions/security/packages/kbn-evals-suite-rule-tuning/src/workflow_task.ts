@@ -9,25 +9,28 @@
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
- * Public License v1 as approved by ....... Use, modification, and distribution
- * are permitted under the Elastic License 2.0.
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the GNU AGPL v3.0 or the SSPL v1.
  */
 
-import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  ExecutionStatus,
-  WorkflowExecutionDto,
-  WorkflowStepExecutionDto,
+import type { HttpHandler } from '@kbn/core/public';
+import {
+  TerminalExecutionStatuses,
+  type ExecutionStatus,
+  type WorkflowExecutionDto,
+  type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { RULE_TUNING_WORKFLOW_ID, WORKFLOWS_API_VERSION, type ChangeType } from './constants';
 
 /**
- * Structured output the workflow's `diagnose_rule` ai.agent step is schema-constrained to
- * return (see rule_tuning.yaml). Field names mirror the workflow schema exactly so this
- * interface drifts loudly against the workflow definition, not silently.
+ * The `ai.agent` step (diagnose_rule) whose structured output we grade. Matched on
+ * `stepType` so the harness survives step renames in the workflow definition.
  */
-export interface TuningStructuredOutput {
+const AGENT_STEP_TYPE = 'ai.agent';
+
+/** Structured output the diagnose step is schema-constrained to return. */
+export interface TuningProposal {
   change_type?: ChangeType;
   summary?: string;
   exception_entries?: Array<{
@@ -42,23 +45,16 @@ export interface TuningStructuredOutput {
   proposed_severity?: string;
 }
 
-/** Task output graded by the suite's evaluators. */
-export interface RuleTuningProposal extends TuningStructuredOutput {
-  executionId: string;
-  executionStatus: ExecutionStatus;
-}
-
-/** The diagnose step whose structured output we grade (matched by name; stable in rule_tuning.yaml). */
-const DIAGNOSE_STEP_ID = 'diagnose_rule';
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
 const readDiagnoseStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
-): TuningStructuredOutput | undefined => {
-  const diagnoseSteps = stepExecutions.filter((step) => step.stepId === DIAGNOSE_STEP_ID);
-  for (const step of diagnoseSteps) {
-    const output = step.output as { structured_output?: TuningStructuredOutput } | null | undefined;
+): TuningProposal | undefined => {
+  const agentSteps = stepExecutions.filter((step) => step.stepType === AGENT_STEP_TYPE);
+  for (const step of agentSteps) {
+    const output = step.output as { structured_output?: TuningProposal } | null | undefined;
     if (output?.structured_output) {
       return output.structured_output;
     }
@@ -67,61 +63,78 @@ const readDiagnoseStructuredOutput = (
 };
 
 /**
- * Triggers the managed rule-tuning workflow once (interval trigger semantics: the workflow
- * harvests rules whose alerts analysts closed as false positives) and polls the execution
- * until terminal, returning the diagnose step's structured proposal.
- *
- * The caller seeds rules + FP-alert dispositions before invoking (see the eval spec); this
- * function only runs and reads.
+ * Runs the managed rule-tuning workflow end-to-end for one seeded FP rule and returns the
+ * diagnose step's proposal. The sweep is scheduled; we trigger it via the run route with
+ * `min_fp_count: 1` so the seeded rule is harvested in the same execution.
  */
 export const runRuleTuningWorkflow = async ({
   fetch,
   log,
-  minFpCount = 1,
-  timeoutMs = 10 * 60 * 1000,
+  maxWaitMs = 12 * 60_000,
+  pollIntervalMs = 3_000,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
-  minFpCount?: number;
-  timeoutMs?: number;
-}): Promise<RuleTuningProposal> => {
-  const startResponse = await fetch.post<{ id: string }>({
-    path: `/internal/workflows/${RULE_TUNING_WORKFLOW_ID}/run`,
-    headers: { 'Elastic-Api-Version': WORKFLOWS_API_VERSION },
-    body: { inputs: { min_fp_count: minFpCount } },
-  });
-  const executionId = startResponse.id;
-  log.info(`rule-tuning workflow execution ${executionId} started`);
+  maxWaitMs?: number;
+  pollIntervalMs?: number;
+}): Promise<{
+  executionId: string;
+  executionStatus: ExecutionStatus;
+  proposal?: TuningProposal;
+}> => {
+  const { workflowExecutionId } = (await fetch(
+    `/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/run`,
+    {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({
+        inputs: { settings: { min_fp_count: 1 } },
+      }),
+    }
+  )) as { workflowExecutionId: string };
 
-  const deadline = Date.now() + timeoutMs;
+  log.info(`Started rule-tuning workflow execution ${workflowExecutionId}`);
+
+  const deadline = Date.now() + maxWaitMs;
   let execution: WorkflowExecutionDto | undefined;
+
   while (Date.now() < deadline) {
-    const pollResponse = await fetch.get<WorkflowExecutionDto>({
-      path: `/internal/workflows/executions/${executionId}`,
-      headers: { 'Elastic-Api-Version': WORKFLOWS_API_VERSION },
-    });
-    execution = pollResponse;
-    const status: ExecutionStatus = execution.status as ExecutionStatus;
-    if (['completed', 'failed', 'cancelled', 'skipped'].includes(status as string)) {
+    execution = (await fetch(`/api/workflows/executions/${workflowExecutionId}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      query: { includeOutput: true },
+    })) as WorkflowExecutionDto;
+
+    if (isTerminal(execution.status)) {
       break;
     }
-    await sleep(10_000);
+
+    await sleep(pollIntervalMs);
   }
 
   if (!execution) {
-    throw new Error(`rule-tuning workflow execution ${executionId} never returned a status`);
+    throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
   }
 
-  const structuredOutput = readDiagnoseStructuredOutput(
-    (execution as unknown as { stepExecutions?: WorkflowStepExecutionDto[] }).stepExecutions ?? []
-  );
-  if (execution.status === 'completed' && !structuredOutput) {
-    log.warning(`execution ${executionId} completed without a diagnose_rule structured output`);
+  if (!isTerminal(execution.status)) {
+    log.warning(
+      `Workflow execution ${workflowExecutionId} did not reach a terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
+    );
+  }
+
+  const proposal = readDiagnoseStructuredOutput(execution.stepExecutions);
+
+  if (!proposal?.change_type) {
+    log.warning(
+      `Workflow execution ${workflowExecutionId} produced no change_type (status: ${execution.status})`
+    );
   }
 
   return {
-    ...structuredOutput,
-    executionId,
-    executionStatus: execution.status as ExecutionStatus,
+    executionId: workflowExecutionId,
+    executionStatus: execution.status,
+    proposal,
   };
 };

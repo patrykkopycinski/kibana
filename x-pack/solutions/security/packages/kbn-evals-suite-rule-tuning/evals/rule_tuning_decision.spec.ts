@@ -163,12 +163,16 @@ evaluate.describe(
               const uniqueRuleId = `${fixture.id}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
               createdRuleIds.add(uniqueRuleId);
 
-              await seedRuleAndFpAlerts({ fetch, esClient, log }, fixture, uniqueRuleId);
+              const seededUuid = await seedRuleAndFpAlerts(
+                { fetch, esClient, log },
+                fixture,
+                uniqueRuleId
+              );
 
               try {
                 return await runRuleTuningWorkflow({ fetch, log });
               } finally {
-                await cleanupSeededArtifacts({ fetch, esClient }, uniqueRuleId, fixture);
+                await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, fixture);
               }
             },
           },

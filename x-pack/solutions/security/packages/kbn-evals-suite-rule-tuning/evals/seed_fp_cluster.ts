@@ -119,6 +119,12 @@ export const seedRuleAndFpAlerts = async (
   const ruleName = `eval rule-tuning ${fixture.id}`;
   const ruleId = `eval-rt-${fixture.id}`;
 
+  // 0. Remove a stale rule from a previous aborted run so the create below is idempotent.
+  await fetch(`/api/detection_engine/rules?spaceId=default&rule_id=${encodeURIComponent(ruleId)}`, {
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'true' },
+  }).catch(() => {});
+
   // 1. Create the detection rule via the detection engine API.
   const rule = await fetch<{ id?: string }>('/api/detection_engine/rules?spaceId=default', {
     method: 'POST',
@@ -163,6 +169,7 @@ export const seedRuleAndFpAlerts = async (
     operations: docs.flatMap((d) => [{ index: {} }, d]),
   });
   log.info(`indexed ${docs.length} closed-FP alerts for rule uuid ${seededUuid}`);
+  return seededUuid;
 };
 
 export const cleanupSeededArtifacts = async (
@@ -170,7 +177,8 @@ export const cleanupSeededArtifacts = async (
   uniqueRuleId: string,
   fixture: SeedFixtureSpec
 ): Promise<void> => {
-  // Alerts first (they reference the rule), then the rule itself.
+  // Alerts first (they reference the rule), then the rule itself. uniqueRuleId is the
+  // seeded rule's real uuid (returned by seedRuleAndFpAlerts), not the spec's run-scoped id.
   await esClient
     .deleteByQuery({
       index: ALERTS_INDEX,
@@ -179,9 +187,13 @@ export const cleanupSeededArtifacts = async (
       conflicts: 'proceed',
     })
     .catch(() => {});
-  await fetch(`/api/detection_engine/rules?spaceId=default`, {
-    method: 'DELETE',
-    headers: { 'kbn-xsrf': 'true' },
-    body: JSON.stringify({ ids: [`eval-rt-${fixture.id}`] }),
-  }).catch(() => {});
+  await fetch(
+    `/api/detection_engine/rules?spaceId=default&rule_id=${encodeURIComponent(
+      `eval-rt-${fixture.id}`
+    )}`,
+    {
+      method: 'DELETE',
+      headers: { 'kbn-xsrf': 'true' },
+    }
+  ).catch(() => {});
 };

@@ -108,7 +108,10 @@ const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: numb
   'kibana.alert.workflow_tags': [],
   'kibana.alert.severity': 'medium',
   'kibana.alert.risk_score': 40,
-  'signal.reason': `eval-seed fp cluster ${seq}`,
+  // NOTE: `signal.*` fields are read-only field aliases in the alerts index mapping;
+  // writing them fails every bulk item with document_parsing_exception. Write the
+  // concrete backing fields instead.
+  'kibana.alert.reason': `eval-seed fp cluster ${seq}`,
 });
 
 export const seedRuleAndFpAlerts = async (
@@ -163,11 +166,19 @@ export const seedRuleAndFpAlerts = async (
     source: { ip: e.ip },
     process: { name: e.process },
   }));
-  await esClient.bulk({
+  const bulkResp = await esClient.bulk({
     index: ALERTS_INDEX,
     refresh: 'wait_for',
     operations: docs.flatMap((d) => [{ index: {} }, d]),
   });
+  const failed = bulkResp.items?.filter((i) => i.index?.error) ?? [];
+  if (bulkResp.errors || failed.length > 0) {
+    throw new Error(
+      `bulk indexing failed for rule ${seededUuid}: ${JSON.stringify(
+        failed[0]?.index?.error
+      )?.slice(0, 500)}`
+    );
+  }
   log.info(`indexed ${docs.length} closed-FP alerts for rule uuid ${seededUuid}`);
   return seededUuid;
 };

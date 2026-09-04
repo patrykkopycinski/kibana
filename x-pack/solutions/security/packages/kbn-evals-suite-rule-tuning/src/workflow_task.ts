@@ -19,6 +19,7 @@ import {
   TerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
+  type WorkflowExecutionListDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { RULE_TUNING_WORKFLOW_ID, WORKFLOWS_API_VERSION, type ChangeType } from './constants';
@@ -88,6 +89,27 @@ export const runRuleTuningWorkflow = async ({
   executionStatus: ExecutionStatus;
   proposal?: RuleTuningProposal;
 }> => {
+  // Prior runs may have parked executions at the review_tuning HITL gate (non-terminal
+  // `waiting`), and schedule_workflow SKIPS any new run while such an execution exists.
+  // Resume those first — exactly what the external approve URL does — so this run is
+  // not dead on arrival.
+  const stale = (await fetch(`/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/executions`, {
+    method: 'GET',
+    version: WORKFLOWS_API_VERSION,
+    headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+    query: { statuses: 'waiting' },
+  })) as WorkflowExecutionListDto;
+
+  for (const exec of stale.results ?? []) {
+    await fetch(`/api/workflows/executions/${exec.id}/resume`, {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({ input: { approved: true } }),
+    });
+    log.info(`Resumed stale waiting execution ${exec.executionId} before scheduling`);
+  }
+
   const { workflowExecutionId } = (await fetch(
     `/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/run`,
     {

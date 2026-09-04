@@ -218,6 +218,7 @@ components:
         - scopeSummary
         - scopes
         - callables
+        - autonomyLevel
         - metrics
         - recentRuns
       properties:
@@ -279,6 +280,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WatchCallableRef'
+        autonomyLevel:
+          type: string
+          enum: [manual, assisted, supervised]
+          description: >-
+            Autonomy dial level (D15, 2026-07-28); manual is the MVP default. Same vocabulary as
+            WatchAutonomyLevel in watch_settings.schema.yaml. projectWorkflowToWatch always sets this.
         metrics:
           $ref: '#/components/schemas/WatchMetrics'
         recentRuns:

@@ -51,6 +51,7 @@ const floorWatchBase: Watch = {
   managed: true,
   sortOrder: 10,
   mandate: 'Frontline triage',
+  autonomyLevel: 'manual',
   description:
     'Tier-1 Security Watch. Triages alerts via the alert-analysis skill. Full Alert Analysis managed-workflow wrap is the next Floor spike.',
   schedule: {
@@ -127,6 +128,7 @@ const officerWatchBase: Watch = {
   managed: true,
   sortOrder: 20,
   mandate: 'Escalation & briefs',
+  autonomyLevel: 'supervised',
   description:
     'Tier-2 Security Watch. Escalates criticals, drafts briefs, and stages gated response proposals for human approval.',
   schedule: {
@@ -179,6 +181,7 @@ const darkWatchBase: Watch = {
   managed: true,
   sortOrder: 30,
   mandate: 'Continuous, technology-aware hunting for relevant threats and coverage gaps',
+  autonomyLevel: 'supervised',
   description:
     'Dark Watch skeleton. Continuous, technology-aware hunting with overnight UTC sweeps and reviewable findings.',
   schedule: {
@@ -234,6 +237,7 @@ const deepWatchBase: Watch = {
   managed: true,
   sortOrder: 40,
   mandate: 'Deep investigation & hunts',
+  autonomyLevel: 'assisted',
   description:
     'Deep Watch skeleton. Specialist, on-demand depth — forensics, hunts, and draft-only conclusions under human review.',
   schedule: {
@@ -283,6 +287,7 @@ const detectionWatchBase: Watch = {
   managed: true,
   sortOrder: 50,
   mandate: 'Rule tuning & coverage',
+  autonomyLevel: 'manual',
   description:
     'Detection Watch skeleton. Turns false-positive signals and coverage gaps into reviewable rule proposals — tuning, creation, and prebuilt onboarding.',
   schedule: {

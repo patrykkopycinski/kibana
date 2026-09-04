@@ -213,6 +213,10 @@ export const Watch = lazySchema(() =>
     scopeSummary: z.string(),
     scopes: z.array(WatchScope),
     callables: z.array(WatchCallableRef),
+    /**
+     * Autonomy dial level (D15, 2026-07-28); manual is the MVP default. Same vocabulary as WatchAutonomyLevel in watch_settings.schema.yaml. projectWorkflowToWatch always sets this.
+     */
+    autonomyLevel: z.enum(['manual', 'assisted', 'supervised']),
     metrics: WatchMetrics,
     recentRuns: z.array(WatchRecentRun),
   })

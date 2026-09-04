@@ -169,7 +169,8 @@ export type {
 /**
  * The read-only surface of a conversation client (get + list).
  */
-export type ReadOnlyConversationClient = Pick<ConversationPublicClient, 'get' | 'list'>;
+import type { ConversationPublicClient as _ConversationPublicClient } from './conversations';
+export type ReadOnlyConversationClient = Pick<_ConversationPublicClient, 'get' | 'list'>;
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,

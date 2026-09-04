@@ -398,7 +398,8 @@ export class AgentBuilderPlugin
             get: client.get.bind(client),
             list: client.list.bind(client),
             create: client.create.bind(client),
-            update: client.update.bind(client),
+            update: (conversationUpdate: { id: string; title?: string }) =>
+              client.update(conversationUpdate, { access: 'owner' }),
             delete: client.delete.bind(client),
           };
         },

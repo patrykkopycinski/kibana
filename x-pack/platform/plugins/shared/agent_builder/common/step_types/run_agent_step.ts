@@ -205,6 +205,10 @@ export const OutputSchema = z.object({
           .optional()
           .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
         totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
+        latencyMs: z
+          .number()
+          .optional()
+          .describe('Wall-clock duration of the step execution in milliseconds.'),
       }),
     })
     .describe('Step execution metadata, including token usage across all LLM rounds.')

@@ -6,7 +6,6 @@
  */
 
 import type {
-  Conversation,
   ConversationAccessControlInput,
   ConversationListOptions,
   ConversationWithPermissions,
@@ -53,7 +52,7 @@ export interface ConversationWriterClient extends ConversationPublicClient {
   /**
    * Update the mutable fields of a conversation.
    */
-  update(request: ConversationUpdatePublicRequest): Promise<ConversationWithPermissions>;
+  update(conversationUpdate: { id: string; title?: string; accessControl?: ConversationAccessControlInput }): Promise<ConversationWithPermissions>;
   /**
    * Delete a conversation by its ID.
    */

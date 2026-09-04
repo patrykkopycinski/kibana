@@ -28,7 +28,6 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-impossible-travel-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Impossible travel — exec account (cfo@corp)',
     createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -66,7 +65,6 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-sales-nas-002',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Ransomware encryption — Sales file server',
     createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
@@ -97,7 +95,6 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-floor-domain-admins-003',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Unauthorized Domain Admins elevation',
     createdAt: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 13 * 60 * 1000).toISOString(),
@@ -128,7 +125,6 @@ const containInvestigations: Investigation[] = [
   {
     id: 'inv-officer-sales-nas-isolation-004',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Isolation in progress — Sales-NAS',
     createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 11 * 60 * 1000).toISOString(),
@@ -162,7 +158,6 @@ const escalateInvestigations: Investigation[] = [
   {
     id: 'inv-floor-findb-staged-005',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Staged archive — FIN-DB-02',
     createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 9 * 60 * 1000).toISOString(),
@@ -193,7 +188,6 @@ const escalateInvestigations: Investigation[] = [
   {
     id: 'inv-floor-phishing-url-006',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Phishing — invoice lure (Finance)',
     createdAt: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
@@ -227,7 +221,6 @@ const investigateInvestigations: Investigation[] = [
   {
     id: 'inv-dark-beacon-corroborated-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Corroborated C2 beacon · host-srv-db02 + host-srv-app01',
     createdAt: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
@@ -268,7 +261,6 @@ const tuneInvestigations: Investigation[] = [
   {
     id: 'inv-floor-oauth-tune-007',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'OAuth token abuse · app-salesforce-sync',
     createdAt: new Date(Date.now() - 16.5 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
@@ -294,7 +286,6 @@ const resolvedInvestigations: Investigation[] = [
   {
     id: 'inv-dark-mailbox-auto-008',
     template_id: TEMPLATE_ID_INVESTIGATION,
-
     title: 'Mailbox forwarding rule removed — j.reyes',
     createdAt: new Date(Date.now() - 44 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 23 * 60 * 1000).toISOString(),

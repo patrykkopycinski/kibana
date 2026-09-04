@@ -12,7 +12,6 @@ import { getMockProposalsByInvestigationId } from '@kbn/pnd-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { realProposals } from './real_data';
 
 const ListProposalsRequestParams = z.object({
   id: z.string().min(1).max(256),
@@ -24,7 +23,6 @@ export const registerListInvestigationProposalsRoute = ({
   router,
   logger,
   config,
-  getInvestigationStore,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -44,7 +42,7 @@ export const registerListInvestigationProposalsRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      async (_context, request, response) => {
         try {
           const { id } = request.params;
 
@@ -57,19 +55,7 @@ export const registerListInvestigationProposalsRoute = ({
             return response.ok({ body });
           }
 
-          const store = getInvestigationStore();
-          if (store != null) {
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const body = await store.listProposals(esClient, id);
-            return response.ok({ body });
-          }
-
-          // Store not yet initialized — fall back to seed data.
-          const proposals = realProposals[id] ?? [];
-          const body: ListInvestigationProposalsResponse = {
-            proposals,
-            total: proposals.length,
-          };
+          const body: ListInvestigationProposalsResponse = { proposals: [], total: 0 };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list investigation proposals: ${error}`);

@@ -42,8 +42,7 @@ export interface WatchWorkflowsManagementClient {
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string,
-    options?: { includeOutput?: boolean }
+    spaceId: string
   ): Promise<WorkflowExecutionDto | null>;
 
   cancelAllActiveWorkflowExecutions(
@@ -105,10 +104,9 @@ export class WatchWorkflowsManagementClientImpl implements WatchWorkflowsManagem
 
   getWorkflowExecution(
     workflowExecutionId: string,
-    spaceId: string,
-    options?: { includeOutput?: boolean }
+    spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
-    return this.management.getWorkflowExecution(workflowExecutionId, spaceId, options);
+    return this.management.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   cancelAllActiveWorkflowExecutions(

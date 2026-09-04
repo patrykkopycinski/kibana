@@ -10,14 +10,8 @@ import type { ListInvestigationsResponse } from '@kbn/pnd-common';
 import { MOCK_INVESTIGATIONS } from '@kbn/pnd-common';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { realInvestigations } from './real_data';
 
-export const registerListInvestigationsRoute = ({
-  router,
-  logger,
-  config,
-  getInvestigationStore,
-}: RouteDependencies) => {
+export const registerListInvestigationsRoute = ({ router, logger, config }: RouteDependencies) => {
   router.versioned
     .get({
       path: PND_INVESTIGATIONS_URL,
@@ -34,7 +28,7 @@ export const registerListInvestigationsRoute = ({
           request: {},
         },
       },
-      async (context, _request, response) => {
+      async (_context, _request, response) => {
         try {
           if (config.ui.useMockData) {
             const body: ListInvestigationsResponse = {
@@ -44,19 +38,7 @@ export const registerListInvestigationsRoute = ({
             return response.ok({ body });
           }
 
-          const store = getInvestigationStore();
-          if (store != null) {
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const body = await store.listInvestigations(esClient);
-            return response.ok({ body });
-          }
-
-          // Store not yet initialized — fall back to the seed data so the API
-          // stays available during the brief window before start() completes.
-          const body: ListInvestigationsResponse = {
-            investigations: realInvestigations,
-            total: realInvestigations.length,
-          };
+          const body: ListInvestigationsResponse = { investigations: [], total: 0 };
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list investigations: ${error}`);

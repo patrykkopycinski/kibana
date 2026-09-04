@@ -17,7 +17,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-impossible-travel-revoke-001',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-officer-impossible-travel-001',
     type: 'contain',
     confidence: 0.94,
@@ -47,7 +46,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-impossible-travel-reset-002',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-officer-impossible-travel-001',
     type: 'contain',
     confidence: 0.88,
@@ -65,7 +63,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-sales-nas-isolate-003',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-officer-sales-nas-002',
     type: 'contain',
     confidence: 0.89,
@@ -87,7 +84,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-domain-admins-remove-004',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-floor-domain-admins-003',
     type: 'contain',
     confidence: 0.82,
@@ -106,7 +102,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-findb-egress-005',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-floor-findb-staged-005',
     type: 'escalate',
     confidence: 0.74,
@@ -125,7 +120,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-phishing-block-006',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-floor-phishing-url-006',
     type: 'escalate',
     confidence: 0.66,
@@ -143,7 +137,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-beacon-contain-007',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-dark-beacon-corroborated-001',
     type: 'contain',
     confidence: 0.91,
@@ -165,7 +158,6 @@ export const MOCK_PROPOSALS: Proposal[] = [
   {
     id: 'prop-oauth-tune-008',
     template_id: TEMPLATE_ID_PROPOSAL,
-
     parentConversationId: 'inv-floor-oauth-tune-007',
     type: 'tune',
     confidence: 0.71,

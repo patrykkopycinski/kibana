@@ -13,9 +13,6 @@ export const configSchema = schema.object({
   ui: schema.object({
     useMockData: schema.boolean({ defaultValue: true }),
   }),
-  conversationShadowWrite: schema.boolean({
-    defaultValue: false,
-  }),
 });
 
 export type PndConfig = TypeOf<typeof configSchema>;

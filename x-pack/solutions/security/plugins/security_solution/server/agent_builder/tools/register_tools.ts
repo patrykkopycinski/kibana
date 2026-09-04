@@ -36,6 +36,7 @@ import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import { registerSiemReadinessTools } from './siem_readiness';
+import { registerSiemMigrationTools } from './siem_migrations';
 import { runRulePreviewTool } from './run_rule_preview_tool';
 import {
   analyseEnvironmentTool,
@@ -134,5 +135,15 @@ export const registerTools = (
 
   if (SIEM_READINESS_AGENT_BUILDER_ENABLED) {
     registerSiemReadinessTools(agentBuilder, core, logger, isServerless);
+  }
+
+  // SIEM Migration agent builder tools: gated by the Automatic Migration feature flag
+  // (`siemMigrationsDisabled`) and the dedicated agent-builder experimental flag, so tools and the
+  // follow-up skills (#18761+) ship in lockstep — no skill registered without its tools.
+  if (
+    !experimentalFeatures.siemMigrationsDisabled &&
+    experimentalFeatures.siemRuleMigrationsAgentBuilderEnabled
+  ) {
+    registerSiemMigrationTools(agentBuilder, core, productFeaturesService, logger);
   }
 };

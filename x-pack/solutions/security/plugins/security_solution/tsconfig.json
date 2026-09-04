@@ -19,11 +19,7 @@
     "public/**/*.json",
     "../../../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/setup-node-env",
     "@kbn/core",
@@ -58,6 +54,7 @@
     "@kbn/core-spaces-common",
     "@kbn/timelines-plugin",
     "@kbn/es-query",
+    "@kbn/es-errors",
     "@kbn/as-code-shared-transforms",
     "@kbn/utility-types",
     "@kbn/securitysolution-list-utils",
@@ -69,7 +66,6 @@
     "@kbn/rule-data-utils",
     "@kbn/securitysolution-t-grid",
     "@kbn/rule-registry-plugin",
-    "@kbn/securitysolution-mitre-catalog",
     "@kbn/securitysolution-utils",
     "@kbn/securitysolution-list-constants",
     "@kbn/config-schema",
@@ -124,6 +120,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/apm-utils",
+    "@kbn/tracing-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/es-types",
     "@kbn/utils",
@@ -295,8 +292,6 @@
     "@kbn/esql-language",
     "@kbn/workflows-ui",
     "@kbn/workflows",
-    "@kbn/deeplinks-workflows",
-    "@kbn/core-rendering-browser",
     "@kbn/controls-constants",
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
@@ -316,6 +311,6 @@
     "@kbn/chart-icons",
     "@kbn/core-mount-utils-browser",
     "@kbn/ui-callout",
-    "@kbn/core-ui-settings-common",
+    "@kbn/shared-ux-utility",
   ]
 }

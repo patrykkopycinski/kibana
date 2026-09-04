@@ -18,6 +18,7 @@ export enum ToolResultType {
   other = 'other',
   error = 'error',
   fileReference = 'file_reference',
+  image = 'image',
 }
 
 interface ToolResultTypeDataMap {
@@ -30,6 +31,7 @@ interface ToolResultTypeDataMap {
   [ToolResultType.error]: ErrorResultData;
   [ToolResultType.fileReference]: FileReferenceResultData;
   [ToolResultType.other]: OtherResultData;
+  [ToolResultType.image]: ImageResultData;
 }
 
 export type ToolResultDataOf<Type extends ToolResultType> = ToolResultTypeDataMap[Type];
@@ -153,23 +155,6 @@ export type OtherResult<T extends Object = Record<string, unknown>> = ToolResult
   T
 >;
 
-/**
- * Shape-level marker for `ToolResultType.other` results produced by the
- * endpoint response actions skill (isolate/unisolate/scan/running-processes/
- * list-endpoints/get-endpoint-status). `ToolResultType.other` is used by
- * dozens of unrelated skills across solutions, so a global change to how
- * `other` results render would be far too broad (see anti-overengineering
- * gate). Instead, response-action tools stamp `kind: 'response_action_result'`
- * on their `data` payload so a follow-up UI renderer can identify and
- * render them inline without affecting any other skill's `other` results.
- */
-export interface ResponseActionResultData {
-  kind: 'response_action_result';
-  [key: string]: unknown;
-}
-
-export type ResponseActionResult = ToolResultMixin<ToolResultType.other, ResponseActionResultData>;
-
 // error
 
 export interface ErrorResultData {
@@ -225,11 +210,17 @@ export const isVisualizationResult = (result: ToolResult): result is Visualizati
   return result.type === ToolResultType.visualization;
 };
 
-export const isResponseActionResult = (result: ToolResult): result is ResponseActionResult => {
-  return (
-    result.type === ToolResultType.other &&
-    typeof result.data === 'object' &&
-    result.data !== null &&
-    (result.data as Record<string, unknown>).kind === 'response_action_result'
-  );
+// image
+
+export interface ImageResultData {
+  attachment_id: string;
+  mime_type: string;
+  name?: string;
+  description: string;
+}
+
+export type ImageResult = ToolResultMixin<ToolResultType.image>;
+
+export const isImageResult = (result: ToolResult): result is ImageResult => {
+  return result.type === ToolResultType.image;
 };

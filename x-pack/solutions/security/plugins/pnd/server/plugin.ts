@@ -14,8 +14,14 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { PND_API_PRIVILEGE_READ, PND_FEATURE_ID, PND_PLUGIN_NAME } from '../common/constants';
+import {
+  PND_API_PRIVILEGE_READ,
+  PND_API_PRIVILEGE_WRITE,
+  PND_FEATURE_ID,
+  PND_PLUGIN_NAME,
+} from '../common/constants';
 import type { PndConfig } from './config';
 import type {
   PndPluginSetup,
@@ -25,15 +31,11 @@ import type {
 } from './types';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
-import { installStatic } from './managed_workflows/install_static';
-import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
-import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
+import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
+import { WatchesService } from './services/watches/watches_service';
+import { WorkersService } from './services/workers/workers_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
-import { InvestigationStore } from './services/investigations/investigation_store';
-import { PndConversationStore } from './services/investigations/pnd_conversation_store';
-import { DualWriteStore } from './services/investigations/dual_write_store';
-import type { PndStore } from './services/investigations/pnd_store';
-import { PND_WATCH_ORCHESTRATOR_AGENT_ID } from './services/investigations/template_mapping';
+import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -41,10 +43,11 @@ export class PndPlugin
   private readonly logger: Logger;
   private readonly config: PndConfig;
   private spaces?: PndStartDependencies['spaces'];
-  private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
-  private investigationStore?: PndStore;
-  private agentBuilder?: PndStartDependencies['agentBuilder'];
+
+  /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
+  private watchesService?: WatchesService;
+  private workersService?: WorkersService;
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -53,7 +56,7 @@ export class PndPlugin
 
   setup(
     coreSetup: CoreSetup<PndStartDependencies, PndPluginStart>,
-    { features, workflowsExtensions, workflowsManagement, agentBuilder }: PndSetupDependencies
+    { agentBuilder, features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
   ): PndPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('PND plugin is disabled');
@@ -62,32 +65,10 @@ export class PndPlugin
 
     this.logger.info('Setting up PND plugin');
 
-    this.workflowsManagementApi = workflowsManagement?.management;
+    this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
-
-    // Backing agent for every Conversation a Watch creates (investigation,
-    // proposal, incident — see template_mapping.ts). Not directly conversable;
-    // its sole purpose is being a resolvable `agent_id` so
-    // `agentRegistry.get(conversation.agent_id, {access: 'use'})` (client.ts)
-    // succeeds instead of silently failing on every PND-created conversation.
-    // Optional because Agent Builder itself can be disabled.
-    agentBuilder?.agents.register({
-      id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
-      name: 'PND Watch Orchestrator',
-      description:
-        'Backing agent for PND (Proactive Network Defense) Watch investigations, proposals, ' +
-        'and incidents. Not directly conversable by end users — anchors the agent_id of ' +
-        'Conversations created by Watch workers.',
-      avatar_icon: 'securityAnalyticsApp',
-      configuration: {
-        instructions:
-          'You back autonomous Watch investigations. You do not converse directly; your ' +
-          'agent_id anchors Conversations created by Watch workers for investigations, ' +
-          'proposals, and incidents.',
-        tools: [],
-      },
-    });
+    registerAgentType(agentBuilder);
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,
@@ -98,9 +79,9 @@ export class PndPlugin
       privileges: {
         all: {
           app: ['kibana', PND_FEATURE_ID],
-          api: [PND_API_PRIVILEGE_READ],
+          api: [PND_API_PRIVILEGE_READ, PND_API_PRIVILEGE_WRITE],
           savedObject: { all: [], read: [] },
-          ui: ['show'],
+          ui: ['show', 'write'],
         },
         read: {
           app: ['kibana', PND_FEATURE_ID],
@@ -118,13 +99,8 @@ export class PndPlugin
       logger: this.logger,
       config: this.config,
       getSpaceId: (request) => this.getSpaceId(request),
-      getWatchProjection: () => this.watchProjection,
-      getWorkflowsManagement: () => this.workflowsManagementApi,
-      getInvestigationStore: () => this.investigationStore,
-      getConversationClient: (request) =>
-        this.agentBuilder && typeof this.agentBuilder.conversations?.getScopedClient === 'function'
-          ? this.agentBuilder.conversations.getScopedClient({ request })
-          : undefined,
+      getWatchesService: () => this.requireWatchesService(),
+      getWorkersService: () => this.requireWorkersService(),
     });
 
     return {};
@@ -132,76 +108,61 @@ export class PndPlugin
 
   start(_core: CoreStart, plugins: PndStartDependencies): PndPluginStart {
     this.spaces = plugins.spaces;
-    this.agentBuilder = plugins.agentBuilder;
 
     if (!this.config.enabled) {
       return {};
     }
 
-    const installationReady = installStatic({
-      enabled: this.config.enabled,
+    void ensureAgentSafe({
+      agentBuilder: plugins.agentBuilder,
+      spaceId: DEFAULT_SPACE_ID,
+      logger: this.logger,
+    });
+
+    const management = this.workflowsManagementApi
+      ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+      : undefined;
+    const managedWorkflows = initializeManagedWorkflows({
       workflowsExtensions: plugins.workflowsExtensions,
       logger: this.logger,
-    })
-      .then(({ failedIds }) => {
-        if (failedIds.length > 0) {
-          this.logger.warn(
-            `PND managed watch install incomplete — failed ids: ${failedIds.join(', ')}`
-          );
-        }
-      })
-      .catch((error) => {
-        this.logger.error(
-          `PND managed watch installation failed: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      });
-
-    if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
-      const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
-      this.watchProjection = new WatchWorkflowProjectionServiceImpl(
-        managementClient,
-        this.logger,
-        installationReady
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
+        : undefined,
+    }).catch((error) => {
+      this.logger.error(
+        `PND managed workflow initialization failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
       );
-    }
+      return undefined;
+    });
 
-    // Stand up the Elasticsearch-backed investigation/proposal store. Index
-    // creation + seeding happens lazily on the first authenticated request
-    // (see InvestigationStore.ensureReady), because the internal user cannot
-    // create arbitrary data indices — the request-scoped user can.
-    if (!this.config.ui.useMockData) {
-      const legacyStore = new InvestigationStore(this.logger);
-
-      // When conversation shadow-write is enabled (and the Agent Builder
-      // conversations plugin is available), wrap the legacy store in a
-      // DualWriteStore that shadows every write to the platform Conversation
-      // store. Shadow failures are logged and non-blocking.
-      if (
-        this.config.conversationShadowWrite &&
-        plugins.agentBuilder &&
-        typeof plugins.agentBuilder.conversations?.getScopedWriterClient === 'function'
-      ) {
-        const conversationStore = new PndConversationStore(
-          this.logger.get('conversation-shadow'),
-          legacyStore,
-          // Resolver: obtain a scoped writer client using the request context.
-          // The DualWriteStore passes the route's KibanaRequest through.
-          (request) => plugins.agentBuilder!.conversations.getScopedWriterClient({ request })
-        );
-        this.investigationStore = new DualWriteStore(
-          this.logger.get('dual-write'),
-          legacyStore,
-          conversationStore
-        );
-        this.logger.info('PND conversation shadow-write enabled (DualWriteStore active)');
-      } else {
-        this.investigationStore = legacyStore;
-      }
-    }
+    // Mock mode changes presentation data only; durable Worker settings and enablement still use Workflows.
+    this.watchesService = new WatchesService();
+    this.workersService = new WorkersService(management, managedWorkflows, this.logger, {
+      ensureAgentForSpace: plugins.agentBuilder
+        ? (spaceId) =>
+            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        : undefined,
+      agentBuilder: plugins.agentBuilder,
+      agentTypes: [agentType],
+    });
 
     return {};
+  }
+
+  private requireWatchesService(): WatchesService {
+    if (!this.watchesService) {
+      throw new Error('Watches service is not available until the PND plugin has started');
+    }
+    return this.watchesService;
+  }
+
+  private requireWorkersService(): WorkersService {
+    if (!this.workersService) {
+      throw new Error('Workers service is not available until the PND plugin has started');
+    }
+    return this.workersService;
   }
 
   private getSpaceId(request: KibanaRequest): string {

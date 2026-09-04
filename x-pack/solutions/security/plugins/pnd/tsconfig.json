@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -24,15 +24,15 @@
     "@kbn/deeplinks-security",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-yaml",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-spaces-common",
     "@kbn/logging-mocks",
-    "@kbn/scout-security",
-    "@kbn/elastic-assistant-common",
-    "@kbn/react-kibana-context-theme",
-    "@kbn/workflows-execution-engine",
-    "@kbn/agent-builder-server"
+    "@kbn/core-http-server-mocks",
   ]
 }

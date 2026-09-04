@@ -35,16 +35,16 @@ dependsOn:
   - '@kbn/deeplinks-security'
   - '@kbn/spaces-plugin'
   - '@kbn/workflows'
+  - '@kbn/workflows-yaml'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
-  - '@kbn/logging-mocks'
-  - '@kbn/scout-security'
-  - '@kbn/elastic-assistant-common'
-  - '@kbn/react-kibana-context-theme'
-  - '@kbn/workflows-execution-engine'
   - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-spaces-common'
+  - '@kbn/logging-mocks'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
@@ -56,7 +56,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

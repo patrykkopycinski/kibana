@@ -207,6 +207,12 @@ export const runRuleTuningWorkflow = async ({
 
     // The HITL gate parks the run in `waiting_for_input` (ExecutionStatus.WAITING_FOR_INPUT),
     // NOT `waiting` — see isAwaitingApproval.
+    // Log the exact status string the gate saw so a stall names itself: if this loops on an
+    // unexpected value (e.g. a new ExecutionStatus the harness doesn't resume on), the log
+    // shows it instead of silently polling until timeout.
+    if (!approvalResumed) {
+      log.info(`Execution ${workflowExecutionId} status: ${execution.status}`);
+    }
     if (!approvalResumed && isAwaitingApproval(execution.status)) {
       await fetch(`/api/workflows/executions/${workflowExecutionId}/resume`, {
         method: 'POST',
@@ -247,9 +253,18 @@ export const runRuleTuningWorkflow = async ({
     );
   }
 
+  // Reachability assert: if the run completed but produced no diagnose proposal, the LLM was
+  // never invoked — almost always because the seeded rule failed the diagnose gate
+  // (`fetch_rule.output.enabled == true`). Name the steps that DID run so the cause is visible
+  // instead of degrading to a silent 0.
   if (!proposal?.change_type) {
-    log.warning(
-      `Workflow execution ${workflowExecutionId} produced no change_type (status: ${execution.status})`
+    const stepsRun = (execution.stepExecutions ?? [])
+      .map((s) => `${s.stepId}(${s.stepType})`)
+      .join(', ');
+    throw new Error(
+      `Workflow execution ${workflowExecutionId} completed (status: ${execution.status}) but ` +
+        `diagnose_rule produced no proposal — the seeded rule likely failed the diagnose gate ` +
+        `(check it is enabled). Steps that ran: [${stepsRun}]`
     );
   }
 

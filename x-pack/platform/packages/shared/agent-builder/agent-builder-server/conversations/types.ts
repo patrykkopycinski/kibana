@@ -53,7 +53,11 @@ export interface ConversationWriterClient extends ConversationPublicClient {
   /**
    * Update the mutable fields of a conversation.
    */
-  update(conversationUpdate: { id: string; title?: string; accessControl?: ConversationAccessControlInput }): Promise<Conversation>;
+  update(conversationUpdate: {
+    id: string;
+    title?: string;
+    accessControl?: ConversationAccessControlInput;
+  }): Promise<Conversation>;
   /**
    * Delete a conversation by its ID.
    */

@@ -89,25 +89,25 @@ export const runRuleTuningWorkflow = async ({
   executionStatus: ExecutionStatus;
   proposal?: RuleTuningProposal;
 }> => {
-  // Prior runs may have parked executions at the review_tuning HITL gate (non-terminal
-  // `waiting`), and schedule_workflow SKIPS any new run while such an execution exists.
-  // Resume those first — exactly what the external approve URL does — so this run is
-  // not dead on arrival.
+  // A scheduled sweep of this workflow may be in flight (pending/running/waiting at the
+  // review_tuning HITL gate). schedule_workflow SKIPS any new run while ANY non-terminal
+  // execution exists, so a boot-time sweep poisons every eval run with SKIPPED. Cancel
+  // stale executions first — do NOT resume them (their inputs are not ours).
   const stale = (await fetch(`/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/executions`, {
     method: 'GET',
     version: WORKFLOWS_API_VERSION,
     headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-    query: { statuses: 'waiting' },
+    query: { statuses: 'pending,waiting,waiting_for_input,waiting_for_child,running,queued' },
   })) as WorkflowExecutionListDto;
 
-  for (const exec of stale.results ?? []) {
-    await fetch(`/api/workflows/executions/${exec.id}/resume`, {
+  if ((stale.results ?? []).length > 0) {
+    // Route cancels ALL active executions of this workflow (no body needed).
+    await fetch(`/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/executions/cancel`, {
       method: 'POST',
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-      body: JSON.stringify({ input: { approved: true } }),
     });
-    log.info(`Resumed stale waiting execution ${exec.executionId} before scheduling`);
+    log.info(`Cancelled ${stale.results.length} stale non-terminal execution(s) before scheduling`);
   }
 
   const { workflowExecutionId } = (await fetch(

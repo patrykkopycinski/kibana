@@ -31,11 +31,6 @@
  *   - ValidProposal (CODE): structured output conforms to the workflow's fail-closed gate
  *     contract (per-path payload fields, suppression only on capable rule types).
  *   - RationaleQuality (LLM): the summary is grounded in the seeded FP evidence.
- *
- * TODO(before merge of the underlying worker PR): port Hannah's seed script
- * (gist b63c0fbb38b423a64250d899a9b8cbec) rule/alert shapes into seed fixtures below — the
- * dataset skeleton and golden labels are final, the doc bodies need the production field
- * names verified against a live stack.
  */
 
 import { tags } from '@kbn/scout';

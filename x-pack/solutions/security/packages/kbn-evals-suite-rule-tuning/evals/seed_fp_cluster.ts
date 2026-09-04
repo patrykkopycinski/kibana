@@ -56,12 +56,14 @@ const ENTITY_PROFILES: Record<
     { host: 'build-agent-01', user: 'build.eng', ip: '10.0.4.15', process: 'node' },
   ],
   // FPs spread across many entities share one over-broad query term → narrow the query.
+  // No entity (host/user/ip/process) repeats across the cluster, so a tight entity
+  // exception is not a viable fix; the only signal is the match-all query itself.
   'fp-overbroad-query': [
     { host: 'web-01', user: 'www-data', ip: '10.1.0.5', process: 'nginx' },
-    { host: 'web-02', user: 'www-data', ip: '10.1.0.6', process: 'nginx' },
-    { host: 'web-03', user: 'www-data', ip: '10.1.0.7', process: 'nginx' },
-    { host: 'api-01', user: 'svc_api', ip: '10.1.1.9', process: 'nginx' },
-    { host: 'api-02', user: 'svc_api', ip: '10.1.1.10', process: 'nginx' },
+    { host: 'api-02', user: 'svc_api', ip: '10.1.1.10', process: 'node' },
+    { host: 'db-03', user: 'postgres', ip: '10.1.2.20', process: 'postgres' },
+    { host: 'cache-04', user: 'redis', ip: '10.1.3.30', process: 'redis-server' },
+    { host: 'worker-05', user: 'batch', ip: '10.1.4.40', process: 'python3' },
   ],
   // Same benign scanner entity repeatedly re-firing → suppression with group-by.
   'fp-volume-suppression': [
@@ -79,13 +81,15 @@ const ENTITY_PROFILES: Record<
     { host: 'fleet-d', user: 'analyst4', ip: '10.2.0.4', process: 'ssh' },
     { host: 'fleet-e', user: 'analyst5', ip: '10.2.0.5', process: 'curl' },
   ],
-  // Benign everywhere, no discriminating signal at all → disable.
+  // Benign everywhere, no discriminating signal at all → disable. Every entity is
+  // distinct across every dimension, so no exception, suppression, or query-narrow
+  // target exists; the rule itself is the problem.
   'fp-unfixable-noise': [
     { host: 'any-a', user: 'svc_health', ip: '10.3.0.1', process: 'kube-probe' },
-    { host: 'any-b', user: 'svc_health', ip: '10.3.0.2', process: 'kube-probe' },
-    { host: 'any-c', user: 'svc_health', ip: '10.3.0.3', process: 'kube-probe' },
-    { host: 'any-d', user: 'svc_health', ip: '10.3.0.4', process: 'kube-probe' },
-    { host: 'any-e', user: 'svc_health', ip: '10.3.0.5', process: 'kube-probe' },
+    { host: 'any-b', user: 'svc_backup', ip: '10.3.1.2', process: 'restic' },
+    { host: 'any-c', user: 'svc_metrics', ip: '10.3.2.3', process: 'node-exporter' },
+    { host: 'any-d', user: 'svc_deploy', ip: '10.3.3.4', process: 'helm' },
+    { host: 'any-e', user: 'svc_cron', ip: '10.3.4.5', process: 'cron' },
   ],
 };
 

@@ -64,6 +64,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
         outputTokens: number;
         cachedTokens: number;
         totalTokens: number;
+        latencyMs?: number;
       } = { inputTokens: 0, outputTokens: 0, cachedTokens: 0, totalTokens: 0 };
 
       try {

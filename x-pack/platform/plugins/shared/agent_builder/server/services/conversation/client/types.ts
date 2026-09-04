@@ -234,3 +234,5 @@ export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
 };
+
+export type { ConversationSearchFilters, ConversationExtendedFieldFilter } from '@kbn/agent-builder-common/chat/conversation_list';

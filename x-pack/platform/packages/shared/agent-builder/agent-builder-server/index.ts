@@ -160,7 +160,16 @@ export type {
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
 } from './plugin_contract';
-export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
+export type {
+  ConversationPublicClient,
+  ConversationWriterClient,
+  ConversationCreatePublicRequest,
+} from './conversations';
+
+/**
+ * The read-only surface of a conversation client (get + list).
+ */
+export type ReadOnlyConversationClient = Pick<ConversationPublicClient, 'get' | 'list'>;
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,

@@ -6,6 +6,7 @@
  */
 
 import type {
+  Conversation,
   ConversationAccessControlInput,
   ConversationListOptions,
   ConversationWithPermissions,
@@ -42,4 +43,19 @@ export interface ConversationPublicClient {
    * Create a new empty conversation (without triggering an execution).
    */
   create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
+}
+
+/**
+ * Read/write conversation client: the public read surface plus write
+ * operations. Returned by `getScopedWriterClient`.
+ */
+export interface ConversationWriterClient extends ConversationPublicClient {
+  /**
+   * Update the mutable fields of a conversation.
+   */
+  update(request: ConversationUpdatePublicRequest): Promise<ConversationWithPermissions>;
+  /**
+   * Delete a conversation by its ID.
+   */
+  delete(conversationId: string): Promise<boolean>;
 }

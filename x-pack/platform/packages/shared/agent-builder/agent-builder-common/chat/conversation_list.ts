@@ -11,4 +11,19 @@ export interface ConversationListOptions {
   perPage?: number;
   sortOrder?: 'asc' | 'desc';
   pinned?: boolean;
+  filters?: ConversationSearchFilters;
+}
+
+export interface ConversationExtendedFieldFilter {
+  key: string;
+  value?: string;
+  exists?: boolean;
+}
+
+export interface ConversationSearchFilters {
+  template?: {
+    id?: string;
+    version?: number;
+  };
+  extendedFields?: ConversationExtendedFieldFilter[];
 }

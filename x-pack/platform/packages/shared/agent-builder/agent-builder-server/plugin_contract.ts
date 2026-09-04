@@ -8,7 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
-import type { ConversationPublicClient } from './conversations';
+import type { ConversationPublicClient, ConversationWriterClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -225,6 +225,12 @@ export interface ConversationsStart {
    * Returns a conversation client scoped to the given request's user and space.
    */
   getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
+  /**
+   * Returns a read/write conversation client scoped to the given request's
+   * user and space. Write operations (create/update/delete) act as the
+   * requesting user.
+   */
+  getScopedWriterClient(opts: { request: KibanaRequest }): Promise<ConversationWriterClient>;
 }
 
 /**

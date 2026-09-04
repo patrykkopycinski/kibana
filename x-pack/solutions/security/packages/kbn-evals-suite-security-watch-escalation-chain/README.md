@@ -50,7 +50,7 @@ node scripts/jest --config \
 # Eval suites use createPlaywrightEvalsConfig, so they run via scripts/evals
 # (scripts/scout run-tests rejects them):
 node scripts/evals run --suite security-watch-escalation-chain \
-  --model eis-anthropic-claude-4-6-sonnet --judge eis-anthropic-claude-4-6-sonnet
+  --model eis-anthropic-claude-5-sonnet --judge eis-google-gemini-3-0-flash
 ```
 
 Set `TRACING_ES_URL` to the golden trace ES so per-example traces and score docs

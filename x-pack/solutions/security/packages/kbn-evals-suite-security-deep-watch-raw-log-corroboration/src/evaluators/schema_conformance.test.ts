@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SCENARIOS } from '../src/dataset';
-import type { CorroborationReport } from '../src/types';
+import { SCENARIOS } from '../dataset';
+import type { CorroborationReport } from '../types';
 
 describe('raw_log_corroboration schema conformance (L1)', () => {
   it('all scenarios have required fields', () => {

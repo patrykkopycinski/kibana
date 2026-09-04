@@ -198,10 +198,14 @@ describe('PND managed watch workflows', () => {
       }
     });
 
-    it('all watches have autonomyLevel between 1 and 5', () => {
+    it('all watches have a valid D15 autonomy level', () => {
+      // D15 vocabulary: autonomyLevel is a string union, not the legacy 1-5
+      // numeric scale. `projectWorkflowToWatch` coerces anything else (including
+      // the numeric values still present in the watch YAMLs) via
+      // `asWatchAutonomyLevel`, so the projection never yields a number and a
+      // numeric range assertion here can only ever read `undefined`.
       for (const w of allWatches) {
-        expect(w.autonomyLevel).toBeGreaterThanOrEqual(1);
-        expect(w.autonomyLevel).toBeLessThanOrEqual(5);
+        expect(['manual', 'assisted', 'supervised']).toContain(w.autonomyLevel);
       }
     });
 

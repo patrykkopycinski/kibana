@@ -21,11 +21,29 @@ import {
   DEEP_WATCH_FORENSICS_SKILL_ID,
   agentBuilderDefaultAgentId,
 } from '../src/constants';
+import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { cleanupSeededData } from '../src/data_generators/cleanup';
 
 evaluate.describe(
   'C3:L3 | Deep Watch Forensics — Composite pipeline',
   { tag: tags.stateful.classic },
   () => {
+    // The fixture named in this spec's header is not ambient — it has to be
+    // seeded. Without it `execute_esql` returns zero rows and the agent
+    // correctly-but-unhelpfully stops at "insufficient evidence" instead of
+    // reaching `produce_draft_forensic_report`, so `produceDraftCalled` below
+    // fails for reasons that have nothing to do with the model. Same root cause
+    // and same remedy as the sibling leaf_quality/durable_outcome specs
+    // (verified live 2026-07-30).
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      await cleanupSeededData({ esClient });
+      await seedForensicTimeline({ esClient }, log);
+    });
+
+    evaluate.afterAll(async ({ esClient }) => {
+      await cleanupSeededData({ esClient });
+    });
+
     // Replicates the real Watch invocation path from `watch_deep_worker.yaml`'s
     // `forensic_investigation` ai.agent step. Per CWL Option 2 (Slack
     // C0BHGGA6PHC/p1784742716537469, elastic/kibana#280617), that step performs

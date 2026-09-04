@@ -140,6 +140,9 @@ evaluate.describe(
 
         await executorClient.runExperiment(
           {
+            // The workflow's concurrency group is max:1 strategy:drop — parallel task runs
+            // would be dropped ("Dropped due to concurrency limit"). Serialize to match.
+            concurrency: 1,
             datasets: [
               {
                 name: 'security: rule-tuning-workflow-decision',

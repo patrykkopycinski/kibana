@@ -67,6 +67,49 @@ const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatus
 export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
   status === ExecutionStatus.WAITING_FOR_INPUT || status === ExecutionStatus.WAITING;
 
+/**
+ * Polls until this workflow has no non-terminal executions left.
+ *
+ * `/executions/cancel` returns before the runtime has actually torn the executions down, and
+ * the workflow is `concurrency: max 1, drop` — scheduling into a non-drained backlog gets the
+ * new run SKIPPED, which reads downstream as a legitimate 0 score.
+ */
+const waitForNoActiveExecutions = async ({
+  fetch,
+  log,
+  pollIntervalMs,
+  timeoutMs = 60_000,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  pollIntervalMs: number;
+  timeoutMs?: number;
+}): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const { results = [] } = (await fetch(
+      `/api/workflows/workflow/${RULE_TUNING_WORKFLOW_ID}/executions`,
+      {
+        method: 'GET',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        query: { statuses: [...NonTerminalExecutionStatuses] },
+      }
+    )) as unknown as WorkflowExecutionListDto;
+
+    if (results.length === 0) return;
+    await sleep(pollIntervalMs);
+  }
+  log.warning(`Stale executions still active after ${timeoutMs}ms; scheduling anyway`);
+};
+
+/**
+ * True for executions the runtime never actually ran — dropped by `concurrency: max 1` or
+ * cancelled. Scoring these 0 would report an infrastructure collision as a model failure.
+ */
+export const neverRan = (status: ExecutionStatus): boolean =>
+  status === ExecutionStatus.SKIPPED || status === ExecutionStatus.CANCELLED;
+
 const readDiagnoseStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
 ): RuleTuningProposal | undefined => {
@@ -119,6 +162,11 @@ export const runRuleTuningWorkflow = async ({
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
     });
     log.info(`Cancelled ${stale.results.length} stale non-terminal execution(s) before scheduling`);
+
+    // Cancellation is async. Scheduling before it settles means concurrency (max:1, drop)
+    // silently SKIPS our run — the first fixtures of a suite scored 0 on `status: skipped`
+    // while later ones passed. Wait for the backlog to actually drain.
+    await waitForNoActiveExecutions({ fetch, log, pollIntervalMs });
   }
 
   const { workflowExecutionId } = (await fetch(
@@ -188,6 +236,16 @@ export const runRuleTuningWorkflow = async ({
   }
 
   const proposal = readDiagnoseStructuredOutput(execution.stepExecutions);
+
+  // A run the runtime never executed (skipped by concurrency, or cancelled) carries no
+  // proposal. Scoring it 0 would report an infrastructure collision as a model failure, so
+  // fail loudly instead — an accurate low score is only meaningful if the run actually ran.
+  if (neverRan(execution.status)) {
+    throw new Error(
+      `Workflow execution ${workflowExecutionId} never ran (status: ${execution.status}) — ` +
+        `concurrency collision, not a model result.`
+    );
+  }
 
   if (!proposal?.change_type) {
     log.warning(

@@ -15,7 +15,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { changeTypeAccuracy, validProposal } from './evaluators';
-import { isAwaitingApproval, type RuleTuningVerdict } from './workflow_task';
+import { isAwaitingApproval, neverRan, type RuleTuningVerdict } from './workflow_task';
 import type { ChangeType } from './constants';
 
 describe('rule-tuning evaluators', () => {
@@ -153,6 +153,20 @@ describe('rule-tuning evaluators', () => {
     it('does not auto-approve terminal runs', () => {
       expect(isAwaitingApproval(ExecutionStatus.COMPLETED)).toBe(false);
       expect(isAwaitingApproval(ExecutionStatus.CANCELLED)).toBe(false);
+    });
+  });
+
+  describe('neverRan', () => {
+    // `concurrency: max 1, drop` SKIPS a run scheduled into a non-drained backlog. Treating
+    // that as a 0 reports an infrastructure collision as a model failure.
+    it('flags runs the runtime dropped or cancelled', () => {
+      expect(neverRan(ExecutionStatus.SKIPPED)).toBe(true);
+      expect(neverRan(ExecutionStatus.CANCELLED)).toBe(true);
+    });
+
+    it('does not flag runs that genuinely executed', () => {
+      expect(neverRan(ExecutionStatus.COMPLETED)).toBe(false);
+      expect(neverRan(ExecutionStatus.FAILED)).toBe(false);
     });
   });
 });

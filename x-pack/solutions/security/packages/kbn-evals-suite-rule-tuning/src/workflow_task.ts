@@ -17,6 +17,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import {
   TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
   type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowExecutionListDto,
@@ -97,8 +98,8 @@ export const runRuleTuningWorkflow = async ({
     method: 'GET',
     version: WORKFLOWS_API_VERSION,
     headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-    query: { statuses: 'pending,waiting,waiting_for_input,waiting_for_child,running,queued' },
-  })) as WorkflowExecutionListDto;
+    query: { statuses: [...NonTerminalExecutionStatuses] },
+  })) as unknown as WorkflowExecutionListDto;
 
   if ((stale.results ?? []).length > 0) {
     // Route cancels ALL active executions of this workflow (no body needed).

@@ -13,8 +13,9 @@
  * are permitted under the Elastic License 2.0.
  */
 
+import { ExecutionStatus } from '@kbn/workflows';
 import { changeTypeAccuracy, validProposal } from './evaluators';
-import type { RuleTuningVerdict } from './workflow_task';
+import { isAwaitingApproval, type RuleTuningVerdict } from './workflow_task';
 import type { ChangeType } from './constants';
 
 describe('rule-tuning evaluators', () => {
@@ -128,6 +129,30 @@ describe('rule-tuning evaluators', () => {
         metadata: { ruleType: 'query' },
       } as never);
       expect(result.score).toBe(1);
+    });
+  });
+
+  describe('isAwaitingApproval', () => {
+    // The review_tuning HITL gate reports `waiting_for_input`. A bare-string check for
+    // 'waiting' alone silently never matched, so every run parked at the gate until the
+    // next task's stale-cancel killed it and no fixture ever produced a score.
+    it('recognises the waiting_for_input status the HITL gate actually emits', () => {
+      expect(isAwaitingApproval(ExecutionStatus.WAITING_FOR_INPUT)).toBe(true);
+    });
+
+    it('also recognises the plain waiting status', () => {
+      expect(isAwaitingApproval(ExecutionStatus.WAITING)).toBe(true);
+    });
+
+    it('does not auto-approve runs that are merely running or pending', () => {
+      expect(isAwaitingApproval(ExecutionStatus.RUNNING)).toBe(false);
+      expect(isAwaitingApproval(ExecutionStatus.PENDING)).toBe(false);
+      expect(isAwaitingApproval(ExecutionStatus.WAITING_FOR_CHILD)).toBe(false);
+    });
+
+    it('does not auto-approve terminal runs', () => {
+      expect(isAwaitingApproval(ExecutionStatus.COMPLETED)).toBe(false);
+      expect(isAwaitingApproval(ExecutionStatus.CANCELLED)).toBe(false);
     });
   });
 });

@@ -18,7 +18,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import {
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
-  type ExecutionStatus,
+  ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowExecutionListDto,
   type WorkflowStepExecutionDto,
@@ -56,6 +56,16 @@ export interface RuleTuningVerdict extends RuleTuningProposal {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
+
+/**
+ * True while an execution is parked on the review_tuning human-approval gate.
+ *
+ * The gate reports `waiting_for_input`, not `waiting` — an earlier bare-string check for
+ * 'waiting' alone never matched, so every run sat at the gate until the next task's
+ * stale-cancel killed it and no fixture ever scored. Exported so a test pins the contract.
+ */
+export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
+  status === ExecutionStatus.WAITING_FOR_INPUT || status === ExecutionStatus.WAITING;
 
 const readDiagnoseStructuredOutput = (
   stepExecutions: WorkflowStepExecutionDto[]
@@ -128,8 +138,8 @@ export const runRuleTuningWorkflow = async ({
   const deadline = Date.now() + maxWaitMs;
   let execution: WorkflowExecutionDto | undefined;
 
-  // The workflow's review_tuning step is a 72h human-approval gate; a run parks in a
-  // non-terminal `waiting` status there. Because schedule_workflow skips new runs while
+  // The workflow's review_tuning step is a 72h human-approval gate; a run parks there in the
+  // non-terminal `waiting_for_input` status. Because schedule_workflow skips new runs while
   // a non-terminal execution exists, an un-approved run also poisons every later run.
   // The eval drives the full production path, then auto-approves the gate exactly like
   // the external resume URL does (input: { approved: true }).
@@ -147,7 +157,9 @@ export const runRuleTuningWorkflow = async ({
       break;
     }
 
-    if (!approvalResumed && execution.status === 'waiting') {
+    // The HITL gate parks the run in `waiting_for_input` (ExecutionStatus.WAITING_FOR_INPUT),
+    // NOT `waiting` — see isAwaitingApproval.
+    if (!approvalResumed && isAwaitingApproval(execution.status)) {
       await fetch(`/api/workflows/executions/${workflowExecutionId}/resume`, {
         method: 'POST',
         version: WORKFLOWS_API_VERSION,

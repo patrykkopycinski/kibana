@@ -118,7 +118,7 @@ export const seedRuleAndFpAlerts = async (
   { fetch, esClient, log }: SeedContext,
   fixture: SeedFixtureSpec,
   uniqueRuleId: string
-): Promise<void> => {
+): Promise<string> => {
   const ruleName = `eval rule-tuning ${fixture.id}`;
   const ruleId = `eval-rt-${fixture.id}`;
 
@@ -144,7 +144,12 @@ export const seedRuleAndFpAlerts = async (
       interval: '5m',
       from: 'now-10m',
       to: 'now',
-      enabled: false, // eval seeds never execute the rule itself
+      // The worker only diagnoses enabled rules (rule_tuning.yaml gates diagnose_rule on
+      // `fetch_rule.output.enabled == true`) — a disabled rule produces no FPs, so tuning it
+      // is meaningless. Seeding it disabled skipped diagnosis and yielded empty proposals.
+      // Enabling is safe here: `index` has no source documents, so the rule executes and
+      // matches nothing; the FP cluster is bulk-indexed directly against its uuid below.
+      enabled: true,
       description: `kbn-evals rule-tuning fixture: ${fixture.id} (expected ${fixture.expected})`,
       tags: ['eval-rule-tuning'],
     }),

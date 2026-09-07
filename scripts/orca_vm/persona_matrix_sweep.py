@@ -106,6 +106,27 @@ SUITE_PROFILES = {
         "gate": "floor",
         "min_docs": 80,
     },
+    "security-forensics-watch-raw-log-corroboration": {
+        "cli_suite": "security-forensics-watch-raw-log-corroboration",
+        "gate_suite_id": "security-forensics-watch-raw-log-corroboration",
+        "vm_prefix": "orca-fw",
+        # 5 examples, MEASURED from a completed canary run (orca-canary-fwrlc,
+        # 2026-09-07, "5 passed (7.6m)"): SCORECARD_LINES=5 and
+        # DISTINCT_EXAMPLE_IDS=5 agree. Example ids: full-corroboration,
+        # partial-gap, raw-log-full-corroboration, raw-log-partial-gap,
+        # raw-log-no-raw-telemetry.
+        "n_examples": 5,
+        # RAGGED, not a uniform grid: the three L2 examples emit 5 scorecard
+        # fields each, while the L3/L4 examples emit none, so
+        # examples x evaluators is structurally wrong here. Gate on a floor.
+        "gate": "floor",
+        # NOT measured against ES: the canary VM was torn down before the score
+        # docs were counted, so this floor is derived (3 L2 examples x 5 scored
+        # scorecard fields = 15 expected docs) rather than observed. It is set
+        # low deliberately -- it only catches a near-empty run. Replace with a
+        # measured value from `.ds-.evaluation-scores*` on the next sweep.
+        "min_docs": 12,
+    },
 }
 
 # Selected by --suite; mutated once in main() before any VM work.

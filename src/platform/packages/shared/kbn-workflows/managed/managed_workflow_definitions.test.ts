@@ -13,6 +13,8 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_RULE_CREATION_WORKFLOW_ID,
+  PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_WATCH_DARK_WORKFLOW_ID,
   PND_WATCH_DEEP_WORKFLOW_ID,
@@ -23,6 +25,9 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import { PND_MANAGED_WORKFLOW_PLUGIN_ID } from './definitions/pnd/constants';
+import RULE_CREATION_YAML from './definitions/pnd/rule_creation.yaml';
+import RULE_PREVIEW_YAML from './definitions/pnd/rule_preview.yaml';
 import RULE_TUNING_YAML from './definitions/pnd/rule_tuning.yaml';
 import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
 import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
@@ -145,18 +150,50 @@ function createContentFingerprint(content: string): string {
   return fingerprint.toString(16).padStart(8, '0');
 }
 
-it.each([
-  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:be67d019'],
-  [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
-  [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
-  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
-  [PND_RULE_TUNING_WORKFLOW_ID, RULE_TUNING_YAML, '4:778215a3'],
-] as const)(
+/**
+ * Fingerprints for every managed definition that ships a statically imported YAML string.
+ *
+ * `yamlTemplate` definitions are hashed from their function source, but an imported YAML
+ * string is invisible to that hash: editing the file changes what new spaces install while
+ * already-installed spaces keep the old copy until `definition.version` is bumped. These
+ * fingerprints force the bump to happen in the same change as the edit.
+ */
+const YAML_FINGERPRINTS: Record<string, readonly [string, string]> = {
+  [PND_WATCH_FLOOR_WORKFLOW_ID]: [WATCH_FLOOR_YAML, '1:be67d019'],
+  [PND_WATCH_OFFICER_WORKFLOW_ID]: [WATCH_OFFICER_YAML, '1:9b3f3d18'],
+  [PND_WATCH_DARK_WORKFLOW_ID]: [WATCH_DARK_YAML, '1:4f835cad'],
+  [PND_WATCH_DEEP_WORKFLOW_ID]: [WATCH_DEEP_YAML, '1:79b46054'],
+  [PND_WATCH_DETECTION_WORKFLOW_ID]: [WATCH_DETECTION_YAML, '1:c23724c4'],
+  [PND_RULE_TUNING_WORKFLOW_ID]: [RULE_TUNING_YAML, '5:8e560bf2'],
+  [PND_RULE_PREVIEW_WORKFLOW_ID]: [RULE_PREVIEW_YAML, '1:d6f68350'],
+  [PND_RULE_CREATION_WORKFLOW_ID]: [RULE_CREATION_YAML, '2:95f37a04'],
+};
+
+/**
+ * Coverage assertion. The fingerprint table above used to be hand-maintained, which meant
+ * "a guard exists" did not imply "my definition is guarded" — rule_preview and rule_creation
+ * shipped imported YAML with no fingerprint at all and could drift silently. Assert set
+ * COVERAGE against the registry so a newly registered yaml-backed definition fails here
+ * until it is added, instead of being quietly unguarded.
+ */
+it('fingerprints every registered yaml-backed PND managed definition', () => {
+  // Scope: PND owns this table. Other plugins' yaml-backed definitions are theirs to
+  // guard — asserting over the whole registry would fail this suite on their changes.
+  const unguarded = managedWorkflowDefinitions
+    .filter((definition) => definition.pluginId === PND_MANAGED_WORKFLOW_PLUGIN_ID)
+    .filter((definition) => hasYaml(definition))
+    .map(({ id }) => id)
+    .filter((id) => !(id in YAML_FINGERPRINTS))
+    .sort();
+
+  expect(unguarded).toEqual([]);
+});
+
+it.each(Object.entries(YAML_FINGERPRINTS))(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
-  (workflowId, importedYaml, expectedFingerprint) => {
+  (workflowId, [importedYaml, expectedFingerprint]) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
-    if (!definition) throw new Error(`Managed watch "${workflowId}" is not registered`);
+    if (!definition) throw new Error(`Managed workflow "${workflowId}" is not registered`);
     const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
     if (actualFingerprint === expectedFingerprint) {
       return;
@@ -164,7 +201,7 @@ it.each([
     throw new Error(
       `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
         `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
-        `Bump version in the watch module and update this expected fingerprint in the same change.`
+        `Bump version in the definition module and update this expected fingerprint in the same change.`
     );
   }
 );

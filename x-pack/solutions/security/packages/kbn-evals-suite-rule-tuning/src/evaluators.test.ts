@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
- * Public License v1 as approved by ....... Use, modification, and distribution
- * are permitted under the Elastic License 2.0.
- */
-
 import { ExecutionStatus } from '@kbn/workflows';
 import { changeTypeAccuracy, validProposal } from './evaluators';
 import { isAwaitingApproval, neverRan, type RuleTuningVerdict } from './workflow_task';
@@ -121,6 +113,19 @@ describe('rule-tuning evaluators', () => {
         metadata: { ruleType: 'machine_learning' },
       } as never);
       expect(result.score).toBe(0);
+    });
+
+    it('rejects suppression when ruleType is absent from metadata', async () => {
+      // The rule-type precondition must bite, not be waived. `ruleType == null ||` made the
+      // gate vacuous: any example whose metadata lost ruleType scored a suppression
+      // proposal valid. Removing that clause (so a missing ruleType fails the check) is
+      // the mutation under test here — this test goes RED if the clause returns.
+      const result = await validProposal.evaluate!({
+        output: { ...base, change_type: 'suppression', suppression_group_by: ['host.name'] },
+        metadata: {},
+      } as never);
+      expect(result.score).toBe(0);
+      expect((result.metadata as { payloadValid: boolean }).payloadValid).toBe(false);
     });
 
     it('accepts suppression on a suppression-capable rule type', async () => {

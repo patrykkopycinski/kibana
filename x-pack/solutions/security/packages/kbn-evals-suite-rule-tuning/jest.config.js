@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
- * Public License v1 as approved by ....... Use, modification, and distribution
- * are permitted under the Elastic License 2.0.
- */
-
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',

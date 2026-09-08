@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
- * Public License v1 as approved by ....... Use, modification, and distribution
- * are permitted under the Elastic License 2.0.
- */
-
 /**
  * Tuning-decision eval for the managed `system-security-rule-tuning` workflow.
  *
@@ -33,6 +25,7 @@
  *   - RationaleQuality (LLM): the summary is grounded in the seeded FP evidence.
  */
 
+import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -88,6 +81,19 @@ const TUNING_FIXTURES: Array<{
     description:
       'Rule fires exclusively on benign activity with no discriminating signal — disable',
   },
+  // Rule-type precondition fixture. The alert cluster looks exactly like the suppression
+  // case (one entity re-firing), but `new_terms` is not in SUPPRESSION_CAPABLE_RULE_TYPES,
+  // so `can_apply_suppression` must refuse and the safe answer is the manual hand-off.
+  // Without this the suppression rule-type gate is asserted only in unit tests and never
+  // exercised against a real model on a real rule.
+  {
+    id: 'fp-suppression-incapable-rule-type',
+    expected: 'manual',
+    ruleType: 'new_terms',
+    description:
+      'Repeated single-entity FPs on a new_terms rule — suppression is not applicable to ' +
+      'this rule type, so the worker must fall back to a manual hand-off',
+  },
 ];
 
 interface RuleTuningExample extends Example {
@@ -114,7 +120,7 @@ evaluate.describe(
 
     evaluate(
       'proposes the golden tuning path for each seeded FP cluster',
-      async ({ executorClient, evaluators, fetch, log, esClient }) => {
+      async ({ executorClient, evaluators, fetch, log, esClient, connector }) => {
         const examples: RuleTuningExample[] = TUNING_FIXTURES.map((fixture) => ({
           id: fixture.id,
           input: { fixtureId: fixture.id },
@@ -161,16 +167,19 @@ evaluate.describe(
               const uniqueRuleId = `${fixture.id}-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
               createdRuleIds.add(uniqueRuleId);
 
-              const seededUuid = await seedRuleAndFpAlerts(
+              const { seededUuid, ruleId } = await seedRuleAndFpAlerts(
                 { fetch, esClient, log },
                 fixture,
                 uniqueRuleId
               );
 
               try {
-                return await runRuleTuningWorkflow({ fetch, log });
+                // Pin the workflow's ai.agent step to the connector under test. Without
+                // this the step falls back to the space default and every Playwright
+                // project scores the same model under six different labels.
+                return await runRuleTuningWorkflow({ fetch, log, connectorId: connector.id });
               } finally {
-                await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, fixture);
+                await cleanupSeededArtifacts({ fetch, esClient }, seededUuid, ruleId);
               }
             },
           },
@@ -178,5 +187,56 @@ evaluate.describe(
         );
       }
     );
+
+    // Evaluator control: if the CODE evaluators silently accept garbage, every score
+    // above is untrustworthy. Feed known-broken verdicts straight into the evaluators
+    // and require rejection. A silent pass here means the suite's gates are vacuous.
+    evaluate('rejects malformed diagnose output (evaluator control)', async () => {
+      const completedRun = {
+        executionId: 'evaluator-control',
+        executionStatus: 'completed' as never,
+      };
+
+      // change_type outside the enum — the runtime gate would refuse the PATCH.
+      const outOfEnum = await validProposal.evaluate?.({
+        output: {
+          ...completedRun,
+          change_type: 'delete_rule' as ChangeType,
+        },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(outOfEnum?.score).toBe(0);
+      expect(outOfEnum?.label).toBe('invalid');
+
+      // Well-formed change_type but empty payload — minItems gate must bite.
+      const emptyEntries = await validProposal.evaluate?.({
+        output: {
+          ...completedRun,
+          change_type: 'exception' as ChangeType,
+          exception_entries: [],
+        },
+        metadata: { ruleType: 'query' },
+      } as never);
+      expect(emptyEntries?.score).toBe(0);
+
+      // Suppression proposed for a rule type that cannot carry it — must reject
+      // rather than fall through to a free pass.
+      const suppressionIncapable = await validProposal.evaluate?.({
+        output: {
+          ...completedRun,
+          change_type: 'suppression' as ChangeType,
+          suppression_group_by: ['host.id'],
+        },
+        metadata: { ruleType: 'new_terms' },
+      } as never);
+      expect(suppressionIncapable?.score).toBe(0);
+
+      // No proposal at all (workflow failed upstream) — accuracy must score 0, not error.
+      const noProposal = await changeTypeAccuracy.evaluate?.({
+        output: { ...completedRun, executionStatus: 'failed' as never },
+        expected: { change_type: 'query' },
+      } as never);
+      expect(noProposal?.score).toBe(0);
+    });
   }
 );

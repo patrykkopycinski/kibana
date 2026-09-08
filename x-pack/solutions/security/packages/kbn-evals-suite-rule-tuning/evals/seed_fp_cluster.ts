@@ -11,6 +11,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License.
  */
 
+import { createHash } from 'crypto';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -91,6 +92,16 @@ const ENTITY_PROFILES: Record<
     { host: 'any-d', user: 'svc_deploy', ip: '10.3.3.4', process: 'helm' },
     { host: 'any-e', user: 'svc_cron', ip: '10.3.4.5', process: 'cron' },
   ],
+  // Deliberately shaped like the suppression case — one entity re-firing — but seeded on a
+  // new_terms rule, which cannot carry alert_suppression. The entity evidence points at
+  // suppression while the rule type forbids it, so the only safe answer is manual.
+  'fp-suppression-incapable-rule-type': [
+    { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
+    { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
+    { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
+    { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
+    { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
+  ],
 };
 
 /** Query text per fixture: only the over-broad fixture is meant to be narrowed. */
@@ -100,6 +111,25 @@ const FIXTURE_QUERIES: Record<string, string> = {
   'fp-volume-suppression': 'process.name:nmap',
   'fp-low-value-risk': 'process.name:(ssh or curl)',
   'fp-unfixable-noise': 'process.name:kube-probe',
+  'fp-suppression-incapable-rule-type': 'process.name:inventory-agent',
+};
+
+/**
+ * Type-specific required fields per rule type, per `rule_schemas.schema.yaml`. A create
+ * payload missing these is rejected by the detection engine API, so the seeded fixture
+ * would never exist and the eval would score a seeding bug as a model failure.
+ */
+const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => {
+  switch (ruleType) {
+    case 'new_terms':
+      // NewTermsRuleRequiredFields: type, query, new_terms_fields, history_window_start.
+      return {
+        new_terms_fields: ['user.name'],
+        history_window_start: 'now-7d',
+      };
+    default:
+      return {};
+  }
 };
 
 const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: number) => ({
@@ -122,9 +152,17 @@ export const seedRuleAndFpAlerts = async (
   { fetch, esClient, log }: SeedContext,
   fixture: SeedFixtureSpec,
   uniqueRuleId: string
-): Promise<string> => {
-  const ruleName = `eval rule-tuning ${fixture.id}`;
-  const ruleId = `eval-rt-${fixture.id}`;
+): Promise<{ seededUuid: string; ruleId: string }> => {
+  // The rule name and description are read by the agent: the harvest KEEPs
+  // `kibana.alert.rule.name` and the worker interpolates it straight into the diagnose
+  // prompt, and the agent can fetch the rule (description included) through its tools.
+  // Fixture ids are self-describing (`fp-overbroad-query`, `fp-unfixable-noise`), and
+  // `fixture.expected` IS the golden label — putting either in a reachable field hands
+  // the model the answer key and makes every score meaningless. Derive an opaque token
+  // instead, and keep the fixture id only in the local log line below.
+  const opaqueToken = createHash('sha256').update(uniqueRuleId).digest('hex').slice(0, 12);
+  const ruleName = `eval rule-tuning ${opaqueToken}`;
+  const ruleId = `eval-rt-${opaqueToken}`;
 
   // 0. Remove a stale rule from a previous aborted run so the create below is idempotent.
   await fetch(`/api/detection_engine/rules?spaceId=default&rule_id=${encodeURIComponent(ruleId)}`, {
@@ -154,8 +192,11 @@ export const seedRuleAndFpAlerts = async (
       // Enabling is safe here: `index` has no source documents, so the rule executes and
       // matches nothing; the FP cluster is bulk-indexed directly against its uuid below.
       enabled: true,
-      description: `kbn-evals rule-tuning fixture: ${fixture.id} (expected ${fixture.expected})`,
+      // Neither the fixture id nor its expected label may appear here: the agent can
+      // fetch this rule and read the description. Opaque token only.
+      description: `kbn-evals rule-tuning seeded rule ${opaqueToken}`,
       tags: ['eval-rule-tuning'],
+      ...typeSpecificCreateFields(fixture.ruleType),
     }),
   });
   log.info(
@@ -189,31 +230,29 @@ export const seedRuleAndFpAlerts = async (
     );
   }
   log.info(`indexed ${docs.length} closed-FP alerts for rule uuid ${seededUuid}`);
-  return seededUuid;
+  return { seededUuid, ruleId };
 };
 
 export const cleanupSeededArtifacts = async (
   { fetch, esClient }: { fetch: SeedContext['fetch']; esClient: EsClient },
-  uniqueRuleId: string,
-  fixture: SeedFixtureSpec
+  seededUuid: string,
+  ruleId: string
 ): Promise<void> => {
-  // Alerts first (they reference the rule), then the rule itself. uniqueRuleId is the
-  // seeded rule's real uuid (returned by seedRuleAndFpAlerts), not the spec's run-scoped id.
+  // Alerts first (they reference the rule), then the rule itself. `seededUuid` is the
+  // seeded rule's real uuid (returned by seedRuleAndFpAlerts); `ruleId` is the opaque
+  // token-derived rule_id it was created under. Recomputing the rule_id from the fixture
+  // id here would delete nothing now that ids are token-derived, silently leaking a rule
+  // per run into later sweeps.
   await esClient
     .deleteByQuery({
       index: ALERTS_INDEX,
-      query: { term: { 'kibana.alert.rule.uuid': uniqueRuleId } },
+      query: { term: { 'kibana.alert.rule.uuid': seededUuid } },
       refresh: true,
       conflicts: 'proceed',
     })
     .catch(() => {});
-  await fetch(
-    `/api/detection_engine/rules?spaceId=default&rule_id=${encodeURIComponent(
-      `eval-rt-${fixture.id}`
-    )}`,
-    {
-      method: 'DELETE',
-      headers: { 'kbn-xsrf': 'true' },
-    }
-  ).catch(() => {});
+  await fetch(`/api/detection_engine/rules?spaceId=default&rule_id=${encodeURIComponent(ruleId)}`, {
+    method: 'DELETE',
+    headers: { 'kbn-xsrf': 'true' },
+  }).catch(() => {});
 };

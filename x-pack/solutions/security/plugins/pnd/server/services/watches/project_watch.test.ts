@@ -852,6 +852,30 @@ describe('project watch', () => {
           expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
         }
       });
+
+      // diagnose_rule's prompt tells the agent to reason from the entity breakdown of the
+      // FP cluster. That breakdown only exists if fetch_fp_entities runs first and its
+      // output is interpolated into the agent message. Asserting the contract here stops a
+      // repeat of the regression where the prompt referenced context the workflow never
+      // supplied — the exact bug that made overbroad-query/unfixable-noise/low-value-risk
+      // fixtures unanswerable and read as a false model ceiling.
+      it('feeds the entity breakdown diagnose_rule reasons about', () => {
+        const diagnose = tuningSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const message = String(diagnose.with?.message);
+
+        expect(tuningSteps.some(({ name }) => name === 'fetch_fp_entities')).toBe(true);
+        expect(message).toContain('entity breakdown');
+        // The data itself, not just a reference in a guard. The conditional header
+        // `{% if steps.fetch_fp_entities.output.values %}` mentions the step without
+        // injecting its rows, so asserting the bare step name is a false green — the
+        // `| json` interpolation is what actually puts the breakdown into the prompt.
+        expect(message).toContain('steps.fetch_fp_entities.output.values | json');
+
+        const entities = tuningSteps.find(({ name }) => name === 'fetch_fp_entities')!;
+        const entityQuery = String(entities.with?.query);
+        expect(entityQuery).toContain('kibana.alert.rule.uuid');
+        expect(entityQuery).toContain('{{ workflow.spaceId }}');
+      });
     });
   });
 });

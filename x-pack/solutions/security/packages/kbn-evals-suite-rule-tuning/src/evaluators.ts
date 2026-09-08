@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0, the GNU Affero General Public License v3.0 only, or the Server Side
- * Public License v1 as approved by ....... Use, modification, and distribution
- * are permitted under the Elastic License 2.0.
- */
-
 import type { Evaluator } from '@kbn/evals';
 import { CHANGE_TYPES, SUPPRESSION_CAPABLE_RULE_TYPES, type ChangeType } from './constants';
 import type { RuleTuningProposal } from './workflow_task';
@@ -75,11 +67,15 @@ export const validProposal: Evaluator = {
           typeof proposal.proposed_query === 'string' && proposal.proposed_query !== '';
         break;
       case 'suppression':
+        // `ruleType == null ||` here would make the whole rule-type precondition vacuous:
+        // any example whose metadata lost ruleType would pass suppression validation for
+        // free, which is exactly the gate/schema drift this evaluator exists to catch.
+        // An unknown rule type cannot be validated, so it is not valid.
         payloadValid =
           Array.isArray(proposal.suppression_group_by) &&
           proposal.suppression_group_by.length > 0 &&
-          (ruleType == null ||
-            (SUPPRESSION_CAPABLE_RULE_TYPES as readonly string[]).includes(ruleType));
+          ruleType != null &&
+          (SUPPRESSION_CAPABLE_RULE_TYPES as readonly string[]).includes(ruleType);
         break;
       case 'risk_score':
         payloadValid =

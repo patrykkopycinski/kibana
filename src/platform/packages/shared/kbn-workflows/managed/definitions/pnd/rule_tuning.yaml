@@ -29,6 +29,13 @@ triggers:
           type: number
           default: 24
           description: How far back to look for alerts analysts closed as false positives.
+        connector_id:
+          type: string
+          description: >
+            GenAI connector id used by the diagnose step's model routing. When omitted
+            (or empty) the step falls back to the Agent Builder default model, which is
+            the production path. Eval harnesses pass the connector under test so the
+            proposal is attributable to a specific model rather than the space default.
       additionalProperties: false
 outputs:
   - name: rules_examined
@@ -92,11 +99,38 @@ steps:
         on-failure:
           continue: true
 
+      # The diagnose prompt tells the agent to reason from the entity distribution of the
+      # FP cluster; that breakdown has to actually be in the message. Without it the agent
+      # sees only a rule name and an FP count, and the paths whose label is only derivable
+      # from entity dispersion (over-broad query, unfixable noise, low-value risk) are not
+      # decidable from the prompt at all. Aggregated here rather than left to the agent's
+      # own tool calls so every model under evaluation receives identical evidence.
+      - name: fetch_fp_entities
+        type: elasticsearch.esql.query
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+        with:
+          allow_partial_results: false
+          query: |-
+            FROM .alerts-security.alerts-{{ workflow.spaceId }}
+            | WHERE `kibana.alert.rule.uuid` == "{{ foreach.item.0 }}"
+              AND `kibana.alert.workflow_status` == "closed"
+              AND `kibana.alert.workflow_reason` == "false_positive"
+              AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+            | STATS entity_fp_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
+            | SORT entity_fp_count DESC
+            | LIMIT 20
+        on-failure:
+          continue: true
+
       - name: diagnose_rule
         type: ai.agent
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
         timeout: "10m"
         create-conversation: true
+        # Empty/omitted falls back to the Agent Builder default (the production path);
+        # an eval harness passes the connector under test so the resulting proposal is
+        # attributable to a named model instead of whatever the space defaults to.
+        connector-id: "{{ inputs.connector_id }}"
         with:
           message: |-
             Use the [/investigate-rule](skill://investigate-rule) skill to investigate
@@ -105,6 +139,21 @@ steps:
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
             during the last {{ inputs.lookback_hours }} hours. These are confirmed
             analyst dispositions — not suspected noise.
+
+            Entity breakdown of those false positives
+            (columns: {{ steps.fetch_fp_entities.output.columns | map: 'name' | json }}):
+            {% if steps.fetch_fp_entities.error == null and steps.fetch_fp_entities.output.values %}
+            {{ steps.fetch_fp_entities.output.values | json }}
+
+            Each row is one host/user/ip/process combination and how many false
+            positives it accounts for. A cluster concentrated on one combination is
+            exceptionable or suppressible; one spread evenly across unrelated entities
+            is not, and points at the query or the rule itself.
+            {% else %}
+            Unavailable — the entity aggregation did not return. Diagnose from the rule
+            definition alone, and prefer `manual` over a change you cannot ground in
+            evidence.
+            {% endif %}
 
             After investigating, return one structured tuning proposal using the schema.
             Choose exactly one change_type in this order of preference:

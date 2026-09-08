@@ -131,11 +131,19 @@ const readDiagnoseStructuredOutput = (
 export const runRuleTuningWorkflow = async ({
   fetch,
   log,
+  connectorId,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  /**
+   * Connector the workflow's `diagnose_rule` ai.agent step must run on. Required so each
+   * Playwright project actually evaluates its own model: with no `connector-id` on the
+   * step, `resolveConnectorOrInferenceId` returns undefined and the step silently falls
+   * back to the space default agent — every model project would score one same model.
+   */
+  connectorId: string;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<{
@@ -176,7 +184,7 @@ export const runRuleTuningWorkflow = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       body: JSON.stringify({
-        inputs: { min_fp_count: 1 },
+        inputs: { min_fp_count: 1, connector_id: connectorId },
       }),
     }
   )) as { workflowExecutionId: string };

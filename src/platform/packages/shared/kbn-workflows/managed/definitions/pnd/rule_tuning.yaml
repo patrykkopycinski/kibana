@@ -138,7 +138,10 @@ steps:
               proposed_severity (low / medium / high / critical).
 
             manual  — None of the above is safe to apply automatically. Use summary
-              to describe the recommended manual change.
+              to describe: (a) the false-positive pattern you found, (b) which automated
+              paths you considered (exception / query / risk_score) and why each is unsafe
+              or inapplicable for this rule, and (c) a concrete recommendation for what the
+              analyst should do manually in the Detection Rules UI.
           schema:
             type: object
             properties:
@@ -276,8 +279,13 @@ steps:
             Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
             {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
-            No automated change can be applied safely. Approving records the handoff;
-            apply the recommended change manually in the Detection Rules UI.
+            No automated change can be applied safely for this rule.
+            Approving records the handoff — no rule changes are made automatically.
+
+            Analysis and recommendation:
+            {{ steps.diagnose_rule.output.structured_output.summary }}
+
+            Apply the recommended change in the Detection Rules UI.
             {% endif %}
 
             {% if steps.diagnose_rule.output.conversation_id %}

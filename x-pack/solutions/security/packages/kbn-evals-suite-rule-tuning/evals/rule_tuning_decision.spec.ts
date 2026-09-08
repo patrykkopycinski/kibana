@@ -64,9 +64,10 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-volume-suppression',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Low-value alert flood from a repeated benign process — group-by suppression',
+    description:
+      'Low-value alert flood from a repeated benign process — no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-risk',
@@ -76,7 +77,7 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-unfixable-noise',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
       'Rule fires exclusively on benign activity with no discriminating signal — disable',
@@ -161,33 +162,38 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-suppression-healthcheck',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Benign curl re-firing from one entity - group-by suppression',
+    description:
+      'Benign curl re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-vulnscan',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Benign nessus re-firing from one entity - group-by suppression',
+    description:
+      'Benign nessus re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-inventory',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Benign osqueryd re-firing from one entity - group-by suppression',
+    description:
+      'Benign osqueryd re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-patchagent',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Benign wuauclt re-firing from one entity - group-by suppression',
+    description:
+      'Benign wuauclt re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-suppression-logship',
-    expected: 'suppression',
+    expected: 'manual',
     ruleType: 'query',
-    description: 'Benign filebeat re-firing from one entity - group-by suppression',
+    description:
+      'Benign filebeat re-firing from one entity - no automated path, recommend suppression manually',
   },
   {
     id: 'fp-low-value-admin-tools',
@@ -226,38 +232,38 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-unfixable-telemetry',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
-      'Only telemetry agents match, with no field separating benign from malicious - disable the rule',
+      'Only telemetry agents match, with no field separating benign from malicious - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-agentmesh',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
-      'Service-mesh sidecars account for every hit and share no discriminating attribute - disable',
+      'Service-mesh sidecars account for every hit and share no discriminating attribute - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-buildfarm',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
-      'Ephemeral build-farm workers regenerate identifiers each run, so no stable filter exists - disable',
+      'Ephemeral build-farm workers regenerate identifiers each run, so no stable filter exists - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-imaging',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
-      'OS imaging fleets reproduce the pattern wholesale with nothing to key an exception on - disable',
+      'OS imaging fleets reproduce the pattern wholesale with nothing to key an exception on - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-unfixable-mailflow',
-    expected: 'disable',
+    expected: 'manual',
     ruleType: 'query',
     description:
-      'Mail-gateway scanning is indistinguishable from the targeted behaviour - disable the rule',
+      'Mail-gateway scanning is indistinguishable from the targeted behaviour - no automated path, recommend disabling manually',
   },
   {
     id: 'fp-manual-newterms-dns',

@@ -413,7 +413,10 @@ steps:
       # harvest's KEEP projects: the alert_ids multivalue.
       - name: mark_alerts_dismissed
         type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == false }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.dismissed_tags }}"
@@ -426,7 +429,9 @@ steps:
       - name: mark_alerts_applied
         type: security.setAlertTags
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_apply_failures.output.any_apply_ran == true
             and steps.classify_apply_failures.output.query_failed != true
             and steps.classify_apply_failures.output.exception_failed != true
@@ -434,6 +439,24 @@ steps:
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.applied_tags }}"
+          tags_to_remove: []
+        on-failure:
+          continue: true
+
+      # Manual handoffs are approved but nothing is applied; tag alerts reviewed-only
+      # so the harvest filter excludes them and the same proposal is not re-diagnosed.
+      - name: mark_alerts_reviewed_manual
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_query == false
+            and steps.classify_proposal.output.can_apply_exception == false
+            and steps.classify_proposal.output.can_apply_risk_score == false }}
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.dismissed_tags }}"
           tags_to_remove: []
         on-failure:
           continue: true

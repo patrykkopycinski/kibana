@@ -350,9 +350,7 @@ steps:
         type: data.set
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply_query == false
-            and steps.classify_proposal.output.can_apply_exception == false
-            and steps.classify_proposal.output.can_apply_risk_score == false }}
+            and steps.classify_apply_failures.output.any_apply_ran == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
@@ -363,6 +361,10 @@ steps:
       - name: classify_apply_failures
         type: data.set
         with:
+          any_apply_ran: >-
+            ${{ steps.classify_proposal.output.can_apply_query == true
+              or steps.classify_proposal.output.can_apply_exception == true
+              or steps.classify_proposal.output.can_apply_risk_score == true }}
           query_failed: >-
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_query == true
@@ -407,6 +409,7 @@ steps:
         type: security.setAlertTags
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_apply_failures.output.any_apply_ran == true
             and steps.classify_apply_failures.output.query_failed != true
             and steps.classify_apply_failures.output.exception_failed != true
             and steps.classify_apply_failures.output.risk_score_failed != true }}

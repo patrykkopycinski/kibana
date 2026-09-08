@@ -455,7 +455,8 @@
       ],
       "ciLabels": [
         "evals:security-rule-tuning"
-      ]
+      ],
+      "serverConfigSet": "evals_security_rule_tuning"
     },
     {
       "id": "skill-selection-benchmark",

@@ -16,24 +16,24 @@ import {
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
-  PND_WATCH_DARK_WORKFLOW_ID,
-  PND_WATCH_DEEP_WORKFLOW_ID,
-  PND_WATCH_DETECTION_WORKFLOW_ID,
-  PND_WATCH_FLOOR_WORKFLOW_ID,
-  PND_WATCH_OFFICER_WORKFLOW_ID,
+  PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID,
+  PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
+  PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID } from './definitions/pnd/constants';
+import DARK_CONTINUOUS_THREAT_HUNT_YAML from './definitions/pnd/dark_continuous_threat_hunt.yaml';
+import DETECTION_RULE_CREATION_YAML from './definitions/pnd/detection_rule_creation.yaml';
+import DETECTION_RULE_TUNING_YAML from './definitions/pnd/detection_rule_tuning.yaml';
+import FLOOR_ALERT_TRIAGE_YAML from './definitions/pnd/floor_alert_triage.yaml';
+import FLOOR_ATTACK_DISCOVERY_YAML from './definitions/pnd/floor_attack_discovery.yaml';
 import RULE_CREATION_YAML from './definitions/pnd/rule_creation.yaml';
 import RULE_PREVIEW_YAML from './definitions/pnd/rule_preview.yaml';
 import RULE_TUNING_YAML from './definitions/pnd/rule_tuning.yaml';
-import WATCH_DARK_YAML from './definitions/pnd/watch_dark.yaml';
-import WATCH_DEEP_YAML from './definitions/pnd/watch_deep.yaml';
-import WATCH_DETECTION_YAML from './definitions/pnd/watch_detection.yaml';
-import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
-import WATCH_OFFICER_YAML from './definitions/pnd/watch_officer.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -57,23 +57,23 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
-  [PND_WATCH_FLOOR_WORKFLOW_ID]: {
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_OFFICER_WORKFLOW_ID]: {
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DARK_WORKFLOW_ID]: {
+  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DEEP_WORKFLOW_ID]: {
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
-  [PND_WATCH_DETECTION_WORKFLOW_ID]: {
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
   },
@@ -159,12 +159,15 @@ function createContentFingerprint(content: string): string {
  * fingerprints force the bump to happen in the same change as the edit.
  */
 const YAML_FINGERPRINTS: Record<string, readonly [string, string]> = {
-  [PND_WATCH_FLOOR_WORKFLOW_ID]: [WATCH_FLOOR_YAML, '1:be67d019'],
-  [PND_WATCH_OFFICER_WORKFLOW_ID]: [WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID]: [WATCH_DARK_YAML, '1:4f835cad'],
-  [PND_WATCH_DEEP_WORKFLOW_ID]: [WATCH_DEEP_YAML, '1:79b46054'],
-  [PND_WATCH_DETECTION_WORKFLOW_ID]: [WATCH_DETECTION_YAML, '1:c23724c4'],
-  [PND_RULE_TUNING_WORKFLOW_ID]: [RULE_TUNING_YAML, '5:8e560bf2'],
+  [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: [FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: [FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: [
+    DARK_CONTINUOUS_THREAT_HUNT_YAML,
+    '2:de85a75a',
+  ],
+  [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: [DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
+  [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: [DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
+  [PND_RULE_TUNING_WORKFLOW_ID]: [RULE_TUNING_YAML, '4:8e560bf2'],
   [PND_RULE_PREVIEW_WORKFLOW_ID]: [RULE_PREVIEW_YAML, '1:d6f68350'],
   [PND_RULE_CREATION_WORKFLOW_ID]: [RULE_CREATION_YAML, '2:95f37a04'],
 };
@@ -301,4 +304,25 @@ describe('managedWorkflowDefinitions', () => {
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );
+});
+
+describe('rule tuning diagnose prompt', () => {
+  // The prompt tells the model to use "the entity breakdown above" to pick the tightest
+  // exception conditions. That sentence is only true if a step actually fetches those
+  // entities AND its output is interpolated into the message — otherwise the model is
+  // told to ground its proposal in evidence that was never supplied, and silently
+  // invents entities instead. Asserting the prompt text alone would not catch that;
+  // the binding between producer step and consumer message is the thing that matters.
+  it('supplies the entity breakdown it instructs the model to use', () => {
+    expect(RULE_TUNING_YAML).toContain('name: fetch_fp_entities');
+    expect(RULE_TUNING_YAML).toContain('{{ steps.fetch_fp_entities.output.values | json }}');
+  });
+
+  // Rule types without an alert-suppression capability cannot receive a suppression
+  // change. Without this precondition the workflow proposes suppression on e.g.
+  // new_terms and the apply step fails at runtime, after the analyst approved it.
+  it('gates suppression on suppression-capable rule types', () => {
+    expect(RULE_TUNING_YAML).toContain("steps.fetch_rule.output.type == 'query'");
+    expect(RULE_TUNING_YAML).toContain("steps.fetch_rule.output.type == 'threshold'");
+  });
 });

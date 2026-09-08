@@ -3,7 +3,7 @@ name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
   and applies the approved tuning change: a rule exception, a narrowed query,
-  alert suppression, a risk score adjustment, or a rule disable.
+  or a risk score adjustment — otherwise it hands off for manual tuning.
 enabled: true
 tags:
   - security
@@ -32,10 +32,9 @@ triggers:
         connector_id:
           type: string
           description: >
-            GenAI connector id used by the diagnose step's model routing. When omitted
-            (or empty) the step falls back to the Agent Builder default model, which is
-            the production path. Eval harnesses pass the connector under test so the
-            proposal is attributable to a specific model rather than the space default.
+            Inference connector the diagnose step runs on. Pinning it here is what lets an
+            eval run compare models; unset, every run silently uses the deployment default
+            and a multi-model sweep measures the same model N times.
       additionalProperties: false
 outputs:
   - name: rules_examined
@@ -99,12 +98,17 @@ steps:
         on-failure:
           continue: true
 
-      # The diagnose prompt tells the agent to reason from the entity distribution of the
-      # FP cluster; that breakdown has to actually be in the message. Without it the agent
-      # sees only a rule name and an FP count, and the paths whose label is only derivable
-      # from entity dispersion (over-broad query, unfixable noise, low-value risk) are not
-      # decidable from the prompt at all. Aggregated here rather than left to the agent's
-      # own tool calls so every model under evaluation receives identical evidence.
+      # Surfaces fetch failures in the execution trace so they don't disappear
+      # silently. Alerts stay untagged, so the rule re-appears on the next sweep.
+      - name: record_fetch_failed
+        type: data.set
+        if: "${{ steps.fetch_rule.error != null }}"
+        with:
+          rule_id: "{{ foreach.item.0 }}"
+          rule_name: "{{ foreach.item.1 }}"
+          note: >-
+            Could not fetch rule details. Alerts will be re-harvested on the next sweep.
+
       - name: fetch_fp_entities
         type: elasticsearch.esql.query
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
@@ -127,9 +131,6 @@ steps:
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
         timeout: "10m"
         create-conversation: true
-        # Empty/omitted falls back to the Agent Builder default (the production path);
-        # an eval harness passes the connector under test so the resulting proposal is
-        # attributable to a named model instead of whatever the space defaults to.
         connector-id: "{{ inputs.connector_id }}"
         with:
           message: |-
@@ -171,26 +172,21 @@ steps:
               excepting individually. Only valid for rule type "query". Populate
               proposed_query with the full narrowed KQL in the same language.
 
-            suppression  — The same entity is generating repeated duplicate alerts.
-              Populate suppression_group_by with 1–3 field names to group by. Prefer
-              this over exception only when the entity itself is legitimately active
-              but the alert volume is the problem (e.g. a known scanner host).
-
             risk_score  — The rule has real detection value but the alerts are
               low-priority noise. Populate proposed_risk_score (0–100) and
               proposed_severity (low / medium / high / critical).
 
-            disable  — Last resort. The rule has no detection value or is fully
-              redundant with another active rule.
-
             manual  — None of the above is safe to apply automatically. Use summary
-              to describe the recommended manual change.
+              to describe: (a) the false-positive pattern you found, (b) which automated
+              paths you considered (exception / query / risk_score) and why each is unsafe
+              or inapplicable for this rule, and (c) a concrete recommendation for what the
+              analyst should do manually in the Detection Rules UI.
           schema:
             type: object
             properties:
               change_type:
                 type: string
-                enum: [exception, query, suppression, risk_score, disable, manual]
+                enum: [exception, query, risk_score, manual]
               summary:
                 type: string
               exception_entries:
@@ -213,12 +209,6 @@ steps:
                   required: [field, operator]
               proposed_query:
                 type: string
-              suppression_group_by:
-                type: array
-                items:
-                  type: string
-                minItems: 1
-                maxItems: 3
               proposed_risk_score:
                 type: integer
                 minimum: 0
@@ -283,7 +273,10 @@ steps:
 
       - name: review_tuning
         type: waitForApproval
-        if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.diagnose_rule.output.structured_output.summary != null }}
         timeout: "72h"
         with:
           approveLabel: Apply tuning
@@ -319,27 +312,19 @@ steps:
             {% endif %}
             Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "suppression" %}
-            Proposed alert suppression, grouped by:
-            {% for field in steps.diagnose_rule.output.structured_output.suppression_group_by %}
-            - {{ field }}
-            {% endfor %}
-            Approving enables alert suppression on the rule. Suppression cannot be removed
-            automatically; undo it manually in the Detection Rules UI.
-            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
             Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
             Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
             Approving patches the rule's risk score and severity. It can be changed back in the Detection Rules UI.
             {% endif %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "disable" %}
-            This proposal disables the rule entirely. This is a last resort — only approve
-            if you are confident the rule provides no detection value or is fully redundant.
-            Approving disables the rule. It can be re-enabled in the Detection Rules UI.
-            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "manual" %}
-            No automated change can be applied safely. Approving records the handoff;
-            apply the recommended change manually in the Detection Rules UI.
+            No automated change can be applied safely for this rule.
+            Approving records the handoff — no rule changes are made automatically.
+
+            Analysis and recommendation:
+            {{ steps.diagnose_rule.output.structured_output.summary }}
+
+            Apply the recommended change in the Detection Rules UI.
             {% endif %}
 
             {% if steps.diagnose_rule.output.conversation_id %}
@@ -347,47 +332,36 @@ steps:
             {% endif %}
 
       # Decided once so the apply and hand-off branches stay exact complements.
+      # Gated on fetch_rule so a skipped diagnose_rule cannot carry a prior
+      # iteration's stale proposal into the apply steps.
       - name: classify_proposal
         type: data.set
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
         with:
           can_apply_query: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
               and steps.diagnose_rule.output.structured_output.proposed_query != ''
-              and steps.fetch_rule.output.type == 'query'
-              and steps.preview_proposed_query.output.succeeded == true
-              and steps.preview_proposed_query.output.is_aborted == false }}
+              and steps.fetch_rule.output.type == 'query' }}
           can_apply_exception: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
-              and steps.diagnose_rule.output.structured_output.exception_entries != null }}
-          can_apply_suppression: >-
-            ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
-              and steps.diagnose_rule.output.structured_output.suppression_group_by != null
-              and (steps.fetch_rule.output.type == 'query'
-                or steps.fetch_rule.output.type == 'saved_query'
-                or steps.fetch_rule.output.type == 'eql'
-                or steps.fetch_rule.output.type == 'threshold') }}
+              and steps.diagnose_rule.output.structured_output.exception_entries != null
+              and steps.diagnose_rule.output.structured_output.exception_entries.size > 0 }}
           can_apply_risk_score: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
               and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
               and steps.diagnose_rule.output.structured_output.proposed_severity != null }}
-          can_apply_disable: >-
-            ${{ steps.diagnose_rule.output.structured_output.change_type == 'disable' }}
 
       - name: apply_query_tuning
-        type: kibana.request
+        type: security.patchRule
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == true }}
         on-failure:
           continue: true
         with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
+          patch:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
@@ -396,7 +370,9 @@ steps:
       - name: apply_exception_tuning
         type: security.createRuleException
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_exception == true }}
         on-failure:
           continue: true
@@ -406,63 +382,32 @@ steps:
           description: "Added by the rule tuning workflow."
           entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
 
-      - name: apply_suppression_tuning
-        type: kibana.request
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply_suppression == true }}
-        on-failure:
-          continue: true
-        with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
-            id: "{{ foreach.item.0 }}"
-            alert_suppression:
-              group_by: "${{ steps.diagnose_rule.output.structured_output.suppression_group_by }}"
 
       - name: apply_risk_score_tuning
-        type: kibana.request
+        type: security.patchRule
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_risk_score == true }}
         on-failure:
           continue: true
         with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
+          patch:
             id: "{{ foreach.item.0 }}"
             risk_score: "${{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}"
             severity: "{{ steps.diagnose_rule.output.structured_output.proposed_severity }}"
 
-      - name: apply_disable_tuning
-        type: security.disableRule
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply_disable == true }}
-        on-failure:
-          continue: true
-        with:
-          ids: ["{{ foreach.item.0 }}"]
 
       - name: record_manual_tuning
         type: data.set
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == false
             and steps.classify_proposal.output.can_apply_exception == false
-            and steps.classify_proposal.output.can_apply_suppression == false
-            and steps.classify_proposal.output.can_apply_risk_score == false
-            and steps.classify_proposal.output.can_apply_disable == false }}
+            and steps.classify_proposal.output.can_apply_risk_score == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
@@ -473,6 +418,10 @@ steps:
       - name: classify_apply_failures
         type: data.set
         with:
+          any_apply_ran: >-
+            ${{ steps.classify_proposal.output.can_apply_query == true
+              or steps.classify_proposal.output.can_apply_exception == true
+              or steps.classify_proposal.output.can_apply_risk_score == true }}
           query_failed: >-
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_query == true
@@ -481,18 +430,10 @@ steps:
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_exception == true
               and steps.apply_exception_tuning.error != null }}
-          suppression_failed: >-
-            ${{ steps.review_tuning.output.response.approved == true
-              and steps.classify_proposal.output.can_apply_suppression == true
-              and steps.apply_suppression_tuning.error != null }}
           risk_score_failed: >-
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_risk_score == true
               and steps.apply_risk_score_tuning.error != null }}
-          disable_failed: >-
-            ${{ steps.review_tuning.output.response.approved == true
-              and steps.classify_proposal.output.can_apply_disable == true
-              and steps.apply_disable_tuning.error != null }}
 
       # An approved proposal whose apply step errored must not vanish silently.
       - name: record_failed_apply
@@ -500,9 +441,7 @@ steps:
         if: >-
           ${{ steps.classify_apply_failures.output.query_failed == true
             or steps.classify_apply_failures.output.exception_failed == true
-            or steps.classify_apply_failures.output.suppression_failed == true
-            or steps.classify_apply_failures.output.risk_score_failed == true
-            or steps.classify_apply_failures.output.disable_failed == true }}
+            or steps.classify_apply_failures.output.risk_score_failed == true }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: >-
@@ -513,7 +452,10 @@ steps:
       # harvest's KEEP projects: the alert_ids multivalue.
       - name: mark_alerts_dismissed
         type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == false }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.dismissed_tags }}"
@@ -526,15 +468,34 @@ steps:
       - name: mark_alerts_applied
         type: security.setAlertTags
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
+            and steps.classify_apply_failures.output.any_apply_ran == true
             and steps.classify_apply_failures.output.query_failed != true
             and steps.classify_apply_failures.output.exception_failed != true
-            and steps.classify_apply_failures.output.suppression_failed != true
-            and steps.classify_apply_failures.output.risk_score_failed != true
-            and steps.classify_apply_failures.output.disable_failed != true }}
+            and steps.classify_apply_failures.output.risk_score_failed != true }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add: "${{ consts.applied_tags }}"
+          tags_to_remove: []
+        on-failure:
+          continue: true
+
+      # Manual handoffs are approved but nothing is applied; tag alerts reviewed-only
+      # so the harvest filter excludes them and the same proposal is not re-diagnosed.
+      - name: mark_alerts_reviewed_manual
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_query == false
+            and steps.classify_proposal.output.can_apply_exception == false
+            and steps.classify_proposal.output.can_apply_risk_score == false }}
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add: "${{ consts.dismissed_tags }}"
           tags_to_remove: []
         on-failure:
           continue: true

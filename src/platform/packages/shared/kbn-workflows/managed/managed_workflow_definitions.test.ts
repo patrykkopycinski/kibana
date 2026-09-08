@@ -64,6 +64,7 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
     settingsVersion: 1,
     autonomyLevel: 'manual',
+    scheduleInterval: '24h',
   },
   [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -160,14 +161,14 @@ function createContentFingerprint(content: string): string {
  */
 const YAML_FINGERPRINTS: Record<string, readonly [string, string]> = {
   [PND_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: [FLOOR_ALERT_TRIAGE_YAML, '1:d6a82eff'],
-  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: [FLOOR_ATTACK_DISCOVERY_YAML, '1:149ca943'],
+  [PND_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: [FLOOR_ATTACK_DISCOVERY_YAML, '2:d13818a0'],
   [PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: [
     DARK_CONTINUOUS_THREAT_HUNT_YAML,
     '2:de85a75a',
   ],
   [PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: [DETECTION_RULE_TUNING_YAML, '1:f39d6360'],
   [PND_WORKER_DETECTION_RULE_CREATION_WORKFLOW_ID]: [DETECTION_RULE_CREATION_YAML, '1:a6804a44'],
-  [PND_RULE_TUNING_WORKFLOW_ID]: [RULE_TUNING_YAML, '4:8e560bf2'],
+  [PND_RULE_TUNING_WORKFLOW_ID]: [RULE_TUNING_YAML, '4:8935315b'],
   [PND_RULE_PREVIEW_WORKFLOW_ID]: [RULE_PREVIEW_YAML, '1:d6f68350'],
   [PND_RULE_CREATION_WORKFLOW_ID]: [RULE_CREATION_YAML, '2:95f37a04'],
 };
@@ -316,13 +317,5 @@ describe('rule tuning diagnose prompt', () => {
   it('supplies the entity breakdown it instructs the model to use', () => {
     expect(RULE_TUNING_YAML).toContain('name: fetch_fp_entities');
     expect(RULE_TUNING_YAML).toContain('{{ steps.fetch_fp_entities.output.values | json }}');
-  });
-
-  // Rule types without an alert-suppression capability cannot receive a suppression
-  // change. Without this precondition the workflow proposes suppression on e.g.
-  // new_terms and the apply step fails at runtime, after the analyst approved it.
-  it('gates suppression on suppression-capable rule types', () => {
-    expect(RULE_TUNING_YAML).toContain("steps.fetch_rule.output.type == 'query'");
-    expect(RULE_TUNING_YAML).toContain("steps.fetch_rule.output.type == 'threshold'");
   });
 });

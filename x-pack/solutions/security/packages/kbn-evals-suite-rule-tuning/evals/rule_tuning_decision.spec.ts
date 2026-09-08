@@ -94,6 +94,199 @@ const TUNING_FIXTURES: Array<{
       'Repeated single-entity FPs on a new_terms rule — suppression is not applicable to ' +
       'this rule type, so the worker must fall back to a manual hand-off',
   },
+  {
+    id: 'fp-host-exception-ci',
+    expected: 'exception',
+    ruleType: 'query',
+    description: 'Repeated FPs concentrated on ci-runner-07 - tightest fix is an exception entry',
+  },
+  {
+    id: 'fp-host-exception-backup',
+    expected: 'exception',
+    ruleType: 'query',
+    description: 'Repeated FPs concentrated on backup-nas-02 - tightest fix is an exception entry',
+  },
+  {
+    id: 'fp-host-exception-av',
+    expected: 'exception',
+    ruleType: 'query',
+    description: 'Repeated FPs concentrated on sec-scan-11 - tightest fix is an exception entry',
+  },
+  {
+    id: 'fp-host-exception-print',
+    expected: 'exception',
+    ruleType: 'query',
+    description: 'Repeated FPs concentrated on print-srv-01 - tightest fix is an exception entry',
+  },
+  {
+    id: 'fp-host-exception-mdm',
+    expected: 'exception',
+    ruleType: 'query',
+    description: 'Repeated FPs concentrated on mdm-agent-09 - tightest fix is an exception entry',
+  },
+  {
+    id: 'fp-overbroad-wildcard-cmd',
+    expected: 'query',
+    ruleType: 'query',
+    description:
+      'A wildcard command-line term matches unrelated admin tooling across many hosts - tighten the process arguments',
+  },
+  {
+    id: 'fp-overbroad-any-user',
+    expected: 'query',
+    ruleType: 'query',
+    description:
+      'The rule omits a user filter, so every service account trips it - scope the query to interactive users',
+  },
+  {
+    id: 'fp-overbroad-port-range',
+    expected: 'query',
+    ruleType: 'query',
+    description:
+      'A broad destination port range sweeps in routine service traffic - restrict the port set',
+  },
+  {
+    id: 'fp-overbroad-parent-any',
+    expected: 'query',
+    ruleType: 'query',
+    description:
+      'No parent-process constraint lets benign launchers match - pin the expected parent binary',
+  },
+  {
+    id: 'fp-overbroad-ext-match',
+    expected: 'query',
+    ruleType: 'query',
+    description:
+      'A loose file-extension match catches ordinary document activity - narrow the extension list',
+  },
+  {
+    id: 'fp-suppression-healthcheck',
+    expected: 'suppression',
+    ruleType: 'query',
+    description: 'Benign curl re-firing from one entity - group-by suppression',
+  },
+  {
+    id: 'fp-suppression-vulnscan',
+    expected: 'suppression',
+    ruleType: 'query',
+    description: 'Benign nessus re-firing from one entity - group-by suppression',
+  },
+  {
+    id: 'fp-suppression-inventory',
+    expected: 'suppression',
+    ruleType: 'query',
+    description: 'Benign osqueryd re-firing from one entity - group-by suppression',
+  },
+  {
+    id: 'fp-suppression-patchagent',
+    expected: 'suppression',
+    ruleType: 'query',
+    description: 'Benign wuauclt re-firing from one entity - group-by suppression',
+  },
+  {
+    id: 'fp-suppression-logship',
+    expected: 'suppression',
+    ruleType: 'query',
+    description: 'Benign filebeat re-firing from one entity - group-by suppression',
+  },
+  {
+    id: 'fp-low-value-admin-tools',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description:
+      'Sanctioned admin tooling generates true but unremarkable hits - lower risk score and severity',
+  },
+  {
+    id: 'fp-low-value-devtools',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description:
+      'Developer tooling on build laptops fires constantly with no incident value - downgrade scoring',
+  },
+  {
+    id: 'fp-low-value-remote-support',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description:
+      'Approved remote-support sessions are real yet routine - reduce risk score rather than exclude',
+  },
+  {
+    id: 'fp-low-value-archive',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description:
+      'Routine archive extraction is benign in this environment - downgrade instead of suppressing',
+  },
+  {
+    id: 'fp-low-value-scripting',
+    expected: 'risk_score',
+    ruleType: 'query',
+    description:
+      'Everyday scripting by platform engineers is expected - lower severity to keep visibility',
+  },
+  {
+    id: 'fp-unfixable-telemetry',
+    expected: 'disable',
+    ruleType: 'query',
+    description:
+      'Only telemetry agents match, with no field separating benign from malicious - disable the rule',
+  },
+  {
+    id: 'fp-unfixable-agentmesh',
+    expected: 'disable',
+    ruleType: 'query',
+    description:
+      'Service-mesh sidecars account for every hit and share no discriminating attribute - disable',
+  },
+  {
+    id: 'fp-unfixable-buildfarm',
+    expected: 'disable',
+    ruleType: 'query',
+    description:
+      'Ephemeral build-farm workers regenerate identifiers each run, so no stable filter exists - disable',
+  },
+  {
+    id: 'fp-unfixable-imaging',
+    expected: 'disable',
+    ruleType: 'query',
+    description:
+      'OS imaging fleets reproduce the pattern wholesale with nothing to key an exception on - disable',
+  },
+  {
+    id: 'fp-unfixable-mailflow',
+    expected: 'disable',
+    ruleType: 'query',
+    description:
+      'Mail-gateway scanning is indistinguishable from the targeted behaviour - disable the rule',
+  },
+  {
+    id: 'fp-manual-newterms-dns',
+    expected: 'manual',
+    ruleType: 'new_terms',
+    description:
+      'New DNS resolvers trip a new_terms rule; suppression is unsupported for this rule type, so escalate',
+  },
+  {
+    id: 'fp-manual-newterms-proxy',
+    expected: 'manual',
+    ruleType: 'new_terms',
+    description:
+      'A newly introduced proxy host looks novel to a new_terms rule - needs human review, not suppression',
+  },
+  {
+    id: 'fp-manual-newterms-vpn',
+    expected: 'manual',
+    ruleType: 'new_terms',
+    description:
+      'A replacement VPN concentrator registers as an unseen term - escalate rather than auto-tune',
+  },
+  {
+    id: 'fp-manual-newterms-ntp',
+    expected: 'manual',
+    ruleType: 'new_terms',
+    description:
+      'A re-pointed NTP source appears novel on a new_terms rule - route to manual review',
+  },
 ];
 
 interface RuleTuningExample extends Example {

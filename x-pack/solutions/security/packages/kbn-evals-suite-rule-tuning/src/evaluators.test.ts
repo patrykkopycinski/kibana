@@ -10,6 +10,7 @@ import { changeTypeAccuracy, validProposal } from './evaluators';
 import {
   explainMissingProposal,
   isAwaitingApproval,
+  isWaitingStepNotReady,
   neverRan,
   type RuleTuningVerdict,
 } from './workflow_task';
@@ -209,5 +210,34 @@ describe('explainMissingProposal', () => {
 
   it('always names the steps that ran so the cause is checkable', () => {
     expect(explainMissingProposal(timeoutSteps)).toContain('diagnose_rule(step_level_timeout)');
+  });
+});
+
+describe('isWaitingStepNotReady', () => {
+  // The resume route rejects with this 409 when the execution has reached waiting_for_input but
+  // its waiting step row is not queryable yet. Retrying through it is correct; treating it as a
+  // hard failure killed a 35-fixture run on fixture 8.
+  const raceError = new Error(
+    'Workflow execution "e1ebcee4" is in status "waiting step not found" but expected "waiting_for_input".'
+  );
+
+  it('matches the not-yet-persisted waiting step race', () => {
+    expect(isWaitingStepNotReady(raceError)).toBe(true);
+  });
+
+  it('does NOT match a genuine double-approval conflict', () => {
+    const alreadyResponded = new Error(
+      'Workflow execution "e1ebcee4" is in status "already responded to or no longer waiting for input" but expected "waiting_for_input".'
+    );
+    expect(isWaitingStepNotReady(alreadyResponded)).toBe(false);
+  });
+
+  it('does NOT match an unrelated transport failure', () => {
+    expect(isWaitingStepNotReady(new Error('socket hang up'))).toBe(false);
+  });
+
+  it('tolerates a non-Error rejection', () => {
+    expect(isWaitingStepNotReady('waiting step not found')).toBe(true);
+    expect(isWaitingStepNotReady(undefined)).toBe(false);
   });
 });

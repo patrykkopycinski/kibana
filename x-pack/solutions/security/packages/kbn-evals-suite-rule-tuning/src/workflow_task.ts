@@ -68,6 +68,19 @@ export const isAwaitingApproval = (status: ExecutionStatus): boolean =>
   status === ExecutionStatus.WAITING_FOR_INPUT || status === ExecutionStatus.WAITING;
 
 /**
+ * True for the 409 the resume route returns when an execution has reached `waiting_for_input`
+ * but its waiting STEP row is not queryable yet.
+ *
+ * `resumeWorkflowExecution` resolves the waiting step via `getWaitingStepExecutionId` and
+ * rejects with `is in status "waiting step not found" but expected "waiting_for_input"` when
+ * that lookup comes back empty. That is a read-after-write race the harness should re-poll
+ * through, not a real conflict — so this stays narrow. An "already responded to" 409 (a genuine
+ * double-approval) does NOT match and still fails the run.
+ */
+export const isWaitingStepNotReady = (error: unknown): boolean =>
+  /waiting step not found/.test(String((error as { message?: unknown })?.message ?? error));
+
+/**
  * Polls until this workflow has no non-terminal executions left.
  *
  * `/executions/cancel` returns before the runtime has actually torn the executions down, and
@@ -240,14 +253,29 @@ export const runRuleTuningWorkflow = async ({
       log.info(`Execution ${workflowExecutionId} status: ${execution.status}`);
     }
     if (!approvalResumed && isAwaitingApproval(execution.status)) {
-      await fetch(`/api/workflows/executions/${workflowExecutionId}/resume`, {
-        method: 'POST',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ input: { approved: true } }),
-      });
-      approvalResumed = true;
-      log.info(`Auto-approved review_tuning gate for execution ${workflowExecutionId}`);
+      // The execution reaching `waiting_for_input` does not guarantee its waiting STEP row is
+      // queryable yet. `resumeWorkflowExecution` looks that step up and, when it is not there,
+      // rejects with 409 `waiting step not found` -- a read-after-write race, not a real
+      // conflict. Treat it as "not ready yet" and re-poll instead of burning the whole suite:
+      // leaving approvalResumed false lets the next iteration retry the approval.
+      try {
+        await fetch(`/api/workflows/executions/${workflowExecutionId}/resume`, {
+          method: 'POST',
+          version: WORKFLOWS_API_VERSION,
+          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          body: JSON.stringify({ input: { approved: true } }),
+        });
+        approvalResumed = true;
+        log.info(`Auto-approved review_tuning gate for execution ${workflowExecutionId}`);
+      } catch (error) {
+        if (!isWaitingStepNotReady(error)) {
+          throw error;
+        }
+        log.info(
+          `Approval gate for execution ${workflowExecutionId} is not resumable yet ` +
+            `(waiting step not persisted); retrying after ${pollIntervalMs}ms`
+        );
+      }
       await sleep(pollIntervalMs); // resume is async; give it a beat before re-poll
     } else {
       await sleep(pollIntervalMs);

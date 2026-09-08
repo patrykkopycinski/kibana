@@ -3,7 +3,7 @@ name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, diagnoses each one,
   and applies the approved tuning change: a rule exception, a narrowed query,
-  alert suppression, a risk score adjustment, or a rule disable.
+  or a risk score adjustment — otherwise it hands off for manual tuning.
 enabled: true
 tags:
   - security

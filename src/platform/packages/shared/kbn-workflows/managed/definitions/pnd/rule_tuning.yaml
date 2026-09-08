@@ -315,7 +315,9 @@ steps:
       - name: apply_query_tuning
         type: security.patchRule
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == true }}
         on-failure:
           continue: true
@@ -329,7 +331,9 @@ steps:
       - name: apply_exception_tuning
         type: security.createRuleException
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_exception == true }}
         on-failure:
           continue: true
@@ -343,7 +347,9 @@ steps:
       - name: apply_risk_score_tuning
         type: security.patchRule
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_risk_score == true }}
         on-failure:
           continue: true
@@ -357,8 +363,12 @@ steps:
       - name: record_manual_tuning
         type: data.set
         if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_apply_failures.output.any_apply_ran == false }}
+          ${{ steps.fetch_rule.error == null
+            and steps.fetch_rule.output.enabled == true
+            and steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply_query == false
+            and steps.classify_proposal.output.can_apply_exception == false
+            and steps.classify_proposal.output.can_apply_risk_score == false }}
         with:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.

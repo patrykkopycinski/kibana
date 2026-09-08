@@ -7,7 +7,12 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { changeTypeAccuracy, validProposal } from './evaluators';
-import { isAwaitingApproval, neverRan, type RuleTuningVerdict } from './workflow_task';
+import {
+  explainMissingProposal,
+  isAwaitingApproval,
+  neverRan,
+  type RuleTuningVerdict,
+} from './workflow_task';
 import type { ChangeType } from './constants';
 
 describe('rule-tuning evaluators', () => {
@@ -173,5 +178,36 @@ describe('rule-tuning evaluators', () => {
       expect(neverRan(ExecutionStatus.COMPLETED)).toBe(false);
       expect(neverRan(ExecutionStatus.FAILED)).toBe(false);
     });
+  });
+});
+
+describe('explainMissingProposal', () => {
+  // A timed-out agent step and a rule that failed the diagnose gate both score 0, but one is a
+  // model result and the other a fixture bug. Asserting the gate cause unconditionally sent
+  // readers to check rule seeding when GLM-5.2 had simply blown its 10m step budget.
+  const gateSteps = [
+    { stepId: 'fetch_rule', stepType: 'kibana.request' },
+    { stepId: 'if_diagnose_rule', stepType: 'if' },
+  ];
+  const timeoutSteps = [
+    ...gateSteps,
+    { stepId: 'diagnose_rule', stepType: 'step_level_timeout' },
+    { stepId: 'diagnose_rule', stepType: 'ai.agent' },
+  ];
+
+  it('blames the step timeout when the agent step ran out of time', () => {
+    const msg = explainMissingProposal(timeoutSteps);
+    expect(msg).toContain('hit its step timeout');
+    expect(msg).not.toContain('failed the diagnose gate');
+  });
+
+  it('blames the diagnose gate when no step timed out', () => {
+    const msg = explainMissingProposal(gateSteps);
+    expect(msg).toContain('failed the diagnose gate');
+    expect(msg).not.toContain('hit its step timeout');
+  });
+
+  it('always names the steps that ran so the cause is checkable', () => {
+    expect(explainMissingProposal(timeoutSteps)).toContain('diagnose_rule(step_level_timeout)');
   });
 });

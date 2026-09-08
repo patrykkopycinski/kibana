@@ -128,6 +128,24 @@ const readDiagnoseStructuredOutput = (
  * diagnose step's proposal. The sweep is scheduled; we trigger it via the run route with
  * `min_fp_count: 1` so the seeded rule is harvested in the same execution.
  */
+/**
+ * Explain why a completed execution produced no proposal.
+ *
+ * Two causes are indistinguishable in the score (both yield 0) but demand opposite responses:
+ * an agent step that ran out of time is a real model result, while a rule that failed the
+ * diagnose gate is a fixture bug. The step list already carries the distinction, so classify it
+ * here instead of asserting one cause and sending the reader to check the wrong thing.
+ */
+export const explainMissingProposal = (
+  steps: Array<{ stepId: string; stepType?: string }>
+): string => {
+  const stepsRun = steps.map((s) => `${s.stepId}(${s.stepType})`).join(', ');
+  const cause = steps.some((s) => s.stepType === 'step_level_timeout')
+    ? `diagnose_rule hit its step timeout before proposing — the model was too slow to decide, not a seeding failure`
+    : `diagnose_rule produced no proposal — the seeded rule likely failed the diagnose gate (check it is enabled)`;
+  return `${cause}. Steps that ran: [${stepsRun}]`;
+};
+
 export const runRuleTuningWorkflow = async ({
   fetch,
   log,
@@ -261,18 +279,16 @@ export const runRuleTuningWorkflow = async ({
     );
   }
 
-  // Reachability assert: if the run completed but produced no diagnose proposal, the LLM was
-  // never invoked — almost always because the seeded rule failed the diagnose gate
-  // (`fetch_rule.output.enabled == true`). Name the steps that DID run so the cause is visible
-  // instead of degrading to a silent 0.
+  // Reachability assert: if the run completed but produced no diagnose proposal, distinguish the
+  // two causes the step list can already tell apart — the agent step timing out (a real model
+  // result: too slow to decide) versus the seeded rule failing the diagnose gate
+  // (`fetch_rule.output.enabled == true`, a fixture bug). Naming the wrong one sends the reader
+  // to check rule seeding when the model actually exceeded its step budget.
   if (!proposal?.change_type) {
-    const stepsRun = (execution.stepExecutions ?? [])
-      .map((s) => `${s.stepId}(${s.stepType})`)
-      .join(', ');
     throw new Error(
-      `Workflow execution ${workflowExecutionId} completed (status: ${execution.status}) but ` +
-        `diagnose_rule produced no proposal — the seeded rule likely failed the diagnose gate ` +
-        `(check it is enabled). Steps that ran: [${stepsRun}]`
+      `Workflow execution ${workflowExecutionId} completed (status: ${
+        execution.status
+      }) but ${explainMissingProposal(execution.stepExecutions ?? [])}`
     );
   }
 

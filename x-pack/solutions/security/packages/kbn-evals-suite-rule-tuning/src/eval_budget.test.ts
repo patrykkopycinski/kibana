@@ -192,13 +192,15 @@ describe('rule-tuning eval budget', () => {
   });
 
   it('enables every experimental skill the workflow asks the agent to load', () => {
-    // The diagnose step tells the agent to use `skill://investigate-rule`, but that skill is
-    // registered only when `investigateRuleSkill` is in enableExperimental. When the eval stack
-    // omits the flag, load_skill returns "Skill 'investigate-rule' not found." and the agent
-    // silently falls back to whatever generic skill it can find — the run still exits 0 and
-    // still produces scores, so the miss reads as a model quality problem instead of a
-    // misconfigured stack. Measured on a full 35-fixture run: 34 of 68 load_skill calls 404'd
-    // and `investigate-rule` loaded zero times.
+    // A skill referenced as `skill://<id>` but not enabled via enableExperimental returns
+    // "Skill '<id>' not found." at run time; the agent then falls back to unrelated generic
+    // skills while the run still exits 0 and still emits scores, so a misconfigured stack is
+    // indistinguishable from a weak model. Measured before this was caught: 34 of 68
+    // load_skill calls 404'd and `investigate-rule` loaded zero times.
+    //
+    // The diagnose step currently requests no skill, so this asserts nothing today — it is a
+    // tripwire for whoever re-adds one. Keep it: the cost of a silent 404 is a wasted
+    // multi-hour run.
     const workflow = readWorkflow();
     const config = readFileSync(
       join(
@@ -209,8 +211,6 @@ describe('rule-tuning eval budget', () => {
     );
 
     const requested = [...workflow.matchAll(/skill:\/\/([a-z0-9-]+)/g)].map((match) => match[1]);
-    expect(requested.length).toBeGreaterThan(0);
-
     const flagBlock = config.match(/enableExperimental=\$\{JSON\.stringify\(\[([^\]]*)\]/);
     const enabled = flagBlock ? flagBlock[1] : '';
 
@@ -218,6 +218,38 @@ describe('rule-tuning eval budget', () => {
       // `investigate-rule` is registered behind the `investigateRuleSkill` flag.
       const flag = `${skill.replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Skill`;
       expect(enabled).toContain(flag);
+    }
+  });
+
+  it('does not delegate the structured decision to an advisory, human-facing skill', () => {
+    // `investigate-rule` is analyst-facing guidance: it states it "never applies a change",
+    // forbids emitting "an auto-applied / machine-actionable change", and mandates a
+    // five-section markdown answer. The diagnose step needs the opposite — one structured
+    // change_type the workflow auto-applies through security.patchRule. Measured on a full
+    // 35-fixture run where the skill loaded 35/35: the skill body mentions `exception` 21x
+    // and `query` 21x but `risk_score` ZERO times, so risk_score was never predicted once and
+    // its 6 fixtures were unwinnable; accuracy fell 12/35 -> 10/35 versus the run where the
+    // skill silently 404'd. Keep the diagnose criteria in the workflow, which already spells
+    // out all four change_types.
+    const workflow = readWorkflow();
+    const diagnose = workflow.slice(workflow.indexOf('- name: diagnose_rule'));
+    const message = diagnose.slice(0, diagnose.indexOf('schema:'));
+
+    expect(message).not.toMatch(/skill:\/\//);
+  });
+
+  it('spells out criteria for every change_type it can emit', () => {
+    // With no skill supplying guidance, the prompt is the only place the agent learns what
+    // each change_type means. A label the prompt never explains is one the agent cannot pick.
+    const workflow = readWorkflow();
+    const diagnose = workflow.slice(workflow.indexOf('- name: diagnose_rule'));
+    const message = diagnose.slice(0, diagnose.indexOf('schema:'));
+
+    const enumMatch = workflow.match(/change_type:\s*\n\s*type: string\s*\n\s*enum: \[([^\]]+)\]/);
+    if (!enumMatch) throw new Error('rule_tuning.yaml no longer declares a change_type enum');
+
+    for (const label of enumMatch[1].split(',').map((value) => value.trim())) {
+      expect(message).toMatch(new RegExp(`^\\s*${label}\\s+—`, 'm'));
     }
   });
 

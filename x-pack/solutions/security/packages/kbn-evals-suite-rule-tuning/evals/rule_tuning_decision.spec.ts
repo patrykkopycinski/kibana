@@ -49,6 +49,8 @@ const TUNING_FIXTURES: Array<{
   expected: ChangeType;
   ruleType: string;
   description: string;
+  riskScore?: number;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }> = [
   {
     id: 'fp-host-exception',
@@ -73,6 +75,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-risk',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description: 'Alerts are real but low-value — downgrade risk score and severity',
   },
   {
@@ -199,6 +203,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-admin-tools',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description:
       'Sanctioned admin tooling generates true but unremarkable hits - lower risk score and severity',
   },
@@ -206,6 +212,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-devtools',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description:
       'Developer tooling on build laptops fires constantly with no incident value - downgrade scoring',
   },
@@ -213,6 +221,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-remote-support',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description:
       'Approved remote-support sessions are real yet routine - reduce risk score rather than exclude',
   },
@@ -220,6 +230,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-archive',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description:
       'Routine archive extraction is benign in this environment - downgrade instead of suppressing',
   },
@@ -227,6 +239,8 @@ const TUNING_FIXTURES: Array<{
     id: 'fp-low-value-scripting',
     expected: 'risk_score',
     ruleType: 'query',
+    riskScore: 73,
+    severity: 'high',
     description:
       'Everyday scripting by platform engineers is expected - lower severity to keep visibility',
   },

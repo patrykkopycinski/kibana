@@ -211,6 +211,33 @@ describe('rule-tuning eval budget', () => {
     expect(args).not.toMatch(/investigateRuleSkill/);
   });
 
+  it('seeds risk_score fixtures with scoring the agent can actually downgrade', () => {
+    // Every fixture was created with a hardcoded `risk_score: 40` / `severity: 'medium'`,
+    // so a "real but low-value" rule was indistinguishable from a severe one. The
+    // risk_score label was unreachable from seeded data: all 6 fp-low-value-* fixtures
+    // scored 0/6 across four runs, on three different stack configurations.
+    const seeder = read('evals/seed_fp_cluster.ts');
+
+    // The rule body must derive scoring from the fixture rather than a shared literal.
+    const ruleBody = seeder.slice(seeder.indexOf('rule_id: ruleId'));
+    const createBlock = ruleBody.slice(0, ruleBody.indexOf('interval:'));
+
+    expect(createBlock).not.toMatch(/risk_score: \d+/);
+    expect(createBlock).not.toMatch(/severity: '(low|medium|high|critical)'/);
+    expect(createBlock).toMatch(/risk_score: fixture\./);
+    expect(createBlock).toMatch(/severity: fixture\./);
+
+    // ...and the risk_score fixtures must actually set high scoring, or the plumbing is
+    // wired to nothing and every rule is still seeded at the medium/40 default.
+    const suite = read('evals/rule_tuning_decision.spec.ts');
+    const riskFixtures = suite.match(/\{[^{}]*expected: 'risk_score'[^{}]*\}/g) ?? [];
+    expect(riskFixtures.length).toBeGreaterThan(0);
+    for (const fixture of riskFixtures) {
+      expect(fixture).toMatch(/riskScore: \d+/);
+      expect(fixture).toMatch(/severity: '(high|critical)'/);
+    }
+  });
+
   it('gives the agent the rule fields it must ground each change_type in', () => {
     // fetch_rule retrieves the full rule, but the diagnose prompt historically passed only
     // the rule name and the entity aggregation. Without the rule's own query the agent

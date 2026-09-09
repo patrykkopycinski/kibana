@@ -33,6 +33,15 @@ export interface SeedFixtureSpec {
   id: string;
   ruleType: string;
   expected: string;
+  /**
+   * Starting scoring for the seeded rule. `risk_score` fixtures need a rule that is
+   * scored HIGH so there is something to downgrade — with the previous shared
+   * `risk_score: 40` / `severity: 'medium'` literal, a "real but low-value" rule was
+   * byte-identical to a severe one and the label was unreachable from seeded data.
+   * Defaults keep every other fixture on the original medium/40 baseline.
+   */
+  riskScore?: number;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 interface SeedContext {
@@ -413,8 +422,8 @@ export const seedRuleAndFpAlerts = async (
       query: FIXTURE_QUERIES[fixture.id],
       language: 'kuery',
       index: ['logs-endpoint.events.process-default'],
-      severity: 'medium',
-      risk_score: 40,
+      severity: fixture.severity ?? 'medium',
+      risk_score: fixture.riskScore ?? 40,
       interval: '5m',
       from: 'now-10m',
       to: 'now',

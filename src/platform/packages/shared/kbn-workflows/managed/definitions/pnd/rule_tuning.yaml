@@ -178,8 +178,8 @@ steps:
 
             Each row is one host/user/ip/process combination and how many false
             positives it accounts for. A cluster concentrated on one combination is
-            exceptionable or suppressible; one spread evenly across unrelated entities
-            is not, and points at the query or the rule itself.
+            exceptionable when the rule type allows it; one spread evenly across
+            unrelated entities is not, and points at the query or the rule itself.
             {% else %}
             Unavailable — the entity aggregation did not return. Diagnose from the rule
             definition alone, and prefer `manual` over a change you cannot ground in
@@ -203,6 +203,12 @@ steps:
             query  — The query is too broad and FPs share a pattern not worth
               excepting individually. Only valid for rule type "query". Populate
               proposed_query with the full narrowed KQL in the same language.
+
+            Rule type gates the automated options. The rule's type is shown above.
+            exception and query both edit query-rule logic: when the type is
+            anything other than "query" (for example "new_terms"), neither applies
+            however concentrated the false positives look, and the correct answer
+            is manual even for a single repeating entity.
 
             risk_score  — The rule has real detection value but the alerts are
               low-priority noise. Populate proposed_risk_score (0–100) and

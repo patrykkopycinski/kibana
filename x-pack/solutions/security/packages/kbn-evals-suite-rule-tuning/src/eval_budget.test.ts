@@ -211,6 +211,25 @@ describe('rule-tuning eval budget', () => {
     expect(args).not.toMatch(/investigateRuleSkill/);
   });
 
+  it('tells the agent which change_types a non-query rule type can actually use', () => {
+    // 5 fixtures are labelled `manual` solely because the rule is `new_terms`:
+    // exception/query edit query-rule logic and do not apply to that type. The prompt
+    // interpolates the rule `type` but never stated its consequence, and separately told
+    // the agent a concentrated cluster was "exceptionable or suppressible" — suppression
+    // is not in the enum, so that steered every concentrated fixture to `exception`.
+    // Measured e1d62a661: 0/11 concentrated `manual` fixtures correct, all 11 predicted
+    // `exception`, while the 5/5/5-spread `manual` fixtures scored 5/6.
+    const workflow = readWorkflow();
+    const diagnose = workflow.slice(workflow.indexOf('name: diagnose_rule'));
+
+    // The rule-type gate must be stated, naming the type the fixtures actually use.
+    expect(diagnose).toMatch(/new_terms/);
+
+    // ...and the entity-cluster guidance must not offer suppression, which the
+    // change_type enum cannot express.
+    expect(diagnose).not.toMatch(/exceptionable or suppressible/);
+  });
+
   it('seeds risk_score fixtures with scoring the agent can actually downgrade', () => {
     // Every fixture was created with a hardcoded `risk_score: 40` / `severity: 'medium'`,
     // so a "real but low-value" rule was indistinguishable from a severe one. The

@@ -72,6 +72,45 @@ describe('rule-tuning eval budget', () => {
     expect(countFixtures()).toBeGreaterThanOrEqual(30);
   });
 
+  it('states the smallest accuracy gap the fixture count can actually resolve', () => {
+    // Ranking two models on this suite is a PAIRED comparison: the same fixtures are graded
+    // by both, so significance comes from the fixtures they DISAGREE on (McNemar), not from
+    // the raw accuracy difference. With d discordant pairs, one model must win w of them for
+    // a two-sided exact p < 0.05, and the accuracy gap that represents is (w - (d - w)) / n.
+    //
+    // At n=35 that floor is ~0.23 absolute accuracy. Anything smaller is indistinguishable
+    // from sampling noise, which is why this suite reports TIED instead of a ranking. If the
+    // fixture count grows, this number drops and the guard's message stays truthful.
+    const n = countFixtures();
+    const twoSidedExactP = (wins: number, discordant: number) => {
+      // sum of binomial(discordant, k) for k >= wins, at p=0.5, doubled for two-sided
+      let tail = 0;
+      for (let k = wins; k <= discordant; k++) {
+        let coefficient = 1;
+        for (let j = 0; j < k; j++) coefficient = (coefficient * (discordant - j)) / (j + 1);
+        tail += coefficient;
+      }
+      return (tail / 2 ** discordant) * 2;
+    };
+
+    // A realistic discordance for two models near this suite's accuracy band.
+    const discordant = 12;
+    let winsNeeded = discordant;
+    for (let w = Math.floor(discordant / 2) + 1; w <= discordant; w++) {
+      if (twoSidedExactP(w, discordant) < 0.05) {
+        winsNeeded = w;
+        break;
+      }
+    }
+    const minDetectableGap = (winsNeeded - (discordant - winsNeeded)) / n;
+
+    // The suite must not silently become one that claims to resolve gaps it cannot. If a
+    // future n makes this floor better than 0.10, the TIED language in the report is stale
+    // and must be revisited deliberately rather than by accident.
+    expect(minDetectableGap).toBeGreaterThan(0.1);
+    expect(minDetectableGap).toBeLessThanOrEqual(0.35);
+  });
+
   it('keeps the majority class small enough that a constant answer cannot look competent', () => {
     // A single-label suite is trivially gamed: a model that always answers the most common
     // change_type scores the majority share while demonstrating no discrimination at all. That

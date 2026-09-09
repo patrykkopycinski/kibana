@@ -22,13 +22,13 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * spans, so without the override every model scores 0 on skill usage regardless of what
  * it actually did — a silent false negative rather than a failed run.
  *
- * The diagnose step routes the agent to `skill://investigate-rule`, which is registered
- * only when `investigateRuleSkill` is in `enableExperimental` (it defaults to false). With
- * the flag off, `load_skill` returns "Skill 'investigate-rule' not found." and the agent
- * falls back to unrelated generic skills, yet the run still exits 0 and still emits scores
- * — so a misconfigured stack is indistinguishable from a weak model. Measured on a full
- * 35-fixture run before this override: 34 of 68 `load_skill` calls 404'd and
- * `investigate-rule` loaded zero times.
+ * `investigateRuleSkill` is deliberately NOT enabled here, which matches its production
+ * default. That skill is analyst-facing guidance — it never applies a change and forbids
+ * machine-actionable output — while this workflow auto-applies a structured change_type
+ * through security.patchRule. Registering it lets the agent load it unprompted: measured
+ * on a 35-fixture run with the flag on, it loaded 35/35 times, its body mentioned
+ * `risk_score` zero times, risk_score was never once predicted, and accuracy fell to
+ * 10/35 from 12/35. The suite measures the workflow's own prompt, so leave it off.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -41,7 +41,6 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['investigateRuleSkill'])}`,
     ],
   },
 };

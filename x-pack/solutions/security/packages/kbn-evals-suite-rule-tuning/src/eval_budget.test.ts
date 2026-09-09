@@ -191,17 +191,14 @@ describe('rule-tuning eval budget', () => {
     expect(workflow).toMatch(/concurrency_key:\s*\n\s*type: string/);
   });
 
-  it('enables every experimental skill the workflow asks the agent to load', () => {
-    // A skill referenced as `skill://<id>` but not enabled via enableExperimental returns
-    // "Skill '<id>' not found." at run time; the agent then falls back to unrelated generic
-    // skills while the run still exits 0 and still emits scores, so a misconfigured stack is
-    // indistinguishable from a weak model. Measured before this was caught: 34 of 68
-    // load_skill calls 404'd and `investigate-rule` loaded zero times.
-    //
-    // The diagnose step currently requests no skill, so this asserts nothing today — it is a
-    // tripwire for whoever re-adds one. Keep it: the cost of a silent 404 is a wasted
-    // multi-hour run.
-    const workflow = readWorkflow();
+  it('leaves the advisory investigate-rule skill unregistered on the eval stack', () => {
+    // Removing `skill://investigate-rule` from the prompt is not enough: while the skill is
+    // registered, the agent still discovers and loads it on its own (measured: 3 unprompted
+    // loads in the first 2 fixtures after the prompt reference was removed). Its contract is
+    // the opposite of this workflow's -- it never applies a change, forbids machine-actionable
+    // output, and never mentions risk_score -- so registering it silently replaces the
+    // criteria the workflow spells out. Its production default is off; keep the eval stack
+    // matching production so the suite measures the workflow's own prompt.
     const config = readFileSync(
       join(
         __dirname,
@@ -210,15 +207,8 @@ describe('rule-tuning eval budget', () => {
       'utf8'
     );
 
-    const requested = [...workflow.matchAll(/skill:\/\/([a-z0-9-]+)/g)].map((match) => match[1]);
-    const flagBlock = config.match(/enableExperimental=\$\{JSON\.stringify\(\[([^\]]*)\]/);
-    const enabled = flagBlock ? flagBlock[1] : '';
-
-    for (const skill of requested) {
-      // `investigate-rule` is registered behind the `investigateRuleSkill` flag.
-      const flag = `${skill.replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Skill`;
-      expect(enabled).toContain(flag);
-    }
+    const args = config.slice(config.indexOf('serverArgs: ['));
+    expect(args).not.toMatch(/investigateRuleSkill/);
   });
 
   it('does not delegate the structured decision to an advisory, human-facing skill', () => {

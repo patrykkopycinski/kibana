@@ -211,6 +211,20 @@ describe('rule-tuning eval budget', () => {
     expect(args).not.toMatch(/investigateRuleSkill/);
   });
 
+  it('gives the agent the rule fields it must ground each change_type in', () => {
+    // fetch_rule retrieves the full rule, but the diagnose prompt historically passed only
+    // the rule name and the entity aggregation. Without the rule's own query the agent
+    // cannot populate proposed_query, and without the current risk_score/severity it cannot
+    // justify lowering them - so `query` and `risk_score` collapse into `manual`.
+    const workflow = readWorkflow();
+    const diagnose = workflow.slice(workflow.indexOf('name: diagnose_rule'));
+    const message = diagnose.slice(0, diagnose.indexOf('schema:'));
+
+    expect(message).toMatch(/steps\.fetch_rule\.output\.query/);
+    expect(message).toMatch(/steps\.fetch_rule\.output\.risk_score/);
+    expect(message).toMatch(/steps\.fetch_rule\.output\.severity/);
+  });
+
   it('does not delegate the structured decision to an advisory, human-facing skill', () => {
     // `investigate-rule` is analyst-facing guidance: it states it "never applies a change",
     // forbids emitting "an auto-applied / machine-actionable change", and mandates a

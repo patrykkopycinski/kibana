@@ -160,6 +160,17 @@ steps:
             during the last {{ inputs.lookback_hours }} hours. These are confirmed
             analyst dispositions — not suspected noise.
 
+            Rule definition
+              type:            {{ steps.fetch_rule.output.type }}
+              language:        {{ steps.fetch_rule.output.language | default: 'n/a' }}
+              query:           {{ steps.fetch_rule.output.query | default: 'n/a' }}
+              risk_score:      {{ steps.fetch_rule.output.risk_score }}
+              severity:        {{ steps.fetch_rule.output.severity }}
+
+            The query above is the rule's current logic — narrow it only from this text.
+            The risk_score and severity above are its current scoring; propose new values
+            relative to them rather than in the abstract.
+
             Entity breakdown of those false positives
             (columns: {{ steps.fetch_fp_entities.output.columns | map: 'name' | json }}):
             {% if steps.fetch_fp_entities.error == null and steps.fetch_fp_entities.output.values %}

@@ -151,10 +151,13 @@ steps:
         connector-id: "{{ inputs.connector_id }}"
         with:
           message: |-
-            Investigate rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}) and return a
-            structured tuning proposal. Ground every claim in the rule definition and the
-            evidence below; this decision is applied automatically once an analyst approves
-            it, so do not describe changes for a human to make by hand.
+            Use the [/investigate-rule](skill://investigate-rule) skill to investigate
+            rule_id "{{ foreach.item.3 }}" ({{ foreach.item.1 }}), then return a structured
+            tuning proposal. Ground every claim in the rule definition and the evidence
+            below; this decision is applied automatically once an analyst approves it, so
+            do not describe changes for a human to make by hand. Follow the skill's
+            investigation steps, but answer with the schema below rather than its prose
+            sections, and choose the change_type by the criteria stated here.
 
             {{ foreach.item.2 }} alerts from this rule were closed as false positives
             during the last {{ inputs.lookback_hours }} hours. These are confirmed

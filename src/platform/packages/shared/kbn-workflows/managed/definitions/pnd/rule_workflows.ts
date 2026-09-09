@@ -38,7 +38,9 @@ export const PND_RULE_TUNING_WORKFLOW = {
   //    suppression for a concentrated entity cluster (not a change_type it can emit).
   // 7: the risk_score criterion is tied to the rule's current scoring and to
   //    entity-spread, instead of a subjective "low-priority noise" judgement.
-  version: 7,
+  // 8: diagnose_rule invokes skill://investigate-rule again (restoring the shared chat/worker
+  //    investigation path) while binding the answer to this workflow's schema and criteria.
+  version: 8,
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

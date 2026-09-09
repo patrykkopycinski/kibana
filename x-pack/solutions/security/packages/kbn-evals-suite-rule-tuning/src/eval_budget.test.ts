@@ -191,14 +191,12 @@ describe('rule-tuning eval budget', () => {
     expect(workflow).toMatch(/concurrency_key:\s*\n\s*type: string/);
   });
 
-  it('leaves the advisory investigate-rule skill unregistered on the eval stack', () => {
-    // Removing `skill://investigate-rule` from the prompt is not enough: while the skill is
-    // registered, the agent still discovers and loads it on its own (measured: 3 unprompted
-    // loads in the first 2 fixtures after the prompt reference was removed). Its contract is
-    // the opposite of this workflow's -- it never applies a change, forbids machine-actionable
-    // output, and never mentions risk_score -- so registering it silently replaces the
-    // criteria the workflow spells out. Its production default is off; keep the eval stack
-    // matching production so the suite measures the workflow's own prompt.
+  it('registers the investigate-rule skill on the eval stack the prompt invokes', () => {
+    // The diagnose prompt invokes `skill://investigate-rule`. If the flag is off the
+    // reference 404s and the step silently runs on a degraded prompt -- measured on two
+    // earlier runs, where load_skill returned 34 404s and zero successful loads. The eval
+    // stack must register what the workflow calls, or the suite scores a path production
+    // never takes.
     const config = readFileSync(
       join(
         __dirname,
@@ -208,7 +206,7 @@ describe('rule-tuning eval budget', () => {
     );
 
     const args = config.slice(config.indexOf('serverArgs: ['));
-    expect(args).not.toMatch(/investigateRuleSkill/);
+    expect(args).toMatch(/investigateRuleSkill/);
   });
 
   it('ties the risk_score criterion to the scoring it already shows the agent', () => {
@@ -292,21 +290,23 @@ describe('rule-tuning eval budget', () => {
     expect(message).toMatch(/steps\.fetch_rule\.output\.severity/);
   });
 
-  it('does not delegate the structured decision to an advisory, human-facing skill', () => {
-    // `investigate-rule` is analyst-facing guidance: it states it "never applies a change",
-    // forbids emitting "an auto-applied / machine-actionable change", and mandates a
-    // five-section markdown answer. The diagnose step needs the opposite — one structured
-    // change_type the workflow auto-applies through security.patchRule. Measured on a full
-    // 35-fixture run where the skill loaded 35/35: the skill body mentions `exception` 21x
-    // and `query` 21x but `risk_score` ZERO times, so risk_score was never predicted once and
-    // its 6 fixtures were unwinnable; accuracy fell 12/35 -> 10/35 versus the run where the
-    // skill silently 404'd. Keep the diagnose criteria in the workflow, which already spells
-    // out all four change_types.
+  it('invokes the shared investigate-rule skill for the investigation', () => {
+    // Chat and the tuning worker share one rule-investigation path (bdef0d8917a9): the skill
+    // runs the investigation, the schema fence turns it into the structured proposal this
+    // workflow auto-applies through security.patchRule. An earlier commit dropped the
+    // delegation, but that was measured TIED (10/35 with the skill vs 9/35 without, paired
+    // McNemar p=1.000) -- it removed a deliberate architecture without a measurable gain.
+    // The prompt must still bind the answer to this workflow's schema and criteria, so the
+    // skill's analyst-facing prose contract cannot override the structured decision.
     const workflow = readWorkflow();
     const diagnose = workflow.slice(workflow.indexOf('- name: diagnose_rule'));
     const message = diagnose.slice(0, diagnose.indexOf('schema:'));
 
-    expect(message).not.toMatch(/skill:\/\//);
+    expect(message).toMatch(/skill:\/\/investigate-rule/);
+    // ...and the schema/criteria override must accompany it, or the skill's five-section
+    // prose contract competes with the structured output.
+    expect(message).toMatch(/schema below/);
+    expect(message).toMatch(/criteria stated here/);
   });
 
   it('spells out criteria for every change_type it can emit', () => {

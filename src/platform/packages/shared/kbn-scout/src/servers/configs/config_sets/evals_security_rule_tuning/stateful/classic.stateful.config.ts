@@ -22,13 +22,11 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * spans, so without the override every model scores 0 on skill usage regardless of what
  * it actually did — a silent false negative rather than a failed run.
  *
- * `investigateRuleSkill` is deliberately NOT enabled here, which matches its production
- * default. That skill is analyst-facing guidance — it never applies a change and forbids
- * machine-actionable output — while this workflow auto-applies a structured change_type
- * through security.patchRule. Registering it lets the agent load it unprompted: measured
- * on a 35-fixture run with the flag on, it loaded 35/35 times, its body mentioned
- * `risk_score` zero times, risk_score was never once predicted, and accuracy fell to
- * 10/35 from 12/35. The suite measures the workflow's own prompt, so leave it off.
+ * `investigateRuleSkill` is enabled here because the diagnose step invokes
+ * `skill://investigate-rule`: chat and the tuning worker share one rule-investigation
+ * path, and the schema fence turns that investigation into the structured proposal the
+ * workflow auto-applies. Without the flag the skill reference 404s and the step runs on a
+ * degraded prompt, so the suite would measure a path production never takes.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -41,6 +39,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+      '--xpack.securitySolution.enableExperimental=["investigateRuleSkill"]',
     ],
   },
 };

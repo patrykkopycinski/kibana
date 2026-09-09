@@ -32,7 +32,9 @@ export const PND_RULE_TUNING_WORKFLOW = {
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
   // 4: diagnose_rule pins connector_id and receives the fetch_fp_entities breakdown.
-  version: 4,
+  // 5: diagnose_rule states the change_types in no priority order, stops delegating to
+  //    the advisory investigate-rule skill, and is shown the rule's own query and scoring.
+  version: 5,
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

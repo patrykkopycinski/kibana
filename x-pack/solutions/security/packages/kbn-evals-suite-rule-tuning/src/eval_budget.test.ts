@@ -126,6 +126,27 @@ describe('rule-tuning eval budget', () => {
     expect(majority / total).toBeLessThanOrEqual(0.5);
   });
 
+  it('states no precedence between change_types in the diagnose prompt', () => {
+    const workflow = readFileSync(
+      join(
+        __dirname,
+        '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/rule_tuning.yaml'
+      ),
+      'utf8'
+    );
+
+    // Three frontier models from three families each scored exception 6/6 and both
+    // query 0/6 and risk_score 0/6, with gpt-5.5 and gemini-3.1-pro agreeing on all 35
+    // fixtures (McNemar b=0 c=0). Ranking the change_types collapses the distribution
+    // onto whichever is named first, so the prompt must not rank them.
+    expect(workflow).not.toMatch(/in this order of preference/i);
+    expect(workflow).not.toMatch(/order of preference/i);
+
+    // `manual` must carry its own positive criteria rather than being defined as
+    // "none of the above", which turns it into a catch-all for uncertainty.
+    expect(workflow).not.toMatch(/manual\s+—\s*None of the above/i);
+  });
+
   it('keeps every change_type the workflow can emit represented in the fixtures', () => {
     // A label the workflow can no longer emit is unscoreable: every fixture carrying it is a
     // guaranteed zero that reads as a model failure. Tie the golden labels to the enum so a

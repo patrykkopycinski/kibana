@@ -157,7 +157,9 @@ steps:
             {% endif %}
 
             After investigating, return one structured tuning proposal using the schema.
-            Choose exactly one change_type in this order of preference:
+            Choose exactly one change_type — the one whose criteria the evidence actually
+            meets. The four are listed in no priority order and none is a preferred or
+            default answer; a type is correct only when its own criteria below are met.
 
             exception  — The rule logic is correct but fires on a known-good entity.
               Use the entity breakdown above to identify the tightest conditions.
@@ -176,11 +178,16 @@ steps:
               low-priority noise. Populate proposed_risk_score (0–100) and
               proposed_severity (low / medium / high / critical).
 
-            manual  — None of the above is safe to apply automatically. Use summary
+            manual  — Use ONLY after checking the three above against their own criteria
+              and finding that none is met: no known-good entity to except, no shared
+              over-broad pattern to narrow (or the rule type is not "query"), and the
+              alerts are not merely low-priority noise. `manual` is not a fallback for
+              uncertainty — if one of the three fits the evidence, choose it. Use summary
               to describe: (a) the false-positive pattern you found, (b) which automated
-              paths you considered (exception / query / risk_score) and why each is unsafe
-              or inapplicable for this rule, and (c) a concrete recommendation for what the
-              analyst should do manually in the Detection Rules UI.
+              paths you considered (exception / query / risk_score) and the specific
+              reason each is unsafe or inapplicable for this rule, and (c) a concrete
+              recommendation for what the analyst should do manually in the Detection
+              Rules UI.
           schema:
             type: object
             properties:

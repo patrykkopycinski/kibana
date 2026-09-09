@@ -211,6 +211,24 @@ describe('rule-tuning eval budget', () => {
     expect(args).not.toMatch(/investigateRuleSkill/);
   });
 
+  it('ties the risk_score criterion to the scoring it already shows the agent', () => {
+    // 6 fixtures seed riskScore 73 / severity high and expect `risk_score`. The prompt
+    // interpolates that scoring, but the criterion described it only as "low-priority
+    // noise" -- a subjective judgement with no reference to the numbers on screen, so
+    // the agent scored 1/6 on a perfectly discriminative signal.
+    const workflow = readWorkflow();
+    const diagnose = workflow.slice(workflow.indexOf('name: diagnose_rule'));
+
+    // Scope to the risk_score criterion itself, which ends where `manual` begins.
+    const criterion = diagnose.slice(
+      diagnose.indexOf('risk_score  —'),
+      diagnose.indexOf('manual  —')
+    );
+    expect(criterion.length).toBeGreaterThan(0);
+    expect(criterion).toMatch(/scoring shown above|risk_score and severity above|current scoring/);
+    expect(criterion).toMatch(/spread across many|not concentrated|no single entity/);
+  });
+
   it('tells the agent which change_types a non-query rule type can actually use', () => {
     // 5 fixtures are labelled `manual` solely because the rule is `new_terms`:
     // exception/query edit query-rule logic and do not apply to that type. The prompt

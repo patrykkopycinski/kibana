@@ -210,15 +210,22 @@ steps:
             however concentrated the false positives look, and the correct answer
             is manual even for a single repeating entity.
 
-            risk_score  — The rule has real detection value but the alerts are
-              low-priority noise. Populate proposed_risk_score (0–100) and
-              proposed_severity (low / medium / high / critical).
+            risk_score  — The rule has real detection value but its alerts are rated
+              more urgent than they are. The decisive evidence is the current scoring
+              shown above versus what the activity is worth: benign routine work
+              carrying a high risk_score or severity is mis-rated, not un-tunable.
+              This is the right answer when the false positives are spread across many
+              distinct entities (so no exception is tight enough) yet the query itself
+              is correctly written (so nothing needs narrowing). Populate
+              proposed_risk_score (0–100) and proposed_severity
+              (low / medium / high / critical) with the lowered rating.
 
             manual  — Use ONLY after checking the three above against their own criteria
               and finding that none is met: no known-good entity to except, no shared
               over-broad pattern to narrow (or the rule type is not "query"), and the
-              alerts are not merely low-priority noise. `manual` is not a fallback for
-              uncertainty — if one of the three fits the evidence, choose it. Use summary
+              alerts' current scoring already matches what the activity is worth.
+              `manual` is not a fallback for uncertainty — if one of the three fits
+              the evidence, choose it. Use summary
               to describe: (a) the false-positive pattern you found, (b) which automated
               paths you considered (exception / query / risk_score) and the specific
               reason each is unsafe or inapplicable for this rule, and (c) a concrete

@@ -220,13 +220,16 @@ describe('rule-tuning eval budget', () => {
     const diagnose = workflow.slice(workflow.indexOf('name: diagnose_rule'));
 
     // Scope to the risk_score criterion itself, which ends where `manual` begins.
-    const criterion = diagnose.slice(
-      diagnose.indexOf('risk_score  —'),
-      diagnose.indexOf('manual  —')
-    );
-    expect(criterion.length).toBeGreaterThan(0);
-    expect(criterion).toMatch(/scoring shown above|risk_score and severity above|current scoring/);
-    expect(criterion).toMatch(/spread across many|not concentrated|no single entity/);
+    const start = diagnose.indexOf('risk_score  —');
+    const end = diagnose.indexOf('manual  —');
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+
+    // The criterion must point at the scoring the prompt already interpolates...
+    const criterion = diagnose.slice(start, end);
+    expect(criterion).toMatch(/current scoring/);
+    // ...and at the entity spread that separates it from `exception`.
+    expect(criterion).toMatch(/spread across many/);
   });
 
   it('tells the agent which change_types a non-query rule type can actually use', () => {

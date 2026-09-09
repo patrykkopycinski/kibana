@@ -10,7 +10,16 @@ tags:
   - detection-rule-tuning
 settings:
   concurrency:
-    key: detection-rule-tuning
+    # The harvest reads alerts NOT carrying `reviewed_tag`, but that tag is only written
+    # by the mark steps at the very end — after a 72h approval gate. Two overlapping runs
+    # against the same alert index would both harvest the same alerts and diagnose them
+    # twice, so production MUST share one lock: the key defaults to a constant.
+    #
+    # An eval run drives its own isolated stack and its own seeded alert index, where that
+    # cross-run hazard does not exist and the shared lock only serializes fixtures that
+    # have nothing to do with each other. Passing `concurrency_key` lets such a run opt
+    # into an isolated lock; unset, behaviour is byte-identical to the constant key.
+    key: "detection-rule-tuning-{{ inputs.concurrency_key | default: 'shared' }}"
     strategy: drop
     max: 1
 triggers:
@@ -35,6 +44,14 @@ triggers:
             Inference connector the diagnose step runs on. Pinning it here is what lets an
             eval run compare models; unset, every run silently uses the deployment default
             and a multi-model sweep measures the same model N times.
+        concurrency_key:
+          type: string
+          description: >
+            Suffix for the concurrency lock. Leave unset in production so every run shares
+            one lock — the harvest's `reviewed_tag` filter cannot prevent two overlapping
+            runs from diagnosing the same alerts, because that tag is written only after
+            the approval gate. Eval runs own an isolated stack and seeded alerts, so they
+            pass a unique value to stop unrelated fixtures serializing behind each other.
       additionalProperties: false
 outputs:
   - name: rules_examined

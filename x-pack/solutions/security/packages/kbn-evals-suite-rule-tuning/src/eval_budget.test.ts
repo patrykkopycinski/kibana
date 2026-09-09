@@ -22,6 +22,15 @@ const SECONDS_PER_FIXTURE = 233; // measured: 6 fixtures ran 1396s wall on a smo
 
 const read = (relativePath: string) => readFileSync(join(__dirname, '..', relativePath), 'utf8');
 
+const readWorkflow = () =>
+  readFileSync(
+    join(
+      __dirname,
+      '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/rule_tuning.yaml'
+    ),
+    'utf8'
+  );
+
 const countFixtures = () => {
   const spec = read('evals/rule_tuning_decision.spec.ts');
   const ids = spec.match(/^ {4}id: '/gm) ?? [];
@@ -145,6 +154,41 @@ describe('rule-tuning eval budget', () => {
     // `manual` must carry its own positive criteria rather than being defined as
     // "none of the above", which turns it into a catch-all for uncertainty.
     expect(workflow).not.toMatch(/manual\s+—\s*None of the above/i);
+  });
+
+  it('keeps the production concurrency lock shared when no key is passed', () => {
+    // The harvest selects alerts NOT carrying `reviewed_tag`, but that tag is written by the
+    // mark steps at the end of the run — after a 72h approval gate. So the filter cannot stop
+    // two overlapping executions from harvesting the same alerts and diagnosing them twice:
+    // the shared lock is the only thing preventing it. Parameterising the key to let eval runs
+    // isolate themselves is safe ONLY while it still collapses to one constant by default.
+    const workflow = readWorkflow();
+
+    const keyMatch = workflow.match(/concurrency:\s*(?:\n\s*#[^\n]*)*\n\s*key:\s*(.+)/);
+    if (!keyMatch) throw new Error('rule_tuning.yaml no longer declares a concurrency key');
+    const key = keyMatch[1].trim();
+
+    // Templated is fine; unconditionally per-execution is not. A key that interpolates
+    // execution.id (or anything else always-unique) gives every production run its own lock
+    // and silently removes the double-diagnosis guard.
+    expect(key).not.toMatch(/execution\.id/);
+    expect(key).not.toMatch(/workflow\.execution/);
+
+    // Any interpolation must carry a `default:` filter, so an absent input yields a constant.
+    if (key.includes('{{')) {
+      expect(key).toMatch(/\|\s*default:/);
+    }
+
+    // And the lock must still be a real lock. Matched off `strategy:` rather than
+    // `concurrency:` so an explanatory comment block cannot push `max` out of range.
+    expect(workflow).toMatch(/strategy:\s*drop[\s\S]{0,80}?max:\s*1/);
+  });
+
+  it('declares concurrency_key so an isolated eval run can opt out of the shared lock', () => {
+    // `additionalProperties: false` means an undeclared input is rejected at schedule time,
+    // which would surface as a workflow error rather than a slow run.
+    const workflow = readWorkflow();
+    expect(workflow).toMatch(/concurrency_key:\s*\n\s*type: string/);
   });
 
   it('keeps every change_type the workflow can emit represented in the fixtures', () => {

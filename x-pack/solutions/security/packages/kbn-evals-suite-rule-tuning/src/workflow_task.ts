@@ -163,6 +163,7 @@ export const runRuleTuningWorkflow = async ({
   fetch,
   log,
   connectorId,
+  concurrencyKey,
   maxWaitMs = 12 * 60_000,
   pollIntervalMs = 3_000,
 }: {
@@ -175,6 +176,14 @@ export const runRuleTuningWorkflow = async ({
    * back to the space default agent — every model project would score one same model.
    */
   connectorId: string;
+  /**
+   * Suffix for the workflow's concurrency lock. Production passes nothing and every run shares
+   * one lock, which is load-bearing: the harvest filters on `reviewed_tag`, but that tag is only
+   * written after the approval gate, so two overlapping production runs would diagnose the same
+   * alerts twice. An eval run drives an isolated stack with its own seeded alerts, so it passes a
+   * unique key to keep unrelated fixtures from serializing behind one another.
+   */
+  concurrencyKey?: string;
   maxWaitMs?: number;
   pollIntervalMs?: number;
 }): Promise<{
@@ -215,7 +224,12 @@ export const runRuleTuningWorkflow = async ({
       version: WORKFLOWS_API_VERSION,
       headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
       body: JSON.stringify({
-        inputs: { min_fp_count: 1, connector_id: connectorId },
+        // The workflow's concurrency key defaults to a shared constant, because in production
+        // two overlapping runs would harvest and diagnose the same alerts. An eval run owns an
+        // isolated stack with its own seeded alerts, so that hazard does not exist here and the
+        // shared lock would only serialize unrelated fixtures. Pass a unique key so runs can be
+        // parallelised; production, which passes nothing, keeps the single shared lock.
+        inputs: { min_fp_count: 1, connector_id: connectorId, concurrency_key: concurrencyKey },
       }),
     }
   )) as { workflowExecutionId: string };

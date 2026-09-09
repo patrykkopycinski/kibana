@@ -21,6 +21,14 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * invocations from the exported spans. The suite's SkillInvoked evaluator reads those
  * spans, so without the override every model scores 0 on skill usage regardless of what
  * it actually did — a silent false negative rather than a failed run.
+ *
+ * The diagnose step routes the agent to `skill://investigate-rule`, which is registered
+ * only when `investigateRuleSkill` is in `enableExperimental` (it defaults to false). With
+ * the flag off, `load_skill` returns "Skill 'investigate-rule' not found." and the agent
+ * falls back to unrelated generic skills, yet the run still exits 0 and still emits scores
+ * — so a misconfigured stack is indistinguishable from a weak model. Measured on a full
+ * 35-fixture run before this override: 34 of 68 `load_skill` calls 404'd and
+ * `investigate-rule` loaded zero times.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -33,6 +41,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['investigateRuleSkill'])}`,
     ],
   },
 };

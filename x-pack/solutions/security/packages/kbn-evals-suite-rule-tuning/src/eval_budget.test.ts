@@ -191,6 +191,36 @@ describe('rule-tuning eval budget', () => {
     expect(workflow).toMatch(/concurrency_key:\s*\n\s*type: string/);
   });
 
+  it('enables every experimental skill the workflow asks the agent to load', () => {
+    // The diagnose step tells the agent to use `skill://investigate-rule`, but that skill is
+    // registered only when `investigateRuleSkill` is in enableExperimental. When the eval stack
+    // omits the flag, load_skill returns "Skill 'investigate-rule' not found." and the agent
+    // silently falls back to whatever generic skill it can find — the run still exits 0 and
+    // still produces scores, so the miss reads as a model quality problem instead of a
+    // misconfigured stack. Measured on a full 35-fixture run: 34 of 68 load_skill calls 404'd
+    // and `investigate-rule` loaded zero times.
+    const workflow = readWorkflow();
+    const config = readFileSync(
+      join(
+        __dirname,
+        '../../../../../../src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_rule_tuning/stateful/classic.stateful.config.ts'
+      ),
+      'utf8'
+    );
+
+    const requested = [...workflow.matchAll(/skill:\/\/([a-z0-9-]+)/g)].map((match) => match[1]);
+    expect(requested.length).toBeGreaterThan(0);
+
+    const flagBlock = config.match(/enableExperimental=\$\{JSON\.stringify\(\[([^\]]*)\]/);
+    const enabled = flagBlock ? flagBlock[1] : '';
+
+    for (const skill of requested) {
+      // `investigate-rule` is registered behind the `investigateRuleSkill` flag.
+      const flag = `${skill.replace(/-([a-z])/g, (_, c) => c.toUpperCase())}Skill`;
+      expect(enabled).toContain(flag);
+    }
+  });
+
   it('keeps every change_type the workflow can emit represented in the fixtures', () => {
     // A label the workflow can no longer emit is unscoreable: every fixture carrying it is a
     // guaranteed zero that reads as a model failure. Tie the golden labels to the enum so a

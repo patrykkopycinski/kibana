@@ -47,9 +47,7 @@ const goldenLabels = () => {
   const ids = [...spec.matchAll(/^ {4}id: '([^']+)'/gm)].map((m) => m[1]);
   const expected = [...spec.matchAll(/^ {4}expected: '([a-z_]+)'/gm)].map((m) => m[1]);
   if (ids.length !== expected.length) {
-    throw new Error(
-      `fixture spec id count (${ids.length}) != expected count (${expected.length})`
-    );
+    throw new Error(`fixture spec id count (${ids.length}) != expected count (${expected.length})`);
   }
   return new Map(ids.map((id, i) => [id, expected[i]]));
 };

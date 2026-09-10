@@ -143,6 +143,22 @@ steps:
         on-failure:
           continue: true
 
+      - name: fetch_open_entities
+        type: elasticsearch.esql.query
+        if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
+        with:
+          allow_partial_results: false
+          query: |-
+            FROM .alerts-security.alerts-{{ workflow.spaceId }}
+            | WHERE `kibana.alert.rule.uuid` == "{{ foreach.item.0 }}"
+              AND NOT (`kibana.alert.workflow_status` == "closed" AND `kibana.alert.workflow_reason` == "false_positive")
+              AND @timestamp >= NOW() - {{ inputs.lookback_hours }} hours
+            | STATS entity_count = COUNT(*) BY `host.name`, `user.name`, `source.ip`, `process.name`
+            | SORT entity_count DESC
+            | LIMIT 20
+        on-failure:
+          continue: true
+
       - name: diagnose_rule
         type: ai.agent
         if: "${{ steps.fetch_rule.error == null and steps.fetch_rule.output.enabled == true }}"
@@ -189,6 +205,21 @@ steps:
             evidence.
             {% endif %}
 
+            Still-open alerts from this rule (everything NOT closed as a false positive —
+            live detections and other dispositions)
+            (columns: {{ steps.fetch_open_entities.output.columns | map: 'name' | json }}):
+            {% if steps.fetch_open_entities.error == null and steps.fetch_open_entities.output.values %}
+            {{ steps.fetch_open_entities.output.values | json }}
+
+            These are live detections. If entities that produce the false positives
+            above also appear in the still-open alerts here, then no exception,
+            suppression, or query narrowing can remove the noise without also
+            suppressing live alerts — every field-based change is unsafe for them.
+            {% else %}
+            None returned — every recent alert from this rule was closed as a false
+            positive, or the aggregation did not return.
+            {% endif %}
+
             After investigating, return one structured tuning proposal using the schema.
             Choose exactly one change_type — the one whose criteria the evidence actually
             meets. The four are listed in no priority order and none is a preferred or
@@ -227,6 +258,9 @@ steps:
               and finding that none is met: no known-good entity to except, no shared
               over-broad pattern to narrow (or the rule type is not "query"), and the
               alerts' current scoring already matches what the activity is worth.
+              When the entities behind the false positives also appear in the still-open
+              alerts above, every field-based change would suppress live detections too —
+              that overlap on its own makes this a manual situation.
               `manual` is not a fallback for uncertainty — if one of the three fits
               the evidence, choose it. Use summary
               to describe: (a) the false-positive pattern you found, (b) which automated

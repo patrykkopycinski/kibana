@@ -40,7 +40,9 @@ export const PND_RULE_TUNING_WORKFLOW = {
   //    entity-spread, instead of a subjective "low-priority noise" judgement.
   // 8: diagnose_rule invokes skill://investigate-rule again (restoring the shared chat/worker
   //    investigation path) while binding the answer to this workflow's schema and criteria.
-  version: 8,
+  // 9: fetch_open_entities surfaces still-open (live) alerts per entity to diagnose_rule, and
+  //    the manual criterion treats FP/live entity overlap as decisive evidence.
+  version: 9,
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

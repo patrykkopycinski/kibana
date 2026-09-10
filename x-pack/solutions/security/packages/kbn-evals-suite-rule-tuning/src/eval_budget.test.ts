@@ -320,6 +320,18 @@ describe('rule-tuning eval budget', () => {
     expect(unfixable.length).toBeGreaterThan(0);
   });
 
+  it('surfaces still-open alerts to the diagnose step and ties the manual criterion to them', () => {
+    // Unfixable fixtures are unlearnable without this: the diagnose message only showed
+    // the closed-FP entity breakdown, so "no field-based change is defensible" was not
+    // observable. Validated 2026-09-10: seeding true positives alone did not move
+    // unfixable recall (5/17 before and after) because the evidence never reached the prompt.
+    const wf = readWorkflow();
+    expect(wf).toContain('name: fetch_open_entities');
+    const msg = wf.slice(wf.indexOf('message: |-'));
+    expect(msg).toContain('steps.fetch_open_entities.output.values');
+    expect(msg).toContain('also appear in the still-open alerts');
+  });
+
   it('gives the agent the rule fields it must ground each change_type in', () => {
     // fetch_rule retrieves the full rule, but the diagnose prompt historically passed only
     // the rule name and the entity aggregation. Without the rule's own query the agent

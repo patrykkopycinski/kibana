@@ -294,6 +294,32 @@ describe('rule-tuning eval budget', () => {
     expect(baseAlertBlock).toMatch(/fixture\.riskScore/);
   });
 
+  it('seeds unfixable fixtures with true positives that share every field with the FPs', () => {
+    // The `manual` label on fp-unfixable-* asserts "no exception/query/risk-score change is
+    // defensible" — but the seeder emitted ONLY false positives, so nothing in the data
+    // distinguishes "unfixable" (real detection value, no discriminating field) from
+    // "low-value" (risk_score downgrade). The observable signature of unfixable is a minority
+    // of TRUE positives on the same rule sharing host/user/process with the FPs: any field
+    // filter would kill real detections, so manual is the only defensible answer.
+    const seeder = read('evals/seed_fp_cluster.ts');
+
+    // The docs builder must special-case unfixable fixtures with a TP minority.
+    const docsStart = seeder.indexOf('= entities.map');
+    expect(docsStart).toBeGreaterThan(-1);
+    const docsBlock = seeder.slice(docsStart, seeder.indexOf('const bulkResp', docsStart));
+    expect(docsBlock).toMatch(/fp-unfixable-/);
+
+    // The TP rows must be open (NOT closed false_positive — the harvest query must not pick
+    // them up) and must reuse the fixture's own entity tuples so they share every field.
+    expect(docsBlock).toMatch(/'kibana\.alert\.workflow_status': 'open'/);
+    expect(docsBlock).toMatch(/entities\.slice/);
+
+    // ...and every unfixable fixture must actually be exercised by the suite.
+    const suite = read('evals/rule_tuning_decision.spec.ts');
+    const unfixable = suite.match(/id: 'fp-unfixable-[a-z]+'/g) ?? [];
+    expect(unfixable.length).toBeGreaterThan(0);
+  });
+
   it('gives the agent the rule fields it must ground each change_type in', () => {
     // fetch_rule retrieves the full rule, but the diagnose prompt historically passed only
     // the rule name and the entity aggregation. Without the rule's own query the agent

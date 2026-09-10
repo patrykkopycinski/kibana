@@ -461,13 +461,42 @@ export const seedRuleAndFpAlerts = async (
   if (entities.length === 0) {
     throw new Error(`No entity profile for fixture ${fixture.id}`);
   }
-  const docs = entities.map((e, i) => ({
+  const docs: Array<Record<string, unknown>> = entities.map((e, i) => ({
     ...baseAlert(seededUuid, ruleName, ruleId, i, fixture),
     host: { name: e.host },
     user: { name: e.user },
     source: { ip: e.ip },
     process: { name: e.process },
   }));
+
+  // fp-unfixable-* fixtures label the rule `manual`: the rule has real detection value, but
+  // no field separates the false positives from the true ones, so no exception, query narrow,
+  // or risk-score change is defensible. That property is only readable from seeded data if
+  // TRUE positives exist and share every entity field with the FPs — any filter tight enough
+  // to remove the FPs would kill real detections. Seed a minority of open (NOT closed-FP, so
+  // the harvest query never picks them up) alerts reusing the first two entity tuples. Without
+  // them the fixture was a pure-FP cluster indistinguishable from a low-value rule, and every
+  // slate model scored `manual` 5-6/17 by flipping between risk_score and exception.
+  if (fixture.id.startsWith('fp-unfixable-')) {
+    docs.push(
+      ...entities.slice(0, 2).map((e, i) => {
+        const {
+          'kibana.alert.workflow_status': _status,
+          'kibana.alert.workflow_reason': _reason,
+          ...base
+        } = baseAlert(seededUuid, ruleName, ruleId, entities.length + i, fixture);
+        return {
+          ...base,
+          'kibana.alert.workflow_status': 'open',
+          'kibana.alert.reason': `eval-seed true positive ${i}`,
+          host: { name: e.host },
+          user: { name: e.user },
+          source: { ip: e.ip },
+          process: { name: e.process },
+        };
+      })
+    );
+  }
   const bulkResp = await esClient.bulk({
     index: ALERTS_INDEX,
     refresh: 'wait_for',

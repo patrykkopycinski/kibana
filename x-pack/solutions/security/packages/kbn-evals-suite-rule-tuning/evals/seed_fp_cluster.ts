@@ -373,7 +373,13 @@ const typeSpecificCreateFields = (ruleType: string): Record<string, unknown> => 
   }
 };
 
-const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: number) => ({
+const baseAlert = (
+  ruleUuid: string,
+  ruleName: string,
+  ruleId: string,
+  seq: number,
+  fixture: SeedFixtureSpec
+) => ({
   '@timestamp': new Date().toISOString(),
   'kibana.alert.rule.uuid': ruleUuid,
   'kibana.alert.rule.name': ruleName,
@@ -381,8 +387,13 @@ const baseAlert = (ruleUuid: string, ruleName: string, ruleId: string, seq: numb
   'kibana.alert.workflow_status': 'closed',
   'kibana.alert.workflow_reason': 'false_positive',
   'kibana.alert.workflow_tags': [],
-  'kibana.alert.severity': 'medium',
-  'kibana.alert.risk_score': 40,
+  // The alert rows must carry the fixture's scoring, not a shared literal. A risk_score
+  // fixture is a rule whose scoring is HIGHER than its activity warrants; that mis-rating
+  // is the very signal the diagnose step keys on, and it is only readable from the seeded
+  // data if the alerts themselves show it. A hardcoded medium/40 made a mis-rated rule
+  // indistinguishable from a correctly-rated one at the alert level.
+  'kibana.alert.severity': fixture.severity ?? 'medium',
+  'kibana.alert.risk_score': fixture.riskScore ?? 40,
   // NOTE: `signal.*` fields are read-only field aliases in the alerts index mapping;
   // writing them fails every bulk item with document_parsing_exception. Write the
   // concrete backing fields instead.
@@ -451,7 +462,7 @@ export const seedRuleAndFpAlerts = async (
     throw new Error(`No entity profile for fixture ${fixture.id}`);
   }
   const docs = entities.map((e, i) => ({
-    ...baseAlert(seededUuid, ruleName, ruleId, i),
+    ...baseAlert(seededUuid, ruleName, ruleId, i, fixture),
     host: { name: e.host },
     user: { name: e.user },
     source: { ip: e.ip },

@@ -276,6 +276,24 @@ describe('rule-tuning eval budget', () => {
     }
   });
 
+  it('propagates the mis-rated scoring into the alert rows, not just the rule header', () => {
+    // The diagnose prompt's risk_score criterion keys on "benign routine work carrying a
+    // high risk_score or severity" — that signal must be readable from the FP cluster the
+    // agent aggregates, not only from the rule header it may not weigh. baseAlert()
+    // historically hardcoded severity 'medium' / risk_score 40 for EVERY fixture, so a
+    // high-rated risk_score rule's own alerts all read medium/40 and the mis-rating was
+    // invisible in the evidence. The alerts must carry the fixture's scoring.
+    const seeder = read('evals/seed_fp_cluster.ts');
+
+    // The alert row builder must take scoring from the fixture, not a hardcoded literal.
+    const baseAlertStart = seeder.indexOf('const baseAlert');
+    const baseAlertBlock = seeder.slice(baseAlertStart, seeder.indexOf('});', baseAlertStart));
+    expect(baseAlertBlock).not.toMatch(/'kibana\.alert\.severity': '(low|medium|high|critical)'/);
+    expect(baseAlertBlock).not.toMatch(/'kibana\.alert\.risk_score': \d+/);
+    expect(baseAlertBlock).toMatch(/fixture\.severity/);
+    expect(baseAlertBlock).toMatch(/fixture\.riskScore/);
+  });
+
   it('gives the agent the rule fields it must ground each change_type in', () => {
     // fetch_rule retrieves the full rule, but the diagnose prompt historically passed only
     // the rule name and the entity aggregation. Without the rule's own query the agent

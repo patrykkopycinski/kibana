@@ -66,13 +66,8 @@ export {
   buildWorkerUrl,
 } from './constants';
 
-export type {
-  ActionApprovalPolicy,
-  ActionCategory,
-  ActionCatalogEntry,
-  ActionImpact,
-  ListActionsResponse,
-} from './action_catalog_types';
+export type { ActionCatalogEntry, ListActionsResponse } from './action_catalog_types';
+export type { ActionApprovalPolicy, ActionCategory, ActionImpact } from '@kbn/workflows';
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';
 
 export {

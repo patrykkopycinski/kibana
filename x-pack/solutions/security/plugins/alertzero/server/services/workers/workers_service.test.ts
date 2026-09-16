@@ -11,9 +11,11 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
+  type UpdateWorkerRequestBody,
 } from '@kbn/alertzero-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { WorkerSettingsPatch } from '../../managed_workflows/workers/types';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import { WorkersService } from './workers_service';
 
@@ -418,5 +420,68 @@ describe('WorkersService', () => {
 
     expect(harness.management.getWorkflow).not.toHaveBeenCalled();
     expect(Array.isArray(triage?.skills)).toBe(true);
+  });
+
+  /*
+   * The post-MVP settings seam, service side. The guard is a PAIR — the request boundary strips
+   * keys the schema does not declare, and `WorkerSettingsPatch` names only the settings keys that
+   * may reach the durable values. Neither half may be made permissive, so this case pins what the
+   * durable document can carry: the two settings keys and the settings version, nothing else, for
+   * an update that also carries `enabled`, `settingsRevision` and an unknown key. No legacy key
+   * name is asserted as "must be rejected" — see the note in `routes/workers/update_worker.test.ts`
+   * for why a hand-written list of those names would obstruct the intended fix.
+   */
+  it('writes only the settings keys to the durable values', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    const result = await service.update(
+      ATTACK_DISCOVERY,
+      {
+        enabled: true,
+        settingsRevision: enabled.response.worker.settingsRevision,
+        autonomyLevel: 'assisted',
+        scheduleInterval: '15m',
+        approvalGate: { id: 'gate-1', requirement: 'always' },
+      } as unknown as UpdateWorkerRequestBody,
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    const values = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`)?.values ?? {};
+    expect(Object.keys(values).sort()).toEqual([
+      'autonomyLevel',
+      'scheduleInterval',
+      'settingsVersion',
+    ]);
+    expect(values).not.toHaveProperty('approvalGate');
+    expect(values).not.toHaveProperty('enabled');
+    expect(values).not.toHaveProperty('settingsRevision');
+  });
+
+  /*
+   * The load-bearing half of the pair is a type, so pin it where it can bite: widening
+   * `WorkerSettingsPatch` (to `Pick` `enabled`, or to admit a post-MVP key) leaves the directives
+   * below unused and the type check fails with TS2578. jest transforms through the repo's babel
+   * config and never type checks, so this case is green under jest whichever way the type goes;
+   * it is verified with
+   * `node scripts/type_check --project x-pack/solutions/security/plugins/alertzero/tsconfig.json`.
+   */
+  it('keeps the patch type pinned to the settings keys', () => {
+    const picked: Array<keyof WorkerSettingsPatch> = ['autonomyLevel', 'scheduleInterval'];
+    // @ts-expect-error `enabled` is a Worker field, never a setting the service may apply
+    const enabledIsNotASetting: keyof WorkerSettingsPatch = 'enabled';
+    // @ts-expect-error a post-MVP key must not be nameable through the patch type
+    const postMvpIsNotASetting: keyof WorkerSettingsPatch = 'approvalGate';
+
+    expect([...picked, enabledIsNotASetting, postMvpIsNotASetting]).toEqual([
+      'autonomyLevel',
+      'scheduleInterval',
+      'enabled',
+      'approvalGate',
+    ]);
   });
 });

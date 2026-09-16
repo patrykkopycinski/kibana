@@ -144,11 +144,11 @@ function createContentFingerprint(content: string): string {
 }
 
 it.each([
-  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:be67d019'],
+  [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '2:4a71051d'],
   [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
   [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:4f835cad'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
-  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
+  [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '2:bd9d59a5'],
 ] as const)(
   'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
@@ -200,6 +200,28 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {
     expect(id.startsWith('system-')).toBe(true);
   });
+
+  // The Watch API projects callables to {id, name, kind, summary, lastRun}
+  // (kbn-pnd-common watch.gen.ts WatchCallableRef). Any other key on a
+  // declared callable is silently dropped by that projection, so this guard
+  // keeps YAML authors from re-adding doc-only fields (e.g. gated/enabled)
+  // that look wired but are never consumed or rejected anywhere.
+  it.each(managedDefinitionsById)(
+    '%s declares only projectable callable override keys',
+    (id, definition) => {
+      const renderedYaml = renderWorkflowYaml(definition);
+      const parsed = parse(renderedYaml) as {
+        consts?: { watch_policy?: { callables?: Array<Record<string, unknown>> } };
+      };
+      const callables = parsed.consts?.watch_policy?.callables ?? [];
+      for (const callable of callables) {
+        const unexpected = Object.keys(callable).filter(
+          (key) => !['id', 'name', 'kind', 'summary', 'lastRun'].includes(key)
+        );
+        expect(unexpected).toEqual([]);
+      }
+    }
+  );
 
   it.each(managedDefinitionsById)('%s declares an explicit pluginId', (_id, definition) => {
     expect(typeof definition.pluginId).toBe('string');

@@ -17,7 +17,7 @@ import {
 import type { AgentLookup } from '../utils';
 import type { InternalAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { WATCH_DETECTION_TAG, WATCH_TAG } from '@kbn/pnd-common';
+import { WATCH_DETECTION_TAG, WATCH_TAG, WatchCallableRef } from '@kbn/pnd-common';
 import {
   extractWatchPolicy,
   normalizeWorkflowTriggerType,
@@ -760,6 +760,113 @@ describe('project watch', () => {
           expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
         }
       });
+    });
+  });
+
+  describe('policy callable projection stays schema-complete', () => {
+    const makeDefinition = (agentStep: object) =>
+      ({
+        version: '1',
+        name: 'Test Watch',
+        triggers: [{ type: 'manual' }],
+        steps: [agentStep],
+      } as unknown as WorkflowYaml);
+    const step = (overrides: object = {}) => ({
+      name: 'run',
+      type: 'ai.agent',
+      'agent-id': 'my-agent',
+      with: { message: 'go' },
+      ...overrides,
+    });
+
+    // projectSkillsFromDefinition rebuilds each policy callable key-by-key.
+    // If WatchCallableRef (watch.schema.yaml -> watch.gen.ts) grows a field
+    // the projection does not copy, managed YAML authors could set it and it
+    // would be silently dropped from the projected Watch the UI renders.
+    // Deriving the expected key set from the schema itself keeps this guard
+    // in sync without manual updates.
+    const callableRefKeys = Object.keys(WatchCallableRef.shape) as Array<string>;
+    const fullPolicyCallable = Object.fromEntries(
+      callableRefKeys.map((key) => {
+        switch (key) {
+          case 'id':
+            return [key, 'my-skill'];
+          case 'name':
+            return [key, 'Schema Name'];
+          case 'kind':
+            return [key, 'skill'];
+          case 'summary':
+            return [key, 'Schema summary'];
+          case 'lastRun':
+            return [key, '2026-09-16T00:00:00.000Z'];
+          default:
+            throw new Error(
+              `WatchCallableRef grew a key the projection test does not know about: ${key}. ` +
+                'Update the switch in this test AND projectSkillsFromDefinition so the new ' +
+                'field is projected, not silently dropped.'
+            );
+        }
+      })
+    );
+
+    it('projects every key WatchCallableRef declares', () => {
+      expect(callableRefKeys.length).toBeGreaterThan(0);
+      const agents: AgentLookup = {
+        getAgent: () => null,
+        getAgentType: () => null,
+        getSkill: () => null,
+      };
+      const [projected] = projectSkillsFromDefinition(
+        makeDefinition(
+          step({ with: { message: 'go', configuration_overrides: { skill_ids: ['my-skill'] } } })
+        ),
+        { callables: [fullPolicyCallable] } as never,
+        agents
+      );
+      // toEqual is exact: any declared-but-unprojected key fails here.
+      expect(projected).toEqual({
+        id: 'my-skill',
+        name: 'Schema Name',
+        kind: 'skill',
+        summary: 'Schema summary',
+        lastRun: '2026-09-16T00:00:00.000Z',
+      });
+    });
+
+    it('resolves every projected key through the schema (no phantom fields)', () => {
+      // The inverse guard: the projection must not emit keys the schema
+      // dropped. Doc-only fields (gated/enabled) were removed from the
+      // schema, so they must never reappear in projections either.
+      const result = WatchCallableRef.safeParse(fullPolicyCallable);
+      expect(result.success).toBe(true);
+    });
+
+    it('never projects doc-only fields removed from the schema (gated/enabled)', () => {
+      const agents: AgentLookup = {
+        getAgent: () => null,
+        getAgentType: () => null,
+        getSkill: () => null,
+      };
+      const policy = {
+        callables: [
+          {
+            id: 'my-skill',
+            name: 'Schema Name',
+            summary: 'Schema summary',
+            gated: true,
+            enabled: false,
+          },
+        ],
+      };
+      const [projected] = projectSkillsFromDefinition(
+        makeDefinition(
+          step({ with: { message: 'go', configuration_overrides: { skill_ids: ['my-skill'] } } })
+        ),
+        policy as never,
+        agents
+      );
+      expect(projected).not.toHaveProperty('gated');
+      expect(projected).not.toHaveProperty('enabled');
     });
   });
 });

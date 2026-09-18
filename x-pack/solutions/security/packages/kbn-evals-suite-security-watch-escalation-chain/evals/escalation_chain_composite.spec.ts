@@ -48,7 +48,14 @@
 import { tags, evaluate } from '@kbn/evals';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WATCH_WORKFLOW_IDS, buildSyntheticEscalation, PND_INDICES } from '../src/constants';
+import { pollUntil } from '../src/polling';
 import { runWatchWorkflow, readProposalsForInvestigation } from '../src/workflow_task';
+
+/**
+ * How long the downstream fan-out gets to write its proposals after Dark's own
+ * top-level execution reports terminal. Bounded and re-read by `pollUntil`.
+ */
+const PROPOSAL_SETTLE_TIMEOUT_MS = 60_000;
 
 evaluate.describe(
   'C-watch-chain:L3 | Watch escalation chain — Dark -> Deep -> Detection',
@@ -96,18 +103,25 @@ evaluate.describe(
           `[L3] Dark Watch execution ${darkExecution.executionId} → ${darkExecution.status}`
         );
 
-        // Give downstream fan-out (Deep, Detection x2, each their own
-        // workflow.execute child) a little settle time after Dark's own
-        // top-level execution reports terminal — those children run inside
-        // Dark's own execution but their proposal-emit steps are
-        // `on-failure: continue`, so a slow nested worker can still be
-        // writing after the parent step tree reports done.
-        await new Promise((resolve) => setTimeout(resolve, 5_000));
-
-        const proposals = await readProposalsForInvestigation({
-          esClient,
-          investigationId,
-          index: PND_INDICES.proposals,
+        // Downstream fan-out (Deep, Detection x2, each their own
+        // workflow.execute child) settles after Dark's own top-level execution
+        // reports terminal: those children run inside Dark's execution but
+        // their proposal-emit steps are `on-failure: continue`, so a slow
+        // nested worker can still be writing after the parent step tree
+        // reports done. Poll for the proposals instead of sleeping a fixed
+        // interval and reading once — a fixed wait scores a slow fan-out as a
+        // chain that never wrote.
+        const proposals = await pollUntil({
+          read: () =>
+            readProposalsForInvestigation({
+              esClient,
+              investigationId,
+              index: PND_INDICES.proposals,
+            }),
+          isSettled: (found) => found.length > 0,
+          description: `proposals for investigationId ${investigationId}`,
+          timeoutMs: PROPOSAL_SETTLE_TIMEOUT_MS,
+          intervalMs: 1_000,
         });
 
         const investigationIds = new Set(proposals.map((p) => p.investigationId));

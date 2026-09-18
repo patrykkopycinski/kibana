@@ -118,7 +118,7 @@ export const forensicDataset: ForensicExample[] = [
     output: {
       minTimelineEvents: 1,
       expectedIocs: [
-        { type: 'network_destination', value: '203.0.113.77', status: 'not_found' },
+        { type: 'network_destination', value: '203.0.113.77', status: 'confirmed' },
         { type: 'file_hash', value: 'd2a5b8e1c4f7a9b3d6e0f2c5a8b1d4e7', status: 'not_found' },
         {
           type: 'registry_key',

@@ -21,6 +21,25 @@ export interface WatchWorkflowExecution {
 }
 
 /**
+ * A workflow that never reached a terminal status is not a completed run.
+ * Returning the last observed status let callers score a still-running (or
+ * stuck) execution as if it had finished, so the timeout is raised instead.
+ */
+export class WatchWorkflowTimeoutError extends Error {
+  constructor(
+    readonly workflowId: string,
+    readonly executionId: string,
+    readonly status: ExecutionStatus,
+    readonly maxWaitMs: number
+  ) {
+    super(
+      `${workflowId} execution ${executionId} did not reach terminal status within ${maxWaitMs}ms (last status: ${status})`
+    );
+    this.name = 'WatchWorkflowTimeoutError';
+  }
+}
+
+/**
  * Starts a managed Watch orchestrator workflow and polls until it reaches a
  * terminal status. Used to drive Dark/Deep/Detection directly with a
  * synthetic `escalation` (or `detectionChangeSignal`/`ruleTuningTrigger`)
@@ -71,8 +90,11 @@ export const runWatchWorkflow = async ({
   }
 
   if (!isTerminal(execution.status)) {
-    log.warning(
-      `${workflowId} execution ${workflowExecutionId} did not reach terminal status within ${maxWaitMs}ms (last status: ${execution.status})`
+    throw new WatchWorkflowTimeoutError(
+      workflowId,
+      workflowExecutionId,
+      execution.status,
+      maxWaitMs
     );
   }
 

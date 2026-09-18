@@ -56,11 +56,38 @@ export function getNarrativeText(response: ResponseLike): string {
 }
 
 /**
- * Counts distinct matched terms case-insensitively — "Gap", "gap", "Gaps" from
- * repeated headings collapse toward distinct claims rather than raw mentions.
+ * Splits narrative text into claim units: lines, then sentences within a line.
+ * A heading on its own line is one unit; a bulleted finding is one unit.
  */
-export function countDistinctClaims(text: string, pattern: RegExp): number {
-  const matches = text.match(pattern);
-  if (!matches) return 0;
-  return new Set(matches.map((m) => m.toLowerCase())).size;
+function claimUnits(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .flatMap((line) => line.split(/(?<=[.!?])\s+/))
+    .map((unit) => unit.trim())
+    .filter((unit) => unit.length > 0);
+}
+
+/**
+ * Counts distinct claims rather than distinct word forms.
+ *
+ * Deduplicating matches by lexical form measures the model's vocabulary, not
+ * the events it reported: three stages each reported "corroborated" in their
+ * own bullet score 1, while a single claim phrased "corroborated …
+ * corroborating … corroboration" scores 3. So each claim unit (line or
+ * sentence) is counted once, with the matched verb form replaced by
+ * `canonical` — that collapses one claim's vocabulary while keeping separate
+ * claims separate.
+ *
+ * @param pattern claim pattern, e.g. the corroboration verb forms
+ * @param canonical replacement for every match, e.g. the base verb
+ */
+export function countDistinctClaimUnits(text: string, pattern: RegExp, canonical: string): number {
+  const matcher = new RegExp(pattern.source, pattern.flags.replace(/g/g, ''));
+  const replacer = new RegExp(pattern.source, `${pattern.flags.replace(/g/g, '')}g`);
+
+  const claims = claimUnits(text)
+    .filter((unit) => matcher.test(unit))
+    .map((unit) => unit.replace(replacer, canonical).toLowerCase().replace(/\s+/g, ' '));
+
+  return new Set(claims).size;
 }

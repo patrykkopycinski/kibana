@@ -97,7 +97,17 @@ evaluate.describe(
         const structuredOutput = hasCorroborated && hasGaps && hasConfidence;
         const pivotLogic = hasProcessQuery && (hasPersistenceCheck || hasLateralCheck);
 
-        const success = hasEsql && multiStep && structuredOutput && pivotLogic;
+        // `success` is the AND of every dimension the scorecard reports. Skill
+        // invocation, discovery and search were reported but never enforced, so a
+        // run that skipped the routing skill still scored as a pass.
+        const success =
+          hasEsql &&
+          multiStep &&
+          structuredOutput &&
+          pivotLogic &&
+          hasDiscovery &&
+          hasSearch &&
+          hasSkillInvoke;
 
         log.info(
           `[L3] tools=${toolIds.size}, esql=${hasEsql}, multiStep=${multiStep}, ` +

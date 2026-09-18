@@ -15,7 +15,7 @@
  */
 
 import { tags, getToolCallSteps, type Example } from '@kbn/evals';
-import { getNarrativeText, countDistinctClaims } from '../src/narrative_claims';
+import { getNarrativeText, countDistinctClaimUnits } from '../src/narrative_claims';
 import { logScorecard } from '../src/scorecard_log';
 import { selectShard } from '../src/select_shard';
 import { evaluate as base } from '../src/evaluate';
@@ -117,8 +117,12 @@ base.describe('Raw Log Corroboration — L2 leaf quality', { tag: tags.stateful.
         // case-insensitively so repeated headings/boilerplate don't count as
         // distinct identified gaps.
         const narrativeText = getNarrativeText(response);
-        const corroboratedCount = countDistinctClaims(narrativeText, /corroborat\w*/gi);
-        const gapCount = countDistinctClaims(narrativeText, /gap\w*/gi);
+        const corroboratedCount = countDistinctClaimUnits(
+          narrativeText,
+          /corroborat\w*/gi,
+          'corroborated'
+        );
+        const gapCount = countDistinctClaimUnits(narrativeText, /gap\w*/gi, 'gap');
 
         // Groundedness
         const hasQueryReferences =

@@ -19,12 +19,14 @@
  * (Agent Builder templated conversation) object model is ready.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
+import { DEEP_WATCH_TOOL_IDS, agentBuilderDefaultAgentId } from '../src/constants';
 import {
-  DEEP_WATCH_TOOL_IDS,
-  DEEP_WATCH_FORENSICS_REPORTS_INDEX,
-  agentBuilderDefaultAgentId,
-} from '../src/constants';
+  buildDurableOutcomeSearch,
+  evaluateDurableOutcome,
+  type DurableOutcomeHit,
+} from '../src/gates/durable_outcome';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../src/data_generators/cleanup';
 
@@ -50,13 +52,20 @@ evaluate.describe(
       await cleanupSeededData({ esClient });
     });
 
-    const message =
-      'Forensic investigation requested. APT29 lateral movement on DESKTOP-APT29. ' +
-      'C2 IP 185.220.101.42. Perform deep forensic analysis and produce a DRAFT specialist report.';
-
     evaluate(
       'should persist draft report to the durable index',
       async ({ agentBuilderClient, esClient, log }) => {
+        // The readback has to identify THIS invocation's write. A bare time
+        // window is satisfied by any DRAFT report an earlier example, retry,
+        // model or concurrent run wrote minutes ago, so the run id is echoed
+        // through the request and the readback filters on it.
+        const runId = `fw-l4-${uuidv4()}`;
+        const message =
+          'Forensic investigation requested. APT29 lateral movement on DESKTOP-APT29. ' +
+          'C2 IP 185.220.101.42. Perform deep forensic analysis and produce a DRAFT specialist report. ' +
+          `Include this run identifier verbatim in the persisted report: ${runId}`;
+
+        const runStartedAt = new Date().toISOString();
         const result = await agentBuilderClient.converse({
           agentId: agentBuilderDefaultAgentId,
           input: message,
@@ -66,58 +75,32 @@ evaluate.describe(
         const toolIds = new Set(steps.map((s) => s.tool_id).filter(Boolean));
 
         const produceDraftCalled = toolIds.has(DEEP_WATCH_TOOL_IDS.produce_draft_forensic_report);
-        log.info(`[L4] produceDraftCalled=${produceDraftCalled}`);
+        log.info(`[L4] runId=${runId} produceDraftCalled=${produceDraftCalled}`);
 
-        // ── Verify persistence ──────────────────────────────────────────────
-        let persistedCount = 0;
-        let hasEvaluationRecordShape = false;
+        let correlatedHits: DurableOutcomeHit[] = [];
 
         try {
-          const searchRes = await esClient.search({
-            index: DEEP_WATCH_FORENSICS_REPORTS_INDEX,
-            query: {
-              bool: {
-                must: [
-                  { match: { report_status: 'DRAFT' } },
-                  { range: { '@timestamp': { gte: 'now-5m' } } },
-                ],
-              },
-            },
-            size: 5,
-            sort: [{ '@timestamp': 'desc' }],
-          });
-
-          const hits = (searchRes.hits?.hits ?? []) as Array<{
-            _source: Record<string, unknown>;
-          }>;
-          persistedCount = hits.length;
-          log.info(`[L4] Persisted reports found: ${persistedCount}`);
-
-          if (persistedCount > 0) {
-            const record = hits[0]._source;
-            hasEvaluationRecordShape =
-              record.report_status !== undefined &&
-              record.timeline !== undefined &&
-              record.validated_iocs !== undefined &&
-              record.unresolved_questions !== undefined &&
-              record.confidence_assessment !== undefined;
-
-            log.info(`[L4] Evaluation Record shape valid: ${hasEvaluationRecordShape}`);
-          }
+          const searchRes = await esClient.search(
+            buildDurableOutcomeSearch({ runId, runStartedAt })
+          );
+          correlatedHits = (searchRes.hits?.hits ?? []) as unknown as DurableOutcomeHit[];
+          log.info(`[L4] Reports correlated to ${runId}: ${correlatedHits.length}`);
         } catch (e) {
-          log.warning(`[L4] ES search failed: ${(e as Error).message}`);
+          log.warning(`[L4] ES readback failed: ${(e as Error).message}`);
         }
 
+        const gate = evaluateDurableOutcome({ produceDraftCalled, correlatedHits });
+
         return {
-          success: produceDraftCalled && persistedCount > 0,
+          success: gate.success,
           explanation:
             `produce_draft called: ${produceDraftCalled}. ` +
-            `Persisted docs: ${persistedCount}. ` +
-            `Evaluation Record shape: ${hasEvaluationRecordShape}.`,
+            `Reports correlated to ${runId}: ${gate.persistedCount}. ` +
+            `Evaluation Record shape: ${gate.hasEvaluationRecordShape}.`,
           scorecard: {
             produceDraft: produceDraftCalled ? 1 : 0,
-            persisted: persistedCount > 0 ? 1 : 0,
-            evaluationRecordShape: hasEvaluationRecordShape ? 1 : 0,
+            persisted: gate.persistedCount > 0 ? 1 : 0,
+            evaluationRecordShape: gate.hasEvaluationRecordShape ? 1 : 0,
           },
         };
       }

@@ -39,6 +39,12 @@ import { v4 as uuidv4 } from 'uuid';
 import type { KbnClient } from '@kbn/kbn-client';
 import { tags, evaluate } from '@kbn/evals';
 import {
+  allPriorEventsCarriedForward,
+  evaluateHilRejectionGate,
+  isPausedExecutionStatus,
+  isTerminalExecutionStatus,
+} from '../src/gates/orchestrator_identity';
+import {
   PND_EMIT_PROPOSAL_PATH,
   PND_API_VERSION,
   PND_INVESTIGATIONS_INDEX,
@@ -380,12 +386,10 @@ evaluate.describe(
           while (Date.now() < deadline) {
             const ex = await pollExecution();
             status = ex.status;
-            if (status === 'waiting_for_input' || status === 'waiting') break;
-            if (status === 'failed' || status === 'completed' || status === 'cancelled') break;
+            if (isPausedExecutionStatus(status) || isTerminalExecutionStatus(status)) break;
             await new Promise((r) => setTimeout(r, 1500));
           }
           log.info(`[D4] run ${executionId} pre-reject status=${status}`);
-          const reachedPause = status === 'waiting_for_input' || status === 'waiting';
 
           // 4. REJECT the approval.
           await kbnClient.request({
@@ -419,24 +423,28 @@ evaluate.describe(
           // first write, so index *existence* is not a reliable signal of whether
           // the write ran (an auto-configured empty index could exist either way).
           // Zero marker documents is the honest assertion that the consequential
-          // write never executed. The run's terminal status may be completed /
-          // failed / cancelled depending on engine semantics for a rejected wait —
-          // the gate invariant is about the SIDE EFFECT, not the status label.
-          const consequentialStepDidNotRun = markerDocs === 0;
-          const halted = finalStatus !== 'running' && finalStatus !== 'waiting_for_input';
+          // write never executed — but zero markers alone is also what a run that
+          // is STILL PAUSED after the rejection produces, so the rejection has to
+          // have actually ended the run. A paused execution means the rejection
+          // did not take effect and the write is still pending.
+          const gate = evaluateHilRejectionGate({
+            preRejectStatus: status,
+            postRejectStatus: finalStatus,
+            markerDocs,
+          });
 
-          const success = reachedPause && consequentialStepDidNotRun && halted;
+          const success = gate.success;
           return {
             success,
             explanation:
-              `HIL pause reached=${reachedPause} (status=${status}); after REJECT ` +
+              `HIL pause reached=${gate.reachedPause} (status=${status}); after REJECT ` +
               `the consequential elasticsearch.index step wrote ${markerDocs} marker ` +
               `doc(s) (must be 0 for fail-closed). Final run status=${finalStatus} ` +
-              `(halted=${halted}).`,
+              `(halted=${gate.halted}).`,
             scorecard: {
-              reachedHilPause: reachedPause ? 1 : 0,
-              consequentialStepDidNotRun: consequentialStepDidNotRun ? 1 : 0,
-              runHaltedAfterReject: halted ? 1 : 0,
+              reachedHilPause: gate.reachedPause ? 1 : 0,
+              consequentialStepDidNotRun: gate.consequentialStepDidNotRun ? 1 : 0,
+              runHaltedAfterReject: gate.halted ? 1 : 0,
             },
           };
         } finally {
@@ -623,14 +631,21 @@ evaluate.describe(
           workerRun: workerRun({ alertId, investigationId }),
         });
 
-        // Snapshot the pre-fork timeline so carry-over can be compared exactly.
+        // Snapshot the pre-fork timeline so carry-over can be compared exactly:
+        // the fork is lossless only if every one of THESE events is still
+        // present in the Incident, so the events themselves are captured, not
+        // just their number.
         let preForkEventCount = 0;
+        let preForkEvents: Array<{ type?: string; summary?: string }> = [];
         try {
-          const pre = await esClient.get<{ events?: unknown[] }>({
+          const pre = await esClient.get<{
+            events?: Array<{ type?: string; summary?: string }>;
+          }>({
             index: PND_INVESTIGATIONS_INDEX,
             id: investigationId,
           });
-          preForkEventCount = pre._source?.events?.length ?? 0;
+          preForkEvents = pre._source?.events ?? [];
+          preForkEventCount = preForkEvents.length;
         } catch (e) {
           log.warning(`[D7] pre-fork investigation read failed: ${(e as Error).message}`);
         }
@@ -678,9 +693,10 @@ evaluate.describe(
             src?.template_id === 'incident' && src?.forkedFromInvestigationId === investigationId;
 
           const incidentEvents = src?.events ?? [];
-          // Lossless: every pre-fork event carried over, PLUS the fork event.
-          carriedAllPriorThreads =
-            preForkEventCount > 0 && incidentEvents.length === preForkEventCount + 1;
+          // Lossless: every pre-fork event carried over unchanged, PLUS the fork
+          // event. Comparing counts accepts a fork that drops one thread and
+          // writes a different event in its place.
+          carriedAllPriorThreads = allPriorEventsCarriedForward(preForkEvents, incidentEvents);
           promotionAudited = incidentEvents.some(
             (evt) =>
               evt?.type === 'decision' && (evt?.summary ?? '').includes('promoted to Incident')

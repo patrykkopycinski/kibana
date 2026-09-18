@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 /** Managed workflow IDs for the Watch escalation chain (see @kbn/workflows/managed). */
 export const WATCH_WORKFLOW_IDS = {
   floor: 'system-security-watch-floor',
@@ -22,12 +24,24 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
  * confidence clears `escalateThreshold`. The L0 transition-gate test asserts
  * the synthetic fixture actually trips this predicate, so a fixture/policy
  * drift is caught without booting the workflow engine.
+ *
+ * The orchestrator definition is not in this repository, so the policy is
+ * additionally asserted against the in-tree Floor worker's structured-output
+ * contract (`FLOOR_WORKER_DEFINITION_PATH`): the triggering verdict has to be
+ * one the worker can emit, and the threshold has to sit inside the confidence
+ * range it reports.
  */
 export const FLOOR_ESCALATION_POLICY = {
   escalateThreshold: 0.75,
   escalateTo: 'watch-dark',
   triggeringClassification: 'true_positive',
 } as const;
+
+/** In-tree managed definition of the Floor worker the escalation policy gates. */
+export const FLOOR_WORKER_DEFINITION_PATH = path.join(
+  __dirname,
+  '../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/floor_alert_triage.yaml'
+);
 
 /**
  * Synthetic escalation payload used to directly invoke Dark Watch, bypassing

@@ -12,14 +12,22 @@
  * whose findings exist only in an ephemeral tool/chat response has no L4."
  *
  * Verifies that the corroboration report is persisted to the Investigation
- * timeline via the emit_corroboration route, making the findings durable
- * and replayable for Evaluation Record scoring.
+ * timeline, making the findings durable and replayable for Evaluation Record
+ * scoring. Persistence is read back from ES and correlated by a per-run id
+ * echoed through the request: a response that merely mentions "persisted" or
+ * "timeline" is prose, not evidence of a durable write.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import { SCENARIOS } from '../src/dataset';
 import { logScorecard } from '../src/scorecard_log';
 import { SKILL_ID } from '../src/constants';
+import {
+  buildInvestigationReadbackSearch,
+  evaluateDurableOutcome,
+  type DurableOutcomeHit,
+} from '../src/durable_outcome';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 
 evaluate.describe(
@@ -42,15 +50,21 @@ evaluate.describe(
       'should persist corroboration findings to investigation timeline',
       { tag: tags.stateful.classic },
       async ({ agentBuilderClient, esClient, evaluators, log }) => {
+        // A time-window readback is satisfied by an investigation another run
+        // wrote minutes ago, so the run id travels with the request and the
+        // readback filters on it.
+        const runId = `rl-l4-${uuidv4()}`;
         const prompt =
           `Corroborate the following alert narrative against raw telemetry.\n\n` +
           `Narrative: ${scenario.narrative}\n` +
           `Hosts: ${scenario.scope.hosts.join(', ')}\n\n` +
           `Query logs-* indices. Report corroborated events, gap events, confidence, ` +
-          `and unresolved questions. Persist findings to the investigation timeline.`;
+          `and unresolved questions. Persist findings to the investigation timeline ` +
+          `and include this run identifier verbatim in the persisted record: ${runId}`;
 
         log.info('[L4] Starting durable outcome test');
 
+        const runStartedAt = new Date().toISOString();
         const response = await agentBuilderClient.converse({
           agentId: 'elastic-ai-agent',
           input: prompt,
@@ -62,38 +76,36 @@ evaluate.describe(
         // Skill invocation gate
         const skillInvoked = [...toolIds].some((id) => (id as string).includes(SKILL_ID));
 
-        // Durable write: check if emit_corroboration was called or if
-        // the investigation timeline was updated
-        const hasEmitCorroboration = [...toolIds].some(
-          (id) =>
-            (id as string).includes('emit_corroboration') ||
-            (id as string).includes('recordDeepWatch')
-        );
-
-        // Verify persisted data in ES
-        const responseText = JSON.stringify(response);
-        const hasPersistedRef =
-          responseText.includes('investigation') ||
-          responseText.includes('timeline') ||
-          responseText.includes('persisted');
-
         // Structured report fields
-        const hasCorroborated = responseText.toLowerCase().includes('corroborat');
-        const hasGaps = responseText.toLowerCase().includes('gap');
-        const hasUnresolved = responseText.toLowerCase().includes('unresolved');
+        const responseText = JSON.stringify(response).toLowerCase();
+        const hasCorroborated = responseText.includes('corroborat');
+        const hasGaps = responseText.includes('gap');
+        const hasUnresolved = responseText.includes('unresolved');
 
         const reportComplete = hasCorroborated && hasGaps && hasUnresolved;
-        const success = skillInvoked && hasEmitCorroboration && hasPersistedRef;
+
+        let correlatedHits: DurableOutcomeHit[] = [];
+        try {
+          const searchRes = await esClient.search(
+            buildInvestigationReadbackSearch({ runId, runStartedAt })
+          );
+          correlatedHits = (searchRes.hits?.hits ?? []) as unknown as DurableOutcomeHit[];
+        } catch (e) {
+          log.warning(`[L4] investigation readback failed: ${(e as Error).message}`);
+        }
+
+        const durable = evaluateDurableOutcome({ correlatedHits });
+        const success = skillInvoked && durable.success && reportComplete;
 
         log.info(
-          `[L4] skillInvoked=${skillInvoked}, durableWrite=${hasEmitCorroboration}, ` +
-            `persisted=${hasPersistedRef}, complete=${reportComplete}`
+          `[L4] skillInvoked=${skillInvoked}, runId=${runId}, ` +
+            `recordsCorrelatedToRun=${durable.persistedCount}, ` +
+            `corroborationStored=${durable.corroborationContentStored}, complete=${reportComplete}`
         );
 
         const scorecard = {
           skillInvoked: skillInvoked ? 1 : 0,
-          durableWriteCalled: hasEmitCorroboration ? 1 : 0,
-          durableOutcomeVerified: hasPersistedRef ? 1 : 0,
+          durableOutcomeVerified: durable.success ? 1 : 0,
           reportCompleteness: reportComplete ? 1 : 0,
         };
 
@@ -103,8 +115,8 @@ evaluate.describe(
           success,
           explanation:
             `Skill invoked: ${skillInvoked}. ` +
-            `Durable write: ${hasEmitCorroboration}. ` +
-            `Persisted ref: ${hasPersistedRef}. ` +
+            `Investigation records carrying ${runId}: ${durable.persistedCount}. ` +
+            `Corroboration content stored: ${durable.corroborationContentStored}. ` +
             `Report complete: ${reportComplete}.`,
           scorecard,
         };

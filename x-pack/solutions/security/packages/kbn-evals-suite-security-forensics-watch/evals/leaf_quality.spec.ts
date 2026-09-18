@@ -49,6 +49,11 @@ import { FORENSIC_CASES } from '../src/dataset';
 import { seedForensicTimeline } from '../src/data_generators/forensic_data';
 import { cleanupSeededData } from '../src/data_generators/cleanup';
 import {
+  evaluateLeafQualityGate,
+  hasExplicitConfidenceLevel,
+  iocsMatchExpected,
+} from '../src/gates/leaf_quality';
+import {
   DEEP_WATCH_TOOL_IDS,
   DEEP_WATCH_FORENSICS_SKILL_ID,
   DEEP_WATCH_TOOL_NAMESPACE,
@@ -65,6 +70,7 @@ interface ForensicEvalExample extends Example {
     minUnresolvedQuestions: number;
     draftLabelRequired: boolean;
     noExecutionRequired: boolean;
+    expectedIocs: Array<{ type: string; value: string; status: string }>;
   };
   metadata?: {
     case_id: string;
@@ -101,6 +107,7 @@ const buildExamples = (): ForensicEvalExample[] =>
       minUnresolvedQuestions: example.output.minUnresolvedQuestions,
       draftLabelRequired: example.output.draftLabelRequired,
       noExecutionRequired: example.output.noExecutionRequired,
+      expectedIocs: example.output.expectedIocs,
     },
     metadata: {
       case_id: example.id,
@@ -262,18 +269,25 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
         // Thresholds come from the dataset, which already declares them
         // (minUnresolvedQuestions / draftLabelRequired / noExecutionRequired);
         // the previous scorer ignored those fields and substituted prose.
+        // Every dimension the scorecard reports also gates `success`: a run that
+        // calls both tools, labels a draft and names a question while recovering
+        // zero timeline events and validating no golden IoC has not demonstrated
+        // forensic quality, so those values cannot be diagnostic-only.
         const draftLabelOk = !example.output.draftLabelRequired || draftLabelPresent;
         const noExecutionOk = !example.output.noExecutionRequired || proposalOnly;
-        const questionsOk = unresolvedQuestions.length >= example.output.minUnresolvedQuestions;
-        const timelineOk = timelineEvents >= example.output.minTimelineEvents;
 
-        const success =
-          skillInvoked &&
-          packageEvidenceCalled &&
-          produceDraftCalled &&
-          draftLabelOk &&
-          noExecutionOk &&
-          questionsOk;
+        const gate = evaluateLeafQualityGate({
+          skillInvoked,
+          correctToolCalled: packageEvidenceCalled && produceDraftCalled,
+          timelineDepth: timelineEvents >= example.output.minTimelineEvents,
+          iocValidation: iocsMatchExpected(example.output.expectedIocs, validatedIocs),
+          guardrailCompliance: draftLabelOk && noExecutionOk,
+          unresolvedQuestions: unresolvedQuestions.length >= example.output.minUnresolvedQuestions,
+          confidenceLevels: hasExplicitConfidenceLevel(confidenceOverall),
+          esqlUsed: esqlToolsCalled,
+          draftPersisted,
+        });
+        const success = gate.success;
 
         return {
           success,
@@ -286,17 +300,9 @@ base.describe('Forensics Watch — L2 Leaf Quality', { tag: tags.stateful.classi
             `IoCs validated: ${validatedIocs.length}, ` +
             `unresolved questions: ${unresolvedQuestions.length}/${example.output.minUnresolvedQuestions}, ` +
             `confidence: ${confidenceOverall ?? 'none'}. ` +
+            `Failing dimensions: ${gate.failing.join(', ') || 'none'}. ` +
             `(Prose signals are diagnostic only: ${JSON.stringify(proseSignals)})`,
-          scorecard: {
-            skillInvoked: skillInvoked ? 1 : 0,
-            correctToolCalled: packageEvidenceCalled && produceDraftCalled ? 1 : 0,
-            timelineDepth: timelineOk ? 1 : 0,
-            guardrailCompliance: draftLabelOk && noExecutionOk ? 1 : 0,
-            unresolvedQuestions: questionsOk ? 1 : 0,
-            confidenceLevels: confidenceOverall ? 1 : 0,
-            iocValidation: validatedIocs.length > 0 ? 1 : 0,
-            draftPersisted: draftPersisted ? 1 : 0,
-          },
+          scorecard: gate.scorecard,
           evaluationDataset: {
             examples: [
               {

@@ -267,23 +267,33 @@ const EVENTS: ForensicEvent[] = [
 ];
 
 /**
- * Bulk-index the Forensics Watch seed events into `logs-endpoint.events.*`.
- * Idempotent when paired with cleanupSeededData() in beforeAll (reclaims by
- * the `eval-agent-dwf-` prefix).
+ * One fully-built seed document, ready for the bulk API.
  */
-export async function seedForensicTimeline(
-  { esClient }: { esClient: Client },
-  log: ToolingLog,
-  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
-): Promise<void> {
-  const operations = EVENTS.flatMap((event) => {
+export interface SeededForensicEvent {
+  index: string;
+  host: string;
+  timestamp: string;
+  document: Record<string, unknown>;
+}
+
+/**
+ * Builds the seed documents without touching Elasticsearch.
+ *
+ * Exported so the dataset's golden IoC labels can be verified against the
+ * telemetry this seeder actually inserts (`dataset_invariants.test.ts`);
+ * a label the seeder contradicts is a mis-scored eval, not a model failure.
+ */
+export const buildForensicEvents = (baseTime: Date): SeededForensicEvent[] =>
+  EVENTS.map((event) => {
     const agentId = AGENT_IDS[event.host];
     const timestamp = new Date(baseTime.getTime() + event.offsetMinutes * 60 * 1000).toISOString();
     const [, dataset] = event.index.match(/^logs-(endpoint\.events\.[a-z]+)-default$/) ?? [];
 
-    return [
-      { create: { _index: event.index } },
-      {
+    return {
+      index: event.index,
+      host: event.host,
+      timestamp,
+      document: {
         '@timestamp': timestamp,
         agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
         elastic: { agent: { id: agentId } },
@@ -296,8 +306,23 @@ export async function seedForensicTimeline(
           dataset,
         },
       },
-    ];
+    };
   });
+
+/**
+ * Bulk-index the Forensics Watch seed events into `logs-endpoint.events.*`.
+ * Idempotent when paired with cleanupSeededData() in beforeAll (reclaims by
+ * the `eval-agent-dwf-` prefix).
+ */
+export async function seedForensicTimeline(
+  { esClient }: { esClient: Client },
+  log: ToolingLog,
+  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
+): Promise<void> {
+  const operations = buildForensicEvents(baseTime).flatMap((event) => [
+    { create: { _index: event.index } },
+    event.document,
+  ]);
 
   const response = await esClient.bulk({ operations, refresh: true });
 

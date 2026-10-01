@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
-module.exports = require('./junit_reporter');
+// require these polyfills after setting up the require hook so that @babel/preset-env
+// will spot the import in the polyfill file and replace it with the necessary polyfills
+// for the current node.js version
+import 'core-js/stable';

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import type { WatchAutonomyLevel } from '@kbn/alertzero-common';
 import {
+  factValueParts,
   getAutonomyLevelCards,
   workerNameForCards,
   supervisedWarnForWorker,
@@ -116,7 +117,7 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
                 color: ${euiTheme.colors.textSubdued};
               `}
             >
-              <FactParts parts={fact.parts} />
+              <FactParts parts={factValueParts(fact.value)} />
             </dd>
           </div>
         ))}

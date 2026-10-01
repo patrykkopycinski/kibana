@@ -32,10 +32,7 @@ const parseInterval = (interval: string | undefined): { amount: number; unit: Sc
   return { amount: Number(match[1]), unit: match[2] as ScheduleUnit };
 };
 
-const formatInterval = (amount: number, unit: ScheduleUnit): string => {
-  const safe = Number.isFinite(amount) && amount >= 1 ? Math.floor(amount) : 1;
-  return `${safe}${unit}`;
-};
+const formatInterval = (amount: number, unit: ScheduleUnit): string => `${amount}${unit}`;
 
 interface ScheduleIntervalFieldProps {
   workerId: string;
@@ -47,7 +44,8 @@ interface ScheduleIntervalFieldProps {
 /**
  * Trigger row ported from the Sep 14 prototype (notdaybreak_mvp
  * WorkerSettingsForm): plain "Every N unit" amount + unit select. Commits on
- * change; invalid amounts keep the last valid interval.
+ * change; an amount that is not a whole number of units stays on screen flagged
+ * instead of being floored into a different cadence.
  */
 export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   workerId,
@@ -59,9 +57,12 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
   const [amountDraft, setAmountDraft] = useState<string | null>(null);
 
   const commit = useCallback(
-    (nextAmount: number, nextUnit: ScheduleUnit) => {
-      if (!Number.isFinite(nextAmount) || nextAmount < 1) {
-        setAmountDraft(null);
+    (nextAmount: number, nextUnit: ScheduleUnit, rawDraft?: string) => {
+      // A typed value that is not a whole number of units (1.9, 0) is not a cadence this control can
+      // store, and flooring it would silently save a different one. Keep it on screen — and flagged
+      // by `amountInvalid` below — instead of committing.
+      if (!Number.isInteger(nextAmount) || nextAmount < 1) {
+        setAmountDraft(rawDraft ?? String(nextAmount));
         return;
       }
       setAmountDraft(null);
@@ -112,7 +113,7 @@ export const ScheduleIntervalField: React.FC<ScheduleIntervalFieldProps> = ({
               }
               const next = Number(raw);
               if (Number.isFinite(next)) {
-                commit(next, unit);
+                commit(next, unit, raw);
               }
             }}
             onBlur={() => setAmountDraft(null)}

@@ -83,32 +83,54 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const controlsDisabled = settingsLocked || isSaving;
   const CustomSettings = getWorkerCustomSettingsComponent(worker.id);
 
-  const accordionCss = useMemo(
+  const accordionHeaderStyles = useMemo(
     () => css`
-      .euiAccordion__triggerWrapper {
-        align-items: flex-start;
-        padding: ${euiTheme.size.base};
-        /* Full-width rule under the header, mirroring the static single-Worker band. */
-        border-bottom: ${isExpanded ? euiTheme.border.thin : 'none'};
-      }
-      .euiAccordion__button {
-        width: auto;
+      align-self: flex-start;
+      width: 100%;
+      min-width: 0;
+      padding: ${euiTheme.size.base};
+      text-align: left;
+    `,
+    [euiTheme]
+  );
 
-        &,
-        &:hover,
-        &:focus,
-        &:hover *,
-        &:focus * {
-          text-decoration: none;
-        }
+  const accordionHeaderActionStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      padding: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionArrowStyles = useMemo(
+    () => css`
+      align-self: flex-start;
+      margin-left: ${euiTheme.size.base};
+      margin-top: ${euiTheme.size.base};
+    `,
+    [euiTheme]
+  );
+
+  const accordionButtonStyles = useMemo(
+    () => css`
+      width: auto;
+
+      &,
+      &:hover,
+      &:focus,
+      &:hover *,
+      &:focus * {
+        text-decoration: none;
       }
-      .euiAccordion__optionalAction {
-        align-self: flex-start;
-        padding-block-start: 0;
-      }
-      .euiAccordion__children {
-        padding: ${euiTheme.size.base};
-      }
+    `,
+    []
+  );
+
+  const accordionBodyStyles = useMemo(
+    () => css`
+      padding: ${euiTheme.size.base};
+      /* Full-width rule under the header, mirroring the static single-Worker band. */
+      border-top: ${isExpanded ? euiTheme.border.thin : 'none'};
     `,
     [euiTheme, isExpanded]
   );
@@ -237,16 +259,31 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
           paddingSize="none"
           forceState={isExpanded ? 'open' : 'closed'}
           onToggle={(isOpen) => onToggle(worker.id, isOpen)}
-          buttonContent={headerBandContent(`${worker.id}-heading`, 'span')}
           buttonContentClassName="alertZeroWorkerAccordion__buttonContent"
+          buttonContent={
+            <div
+              css={accordionHeaderStyles}
+              data-test-subj={`alertZeroWorkerAccordionHeader-${worker.id}`}
+            >
+              {headerBandContent(`${worker.id}-heading`, 'span')}
+            </div>
+          }
+          // Layout rides on EuiAccordion's own props and on nodes we render: EUI's internal
+          // `.euiAccordion__*` classes are not part of its public contract, so an EUI update may
+          // reshape them without notice.
+          buttonProps={{ css: accordionButtonStyles }}
+          arrowProps={{ css: accordionArrowStyles }}
           extraAction={
-            <div onClick={stopAccordionToggle} onKeyDown={stopAccordionToggle}>
+            <div
+              css={accordionHeaderActionStyles}
+              onClick={stopAccordionToggle}
+              onKeyDown={stopAccordionToggle}
+            >
               {enabledSwitch}
             </div>
           }
           data-test-subj={`alertZeroWatchWorkerAccordion-${worker.id}`}
           css={css`
-            ${accordionCss}
             .alertZeroWorkerAccordion__buttonContent {
               flex: 1;
               min-width: 0;
@@ -254,7 +291,12 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
             }
           `}
         >
-          {settingsBody}
+          <div
+            css={accordionBodyStyles}
+            data-test-subj={`alertZeroWorkerSettingsBody-${worker.id}`}
+          >
+            {settingsBody}
+          </div>
         </EuiAccordion>
       </EuiPanel>
     );

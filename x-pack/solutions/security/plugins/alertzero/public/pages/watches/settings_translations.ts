@@ -717,7 +717,7 @@ const WATCH_INTROS: Record<string, string> = {
 export const watchIntro = (watchId: string): string | undefined => WATCH_INTROS[watchId];
 
 /* -------------------------------------------------------------------------- */
-/* Two-column Worker settings layout (summary rail, autonomy cards, trigger)  */
+/* Worker settings layout (autonomy cards, trigger)                            */
 /* -------------------------------------------------------------------------- */
 
 export const AUTONOMY_ACTOR_WORKER = i18n.translate(

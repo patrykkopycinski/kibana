@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import {
@@ -246,6 +248,32 @@ describe('WatchDetailPage', () => {
         `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID}`
       )
     ).toBeInTheDocument();
+  });
+
+  it('lays the accordion out with its own nodes and keeps the enable switch out of the toggle button', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
+
+    for (const worker of floorWorkers) {
+      const header = screen.getByTestId(`alertZeroWorkerAccordionHeader-${worker.id}`);
+      const body = screen.getByTestId(`alertZeroWorkerSettingsBody-${worker.id}`);
+      expect(header).toBeInTheDocument();
+      expect(body).toBeInTheDocument();
+      // The band and the body carry the padding: EUI's own accordion nodes stay untouched.
+      expect(getComputedStyle(header).padding).toBe('16px');
+      expect(getComputedStyle(body).padding).toBe('16px');
+
+      // The switch is interactive content; EUI renders it beside the toggle, never inside it.
+      expect(
+        screen.getByTestId(`alertZeroWorkerEnabledSwitch-${worker.id}`).closest('button')
+      ).toBeNull();
+    }
+  });
+
+  it('styles its accordion through EuiAccordion props, not through EUI private classes', () => {
+    // `.euiAccordion__*` is EUI internals rather than a public contract, so an EUI update may
+    // reshape it — the panel has to carry its own nodes and style them instead.
+    const panelSource = readFileSync(join(__dirname, 'components/worker_settings_panel.tsx'), 'utf8');
+    expect(panelSource).not.toMatch(/\.euiAccordion__/);
   });
 
   it('renders each member as a section in a single column — no summary rail', () => {

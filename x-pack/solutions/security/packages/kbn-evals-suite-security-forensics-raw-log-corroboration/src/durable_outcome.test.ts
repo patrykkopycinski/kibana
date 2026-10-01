@@ -19,7 +19,7 @@ const hitWith = (source: Record<string, unknown>): DurableOutcomeHit => ({ _sour
 describe('buildInvestigationReadbackSearch', () => {
   it('correlates the readback to the run id and the run start time', () => {
     const search = buildInvestigationReadbackSearch(runContext);
-    const must = (search.query.bool.must ?? []) as unknown[];
+    const { must } = (search.query as { bool: { must: unknown[] } }).bool;
 
     expect(search.index).toBe('.pnd-investigations');
     expect(must).toEqual([

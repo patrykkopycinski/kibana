@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-const defaultSleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const defaultSleep = (ms: number): Promise<void> =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), ms);
+  });
 
 export interface PollUntilOptions<T> {
   /** Reads the current value. */

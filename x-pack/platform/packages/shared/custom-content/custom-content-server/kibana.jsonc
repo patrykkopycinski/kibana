@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/custom-content-server",
-  "owner": ["@elastic/kibana-dashboards"],
-  "group": "platform",
-  "visibility": "shared"
-}

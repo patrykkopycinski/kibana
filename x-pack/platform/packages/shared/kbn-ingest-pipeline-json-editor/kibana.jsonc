@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ingest-pipeline-json-editor",
-  "owner": "@elastic/streams-ui",
-  "group": "platform",
-  "visibility": "shared"
-}

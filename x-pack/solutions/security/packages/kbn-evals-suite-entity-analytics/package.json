@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/evals-suite-entity-analytics",
-  "version": "1.0.0",
-  "private": true,
-  "license": "Elastic License 2.0",
-  "kbnGenerated": true
-}

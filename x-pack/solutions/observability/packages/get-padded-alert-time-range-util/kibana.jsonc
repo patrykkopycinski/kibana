@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/observability-get-padded-alert-time-range-util",
-  "owner": [
-    "@elastic/nightshift-sre-agent-team"
-  ],
-  "group": "observability",
-  "visibility": "private"
-}

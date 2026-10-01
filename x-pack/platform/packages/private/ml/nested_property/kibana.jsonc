@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ml-nested-property",
-  "owner": "@elastic/search-ml-ux",
-  "group": "platform",
-  "visibility": "private"
-}

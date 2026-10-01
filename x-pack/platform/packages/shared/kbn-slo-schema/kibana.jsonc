@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/slo-schema",
-  "owner": [
-    "@elastic/nightshift-sre-agent-team"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

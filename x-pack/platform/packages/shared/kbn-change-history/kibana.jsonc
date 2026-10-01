@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/change-history",
-  "owner": "@elastic/kibana-core",
-  "group": "platform",
-  "visibility": "shared"
-}

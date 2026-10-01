@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/significant-events-schema",
-  "owner": "@elastic/nightshift-sre-agent-team",
-  "group": "platform",
-  "visibility": "shared"
-}

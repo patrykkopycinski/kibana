@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/inference-tracing",
-  "owner": "@elastic/search-ml-ux",
-  "group": "platform",
-  "visibility": "shared"
-}

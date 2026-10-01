@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/alerting-v2-browser-shared",
-  "owner": "@elastic/rna-project-team",
-  "group": "platform",
-  "visibility": "shared"
-}

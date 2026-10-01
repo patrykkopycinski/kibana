@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/aiops-server-schemas",
-  "owner": [
-    "@elastic/search-ml-ux"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

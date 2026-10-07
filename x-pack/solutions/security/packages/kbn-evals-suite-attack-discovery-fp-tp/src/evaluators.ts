@@ -297,12 +297,6 @@ interface WorldClaim {
   id?: string;
 }
 
-interface RawCheck {
-  name?: string;
-  status?: string;
-  result?: string;
-}
-
 interface AlertLinkClaim {
   field?: string;
   value?: string;

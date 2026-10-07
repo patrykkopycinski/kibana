@@ -41,6 +41,8 @@ describe('persona matrix tool ownership and parity queries', () => {
     for (const [id, expectedIndex, field] of [
       ['vt.hash.lookup', 'logs-chrysalis-sim.alerts-default', 'labels.simulation'],
       ['check.on.call.schedule', 'on-call-schedule', 'rotation'],
+      ['get.time', 'logs-chrysalis-sim.alerts-default', 'labels.simulation'],
+      ['create.channel', 'logs-chrysalis-sim.alerts-default', 'labels.simulation'],
     ]) {
       const query = bodies.find((body) => body.id === id)?.configuration.query ?? '';
       const from = query.match(/FROM ([^ ]+)/)?.[1];

@@ -113,7 +113,7 @@ run(
       );
       await seedChrysalisAlerts({ esClient, log });
       await seedPersonaMatrixTools({ kbnClient, log, parity: true });
-      for (const id of ['vt.hash.lookup', 'check.on.call.schedule']) {
+      for (const id of ['vt.hash.lookup', 'check.on.call.schedule', 'get.time', 'create.channel']) {
         const response = await esClient.esql.query({ query: queries[id] });
         console.log(`shim ${id} rows=${response.values.length}`);
         expect(response.values.length).toBeGreaterThan(0);

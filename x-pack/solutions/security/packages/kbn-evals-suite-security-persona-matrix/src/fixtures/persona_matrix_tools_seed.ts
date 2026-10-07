@@ -175,7 +175,8 @@ export async function seedPersonaMatrixTools({
       description: 'Get the current time and date.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | LIMIT 1 | KEEP @timestamp`,
+        query:
+          'FROM logs-chrysalis-sim.alerts-default | WHERE labels.simulation == "chrysalis-sim" | KEEP @timestamp | LIMIT 1',
         params: {},
       },
     },
@@ -192,7 +193,8 @@ export async function seedPersonaMatrixTools({
         'escalate a case or notify a channel.',
       tags: ['persona-matrix', 'parity-shim'],
       configuration: {
-        query: `FROM ${ALERT_INDEX} | LIMIT 1 | KEEP kibana.alert.rule.name`,
+        query:
+          'FROM logs-chrysalis-sim.alerts-default | WHERE labels.simulation == "chrysalis-sim" | KEEP kibana.alert.rule.name | LIMIT 1',
         params: {},
       },
     },

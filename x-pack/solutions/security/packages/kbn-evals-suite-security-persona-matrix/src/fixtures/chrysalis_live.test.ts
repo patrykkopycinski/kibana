@@ -9,14 +9,57 @@
 import { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { PARITY_DOCS } from './chrysalis_parity_docs';
-import { seedChrysalisAlerts, cleanupChrysalisAlerts } from './chrysalis_seed';
 import { seedPersonaMatrixTools, cleanupPersonaMatrixTools } from './persona_matrix_tools_seed';
+
+const loadParityFixture = (): typeof import('./chrysalis_seed') => {
+  const previousProfile = process.env.SEED_PROFILE;
+  process.env.SEED_PROFILE = 'parity';
+  try {
+    let loaded: typeof import('./chrysalis_seed') | undefined;
+    jest.isolateModules(() => {
+      loaded = jest.requireActual<typeof import('./chrysalis_seed')>('./chrysalis_seed');
+    });
+    if (!loaded) {
+      throw new Error('Chrysalis parity fixture failed to load');
+    }
+    return loaded;
+  } finally {
+    if (previousProfile === undefined) {
+      delete process.env.SEED_PROFILE;
+    } else {
+      process.env.SEED_PROFILE = previousProfile;
+    }
+  }
+};
+
+it('loads the parity fixture independently of the ambient profile', () => {
+  const previousProfile = process.env.SEED_PROFILE;
+  try {
+    for (const ambient of [undefined, 'minimal']) {
+      if (ambient === undefined) {
+        delete process.env.SEED_PROFILE;
+      } else {
+        process.env.SEED_PROFILE = ambient;
+      }
+      expect(loadParityFixture().seedProfile).toBe('parity');
+      expect(process.env.SEED_PROFILE).toBe(ambient);
+    }
+  } finally {
+    if (previousProfile === undefined) {
+      delete process.env.SEED_PROFILE;
+    } else {
+      process.env.SEED_PROFILE = previousProfile;
+    }
+  }
+});
 
 const run = process.env.PERSONA_MATRIX_LIVE_ES === 'http://127.0.0.1:19220' ? it : it.skip;
 
 run(
   'dedicated Elasticsearch: foreign telemetry survives parity seed, lookup, cleanup, and reseed',
   async () => {
+    const { seedChrysalisAlerts, cleanupChrysalisAlerts, seedProfile } = loadParityFixture();
+    expect(seedProfile).toBe('parity');
     const esClient = new EsClient({
       node: process.env.PERSONA_MATRIX_LIVE_ES,
       auth: { username: 'elastic', password: 'changeme' },

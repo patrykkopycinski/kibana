@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PARITY_DOCS } from '../fixtures/chrysalis_parity_docs';
 import {
   PERSONA_MATRIX_PARITY_TOOL_IDS,
   PERSONA_MATRIX_TOOL_IDS,
@@ -125,6 +126,26 @@ describe('persona matrix question and grading consistency', () => {
         });
       }
     }
+  });
+
+  it('grounds the detection-rule-edit-c rule attachment in the parity snapshot', () => {
+    const attachment =
+      PERSONA_MATRIX_EXAMPLES.find(({ id }) => id === 'detection-rule-edit-c')?.input.attachment ??
+      '';
+    const rules = PARITY_DOCS.flatMap(({ doc }) => {
+      const rule = (doc as { kibana?: { alert?: { rule?: Record<string, unknown> } } }).kibana
+        ?.alert?.rule;
+      return rule ? [rule] : [];
+    });
+    const rule = rules.find(({ name }) => attachment.includes(`Name: ${name}\n`));
+    expect(rule).toBeDefined();
+    expect(attachment).toContain(`Rule ID: ${rule?.rule_id}\n`);
+    expect(attachment).toContain(`Severity: ${rule?.severity} (risk: ${rule?.risk_score})\n`);
+    expect(attachment).toContain(
+      `Interval: ${rule?.interval} (from: ${rule?.from}, to: ${rule?.to})`
+    );
+    expect(attachment).toContain(`Description: ${rule?.description}`);
+    expect(attachment).toContain(`Tags: ${(rule?.tags as string[]).join(', ')}\n`);
   });
 
   it('does not grade multi-step trajectories on tools that parity runs may call under an alias', () => {

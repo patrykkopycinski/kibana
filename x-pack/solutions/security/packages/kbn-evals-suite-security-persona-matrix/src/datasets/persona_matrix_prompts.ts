@@ -206,6 +206,21 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       question:
         "Now that we've confirmed this threat, help me close the detection gap - create a rule " +
         'so we catch this automatically next time, and ground it in the relevant Security Labs research.',
+      // Rule context for the original benchmark's attach_rule=true. Every value below is copied
+      // from the kibana.alert.rule.* fields of the chrysalis-sim parity snapshot alert for this
+      // rule (fixtures/chrysalis_parity_docs.ts). The snapshot carries no rule query, so none is given.
+      attachment:
+        'Rule Details:\n' +
+        '  Name: DLL Side-Loading via Signed Bitdefender Binary\n' +
+        '  Rule ID: 0bbb8807-1162-5307-910e-a1790dd23fa5\n' +
+        '  Type: siem.queryRule (Custom Query Rule)\n' +
+        '  Severity: critical (risk: 90)\n' +
+        '  Interval: 5m (from: now-6m, to: now)\n' +
+        '  Tags: Tactic: Defense Evasion, Threat: Lotus Blossom, Data Source: Elastic Defend\n' +
+        '  MITRE: TA0005 Defense Evasion / T1574.002 (Hijack Execution Flow: DLL Side-Loading)\n' +
+        '  Description: BluetoothService.exe (a renamed, signed Bitdefender Submission Wizard) loaded an ' +
+        'unsigned log.dll from the same AppData folder. Classic DLL side-loading pattern — the Chrysalis ' +
+        'loader uses LogInit/LogWrite exports of log.dll to decrypt and execute the embedded shellcode.',
     },
     output: {
       reference:

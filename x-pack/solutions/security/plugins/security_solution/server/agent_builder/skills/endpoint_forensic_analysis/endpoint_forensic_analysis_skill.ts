@@ -170,7 +170,7 @@ After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IO
 - The **Source event** column should reference the telemetry indices queried (e.g. \`logs-endpoint.events.*\`); do not invent per-row event IDs.
 - If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the IoC extraction failed, report the error, and answer from the telemetry you already have. An empty IoC table means no corroborated indicators; an \`error\` means unknown. Observed hashes still require attack correlation.
 
-Do not put uncorrelated observed hashes in the IoC table or offer them for hunting. The tool returns host-wide hashes separately in \`observed_file_hashes\`; host/time scope alone does not establish compromise. Only hashes corroborated by the reconstructed attack belong in the file-hash IoC category.
+Do not put uncorrelated observed hashes in the IoC table or offer them for hunting. The tool returns host-wide hashes and destinations separately in \`observed_file_hashes\` and \`observed_network_destinations\`; host/time scope alone does not establish compromise (a public IP or an internal hostname such as a domain controller is routine traffic). Only hashes and destinations corroborated by the reconstructed attack belong in the file-hash and network-destination IoC categories.
 
 Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
 
@@ -247,7 +247,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns observed file hashes (not IoCs without attack correlation), network destinations, registry persistence keys, and renamed file extensions. ' +
+        'Returns observed file hashes and network destinations (neither is an IoC without attack correlation), registry persistence keys, and renamed file extensions. ' +
         'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
@@ -256,7 +256,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, file.Ext.original.extension, @timestamp`,
+          `| KEEP process.hash.sha256, file.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, file.Ext.original.extension, @timestamp`,
           `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
@@ -264,11 +264,11 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         const iocs: Record<string, unknown[]> = {
           file_hashes: [],
           process_chain: [],
-          network_destinations: [],
           registry_persistence_keys: [],
           file_extensions: [],
         };
         const observedFileHashes: string[] = [];
+        const observedNetworkDestinations: string[] = [];
         const firstSeenByCategory: Record<string, string> = {};
         let iocsError: string | undefined;
         let truncated = false;
@@ -317,6 +317,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
 
           const hashIdx = colIndex('process.hash.sha256');
+          const fileHashIdx = colIndex('file.hash.sha256');
           const exeIdx = colIndex('process.executable');
           const parentNameIdx = colIndex('process.parent.name');
           const parentCmdIdx = colIndex('process.parent.command_line');
@@ -366,8 +367,17 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
             const ext = extIdx >= 0 ? v[extIdx] : null;
             const origExt = origExtIdx >= 0 ? v[origExtIdx] : null;
 
-            if (hash && typeof hash === 'string' && !observedFileHashes.includes(hash)) {
-              observedFileHashes.push(hash);
+            // Process events carry `process.hash.sha256`; file events (a dropped
+            // payload with no process of its own) carry `file.hash.sha256`.
+            const fileHash = fileHashIdx >= 0 ? v[fileHashIdx] : null;
+            for (const candidate of [hash, fileHash]) {
+              if (
+                candidate &&
+                typeof candidate === 'string' &&
+                !observedFileHashes.includes(candidate)
+              ) {
+                observedFileHashes.push(candidate);
+              }
             }
             if (
               exe &&
@@ -393,23 +403,23 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
               trackCategory('process_chain', v);
             }
-            // External destinations only — RFC1918/loopback/multicast are
-            // ordinary host chatter, not indicators.
+            // Destinations are observed evidence, not indicators: host/time scope
+            // alone does not make a public IP or an internal hostname (SRV-DC01)
+            // malicious. Local/private addresses are dropped as pure chatter; the
+            // rest are listed separately for the model to correlate with the attack.
             if (
               typeof ip === 'string' &&
               !isRfc1918OrLocal(ip) &&
-              !iocs.network_destinations.includes(ip)
+              !observedNetworkDestinations.includes(ip)
             ) {
-              iocs.network_destinations.push(ip);
-              trackCategory('network_destinations', v);
+              observedNetworkDestinations.push(ip);
             }
             if (
               domain &&
               typeof domain === 'string' &&
-              !iocs.network_destinations.includes(domain)
+              !observedNetworkDestinations.includes(domain)
             ) {
-              iocs.network_destinations.push(domain);
-              trackCategory('network_destinations', v);
+              observedNetworkDestinations.push(domain);
             }
             if (
               regPath &&
@@ -454,6 +464,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 time_window_hours: timeWindowHours,
                 iocs,
                 observed_file_hashes: observedFileHashes,
+                observed_network_destinations: observedNetworkDestinations,
                 first_seen_by_category: firstSeenByCategory,
                 ...(truncated && {
                   truncated: true,
@@ -461,7 +472,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 }),
                 ...(iocsError !== undefined && { error: iocsError }),
                 guidance:
-                  'Observed file hashes are not indicators of compromise: correlate them with the reconstructed attack before including them in the IoC table or offering a cross-environment hunt. Present supported indicators as a markdown table.',
+                  'Observed file hashes and network destinations are not indicators of compromise: correlate them with the reconstructed attack before including them in the IoC table or offering a cross-environment hunt. Present supported indicators as a markdown table.',
               },
             },
           ],

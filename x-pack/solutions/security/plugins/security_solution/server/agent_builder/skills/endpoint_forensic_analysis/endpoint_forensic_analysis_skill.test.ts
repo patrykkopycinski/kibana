@@ -133,6 +133,61 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(call).toContain('file.Ext.original.extension');
   });
 
+  it('extract_iocs reads file.hash.sha256 from file events as an observed hash', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    // A dropped payload: the file event has a hash but no process of its own.
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [{ name: 'file.hash.sha256' }, { name: '@timestamp' }],
+      values: [['dropped-payload-hash', '2026-01-01T00:00:00Z']],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as { results: Array<{ data: { observed_file_hashes: string[] } }> };
+
+    expect(esqlQuery.mock.calls[0][0].query).toContain('file.hash.sha256');
+    expect(response.results[0].data.observed_file_hashes).toEqual(['dropped-payload-hash']);
+  });
+
+  it('extract_iocs keeps uncorrelated network destinations out of IoCs', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [{ name: 'destination.ip' }, { name: 'destination.domain' }, { name: '@timestamp' }],
+      values: [
+        ['10.0.0.5', null, '2026-01-01T00:00:00Z'],
+        ['8.8.8.8', null, '2026-01-01T00:01:00Z'],
+        [null, 'SRV-DC01', '2026-01-01T00:02:00Z'],
+      ],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as {
+      results: Array<{
+        data: {
+          iocs: Record<string, unknown[]>;
+          observed_network_destinations: string[];
+          first_seen_by_category: Record<string, string>;
+          guidance: string;
+        };
+      }>;
+    };
+    const data = response.results[0].data;
+
+    expect(data.iocs.network_destinations).toBeUndefined();
+    expect(data.first_seen_by_category.network_destinations).toBeUndefined();
+    expect(data.observed_network_destinations).toEqual(['8.8.8.8', 'SRV-DC01']);
+    expect(data.guidance).toContain('network destinations are not indicators of compromise');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(

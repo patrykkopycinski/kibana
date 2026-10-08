@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod';
@@ -14,10 +15,16 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { API_VERSIONS, buildRespondToActionUrl, buildWorkflowSourceId } from '@kbn/inbox-common';
 import {
+  PROPOSALS_API_VERSION,
+  PROPOSALS_INTERNAL_URL,
+  type ListProposalsResponse,
+  type Proposal,
+} from '@kbn/proposals-common';
+import {
+  AGENT_BUILDER_API_VERSION,
   DRAFT_STEP_ID,
-  REVIEW_STEP_ID,
+  INVESTIGATION_INPUT,
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
 } from './constants';
@@ -25,15 +32,10 @@ import { draftRuleSchema, type DraftRule } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// WAITING_FOR_INPUT is in NonTerminalExecutionStatuses in @kbn/workflows, so we
-// must add it explicitly — otherwise the poll loop spins for maxWaitMs waiting
-// for a workflow that is intentionally paused waiting for human approval.
-const shouldStopPolling = (status: ExecutionStatus) =>
-  TerminalExecutionStatuses.includes(status) || status === ExecutionStatus.WAITING_FOR_INPUT;
-
 // The ai.agent step's persisted output is
-// `{ message, structured_output: { rule, attachment_id, attachment_version }, metadata }` —
-// the rule is NESTED under structured_output.rule (see the managed yaml templates:
+// `{ message, structured_output: { rule, attachment_id, attachment_version, reason },
+//    conversation_id, metadata: { usage } }` — the rule is NESTED under
+// structured_output.rule (see the managed yaml templates:
 // `steps.draft_creation.output.structured_output.rule.query`). Parsing structured_output
 // as the rule itself strips the wrapper and yields an empty object — every evaluator
 // then sees a rule with no fields (the false-zero failure this fixed).
@@ -42,205 +44,247 @@ const stepOutputSchema = z
     structured_output: z
       .object({
         rule: draftRuleSchema,
-        // v3 quality gate: the agent refuses unwinnable gaps instead of drafting.
-        // A refusal is a CORRECT outcome, not a missing rule — evaluators must be
-        // able to tell the two apart (a crashed draft also yields no rule).
-        skipped: z.boolean(),
+        // The workflow has no `skipped` flag: when the agent produces no rule it returns
+        // empty strings for name/description/query and says why under `reason`.
         reason: z.string(),
       })
       .partial(),
+    metadata: z.object({ usage: z.object({ connectorId: z.string() }).partial() }).partial(),
   })
   .partial();
 
+export interface DraftOutcome {
+  rule: DraftRule | undefined;
+  /** True when the agent declined to draft and said why (distinct from a failed draft). */
+  skipped: boolean;
+  /** The agent's one-sentence reason, when it declined. */
+  skipReason: string | undefined;
+  /** Connector the ai.agent step actually ran on, as reported by the step's usage metadata. */
+  connectorId: string | undefined;
+}
+
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-const extractDraftFromSteps = (
-  steps: WorkflowStepExecutionDto[]
-): { rule: DraftRule | undefined; skipped: boolean; skipReason: string | undefined } => {
-  const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
-  const resultRecord = draftSteps.find((s) => s.output != null);
+export const extractDraftFromSteps = (steps: WorkflowStepExecutionDto[]): DraftOutcome => {
+  const resultRecord = steps.find((s) => s.stepId === DRAFT_STEP_ID && s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
-  if (!parsed.success) return { rule: undefined, skipped: false, skipReason: undefined };
+  if (!parsed.success) {
+    return { rule: undefined, skipped: false, skipReason: undefined, connectorId: undefined };
+  }
   const out = parsed.data.structured_output;
+  const connectorId = parsed.data.metadata?.usage?.connectorId;
+  // The workflow's own `draft_ready` test: a draft with no query is not a rule. The
+  // schema forces every rule field to be present, so "no rule" arrives as empty strings.
+  const hasRule = Boolean(out?.rule?.query?.trim());
+  const reason = out?.reason?.trim();
   return {
-    rule: out?.rule,
-    skipped: out?.skipped === true,
-    skipReason: out?.reason,
+    rule: hasRule ? out?.rule : undefined,
+    skipped: !hasRule && Boolean(reason),
+    skipReason: reason || undefined,
+    connectorId,
   };
 };
 
-export interface RuleCreationResult {
-  rule: DraftRule | undefined;
-  /** True when the v3 quality gate refused to draft (distinct from a failed draft). */
-  skipped: boolean;
-  /** Which gate the agent reported tripping, when it skipped. */
-  skipReason: string | undefined;
+export interface RuleCreationResult extends DraftOutcome {
+  /** True when the run parked on a pending proposal awaiting the analyst. */
   pendingApproval: boolean;
+  /** The pending proposal, when the run reached the gate. */
+  proposalId: string | undefined;
+  /** Investigation (conversation) the proposal is recorded on. */
+  investigationId: string;
   traceId: string | undefined;
   workflowExecutionId: string;
+  status: ExecutionStatus;
   stepExecutions: WorkflowStepExecutionDto[];
+}
+
+export interface RuleCreationInput {
+  technique: string;
+  gap_description: string;
+  evidence: string;
+  confidence: number;
 }
 
 export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
+  private readonly investigationIds: string[] = [];
 
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
-  private async pollExecution({
-    workflowExecutionId,
-    isDone,
-    maxWaitMs,
-    pollIntervalMs,
-  }: {
-    workflowExecutionId: string;
-    isDone: (status: ExecutionStatus) => boolean;
-    maxWaitMs: number;
-    pollIntervalMs: number;
-  }): Promise<WorkflowExecutionDto> {
-    const deadline = Date.now() + maxWaitMs;
-    let execution: WorkflowExecutionDto | undefined;
-
-    while (Date.now() < deadline) {
-      execution = await this.fetch<WorkflowExecutionDto>(
-        `/api/workflows/executions/${workflowExecutionId}`,
-        {
-          method: 'GET',
-          version: WORKFLOWS_API_VERSION,
-          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-          query: { includeOutput: true },
-        }
-      );
-
-      if (isDone(execution.status)) break;
-      await sleep(pollIntervalMs);
-    }
-
-    if (!execution) {
-      throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
-    }
-    return execution;
+  private async getExecution(workflowExecutionId: string): Promise<WorkflowExecutionDto> {
+    return this.fetch<WorkflowExecutionDto>(`/api/workflows/executions/${workflowExecutionId}`, {
+      method: 'GET',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      query: { includeOutput: true },
+    });
   }
 
+  private async findPendingProposal(investigationId: string): Promise<Proposal | undefined> {
+    const { proposals } = await this.fetch<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
+      method: 'GET',
+      version: PROPOSALS_API_VERSION,
+      headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
+      query: { conversationId: investigationId, status: 'pending', size: 1 },
+    });
+    return proposals[0];
+  }
+
+  /**
+   * Opens the investigation the workflow records its proposal on. The workflow requires one
+   * (`investigation_id`), and a production caller (coverage review) always opens it first.
+   * Public: the proposal gate reads it under the worker's own identity, not the basic-auth user.
+   */
+  private async createInvestigation(title: string): Promise<string> {
+    const conversationId = uuidv4();
+    await this.fetch('/api/agent_builder/conversations', {
+      method: 'POST',
+      version: AGENT_BUILDER_API_VERSION,
+      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+      body: JSON.stringify({
+        conversation_id: conversationId,
+        title,
+        access_control: { access_mode: 'public', entries: [] },
+      }),
+    });
+    this.investigationIds.push(conversationId);
+    return conversationId;
+  }
+
+  /**
+   * Runs the managed workflow and waits until it either finishes or parks on the analyst's
+   * decision. `propose_creation` and `preview_creation` both park the run in
+   * WAITING_FOR_CHILD, so that status alone does not mean the gate was reached: the run is
+   * only at the gate once a pending proposal exists on its investigation.
+   */
   async run({
     input,
     maxWaitMs = 10 * 60_000,
     pollIntervalMs = 5_000,
   }: {
-    input: {
-      technique: string;
-      gap_description: string;
-      evidence: string;
-      confidence: number;
-    };
+    input: RuleCreationInput;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<RuleCreationResult> {
+    const investigationId = await this.createInvestigation(
+      `Rule creation eval: ${input.technique}`
+    );
+
     const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
       `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}/run`,
       {
         method: 'POST',
         version: WORKFLOWS_API_VERSION,
         headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ inputs: input }),
+        body: JSON.stringify({ inputs: { ...input, [INVESTIGATION_INPUT]: investigationId } }),
       }
     );
 
-    this.log.info(`Started rule-creation workflow execution ${workflowExecutionId}`);
+    this.log.info(
+      `Started rule-creation workflow execution ${workflowExecutionId} on investigation ${investigationId}`
+    );
     this.pendingExecutionIds.push(workflowExecutionId);
 
-    const execution = await this.pollExecution({
-      workflowExecutionId,
-      isDone: shouldStopPolling,
-      maxWaitMs,
-      pollIntervalMs,
-    });
+    const deadline = Date.now() + maxWaitMs;
+    let execution: WorkflowExecutionDto | undefined;
+    let proposal: Proposal | undefined;
+    while (Date.now() < deadline) {
+      execution = await this.getExecution(workflowExecutionId);
+      if (TerminalExecutionStatuses.includes(execution.status)) break;
+      if (execution.status === ExecutionStatus.WAITING_FOR_CHILD) {
+        proposal = await this.findPendingProposal(investigationId);
+        if (proposal) break;
+      }
+      await sleep(pollIntervalMs);
+    }
+    if (!execution) {
+      throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
+    }
 
-    if (!shouldStopPolling(execution.status)) {
+    if (!proposal && !TerminalExecutionStatuses.includes(execution.status)) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} did not reach a terminal state within ${maxWaitMs}ms (last status: ${execution.status})`
+        `Workflow ${workflowExecutionId} neither finished nor reached the proposal gate within ${maxWaitMs}ms (last status: ${execution.status})`
       );
     }
 
-    const { rule, skipped, skipReason } = extractDraftFromSteps(execution.stepExecutions ?? []);
+    const draft = extractDraftFromSteps(execution.stepExecutions ?? []);
 
-    if (skipped) {
+    if (draft.skipped) {
       this.log.info(
-        `Workflow ${workflowExecutionId}: draft_creation declined the gap (${
-          skipReason ?? 'no reason given'
-        }) — the v3 quality gate held`
+        `Workflow ${workflowExecutionId}: draft_creation returned no rule (${draft.skipReason})`
       );
-    } else if (!rule) {
+    } else if (!draft.rule) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} reached ${execution.status} but draft_creation produced no rule and did not decline — evaluators will score 0`
+        `Workflow ${workflowExecutionId} reached ${execution.status} but draft_creation produced no rule and gave no reason — evaluators will score N/A`
       );
     }
 
-    const result: RuleCreationResult = {
-      rule,
-      skipped,
-      skipReason,
-      pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
+    return {
+      ...draft,
+      pendingApproval: proposal !== undefined,
+      proposalId: proposal?.id,
+      investigationId,
       traceId: execution.traceId,
       workflowExecutionId,
+      status: execution.status,
       stepExecutions: execution.stepExecutions ?? [],
     };
-    return result;
   }
 
   /**
-   * Responds to the review_creation approval gate for a paused workflow execution, then polls
-   * until the execution reaches a terminal state. Call this after run() returns pendingApproval:true.
+   * Decides the pending proposal the way an analyst does — through the proposals API — then
+   * polls until the rule-creation run reaches a terminal state. Call after run() returned
+   * pendingApproval:true.
    */
   async respond({
     workflowExecutionId,
-    stepExecutions,
+    proposalId,
     approved,
     maxWaitMs = 5 * 60_000,
     pollIntervalMs = 5_000,
   }: {
     workflowExecutionId: string;
-    stepExecutions: WorkflowStepExecutionDto[];
+    proposalId: string | undefined;
     approved: boolean;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<WorkflowExecutionDto> {
-    const reviewStep = stepExecutions.find((s) => s.stepId === REVIEW_STEP_ID && s.output == null);
-    if (!reviewStep) {
-      throw new Error(
-        `${REVIEW_STEP_ID} step not found in waiting state for execution ${workflowExecutionId}`
-      );
+    if (!proposalId) {
+      throw new Error(`No pending proposal to decide for execution ${workflowExecutionId}`);
     }
 
-    const sourceId = buildWorkflowSourceId(
-      RULE_CREATION_WORKFLOW_ID,
-      workflowExecutionId,
-      reviewStep.id
-    );
-    await this.respondToApprovalGate({ sourceId, approved });
-
-    return this.pollExecution({
-      workflowExecutionId,
-      isDone: (status) => TerminalExecutionStatuses.includes(status),
-      maxWaitMs,
-      pollIntervalMs,
-    });
-  }
-
-  private async respondToApprovalGate({
-    sourceId,
-    approved,
-  }: {
-    sourceId: string;
-    approved: boolean;
-  }): Promise<void> {
-    this.log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
-    await this.fetch(buildRespondToActionUrl('workflows', sourceId), {
+    const action = approved ? 'approve' : 'dismiss';
+    this.log.info(`Sending ${action} for proposal ${proposalId}`);
+    await this.fetch(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(proposalId)}/${action}`, {
       method: 'POST',
-      headers: { 'elastic-api-version': API_VERSIONS.internal.v1, 'kbn-xsrf': 'true' },
-      body: JSON.stringify({ input: { approved } }),
+      version: PROPOSALS_API_VERSION,
+      headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
+      body: JSON.stringify(approved ? {} : { dismissReason: 'no_reason' }),
+    });
+
+    const deadline = Date.now() + maxWaitMs;
+    let execution = await this.getExecution(workflowExecutionId);
+    while (!TerminalExecutionStatuses.includes(execution.status) && Date.now() < deadline) {
+      await sleep(pollIntervalMs);
+      execution = await this.getExecution(workflowExecutionId);
+    }
+    return execution;
+  }
+
+  /** Reads the proposal back; the approve/dismiss routes do not return the settled record. */
+  async getProposal(proposalId: string): Promise<Proposal> {
+    return this.fetch<Proposal>(`${PROPOSALS_INTERNAL_URL}/${encodeURIComponent(proposalId)}`, {
+      method: 'GET',
+      version: PROPOSALS_API_VERSION,
+      headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
     });
   }
 
+  /**
+   * Cancels every run this client started (a run parked on its proposal holds the gate open
+   * for up to 72h; cancelling the parent cancels the child gate) and deletes the
+   * investigations it opened.
+   */
   async cancelPending(): Promise<void> {
     await Promise.allSettled(
       this.pendingExecutionIds.map((id) =>
@@ -252,5 +296,16 @@ export class RuleCreationClient {
       )
     );
     this.pendingExecutionIds.length = 0;
+
+    await Promise.allSettled(
+      this.investigationIds.map((id) =>
+        this.fetch(`/api/agent_builder/conversations/${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          version: AGENT_BUILDER_API_VERSION,
+          headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+        })
+      )
+    );
+    this.investigationIds.length = 0;
   }
 }

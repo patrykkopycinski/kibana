@@ -50,6 +50,10 @@ describe('evals_detection_watch_rule_creation config set', () => {
         "registers the security.rule attachment the workflow's attach_draft step writes",
       ],
       [
+        '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+        'withAlertZeroEnabled 404s every /internal/alertzero/* route while the setting is off; the fixture calls /internal/alertzero/workers',
+      ],
+      [
         '--uiSettings.overrides.workflows:ui:enabled=true',
         'the rule-creation workflow is not runnable without the Workflows UI',
       ],

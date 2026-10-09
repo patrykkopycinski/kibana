@@ -25,6 +25,7 @@ import {
 } from '@kbn/proposals-common';
 import {
   AGENT_BUILDER_API_VERSION,
+  COVERAGE_BACKING_INDEX,
   COVERAGE_REVIEW_WORKFLOW_ID,
   CREATE_INVESTIGATION_STEP_ID,
   DRAFT_STEP_ID,
@@ -127,6 +128,30 @@ export interface CoverageTrigger {
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
+/**
+ * The run did not travel the expected coverage chain: the Worker's sweep never started a
+ * review, or the review's coverage check returned a verdict other than `no_coverage` so it
+ * never ran rule_creation. The chain is driven by alertzero_fast — NOT the model under test —
+ * so an example hitting this is an environment/verdict failure, distinct from the model
+ * drafting a bad rule. Classified (not a plain Error) so callers can report it as such instead
+ * of surfacing it as an opaque execution error.
+ */
+export interface CoverageVerdictError extends Error {
+  /** The execution that left the expected path, for reporting step state. */
+  execution: WorkflowExecutionDto;
+}
+
+/** Builds the classified error for a run that left the expected coverage chain. */
+const coverageVerdictError = (
+  message: string,
+  execution: WorkflowExecutionDto
+): CoverageVerdictError => {
+  const error = new Error(message) as CoverageVerdictError;
+  error.name = 'CoverageVerdictError';
+  error.execution = execution;
+  return error;
+};
+
 export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
   private readonly investigationIds: string[] = [];
@@ -180,7 +205,9 @@ export class RuleCreationClient {
   }
 
   /** The rule_creation child coverage_review starts at `run_rule_creation` (sync, one level). */
-  private async findRuleCreationExecutionId(reviewExecutionId: string): Promise<string | undefined> {
+  private async findRuleCreationExecutionId(
+    reviewExecutionId: string
+  ): Promise<string | undefined> {
     const children = await this.fetch<ChildWorkflowExecutionItem[]>(
       `/api/workflows/executions/${encodeURIComponent(reviewExecutionId)}/children`,
       {
@@ -237,6 +264,42 @@ export class RuleCreationClient {
     const deadline = Date.now() + maxWaitMs;
     const kiId = `rule-creation-eval-${uuidv4()}`;
     this.seededWith = trigger.esClient;
+    try {
+      return await this.runSeeded({ input, trigger, kiId, deadline, maxWaitMs, pollIntervalMs });
+    } finally {
+      // Delete the seeded indicator on EVERY exit — success, skip, decline and failure alike.
+      // A pending indicator that outlives its run is picked up by the next sweep, re-reviewed
+      // as the Worker's service account, and at 5 stale KIs (batch_size 5, oldest first) starves
+      // the new seed so every later run() throws. This client also sweeps everything it seeded
+      // in cancelPending(), but that only runs when the harness calls it — inline deletion is
+      // the guarantee that holds even when run() rejects.
+      await trigger.esClient
+        .delete({
+          index: COVERAGE_BACKING_INDEX,
+          id: kiId,
+          refresh: true,
+        })
+        .catch((error: Error) =>
+          this.log.warning(`Could not delete seeded indicator ${kiId}: ${error.message}`)
+        );
+    }
+  }
+
+  private async runSeeded({
+    input,
+    trigger,
+    kiId,
+    deadline,
+    maxWaitMs,
+    pollIntervalMs,
+  }: {
+    input: RuleCreationInput;
+    trigger: CoverageTrigger;
+    kiId: string;
+    deadline: number;
+    maxWaitMs: number;
+    pollIntervalMs: number;
+  }): Promise<RuleCreationResult> {
     await seedCoverageIndicator({
       esClient: trigger.esClient,
       id: kiId,
@@ -267,16 +330,16 @@ export class RuleCreationClient {
         // The sweep ends before the review is visible only when it started none.
         reviewExecutionId = await this.findReviewExecutionId(kiId);
         if (!reviewExecutionId) {
-          throw new Error(
+          throw coverageVerdictError(
             `Coverage Worker run ${workerExecutionId} ended ${workerExecution.status} without ` +
-              `starting a review for indicator ${kiId}. Sweep steps: ` +
-              JSON.stringify(
+              `starting a review for indicator ${kiId}. Sweep steps: ${JSON.stringify(
                 (workerExecution.stepExecutions ?? []).map((s) => ({
                   step: s.stepId,
                   status: s.status,
                   error: s.error,
                 }))
-              )
+              )}`,
+            workerExecution
           );
         }
         break;
@@ -296,10 +359,13 @@ export class RuleCreationClient {
       if (ruleCreationId) break;
       review = await this.getExecution(reviewExecutionId);
       if (isTerminal(review.status)) {
-        throw new Error(
+        throw coverageVerdictError(
           `Coverage review ${reviewExecutionId} ended ${review.status} without running ` +
             `${RUN_RULE_CREATION_STEP_ID} (the coverage check did not return no_coverage). ` +
-            `Steps: ${(review.stepExecutions ?? []).map((s) => `${s.stepId}:${s.status}`).join(', ')}`
+            `Steps: ${(review.stepExecutions ?? [])
+              .map((s) => `${s.stepId}:${s.status}`)
+              .join(', ')}`,
+          review
         );
       }
       await sleep(pollIntervalMs);
@@ -351,7 +417,9 @@ export class RuleCreationClient {
     const draft = extractDraftFromSteps(execution.stepExecutions ?? []);
 
     if (draft.skipped) {
-      this.log.info(`Workflow ${ruleCreationId}: draft_creation returned no rule (${draft.skipReason})`);
+      this.log.info(
+        `Workflow ${ruleCreationId}: draft_creation returned no rule (${draft.skipReason})`
+      );
     } else if (!draft.rule) {
       this.log.warning(
         `Workflow ${ruleCreationId} reached ${execution.status} but draft_creation produced no rule and gave no reason — evaluators will score N/A`

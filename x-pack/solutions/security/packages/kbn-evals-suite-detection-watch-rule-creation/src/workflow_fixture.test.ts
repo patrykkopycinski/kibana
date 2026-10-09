@@ -30,6 +30,7 @@ import {
   BINDING_GUARD_MESSAGE,
   GLOBAL_WORKFLOW_SPACE_ID,
   REQUIRED_STEP_IDS,
+  assertRuleCreationInheritedIdentity,
   assertServiceAccountBindable,
   assertWorkflowInstalled,
   bindCoverageWorker,
@@ -215,7 +216,10 @@ describe('bindCoverageWorker', () => {
     const stack = workersStack();
     const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
 
-    expect(binding).toMatchObject({ workflowId: stack.workerWorkflowId, serviceAccountId: 'sa-cov' });
+    expect(binding).toMatchObject({
+      workflowId: stack.workerWorkflowId,
+      serviceAccountId: 'sa-cov',
+    });
     expect(stack.worker).toMatchObject({
       enabled: true,
       settings: { autonomy: 'assisted', serviceAccountId: 'sa-cov' },
@@ -286,12 +290,103 @@ describe('bindCoverageWorker', () => {
       },
     });
     const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+    // The Worker's stored account wins over the prebuilt one, so the bind re-asserts it.
     expect(stack.worker.settings.serviceAccountId).toBe('sa-orig');
     await binding.restore();
     expect(stack.worker).toMatchObject({
       enabled: false,
       settings: { autonomy: 'manual', serviceAccountId: 'sa-orig' },
     });
+  });
+
+  it('restore sends serviceAccountId: null when the Worker had no account (unbind, not keep)', async () => {
+    const stack = workersStack({
+      initial: { enabled: true, settingsRevision: 1, settings: { autonomy: 'manual' } },
+    });
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+    expect(stack.worker.settings.serviceAccountId).toBe('sa-cov');
+
+    await binding.restore();
+    // An omitted key means "keep" to the Workers API: the Worker would stay bound to the
+    // eval's service account after the suite. The restore PATCH must carry an explicit null.
+    const restorePatch = stack.patches[stack.patches.length - 1];
+    expect(restorePatch.settings).toMatchObject({ serviceAccountId: null });
+    expect(stack.worker.settings.serviceAccountId).toBeNull();
+  });
+
+  it('restores the Worker when the post-PATCH verification throws, before surfacing the error', async () => {
+    // Enabled Worker whose PATCH lands the binding but the follow-up read never sees it —
+    // verification fails while the Worker is enabled and bound.
+    const stack = workersStack();
+    let reads = 0;
+    const failing = jest.fn(async (url: string, opts: { method?: string } = {}) => {
+      if (url === '/internal/alertzero/workers' && opts.method === 'GET') {
+        reads += 1;
+        if (reads > 1) {
+          return {
+            workers: [
+              {
+                id: COVERAGE_WORKER_ID,
+                enabled: false,
+                settingsRevision: 2,
+                settings: { autonomy: 'assisted', serviceAccountId: 'sa-cov' },
+                workflowId: null,
+              },
+            ],
+          };
+        }
+      }
+      return (stack.fetch as (u: string, o?: unknown) => unknown)(url, opts);
+    }) as unknown as HttpHandler;
+
+    await expect(bindCoverageWorker({ fetch: failing, log })).rejects.toThrow(
+      /not enabled with an installed workflow/
+    );
+    // The bad bind was rolled back: restore PATCH ran and unbound the account.
+    const restorePatch = stack.patches[stack.patches.length - 1];
+    expect(restorePatch.settings).toMatchObject({ serviceAccountId: null });
+    expect(restorePatch).not.toHaveProperty('enabled');
+  });
+});
+
+describe('assertRuleCreationInheritedIdentity', () => {
+  const ok = {
+    type: 'service_account' as const,
+    id: 'sa-cov',
+    inheritedFrom: { workloadId: 'system-security-detection-rule-coverage-default' },
+  };
+
+  it('accepts the bound SA inherited from a workload', () => {
+    expect(() =>
+      assertRuleCreationInheritedIdentity({ effectiveIdentity: ok, serviceAccountId: 'sa-cov' })
+    ).not.toThrow();
+  });
+
+  it('fails when the execution recorded no effectiveIdentity', () => {
+    expect(() =>
+      assertRuleCreationInheritedIdentity({
+        effectiveIdentity: undefined,
+        serviceAccountId: 'sa-cov',
+      })
+    ).toThrow(/no effectiveIdentity/);
+  });
+
+  it('fails when a different principal executed the run', () => {
+    expect(() =>
+      assertRuleCreationInheritedIdentity({
+        effectiveIdentity: { ...ok, id: 'sa-other' },
+        serviceAccountId: 'sa-cov',
+      })
+    ).toThrow(/not the .*bound service account/s);
+  });
+
+  it('fails when the SA was bound directly instead of inherited', () => {
+    expect(() =>
+      assertRuleCreationInheritedIdentity({
+        effectiveIdentity: { type: 'service_account', id: 'sa-cov' },
+        serviceAccountId: 'sa-cov',
+      })
+    ).toThrow(/inheritedFrom/);
   });
 });
 
@@ -320,10 +415,7 @@ describe('seedCoverageIndicator', () => {
     expect(index).toBe(COVERAGE_BACKING_INDEX);
     expect(id).toBe('ki-1');
     // coverage_worker.yaml search_pending_indicators filters:
-    const sweep = readFileSync(
-      join(REPO_ROOT, MANAGED_DEFS, 'coverage_worker.yaml'),
-      'utf8'
-    );
+    const sweep = readFileSync(join(REPO_ROOT, MANAGED_DEFS, 'coverage_worker.yaml'), 'utf8');
     expect(sweep).toContain('type: security.coverage');
     expect(sweep).toContain('attributes.status: pending');
     expect(sweep).toContain('attributes.space_id:');

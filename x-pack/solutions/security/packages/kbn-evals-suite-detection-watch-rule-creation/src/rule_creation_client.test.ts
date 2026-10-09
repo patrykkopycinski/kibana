@@ -45,6 +45,7 @@ const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => 
     indices: { exists: jest.fn(async () => true), create: jest.fn() },
     index: jest.fn(async (params: Record<string, any>) => indexed.push(params)),
     deleteByQuery: jest.fn(async () => ({})),
+    delete: jest.fn(async () => ({})),
   } as unknown as EsClient;
 
   const fetch = jest.fn(async (url: string, opts: Omit<Call, 'url'> = {}) => {
@@ -73,9 +74,7 @@ const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => 
     if (url === '/api/workflows/executions/review-1') {
       return {
         status: noRuleCreation ? ExecutionStatus.COMPLETED : ExecutionStatus.WAITING_FOR_CHILD,
-        stepExecutions: [
-          { stepId: 'create_investigation', output: { conversation_id: 'inv-1' } },
-        ],
+        stepExecutions: [{ stepId: 'create_investigation', output: { conversation_id: 'inv-1' } }],
       };
     }
     if (url === '/api/workflows/executions/rc-1') {
@@ -145,7 +144,10 @@ describe('RuleCreationClient', () => {
 
   it('serializes concurrent runs so one sweep is not dropped by another', async () => {
     const { client, calls } = chainStack();
-    await Promise.all([client.run({ input: INPUT, ...fast }), client.run({ input: INPUT, ...fast })]);
+    await Promise.all([
+      client.run({ input: INPUT, ...fast }),
+      client.run({ input: INPUT, ...fast }),
+    ]);
     const runs = calls.filter((c) => c.url.endsWith(`${WORKER_WORKFLOW}/run`));
     expect(runs).toHaveLength(2);
   });
@@ -198,5 +200,31 @@ describe('RuleCreationClient', () => {
       calls.some((c) => c.method === 'DELETE' && c.url === '/api/agent_builder/conversations/inv-1')
     ).toBe(true);
     expect(esClient.deleteByQuery as jest.Mock).toHaveBeenCalled();
+  });
+
+  it('deletes the seeded indicator as soon as run() returns, so no pending KI outlives the run', async () => {
+    const { client, indexed, esClient } = chainStack();
+    await client.run({ input: INPUT, ...fast });
+
+    const deleted = (esClient.delete as jest.Mock).mock.calls;
+    expect(deleted).toHaveLength(1);
+    expect(deleted[0][0]).toMatchObject({ id: indexed[0].id, refresh: true });
+  });
+
+  it('deletes the seeded indicator even when the run fails (no stale KI for the next sweep)', async () => {
+    const { client, indexed, esClient } = chainStack({ noRuleCreation: true });
+    await expect(client.run({ input: INPUT, ...fast })).rejects.toThrow(
+      /no_coverage|run_rule_creation/
+    );
+
+    const deleted = (esClient.delete as jest.Mock).mock.calls;
+    expect(deleted).toHaveLength(1);
+    expect(deleted[0][0]).toMatchObject({ id: indexed[0].id });
+  });
+
+  it('classifies a non-no_coverage verdict as CoverageVerdictError, not a generic failure', async () => {
+    const { client } = chainStack({ noRuleCreation: true });
+    const rejection = client.run({ input: INPUT, ...fast });
+    await expect(rejection).rejects.toMatchObject({ name: 'CoverageVerdictError' });
   });
 });

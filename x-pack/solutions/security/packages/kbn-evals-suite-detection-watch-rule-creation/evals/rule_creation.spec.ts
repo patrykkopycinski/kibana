@@ -16,10 +16,12 @@ import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
 import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
 import {
   assertDraftRanOnModel,
+  assertRuleCreationInheritedIdentity,
   assertWorkflowInstalled,
   bindCoverageWorker,
   bindModelUnderTest,
   ensureJudgeConnectorAccessible,
+  sweepStaleEvalIndicators,
 } from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
@@ -56,6 +58,9 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
     }) => {
       await ensureJudgeConnectorAccessible({ fetch, connector, log });
       await assertWorkflowInstalled({ fetch, log });
+      // Leftover indicators from earlier runs would be re-reviewed by the next sweep and, at
+      // batch_size 5, starve this run's own seed. Sweep once before binding anything.
+      await sweepStaleEvalIndicators(esClient, log);
       restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
       // Production reaches rule_creation through the coverage Worker; bind only that
       // (space-scoped) Worker and let the identity flow down by inheritance.
@@ -83,6 +88,12 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       });
       // Every score below is attributed to `connector`; prove the draft ran on it.
       assertDraftRanOnModel({ connectorId: probe.connectorId, expected: connector.id });
+      // The run must execute as the Worker's bound service account, inherited through the
+      // chain — not as the invoking user and not as a directly-bound rule_creation.
+      assertRuleCreationInheritedIdentity({
+        effectiveIdentity: probe.effectiveIdentity,
+        serviceAccountId: worker.serviceAccountId,
+      });
       if (!probe.traceId) {
         throw new Error(
           'Workflow execution carried no traceId — trace-based evaluators (Tool Routing, Trajectory: *) would ' +

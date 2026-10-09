@@ -15,6 +15,7 @@ import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } f
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import {
   ALERTZERO_API_VERSION,
   ALERTZERO_WORKERS_URL,
@@ -230,6 +231,40 @@ export const assertDraftRanOnModel = ({
   }
 };
 
+/**
+ * Fails the run when rule_creation did not execute as the bound service account inherited from
+ * the coverage Worker. The whole chain is unbound (`run-as-mode: inherit`) down from the
+ * Worker's per-space workflow, so a missing/incorrect `effectiveIdentity` means the binding
+ * did not flow (or flowed from the wrong workload) and the run measured the wrong principal.
+ */
+export const assertRuleCreationInheritedIdentity = ({
+  effectiveIdentity,
+  serviceAccountId,
+}: {
+  effectiveIdentity: WorkflowExecutionDto['effectiveIdentity'];
+  serviceAccountId: string;
+}): void => {
+  if (!effectiveIdentity) {
+    throw new Error(
+      'rule_creation execution recorded no effectiveIdentity — the coverage Worker binding ' +
+        'did not flow down through the sweep and coverage_review (run-as-mode: inherit). ' +
+        'The run executed as the invoking user, not the bound service account.'
+    );
+  }
+  if (effectiveIdentity.type !== 'service_account' || effectiveIdentity.id !== serviceAccountId) {
+    throw new Error(
+      `rule_creation executed as ${effectiveIdentity.type} "${effectiveIdentity.id}", not the ` +
+        `bound service account "${serviceAccountId}". The Worker binding did not inherit.`
+    );
+  }
+  if (!effectiveIdentity.inheritedFrom?.workloadId) {
+    throw new Error(
+      `rule_creation executed as service account "${serviceAccountId}" but with no ` +
+        `inheritedFrom.workloadId — it was bound directly instead of inheriting the coverage ` +
+        `Worker's identity, which is not how production reaches rule_creation.`
+    );
+  }
+};
 
 /**
  * Mirror of the binding guard in workflows_management
@@ -344,7 +379,9 @@ export const bindCoverageWorker = async ({
 }): Promise<CoverageWorkerBinding> => {
   const original = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
   if (!original) {
-    throw new Error(`Worker "${COVERAGE_WORKER_ID}" is not registered; is the alertzero plugin on?`);
+    throw new Error(
+      `Worker "${COVERAGE_WORKER_ID}" is not registered; is the alertzero plugin on?`
+    );
   }
   const serviceAccountId = await resolveCoverageServiceAccountId({ fetch, worker: original });
 
@@ -354,38 +391,67 @@ export const bindCoverageWorker = async ({
     settings: { autonomy: COVERAGE_WORKER_AUTONOMY, serviceAccountId },
   });
 
-  const bound = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
-  if (!bound?.enabled || !bound.workflowId) {
-    throw new Error(
-      `Coverage Worker is not enabled with an installed workflow after the PATCH ` +
-        `(enabled: ${bound?.enabled}, workflowId: ${bound?.workflowId}).`
-    );
-  }
-  if (bound.settings.serviceAccountId !== serviceAccountId) {
-    throw new Error(
-      `Coverage Worker did not store service account ${serviceAccountId} ` +
-        `(has ${bound.settings.serviceAccountId}).`
-    );
-  }
-  log.info(`Coverage Worker enabled as ${serviceAccountId} (workflow ${bound.workflowId})`);
+  const bound = await listWorkers(fetch).then((workers) =>
+    workers.find(({ id }) => id === COVERAGE_WORKER_ID)
+  );
+  try {
+    if (!bound?.enabled || !bound.workflowId) {
+      throw new Error(
+        `Coverage Worker is not enabled with an installed workflow after the PATCH ` +
+          `(enabled: ${bound?.enabled}, workflowId: ${bound?.workflowId}).`
+      );
+    }
+    if (bound.settings.serviceAccountId !== serviceAccountId) {
+      throw new Error(
+        `Coverage Worker did not store service account ${serviceAccountId} ` +
+          `(has ${bound.settings.serviceAccountId}).`
+      );
+    }
+    log.info(`Coverage Worker enabled as ${serviceAccountId} (workflow ${bound.workflowId})`);
 
-  return {
-    workflowId: bound.workflowId,
-    serviceAccountId,
-    restore: async () => {
-      const current = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
-      await patchWorker(fetch, {
-        ...(current && current.enabled !== original.enabled ? { enabled: original.enabled } : {}),
-        settingsRevision: current?.settingsRevision ?? null,
-        settings: {
-          autonomy: original.settings.autonomy,
-          ...(original.settings.serviceAccountId !== undefined
-            ? { serviceAccountId: original.settings.serviceAccountId }
-            : {}),
-        },
-      });
+    return {
+      workflowId: bound.workflowId,
+      serviceAccountId,
+      restore: async () => {
+        const current = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
+        await patchWorker(fetch, {
+          ...(current && current.enabled !== original.enabled ? { enabled: original.enabled } : {}),
+          settingsRevision: current?.settingsRevision ?? null,
+          settings: {
+            autonomy: original.settings.autonomy,
+            // Explicit null unbinds: omitting the key means "keep" to the Workers API, which
+            // would leave the Worker running as the eval's service account after the suite.
+            serviceAccountId: original.settings.serviceAccountId ?? null,
+          },
+        });
+      },
+    };
+  } catch (err) {
+    // The verification above can throw while the Worker is still enabled and bound — restore
+    // before surfacing the failure, so a bad PATCH does not leak the binding into later runs.
+    await restoreCoverageWorker(fetch, original).catch((restoreErr: Error) =>
+      log.error(
+        `Failed to restore the coverage Worker after a bad bind (${restoreErr.message}); ` +
+          `original error follows`
+      )
+    );
+    throw err;
+  }
+};
+
+/** Puts the Worker back to its pre-eval state: enabled flag, autonomy, and account binding. */
+const restoreCoverageWorker = async (fetch: HttpHandler, original: WorkerState): Promise<void> => {
+  const current = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
+  await patchWorker(fetch, {
+    ...(current && current.enabled !== original.enabled ? { enabled: original.enabled } : {}),
+    settingsRevision: current?.settingsRevision ?? null,
+    settings: {
+      autonomy: original.settings.autonomy,
+      // Explicit null unbinds: omitting the key means "keep", which would leave the Worker
+      // bound to the eval's service account after the suite.
+      serviceAccountId: original.settings.serviceAccountId ?? null,
     },
-  };
+  });
 };
 
 /** Marks documents this suite wrote, so cleanup deletes only them. */
@@ -474,4 +540,33 @@ export const deleteEvalIndicators = async (esClient: EsClient): Promise<void> =>
     refresh: true,
     query: { term: { 'attributes.producer': EVAL_INDICATOR_PRODUCER } },
   });
+};
+
+/**
+ * One-time setup sweep: removes every indicator a previous (crashed or misbehaving) run of
+ * this suite left pending. A stale KI is picked up by the next sweep and re-reviewed as the
+ * Worker's service account; at 5 stale KIs (batch_size 5, oldest first) the new seed never
+ * gets swept and run() throws. run() now deletes its own KI on every exit, so this only
+ * guards against leftovers from runs of this code before that fix, or runs killed mid-flight.
+ */
+export const sweepStaleEvalIndicators = async (
+  esClient: EsClient,
+  log: ToolingLog
+): Promise<void> => {
+  const existed = await esClient.indices.exists({ index: COVERAGE_BACKING_INDEX });
+  if (!existed) return;
+  const found = await esClient.search({
+    index: COVERAGE_BACKING_INDEX,
+    query: { term: { 'attributes.producer': EVAL_INDICATOR_PRODUCER } },
+    size: 0,
+  });
+  const stale = found.hits.total;
+  const count = typeof stale === 'number' ? stale : Number(stale?.value ?? 0);
+  if (count > 0) {
+    log.warning(
+      `Deleting ${count} stale eval coverage indicator(s) from earlier runs ` +
+        `(each would be re-reviewed by the next sweep instead of this suite's seed)`
+    );
+    await deleteEvalIndicators(esClient);
+  }
 };

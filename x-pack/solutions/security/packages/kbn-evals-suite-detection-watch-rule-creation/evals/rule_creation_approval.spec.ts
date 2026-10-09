@@ -14,10 +14,12 @@ import { evaluate, tags } from '../src/evaluate';
 import type { RuleCreationClient, RuleCreationResult } from '../src/rule_creation_client';
 import {
   assertDraftRanOnModel,
+  assertRuleCreationInheritedIdentity,
   assertWorkflowInstalled,
   bindCoverageWorker,
   bindModelUnderTest,
   ensureJudgeConnectorAccessible,
+  sweepStaleEvalIndicators,
 } from '../src/workflow_fixture';
 
 const WORKFLOW_INPUT = {
@@ -65,16 +67,23 @@ const runToProposal = async ({
   ruleCreationClient,
   connector,
   onRuleName,
+  serviceAccountId,
 }: {
   ruleCreationClient: RuleCreationClient;
   connector: EvalConnector;
   onRuleName: (name: string | undefined) => void;
+  serviceAccountId: string | undefined;
 }): Promise<RuleCreationResult & { proposalId: string }> => {
   const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
   // Capture the name before deciding: if the decision throws or the test fails
   // mid-flight, afterEach still knows what to sweep by name.
   onRuleName(result.rule?.name);
   assertDraftRanOnModel({ connectorId: result.connectorId, expected: connector.id });
+  // The run must execute as the Worker's bound service account, inherited through the chain.
+  assertRuleCreationInheritedIdentity({
+    effectiveIdentity: result.effectiveIdentity,
+    serviceAccountId: serviceAccountId ?? '',
+  });
 
   if (!result.pendingApproval || !result.proposalId) {
     if (result.skipped) {
@@ -105,6 +114,8 @@ evaluate.describe(
     let createdRuleName: string | undefined;
     let restoreModelBinding: (() => Promise<void>) | undefined;
     let restoreCoverageWorker: (() => Promise<void>) | undefined;
+    /** The SA the Worker was bound to; every run must inherit exactly this identity. */
+    let boundServiceAccountId: string | undefined;
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
       await ruleCreationClient.cancelPending();
@@ -163,7 +174,11 @@ evaluate.describe(
         // through coverage_review, as in production.
         const worker = await bindCoverageWorker({ fetch, log });
         restoreCoverageWorker = worker.restore;
+        boundServiceAccountId = worker.serviceAccountId;
         ruleCreationClient.useCoverageTrigger({ workerWorkflowId: worker.workflowId, esClient });
+        // Leftover indicators from earlier runs would be re-reviewed by the next sweep and, at
+        // batch_size 5, starve this run's own seed. Sweep once before binding anything.
+        await sweepStaleEvalIndicators(esClient, log);
       }
     );
 
@@ -174,6 +189,7 @@ evaluate.describe(
           ruleCreationClient,
           connector,
           onRuleName: (name) => (createdRuleName = name),
+          serviceAccountId: boundServiceAccountId,
         });
 
         // Nothing may exist before the analyst decides: the gate, not the draft, creates.
@@ -225,6 +241,7 @@ evaluate.describe(
           ruleCreationClient,
           connector,
           onRuleName: (name) => (createdRuleName = name),
+          serviceAccountId: boundServiceAccountId,
         });
 
         const execution = await ruleCreationClient.respond({

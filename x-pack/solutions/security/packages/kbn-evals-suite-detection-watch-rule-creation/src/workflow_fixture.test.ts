@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-nodejs-modules -- reading shipped managed workflow YAML and the product's binding guard source from the repo needs fs/path
 import { readFileSync } from 'fs';
+// eslint-disable-next-line import/no-nodejs-modules -- see above
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { HttpHandler } from '@kbn/core/public';
@@ -169,10 +171,18 @@ const workersStack = ({
   serviceAccounts = [{ id: 'sa-cov', name: 'alertzero_rule_coverage' }],
   initial = { enabled: false, settingsRevision: 1, settings: {} } as WorkerRecord,
   createServiceAccountFails,
+  rolePutFails,
+  nextPageCursor,
+  repeatedCursor,
 }: {
   serviceAccounts?: Array<{ id: string; name: string }>;
   initial?: WorkerRecord;
   createServiceAccountFails?: number | true;
+  rolePutFails?: number | true;
+  /** Served on the first GET page; the second page is empty. Simulates a two-page listing. */
+  nextPageCursor?: string;
+  /** Every GET page returns this cursor again — an API that never advances pagination. */
+  repeatedCursor?: string;
 } = {}) => {
   const worker: WorkerRecord = { ...initial, settings: { ...initial.settings } };
   const boundWorkflowIds: string[] = [];
@@ -180,6 +190,11 @@ const workersStack = ({
   const rolePuts: Array<Record<string, unknown> | undefined> = [];
   const createdAccounts: Array<{ name: string; roles: string[] }> = [];
   const workerWorkflowId = `${COVERAGE_WORKER_ID}-${EVAL_SPACE_ID}`;
+  // The live account list; a successful POST appends to it (the eslint no-param-reassign at the
+  // old `serviceAccounts = [...]` line is why this is a separate local).
+  let accounts = [...serviceAccounts];
+  // First GET serves `serviceAccounts` with `nextPageCursor`; the follow-up page is empty.
+  let pagesServed = 0;
   const fetch = jest.fn(async (url: string, opts: { method?: string; body?: string } = {}) => {
     if (url === '/internal/alertzero/workers' && opts.method === 'GET') {
       return {
@@ -207,6 +222,10 @@ const workersStack = ({
     }
     if (url === '/api/security/role/alertzero_rule_coverage' && opts.method === 'PUT') {
       rolePuts.push((opts as { query?: Record<string, unknown> }).query);
+      if (rolePutFails) {
+        const status = rolePutFails === true ? 500 : rolePutFails;
+        throw Object.assign(new Error(`role put failed (${status})`), { status });
+      }
       return {};
     }
     if (url === '/internal/security/service_account' && opts.method === 'POST') {
@@ -217,10 +236,21 @@ const workersStack = ({
         throw Object.assign(new Error(`service account create failed (${status})`), { status });
       }
       const id = `sa-minted-${createdAccounts.length}`;
-      serviceAccounts = [...serviceAccounts, { id, name: body.name }];
+      accounts = [...accounts, { id, name: body.name }];
       return { id, name: body.name };
     }
-    if (url === '/internal/security/service_account') return { serviceAccounts };
+    if (url === '/internal/security/service_account' && opts.method !== 'POST') {
+      const firstPage = pagesServed++ === 0;
+      if (repeatedCursor) {
+        return { serviceAccounts: firstPage ? accounts : [], nextPage: repeatedCursor };
+      }
+      if (nextPageCursor) {
+        return firstPage
+          ? { serviceAccounts: [], nextPage: nextPageCursor }
+          : { serviceAccounts: accounts };
+      }
+      return { serviceAccounts: firstPage ? accounts : [] };
+    }
     throw new Error(`unexpected request ${opts.method} ${url}`);
   }) as unknown as HttpHandler;
   return {
@@ -328,6 +358,53 @@ describe('bindCoverageWorker', () => {
     const stack = workersStack({ serviceAccounts: [], createServiceAccountFails: 400 });
     await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(/400/);
     expect(stack.worker.settings.serviceAccountId).toBeUndefined();
+  });
+
+  it('treats a 409 from the role PUT as "already exists" and still mints the account', async () => {
+    const stack = workersStack({ serviceAccounts: [], rolePutFails: 409 });
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+
+    expect(stack.rolePuts).toEqual([{ createOnly: true }]);
+    expect(stack.createdAccounts).toEqual([
+      { name: 'alertzero_rule_coverage', roles: ['alertzero_rule_coverage'] },
+    ]);
+    expect(binding.serviceAccountId).toBe('sa-minted-1');
+  });
+
+  it('fails loudly when the role PUT rejects with 403', async () => {
+    const stack = workersStack({ serviceAccounts: [], rolePutFails: 403 });
+    await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(/403/);
+    // Nothing was minted past the failed role PUT.
+    expect(stack.createdAccounts).toEqual([]);
+    expect(stack.worker.settings.serviceAccountId).toBeUndefined();
+  });
+
+  it('finds the coverage account on page 2 of the service-account listing', async () => {
+    const stack = workersStack({ nextPageCursor: 'cursor-1' });
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+
+    // The listing followed nextPage: two GETs, the account only on the second page, no minting.
+    const gets = (stack.fetch as unknown as jest.Mock).mock.calls.filter(
+      ([url, opts]) => url === '/internal/security/service_account' && opts?.method !== 'POST'
+    );
+    expect(gets).toHaveLength(2);
+    expect(binding.serviceAccountId).toBe('sa-cov');
+    expect(stack.rolePuts).toEqual([]);
+    expect(stack.createdAccounts).toEqual([]);
+  });
+
+  it('aborts when the service-account listing repeats the same nextPage cursor', async () => {
+    const stack = workersStack({ repeatedCursor: 'stuck' });
+    await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(
+      /repeated the `nextPage` cursor/
+    );
+    // The loop stopped after two pages, before any provisioning.
+    const gets = (stack.fetch as unknown as jest.Mock).mock.calls.filter(
+      ([url, opts]) => url === '/internal/security/service_account' && opts?.method !== 'POST'
+    );
+    expect(gets).toHaveLength(2);
+    expect(stack.rolePuts).toEqual([]);
+    expect(stack.createdAccounts).toEqual([]);
   });
 
   it('restores the Worker to its original enabled flag, autonomy and account', async () => {
@@ -441,10 +518,10 @@ describe('assertRuleCreationInheritedIdentity', () => {
 
 describe('seedCoverageIndicator', () => {
   const esStub = () => {
-    const indexed: Array<Record<string, any>> = [];
+    const indexed: Array<Record<string, unknown>> = [];
     const esClient = {
       indices: { exists: jest.fn(async () => true), create: jest.fn() },
-      index: jest.fn(async (params: Record<string, any>) => indexed.push(params)),
+      index: jest.fn(async (params: Record<string, unknown>) => indexed.push(params)),
     } as unknown as EsClient;
     return { esClient, indexed };
   };
@@ -461,6 +538,7 @@ describe('seedCoverageIndicator', () => {
     });
 
     const [{ index, id, document }] = indexed;
+    const doc = document as Record<string, unknown>;
     expect(index).toBe(COVERAGE_BACKING_INDEX);
     expect(id).toBe('ki-1');
     // coverage_worker.yaml search_pending_indicators filters:
@@ -468,9 +546,9 @@ describe('seedCoverageIndicator', () => {
     expect(sweep).toContain('type: security.coverage');
     expect(sweep).toContain('attributes.status: pending');
     expect(sweep).toContain('attributes.space_id:');
-    expect(document.type).toBe('security.coverage');
-    expect(document.attributes).toMatchObject({ status: 'pending', space_id: EVAL_SPACE_ID });
-    expect(Date.parse(document['@timestamp'])).not.toBeNaN();
+    expect(doc.type).toBe('security.coverage');
+    expect(doc.attributes).toMatchObject({ status: 'pending', space_id: EVAL_SPACE_ID });
+    expect(Date.parse(doc['@timestamp'] as string)).not.toBeNaN();
     // coverage_review.yaml read_ki / gap fields:
     const review = readFileSync(join(REPO_ROOT, MANAGED_DEFS, 'coverage_review.yaml'), 'utf8');
     expect(review).toContain('attributes.technique');

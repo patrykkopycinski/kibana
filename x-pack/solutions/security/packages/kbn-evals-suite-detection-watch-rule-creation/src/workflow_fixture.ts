@@ -341,10 +341,18 @@ const patchWorker = (
   });
 
 /** Same pagination the product's listAccounts uses: `nextPage` until exhausted. */
+const MAX_SERVICE_ACCOUNT_PAGES = 100;
+
 const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountDto[]> => {
   const accounts: ServiceAccountDto[] = [];
   let after: string | undefined;
+  let pages = 0;
   do {
+    if (++pages > MAX_SERVICE_ACCOUNT_PAGES) {
+      throw new Error(
+        `service-account listing exceeded ${MAX_SERVICE_ACCOUNT_PAGES} pages — aborting to avoid an unbounded loop`
+      );
+    }
     const page = await fetch<{ serviceAccounts: ServiceAccountDto[]; nextPage?: string }>(
       '/internal/security/service_account',
       {
@@ -355,6 +363,11 @@ const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountDt
       }
     );
     accounts.push(...(page.serviceAccounts ?? []));
+    if (page.nextPage && page.nextPage === after) {
+      throw new Error(
+        `service-account listing repeated the \`nextPage\` cursor "${after}" — the API is not advancing pagination`
+      );
+    }
     after = page.nextPage;
   } while (after);
   return accounts;

@@ -85,8 +85,9 @@ export const ALERTZERO_API_VERSION = '1';
 export const COVERAGE_WORKER_AUTONOMY = 'assisted';
 
 /**
- * Name of the prebuilt service account production creates for the coverage Worker
- * (`alertzero_rule_coverage`, worker_roles.ts). The fixture looks it up; it never mints one.
+ * Name of the service account the coverage Worker runs as (`alertzero_rule_coverage`,
+ * worker_roles.ts). The fixture looks it up and, when it is missing on a fresh stack, mints it
+ * (role PUT createOnly + service account create) the way production's onboarding does.
  */
 export const COVERAGE_WORKER_SERVICE_ACCOUNT_NAME = 'alertzero_rule_coverage';
 

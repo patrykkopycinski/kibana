@@ -38,12 +38,12 @@ const WORKER_WORKFLOW = 'system-security-detection-rule-coverage-default';
  */
 const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => {
   const calls: Call[] = [];
-  const indexed: Array<Record<string, any>> = [];
+  const indexed: Array<Record<string, unknown>> = [];
   let decided = false;
   let reviewLookups = 0;
   const esClient = {
     indices: { exists: jest.fn(async () => true), create: jest.fn() },
-    index: jest.fn(async (params: Record<string, any>) => indexed.push(params)),
+    index: jest.fn(async (params: Record<string, unknown>) => indexed.push(params)),
     deleteByQuery: jest.fn(async () => ({})),
     delete: jest.fn(async () => ({})),
   } as unknown as EsClient;

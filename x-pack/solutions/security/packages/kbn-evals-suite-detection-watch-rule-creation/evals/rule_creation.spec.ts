@@ -17,9 +17,9 @@ import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
 import {
   assertDraftRanOnModel,
   assertWorkflowInstalled,
+  bindCoverageWorker,
   bindModelUnderTest,
   ensureJudgeConnectorAccessible,
-  ensureRuleCreationRunAsServiceAccount,
 } from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
@@ -27,14 +27,14 @@ import { canaryDataset } from '../datasets/canary';
 
 evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.complete }, () => {
   let restoreModelBinding: (() => Promise<void>) | undefined;
-  let restoreRunAsBinding: (() => Promise<void>) | undefined;
+  let restoreCoverageWorker: (() => Promise<void>) | undefined;
 
   evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
     await restoreModelBinding?.().catch((error: Error) =>
       log.warning(`Could not restore inference feature settings: ${error.message}`)
     );
-    await restoreRunAsBinding?.().catch((error: Error) =>
-      log.warning(`Could not restore rule-creation service account binding: ${error.message}`)
+    await restoreCoverageWorker?.().catch((error: Error) =>
+      log.warning(`Could not restore the coverage Worker: ${error.message}`)
     );
   });
 
@@ -45,17 +45,23 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       log,
       ruleCreationClient,
       traceEsClient,
+      esClient,
     }: {
       fetch: HttpHandler;
       connector: EvalConnector;
       log: ToolingLog;
       ruleCreationClient: RuleCreationClient;
       traceEsClient: EsClient;
+      esClient: EsClient;
     }) => {
       await ensureJudgeConnectorAccessible({ fetch, connector, log });
       await assertWorkflowInstalled({ fetch, log });
       restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
-      restoreRunAsBinding = await ensureRuleCreationRunAsServiceAccount({ fetch, log });
+      // Production reaches rule_creation through the coverage Worker; bind only that
+      // (space-scoped) Worker and let the identity flow down by inheritance.
+      const worker = await bindCoverageWorker({ fetch, log });
+      restoreCoverageWorker = worker.restore;
+      ruleCreationClient.useCoverageTrigger({ workerWorkflowId: worker.workflowId, esClient });
 
       // Trace reachability assertion. A run whose executions carry no traceId — or whose
       // agent tool spans never reach the tracing cluster — silently degrades every

@@ -9,9 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { z } from '@kbn/zod';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
+  type ChildWorkflowExecutionItem,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
@@ -23,12 +25,16 @@ import {
 } from '@kbn/proposals-common';
 import {
   AGENT_BUILDER_API_VERSION,
+  COVERAGE_REVIEW_WORKFLOW_ID,
+  CREATE_INVESTIGATION_STEP_ID,
   DRAFT_STEP_ID,
-  INVESTIGATION_INPUT,
+  EVAL_SPACE_ID,
   RULE_CREATION_WORKFLOW_ID,
+  RUN_RULE_CREATION_STEP_ID,
   WORKFLOWS_API_VERSION,
 } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
+import { deleteEvalIndicators, seedCoverageIndicator } from './workflow_fixture';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -90,10 +96,17 @@ export interface RuleCreationResult extends DraftOutcome {
   pendingApproval: boolean;
   /** The pending proposal, when the run reached the gate. */
   proposalId: string | undefined;
-  /** Investigation (conversation) the proposal is recorded on. */
+  /** Investigation (conversation) the proposal is recorded on; opened by coverage_review. */
   investigationId: string;
   traceId: string | undefined;
+  /** The rule_creation execution (the child coverage_review started via `run_rule_creation`). */
   workflowExecutionId: string;
+  /** The coverage Worker run that swept the seeded indicator. */
+  workerExecutionId: string;
+  /** The coverage_review execution between the two. */
+  reviewExecutionId: string;
+  /** Identity rule_creation recorded; inherited from the Worker, never bound on rule_creation. */
+  effectiveIdentity: WorkflowExecutionDto['effectiveIdentity'];
   status: ExecutionStatus;
   stepExecutions: WorkflowStepExecutionDto[];
 }
@@ -105,11 +118,33 @@ export interface RuleCreationInput {
   confidence: number;
 }
 
+/** Where a run starts: the enabled coverage Worker's per-space workflow, and the ES to seed. */
+export interface CoverageTrigger {
+  /** `workflowId` from `bindCoverageWorker`. */
+  workerWorkflowId: string;
+  esClient: EsClient;
+}
+
+const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
+
 export class RuleCreationClient {
   private readonly pendingExecutionIds: string[] = [];
   private readonly investigationIds: string[] = [];
+  private seededWith: EsClient | undefined;
+  /**
+   * The sweep runs one at a time per space (`concurrency: drop`) and starts reviews for every
+   * pending indicator, so concurrent run() calls would have their sweeps dropped. Serialize.
+   */
+  private queue: Promise<unknown> = Promise.resolve();
+
+  private trigger: CoverageTrigger | undefined;
 
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
+
+  /** Set once per worker after `bindCoverageWorker`; every run() starts from this Worker. */
+  useCoverageTrigger(trigger: CoverageTrigger): void {
+    this.trigger = trigger;
+  }
 
   private async getExecution(workflowExecutionId: string): Promise<WorkflowExecutionDto> {
     return this.fetch<WorkflowExecutionDto>(`/api/workflows/executions/${workflowExecutionId}`, {
@@ -130,67 +165,173 @@ export class RuleCreationClient {
     return proposals[0];
   }
 
-  /**
-   * Opens the investigation the workflow records its proposal on. The workflow requires one
-   * (`investigation_id`), and a production caller (coverage review) always opens it first.
-   * Public: the proposal gate reads it under the worker's own identity, not the basic-auth user.
-   */
-  private async createInvestigation(title: string): Promise<string> {
-    const conversationId = uuidv4();
-    await this.fetch('/api/agent_builder/conversations', {
-      method: 'POST',
-      version: AGENT_BUILDER_API_VERSION,
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      body: JSON.stringify({
-        conversation_id: conversationId,
-        title,
-        access_control: { access_mode: 'public', entries: [] },
-      }),
-    });
-    this.investigationIds.push(conversationId);
-    return conversationId;
+  /** Finds the review coverage_worker started for one indicator by its concurrency key. */
+  private async findReviewExecutionId(kiId: string): Promise<string | undefined> {
+    const { results } = await this.fetch<{ results: Array<{ id: string }> }>(
+      `/api/workflows/workflow/${COVERAGE_REVIEW_WORKFLOW_ID}/executions`,
+      {
+        method: 'GET',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        query: { concurrencyGroupKey: `coverage-${kiId}` },
+      }
+    );
+    return results?.[0]?.id;
+  }
+
+  /** The rule_creation child coverage_review starts at `run_rule_creation` (sync, one level). */
+  private async findRuleCreationExecutionId(reviewExecutionId: string): Promise<string | undefined> {
+    const children = await this.fetch<ChildWorkflowExecutionItem[]>(
+      `/api/workflows/executions/${encodeURIComponent(reviewExecutionId)}/children`,
+      {
+        method: 'GET',
+        version: WORKFLOWS_API_VERSION,
+        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      }
+    );
+    return (Array.isArray(children) ? children : []).find(
+      (child) => child.workflowId === RULE_CREATION_WORKFLOW_ID
+    )?.executionId;
   }
 
   /**
-   * Runs the managed workflow and waits until it either finishes or parks on the analyst's
-   * decision. `propose_creation` and `preview_creation` both park the run in
-   * WAITING_FOR_CHILD, so that status alone does not mean the gate was reached: the run is
-   * only at the gate once a pending proposal exists on its investigation.
+   * Triggers rule_creation the way production does and waits until it either finishes or parks
+   * on the analyst's decision:
+   *
+   *   seed a pending `security.coverage` indicator
+   *   -> run the coverage Worker (bound to its service account by `bindCoverageWorker`)
+   *   -> its sweep starts coverage_review for the indicator (inherit)
+   *   -> coverage_review's `no_coverage` branch runs rule_creation (inherit)
+   *
+   * `propose_creation` and `preview_creation` park the rule_creation run in WAITING_FOR_CHILD,
+   * so that status alone does not mean the gate was reached: the run is only at the gate once a
+   * pending proposal exists on the investigation coverage_review opened.
    */
-  async run({
-    input,
-    maxWaitMs = 10 * 60_000,
-    pollIntervalMs = 5_000,
-  }: {
+  run(params: {
     input: RuleCreationInput;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<RuleCreationResult> {
-    const investigationId = await this.createInvestigation(
-      `Rule creation eval: ${input.technique}`
-    );
+    const { trigger } = this;
+    if (!trigger) {
+      return Promise.reject(
+        new Error('RuleCreationClient.useCoverageTrigger() must be called before run()')
+      );
+    }
+    const result = this.queue.then(() => this.runSerialized({ ...params, trigger }));
+    this.queue = result.catch(() => undefined);
+    return result;
+  }
 
-    const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-      `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}/run`,
-      {
-        method: 'POST',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-        body: JSON.stringify({ inputs: { ...input, [INVESTIGATION_INPUT]: investigationId } }),
-      }
-    );
-
-    this.log.info(
-      `Started rule-creation workflow execution ${workflowExecutionId} on investigation ${investigationId}`
-    );
-    this.pendingExecutionIds.push(workflowExecutionId);
-
+  private async runSerialized({
+    input,
+    trigger,
+    maxWaitMs = 10 * 60_000,
+    pollIntervalMs = 5_000,
+  }: {
+    input: RuleCreationInput;
+    trigger: CoverageTrigger;
+    maxWaitMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<RuleCreationResult> {
     const deadline = Date.now() + maxWaitMs;
+    const kiId = `rule-creation-eval-${uuidv4()}`;
+    this.seededWith = trigger.esClient;
+    await seedCoverageIndicator({
+      esClient: trigger.esClient,
+      id: kiId,
+      technique: input.technique,
+      gapDescription: input.gap_description,
+      evidence: input.evidence,
+      spaceId: EVAL_SPACE_ID,
+    });
+
+    const { workflowExecutionId: workerExecutionId } = await this.fetch<{
+      workflowExecutionId: string;
+    }>(`/api/workflows/workflow/${trigger.workerWorkflowId}/run`, {
+      method: 'POST',
+      version: WORKFLOWS_API_VERSION,
+      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+      body: JSON.stringify({ inputs: {} }),
+    });
+    this.pendingExecutionIds.push(workerExecutionId);
+    this.log.info(`Started coverage Worker run ${workerExecutionId} for indicator ${kiId}`);
+
+    let reviewExecutionId: string | undefined;
+    let workerExecution: WorkflowExecutionDto | undefined;
+    while (Date.now() < deadline && !reviewExecutionId) {
+      reviewExecutionId = await this.findReviewExecutionId(kiId);
+      if (reviewExecutionId) break;
+      workerExecution = await this.getExecution(workerExecutionId);
+      if (isTerminal(workerExecution.status)) {
+        // The sweep ends before the review is visible only when it started none.
+        reviewExecutionId = await this.findReviewExecutionId(kiId);
+        if (!reviewExecutionId) {
+          throw new Error(
+            `Coverage Worker run ${workerExecutionId} ended ${workerExecution.status} without ` +
+              `starting a review for indicator ${kiId}. Sweep steps: ` +
+              JSON.stringify(
+                (workerExecution.stepExecutions ?? []).map((s) => ({
+                  step: s.stepId,
+                  status: s.status,
+                  error: s.error,
+                }))
+              )
+          );
+        }
+        break;
+      }
+      await sleep(pollIntervalMs);
+    }
+    if (!reviewExecutionId) {
+      throw new Error(`No coverage review for indicator ${kiId} within ${maxWaitMs}ms`);
+    }
+    this.pendingExecutionIds.push(reviewExecutionId);
+    this.log.info(`Coverage review ${reviewExecutionId} started for indicator ${kiId}`);
+
+    let ruleCreationId: string | undefined;
+    let review: WorkflowExecutionDto | undefined;
+    while (Date.now() < deadline && !ruleCreationId) {
+      ruleCreationId = await this.findRuleCreationExecutionId(reviewExecutionId);
+      if (ruleCreationId) break;
+      review = await this.getExecution(reviewExecutionId);
+      if (isTerminal(review.status)) {
+        throw new Error(
+          `Coverage review ${reviewExecutionId} ended ${review.status} without running ` +
+            `${RUN_RULE_CREATION_STEP_ID} (the coverage check did not return no_coverage). ` +
+            `Steps: ${(review.stepExecutions ?? []).map((s) => `${s.stepId}:${s.status}`).join(', ')}`
+        );
+      }
+      await sleep(pollIntervalMs);
+    }
+    if (!ruleCreationId) {
+      throw new Error(
+        `Coverage review ${reviewExecutionId} did not start rule_creation within ${maxWaitMs}ms`
+      );
+    }
+    this.pendingExecutionIds.push(ruleCreationId);
+
+    review = await this.getExecution(reviewExecutionId);
+    const investigationId = (
+      review.stepExecutions?.find((s) => s.stepId === CREATE_INVESTIGATION_STEP_ID)?.output as
+        | { conversation_id?: string }
+        | undefined
+    )?.conversation_id;
+    if (!investigationId) {
+      throw new Error(
+        `Coverage review ${reviewExecutionId} recorded no investigation (${CREATE_INVESTIGATION_STEP_ID})`
+      );
+    }
+    this.investigationIds.push(investigationId);
+    this.log.info(
+      `Rule-creation execution ${ruleCreationId} (child of review ${reviewExecutionId}) on investigation ${investigationId}`
+    );
+
     let execution: WorkflowExecutionDto | undefined;
     let proposal: Proposal | undefined;
     while (Date.now() < deadline) {
-      execution = await this.getExecution(workflowExecutionId);
-      if (TerminalExecutionStatuses.includes(execution.status)) break;
+      execution = await this.getExecution(ruleCreationId);
+      if (isTerminal(execution.status)) break;
       if (execution.status === ExecutionStatus.WAITING_FOR_CHILD) {
         proposal = await this.findPendingProposal(investigationId);
         if (proposal) break;
@@ -198,24 +339,22 @@ export class RuleCreationClient {
       await sleep(pollIntervalMs);
     }
     if (!execution) {
-      throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
+      throw new Error(`No execution state returned while polling ${ruleCreationId}`);
     }
 
-    if (!proposal && !TerminalExecutionStatuses.includes(execution.status)) {
+    if (!proposal && !isTerminal(execution.status)) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} neither finished nor reached the proposal gate within ${maxWaitMs}ms (last status: ${execution.status})`
+        `Workflow ${ruleCreationId} neither finished nor reached the proposal gate within ${maxWaitMs}ms (last status: ${execution.status})`
       );
     }
 
     const draft = extractDraftFromSteps(execution.stepExecutions ?? []);
 
     if (draft.skipped) {
-      this.log.info(
-        `Workflow ${workflowExecutionId}: draft_creation returned no rule (${draft.skipReason})`
-      );
+      this.log.info(`Workflow ${ruleCreationId}: draft_creation returned no rule (${draft.skipReason})`);
     } else if (!draft.rule) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} reached ${execution.status} but draft_creation produced no rule and gave no reason — evaluators will score N/A`
+        `Workflow ${ruleCreationId} reached ${execution.status} but draft_creation produced no rule and gave no reason — evaluators will score N/A`
       );
     }
 
@@ -225,7 +364,10 @@ export class RuleCreationClient {
       proposalId: proposal?.id,
       investigationId,
       traceId: execution.traceId,
-      workflowExecutionId,
+      workflowExecutionId: ruleCreationId,
+      workerExecutionId,
+      reviewExecutionId,
+      effectiveIdentity: execution.effectiveIdentity,
       status: execution.status,
       stepExecutions: execution.stepExecutions ?? [],
     };
@@ -264,7 +406,7 @@ export class RuleCreationClient {
 
     const deadline = Date.now() + maxWaitMs;
     let execution = await this.getExecution(workflowExecutionId);
-    while (!TerminalExecutionStatuses.includes(execution.status) && Date.now() < deadline) {
+    while (!isTerminal(execution.status) && Date.now() < deadline) {
       await sleep(pollIntervalMs);
       execution = await this.getExecution(workflowExecutionId);
     }
@@ -281,9 +423,9 @@ export class RuleCreationClient {
   }
 
   /**
-   * Cancels every run this client started (a run parked on its proposal holds the gate open
-   * for up to 72h; cancelling the parent cancels the child gate) and deletes the
-   * investigations it opened.
+   * Cancels every run this client started (a review parked on its proposal holds the gate open
+   * for up to 72h), deletes the investigations coverage_review opened, and removes the
+   * indicators this suite seeded so the next sweep cannot pick them up again.
    */
   async cancelPending(): Promise<void> {
     await Promise.allSettled(
@@ -307,5 +449,11 @@ export class RuleCreationClient {
       )
     );
     this.investigationIds.length = 0;
+
+    if (this.seededWith) {
+      await deleteEvalIndicators(this.seededWith).catch((error: Error) =>
+        this.log.warning(`Could not delete seeded coverage indicators: ${error.message}`)
+      );
+    }
   }
 }

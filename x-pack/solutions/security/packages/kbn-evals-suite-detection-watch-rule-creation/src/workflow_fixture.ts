@@ -12,9 +12,16 @@
  */
 
 import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  ALERTZERO_API_VERSION,
+  ALERTZERO_WORKERS_URL,
+  COVERAGE_BACKING_INDEX,
+  COVERAGE_WORKER_AUTONOMY,
+  COVERAGE_WORKER_ID,
+  COVERAGE_WORKER_SERVICE_ACCOUNT_NAME,
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
@@ -22,7 +29,7 @@ import {
   INFERENCE_SETTINGS_API_VERSION,
   INFERENCE_SETTINGS_ROUTE,
   RULE_CREATION_INFERENCE_FEATURE_ID,
-  RULE_CREATION_EVAL_SERVICE_ACCOUNT_NAME,
+  SERVICE_ACCOUNT_ENV,
   SERVICE_ACCOUNTS_API_VERSION,
 } from './constants';
 
@@ -223,28 +230,23 @@ export const assertDraftRanOnModel = ({
   }
 };
 
+
 /**
- * Splices `run_as: <accountId>` into the installed workflow yaml's `settings:` block without a
- * yaml dependency, preserving every other byte so the managed update keeps the definition hash
- * stable for everything but the intended line. The shipped yaml declares
- * `settings:\n  timeout: "176h"`; the run_as line is inserted as the last settings key at the
- * block's own two-space indent.
+ * Mirror of the binding guard in workflows_management
+ * (`withWorkflowBindingChange`, workflow_service_account_binding.ts): a service account can only
+ * be bound to a workflow installed in a specific space. Managed workflows that production
+ * installs once for every space live in the global space `*` and are rejected with a 400.
+ * Kept here so the unit tests can prove a fixture design against the guard (and a drift test pins
+ * this copy to the product source).
  */
-export const withRunAsSetting = (yaml: string, accountId: string): string => {
-  if (/^  run_as: /m.test(yaml)) {
-    return yaml.replace(/^ {2}run_as: .*$/m, `  run_as: ${JSON.stringify(accountId)}`);
+export const GLOBAL_WORKFLOW_SPACE_ID = '*';
+export const BINDING_GUARD_MESSAGE =
+  'Service account bindings require a workflow installed in a specific space.';
+
+export const assertServiceAccountBindable = (workflowSpaceId: string): void => {
+  if (workflowSpaceId === GLOBAL_WORKFLOW_SPACE_ID) {
+    throw new Error(BINDING_GUARD_MESSAGE);
   }
-  const settingsMatch = /^settings:\n((?: {2}\S.*\n?)*)/m.exec(yaml);
-  if (!settingsMatch) {
-    throw new Error('Installed rule-creation yaml has no settings block to bind run_as into.');
-  }
-  const block = settingsMatch[0];
-  const blockBody = block.slice('settings:\n'.length);
-  const newline = blockBody === '' || blockBody.endsWith('\n') ? '' : '\n';
-  return yaml.replace(
-    block,
-    `settings:\n${blockBody}${newline}  run_as: ${JSON.stringify(accountId)}\n`
-  );
 };
 
 interface ServiceAccountDto {
@@ -252,115 +254,224 @@ interface ServiceAccountDto {
   name: string;
 }
 
+export interface WorkerState {
+  id: string;
+  enabled: boolean;
+  settingsRevision: number | null;
+  settings: { autonomy?: string; serviceAccountId?: string };
+  /** Installed per-space workflow id (`<workerId>-<space>`); null until installed. */
+  workflowId?: string | null;
+}
+
+const workersHeaders = { 'elastic-api-version': ALERTZERO_API_VERSION, 'kbn-xsrf': 'true' };
+
+const listWorkers = async (fetch: HttpHandler): Promise<WorkerState[]> => {
+  const { workers } = await fetch<{ workers: WorkerState[] }>(ALERTZERO_WORKERS_URL, {
+    method: 'GET',
+    version: ALERTZERO_API_VERSION,
+    headers: workersHeaders,
+  });
+  return workers ?? [];
+};
+
+const patchWorker = (
+  fetch: HttpHandler,
+  body: { enabled?: boolean; settingsRevision: number | null; settings: Record<string, unknown> }
+) =>
+  fetch(`${ALERTZERO_WORKERS_URL}/${encodeURIComponent(COVERAGE_WORKER_ID)}`, {
+    method: 'PATCH',
+    version: ALERTZERO_API_VERSION,
+    headers: workersHeaders,
+    body: JSON.stringify(body),
+  });
+
 /**
- * Provisioning for the standalone-run identity (#293963 harness run-as pattern, scoped to this
- * suite by the C3 decision):
- *
- * 1. Create (or reuse) a service account via POST /internal/security/service_account. The
- *    caller must hold manage_security — the suite's admin fetch does.
- * 2. Save the installed rule-creation document's yaml with `settings.run_as` pointing at that
- *    account, through the elevated managed-update route
- *    PUT /api/workflows/managed/workflow/{id}. That route runs inside
- *    withWorkflowBindingChange, so the workload binding ensureServiceAccountBinding demands at
- *    run time is created atomically with the write (an index-time binding change without it
- *    403s "Workflow service account binding does not match").
- *
- * Production never does this: there the coverage Worker's chain resolves run-as-mode: inherit
- * from the worker's own bound account. The eval runs the workflow standalone, and a standalone
- * execution records effectiveIdentity ONLY from settings.run_as (never from the caller's
- * credential), so without this bind the preview_creation/propose_creation steps 403 after the
- * draft and the run ends failed before the proposal gate.
- *
- * Idempotent: an already-bound document with the same account is left untouched. Returns a
- * restore function that puts the original yaml back (best effort).
+ * The service account the coverage Worker runs as: `ALERTZERO_EVAL_SERVICE_ACCOUNT_ID` when set
+ * (the #293963 worker-chain override), else the Worker's already-stored account, else the
+ * prebuilt `alertzero_rule_coverage` account production provisions. Never minted here.
  */
-export const ensureRuleCreationRunAsServiceAccount = async ({
+export const resolveCoverageServiceAccountId = async ({
+  fetch,
+  worker,
+  env = process.env,
+}: {
+  fetch: HttpHandler;
+  worker: WorkerState;
+  env?: NodeJS.ProcessEnv;
+}): Promise<string> => {
+  const fromEnv = env[SERVICE_ACCOUNT_ENV];
+  if (fromEnv) return fromEnv;
+  if (worker.settings.serviceAccountId) return worker.settings.serviceAccountId;
+  const { serviceAccounts } = await fetch<{ serviceAccounts: ServiceAccountDto[] }>(
+    '/internal/security/service_account',
+    {
+      method: 'GET',
+      version: SERVICE_ACCOUNTS_API_VERSION,
+      headers: { 'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION },
+    }
+  );
+  const account = serviceAccounts.find(({ name }) => name === COVERAGE_WORKER_SERVICE_ACCOUNT_NAME);
+  if (!account) {
+    throw new Error(
+      `No service account for the coverage Worker: set ${SERVICE_ACCOUNT_ENV}, or enable the ` +
+        `Rule Coverage Worker once in the UI so "${COVERAGE_WORKER_SERVICE_ACCOUNT_NAME}" exists.`
+    );
+  }
+  return account.id;
+};
+
+export interface CoverageWorkerBinding {
+  /** Per-space Worker workflow id to POST /run. */
+  workflowId: string;
+  serviceAccountId: string;
+  /** Puts the Worker's enabled flag, autonomy and service account back (best effort). */
+  restore: () => Promise<void>;
+}
+
+/**
+ * Enables the coverage Worker in the eval space with its service account, the way the Workers
+ * page does (PATCH /internal/alertzero/workers/{id}, #293963 pattern), as the suite's admin user.
+ * The Worker workflow is installed per space (`<workerId>-<space>`), so the account binds to a
+ * space-scoped workflow; the global sweep, review and rule_creation workflows below it inherit
+ * that identity via `run-as-mode: inherit` and are never bound.
+ */
+export const bindCoverageWorker = async ({
   fetch,
   log,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
-}): Promise<() => Promise<void>> => {
-  const createAccount = async (): Promise<ServiceAccountDto> => {
-    try {
-      return await fetch<ServiceAccountDto>('/internal/security/service_account', {
-        method: 'POST',
-        version: SERVICE_ACCOUNTS_API_VERSION,
-        headers: {
-          'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION,
-          'kbn-xsrf': 'true',
-        },
-        body: JSON.stringify({
-          name: RULE_CREATION_EVAL_SERVICE_ACCOUNT_NAME,
-          description:
-            'Eval-only account for the detection-watch-rule-creation suite: runs the managed ' +
-            'rule-creation workflow standalone under the worker-chain identity its ' +
-            'run-as-mode: inherit steps require.',
-          // Scoped to the standing the suite's own admin user already holds; the account
-          // grants nothing the eval stack's creator does not already have.
-          roles: ['superuser'],
-        }),
-      });
-    } catch (err) {
-      // An existing account with this name returns a conflict; reuse it.
-      const list = await fetch<{ serviceAccounts: ServiceAccountDto[] }>(
-        '/internal/security/service_account',
-        {
-          method: 'GET',
-          version: SERVICE_ACCOUNTS_API_VERSION,
-          headers: { 'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION },
-        }
-      );
-      const existing = list.serviceAccounts.find(
-        ({ name }) => name === RULE_CREATION_EVAL_SERVICE_ACCOUNT_NAME
-      );
-      if (!existing) throw err;
-      return existing;
-    }
-  };
-
-  const account = await createAccount();
-  const workflow = await fetch<{ yaml: string }>(
-    `/api/workflows/workflow/${RULE_CREATION_WORKFLOW_ID}`,
-    {
-      method: 'GET',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-    }
-  );
-  const originalYaml = workflow.yaml;
-  const boundYaml = withRunAsSetting(originalYaml, account.id);
-  if (boundYaml !== originalYaml) {
-    log.info(
-      `Binding rule-creation workflow to service account ${account.id} ` +
-        `(settings.run_as) for the standalone run`
-    );
-    await fetch(`/api/workflows/managed/workflow/${RULE_CREATION_WORKFLOW_ID}`, {
-      method: 'PUT',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION, 'kbn-xsrf': 'true' },
-      body: JSON.stringify({
-        name: 'Detection Rule Creation Worker',
-        yaml: boundYaml,
-        enabled: true,
-        tags: ['security', 'detection-rule-creation'],
-      }),
-    });
-  } else {
-    log.info(`rule-creation workflow already bound to service account ${account.id}`);
+}): Promise<CoverageWorkerBinding> => {
+  const original = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
+  if (!original) {
+    throw new Error(`Worker "${COVERAGE_WORKER_ID}" is not registered; is the alertzero plugin on?`);
   }
-  return async () => {
-    if (boundYaml === originalYaml) return;
-    await fetch(`/api/workflows/managed/workflow/${RULE_CREATION_WORKFLOW_ID}`, {
-      method: 'PUT',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION, 'kbn-xsrf': 'true' },
-      body: JSON.stringify({
-        name: 'Detection Rule Creation Worker',
-        yaml: originalYaml,
-        enabled: true,
-        tags: ['security', 'detection-rule-creation'],
-      }),
-    }).catch((err: Error) => log.warning(`Could not restore rule-creation yaml: ${err.message}`));
+  const serviceAccountId = await resolveCoverageServiceAccountId({ fetch, worker: original });
+
+  await patchWorker(fetch, {
+    ...(original.enabled ? {} : { enabled: true }),
+    settingsRevision: original.settingsRevision,
+    settings: { autonomy: COVERAGE_WORKER_AUTONOMY, serviceAccountId },
+  });
+
+  const bound = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
+  if (!bound?.enabled || !bound.workflowId) {
+    throw new Error(
+      `Coverage Worker is not enabled with an installed workflow after the PATCH ` +
+        `(enabled: ${bound?.enabled}, workflowId: ${bound?.workflowId}).`
+    );
+  }
+  if (bound.settings.serviceAccountId !== serviceAccountId) {
+    throw new Error(
+      `Coverage Worker did not store service account ${serviceAccountId} ` +
+        `(has ${bound.settings.serviceAccountId}).`
+    );
+  }
+  log.info(`Coverage Worker enabled as ${serviceAccountId} (workflow ${bound.workflowId})`);
+
+  return {
+    workflowId: bound.workflowId,
+    serviceAccountId,
+    restore: async () => {
+      const current = (await listWorkers(fetch)).find(({ id }) => id === COVERAGE_WORKER_ID);
+      await patchWorker(fetch, {
+        ...(current && current.enabled !== original.enabled ? { enabled: original.enabled } : {}),
+        settingsRevision: current?.settingsRevision ?? null,
+        settings: {
+          autonomy: original.settings.autonomy,
+          ...(original.settings.serviceAccountId !== undefined
+            ? { serviceAccountId: original.settings.serviceAccountId }
+            : {}),
+        },
+      });
+    },
   };
+};
+
+/** Marks documents this suite wrote, so cleanup deletes only them. */
+export const EVAL_INDICATOR_PRODUCER = 'rule_creation_eval';
+
+/**
+ * Creates the indicator index with the keyword mappings the sweep's term filters need, when the
+ * stack has not created it yet. An existing index (Context Engine's own) is left untouched.
+ */
+export const ensureCoverageIndex = async (esClient: EsClient): Promise<void> => {
+  const exists = await esClient.indices.exists({ index: COVERAGE_BACKING_INDEX });
+  if (exists) return;
+  await esClient.indices.create({
+    index: COVERAGE_BACKING_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        type: { type: 'keyword' },
+        title: { type: 'text' },
+        content: { type: 'text' },
+        attributes: {
+          properties: {
+            status: { type: 'keyword' },
+            technique: { type: 'keyword' },
+            space_id: { type: 'keyword' },
+            producer: { type: 'keyword' },
+          },
+        },
+      },
+    },
+  });
+};
+
+/**
+ * Writes one pending `security.coverage` indicator, the document shape the sweep selects
+ * (coverage_worker.yaml: type, attributes.status=pending, attributes.space_id, @timestamp window)
+ * and coverage_review reads (title, content, attributes.technique), modeled on the product's
+ * write_coverage_kis.ts. Returns the indicator id.
+ */
+export const seedCoverageIndicator = async ({
+  esClient,
+  id,
+  technique,
+  gapDescription,
+  evidence,
+  spaceId,
+}: {
+  esClient: EsClient;
+  id: string;
+  technique: string;
+  gapDescription: string;
+  evidence: string;
+  spaceId: string;
+}): Promise<string> => {
+  await ensureCoverageIndex(esClient);
+  const now = new Date().toISOString();
+  await esClient.index({
+    index: COVERAGE_BACKING_INDEX,
+    id,
+    refresh: 'wait_for',
+    document: {
+      '@timestamp': now,
+      id,
+      updated_at: now,
+      type: 'security.coverage',
+      title: gapDescription,
+      description: gapDescription,
+      content: evidence,
+      tags: ['consumer:detection', 'status:pending'],
+      attributes: {
+        status: 'pending',
+        technique,
+        space_id: spaceId,
+        producer: EVAL_INDICATOR_PRODUCER,
+      },
+    },
+  });
+  return id;
+};
+
+export const deleteEvalIndicators = async (esClient: EsClient): Promise<void> => {
+  const exists = await esClient.indices.exists({ index: COVERAGE_BACKING_INDEX });
+  if (!exists) return;
+  await esClient.deleteByQuery({
+    index: COVERAGE_BACKING_INDEX,
+    refresh: true,
+    query: { term: { 'attributes.producer': EVAL_INDICATOR_PRODUCER } },
+  });
 };

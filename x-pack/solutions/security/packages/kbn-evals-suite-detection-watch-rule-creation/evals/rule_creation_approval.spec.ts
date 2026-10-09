@@ -6,6 +6,7 @@
  */
 
 import type { EvalConnector } from '@kbn/evals';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -14,9 +15,9 @@ import type { RuleCreationClient, RuleCreationResult } from '../src/rule_creatio
 import {
   assertDraftRanOnModel,
   assertWorkflowInstalled,
+  bindCoverageWorker,
   bindModelUnderTest,
   ensureJudgeConnectorAccessible,
-  ensureRuleCreationRunAsServiceAccount,
 } from '../src/workflow_fixture';
 
 const WORKFLOW_INPUT = {
@@ -103,7 +104,7 @@ evaluate.describe(
     const createdRuleIds = new Set<string>();
     let createdRuleName: string | undefined;
     let restoreModelBinding: (() => Promise<void>) | undefined;
-    let restoreRunAsBinding: (() => Promise<void>) | undefined;
+    let restoreCoverageWorker: (() => Promise<void>) | undefined;
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
       await ruleCreationClient.cancelPending();
@@ -136,8 +137,8 @@ evaluate.describe(
       await restoreModelBinding?.().catch((error: Error) =>
         log.warning(`Could not restore inference feature settings: ${error.message}`)
       );
-      await restoreRunAsBinding?.().catch((error: Error) =>
-        log.warning(`Could not restore rule-creation service account binding: ${error.message}`)
+      await restoreCoverageWorker?.().catch((error: Error) =>
+        log.warning(`Could not restore the coverage Worker: ${error.message}`)
       );
     });
 
@@ -146,15 +147,23 @@ evaluate.describe(
         fetch,
         connector,
         log,
+        ruleCreationClient,
+        esClient,
       }: {
         fetch: HttpHandler;
         connector: EvalConnector;
         log: ToolingLog;
+        ruleCreationClient: RuleCreationClient;
+        esClient: EsClient;
       }) => {
         await ensureJudgeConnectorAccessible({ fetch, connector, log });
         await assertWorkflowInstalled({ fetch, log });
         restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
-        restoreRunAsBinding = await ensureRuleCreationRunAsServiceAccount({ fetch, log });
+        // Bind only the space-scoped coverage Worker; rule_creation inherits its identity
+        // through coverage_review, as in production.
+        const worker = await bindCoverageWorker({ fetch, log });
+        restoreCoverageWorker = worker.restore;
+        ruleCreationClient.useCoverageTrigger({ workerWorkflowId: worker.workflowId, esClient });
       }
     );
 

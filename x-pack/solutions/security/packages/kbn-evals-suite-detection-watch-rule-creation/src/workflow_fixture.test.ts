@@ -5,23 +5,52 @@
  * 2.0.
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { HttpHandler } from '@kbn/core/public';
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+  ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { DRAFT_STEP_ID, PROPOSE_STEP_ID, RULE_CREATION_WORKFLOW_ID } from './constants';
-import { REQUIRED_STEP_IDS, assertWorkflowInstalled, withRunAsSetting } from './workflow_fixture';
+import {
+  COVERAGE_BACKING_INDEX,
+  COVERAGE_WORKER_ID,
+  DRAFT_STEP_ID,
+  EVAL_SPACE_ID,
+  PROPOSE_STEP_ID,
+  RULE_CREATION_WORKFLOW_ID,
+  RUN_RULE_CREATION_STEP_ID,
+  SERVICE_ACCOUNT_ENV,
+} from './constants';
+import {
+  BINDING_GUARD_MESSAGE,
+  GLOBAL_WORKFLOW_SPACE_ID,
+  REQUIRED_STEP_IDS,
+  assertServiceAccountBindable,
+  assertWorkflowInstalled,
+  bindCoverageWorker,
+  resolveCoverageServiceAccountId,
+  seedCoverageIndicator,
+} from './workflow_fixture';
 
 const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
-const shippedYaml = (): string => {
-  const definition = getManagedWorkflowDefinition(RULE_CREATION_WORKFLOW_ID);
-  if (!definition?.yaml) {
-    throw new Error(`${RULE_CREATION_WORKFLOW_ID} is not a managed workflow with yaml`);
-  }
+const MANAGED_DEFS = 'src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero';
+
+const definitionYaml = (id: string): string => {
+  const definition = getManagedWorkflowDefinition(id);
+  if (!definition?.yaml) throw new Error(`${id} is not a managed workflow with yaml`);
   return definition.yaml;
+};
+
+const stepBlock = (yaml: string, stepName: string): string => {
+  const lines = yaml.split('\n');
+  const start = lines.findIndex((line) => line.includes(`name: ${stepName}`));
+  return lines.slice(start, start + 12).join('\n');
 };
 
 const fetchReturning = (yaml: string) => jest.fn(async () => ({ yaml })) as unknown as HttpHandler;
@@ -30,7 +59,7 @@ describe('rule-creation workflow contract', () => {
   it('addresses steps that the shipped managed workflow declares', async () => {
     await expect(
       assertWorkflowInstalled({
-        fetch: fetchReturning(shippedYaml()),
+        fetch: fetchReturning(definitionYaml(RULE_CREATION_WORKFLOW_ID)),
         log,
       })
     ).resolves.toBeDefined();
@@ -41,49 +70,273 @@ describe('rule-creation workflow contract', () => {
   });
 
   it('fails setup when a required step is renamed in the workflow', async () => {
-    const renamed = shippedYaml().replace(`- name: ${PROPOSE_STEP_ID}`, '- name: some_other_step');
+    const renamed = definitionYaml(RULE_CREATION_WORKFLOW_ID).replace(
+      `- name: ${PROPOSE_STEP_ID}`,
+      '- name: some_other_step'
+    );
     await expect(assertWorkflowInstalled({ fetch: fetchReturning(renamed), log })).rejects.toThrow(
       PROPOSE_STEP_ID
     );
   });
 });
 
-describe('rule-creation run-as fixture', () => {
-  it('splices run_as into the shipped settings block without touching other keys', () => {
-    const shipped = shippedYaml();
-    const bound = withRunAsSetting(shipped, 'ns/sa-1');
-    // The bind is additive only: every shipped line survives.
-    for (const line of shipped.split('\n')) {
-      expect(bound).toContain(line);
+/**
+ * Where each workflow of the chain is installed, from the shipped definitions: `static` managed
+ * workflows are installed once for every space (global `*`), `dynamic` Worker workflows are
+ * installed per space (`<workerId>-<space>`).
+ */
+const installSpaceOf = (managedId: string): string => {
+  const definition = getManagedWorkflowDefinition(managedId);
+  if (!definition) throw new Error(`${managedId} is not a managed workflow`);
+  return definition.management.lifecycle === 'static' ? GLOBAL_WORKFLOW_SPACE_ID : EVAL_SPACE_ID;
+};
+
+describe('binding guard (product copy)', () => {
+  const guardSource = readFileSync(
+    join(
+      REPO_ROOT,
+      'src/platform/plugins/shared/workflows_management/server/services/workflow_service_account_binding.ts'
+    ),
+    'utf8'
+  );
+
+  it('still matches workflow_service_account_binding.ts (drift pin)', () => {
+    expect(guardSource).toContain(`spaceId === GLOBAL_WORKFLOW_SPACE_ID`);
+    expect(guardSource).toContain(BINDING_GUARD_MESSAGE);
+    expect(GLOBAL_WORKFLOW_SPACE_ID).toBe('*');
+  });
+
+  it('rejects a binding on a global workflow and allows a space-scoped one', () => {
+    expect(() => assertServiceAccountBindable('*')).toThrow(BINDING_GUARD_MESSAGE);
+    expect(() => assertServiceAccountBindable('default')).not.toThrow();
+  });
+
+  it('installs the Worker per space and everything below it globally', () => {
+    expect(installSpaceOf(COVERAGE_WORKER_ID)).toBe(EVAL_SPACE_ID);
+    expect(installSpaceOf(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID)).toBe('*');
+    expect(installSpaceOf(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)).toBe('*');
+    expect(installSpaceOf(RULE_CREATION_WORKFLOW_ID)).toBe('*');
+  });
+
+  it('would reject the 99ad8f48e design: a run_as/binding on global rule_creation is a 400', () => {
+    expect(() => assertServiceAccountBindable(installSpaceOf(RULE_CREATION_WORKFLOW_ID))).toThrow(
+      BINDING_GUARD_MESSAGE
+    );
+  });
+});
+
+describe('production chain shape the fixture relies on', () => {
+  it('keeps rule_creation unbound and reached by inherit through coverage_review', () => {
+    expect(definitionYaml(RULE_CREATION_WORKFLOW_ID)).not.toMatch(/^ {2}run_as:/m);
+    const block = stepBlock(
+      definitionYaml(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID),
+      RUN_RULE_CREATION_STEP_ID
+    );
+    expect(block).toMatch(/run-as-mode: inherit/);
+    expect(block).toMatch(/workflow-id: system-security-rule-creation/);
+  });
+
+  it('has the Worker start the sweep, and the sweep start the review, by inherit', () => {
+    const workerYaml = readFileSync(
+      join(REPO_ROOT, MANAGED_DEFS, 'detection_rule_coverage.yaml'),
+      'utf8'
+    );
+    const workerStep = stepBlock(workerYaml, 'run_rule_coverage');
+    expect(workerStep).toMatch(/run-as-mode: inherit/);
+    expect(workerStep).toMatch(/workflow-id: system-security-coverage-worker/);
+
+    const sweepStep = stepBlock(
+      definitionYaml(ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID),
+      'start_review'
+    );
+    expect(sweepStep).toMatch(/run-as-mode: inherit/);
+    expect(sweepStep).toMatch(/workflow-id: system-security-coverage-review/);
+  });
+});
+
+interface WorkerRecord {
+  enabled: boolean;
+  settingsRevision: number;
+  settings: { autonomy?: string; serviceAccountId?: string };
+}
+
+/**
+ * A fake Kibana that enforces the product's binding guard on whichever workflow a
+ * `serviceAccountId` write lands on. The Workers API binds the Worker's own per-space workflow.
+ */
+const workersStack = ({
+  serviceAccounts = [{ id: 'sa-cov', name: 'alertzero_rule_coverage' }],
+  initial = { enabled: false, settingsRevision: 1, settings: {} } as WorkerRecord,
+}: {
+  serviceAccounts?: Array<{ id: string; name: string }>;
+  initial?: WorkerRecord;
+} = {}) => {
+  const worker: WorkerRecord = { ...initial, settings: { ...initial.settings } };
+  const boundWorkflowIds: string[] = [];
+  const patches: Array<Record<string, unknown>> = [];
+  const workerWorkflowId = `${COVERAGE_WORKER_ID}-${EVAL_SPACE_ID}`;
+  const fetch = jest.fn(async (url: string, opts: { method?: string; body?: string } = {}) => {
+    if (url === '/internal/alertzero/workers' && opts.method === 'GET') {
+      return {
+        workers: [
+          {
+            id: COVERAGE_WORKER_ID,
+            ...worker,
+            workflowId: worker.enabled ? workerWorkflowId : null,
+          },
+        ],
+      };
     }
-    expect(bound).toMatch(/^ {2}run_as: "ns\/sa-1"$/m);
+    if (url === `/internal/alertzero/workers/${COVERAGE_WORKER_ID}` && opts.method === 'PATCH') {
+      const body = JSON.parse(opts.body ?? '{}');
+      patches.push(body);
+      if (body.settings?.serviceAccountId) {
+        // The Worker's own workflow is what gets the binding.
+        assertServiceAccountBindable(EVAL_SPACE_ID);
+        boundWorkflowIds.push(workerWorkflowId);
+      }
+      if (body.enabled !== undefined) worker.enabled = body.enabled;
+      worker.settings = { ...worker.settings, ...body.settings };
+      worker.settingsRevision += 1;
+      return {};
+    }
+    if (url === '/internal/security/service_account') return { serviceAccounts };
+    throw new Error(`unexpected request ${opts.method} ${url}`);
+  }) as unknown as HttpHandler;
+  return { fetch, worker, boundWorkflowIds, patches, workerWorkflowId };
+};
+
+describe('bindCoverageWorker', () => {
+  afterEach(() => {
+    delete process.env[SERVICE_ACCOUNT_ENV];
   });
 
-  it('is idempotent when run_as is already present', () => {
-    const once = withRunAsSetting(shippedYaml(), 'ns/sa-1');
-    const twice = withRunAsSetting(once, 'ns/sa-1');
-    expect(twice).toBe(once);
-    expect(withRunAsSetting(once, 'ns/sa-2')).not.toMatch(/ns\/sa-1/);
+  it('enables the Worker with its service account and binds only the space-scoped Worker', async () => {
+    const stack = workersStack();
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+
+    expect(binding).toMatchObject({ workflowId: stack.workerWorkflowId, serviceAccountId: 'sa-cov' });
+    expect(stack.worker).toMatchObject({
+      enabled: true,
+      settings: { autonomy: 'assisted', serviceAccountId: 'sa-cov' },
+    });
+    // Nothing global was bound: not the sweep, not the review, not rule_creation.
+    expect(stack.boundWorkflowIds).toEqual([stack.workerWorkflowId]);
+    for (const globalId of [
+      RULE_CREATION_WORKFLOW_ID,
+      ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+      ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
+    ]) {
+      expect(stack.boundWorkflowIds).not.toContain(globalId);
+    }
   });
 
-  it('fails loudly when the workflow has no settings block', () => {
-    expect(() => withRunAsSetting('version: "1"\nname: x\n', 'sa')).toThrow('settings block');
+  it('never writes to /api/workflows/managed (no run_as on a managed workflow) or mints an account', async () => {
+    const stack = workersStack();
+    await bindCoverageWorker({ fetch: stack.fetch, log });
+    const urls = (stack.fetch as unknown as jest.Mock).mock.calls.map(([url]) => url as string);
+    expect(urls.some((url) => url.startsWith('/api/workflows'))).toBe(false);
+    const methods = (stack.fetch as unknown as jest.Mock).mock.calls
+      .filter(([url]) => url === '/internal/security/service_account')
+      .map(([, opts]) => (opts as { method?: string }).method);
+    expect(methods.every((method) => method === 'GET')).toBe(true);
   });
 
-  it('pins production shapes: shipped rule_creation yaml has no run_as and coverage_review keeps inherit', () => {
-    // The suite's identity bind must stay EVAL-ONLY. Production resolves rule-creation's
-    // identity through the coverage Worker's chain (run-as-mode: inherit), never through a
-    // literal run_as on the shipped document.
-    expect(shippedYaml()).not.toMatch(/^ {2}run_as:/m);
-    const coverageReview = getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
-    const yaml = coverageReview?.yaml ?? '';
-    expect(yaml).toMatch(/name: run_rule_creation/);
-    const step = yaml.split('\n').findIndex((line) => line.includes('name: run_rule_creation'));
-    const stepBlock = yaml
-      .split('\n')
-      .slice(step, step + 12)
-      .join('\n');
-    expect(stepBlock).toMatch(/run-as-mode: inherit/);
-    expect(stepBlock).toMatch(/workflow-id: system-security-rule-creation/);
+  it('prefers the env override, then the Worker’s stored account, then the prebuilt one', async () => {
+    const stored = workersStack({
+      initial: { enabled: true, settingsRevision: 3, settings: { serviceAccountId: 'sa-stored' } },
+    });
+    const worker = { id: COVERAGE_WORKER_ID, enabled: true, settingsRevision: 3 };
+    expect(
+      await resolveCoverageServiceAccountId({
+        fetch: stored.fetch,
+        worker: { ...worker, settings: { serviceAccountId: 'sa-stored' } },
+        env: {},
+      })
+    ).toBe('sa-stored');
+    expect(
+      await resolveCoverageServiceAccountId({
+        fetch: stored.fetch,
+        worker: { ...worker, settings: { serviceAccountId: 'sa-stored' } },
+        env: { [SERVICE_ACCOUNT_ENV]: 'sa-env' },
+      })
+    ).toBe('sa-env');
+    expect(
+      await resolveCoverageServiceAccountId({
+        fetch: workersStack().fetch,
+        worker: { ...worker, settings: {} },
+        env: {},
+      })
+    ).toBe('sa-cov');
+  });
+
+  it('fails with the remedy when the prebuilt account does not exist', async () => {
+    const stack = workersStack({ serviceAccounts: [] });
+    await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(
+      SERVICE_ACCOUNT_ENV
+    );
+  });
+
+  it('restores the Worker to its original enabled flag, autonomy and account', async () => {
+    const stack = workersStack({
+      initial: {
+        enabled: false,
+        settingsRevision: 1,
+        settings: { autonomy: 'manual', serviceAccountId: 'sa-orig' },
+      },
+    });
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+    expect(stack.worker.settings.serviceAccountId).toBe('sa-orig');
+    await binding.restore();
+    expect(stack.worker).toMatchObject({
+      enabled: false,
+      settings: { autonomy: 'manual', serviceAccountId: 'sa-orig' },
+    });
+  });
+});
+
+describe('seedCoverageIndicator', () => {
+  const esStub = () => {
+    const indexed: Array<Record<string, any>> = [];
+    const esClient = {
+      indices: { exists: jest.fn(async () => true), create: jest.fn() },
+      index: jest.fn(async (params: Record<string, any>) => indexed.push(params)),
+    } as unknown as EsClient;
+    return { esClient, indexed };
+  };
+
+  it('writes a document the coverage sweep selects and coverage_review reads', async () => {
+    const { esClient, indexed } = esStub();
+    await seedCoverageIndicator({
+      esClient,
+      id: 'ki-1',
+      technique: 'T1078.001',
+      gapDescription: 'gap',
+      evidence: 'ev',
+      spaceId: EVAL_SPACE_ID,
+    });
+
+    const [{ index, id, document }] = indexed;
+    expect(index).toBe(COVERAGE_BACKING_INDEX);
+    expect(id).toBe('ki-1');
+    // coverage_worker.yaml search_pending_indicators filters:
+    const sweep = readFileSync(
+      join(REPO_ROOT, MANAGED_DEFS, 'coverage_worker.yaml'),
+      'utf8'
+    );
+    expect(sweep).toContain('type: security.coverage');
+    expect(sweep).toContain('attributes.status: pending');
+    expect(sweep).toContain('attributes.space_id:');
+    expect(document.type).toBe('security.coverage');
+    expect(document.attributes).toMatchObject({ status: 'pending', space_id: EVAL_SPACE_ID });
+    expect(Date.parse(document['@timestamp'])).not.toBeNaN();
+    // coverage_review.yaml read_ki / gap fields:
+    const review = readFileSync(join(REPO_ROOT, MANAGED_DEFS, 'coverage_review.yaml'), 'utf8');
+    expect(review).toContain('attributes.technique');
+    expect(document).toMatchObject({
+      title: 'gap',
+      content: 'ev',
+      attributes: { technique: 'T1078.001' },
+    });
   });
 });

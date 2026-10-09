@@ -168,13 +168,17 @@ interface WorkerRecord {
 const workersStack = ({
   serviceAccounts = [{ id: 'sa-cov', name: 'alertzero_rule_coverage' }],
   initial = { enabled: false, settingsRevision: 1, settings: {} } as WorkerRecord,
+  createServiceAccountFails,
 }: {
   serviceAccounts?: Array<{ id: string; name: string }>;
   initial?: WorkerRecord;
+  createServiceAccountFails?: number | true;
 } = {}) => {
   const worker: WorkerRecord = { ...initial, settings: { ...initial.settings } };
   const boundWorkflowIds: string[] = [];
   const patches: Array<Record<string, unknown>> = [];
+  const rolePuts: Array<Record<string, unknown> | undefined> = [];
+  const createdAccounts: Array<{ name: string; roles: string[] }> = [];
   const workerWorkflowId = `${COVERAGE_WORKER_ID}-${EVAL_SPACE_ID}`;
   const fetch = jest.fn(async (url: string, opts: { method?: string; body?: string } = {}) => {
     if (url === '/internal/alertzero/workers' && opts.method === 'GET') {
@@ -201,10 +205,33 @@ const workersStack = ({
       worker.settingsRevision += 1;
       return {};
     }
+    if (url === '/api/security/role/alertzero_rule_coverage' && opts.method === 'PUT') {
+      rolePuts.push((opts as { query?: Record<string, unknown> }).query);
+      return {};
+    }
+    if (url === '/internal/security/service_account' && opts.method === 'POST') {
+      const body = JSON.parse(opts.body ?? '{}');
+      createdAccounts.push({ name: body.name, roles: body.roles });
+      if (createServiceAccountFails) {
+        const status = createServiceAccountFails === true ? 400 : createServiceAccountFails;
+        throw Object.assign(new Error(`service account create failed (${status})`), { status });
+      }
+      const id = `sa-minted-${createdAccounts.length}`;
+      serviceAccounts = [...serviceAccounts, { id, name: body.name }];
+      return { id, name: body.name };
+    }
     if (url === '/internal/security/service_account') return { serviceAccounts };
     throw new Error(`unexpected request ${opts.method} ${url}`);
   }) as unknown as HttpHandler;
-  return { fetch, worker, boundWorkflowIds, patches, workerWorkflowId };
+  return {
+    fetch,
+    worker,
+    boundWorkflowIds,
+    patches,
+    rolePuts,
+    createdAccounts,
+    workerWorkflowId,
+  };
 };
 
 describe('bindCoverageWorker', () => {
@@ -274,11 +301,33 @@ describe('bindCoverageWorker', () => {
     ).toBe('sa-cov');
   });
 
-  it('fails with the remedy when the prebuilt account does not exist', async () => {
+  it('provisions the account like onboarding when the prebuilt one is absent', async () => {
     const stack = workersStack({ serviceAccounts: [] });
-    await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(
-      SERVICE_ACCOUNT_ENV
-    );
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+
+    // The role PUT runs first, createOnly, with the production role definition.
+    expect(stack.rolePuts).toEqual([{ createOnly: true }]);
+    // Then the service account create, named and roled the way the product's onboarding does.
+    expect(stack.createdAccounts).toEqual([
+      { name: 'alertzero_rule_coverage', roles: ['alertzero_rule_coverage'] },
+    ]);
+    expect(binding.serviceAccountId).toBe('sa-minted-1');
+    expect(stack.worker.settings.serviceAccountId).toBe('sa-minted-1');
+  });
+
+  it('reuses the prebuilt account without minting a second one', async () => {
+    const stack = workersStack(); // ships alertzero_rule_coverage already
+    const binding = await bindCoverageWorker({ fetch: stack.fetch, log });
+
+    expect(binding.serviceAccountId).toBe('sa-cov');
+    expect(stack.createdAccounts).toEqual([]);
+    expect(stack.rolePuts).toEqual([]);
+  });
+
+  it('fails loudly when the service account create fails', async () => {
+    const stack = workersStack({ serviceAccounts: [], createServiceAccountFails: 400 });
+    await expect(bindCoverageWorker({ fetch: stack.fetch, log })).rejects.toThrow(/400/);
+    expect(stack.worker.settings.serviceAccountId).toBeUndefined();
   });
 
   it('restores the Worker to its original enabled flag, autonomy and account', async () => {

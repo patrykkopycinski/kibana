@@ -12,6 +12,11 @@
  */
 
 import { getInferenceEndpointId, inferenceEndpointExists, type EvalConnector } from '@kbn/evals';
+import {
+  buildSecurityRoleUrl,
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
+} from '@kbn/alertzero-plugin/common/worker_roles';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -300,6 +305,21 @@ export interface WorkerState {
 
 const workersHeaders = { 'elastic-api-version': ALERTZERO_API_VERSION, 'kbn-xsrf': 'true' };
 
+const statusOf = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { status, response } = error as { status?: unknown; response?: { status?: unknown } };
+  const code = typeof status === 'number' ? status : response?.status;
+  return typeof code === 'number' ? code : undefined;
+};
+
+const SERVICE_ACCOUNTS_PAGE_SIZE = 100;
+
+/** Same role definition the product's onboarding installs for the coverage Worker. */
+const COVERAGE_ROLE_DEFINITION = WORKER_ROLE_DEFINITIONS[COVERAGE_WORKER_ID];
+
+const COVERAGE_SERVICE_ACCOUNT_DESCRIPTION =
+  'AlertZero Rule Coverage worker service account (provisioned by the rule-creation eval suite)';
+
 const listWorkers = async (fetch: HttpHandler): Promise<WorkerState[]> => {
   const { workers } = await fetch<{ workers: WorkerState[] }>(ALERTZERO_WORKERS_URL, {
     method: 'GET',
@@ -320,10 +340,51 @@ const patchWorker = (
     body: JSON.stringify(body),
   });
 
+/** Same pagination the product's listAccounts uses: `nextPage` until exhausted. */
+const listServiceAccounts = async (fetch: HttpHandler): Promise<ServiceAccountDto[]> => {
+  const accounts: ServiceAccountDto[] = [];
+  let after: string | undefined;
+  do {
+    const page = await fetch<{ serviceAccounts: ServiceAccountDto[]; nextPage?: string }>(
+      '/internal/security/service_account',
+      {
+        method: 'GET',
+        version: SERVICE_ACCOUNTS_API_VERSION,
+        headers: { 'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION },
+        query: { limit: SERVICE_ACCOUNTS_PAGE_SIZE, ...(after ? { after } : {}) },
+      }
+    );
+    accounts.push(...(page.serviceAccounts ?? []));
+    after = page.nextPage;
+  } while (after);
+  return accounts;
+};
+
+/**
+ * The role PUT `ensureWorkerServiceAccounts` issues: createOnly, so a role installed by the
+ * product or a previous run is reused as is and never overwritten. A 409 means "already
+ * exists" and is success here.
+ */
+const ensureCoverageRole = async (fetch: HttpHandler): Promise<void> => {
+  try {
+    await fetch(buildSecurityRoleUrl(COVERAGE_WORKER_SERVICE_ACCOUNT_NAME), {
+      method: 'PUT',
+      version: SECURITY_ROLE_API_VERSION,
+      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
+      query: { createOnly: true },
+      body: JSON.stringify(COVERAGE_ROLE_DEFINITION.role),
+    });
+  } catch (error) {
+    if (statusOf(error) !== 409) throw error;
+  }
+};
+
 /**
  * The service account the coverage Worker runs as: `ALERTZERO_EVAL_SERVICE_ACCOUNT_ID` when set
  * (the #293963 worker-chain override), else the Worker's already-stored account, else the
- * prebuilt `alertzero_rule_coverage` account production provisions. Never minted here.
+ * prebuilt `alertzero_rule_coverage` account production provisions. When it is missing the
+ * fixture mints it the way production's onboarding does (role PUT createOnly, then the service
+ * account create), so a fresh stack needs no UI round-trip.
  */
 export const resolveCoverageServiceAccountId = async ({
   fetch,
@@ -337,22 +398,21 @@ export const resolveCoverageServiceAccountId = async ({
   const fromEnv = env[SERVICE_ACCOUNT_ENV];
   if (fromEnv) return fromEnv;
   if (worker.settings.serviceAccountId) return worker.settings.serviceAccountId;
-  const { serviceAccounts } = await fetch<{ serviceAccounts: ServiceAccountDto[] }>(
-    '/internal/security/service_account',
-    {
-      method: 'GET',
-      version: SERVICE_ACCOUNTS_API_VERSION,
-      headers: { 'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION },
-    }
-  );
-  const account = serviceAccounts.find(({ name }) => name === COVERAGE_WORKER_SERVICE_ACCOUNT_NAME);
-  if (!account) {
-    throw new Error(
-      `No service account for the coverage Worker: set ${SERVICE_ACCOUNT_ENV}, or enable the ` +
-        `Rule Coverage Worker once in the UI so "${COVERAGE_WORKER_SERVICE_ACCOUNT_NAME}" exists.`
-    );
-  }
-  return account.id;
+  const accounts = await listServiceAccounts(fetch);
+  const account = accounts.find(({ name }) => name === COVERAGE_WORKER_SERVICE_ACCOUNT_NAME);
+  if (account) return account.id;
+  await ensureCoverageRole(fetch);
+  const created = await fetch<ServiceAccountDto>('/internal/security/service_account', {
+    method: 'POST',
+    version: SERVICE_ACCOUNTS_API_VERSION,
+    headers: { 'elastic-api-version': SERVICE_ACCOUNTS_API_VERSION, 'kbn-xsrf': 'true' },
+    body: JSON.stringify({
+      name: COVERAGE_WORKER_SERVICE_ACCOUNT_NAME,
+      description: COVERAGE_SERVICE_ACCOUNT_DESCRIPTION,
+      roles: [COVERAGE_WORKER_SERVICE_ACCOUNT_NAME],
+    }),
+  });
+  return created.id;
 };
 
 export interface CoverageWorkerBinding {

@@ -6,26 +6,13 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type { CoordinatorRun } from '../types';
 import { InvalidCell } from '../types';
-import { classifyHitIds, seededHitRecallTier1, seededHitRecallTier2 } from './clean_validity';
-import type { CorpusLabels } from '../datasets/labels';
+import { classifyHitIds, classificationIsTotal, seededHitRecallTier1, seededHitRecallTier2 } from './clean_validity';
+import { invalidCellVerdict, type HuntExample, type HuntRunRecord } from './run_record';
 
-/** What the harness records per report-run for the code evaluators. */
-export interface HuntRunRecord {
-  runKey: string;
-  phase: 'E0' | 'E+' | 'E-';
-  reportClass: string;
-  sampleBase?: string;
-  /** Coordinator output read from the run_hunt_coordinator step output. */
-  run: CoordinatorRun;
-  /** seeded hit `_id`s (ES _id space), per tier. */
-  tier1HitIds: string[];
-  tier2HitIds: string[];
-  tier1MatchedIocs?: Array<{ value: string; hitIds: string[] }>;
-}
+export type { HuntRunRecord } from './run_record';
 
-const METRICS_EXAMPLE_COUNT = 42; // 14 reports x 3 phases (design v1 §1)
+export const METRICS_EXAMPLE_COUNT = 42; // 14 reports x 3 phases (design v1 §1)
 
 /**
  * M1 (Tier 1 + Tier 2 separately) and M2 (FalseHitRate) as CODE evaluators
@@ -35,13 +22,15 @@ const METRICS_EXAMPLE_COUNT = 42; // 14 reports x 3 phases (design v1 §1)
  */
 
 export const createSeededHitRecallTier1Evaluator = (): Evaluator<
-  { output: HuntRunRecord; metadata: { labels: CorpusLabels } },
+  HuntExample,
   HuntRunRecord
 > => ({
   name: 'HuntWatchSeededHitRecallTier1',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
+    const invalid = invalidCellVerdict(output, metadata);
+    if (invalid) return invalid;
     const plantedIocs = metadata.labels.plantedIocs;
     const matchedIocs = (output.tier1MatchedIocs ?? []).map((m) => ({
       value: m.value,
@@ -61,13 +50,15 @@ export const createSeededHitRecallTier1Evaluator = (): Evaluator<
 });
 
 export const createSeededHitRecallTier2Evaluator = (): Evaluator<
-  { output: HuntRunRecord; metadata: { labels: CorpusLabels } },
+  HuntExample,
   HuntRunRecord
 > => ({
   name: 'HuntWatchSeededHitRecallTier2',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
+    const invalid = invalidCellVerdict(output, metadata);
+    if (invalid) return invalid;
     // Only executed behaviours with hits count (design v3 §2: T2-reached).
     const behaviours = (output.run.behaviours ?? [])
       .filter((b) => b.executed)
@@ -92,23 +83,15 @@ export const createSeededHitRecallTier2Evaluator = (): Evaluator<
 });
 
 export const createFalseHitRateEvaluator = (): Evaluator<
-  {
-    output: HuntRunRecord;
-    metadata: {
-      labels: CorpusLabels;
-      noise: string[];
-      twinChanged: string[];
-      twinRetained: string[];
-      foreign: string[];
-      fixture: string[];
-    };
-  },
+  HuntExample,
   HuntRunRecord
 > => ({
   name: 'HuntWatchFalseHitRate',
   kind: 'CODE',
   direction: 'minimize',
   evaluate: async ({ output, metadata }) => {
+    const invalid = invalidCellVerdict(output, metadata);
+    if (invalid) return invalid;
     const { labels } = metadata;
     const planted = (base: string): Set<string> => {
       // positive doc ids of one sample, in the seeded-id space
@@ -142,6 +125,9 @@ export const createFalseHitRateEvaluator = (): Evaluator<
           fixture: new Set(metadata.fixture),
         },
       });
+      if (!classificationIsTotal(hitIds, classified)) {
+        throw new InvalidCell('M2 classification is not total: a hit id fell in no bucket');
+      }
       for (const bucket of Object.values(classified)) {
         if (bucket === 'false') falseCount += 1;
         if (bucket === 'twin-retained') retained += 1;
@@ -161,4 +147,3 @@ export const createFalseHitRateEvaluator = (): Evaluator<
   },
 });
 
-export { METRICS_EXAMPLE_COUNT };

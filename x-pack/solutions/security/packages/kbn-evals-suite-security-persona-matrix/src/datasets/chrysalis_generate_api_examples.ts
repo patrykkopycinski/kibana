@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License 2.0
- * that can be found in the licenses directory at the root of this repository.
- */
-
 import type { AttackDiscoveryDatasetExample } from '@kbn/evals-suite-attack-discovery/src/types';
 import {
   CHRYSALIS_EPISODE_WINDOWS,
@@ -28,8 +22,8 @@ import {
  * example over the whole 95-alert window. No `bundledAlerts` padding and no
  * mixed input modes: every example is `generateApi`.
  *
- * Windows derive from the live GCS snapshot's day-based episode remap
- * (episode N -> 2026-03-(18+N)); see chrysalis_reference.ts.
+ * Windows are millisecond-precision episode ranges over the live snapshot's
+ * alert timestamps; see chrysalis_reference.ts.
  */
 export const buildChrysalisGenerateApiExamples = (
   connectorId: string

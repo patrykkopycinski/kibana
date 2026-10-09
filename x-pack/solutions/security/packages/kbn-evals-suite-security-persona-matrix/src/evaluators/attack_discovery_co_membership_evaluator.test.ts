@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License 2.0
- * that can be found in the licenses directory at the root of this repository.
- */
-
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   ATTACK_DISCOVERY_CO_MEMBERSHIP_EVALUATOR_NAME,
@@ -20,10 +14,12 @@ import {
 import {
   CHRYSALIS_EPISODE_WINDOWS,
   CHRYSALIS_REFERENCE_CHAINS,
+  CHRYSALIS_CORPUS_WINDOW,
   CHRYSALIS_REFERENCE_STATUS,
   CHRYSALIS_REFERENCE_TOTAL_ALERTS,
 } from '../datasets/chrysalis_reference';
 import { buildChrysalisGenerateApiExamples } from '../datasets/chrysalis_generate_api_examples';
+import { CHRYSALIS_LIVE_CORPUS } from '../datasets/chrysalis_live_corpus_fixture';
 
 const log = new ToolingLog();
 
@@ -94,6 +90,31 @@ describe('scoreCoMembership', () => {
     expect(s.recall).toBeCloseTo(0.5); // (a,c),(b,c) reference pairs are not recovered
   });
 
+  it('duplicate output groups do not inflate recall above 1', () => {
+    const s = scoreCoMembership({
+      outputGroups: [
+        ['a', 'b', 'c'],
+        ['a', 'b', 'c'],
+        ['d', 'e'],
+      ],
+      referenceChains: reference,
+    });
+    expect(s.recall).toBe(1);
+    expect(s.precision).toBe(1);
+    expect(s.f1).toBe(1);
+  });
+
+  it('a repeated id within a group forms no self-pair', () => {
+    const s = scoreCoMembership({
+      outputGroups: [['a', 'a', 'b']],
+      referenceChains: reference,
+    });
+    // only the distinct pair (a,b) exists; it is a true pair
+    expect(s.precision).toBe(1);
+    expect(s.recall).toBeCloseTo(1 / 4);
+    expect(s.label).toBe('1/1 pairs');
+  });
+
   it('M2: empty reference labels no_reference and scores null', () => {
     const s = scoreCoMembership({ outputGroups: reference, referenceChains: [] });
     expect(s.label).toBe('no_reference');
@@ -152,7 +173,7 @@ describe('createAttackDiscoveryCoMembershipEvaluator', () => {
     expect(wrong.score).toBe(0);
   });
 
-  it('M2: empty expected output is labeled no_reference with score 0', async () => {
+  it('M2: empty expected output is labeled no_reference with a null score', async () => {
     const result = await evaluator.evaluate({
       input: example.input,
       output: { insights: [{ alertIds: ['a'] }] } as never,
@@ -160,7 +181,34 @@ describe('createAttackDiscoveryCoMembershipEvaluator', () => {
       metadata: {},
     });
     expect(result.label).toBe('no_reference');
-    expect(result.score).toBe(0);
+    expect(result.score).toBeNull();
+    expect(result.metadata).toMatchObject({ reference_status: 'unsigned' });
+  });
+
+  it('records the unsigned reference status in result metadata', async () => {
+    const result = await evaluator.evaluate({
+      input: example.input,
+      output: { insights: [{ alertIds: ['a', 'b', 'c'] }] } as never,
+      expected: example.output,
+      metadata: {},
+    });
+    expect(result.metadata).toMatchObject({
+      precision: 1,
+      recall: 1,
+      reference_status: 'unsigned',
+    });
+  });
+
+  it('task errors score null with label error instead of 0', async () => {
+    const result = await evaluator.evaluate({
+      input: example.input,
+      output: { insights: null, errors: ['connector timeout'] } as never,
+      expected: example.output,
+      metadata: {},
+    });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('error');
+    expect(result.metadata).toMatchObject({ reference_status: 'unsigned' });
   });
 
   it('reads snake_case alert_ids from generateApi wire shapes', async () => {
@@ -181,32 +229,46 @@ describe('Chrysalis reference dataset', () => {
     expect(new Set(all).size).toBe(CHRYSALIS_REFERENCE_TOTAL_ALERTS);
   });
 
-  it('every chain id matches its alert ids host suffix and 3-digit index', () => {
-    for (const chainRef of CHRYSALIS_REFERENCE_CHAINS) {
-      for (const alertId of chainRef.alertIds) {
-        expect(alertId).toMatch(/^dhrumil-insights-gold-v1-\d{3}-[A-Z0-9-]+$/);
+  it('every reference alert id is a live alert uuid from the restored snapshot', () => {
+    const liveUuids = new Set(CHRYSALIS_LIVE_CORPUS.map((a) => a.alertUuid));
+    expect(liveUuids.size).toBe(CHRYSALIS_REFERENCE_TOTAL_ALERTS);
+    for (const chain of CHRYSALIS_REFERENCE_CHAINS) {
+      for (const alertId of chain.alertIds) {
+        expect(alertId).toMatch(/^[0-9a-f]{64}$/);
+        expect(liveUuids.has(alertId)).toBe(true);
       }
     }
   });
 
-  it('per-episode alert counts match the committed episode files', () => {
+  it('each chain contains only alerts of its own episode, and covers the episode', () => {
+    const episodeOf = new Map(CHRYSALIS_LIVE_CORPUS.map((a) => [a.alertUuid, a.episode]));
     for (const [ep, expectedCount] of Object.entries(EPISODE_ALERT_COUNTS)) {
-      const actual =
-        CHRYSALIS_REFERENCE_CHAINS.filter((c) => c.episode === Number(ep))
-          .flatMap((c) => c.alertIds)
-          .filter((id) => !id.endsWith('-PRIV')).length +
-        CHRYSALIS_REFERENCE_CHAINS.filter((c) => c.episode === Number(ep))
-          .flatMap((c) => c.alertIds)
-          .filter((id) => id.endsWith('-PRIV')).length;
-      expect(actual).toBe(expectedCount);
+      const ids = CHRYSALIS_REFERENCE_CHAINS.filter((c) => c.episode === Number(ep)).flatMap(
+        (c) => c.alertIds
+      );
+      expect(ids).toHaveLength(expectedCount);
+      for (const id of ids) expect(episodeOf.get(id)).toBe(Number(ep));
     }
   });
 
-  it('episode windows are contiguous UTC days covering 2026-03-19..27', () => {
+  it('episode windows select exactly the per-episode alert counts from the live fixture', () => {
     expect(CHRYSALIS_EPISODE_WINDOWS).toHaveLength(8);
+    const inWindow = (ts: string, w: { start: string; end: string }) =>
+      ts >= w.start && ts <= w.end; // the generate API filters gte/lte (end inclusive)
     for (const w of CHRYSALIS_EPISODE_WINDOWS) {
-      expect(w.start).toBe(`2026-03-${String(18 + w.episode).padStart(2, '0')}T00:00:00.000Z`);
-      expect(w.end).toBe(`2026-03-${String(19 + w.episode).padStart(2, '0')}T00:00:00.000Z`);
+      const selected = CHRYSALIS_LIVE_CORPUS.filter((a) => inWindow(a.timestamp, w));
+      expect(selected).toHaveLength(EPISODE_ALERT_COUNTS[w.episode] as number);
+      expect(selected.every((a) => a.episode === w.episode)).toBe(true);
+    }
+    const all = CHRYSALIS_LIVE_CORPUS.filter((a) => inWindow(a.timestamp, CHRYSALIS_CORPUS_WINDOW));
+    expect(all).toHaveLength(CHRYSALIS_REFERENCE_TOTAL_ALERTS);
+  });
+
+  it('episode windows are disjoint and ordered', () => {
+    for (let i = 1; i < CHRYSALIS_EPISODE_WINDOWS.length; i++) {
+      const prev = CHRYSALIS_EPISODE_WINDOWS[i - 1] as { end: string };
+      const cur = CHRYSALIS_EPISODE_WINDOWS[i] as { start: string };
+      expect(prev.end < cur.start).toBe(true);
     }
   });
 
@@ -225,12 +287,18 @@ describe('buildChrysalisGenerateApiExamples', () => {
     }
   });
 
-  it('M3 sanity: episode window mismatch is detectable — each window selects only its chains', () => {
+  it('per-episode examples use the episode windows and expect only that episode alerts', () => {
     const { perEpisode } = buildChrysalisGenerateApiExamples('conn-1');
     for (const [i, ex] of perEpisode.entries()) {
-      const chains = ex.output?.attackDiscoveries ?? [];
-      const expectedChains = CHRYSALIS_REFERENCE_CHAINS.filter((c) => c.episode === i + 1);
-      expect(chains).toHaveLength(expectedChains.length);
+      const w = CHRYSALIS_EPISODE_WINDOWS[i] as { start: string; end: string; episode: number };
+      expect(ex.input).toMatchObject({ start: w.start, end: w.end });
+      const expectedIds = new Set(
+        CHRYSALIS_LIVE_CORPUS.filter((a) => a.timestamp >= w.start && a.timestamp <= w.end).map(
+          (a) => a.alertUuid
+        )
+      );
+      const ids = (ex.output?.attackDiscoveries ?? []).flatMap((d) => d.alertIds);
+      expect(new Set(ids)).toEqual(expectedIds);
     }
   });
 

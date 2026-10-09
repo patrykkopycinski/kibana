@@ -14,25 +14,32 @@ provenance: |
   (alerts-snapshot). The dedup tooling and seed constants live in commit
   1b1006afa7bd (kbn-evals-suite-attack-discovery scripts/dedup_insights_alerts.mjs).
 
-# Alert ids are deterministic: `${seed_label}-{index:03d}-{host}` over the
-# deduped corpus sorted by (host asc, @timestamp asc). Verified invariant under
-# the live snapshot's timestamp remap (episode N -> 2026-03-(18+N)).
+# Reference alert ids are the live `kibana.alert.uuid` values (the `_id` of each
+# restored alert document). They were mapped mechanically from the pre-freeze
+# labels `${seed_label}-{index:03d}-{host}` (deduped corpus sorted by
+# (host asc, @timestamp asc)) via `kibana.alert.original_event.id`, which is
+# unique on 95/95 live docs. Chain membership is unchanged.
+# Label <-> uuid <-> timestamp map: chrysalis_live_corpus_fixture.ts.
 seed_label: dhrumil-insights-gold-v1
 total_alerts: 95
 episode_count: 8
 reference_chain_count: 9
 
-# Episode N remaps onto UTC day 2026-03-(18+N); episodes are day-disjoint.
-# Corpus window = 2026-03-19 .. 2026-03-27 (exclusive end).
+# All 95 live alerts sit in 2026-03-26T22:12:18.438Z..641Z, so windows are
+# millisecond ranges: [first alert of the episode, first alert of the next
+# episode). The generate API filters @timestamp with gte/lte (end inclusive),
+# so `end` below is the next episode's first timestamp minus 1 ms.
+# Corpus window = first..last alert, inclusive.
+corpus_window: { start: 2026-03-26T22:12:18.438Z, end: 2026-03-26T22:12:18.641Z }
 episode_windows:
-  1: { start: 2026-03-19T00:00:00.000Z, end: 2026-03-20T00:00:00.000Z, alerts: 9 }
-  2: { start: 2026-03-20T00:00:00.000Z, end: 2026-03-21T00:00:00.000Z, alerts: 11 }
-  3: { start: 2026-03-21T00:00:00.000Z, end: 2026-03-22T00:00:00.000Z, alerts: 32 }
-  4: { start: 2026-03-22T00:00:00.000Z, end: 2026-03-23T00:00:00.000Z, alerts: 16 }
-  5: { start: 2026-03-23T00:00:00.000Z, end: 2026-03-24T00:00:00.000Z, alerts: 5 }
-  6: { start: 2026-03-24T00:00:00.000Z, end: 2026-03-25T00:00:00.000Z, alerts: 5 }
-  7: { start: 2026-03-25T00:00:00.000Z, end: 2026-03-26T00:00:00.000Z, alerts: 6 }
-  8: { start: 2026-03-26T00:00:00.000Z, end: 2026-03-27T00:00:00.000Z, alerts: 11 }
+  1: { start: 2026-03-26T22:12:18.438Z, end: 2026-03-26T22:12:18.452Z, alerts: 9 }
+  2: { start: 2026-03-26T22:12:18.453Z, end: 2026-03-26T22:12:18.477Z, alerts: 11 }
+  3: { start: 2026-03-26T22:12:18.478Z, end: 2026-03-26T22:12:18.519Z, alerts: 32 }
+  4: { start: 2026-03-26T22:12:18.520Z, end: 2026-03-26T22:12:18.574Z, alerts: 16 }
+  5: { start: 2026-03-26T22:12:18.575Z, end: 2026-03-26T22:12:18.587Z, alerts: 5 }
+  6: { start: 2026-03-26T22:12:18.588Z, end: 2026-03-26T22:12:18.604Z, alerts: 5 }
+  7: { start: 2026-03-26T22:12:18.605Z, end: 2026-03-26T22:12:18.611Z, alerts: 6 }
+  8: { start: 2026-03-26T22:12:18.612Z, end: 2026-03-26T22:12:18.641Z, alerts: 11 }
 
 # Strata: OS family and technique family. Episode 3 is the only multi-chain
 # episode (Emotet delivery vs payload/persistence clusters).

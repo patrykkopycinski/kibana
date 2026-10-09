@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file is governed by the Elastic License 2.0
- * that can be found in the licenses directory at the root of this repository.
- */
-
 import type { Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   AttackDiscoveryDatasetExample,
   AttackDiscoveryTaskOutput,
 } from '@kbn/evals-suite-attack-discovery/src/types';
+import { CHRYSALIS_REFERENCE_STATUS } from '../datasets/chrysalis_reference';
 
 export const ATTACK_DISCOVERY_CO_MEMBERSHIP_EVALUATOR_NAME = 'AttackDiscoveryCoMembership';
 
@@ -32,12 +27,16 @@ const nonEmptyStringArray = (v: unknown): v is readonly string[] =>
 
 const pairKey = (a: string, b: string): string => (a < b ? `${a}\u0000${b}` : `${b}\u0000${a}`);
 
-/** Unordered (i < j) pairs within one group, as canonical keys. */
+/**
+ * Unordered pairs of distinct ids within one group, as canonical keys. Ids are
+ * deduped first so a repeated id never forms a self-pair or a duplicate pair.
+ */
 const pairKeys = (group: readonly string[]): string[] => {
+  const ids = [...new Set(group)];
   const keys: string[] = [];
-  for (let i = 0; i < group.length; i++) {
-    for (let j = i + 1; j < group.length; j++) {
-      keys.push(pairKey(group[i] as string, group[j] as string));
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      keys.push(pairKey(ids[i] as string, ids[j] as string));
     }
   }
   return keys;
@@ -47,9 +46,11 @@ const pairKeys = (group: readonly string[]): string[] => {
  * Pairwise co-membership scoring of output alert groups against reference
  * chains. Judge-free: only alert ids are compared, never prose.
  *
+ * - Pairs are sets: a pair repeated across (or within) output groups counts
+ *   once, so recall can never exceed 1.
  * - True pairs: an (a, b) alert pair co-occurring in the same output group AND
  *   the same reference chain.
- * - Precision = true pairs / output pairs; unknown alert ids in the output
+ * - Precision = true pairs / distinct output pairs; unknown alert ids in the output
  *   form pairs that can never be true, so they count against precision.
  * - Recall = true pairs / reference pairs.
  * - Empty reference (or an example carrying none) scores null and is labeled
@@ -71,8 +72,8 @@ export const scoreCoMembership = ({
     return { precision: null, recall: null, f1: null, label: 'no_reference' };
   }
 
-  const outputPairs = outputGroups.flatMap((group) => pairKeys(group));
-  if (outputPairs.length === 0) {
+  const outputPairs = new Set(outputGroups.flatMap((group) => pairKeys(group)));
+  if (outputPairs.size === 0) {
     return { precision: null, recall: 0, f1: 0, label: 'no_output_groups' };
   }
 
@@ -81,10 +82,10 @@ export const scoreCoMembership = ({
     if (refPairs.has(key)) truePairCount++;
   }
 
-  const precision = truePairCount / outputPairs.length;
+  const precision = truePairCount / outputPairs.size;
   const recall = truePairCount / refPairs.size;
   const f1 = precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
-  return { precision, recall, f1, label: `${truePairCount}/${outputPairs.length} pairs` };
+  return { precision, recall, f1, label: `${truePairCount}/${outputPairs.size} pairs` };
 };
 
 const extractAlertIdGroups = (output: AttackDiscoveryTaskOutput | undefined) => {
@@ -118,6 +119,16 @@ export const createAttackDiscoveryCoMembershipEvaluator = ({
     kind: 'CODE',
     direction: 'maximize',
     evaluate: async ({ output, expected }) => {
+      // Infra failures must not score as a 0 (a real "wrong answer").
+      if (Array.isArray(output?.errors) && output.errors.length > 0) {
+        log.warning(`[co-membership] task errors, not scoring: ${output.errors.join('; ')}`);
+        return {
+          score: null,
+          label: 'error',
+          metadata: { reference_status: CHRYSALIS_REFERENCE_STATUS, errors: output.errors },
+        };
+      }
+
       const referenceChains = (expected?.attackDiscoveries ?? [])
         .map((d) => d.alertIds)
         .filter(nonEmptyStringArray);
@@ -130,9 +141,13 @@ export const createAttackDiscoveryCoMembershipEvaluator = ({
       log.info(`[co-membership] p=${scores.precision} r=${scores.recall} f1=${scores.f1}`);
 
       return {
-        score: scores.f1 ?? 0,
+        score: scores.f1,
         label: scores.label,
-        metadata: { precision: scores.precision, recall: scores.recall },
+        metadata: {
+          precision: scores.precision,
+          recall: scores.recall,
+          reference_status: CHRYSALIS_REFERENCE_STATUS,
+        },
       };
     },
   };

@@ -58,5 +58,21 @@ export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 /** Agent Builder tool the detection-rule-edit skill directs the agent to call after drafting. */
 export const RULE_PREVIEW_TOOL_ID = 'security.run_rule_preview';
 
+/**
+ * Service account the eval provisions for rule_creation, mirroring the identity production
+ * gives the workflow: the coverage Worker's service account, inherited via #296409's
+ * `run-as-mode: inherit` chain (coverage worker -> coverage_review -> rule_creation). The
+ * fixture binds the installed document's `settings.run_as` to this account (see
+ * `ensureRuleCreationRunAsServiceAccount`), because a standalone run started by a
+ * service-account-authenticated caller records NO `effectiveIdentity`
+ * (build_workflow_execution_document.ts: effectiveIdentity comes only from inheritance or
+ * `settings.run_as`) and the `inherit` steps then 403 with "Service account inheritance
+ * requires a parent executing as a service account.".
+ */
+export const RULE_CREATION_EVAL_SERVICE_ACCOUNT_NAME = 'alertzero-rule-creation-eval';
+
+/** Internal security API version used by the service-account routes. */
+export const SERVICE_ACCOUNTS_API_VERSION = '1';
+
 /** Skill the workflow's `ai.agent` step is instructed to route through. */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';

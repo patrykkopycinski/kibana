@@ -7,9 +7,12 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { DRAFT_STEP_ID, PROPOSE_STEP_ID, RULE_CREATION_WORKFLOW_ID } from './constants';
-import { REQUIRED_STEP_IDS, assertWorkflowInstalled } from './workflow_fixture';
+import { REQUIRED_STEP_IDS, assertWorkflowInstalled, withRunAsSetting } from './workflow_fixture';
 
 const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
@@ -42,5 +45,45 @@ describe('rule-creation workflow contract', () => {
     await expect(assertWorkflowInstalled({ fetch: fetchReturning(renamed), log })).rejects.toThrow(
       PROPOSE_STEP_ID
     );
+  });
+});
+
+describe('rule-creation run-as fixture', () => {
+  it('splices run_as into the shipped settings block without touching other keys', () => {
+    const shipped = shippedYaml();
+    const bound = withRunAsSetting(shipped, 'ns/sa-1');
+    // The bind is additive only: every shipped line survives.
+    for (const line of shipped.split('\n')) {
+      expect(bound).toContain(line);
+    }
+    expect(bound).toMatch(/^ {2}run_as: "ns\/sa-1"$/m);
+  });
+
+  it('is idempotent when run_as is already present', () => {
+    const once = withRunAsSetting(shippedYaml(), 'ns/sa-1');
+    const twice = withRunAsSetting(once, 'ns/sa-1');
+    expect(twice).toBe(once);
+    expect(withRunAsSetting(once, 'ns/sa-2')).not.toMatch(/ns\/sa-1/);
+  });
+
+  it('fails loudly when the workflow has no settings block', () => {
+    expect(() => withRunAsSetting('version: "1"\nname: x\n', 'sa')).toThrow('settings block');
+  });
+
+  it('pins production shapes: shipped rule_creation yaml has no run_as and coverage_review keeps inherit', () => {
+    // The suite's identity bind must stay EVAL-ONLY. Production resolves rule-creation's
+    // identity through the coverage Worker's chain (run-as-mode: inherit), never through a
+    // literal run_as on the shipped document.
+    expect(shippedYaml()).not.toMatch(/^ {2}run_as:/m);
+    const coverageReview = getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID);
+    const yaml = coverageReview?.yaml ?? '';
+    expect(yaml).toMatch(/name: run_rule_creation/);
+    const step = yaml.split('\n').findIndex((line) => line.includes('name: run_rule_creation'));
+    const stepBlock = yaml
+      .split('\n')
+      .slice(step, step + 12)
+      .join('\n');
+    expect(stepBlock).toMatch(/run-as-mode: inherit/);
+    expect(stepBlock).toMatch(/workflow-id: system-security-rule-creation/);
   });
 });

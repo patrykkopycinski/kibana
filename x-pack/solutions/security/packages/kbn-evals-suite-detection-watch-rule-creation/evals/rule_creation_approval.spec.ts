@@ -16,6 +16,7 @@ import {
   assertWorkflowInstalled,
   bindModelUnderTest,
   ensureJudgeConnectorAccessible,
+  ensureRuleCreationRunAsServiceAccount,
 } from '../src/workflow_fixture';
 
 const WORKFLOW_INPUT = {
@@ -102,6 +103,7 @@ evaluate.describe(
     const createdRuleIds = new Set<string>();
     let createdRuleName: string | undefined;
     let restoreModelBinding: (() => Promise<void>) | undefined;
+    let restoreRunAsBinding: (() => Promise<void>) | undefined;
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
       await ruleCreationClient.cancelPending();
@@ -134,6 +136,9 @@ evaluate.describe(
       await restoreModelBinding?.().catch((error: Error) =>
         log.warning(`Could not restore inference feature settings: ${error.message}`)
       );
+      await restoreRunAsBinding?.().catch((error: Error) =>
+        log.warning(`Could not restore rule-creation service account binding: ${error.message}`)
+      );
     });
 
     evaluate.beforeAll(
@@ -149,6 +154,7 @@ evaluate.describe(
         await ensureJudgeConnectorAccessible({ fetch, connector, log });
         await assertWorkflowInstalled({ fetch, log });
         restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
+        restoreRunAsBinding = await ensureRuleCreationRunAsServiceAccount({ fetch, log });
       }
     );
 

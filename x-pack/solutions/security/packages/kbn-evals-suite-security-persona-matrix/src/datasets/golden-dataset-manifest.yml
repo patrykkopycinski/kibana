@@ -1,0 +1,86 @@
+# Golden dataset manifest — Chrysalis 95-alert attack-discovery reference
+#
+# UNSIGNED REFERENCE — INTERNAL ONLY. Do not cite externally until an expert
+# signs off (flip reference_status below and record the reviewer + SHA).
+
+dataset_id: chrysalis-95-attack-discovery
+reference_status: unsigned
+frozen_at_branch: eval/g11-ad-reference
+provenance: |
+  Dhrumil's canonical Insights episode corpus (ep*alerts.ndjson.gz), committed
+  under security_solution/scripts/data/episodes/attacks. Restored into the
+  live eval cluster from the deduped GCS snapshot
+  gs://security-ai-datasets/attack-discovery/oh-my-malware-95-deduped/2026-07-24
+  (alerts-snapshot). The dedup tooling and seed constants live in commit
+  1b1006afa7bd (kbn-evals-suite-attack-discovery scripts/dedup_insights_alerts.mjs).
+
+# Alert ids are deterministic: `${seed_label}-{index:03d}-{host}` over the
+# deduped corpus sorted by (host asc, @timestamp asc). Verified invariant under
+# the live snapshot's timestamp remap (episode N -> 2026-03-(18+N)).
+seed_label: dhrumil-insights-gold-v1
+total_alerts: 95
+episode_count: 8
+reference_chain_count: 9
+
+# Episode N remaps onto UTC day 2026-03-(18+N); episodes are day-disjoint.
+# Corpus window = 2026-03-19 .. 2026-03-27 (exclusive end).
+episode_windows:
+  1: { start: 2026-03-19T00:00:00.000Z, end: 2026-03-20T00:00:00.000Z, alerts: 9 }
+  2: { start: 2026-03-20T00:00:00.000Z, end: 2026-03-21T00:00:00.000Z, alerts: 11 }
+  3: { start: 2026-03-21T00:00:00.000Z, end: 2026-03-22T00:00:00.000Z, alerts: 32 }
+  4: { start: 2026-03-22T00:00:00.000Z, end: 2026-03-23T00:00:00.000Z, alerts: 16 }
+  5: { start: 2026-03-23T00:00:00.000Z, end: 2026-03-24T00:00:00.000Z, alerts: 5 }
+  6: { start: 2026-03-24T00:00:00.000Z, end: 2026-03-25T00:00:00.000Z, alerts: 5 }
+  7: { start: 2026-03-25T00:00:00.000Z, end: 2026-03-26T00:00:00.000Z, alerts: 6 }
+  8: { start: 2026-03-26T00:00:00.000Z, end: 2026-03-27T00:00:00.000Z, alerts: 11 }
+
+# Strata: OS family and technique family. Episode 3 is the only multi-chain
+# episode (Emotet delivery vs payload/persistence clusters).
+strata:
+  os: { windows: [1, 2, 3, 4, 6, 7], linux: [5], macos: [8] }
+  initial_access: { office_macro: [1, 3], onenote: [4], word_vbs: [7], user_exec: [2], msi: [6], interactive: [5] }
+  malware_family: { emotet: [3], qbot: [4], sodinokibi: [2], bumblebee: [6], bpfdoor: [5], unnamed: [1, 7, 8] }
+
+holdout:
+  # Dhru's 95 IS this corpus (the anonymizedAlerts CSV-reconstruction path is
+  # explicitly rejected — it loses host/episode structure). The corpus cannot
+  # be its own holdout, so no separate Dhru holdout exists yet. Mark a future
+  # independent seed as holdout here when one lands.
+  dhru: not_separately_seedable
+
+sources:
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep1alerts.ndjson.gz
+    git_blob: d23d008cb283
+    sha256_prefix: 58b52aaa88075bef
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep2alerts.ndjson.gz
+    git_blob: 6f1ce3cd0caf
+    sha256_prefix: cb9160d7b70e3d9e
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep3alerts.ndjson.gz
+    git_blob: 8d8ac140e676
+    sha256_prefix: c1b1313f1a7e102b
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep4alerts.ndjson.gz
+    git_blob: 39146af28ceb
+    sha256_prefix: 855672e97dd05ddc
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep5alerts.ndjson.gz
+    git_blob: dc7ff54685be
+    sha256_prefix: 96b34228ae7a5112
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep6alerts.ndjson.gz
+    git_blob: 7695e7f63437
+    sha256_prefix: e58c53ba1617003a
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep7alerts.ndjson.gz
+    git_blob: c82ddc90bcbc
+    sha256_prefix: 0562514a0dbcb062
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/ep8alerts.ndjson.gz
+    git_blob: 8bb5583df599
+    sha256_prefix: 9ec32ab7ad10cf41
+  - path: x-pack/solutions/security/plugins/security_solution/scripts/data/episodes/attacks/mapping.json
+    git_blob: 9b734f93f5a2
+  - path: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/scripts/dedup_insights_alerts.mjs
+    commit: 1b1006afa7bd
+    note: id-assignment contract replayed by this card's verifier
+
+authoring:
+  protocol: blind
+  inputs: [episode alert documents (host/process/rule/registry), Dhru episode provenance]
+  forbidden_inputs: [model outputs from any attack-discovery run, db9bdac2 transcripts]
+  added_after_output_review: []

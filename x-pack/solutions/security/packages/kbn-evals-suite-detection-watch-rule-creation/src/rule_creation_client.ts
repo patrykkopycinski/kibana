@@ -12,6 +12,7 @@ import { z } from '@kbn/zod';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import {
   ExecutionStatus,
+  NonTerminalExecutionStatuses,
   TerminalExecutionStatuses,
   type ChildWorkflowExecutionItem,
   type WorkflowExecutionDto,
@@ -26,6 +27,7 @@ import {
 import {
   AGENT_BUILDER_API_VERSION,
   COVERAGE_BACKING_INDEX,
+  COVERAGE_CHECK_STEP_ID,
   COVERAGE_REVIEW_WORKFLOW_ID,
   CREATE_INVESTIGATION_STEP_ID,
   DRAFT_STEP_ID,
@@ -38,6 +40,9 @@ import { draftRuleSchema, type DraftRule } from './types';
 import { deleteEvalIndicators, seedCoverageIndicator } from './workflow_fixture';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Executions API maximum page size; the chain never has anywhere near this many active. */
+const ACTIVE_RUNS_PAGE_SIZE = 100;
 
 // The ai.agent step's persisted output is
 // `{ message, structured_output: { rule, attachment_id, attachment_version, reason },
@@ -92,7 +97,21 @@ export const extractDraftFromSteps = (steps: WorkflowStepExecutionDto[]): DraftO
   };
 };
 
+/**
+ * Connector the coverage_review `coverage_check` step ran on, from its `ai.agent` usage metadata.
+ * That step resolves its connector through `alertzero_fast`, so unless the suite binds that
+ * feature it runs on the stack default rather than the model under test.
+ */
+export const extractCoverageCheckConnectorId = (
+  steps: WorkflowStepExecutionDto[]
+): string | undefined => {
+  const resultRecord = steps.find((s) => s.stepId === COVERAGE_CHECK_STEP_ID && s.output != null);
+  return stepOutputSchema.safeParse(resultRecord?.output).data?.metadata?.usage?.connectorId;
+};
+
 export interface RuleCreationResult extends DraftOutcome {
+  /** Connector the coverage_check step actually ran on (recorded so a mismatch is visible). */
+  coverageCheckConnectorId: string | undefined;
   /** True when the run parked on a pending proposal awaiting the analyst. */
   pendingApproval: boolean;
   /** The pending proposal, when the run reached the gate. */
@@ -428,6 +447,7 @@ export class RuleCreationClient {
 
     return {
       ...draft,
+      coverageCheckConnectorId: extractCoverageCheckConnectorId(review.stepExecutions ?? []),
       pendingApproval: proposal !== undefined,
       proposalId: proposal?.id,
       investigationId,
@@ -488,6 +508,75 @@ export class RuleCreationClient {
       version: PROPOSALS_API_VERSION,
       headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
     });
+  }
+
+  private async listActiveCoverageExecutions(
+    workflowIds: readonly string[]
+  ): Promise<Array<{ workflowId: string; id: string; status: ExecutionStatus }>> {
+    const lists = await Promise.all(
+      workflowIds.map(async (workflowId) => {
+        const { results } = await this.fetch<{
+          results?: Array<{ id: string; status: ExecutionStatus }>;
+        }>(`/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions`, {
+          method: 'GET',
+          version: WORKFLOWS_API_VERSION,
+          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          query: { statuses: [...NonTerminalExecutionStatuses], size: ACTIVE_RUNS_PAGE_SIZE },
+        });
+        return (results ?? []).map(({ id, status }) => ({ workflowId, id, status }));
+      })
+    );
+    return lists.flat();
+  }
+
+  /**
+   * Leaves no coverage-chain execution (Worker sweep, review, rule_creation) active. The sweep is
+   * `concurrency: drop, max: 1`, so a run still active from the previous test drops the next
+   * test's sweep ("Dropped due to concurrency limit") and the test then times out on a review
+   * that never starts. Cancels what is active, re-reads to confirm each reached a terminal
+   * status, and throws when anything is still active at the deadline — never skips silently.
+   */
+  async settleCoverageRuns({
+    maxWaitMs = 2 * 60_000,
+    pollIntervalMs = 2_000,
+  }: {
+    maxWaitMs?: number;
+    pollIntervalMs?: number;
+  } = {}): Promise<void> {
+    const { trigger } = this;
+    if (!trigger) {
+      throw new Error('RuleCreationClient.useCoverageTrigger() must be called before settling');
+    }
+    const workflowIds = [
+      trigger.workerWorkflowId,
+      COVERAGE_REVIEW_WORKFLOW_ID,
+      RULE_CREATION_WORKFLOW_ID,
+    ];
+    const deadline = Date.now() + maxWaitMs;
+    for (;;) {
+      const active = await this.listActiveCoverageExecutions(workflowIds);
+      if (active.length === 0) return;
+      if (Date.now() >= deadline) {
+        throw new Error(
+          `${active.length} coverage-chain execution(s) still active ${maxWaitMs}ms after cancel — ` +
+            `the next sweep would be dropped by the concurrency limit: ${active
+              .map(({ workflowId, id, status }) => `${workflowId}/${id}:${status}`)
+              .join(', ')}`
+        );
+      }
+      await Promise.allSettled(
+        active.map(({ id }) =>
+          this.fetch(`/api/workflows/executions/${encodeURIComponent(id)}/cancel`, {
+            method: 'POST',
+            version: WORKFLOWS_API_VERSION,
+            headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          }).catch((error: Error) =>
+            this.log.warning(`Could not cancel execution ${id}: ${error.message}`)
+          )
+        )
+      );
+      await sleep(pollIntervalMs);
+    }
   }
 
   /**

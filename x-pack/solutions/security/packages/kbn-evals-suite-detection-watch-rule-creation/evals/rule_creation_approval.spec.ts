@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
 import type { RuleCreationClient, RuleCreationResult } from '../src/rule_creation_client';
 import {
+  assertCoverageCheckRanOnModel,
   assertDraftRanOnModel,
   assertRuleCreationInheritedIdentity,
   assertWorkflowInstalled,
@@ -79,6 +80,10 @@ const runToProposal = async ({
   // mid-flight, afterEach still knows what to sweep by name.
   onRuleName(result.rule?.name);
   assertDraftRanOnModel({ connectorId: result.connectorId, expected: connector.id });
+  assertCoverageCheckRanOnModel({
+    connectorId: result.coverageCheckConnectorId,
+    expected: connector.id,
+  });
   // The run must execute as the Worker's bound service account, inherited through the chain.
   assertRuleCreationInheritedIdentity({
     effectiveIdentity: result.effectiveIdentity,
@@ -119,6 +124,9 @@ evaluate.describe(
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
       await ruleCreationClient.cancelPending();
+      // cancelPending only cancels what this client recorded. Wait until the whole chain is
+      // terminal (throws if not): a sweep still active here drops the next test's sweep.
+      await ruleCreationClient.settleCoverageRuns();
       for (const id of createdRuleIds) {
         await deleteRule(fetch, id).catch((err: Error) =>
           log.error(`Failed to sweep rule ${id}: ${err.message}`)
@@ -142,6 +150,11 @@ evaluate.describe(
           );
         }
       }
+    });
+
+    evaluate.beforeEach(async ({ ruleCreationClient }) => {
+      // A run left by the previous test (or an earlier crashed run) would drop this test's sweep.
+      await ruleCreationClient.settleCoverageRuns();
     });
 
     evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {

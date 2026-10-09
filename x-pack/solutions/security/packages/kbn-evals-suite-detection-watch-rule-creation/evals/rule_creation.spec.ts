@@ -15,6 +15,7 @@ import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
 import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
 import {
+  assertCoverageCheckRanOnModel,
   assertDraftRanOnModel,
   assertRuleCreationInheritedIdentity,
   assertWorkflowInstalled,
@@ -88,6 +89,10 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
       });
       // Every score below is attributed to `connector`; prove the draft ran on it.
       assertDraftRanOnModel({ connectorId: probe.connectorId, expected: connector.id });
+      assertCoverageCheckRanOnModel({
+        connectorId: probe.coverageCheckConnectorId,
+        expected: connector.id,
+      });
       // The run must execute as the Worker's bound service account, inherited through the
       // chain — not as the invoking user and not as a directly-bound rule_creation.
       assertRuleCreationInheritedIdentity({

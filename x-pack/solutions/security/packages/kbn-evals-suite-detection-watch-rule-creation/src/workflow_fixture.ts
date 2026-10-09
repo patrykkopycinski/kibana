@@ -34,6 +34,7 @@ import {
   PROPOSE_STEP_ID,
   INFERENCE_SETTINGS_API_VERSION,
   INFERENCE_SETTINGS_ROUTE,
+  COVERAGE_CHECK_INFERENCE_FEATURE_ID,
   RULE_CREATION_INFERENCE_FEATURE_ID,
   SERVICE_ACCOUNT_ENV,
   SERVICE_ACCOUNTS_API_VERSION,
@@ -175,13 +176,22 @@ export const mergeFeatureOverride = (
   { feature_id: featureId, endpoints: [{ id: endpointId }] },
 ];
 
+/** Inference features the chain's model-under-test steps resolve their connectors from. */
+const bindableFeatureIds = [
+  RULE_CREATION_INFERENCE_FEATURE_ID,
+  COVERAGE_CHECK_INFERENCE_FEATURE_ID,
+] as const;
+
 /**
- * Points the workflow's `ai.agent` step at the model under test.
+ * Points the chain's `ai.agent` steps at the model under test.
  *
- * The step resolves its connector with `connector-id-by-feature: alertzero_reasoning`, not from
- * the eval connector. Without this, every cell of a multi-model run drafts on the stack's default
- * model and its scores are attributed to the wrong model. Returns a restore callback. The PUT
- * replaces the whole settings object, so this reads, merges and writes.
+ * `draft_creation` resolves its connector with `connector-id-by-feature: alertzero_reasoning`,
+ * and the upstream `coverage_check` verdict with `alertzero_fast`, not from the eval connector.
+ * Without this, every cell of a multi-model run drafts on the stack's default model and its
+ * scores are attributed to the wrong model; an unbound `coverage_check` runs on a small default
+ * model whose service error ends the chain before the model under test ever drafts. Both
+ * features are bound. Returns a restore callback. The PUT replaces the whole settings object,
+ * so this reads, merges and writes.
  */
 export const bindModelUnderTest = async ({
   fetch,
@@ -207,9 +217,14 @@ export const bindModelUnderTest = async ({
   );
   const previous = data.features;
   log.info(
-    `Binding ${RULE_CREATION_INFERENCE_FEATURE_ID} to the model under test: ${connector.id}`
+    `Binding ${RULE_CREATION_INFERENCE_FEATURE_ID} and ${COVERAGE_CHECK_INFERENCE_FEATURE_ID} to the model under test: ${connector.id}`
   );
-  await write(mergeFeatureOverride(previous, RULE_CREATION_INFERENCE_FEATURE_ID, connector.id));
+  await write(
+    bindableFeatureIds.reduce(
+      (features, featureId) => mergeFeatureOverride(features, featureId, connector.id),
+      previous
+    )
+  );
   return async () => {
     await write(previous);
   };
@@ -232,6 +247,27 @@ export const assertDraftRanOnModel = ({
       `draft_creation ran on connector "${connectorId ?? 'unknown'}", not the model under test ` +
         `"${expected}". The ${RULE_CREATION_INFERENCE_FEATURE_ID} feature binding did not take, so ` +
         `scores would be attributed to the wrong model.`
+    );
+  }
+};
+
+/**
+ * Fails the run when the coverage verdict did not run on the model under test. The product
+ * exposes the connector for this step (`alertzero_fast`) and `bindModelUnderTest` binds it, so a
+ * different connector here means the binding did not take. A run with no recorded connector
+ * (the step errored) is left to the chain's own failure; this only rejects a known mismatch.
+ */
+export const assertCoverageCheckRanOnModel = ({
+  connectorId,
+  expected,
+}: {
+  connectorId: string | undefined;
+  expected: string;
+}): void => {
+  if (connectorId !== undefined && connectorId !== expected) {
+    throw new Error(
+      `coverage_check ran on connector "${connectorId}", not the model under test "${expected}". ` +
+        `The ${COVERAGE_CHECK_INFERENCE_FEATURE_ID} feature binding did not take.`
     );
   }
 };

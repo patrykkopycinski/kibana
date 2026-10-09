@@ -42,6 +42,17 @@ export const INVESTIGATION_INPUT = 'investigation_id';
  * @kbn/alertzero-common, which a test package cannot depend on.
  */
 export const RULE_CREATION_INFERENCE_FEATURE_ID = 'alertzero_reasoning';
+
+/**
+ * Inference feature the coverage_review `coverage_check` step resolves its connector from
+ * (`connector-id-by-feature`). Inlined to match ALERTZERO_FAST_INFERENCE_FEATURE_ID in
+ * @kbn/alertzero-common. Left at the stack default it runs on a small fast model, so a service
+ * error there ends the chain before rule_creation and the model under test never drafts.
+ */
+export const COVERAGE_CHECK_INFERENCE_FEATURE_ID = 'alertzero_fast';
+
+/** Step id of the coverage verdict in coverage_review.yaml (an `ai.agent` step). */
+export const COVERAGE_CHECK_STEP_ID = 'coverage_check';
 export const INFERENCE_SETTINGS_ROUTE = '/internal/search_inference_endpoints/settings';
 export const INFERENCE_SETTINGS_API_VERSION = '1';
 

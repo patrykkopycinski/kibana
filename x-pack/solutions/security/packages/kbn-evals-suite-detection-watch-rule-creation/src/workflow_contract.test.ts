@@ -8,8 +8,13 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import {
+  getManagedWorkflowDefinition,
+  ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import {
+  COVERAGE_CHECK_INFERENCE_FEATURE_ID,
+  COVERAGE_CHECK_STEP_ID,
   DRAFT_STEP_ID,
   INVESTIGATION_INPUT,
   PROPOSE_STEP_ID,
@@ -18,6 +23,7 @@ import {
 } from './constants';
 import {
   REQUIRED_STEP_IDS,
+  assertCoverageCheckRanOnModel,
   assertDraftRanOnModel,
   bindModelUnderTest,
   mergeFeatureOverride,
@@ -152,13 +158,43 @@ describe('assertDraftRanOnModel', () => {
   });
 });
 
+describe('assertCoverageCheckRanOnModel', () => {
+  it('passes when the verdict ran on the model under test', () => {
+    expect(() => assertCoverageCheckRanOnModel({ connectorId: 'a', expected: 'a' })).not.toThrow();
+  });
+
+  it('fails when the verdict ran on a different connector (the unbound EIS default)', () => {
+    expect(() =>
+      assertCoverageCheckRanOnModel({ connectorId: 'eis-flash-lite', expected: 'a' })
+    ).toThrow(/coverage_check ran on connector "eis-flash-lite", not the model under test "a"/);
+  });
+
+  it('leaves a step that recorded no connector (errored) to the chain failure', () => {
+    expect(() =>
+      assertCoverageCheckRanOnModel({ connectorId: undefined, expected: 'a' })
+    ).not.toThrow();
+  });
+});
+
+describe('coverage_review contract', () => {
+  const yaml = getManagedWorkflowDefinition(ALERTZERO_COVERAGE_REVIEW_WORKFLOW_ID)?.yaml ?? '';
+
+  it('resolves the coverage_check connector from the feature the suite binds', () => {
+    const step = yaml.slice(yaml.indexOf(`name: ${COVERAGE_CHECK_STEP_ID}`));
+    expect(step.slice(0, step.indexOf('with:'))).toContain(
+      `connector-id-by-feature: ${COVERAGE_CHECK_INFERENCE_FEATURE_ID}`
+    );
+  });
+});
+
 describe('bindModelUnderTest', () => {
   const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
 
-  it('overrides only the reasoning feature and restores the previous settings', async () => {
+  it('overrides the reasoning and coverage-check features and restores the previous settings', async () => {
     const previous = [
       { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
       { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'default' }] },
+      { feature_id: COVERAGE_CHECK_INFERENCE_FEATURE_ID, endpoints: [{ id: 'eis-flash-lite' }] },
     ];
     const calls: Array<{ method: string; body?: string }> = [];
     const fetch = jest.fn(async (_path: string, opts: { method: string; body?: string }) => {
@@ -171,10 +207,21 @@ describe('bindModelUnderTest', () => {
       connector: { id: 'model-under-test' } as never,
       log,
     });
-    expect(JSON.parse(calls[1].body!).features).toEqual([
-      { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
-      { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'model-under-test' }] },
-    ]);
+    const bound = JSON.parse(calls[1].body!).features as Array<{
+      feature_id: string;
+      endpoints: Array<{ id: string }>;
+    }>;
+    expect(bound).toHaveLength(3);
+    expect(bound).toEqual(
+      expect.arrayContaining([
+        { feature_id: 'agent_builder', endpoints: [{ id: 'keep' }] },
+        { feature_id: RULE_CREATION_INFERENCE_FEATURE_ID, endpoints: [{ id: 'model-under-test' }] },
+        {
+          feature_id: COVERAGE_CHECK_INFERENCE_FEATURE_ID,
+          endpoints: [{ id: 'model-under-test' }],
+        },
+      ])
+    );
 
     await restore();
     expect(JSON.parse(calls[2].body!).features).toEqual(previous);

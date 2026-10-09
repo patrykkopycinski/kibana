@@ -10,7 +10,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
 import { PROPOSAL_APPROVE_URL, PROPOSAL_DISMISS_URL } from '@kbn/proposals-common';
-import { RuleCreationClient } from './rule_creation_client';
+import { RuleCreationClient, extractCoverageCheckConnectorId } from './rule_creation_client';
 import { COVERAGE_REVIEW_WORKFLOW_ID, RULE_CREATION_WORKFLOW_ID } from './constants';
 
 const log = { info: jest.fn(), debug: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
@@ -74,7 +74,13 @@ const chainStack = ({ reviewVisibleAfter = 0, noRuleCreation = false } = {}) => 
     if (url === '/api/workflows/executions/review-1') {
       return {
         status: noRuleCreation ? ExecutionStatus.COMPLETED : ExecutionStatus.WAITING_FOR_CHILD,
-        stepExecutions: [{ stepId: 'create_investigation', output: { conversation_id: 'inv-1' } }],
+        stepExecutions: [
+          { stepId: 'create_investigation', output: { conversation_id: 'inv-1' } },
+          {
+            stepId: 'coverage_check',
+            output: { metadata: { usage: { connectorId: 'eis-flash-lite' } } },
+          },
+        ],
       };
     }
     if (url === '/api/workflows/executions/rc-1') {
@@ -130,6 +136,8 @@ describe('RuleCreationClient', () => {
       pendingApproval: true,
       proposalId: 'prop-1',
       effectiveIdentity: { type: 'service_account', id: 'sa-cov' },
+      // The verdict step's connector is recorded, so a mismatch with the model under test is visible.
+      coverageCheckConnectorId: 'eis-flash-lite',
     });
     expect(result.rule).toMatchObject({ name: 'r' });
     // The proposal is looked up on the investigation coverage_review opened.
@@ -226,5 +234,123 @@ describe('RuleCreationClient', () => {
     const { client } = chainStack({ noRuleCreation: true });
     const rejection = client.run({ input: INPUT, ...fast });
     await expect(rejection).rejects.toMatchObject({ name: 'CoverageVerdictError' });
+  });
+});
+
+/**
+ * A stack whose executions list returns `active` for the given workflows until each id is
+ * cancelled; `stubborn` ids ignore the cancel and stay running.
+ */
+const settleStack = ({
+  active,
+  stubborn = [],
+}: {
+  active: Record<string, Array<{ id: string; status: ExecutionStatus }>>;
+  stubborn?: string[];
+}) => {
+  const cancelled = new Set<string>();
+  const calls: Call[] = [];
+  const fetch = jest.fn(async (url: string, opts: Omit<Call, 'url'> = {}) => {
+    calls.push({ url, ...opts });
+    const cancel = /^\/api\/workflows\/executions\/([^/]+)\/cancel$/.exec(url);
+    if (cancel) {
+      if (!stubborn.includes(cancel[1])) cancelled.add(cancel[1]);
+      return {};
+    }
+    const list = /^\/api\/workflows\/workflow\/([^/]+)\/executions$/.exec(url);
+    if (list) {
+      const workflowId = decodeURIComponent(list[1]);
+      return { results: (active[workflowId] ?? []).filter(({ id }) => !cancelled.has(id)) };
+    }
+    return {};
+  }) as unknown as HttpHandler;
+  const client = new RuleCreationClient(fetch, log);
+  client.useCoverageTrigger({ workerWorkflowId: WORKER_WORKFLOW, esClient: {} as EsClient });
+  return { client, calls, cancelled };
+};
+
+describe('RuleCreationClient.settleCoverageRuns', () => {
+  const settleFast = { maxWaitMs: 50, pollIntervalMs: 1 };
+
+  it('requires a coverage trigger', async () => {
+    const client = new RuleCreationClient(jest.fn() as unknown as HttpHandler, log);
+    await expect(client.settleCoverageRuns(settleFast)).rejects.toThrow('useCoverageTrigger');
+  });
+
+  it('resolves immediately, cancelling nothing, when no coverage run is active', async () => {
+    const { client, calls } = settleStack({ active: {} });
+    await client.settleCoverageRuns(settleFast);
+    expect(calls.some((c) => c.url.endsWith('/cancel'))).toBe(false);
+    // Looks at the sweep, the review and rule_creation: any of them holds the concurrency slot.
+    const listed = calls
+      .filter((c) => c.url.endsWith('/executions'))
+      .map((c) => decodeURIComponent(c.url.split('/')[4]));
+    expect(listed).toEqual(
+      expect.arrayContaining([
+        WORKER_WORKFLOW,
+        COVERAGE_REVIEW_WORKFLOW_ID,
+        RULE_CREATION_WORKFLOW_ID,
+      ])
+    );
+  });
+
+  it("cancels the previous test's still-running sweep and review, then confirms they are gone", async () => {
+    const { client, calls, cancelled } = settleStack({
+      active: {
+        [WORKER_WORKFLOW]: [{ id: 'worker-prev', status: ExecutionStatus.RUNNING }],
+        [COVERAGE_REVIEW_WORKFLOW_ID]: [
+          { id: 'review-prev', status: ExecutionStatus.WAITING_FOR_CHILD },
+        ],
+      },
+    });
+    await client.settleCoverageRuns(settleFast);
+
+    expect([...cancelled].sort()).toEqual(['review-prev', 'worker-prev']);
+    // Re-read after the cancel: the last call is a list, not a cancel.
+    expect(calls[calls.length - 1].url.endsWith('/executions')).toBe(true);
+  });
+
+  it('only asks for non-terminal statuses', async () => {
+    const { client, calls } = settleStack({ active: {} });
+    await client.settleCoverageRuns(settleFast);
+    const query = calls.find((c) => c.url.endsWith('/executions'))?.query;
+    expect(query?.statuses).toEqual(
+      expect.arrayContaining([ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_CHILD])
+    );
+    expect(query?.statuses).not.toContain(ExecutionStatus.COMPLETED);
+  });
+
+  it('fails loudly, naming the execution, when a run will not stop', async () => {
+    const { client } = settleStack({
+      active: { [WORKER_WORKFLOW]: [{ id: 'worker-stuck', status: ExecutionStatus.RUNNING }] },
+      stubborn: ['worker-stuck'],
+    });
+    await expect(client.settleCoverageRuns(settleFast)).rejects.toThrow(
+      new RegExp(`${WORKER_WORKFLOW}/worker-stuck:${ExecutionStatus.RUNNING}`)
+    );
+  });
+});
+
+describe('extractCoverageCheckConnectorId', () => {
+  it('reads the connector the coverage_check step ran on', () => {
+    expect(
+      extractCoverageCheckConnectorId([
+        { stepId: 'create_investigation', output: { conversation_id: 'c' } },
+        { stepId: 'coverage_check', output: null },
+        {
+          stepId: 'coverage_check',
+          output: { metadata: { usage: { connectorId: '.google-gemini-3.5-flash-lite' } } },
+        },
+      ] as never)
+    ).toBe('.google-gemini-3.5-flash-lite');
+  });
+
+  it('is undefined when the step errored and recorded no usage', () => {
+    expect(
+      extractCoverageCheckConnectorId([
+        { stepId: 'coverage_check', output: { error: 'Service error' } },
+      ] as never)
+    ).toBeUndefined();
+    expect(extractCoverageCheckConnectorId([])).toBeUndefined();
   });
 });

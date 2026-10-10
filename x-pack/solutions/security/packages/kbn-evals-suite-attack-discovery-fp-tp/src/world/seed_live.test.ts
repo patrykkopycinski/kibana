@@ -87,7 +87,9 @@ describe('buildLiveSeedPlan in a non-default space (G20)', () => {
     });
     const sources = plan.alertOperations.filter((_, i) => i % 2 === 1);
     expect(sources.length).toBeGreaterThan(0);
-    for (const source of sources) expect(source['kibana.space_ids']).toEqual(['sp1']);
+    for (const source of sources) {
+      expect((source as Record<string, unknown>)['kibana.space_ids']).toEqual(['sp1']);
+    }
   });
 
   it('returns an attack document scoped to the space', () => {

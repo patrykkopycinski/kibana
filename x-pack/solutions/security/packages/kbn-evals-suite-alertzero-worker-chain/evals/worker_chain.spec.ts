@@ -104,11 +104,13 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
         featureId: ALERTZERO_REASONING_FEATURE_ID,
         endpointId: connector.id,
       });
+      // G20: the cell's space must exist before anything is seeded or installed in it. The Entity
+      // Store install schedules its Task Manager tasks as the requesting user inside that space and
+      // answers 500 ("Not Found") when the space does not exist yet, so this stays first.
+      restoreSpace = await ensureSpace(fetch, SPACE_ID);
       restoreEntityExtraction = await ensureFpTpSeedPrerequisites(
         kbnRequestFromFetch(fetch, SPACE_ID)
       );
-      // G20: the cell's space must exist before anything is seeded or installed in it.
-      restoreSpace = await ensureSpace(fetch, SPACE_ID);
       // AD's batched generation reads this space's anonymization-fields index; without the
       // defaults every batch fails with index_not_found_exception and no review ever runs.
       await seedAnonymizationFields(ctxOf(fetch));

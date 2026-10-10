@@ -510,12 +510,30 @@ const readGenerationFailure = (execution: WorkflowExecutionDto | undefined): str
  * A review is settled once it is terminal, or once it has raised its proposal
  * (`escalation_gate` ran) and is parked awaiting a human decision — at Manual /
  * Assisted autonomy that park lasts up to 176h, so terminal is not reachable
- * inside the hop timeout and must not be reported as an overrun. Parked means
- * `waiting_for_input`: a review still `running` past the gate is not parked.
+ * inside the hop timeout and must not be reported as an overrun.
+ *
+ * Exactly two shapes are parked; a review still `running` past the gate, or
+ * `waiting_for_child` at any other node, is not:
+ *   - `waiting_for_input` with an `escalation_gate` step execution;
+ *   - `waiting_for_child` with its cursor on `escalation_gate`. The gate is a
+ *     sync `workflow.execute` of system-create-alertzero-proposal, so while that
+ *     child waits for the analyst the review itself reports `waiting_for_child`.
  */
-const isReviewSettled = (execution: WorkflowExecutionDto): boolean =>
-  execution.status === ExecutionStatus.WAITING_FOR_INPUT &&
-  execution.stepExecutions?.some((s) => s.stepId === 'escalation_gate') === true;
+const ESCALATION_GATE_STEP_ID = 'escalation_gate';
+
+const isReviewSettled = (execution: WorkflowExecutionDto): boolean => {
+  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    return execution.stepExecutions?.some((s) => s.stepId === ESCALATION_GATE_STEP_ID) === true;
+  }
+  if (execution.status === ExecutionStatus.WAITING_FOR_CHILD) {
+    // The execution document carries the cursor; WorkflowExecutionDto does not type it.
+    return (
+      (execution as WorkflowExecutionDto & { currentNodeId?: string }).currentNodeId ===
+      ESCALATION_GATE_STEP_ID
+    );
+  }
+  return false;
+};
 
 interface ReviewResult {
   verdict?: VerdictOrigin;

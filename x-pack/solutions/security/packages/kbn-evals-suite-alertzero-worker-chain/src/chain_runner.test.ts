@@ -246,6 +246,8 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     investigationId: string;
     verdict: string;
     status?: string;
+    /** The execution cursor, which the product returns on the execution document. */
+    currentNodeId?: string;
     cancellationReason?: string;
     /** The Investigation's metadata.workflow_execution_ids as the product stored it. */
     workflowExecutionIds?: string[];
@@ -309,6 +311,7 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
       if (review) {
         return {
           status: review.status ?? 'completed',
+          currentNodeId: review.currentNodeId,
           cancellationReason: review.cancellationReason,
           triggeredBy: 'workflow-step',
           stepExecutions: review.steps ?? [
@@ -501,6 +504,65 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
       PARKED_HOP_STATUS
     );
     expect(record.actions).toHaveLength(1);
+  });
+
+  // Live shape (reviews c12df546, 2b55ad8f, 5afe98bb): the gate is a sync workflow.execute of
+  // system-create-alertzero-proposal, so a parked review reports waiting_for_child with its
+  // cursor on escalation_gate rather than waiting_for_input.
+  it('reads a review parked as waiting_for_child on escalation_gate instead of reporting an overrun', async () => {
+    const { fetch } = makeAdFetch([
+      {
+        id: 'rev-1',
+        investigationId: 'inv-1',
+        verdict: 'true_positive',
+        status: 'waiting_for_child',
+        currentNodeId: 'escalation_gate',
+        steps: [
+          step('resolve_investigation_id', { investigation_id: 'inv-1' }),
+          step('resolve_analysis', { verdict: 'true_positive' }),
+          step('escalation_gate', undefined, 'workflow.execute'),
+        ],
+      },
+    ]);
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.harnessInterference).toBeUndefined();
+    expect(record.hops.find((h) => h.hop === 'attack_discovery_review')?.executionStatus).toBe(
+      PARKED_HOP_STATUS
+    );
+  });
+
+  it.each([
+    ['waiting_for_child at another node', 'waiting_for_child', 'run_fp_tp_analysis'],
+    ['waiting_for_child with no cursor', 'waiting_for_child', undefined],
+    ['running on escalation_gate', 'running', 'escalation_gate'],
+    ['pending on escalation_gate', 'pending', 'escalation_gate'],
+  ])('%s is not parked: it overruns', async (_label, status, currentNodeId) => {
+    const { fetch } = makeAdFetch([
+      {
+        id: 'rev-1',
+        investigationId: 'inv-1',
+        verdict: 'true_positive',
+        status,
+        currentNodeId,
+        steps: [
+          step('resolve_investigation_id', { investigation_id: 'inv-1' }),
+          step('resolve_analysis', { verdict: 'true_positive' }),
+        ],
+      },
+    ]);
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.hops.find((h) => h.hop === 'attack_discovery_review')?.executionStatus).toBe(
+      'timeout'
+    );
+    expect(record.harnessInterference).toMatch(/overran its per-hop timeout/);
   });
 
   it('a review still running past the escalation gate is not parked: it overruns', async () => {

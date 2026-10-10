@@ -24,6 +24,44 @@ const PRIVILEGE_ERROR = {
     'security_exception: action [indices:data/read/search] is unauthorized for user [alertzero_x] on indices [entities-latest-sp1]',
 };
 
+describe('readEvidence behind retry wrappers', () => {
+  // An `on-failure: retry` step is recorded twice with one stepId: the wrapper (stepType
+  // `retry`, output null) first, then the step itself. Live exec bf0c3d2a: idx 9 / idx 10.
+  const wrapped = (stepId: string, output: unknown, error?: unknown) => [
+    { stepId, stepType: 'retry', output: null, error: undefined },
+    { stepId, stepType: 'data.set', output, error },
+  ];
+
+  it('reads the real step, not the retry wrapper', () => {
+    const reading = readEvidence(
+      analysis([
+        ...wrapped('count_alerts', { found: 2, cited: 2 }),
+        step('load_entities', search(2)),
+        step('load_events', search(4)),
+        ...wrapped('block_truncated_clear', { verdict: 'false_positive' }),
+      ] as never),
+      'exec-retry',
+      SEEDED
+    );
+    expect(reading.sources.find((s) => s.source === 'alerts')?.hits).toBe(2);
+    expect(reading.completeness).toBe(1);
+    expect(reading.verdict).toBe('false_positive');
+  });
+
+  it('takes the last real attempt and surfaces its error', () => {
+    const reading = readEvidence(
+      analysis([
+        ...wrapped('load_entities', undefined, PRIVILEGE_ERROR),
+        step('count_alerts', { found: 2, cited: 2 }),
+        step('load_events', search(4)),
+      ] as never),
+      'exec-retry-error',
+      SEEDED
+    );
+    expect(reading.swallowedPrivilegeErrors).toHaveLength(1);
+  });
+});
+
 describe('readEvidence', () => {
   it('is complete when every source returns what was seeded', () => {
     const reading = readEvidence(

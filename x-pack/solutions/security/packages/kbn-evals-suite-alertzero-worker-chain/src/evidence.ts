@@ -96,6 +96,24 @@ const alertsFound = (output: unknown): number => {
   return typeof found === 'number' ? found : 0;
 };
 
+type StepExecution = NonNullable<WorkflowExecutionDto['stepExecutions']>[number];
+
+const RETRY_STEP_TYPE = 'retry';
+
+/**
+ * The step execution that carries the real result for `stepId`. A step under `on-failure: retry`
+ * is recorded twice with the same id: the retry wrapper (stepType `retry`, output null), then the
+ * step itself. `.find` returns the wrapper and reads nothing, so skip wrappers and take the last
+ * real execution (the final attempt). A step that only has its wrapper falls back to it.
+ */
+export const findRealStep = (
+  steps: readonly StepExecution[],
+  stepId: string
+): StepExecution | undefined => {
+  const sameId = steps.filter((s) => s.stepId === stepId);
+  return [...sameId].reverse().find((s) => String(s.stepType) !== RETRY_STEP_TYPE) ?? sameId[0];
+};
+
 export const readEvidence = (
   analysis: WorkflowExecutionDto,
   analysisExecutionId: string,
@@ -105,7 +123,7 @@ export const readEvidence = (
   const sources: EvidenceSourceReading[] = (
     Object.entries(EVIDENCE_SOURCE_STEPS) as Array<[EvidenceSource, string]>
   ).map(([source, stepId]) => {
-    const step = steps.find((s) => s.stepId === stepId);
+    const step = findRealStep(steps, stepId);
     const error = errorText(step?.error);
     return {
       source,
@@ -130,9 +148,7 @@ export const readEvidence = (
     .filter((ratio): ratio is number => ratio !== undefined);
 
   const verdict = (
-    steps.find((s) => s.stepId === 'block_truncated_clear')?.output as
-      | { verdict?: unknown }
-      | undefined
+    findRealStep(steps, 'block_truncated_clear')?.output as { verdict?: unknown } | undefined
   )?.verdict;
   return {
     analysisExecutionId,

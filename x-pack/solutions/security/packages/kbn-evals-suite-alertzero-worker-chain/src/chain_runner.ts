@@ -22,6 +22,7 @@ import type {
 } from '@kbn/security-evals-chain-safety';
 import {
   FP_TP_ANALYSIS_WORKFLOW_ID,
+  findRealStep,
   readEvidence,
   type EvidenceReading,
   type SeededEvidence,
@@ -808,7 +809,7 @@ const runChainUnserialized = async ({
       // field is `stepExecutions` (WorkflowExecutionDto), not `steps`.
       const stepExecutions = triageExecution?.stepExecutions ?? [];
       const createdConversationId = (
-        stepExecutions.find((s) => s.stepId === 'create_investigation')?.output as
+        findRealStep(stepExecutions, 'create_investigation')?.output as
           | { conversation_id?: unknown }
           | undefined
       )?.conversation_id;

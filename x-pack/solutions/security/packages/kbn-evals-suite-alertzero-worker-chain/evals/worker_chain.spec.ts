@@ -42,6 +42,7 @@ import {
   ALERTZERO_REASONING_FEATURE_ID,
   WORKER_CHAIN_EXPERIMENT_CONCURRENCY,
 } from '../src/constants';
+import { assertAlertsIndexMapping, ensureSpaceAlertsIndex } from '../src/space_alerts_index';
 import { assertWorkerChainFitsCiBudget, selectWorkerChainExamples } from '../src/example_selection';
 import {
   createHarnessState,
@@ -91,10 +92,12 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
   evaluate.beforeAll(
     async ({
       fetch,
+      esClient,
       connector,
       log,
     }: {
       fetch: HttpHandler;
+      esClient: EsClient;
       connector: EvalConnector;
       log: ToolingLog;
     }) => {
@@ -111,6 +114,15 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       restoreEntityExtraction = await ensureFpTpSeedPrerequisites(
         kbnRequestFromFetch(fetch, SPACE_ID)
       );
+      // The seeder's first write would otherwise auto-create the space's alerts index with
+      // dynamic mappings (no kibana.alert.workflow_reason). Have the rule registry install it
+      // first, then prove the mapping is there before example 1.
+      await ensureSpaceAlertsIndex({
+        kbnRequest: kbnRequestFromFetch(fetch, SPACE_ID),
+        esClient,
+        spaceId: SPACE_ID,
+      });
+      if (SPACE_ID !== 'default') await assertAlertsIndexMapping(esClient, SPACE_ID);
       // AD's batched generation reads this space's anonymization-fields index; without the
       // defaults every batch fails with index_not_found_exception and no review ever runs.
       await seedAnonymizationFields(ctxOf(fetch));

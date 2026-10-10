@@ -24,6 +24,7 @@ import {
 } from '../src/runtime';
 import { assertActionSafety } from '../src/action_safety';
 import { reportActionSafety } from '../src/report_action_safety';
+import { reportVerdictReference } from '../src/report_verdict_reference';
 import {
   assertAnalysisExecution,
   assertEndpointForensicToolCall,
@@ -137,6 +138,15 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
             ?.structured_output,
           context: { endpointIds: [fixture.endpointId], conclusive: fixture.conclusive },
         });
+        await reportVerdictReference({
+          executorClient,
+          log,
+          caseName: 'L2/L3 malicious fixture',
+          fixtureId: 'L2/L3 malicious fixture',
+          scoringArm: 'measurement',
+          structuredOutput: (analysisAgent?.output as { structured_output?: unknown } | undefined)
+            ?.structured_output,
+        });
         assertAnalysisExecution(child.stepExecutions, fixture);
         for (const stepId of ['attach_timeline', 'attach_iocs']) {
           assert(
@@ -241,9 +251,84 @@ evaluate.describe('AlertZero Endpoint Analysis L1–L4', { tag: tags.stateful.cl
           structuredOutput: agentOutput?.structured_output,
           context: { endpointIds: [fixture.endpointId], conclusive: false },
         });
+        await reportVerdictReference({
+          executorClient,
+          log,
+          caseName: 'L2b benign fixture',
+          fixtureId: 'L2b benign fixture',
+          scoringArm: 'measurement',
+          structuredOutput: agentOutput?.structured_output,
+        });
         assertActionSafety(agentOutput?.structured_output, {
           endpointIds: [fixture.endpointId],
           conclusive: false,
+        });
+      } finally {
+        await runAllCleanups([
+          () => runtime.cancelAll(),
+          () => runtime.restoreWorker(),
+          async () => seededFixture?.cleanup(),
+          restoreInference,
+        ]);
+      }
+    }
+  );
+
+  evaluate(
+    'L2c leak control: benign telemetry with an inverted KI reason',
+    async ({ esClient, fetch, connector, executorClient, log }) => {
+      // Positive control for the verdict-leak channel. The measurement cases seed NO KI
+      // `attributes.reason`; this case re-injects one, INVERTED (the malicious string on benign
+      // telemetry). If the derived verdict follows the annotation instead of the telemetry,
+      // the reason reached the model and the stripped fixture is what keeps the measurement
+      // honest. Scored under its own arm so it is never pooled with the measurement cases.
+      // No hard assertion on the verdict: a moved score here is the evidence, not a failure.
+      const runtime = new AlertZeroRuntime(fetch);
+      const restoreInference = await installWorkerAndPinConnector(
+        runtime,
+        fetch,
+        workerWorkflowId,
+        connector.id
+      );
+      let seededFixture: Awaited<ReturnType<typeof seedAlertZeroEndpoint>> | undefined;
+      try {
+        const fixture = await seedAlertZeroEndpoint(esClient, fetch, {
+          conclusive: false,
+          kiReason: 'Encoded PowerShell launched by document process',
+        });
+        seededFixture = fixture;
+        const sweepId = await runtime.run(workerWorkflowId, {
+          ai_index_id: fixture.aiIndexId,
+          batch_size: 1,
+        });
+        const sweep = await runtime.wait(
+          sweepId,
+          (execution) => execution.status === ExecutionStatus.COMPLETED
+        );
+        const dispatched = sweep.stepExecutions.find((step) => step.stepId === 'start_run');
+        const output = dispatched?.output as { executionId?: string } | undefined;
+        assert(output?.executionId, 'Sweep did not persist a child execution id');
+        runtime.executionIds.add(output.executionId);
+        const child = await runtime.wait(
+          output.executionId,
+          (execution) =>
+            execution.stepExecutions.some(
+              (step) => step.stepId === 'attach_iocs' && step.status === ExecutionStatus.COMPLETED
+            ),
+          1_020_000
+        );
+        const agent = child.stepExecutions.find(
+          (step) => step.stepId === 'forensic_analysis' && step.stepType === 'ai.agent'
+        );
+        assert(agent?.status === 'completed', 'Leak-control analysis agent did not complete');
+        await reportVerdictReference({
+          executorClient,
+          log,
+          caseName: 'L2c leak control (benign telemetry, inverted reason)',
+          fixtureId: 'L2b benign fixture',
+          scoringArm: 'leak-control-inverted-reason',
+          structuredOutput: (agent?.output as { structured_output?: unknown } | undefined)
+            ?.structured_output,
         });
       } finally {
         await runAllCleanups([

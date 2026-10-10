@@ -395,6 +395,7 @@ export const seedAlertZeroEndpoint = async (
   fetch: HttpHandler,
   {
     conclusive = true,
+    kiReason,
   }: {
     /**
      * Ground truth of the seeded telemetry. The default seeds the malicious
@@ -403,6 +404,15 @@ export const seedAlertZeroEndpoint = async (
      * disruptive-action-on-inconclusive-ground-truth branch live.
      */
     conclusive?: boolean;
+    /**
+     * Leak-control only. By default the KI carries NO `attributes.reason`: the production
+     * writer (action_handoff_to_forensics.yaml) never writes one, and frozen transcripts
+     * showed the analysis agent quoting this eval-only annotation verbatim ("The eval index
+     * explicitly annotates the task with reason: ...") — the ground truth reached the model.
+     * The leak-control case sets an INVERTED reason on benign telemetry to prove the stripped
+     * fixture is what keeps the verdict scores honest. Never set it on a measurement case.
+     */
+    kiReason?: string;
   } = {}
 ) => {
   const id = randomUUID();
@@ -607,9 +617,7 @@ export const seedAlertZeroEndpoint = async (
           attack_discovery_alert_id: attackDiscoveryAlertId,
           host_name: host,
           autonomy: 'manual',
-          reason: conclusive
-            ? 'Encoded PowerShell launched by document process'
-            : 'Benign document workflow on a clean host',
+          ...(kiReason === undefined ? {} : { reason: kiReason }),
         },
       },
     });

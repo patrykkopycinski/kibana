@@ -4,7 +4,8 @@
     "outDir": "target/types"
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "src/__fixtures__/**/*.json"
   ],
   "kbn_references": [
     "@kbn/agent-builder-plugin",

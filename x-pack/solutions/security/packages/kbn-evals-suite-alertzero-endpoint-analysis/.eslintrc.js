@@ -8,7 +8,12 @@
 module.exports = {
   overrides: [
     {
-      files: ['evals/**/*.ts', 'src/runtime.ts', 'src/report_action_safety.ts'],
+      files: [
+        'evals/**/*.ts',
+        'src/runtime.ts',
+        'src/report_action_safety.ts',
+        'src/report_verdict_reference.ts',
+      ],
       rules: { 'import/no-nodejs-modules': 'off' },
     },
   ],

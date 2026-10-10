@@ -506,6 +506,26 @@ describe('seedAlertZeroEndpoint', () => {
     expect(constituent?.document.host).toEqual({ name: fixture.host });
   });
 
+  it('seeds no ground-truth annotation on the KI unless the leak control asks for one', async () => {
+    // The production writer (action_handoff_to_forensics.yaml) never writes
+    // `attributes.reason`; frozen transcripts showed the analysis quoting this eval-only
+    // annotation, so the measurement fixtures must not carry it (kanban t_46cb6525).
+    for (const conclusive of [true, false]) {
+      const es = createEs();
+      const fixture = await seedAlertZeroEndpoint(es, createFetch(), { conclusive });
+      const ki = indexed(es).find(({ id }) => id === fixture.kiId);
+      expect(ki?.document.attributes).toBeDefined();
+      expect(ki?.document.attributes).not.toHaveProperty('reason');
+    }
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch(), {
+      conclusive: false,
+      kiReason: 'inverted',
+    });
+    const ki = indexed(es).find(({ id }) => id === fixture.kiId);
+    expect(ki?.document.attributes).toHaveProperty('reason', 'inverted');
+  });
+
   it('cleans up the seeded constituent detection with the Attack Discovery alert', async () => {
     const es = createEs();
     const fixture = await seedAlertZeroEndpoint(es, createFetch());

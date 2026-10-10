@@ -449,7 +449,7 @@ const cleanupLiveSeedPlan = async ({
   await deleteDocumentsById(esClient, [
     ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
     ...plan.events,
-    { index: plan.attackIndex, id: plan.attackId },
+    ...(plan.attackDocument ? [{ index: plan.attackIndex, id: plan.attackId }] : []),
   ]);
   for (const entity of plan.entities) {
     await deleteEntity(kbnRequest, entity.entityId);
@@ -469,6 +469,7 @@ export const seedFixture = async ({
   world,
   now = new Date(),
   spaceId = DEFAULT_SPACE_ID,
+  seedAttackDocument = true,
   onCleanupFailure,
 }: {
   esClient: EsClient;
@@ -478,9 +479,17 @@ export const seedFixture = async ({
   now?: Date;
   /** Space the workflows under test run in. Documents, indices and entities are seeded for it. */
   spaceId?: string;
+  /**
+   * Write the authored Attack Discovery document. A run that generates its own discoveries
+   * (the worker chain) passes `false`: the authored one is not an input there.
+   */
+  seedAttackDocument?: boolean;
   onCleanupFailure?: (cleanup: () => Promise<void>) => void;
 }): Promise<FpTpSeededFixture> => {
-  const plan = buildLiveSeedPlan(world, now, spaceId);
+  const plan: FpTpLiveSeedPlan = {
+    ...buildLiveSeedPlan(world, now, spaceId),
+    ...(seedAttackDocument ? {} : { attackDocument: undefined }),
+  };
   const cleanup = () => cleanupLiveSeedPlan({ esClient, kbnRequest, plan });
 
   try {
@@ -497,11 +506,15 @@ export const seedFixture = async ({
       );
     }
     if (plan.attackDocument) {
+      // `require_alias`: the alerting framework installs this name as an alias. Indexing into a
+      // missing name would auto-create a concrete index that squats it, and the product's
+      // `persist_discoveries` then fails with invalid_alias_name_exception.
       await esClient.index({
         index: plan.attackIndex,
         id: plan.attackId,
         document: plan.attackDocument,
         refresh: 'wait_for',
+        require_alias: true,
       });
     }
     for (const entity of plan.entities) {

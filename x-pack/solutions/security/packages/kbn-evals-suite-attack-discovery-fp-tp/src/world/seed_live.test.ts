@@ -246,6 +246,32 @@ describe('seedFixture', () => {
     );
   });
 
+  it('writes the authored Attack Discovery only through an existing alias', async () => {
+    await seedFixture({ esClient: esClient as unknown as EsClient, kbnRequest, world });
+
+    expect(esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({ index: FP_TP_ATTACK_ADHOC_INDEX, require_alias: true })
+    );
+  });
+
+  describe('with seedAttackDocument: false', () => {
+    it('never writes or deletes the adhoc Attack Discovery index', async () => {
+      const { cleanup } = await seedFixture({
+        esClient: esClient as unknown as EsClient,
+        kbnRequest,
+        world,
+        seedAttackDocument: false,
+      });
+      await cleanup();
+
+      const touched = JSON.stringify([
+        ...esClient.index.mock.calls,
+        ...esClient.deleteByQuery.mock.calls,
+      ]);
+      expect(touched).not.toContain(FP_TP_ATTACK_ADHOC_INDEX);
+    });
+  });
+
   it('returns a cleanup that deletes every seeded entity', async () => {
     const { cleanup } = await seedFixture({
       esClient: esClient as unknown as EsClient,

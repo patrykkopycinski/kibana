@@ -455,6 +455,26 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     expect(record.investigation.id).toBe('inv-1');
   });
 
+  it('reads the verdict and investigation id of a review whose steps are wrapped (null-output wrapper first)', async () => {
+    const { fetch } = makeAdFetch([
+      {
+        id: 'rev-1',
+        investigationId: 'inv-1',
+        verdict: 'true_positive',
+        steps: [
+          step('resolve_investigation_id', null, 'step_level_timeout'),
+          step('resolve_investigation_id', { investigation_id: 'inv-1' }, 'workflow.execute'),
+          step('resolve_analysis', null, 'step_level_timeout'),
+          step('resolve_analysis', { verdict: 'true_positive' }, 'workflow.execute'),
+        ],
+      },
+    ]);
+    const record = await runChain(params(fetch, ['attack-discovery']));
+
+    expect(record.investigation.id).toBe('inv-1');
+    expect(record.actions.map((a) => a.autonomyContext?.verdictOrigin)).toEqual(['true_positive']);
+  });
+
   it('reads a review parked on its escalation gate instead of reporting an overrun', async () => {
     const { fetch } = makeAdFetch([
       {
@@ -582,6 +602,35 @@ describe('runChain AD review collection (R5: async grandchildren, real /children
     } as never);
     expect(verdict.score).toBe(0);
     expect(verdict.label).toContain('floor_attack_discovery=generation_failed');
+  });
+
+  it('reads the generation failure from the workflow.execute step behind the step_level_timeout wrapper (live shape)', async () => {
+    const { fetch } = makeAdFetch(
+      [],
+      [
+        // Live: two stepExecutions share the id. The wrapper comes first and has no output.
+        step('run_generation', null, 'step_level_timeout'),
+        step(
+          'run_generation',
+          {
+            batches_failed: 1,
+            batches_total: 1,
+            discoveries_generated: 0,
+            batch_errors: [{ message: 'index_not_found_exception' }],
+          },
+          'workflow.execute'
+        ),
+      ]
+    );
+    const record = await runChain({
+      ...params(fetch, ['attack-discovery']),
+      maxWaitMs: { perActionProposal: 1, attackDiscoveryReview: 50 },
+    });
+
+    expect(record.hops.find((h) => h.hop === 'floor_attack_discovery')?.executionStatus).toBe(
+      GENERATION_FAILED_HOP_STATUS
+    );
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('index_not_found_exception'));
   });
 
   it('keeps a runner with no failed batches completed', async () => {

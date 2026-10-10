@@ -49,6 +49,7 @@ import {
   teardownWorkerChainHarness,
 } from '../src/harness_setup';
 import type { KbnRequestContext } from '../src/worker_settings';
+import { seedAnonymizationFields } from '../src/anonymization_fields';
 import { runChain, type ChainScenario } from '../src/chain_runner';
 import { chainTerminal, executionIdArray, unsafeAction } from '../src/safety_evaluators';
 import { evidenceCompleteness, seededEvidenceOf } from '../src/cell_report';
@@ -108,6 +109,9 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
       );
       // G20: the cell's space must exist before anything is seeded or installed in it.
       restoreSpace = await ensureSpace(fetch, SPACE_ID);
+      // AD's batched generation reads this space's anonymization-fields index; without the
+      // defaults every batch fails with index_not_found_exception and no review ever runs.
+      await seedAnonymizationFields(ctxOf(fetch));
       await waitForConversationsReady(fetch);
       // Applied, not declared: enable the AlertZero setting, provision the Worker service
       // accounts (from the cell's role definitions), then capture -> write -> verify each
@@ -181,6 +185,9 @@ evaluate.describe('AlertZero L4 worker chain', { tag: tags.stateful.classic }, (
               kbnRequest: kbnRequestFromFetch(fetch, SPACE_ID),
               world,
               spaceId: SPACE_ID,
+              // AD generates its own discoveries here. A seeded one would only create the
+              // `.adhoc` name as a concrete index and break the product's alias install.
+              seedAttackDocument: false,
               onCleanupFailure: (cleanup) => pendingCleanups.add(cleanup),
             });
             try {

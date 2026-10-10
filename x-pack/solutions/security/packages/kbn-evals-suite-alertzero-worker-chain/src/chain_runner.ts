@@ -522,8 +522,16 @@ interface ReviewResult {
   investigationId?: string;
 }
 
+/**
+ * Output of the step `stepId`. A step wrapped by the engine (e.g. `run_generation` under
+ * `step_level_timeout`) shows up as TWO stepExecutions with the same id: the wrapper, whose
+ * output is null, then the inner step (`workflow.execute`) that carries the real output. Take
+ * the last non-null one — `.find` returned the wrapper and read nothing.
+ */
 const stepOutput = (execution: WorkflowExecutionDto | undefined, stepId: string): unknown =>
-  execution?.stepExecutions?.find((s) => s.stepId === stepId)?.output;
+  [...(execution?.stepExecutions ?? [])]
+    .reverse()
+    .find((s) => s.stepId === stepId && s.output !== null && s.output !== undefined)?.output;
 
 /**
  * Verdict + Investigation id of one review. Read from the review's own step
